@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Form from './Form';
+import RegisterForm from './RegisterForm';
 import FocusTrap from 'focus-trap-react';
 import './Modal.css';
 
@@ -10,6 +10,7 @@ export const Modal = ({
   modalRef,
   buttonRef,
   closeModal,
+  signUp,
   onSubmit
 }) => {
   return ReactDOM.createPortal(
@@ -39,7 +40,7 @@ export const Modal = ({
             </svg>
           </button>
           <div className="modal-body">
-            <Form onSubmit={onSubmit} />
+            <RegisterForm signUp={signUp} onSubmit={onSubmit} />
           </div>
         </div>
       </aside>

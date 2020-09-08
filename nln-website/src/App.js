@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import './App.css';
 import HomePage from './components/HomePage';
 import AboutPage from './components/AboutPage';
-import SignUpPage from './components/SignUpPage';
+import NotFoundPage from './components/NotFoundPage';
 
 
 function App() {
@@ -16,6 +16,7 @@ function App() {
         <Switch>
           <Route path="/" exact component={HomePage} />
           <Route path="/about" component={AboutPage} />
+          <Route component={NotFoundPage} />
         </Switch>
       </div>
     </Router>

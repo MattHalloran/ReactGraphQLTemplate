@@ -13,21 +13,19 @@ class Navbar extends React.Component {
         return (
             <nav className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
                 <div className="container">
-                    <Link to="/">
-                        <a className="navbar-brand" href="#">Start Bootstrap</a>
+                    <Link to="/" className="navbar-brand">
+                        New Life Nursery
                     </Link>
-                    <Container triggerText="Sign Up" onSubmit={onSignUpSubmit} />
-                    <Container triggerText="Log In" onSubmit={onLogInSubmit} />
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse" id="navbarResponsive">
                         <ul className="navbar-nav ml-auto">
                             <li className="nav-item">
-                                <Container triggerText="Sign Up" onSubmit={onSignUpSubmit} />
+                                <Container triggerText="Sign Up" signUp={true} onSubmit={onSignUpSubmit} />
                             </li>
                             <li className="nav-item">
-                                <Container triggerText="Log In" onSubmit={onLogInSubmit} />
+                                <Container triggerText="Log In" signUp={false} onSubmit={onLogInSubmit} />
                             </li>
                         </ul>
                     </div>

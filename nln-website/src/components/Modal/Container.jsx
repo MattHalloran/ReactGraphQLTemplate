@@ -1,11 +1,22 @@
 // Acts as a wrapper class for text that opens a modal
-import React, { Component } from 'react';
+import React from 'react';
 import Modal from './Modal';
 import Trigger from './Trigger';
 import './Modal.css';
 
-class Container extends Component {
-    state = { isShown: false };
+const ESCAPE_KEY = 27;
+
+class Container extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            isShown: false,
+            signUp: this.props.signUp,
+        }
+    }
+
     showModal = () => {
         this.setState({ isShown: true }, () => {
             this.closeButton.focus();
@@ -17,7 +28,7 @@ class Container extends Component {
         this.toggleScrollLock();
     };
     onKeyDown = (event) => {
-        if (event.keyCode === 27) {
+        if (event.keyCode === ESCAPE_KEY) {
             this.closeModal();
         }
     };
@@ -39,6 +50,7 @@ class Container extends Component {
                 />
                 {this.state.isShown ? (
                     <Modal
+                        signUp={this.state.signUp}
                         onSubmit={this.props.onSubmit}
                         modalRef={(n) => (this.modal = n)}
                         buttonRef={(n) => (this.closeButton = n)}
