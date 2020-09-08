@@ -7,6 +7,7 @@ import HomePage from './components/HomePage';
 import AboutPage from './components/AboutPage';
 import SignUpPage from './components/SignUpPage';
 
+
 function App() {
   return (
     <Router>
@@ -15,7 +16,6 @@ function App() {
         <Switch>
           <Route path="/" exact component={HomePage} />
           <Route path="/about" component={AboutPage} />
-          <Route path="/signup" component={SignUpPage} />
         </Switch>
       </div>
     </Router>
