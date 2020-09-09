@@ -1,0 +1,12 @@
+export { default as AboutPage } from './AboutPage';
+export { default as NotFoundPage } from './NotFoundPage';
+export { default as Burger } from './Burger';
+export { default as ContactInfo } from './ContactInfo';
+export { default as ContactPage } from './ContactPage';
+export { default as HomePage } from './HomePage';
+export { default as Menu } from './Menu';
+export { default as Container } from './Modal/Container';
+export { default as Modal } from './Modal/Modal';
+export { default as RegisterForm } from './Modal/RegisterForm';
+export { default as Trigger } from './Modal/Trigger';
+export { default as Navbar } from './Navbar';
