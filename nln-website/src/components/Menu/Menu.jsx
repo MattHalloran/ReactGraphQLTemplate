@@ -1,22 +1,26 @@
 import React from 'react';
+import { bool, func } from 'prop-types';
 import { StyledMenu } from './Menu.styled';
+import Container from '../Modal/Container/Container';
+const onSignUpSubmit = (event) => {
+  event.preventDefault(event);
+};
+const onLogInSubmit = (event) => {
+  event.preventDefault(event);
+}
 
-const Menu = () => {
+const Menu = ({ open, closeMenu }) => {
   return (
-    <StyledMenu>
-      <a href="/">
-        <span role="img" aria-label="about us">&#x1f481;&#x1f3fb;&#x200d;&#x2642;&#xfe0f;</span>
-        About us
-      </a>
-      <a href="/">
-        <span role="img" aria-label="price">&#x1f4b8;</span>
-        Pricing
-        </a>
-      <a href="/">
-        <span role="img" aria-label="contact">&#x1f4e9;</span>
-        Contact
-        </a>
+    <StyledMenu open={open}>
+      <Container triggerText="Sign Up" signUp={true} clickEvent={() => closeMenu()} onSubmit={onSignUpSubmit} class="nav-link" href="#" />
+      <Container triggerText="Log In" signUp={false} clickEvent={() => closeMenu()} onSubmit={onLogInSubmit} class="nav-link" href="#" />
     </StyledMenu>
   )
 }
+
+Menu.propTypes = {
+  open: bool.isRequired,
+  closeMenu: func.isRequired
+}
+
 export default Menu;

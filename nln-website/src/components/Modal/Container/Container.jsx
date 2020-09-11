@@ -16,8 +16,8 @@ class Container extends React.Component {
             signUp: this.props.signUp,
         }
     }
-
     showModal = () => {
+        this.props.clickEvent && this.props.clickEvent();
         this.setState({ isShown: true }, () => {
             this.closeButton.focus();
         });
