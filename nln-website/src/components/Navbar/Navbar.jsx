@@ -33,7 +33,7 @@ class Navbar extends React.Component {
     }
 
     updateWindowDimensions = () => {
-        this.setState({ showHamburger: window.innerWidth < SHOW_HAMBURGER_AT });
+        this.setState({ showHamburger: window.innerWidth <= SHOW_HAMBURGER_AT });
     }
     //End lifecycle methods
     render() {
