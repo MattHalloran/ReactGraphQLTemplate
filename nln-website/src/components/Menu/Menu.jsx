@@ -1,26 +1,29 @@
 import React from 'react';
-import { bool, func } from 'prop-types';
+import PropTypes from 'prop-types';
 import { StyledMenu } from './Menu.styled';
-import Container from '../Modal/Container/Container';
-const onSignUpSubmit = (event) => {
-  event.preventDefault(event);
-};
-const onLogInSubmit = (event) => {
-  event.preventDefault(event);
-}
+import { Link, useLocation } from 'react-router-dom';
+import RegisterForm from '../RegisterForm';
+import NotFoundPage from '../NotFoundPage';
 
-const Menu = ({ open, closeMenu }) => {
+function Menu(props) {
+  let location = useLocation();
   return (
-    <StyledMenu open={open}>
-      <Container triggerText="Sign Up" signUp={true} clickEvent={() => closeMenu()} onSubmit={onSignUpSubmit} class="nav-link" href="#" />
-      <Container triggerText="Log In" signUp={false} clickEvent={() => closeMenu()} onSubmit={onLogInSubmit} class="nav-link" href="#" />
+    <StyledMenu open={props.open}>
+      <Link to={{
+        pathname: "/register",
+        state: { background: location }
+      }}>Sign Up</Link>
+      <Link to={{
+        pathname: "/login",
+        state: { background: location }
+      }}>Log In</Link>
     </StyledMenu>
-  )
+  );
 }
 
 Menu.propTypes = {
-  open: bool.isRequired,
-  closeMenu: func.isRequired
+  open: PropTypes.bool.isRequired,
+  closeMenu: PropTypes.func.isRequired,
 }
 
 export default Menu;

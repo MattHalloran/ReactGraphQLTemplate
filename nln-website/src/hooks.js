@@ -7,6 +7,7 @@ export const useOnClickOutside = (ref, handler) => {
         if (!ref.current || ref.current.contains(event.target)) {
           return;
         }
+        console.log('chicken 4324324y3243y82y432yui3y2iu')
         handler(event);
       };
       document.addEventListener('mousedown', listener);

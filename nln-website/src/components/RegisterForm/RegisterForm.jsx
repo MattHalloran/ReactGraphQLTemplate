@@ -1,49 +1,57 @@
 import React from 'react';
-import '../Modal.css';
 import './RegisterForm.css';
+import PropTypes from 'prop-types';
 
-class RegisterForm extends React.Component {
+class RegisterForm extends React.Component{
   constructor(props) {
     super(props);
     this.toSignUp = this.toSignUp.bind(this);
     this.toLogIn = this.toLogIn.bind(this);
     this.state = {
-      signUp: this.props.signUp,
-      onSubmit: this.props.onSubmit,
+      isSignUp: this.props.isSignUp,
     }
   }
 
   toSignUp() {
-    this.setState({signUp: true});
+    this.setState({ signUp: true });
   }
 
   toLogIn() {
-    this.setState({signUp: false});
+    this.setState({ signUp: false });
   }
 
-  render() {
+  render(){
     let fields;
-    if (this.state.signUp) {
+    if (this.state.isSignUp) {
       fields = <SignUpFields/>
     } else {
-      fields = <LoginFields />
+      fields = <LoginFields/>
     }
-
-    return (
-      <form onSubmit={this.props.onSubmit}>
-        <div className="form-switch">
-          <ToggleForm text='Sign Up' active={this.state.signUp} onClick={this.toSignUp}/>
-          <ToggleForm text='Log In' active={!this.state.signUp} onClick={this.toLogIn}/>
-        </div>
-        {fields}
-        <div className="form-group">
-        <button className="form-control btn btn-primary" type="submit">
-          Submit
-        </button>
-      </div>
-      </form>
+    return(
+             <form onSubmit={this.props.onSubmit}>
+         <div className="form-switch">
+           <ToggleForm text='Sign Up' active={this.state.isSignUp} onClick={this.toSignUp}/>
+           <ToggleForm text='Log In' active={!this.state.isSignUp} onClick={this.toLogIn}/>
+         </div>
+         {fields}
+         <div className="form-group">
+           <button className="form-control btn btn-primary" type="submit">
+             Submit
+     </button>
+         </div>
+       </form>
     );
   }
+}
+
+RegisterForm.propTypes = {
+  isSignUp: PropTypes.bool.isRequired,
+}
+
+function ToggleForm(props) {
+  return (
+    <u className={props.active ? 'toggle-active' : 'toggle-inactive'} onClick={props.onClick}>{props.text}</u>
+  );
 }
 
 function SignUpFields(props) {
@@ -106,10 +114,4 @@ function LoginFields(props) {
   );
 }
 
-function ToggleForm(props) {
-  return (
-    <u className={props.active? 'toggle-active' : 'toggle-inactive'} onClick={props.onClick}>{props.text}</u>
-  );
-}
-
-export default RegisterForm;
+export default RegisterForm

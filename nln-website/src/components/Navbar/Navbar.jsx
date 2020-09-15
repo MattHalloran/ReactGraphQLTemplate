@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import Container from '../Modal/Container/Container';
+import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '../../components';
+import RegisterForm from '../RegisterForm'
 
 const SHOW_HAMBURGER_AT = 750;
 
@@ -61,7 +61,7 @@ class Hamburger extends React.Component {
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.state = {
-            open:false,
+            open: false,
         }
     }
     toggleOpen = () => {
@@ -80,15 +80,18 @@ class Hamburger extends React.Component {
 }
 
 function NavList(props) {
+    let location = useLocation();
     return (
         <React.Fragment>
             <div>
                 <ul className="navbar-nav ml-auto">
                     <li className="nav-item">
-                        <Container triggerText="Sign Up" signUp={true} onSubmit={props.onSignUpSubmit} class="nav-link" href="#" />
+                        <Link to={{pathname:"/register",
+                            state:{background:location}}}>Sign Up</Link>
                     </li>
                     <li className="nav-item">
-                        <Container triggerText="Log In" signUp={false} onSubmit={props.onLogInSubmit} class="nav-link" href="#" />
+                    <Link to={{pathname:"/login",
+                            state:{background:location}}}>Log In</Link>
                     </li>
                 </ul>
             </div>
