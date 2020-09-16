@@ -1,0 +1,13 @@
+.toggle-active,
+.toggle-inactive {
+    cursor: pointer;
+    padding-right: 5px;
+}
+
+.toggle-active {
+    color:blue;
+}
+
+.toggle-inactive {
+    color:black
+}
