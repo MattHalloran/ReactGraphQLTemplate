@@ -8,6 +8,7 @@ import AboutPage from './components/AboutPage/AboutPage';
 import RegisterForm from './components/RegisterForm/RegisterForm';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import Modal from './components/Modal';
+import Spinner from './components/Spinner';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
@@ -21,6 +22,7 @@ function App() {
         <GlobalStyles />
         <div className="App">
           <Navbar />
+          <Spinner spinning={false}/>
           <RouterWithModal />
         </div>
       </ThemeProvider>
