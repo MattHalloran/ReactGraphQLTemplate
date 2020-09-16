@@ -1,31 +1,33 @@
-from flask import Flask
-import requests
-from api import app, db, bcrypt
+from flask import Flask, render_template, request, jsonify, make_response
+from flask_cors import CORS, cross_origin
+from api import create_app
+from models import db, User
+import sys
+import ast
 
-import time
+app = create_app()
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-@app.route('/api/time')
-def get_current_time():
-    return {'time': time.time()}
-
-#Register a new account
-@app.route('/api/register', methods=['OPTIONS','POST'])
-def register():
-    if request.method == 'OPTIONS':
-        return build_preflight_response()
-    elif request.method == 'POST':
+@app.route('/api/register', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def register(): 
+    try:
+        byte_data = request.data
+        dict_str = byte_data.decode('UTF-8')
+        data = ast.literal_eval(dict_str)
+        print('here1' + request.method)
         hash = 'test'
-        user = User(username=request.form['user'], email=request.form['email'], password=hash)
+        user = User(username=data['name'], email=data['email'], password=hash)
+        print(f'here4 {data["name"]} {data["email"]} {hash} {user}')
         db.session.add(user)
+        print('here5')
         db.session.commit()
-        return build_actual_response({result: "Good to go"})
+        print('here6')
+        return {"result": "Good to go"}
+    except :
+        print('thereeeeeeeee' + request.method)
+        print(sys.exc_info())
+        return {"error": "Failed to register user"}
 
-def build_preflight_response():
-    response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add('Access-Control-Allow-Headers', "*")
-    response.headers.add('Access-Control-Allow-Methods', "*")
-    return response
-def build_actual_response(response):
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
+if __name__ == '__main__':
+    app.run(debug=True)

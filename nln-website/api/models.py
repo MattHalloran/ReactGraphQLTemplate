@@ -4,11 +4,9 @@
 #3) db.create_all()
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import declarative_base
 import enum
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-db = SQLAlchemy(app)
+from api import db, Base
 
 season_types = ["Spring",
     "Summer",
@@ -27,6 +25,13 @@ growth_rates = ["Fast",
     "Slow",
     "Very Slow"]
 
+
+userRoles = db.Table('userRoles',
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+    )
+
 #All users of the system, such as customers and admins
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,8 +40,8 @@ class User(db.Model):
     phone_number = db.Column(db.String(20), unique=True)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    orders = db.relationship('Order', backref='Customer', lazy=True)
-    roles = db.relationship('Role', backref='User', lazy=True)
+    orders = db.relationship('Order', backref='customer', lazy=True)
+    roles = db.relationship('Role', secondary=userRoles, backref='user', lazy=True)
 
     def __repr__(self):
         return f"User('{self.id}', '{self.username}', '{self.email}')"
@@ -45,10 +50,7 @@ class User(db.Model):
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
-
-class UserRoles(db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False) 
+    users = db.relationship('User', secondary=userRoles, backref='role', lazy=True)
 
 class Plant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
