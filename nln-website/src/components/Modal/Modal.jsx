@@ -1,9 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import FocusTrap from 'focus-trap-react';
 import { useHistory } from 'react-router-dom';
 import './Modal.css';
-import RegisterForm from '../RegisterForm';
 
 const ESCAPE_KEY = 27;
 
@@ -23,7 +22,6 @@ function Modal(props) {
     }
     const onKeyDown = (event) => {
         if (event.keyCode !== ESCAPE_KEY) return;
-        console.log('in here bitch')
         closeModal(event);
     };
     return ReactDOM.createPortal(

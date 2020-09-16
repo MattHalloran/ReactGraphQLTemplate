@@ -2,8 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledMenu } from './Menu.styled';
 import { Link, useLocation } from 'react-router-dom';
-import RegisterForm from '../RegisterForm';
-import NotFoundPage from '../NotFoundPage';
 
 function Menu(props) {
   let location = useLocation();
