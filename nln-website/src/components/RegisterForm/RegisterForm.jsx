@@ -1,6 +1,7 @@
 import React from 'react';
 import './RegisterForm.css';
 import PropTypes from 'prop-types';
+import PubSub from '../../pubsub';
 
 class RegisterForm extends React.Component {
   constructor(props) {
@@ -26,7 +27,12 @@ class RegisterForm extends React.Component {
 
   submit(event) {
     event.preventDefault();
-    this.setState({ submitting: true });
+    this.setSubmit(true);
+  }
+
+  setSubmit(isSubmitting) {
+    this.setState({submitting: isSubmitting})
+    PubSub.publish('Loading', isSubmitting)
   }
 
   registerUser(formData) {
@@ -34,25 +40,22 @@ class RegisterForm extends React.Component {
     if (formData.password != formData.confirmPassword) {
       alert('Passwords do not match');
       console.log(formData);
-      this.setState({ submitting: false });
+      this.setSubmit(false)
       return;
     }
     fetch('api/register', {
       method: "POST",
       credentials: "include",
-      headers: { 'Content-Type': 'multipart/form-data' },
-      body: {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      }
+      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+      body: JSON.stringify(formData)
     }).then(res => res.json()
       .then(res => {
         console.log(res);
-        this.setState({ submitting: false });
+        this.setSubmit(false)
       }))
       .catch(err => {
         console.log(err);
+        this.setSubmit(false);
       });
   }
 

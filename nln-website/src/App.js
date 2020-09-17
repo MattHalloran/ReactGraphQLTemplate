@@ -14,7 +14,6 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { theme } from './theme';
 
-
 function App() {
   return (
     <Router>

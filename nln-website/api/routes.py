@@ -12,9 +12,16 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 @cross_origin(supports_credentials=True)
 def register(): 
     try:
+        print('chicken scratch')
+        print(request)
+        print(request.data)
+        print(request.form)
         byte_data = request.data
+        print(byte_data)
         dict_str = byte_data.decode('UTF-8')
+        print(dict_str)
         data = ast.literal_eval(dict_str)
+        print(data)
         print('here1' + request.method)
         hash = 'test'
         user = User(username=data['name'], email=data['email'], password=hash)
