@@ -73,6 +73,9 @@ def numberToEmail(number:str):
 #message - The actual message, in plaintext. If sending an html file instead (such as a newsletter), it is still a good
 #idea to set this field in case some recipients have disabled HTML emails
 #html_file - Path to an html file, if sending one
+#Notes:
+#1) Emojis work for emails, but not phone numbers
+#2) Please do not try sending an html file to an email
 def main(recipients:list, to_text:str = '', subject:str = '', message:str = '', html_file:str = ''):
 
     if len(recipients) == 0:
@@ -120,5 +123,3 @@ if __name__ == '__main__':
     num_args_required = 2
     if len(sys.argv) > num_args_required:
         main(sys.argv[1], sys.argv[2])
-    else:
-        main(['matthalloran8@gmail.com', '+16095796202'], 'recipients', 'this is a subject', 'this is a message')
