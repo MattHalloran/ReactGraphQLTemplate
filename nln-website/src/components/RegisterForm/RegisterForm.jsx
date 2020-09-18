@@ -2,6 +2,7 @@ import React from 'react';
 import './RegisterForm.css';
 import PropTypes from 'prop-types';
 import PubSub from '../../pubsub';
+import TextField from '@material-ui/core/TextField';
 
 class RegisterForm extends React.Component {
   constructor(props) {
@@ -31,8 +32,8 @@ class RegisterForm extends React.Component {
   }
 
   setSubmit(isSubmitting) {
-    this.setState({submitting: isSubmitting})
-    PubSub.publish('Loading', isSubmitting)
+    this.setState({ submitting: isSubmitting })
+    // PubSub.publish('Loading', isSubmitting)
   }
 
   registerUser(formData) {
@@ -102,69 +103,113 @@ function ToggleForm(props) {
 class SignUpFields extends React.Component {
   constructor(props) {
     super(props);
-    this.updateName = this.updateName.bind(this);
-    this.updateEmail = this.updateEmail.bind(this);
-    this.updatePassword = this.updatePassword.bind(this);
-    this.updateConfirmPassword = this.updateConfirmPassword.bind(this);
     this.state = {
       name: "",
+      nameError: "",
       email: "",
+      emailError: "",
       password: "",
+      passwordError: "",
       confirmPassword: "",
     }
   }
   componentWillReceiveProps(newProps) {
     if (newProps.submitting !== this.props.submitting && newProps.submitting) {
-      this.props.onSubmit(this.state);
+      let hasError = this.validate();
+      if (!hasError) {
+        this.props.onSubmit(this.state);
+      } 
     }
   }
-  updateName(e) {
-    this.setState({ name: e.target.value });
+  change = e => {
+    this.setState({ [e.target.name]: e.target.value });
   }
-  updateEmail(e) {
-    this.setState({ email: e.target.value });
-  }
-  updatePassword(e) {
-    this.setState({ password: e.target.value });
-  }
-  updateConfirmPassword(e) {
-    this.setState({ confirmPassword: e.target.value });
+  validate() {
+    let isError = false;
+    const errors = {
+      nameError: "",
+      emailError: "",
+      passwordError: ""
+    }
+
+    if (this.state.name === "") {
+      isError = true;
+      errors.nameError = "Name cannot be blank";
+    }
+
+    if (this.state.email.indexOf("@") === -1) {
+      isError = true;
+      errors.emailError = "Requires valid email"
+    }
+
+    if (this.state.password !== this.state.confirmPassword) {
+      isError = true;
+      errors.passwordError = "Passwords do not match"
+    }
+
+    if (this.state.password.length < 8) {
+      isError = true;
+      errors.passwordError = "Password must be at least 8 characters long"
+    }
+
+    this.setState({
+      ...this.state,
+      ...errors
+    });
+
+    return isError
   }
   render() {
     return (
       <React.Fragment>
-        <div className="form-group">
-          <label htmlFor="name">Name</label>
-          <input className="form-control" id="name" onChange={this.updateName} />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            placeholder="name@example.com"
-            onChange={this.updateEmail}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            onChange={this.updatePassword}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Confirm Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password2"
-            onChange={this.updateConfirmPassword}
-          />
-        </div>
+        <TextField
+          name="name"
+          className="form-input"
+          variant="outlined"
+          label="Name"
+          value={this.state.name}
+          onChange={e => this.change(e)}
+          error={this.state.nameError.length > 0}
+          helperText={this.state.nameError}
+          required
+        />
+        <TextField
+          name="email"
+          className="form-input"
+          type="email"
+          variant="outlined"
+          label="Email"
+          value={this.state.email}
+          onChange={e => this.change(e)}
+          error={this.state.emailError.length > 0}
+          helperText={this.state.emailError}
+          floatingLabelFixed
+          required
+        />
+        <TextField
+          name="password"
+          className="form-input"
+          type="password"
+          variant="outlined"
+          label="Password"
+          value={this.state.password}
+          onChange={e => this.change(e)}
+          error={this.state.passwordError.length > 0}
+          helperText={this.state.passwordError}
+          floatingLabelFixed
+          required
+        />
+        <TextField
+          name="confirmPassword"
+          className="form-input"
+          type="password"
+          variant="outlined"
+          label="Confirm Password"
+          value={this.state.confirmPassword}
+          onChange={e => this.change(e)}
+          floatingLabelFixed
+          required
+        />
       </React.Fragment>
     );
   }
@@ -173,46 +218,77 @@ class SignUpFields extends React.Component {
 class LoginFields extends React.Component {
   constructor(props) {
     super(props);
-    this.updateEmail = this.updateEmail.bind(this);
-    this.updatePassword = this.updatePassword.bind(this);
     this.state = {
       email: "",
+      emailError: "",
       password: "",
+      passwordError: "",
     }
   }
   componentWillReceiveProps(newProps) {
     if (newProps.submitting !== this.props.submitting && newProps.submitting) {
-      this.props.onSubmit(this.state);
+      let hasError = this.validate();
+      if (!hasError) {
+        this.props.onSubmit(this.state);
+      } 
     }
   }
-  updateEmail(e) {
-    this.setState({ email: e.target.value });
+  change = e => {
+    this.setState({ [e.target.name]: e.target.value });
   }
-  updatePassword(e) {
-    this.setState({ password: e.target.value });
+  validate() {
+    let isError = false;
+    const errors = {
+      emailError: "",
+      passwordError: ""
+    }
+
+    if (this.state.email.length === 0) {
+      isError = true;
+      errors.emailError = "Must enter email"
+    }
+
+    if (this.state.password.length === 0) {
+      isError = true;
+      errors.passwordError = "Must enter password"
+    }
+
+    this.setState({
+      ...this.state,
+      ...errors
+    });
+
+    return isError
   }
   render() {
     return (
       <React.Fragment>
-        <div className="form-group">
-          <label htmlFor="email">Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            placeholder="name@example.com"
-            onChange={this.updateEmail}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            onChange={this.updatePassword}
-          />
-        </div>
+        <TextField
+          name="email"
+          className="form-input"
+          type="email"
+          variant="outlined"
+          label="Email"
+          value={this.state.email}
+          onChange={e => this.change(e)}
+          error={this.state.emailError.length > 0}
+          helperText={this.state.emailError}
+          floatingLabelFixed
+          required
+        />
+        <TextField
+          name="password"
+          className="form-input"
+          type="password"
+          variant="outlined"
+          label="Password"
+          value={this.state.password}
+          onChange={e => this.change(e)}
+          error={this.state.passwordError.length > 0}
+          helperText={this.state.passwordError}
+          floatingLabelFixed
+          required
+        />
       </React.Fragment>
     );
   }

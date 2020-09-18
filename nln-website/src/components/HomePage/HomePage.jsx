@@ -3,6 +3,9 @@ import { StyledHero } from './HomePage.styled';
 import { Link } from 'react-router-dom';
 
 class HomePage extends React.Component {
+    componentDidMount() {
+        document.title = "Home Page | New Life Nursery"
+    }
     render() {
         return (
             <div>

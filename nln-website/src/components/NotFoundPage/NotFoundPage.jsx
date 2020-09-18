@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import './NotFoundPage.css';
 
 class NotFoundPage extends React.Component {
+    componentDidMount() {
+        document.title = "404 Page | New Life Nursery"
+    }
     render() {
         return (
             <div className="center">

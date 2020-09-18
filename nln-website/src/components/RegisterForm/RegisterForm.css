@@ -11,3 +11,11 @@
 .toggle-inactive {
     color:black
 }
+
+form {
+    display: grid;
+}
+
+.form-input {
+    padding-bottom: 20px !important;
+}
