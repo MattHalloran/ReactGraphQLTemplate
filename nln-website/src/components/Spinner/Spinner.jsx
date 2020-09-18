@@ -3,7 +3,7 @@ import './Spinner.css';
 import OakSpinner from '../../assets/img/oak-spinner.svg';
 import PubSub from '../../pubsub';
 
-class HomePage extends React.Component {
+class Spinner extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -27,4 +27,4 @@ class HomePage extends React.Component {
     }
 }
 
-export default HomePage;
+export default Spinner;

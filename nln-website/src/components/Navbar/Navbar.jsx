@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '../../components';
-import RegisterForm from '../RegisterForm'
+import './Navbar.css';
 
 const SHOW_HAMBURGER_AT = 750;
 
@@ -71,7 +71,7 @@ class Hamburger extends React.Component {
         return (
             <React.Fragment>
                 <div>
-                    <Burger open={this.state.open} toggleOpen={this.toggleOpen} />
+                    <Burger className="align-right" open={this.state.open} toggleOpen={this.toggleOpen} />
                     <Menu open={this.state.open} closeMenu={() => this.setState({ open: false })} />
                 </div>
             </React.Fragment>
@@ -85,6 +85,10 @@ function NavList(props) {
         <React.Fragment>
             <div>
                 <ul className="navbar-nav ml-auto">
+                    <li className="nav-item">
+                        <Link to={{pathname:"/info",
+                            state:{background:location}}}>Info</Link>
+                    </li>
                     <li className="nav-item">
                         <Link to={{pathname:"/register",
                             state:{background:location}}}>Sign Up</Link>
