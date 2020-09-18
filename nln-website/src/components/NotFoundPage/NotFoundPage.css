@@ -1,0 +1,6 @@
+.center {
+    position: absolute;
+    padding: 2em;
+    top: 50%;
+    transform: translateY(-50%);
+}

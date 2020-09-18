@@ -84,17 +84,20 @@ function NavList(props) {
     return (
         <React.Fragment>
             <div>
-                <ul className="navbar-nav ml-auto">
+                <ul className="nav-list">
                     <li className="nav-item">
-                        <Link to={{pathname:"/info",
+                        <Link className="nav-link" 
+                            to={{pathname:"/info",
                             state:{background:location}}}>Info</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to={{pathname:"/register",
+                        <Link className="nav-link" 
+                            to={{pathname:"/register",
                             state:{background:location}}}>Sign Up</Link>
                     </li>
                     <li className="nav-item">
-                    <Link to={{pathname:"/login",
+                        <Link className="nav-link" 
+                            to={{pathname:"/login",
                             state:{background:location}}}>Log In</Link>
                     </li>
                 </ul>

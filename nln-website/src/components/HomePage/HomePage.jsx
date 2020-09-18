@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyledHero } from './HomePage.styled';
+import { Link } from 'react-router-dom';
 
 class HomePage extends React.Component {
     render() {
@@ -10,7 +11,9 @@ class HomePage extends React.Component {
                     <div class="hero-text">
                         <h1>Beautiful, healthy plants</h1>
                         <h3>At competitive prices</h3>
-                        <button>Order Now</button>
+                        <Link to="/info">
+                            <button className="primary">Order now</button>
+                        </Link>
                     </div>
                 </StyledHero>
 
