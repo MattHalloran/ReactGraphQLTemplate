@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Burger, Menu } from '../../components';
+import { Burger, Menu } from '..';
 import './Navbar.css';
 
 const SHOW_HAMBURGER_AT = 750;

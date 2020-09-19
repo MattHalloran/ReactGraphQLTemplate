@@ -9,6 +9,7 @@ import RegisterForm from './components/RegisterForm/RegisterForm';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import Modal from './components/Modal';
 import Spinner from './components/Spinner';
+import Footer from './components/Footer';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
@@ -20,9 +21,14 @@ function App() {
       <ThemeProvider theme={theme}>
         <GlobalStyles />
         <div className="App">
-          <Navbar />
-          <Spinner spinning={false}/>
-          <RouterWithModal />
+          <div className="page-container">
+            <div className="content-wrap">
+              <Navbar />
+              <Spinner spinning={false} />
+              <RouterWithModal />
+            </div>
+            <Footer />
+          </div>
         </div>
       </ThemeProvider>
     </Router>
@@ -48,10 +54,10 @@ function RouterWithModal() {
         <Route path="/about" component={AboutPage} />
         <Route path="/register" render={() =>
           <RegisterForm isSignUp={true} />
-        }/>
+        } />
         <Route path="/login" render={() =>
           <RegisterForm isSignUp={false} />
-        }/>
+        } />
         <Route component={NotFoundPage} />
       </Switch>
       {background && <Route path="/register" children={<Modal

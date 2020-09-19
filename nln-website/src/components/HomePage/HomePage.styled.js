@@ -17,6 +17,7 @@ export const StyledHero = styled.header`
         position: relative;
     }
 
+    .hero-gradient,
     .hero-text {
         text-align: center;
         position: absolute;
@@ -26,5 +27,11 @@ export const StyledHero = styled.header`
         color: white;
         width: fit-content;
         padding: 2rem;
+    }
+
+    .hero-gradient {
+        background: linear-gradient(to bottom, transparent 0%, black 100%);
+        width: 100%;
+        height: 100%
     }
 `;
