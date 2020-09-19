@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 import ProvenWinners from '../../assets/img/proven-winners.png';
 
-let creditAppLocation = '../../assets/downloads/Confidential_Commercial_Credit_Application-2010.doc';
-
 class Footer extends React.Component {
     render() {
         return (

@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
+import Logo from '../../assets/img/NLN-logo-v1-not-transparent-m.png';
 import './Navbar.css';
 
-const SHOW_HAMBURGER_AT = 750;
+const SHOW_HAMBURGER_AT = 800;
 
 class Navbar extends React.Component {
     constructor(props) {
@@ -47,6 +48,7 @@ class Navbar extends React.Component {
             <nav className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top" >
                 <div className="container">
                     <Link to="/" className="navbar-brand">
+                        <img src={Logo} alt="New Life Nursery Logo" className="nav-logo"/>
                         New Life Nursery
                 </Link>
                     {menu}

@@ -4,7 +4,7 @@ import { StyledNotFoundPage } from './NotFoundPage.styled';
 
 class NotFoundPage extends React.Component {
     componentDidMount() {
-        document.title = "404 Page | New Life Nursery"
+        document.title = "404 | New Life Nursery"
     }
     render() {
         return (
