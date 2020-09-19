@@ -20,10 +20,6 @@ class HomePage extends React.Component {
                         </Link>
                     </div>
                 </StyledHero>
-
-
-
-
             </div >
         );
     }

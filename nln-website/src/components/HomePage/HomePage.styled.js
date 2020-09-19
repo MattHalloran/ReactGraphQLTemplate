@@ -26,7 +26,7 @@ export const StyledHero = styled.header`
         transform: translate(-50%, -50%);
         color: white;
         width: fit-content;
-        padding: 2rem;
+        padding: 1rem;
     }
 
     .hero-gradient {

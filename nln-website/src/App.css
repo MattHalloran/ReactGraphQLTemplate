@@ -25,6 +25,7 @@
 
 .content-wrap{
   flex:1;
+  position: relative;
 }
 
 @keyframes App-logo-spin {
