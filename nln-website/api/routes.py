@@ -2,11 +2,17 @@ from flask import Flask, render_template, request, jsonify, make_response
 from flask_cors import CORS, cross_origin
 from api import create_app
 from models import db, User
+from auth import generate_token, requires_auth, verify_token
 import sys
 import ast
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.route("/api/user", methods=["GET"])
+@requires_auth
+def get_user():
+    return jsonify(result=g.current_user)
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -24,17 +30,39 @@ def register():
         print(data)
         print('here1' + request.method)
         hash = 'test'
-        user = User(username=data['name'], email=data['email'], password=hash)
+        user = User(name=data['name'], email=data['email'], password=data['password'])
         print(f'here4 {data["name"]} {data["email"]} {hash} {user}')
         db.session.add(user)
         print('here5')
-        db.session.commit()
-        print('here6')
-        return {"result": "Good to go"}
+        try:
+            db.session.commit()
+        except IntegrityError:
+            return {"message": "User with that email already exists!"}
+        return {"id": user.id,
+                "token": generate_token(app, user)}
     except :
         print('thereeeeeeeee' + request.method)
         print(sys.exc_info())
-        return {"error": "Failed to register user"}
+        return {"error": "Failed to register user"}, 409
+
+@app.route("/api/get_token", methods=["POST"])
+def get_token():
+    incoming = request.get_json()
+    user = User.get_user_with_email_and_password(incoming["email"], incoming["password"])
+    if user:
+        return jsonify(token=generate_token(user))
+    return jsonify(error=True), 403
+
+
+@app.route("/api/is_token_valid", methods=["POST"])
+def is_token_valid():
+    incoming = request.get_json()
+    is_valid = verify_token(app, incoming["token"])
+
+    if is_valid:
+        return jsonify(token_is_valid=True)
+    else:
+        return jsonify(token_is_valid=False), 403
 
 if __name__ == '__main__':
     app.run(debug=True)
