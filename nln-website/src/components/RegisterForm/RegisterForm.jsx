@@ -2,7 +2,9 @@ import React from 'react';
 import './RegisterForm.css';
 import PropTypes from 'prop-types';
 import PubSub from '../../pubsub';
+import * as actionCreators from '../../actions/auth'
 import TextField from '@material-ui/core/TextField';
+import { Redirect } from "react-router-dom";
 
 class RegisterForm extends React.Component {
   constructor(props) {
@@ -15,6 +17,7 @@ class RegisterForm extends React.Component {
     this.state = {
       isSignUp: this.props.isSignUp,
       submitting: false,
+      redirect: null,
     }
   }
 
@@ -44,20 +47,14 @@ class RegisterForm extends React.Component {
       this.setSubmit(false)
       return;
     }
-    fetch('api/register', {
-      method: "POST",
-      credentials: "include",
-      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
-      body: JSON.stringify(formData)
-    }).then(res => res.json()
-      .then(res => {
-        console.log(res);
-        this.setSubmit(false)
-      }))
-      .catch(err => {
-        console.log(err);
-        this.setSubmit(false);
-      });
+    actionCreators.registerUser(formData.name, formData.email, formData.password).then(response => {
+      console.log('woohoo registered!!!');
+      console.log(response);
+      this.setState({redirect:'/profile'})
+    }).catch(error => {
+      console.log('received error here hereh here')
+      console.log(error);
+    })
   }
 
   login(formData) {
@@ -72,6 +69,9 @@ class RegisterForm extends React.Component {
       fields = <SignUpFields onSubmit={this.registerUser} submitting={this.state.submitting} />
     } else {
       fields = <LoginFields onSubmit={this.login} submitting={this.state.submitting} />
+    }
+    if (this.state.redirect) {
+      return <Redirect to={this.state.redirect} />
     }
     return (
       <form onSubmit={this.props.onSubmit}>

@@ -7,6 +7,8 @@ import HomePage from './components/HomePage/HomePage';
 import AboutPage from './components/AboutPage/AboutPage';
 import RegisterForm from './components/RegisterForm/RegisterForm';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
+import { requireAuthentication } from './components/AuthenticatedComponent';
+import ProfilePage from './components/ProfilePage';
 import Modal from './components/Modal';
 import Spinner from './components/Spinner';
 import Footer from './components/Footer';
@@ -37,21 +39,16 @@ function App() {
 
 // Handles routing. Allows modal popups with their own urls
 function RouterWithModal() {
-  const [currentTime, setCurrentTime] = useState(0);
   let location = useLocation();
   let background = location.state && location.state.background;
   const modalRef = useRef(null);
   const buttonRef = useRef(null);
-  useEffect(() => {
-    fetch('/api/time').then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-    })
-  }, []);
   return (
     <div>
       <Switch location={background || location}>
         <Route path="/" exact component={HomePage} />
         <Route path="/about" component={AboutPage} />
+        <Route path="/profile" component={requireAuthentication(ProfilePage)} />
         <Route path="/register" render={() =>
           <RegisterForm isSignUp={true} />
         } />

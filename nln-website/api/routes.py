@@ -29,20 +29,23 @@ def register():
             db.session.commit()
         except exc.IntegrityError as e:
             print(e)
-            return {"error": "User with that email already exists!"}
+            return {"error": "User with that email already exists!",
+                    "status": 403}, 403
         return {"id": user.id,
-                "token": generate_token(app, user)}
+                "token": generate_token(app, user),
+                "status": 200}, 200
     except Exception as e:
         print('thereeeeeeeee' + request.method)
         print(e)
-        return {"error": "Failed to register user"}, 409
+        return {"error": "Failed to register user",
+                "status": 409}, 409
 
 @app.route("/api/get_token", methods=["POST"])
 def get_token():
     incoming = request.get_json()
     user = User.get_user_from_credentials(incoming["email"], incoming["password"])
     if user:
-        return jsonify(token=generate_token(user))
+        return jsonify(token=generate_token(user)), 200
     return jsonify(error=True), 403
 
 
