@@ -3,6 +3,7 @@ from flask_cors import CORS, cross_origin
 from api import create_app
 from models import db, User
 from auth import generate_token, requires_auth, verify_token
+from sqlalchemy import exc
 import sys
 import ast
 
@@ -18,37 +19,28 @@ def get_user():
 @cross_origin(supports_credentials=True)
 def register(): 
     try:
-        print('chicken scratch')
-        print(request)
-        print(request.data)
-        print(request.form)
         byte_data = request.data
-        print(byte_data)
         dict_str = byte_data.decode('UTF-8')
-        print(dict_str)
         data = ast.literal_eval(dict_str)
-        print(data)
-        print('here1' + request.method)
-        hash = 'test'
         user = User(name=data['name'], email=data['email'], password=data['password'])
         print(f'here4 {data["name"]} {data["email"]} {hash} {user}')
         db.session.add(user)
-        print('here5')
         try:
             db.session.commit()
-        except IntegrityError:
-            return {"message": "User with that email already exists!"}
+        except exc.IntegrityError as e:
+            print(e)
+            return {"error": "User with that email already exists!"}
         return {"id": user.id,
                 "token": generate_token(app, user)}
-    except :
+    except Exception as e:
         print('thereeeeeeeee' + request.method)
-        print(sys.exc_info())
+        print(e)
         return {"error": "Failed to register user"}, 409
 
 @app.route("/api/get_token", methods=["POST"])
 def get_token():
     incoming = request.get_json()
-    user = User.get_user_with_email_and_password(incoming["email"], incoming["password"])
+    user = User.get_user_from_credentials(incoming["email"], incoming["password"])
     if user:
         return jsonify(token=generate_token(user))
     return jsonify(error=True), 403

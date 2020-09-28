@@ -1,8 +1,10 @@
 #To create database,
-#1) navigate to this directory in terminal
-#2) from api import db, create_app
-#3) app = create_app()
-#4) db.create_all()
+#1) navigate to this directory in terminal and open python
+#2) import models
+#3) from api import db, create_app
+#4) app = create_app()
+#5) with app.app_context():
+#       db.create_all()
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import declarative_base
@@ -67,7 +69,7 @@ class User(db.Model):
         return None
 
     def __repr__(self):
-        return f"User('{self.id}', '{self.username}', '{self.email}')"
+        return f"User('{self.id}', '{self.name}', '{self.email}')"
 
 #Roles assigned to an account, which are currently only customer and admin
 class Role(db.Model):
