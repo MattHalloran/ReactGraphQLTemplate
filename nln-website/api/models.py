@@ -57,12 +57,12 @@ class User(db.Model):
 
     @staticmethod
     def hashed_password(password):
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     @staticmethod
     def get_user_from_credentials(email, password):
         user = User.query.filter_by(email=email).first()
-        if user and bcrypt.checkpw(user.password.encode("utf-8"), password):
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             user.last_login = time.time()
             db.session.commit()
             return user

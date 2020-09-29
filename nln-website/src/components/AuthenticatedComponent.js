@@ -24,38 +24,19 @@ export function requireAuthentication(Component) {
 
         checkAuth() {
             if (!this.state.isAuthenticated) {
-                const token = localStorage.getItem('token');
-                console.log(token);
-                if (!token) {
-                    this.setState({ redirect: '/'});
-                } else {
-                    fetch('/api/is_token_valid', {
-                        method: 'post',
-                        credentials: 'include',
-                        headers: {
-                            'Accept': 'application/json', // eslint-disable-line quote-props
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ token }),
-                    })
-                        .then(res => {
-                            if (res.status === 200) {
-                                actionCreators.loginUserSuccess(token);
-                                this.setState({
-                                    loaded_if_needed: true,
-                                    isAuthenticated: true,
-                                });
-
-                            } else {
-                                this.setState({ redirect: '/' })
-                            }
-                        });
-
-                }
-            } else {
-                this.setState({
-                    loaded_if_needed: true,
-                });
+                actionCreators.checkJWT().then(() => {
+                    console.log('found jwt!')
+                    this.setState({
+                        loaded_if_needed: true,
+                        isAuthenticated: true,
+                    });
+                }).catch(() => {
+                    console.log('dang nabbit')
+                    this.setState({ redirect: '/' })
+                })
+            }
+            else {
+                this.setState({ loaded_if_needed: true });
             }
         }
 

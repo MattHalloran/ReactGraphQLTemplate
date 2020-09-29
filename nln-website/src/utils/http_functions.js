@@ -41,10 +41,21 @@ export function create_user(name, email, password) {
 }
 
 export function get_token(email, password) {
-    return axios.post('/api/get_token', {
-        email,
-        password,
-    });
+    return new Promise(function (resolve, reject) {
+        fetch('api/get_token', {
+            method: "POST",
+            credentials: "include",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+            body: JSON.stringify({
+                "email": email,
+                "password": password
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    }); 
 }
 
 export function has_github_token(token) {

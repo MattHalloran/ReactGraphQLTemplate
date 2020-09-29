@@ -15,25 +15,58 @@ import Footer from './components/Footer';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { theme } from './theme';
+//Provide user context
+import UserContext from './contexts/UserContext';
+import * as actionCreators from './actions/auth';
 
-function App() {
-  return (
-    <Router>
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
-        <div className="App">
-          <div className="page-container">
-            <div className="content-wrap">
-              <Navbar />
-              <Spinner spinning={false} />
-              <RouterWithModal />
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      user: {
+        email: null,
+        token: null,
+      }
+    }
+  }
+
+  componentDidMount() {
+    actionCreators.checkJWT().then(res => {
+      this.setState({
+        user: {
+          "email": res.email,
+          "token": res.token
+        }
+      })
+    }).catch(() => {
+      this.setState({ user: {
+        "email": null,
+        "token": null
+      } })
+    })
+  }
+
+  render() {
+    return (
+      <Router>
+        <UserContext.Provider value={this.state.user}>
+          <ThemeProvider theme={theme}>
+            <GlobalStyles />
+            <div className="App">
+              <div className="page-container">
+                <div className="content-wrap">
+                  <Navbar />
+                  <Spinner spinning={false} />
+                  <RouterWithModal />
+                </div>
+                <Footer />
+              </div>
             </div>
-            <Footer />
-          </div>
-        </div>
-      </ThemeProvider>
-    </Router>
-  );
+          </ThemeProvider>
+        </UserContext.Provider>
+      </Router>
+    );
+  }
 }
 
 // Handles routing. Allows modal popups with their own urls

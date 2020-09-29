@@ -10,7 +10,7 @@ class RegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.setSignUp = this.setSignUp.bind(this);
-    this.registerUser = this.registerUser.bind(this);
+    this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.state = {
       isSignUp: this.props.isSignUp,
@@ -28,30 +28,36 @@ class RegisterForm extends React.Component {
     PubSub.publish('Loading', isSubmitting)
   }
 
-  registerUser(formData) {
+  register(formData) {
     this.setSubmit(true);
     actionCreators.registerUser(formData.name, formData.email, formData.password).then(response => {
       console.log('woohoo registered!!!');
       console.log(response);
       this.setSubmit(false);
-      this.setState({ redirect: '/profile' })
+      this.setState({ redirect: '/profile' });
     }).catch(error => {
       console.log('received error here hereh here')
-      console.log(error);
+      console.error(error);
       this.setSubmit(false);
     })
   }
 
   login(formData) {
-    console.log('login');
-    this.setState({ submitting: false });
-    console.log(formData.password);
+    console.log('bloop')
+    this.setSubmit(true);
+    actionCreators.loginUser(formData.email, formData.password).then(response => {
+      this.setSubmit(false);
+      this.setState({ redirect: '/profile' });
+    }).catch(error => {
+      console.error(error);
+      this.setSubmit(false);
+    })
   }
 
   render() {
     let fields;
     if (this.state.isSignUp) {
-      fields = <SignUpFields onSubmit={this.registerUser} submitting={this.state.submitting} />
+      fields = <SignUpFields onSubmit={this.register} submitting={this.state.submitting} />
     } else {
       fields = <LoginFields onSubmit={this.login} submitting={this.state.submitting} />
     }
@@ -238,7 +244,7 @@ class LoginFields extends React.Component {
       ...errors
     });
 
-    return isError
+    return !isError
   }
   render() {
     return (
