@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const StyledMenu = styled.nav`
   display: flex;
   flex-direction: column;
-  transform: ${({ open }) => open ? 'translateX(0)' : 'translateX(-100%)'};
+  transform: ${({ open }) => open ? 'translateX(-100%)' : 'translateX(0%)'};
   justify-content: center;
   background: ${({ theme }) => theme.primaryLight};
   height: 100vh;
@@ -11,7 +11,7 @@ export const StyledMenu = styled.nav`
   padding: 2rem;
   position: absolute;
   top: 0;
-  left: 0;
+  left: 100%;
   transition: transform 0.3s ease-in-out;
   
   @media (max-width: ${({ theme }) => theme.mobile}) {
@@ -27,6 +27,7 @@ export const StyledMenu = styled.nav`
     color: ${({ theme }) => theme.primaryDark};
     text-decoration: none;
     transition: color 0.3s linear;
+    width: max-content;
     
     @media (max-width: ${({ theme }) => theme.mobile}) {
       font-size: 1.5rem;
