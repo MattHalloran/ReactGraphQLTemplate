@@ -1,7 +1,7 @@
 import React from 'react';
 import './RegisterForm.css';
 import PropTypes from 'prop-types';
-import PubSub from '../../pubsub';
+import PubSub from '../../utils/pubsub';
 import * as actionCreators from '../../actions/auth'
 import TextField from '@material-ui/core/TextField';
 import { Redirect } from "react-router-dom";
@@ -9,9 +9,7 @@ import { Redirect } from "react-router-dom";
 class RegisterForm extends React.Component {
   constructor(props) {
     super(props);
-    this.toSignUp = this.toSignUp.bind(this);
-    this.toLogIn = this.toLogIn.bind(this);
-    this.submit = this.submit.bind(this);
+    this.setSignUp = this.setSignUp.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.login = this.login.bind(this);
     this.state = {
@@ -21,39 +19,26 @@ class RegisterForm extends React.Component {
     }
   }
 
-  toSignUp() {
-    this.setState({ isSignUp: true });
-  }
-
-  toLogIn() {
-    this.setState({ isSignUp: false });
-  }
-
-  submit(event) {
-    event.preventDefault();
-    this.setSubmit(true);
+  setSignUp(isSign) {
+    this.setState({ isSignUp: isSign });
   }
 
   setSubmit(isSubmitting) {
     this.setState({ submitting: isSubmitting })
-    // PubSub.publish('Loading', isSubmitting)
+    PubSub.publish('Loading', isSubmitting)
   }
 
   registerUser(formData) {
-    console.log('register user');
-    if (formData.password != formData.confirmPassword) {
-      alert('Passwords do not match');
-      console.log(formData);
-      this.setSubmit(false)
-      return;
-    }
+    this.setSubmit(true);
     actionCreators.registerUser(formData.name, formData.email, formData.password).then(response => {
       console.log('woohoo registered!!!');
       console.log(response);
-      this.setState({redirect:'/profile'})
+      this.setSubmit(false);
+      this.setState({ redirect: '/profile' })
     }).catch(error => {
       console.log('received error here hereh here')
       console.log(error);
+      this.setSubmit(false);
     })
   }
 
@@ -76,15 +61,10 @@ class RegisterForm extends React.Component {
     return (
       <form onSubmit={this.props.onSubmit}>
         <div className="form-switch">
-          <ToggleForm text='Sign Up' active={this.state.isSignUp} onClick={this.toSignUp} />
-          <ToggleForm text='Log In' active={!this.state.isSignUp} onClick={this.toLogIn} />
+          <ToggleForm text='Sign Up' active={this.state.isSignUp} onClick={() => this.setSignUp(true)} />
+          <ToggleForm text='Log In' active={!this.state.isSignUp} onClick={() => this.setSignUp(false)} />
         </div>
         {fields}
-        <div className="form-group">
-          <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
-            Submit
-     </button>
-        </div>
       </form>
     );
   }
@@ -103,6 +83,7 @@ function ToggleForm(props) {
 class SignUpFields extends React.Component {
   constructor(props) {
     super(props);
+    this.submit = this.submit.bind(this);
     this.state = {
       name: "",
       nameError: "",
@@ -113,12 +94,10 @@ class SignUpFields extends React.Component {
       confirmPassword: "",
     }
   }
-  componentWillReceiveProps(newProps) {
-    if (newProps.submitting !== this.props.submitting && newProps.submitting) {
-      let hasError = this.validate();
-      if (!hasError) {
-        this.props.onSubmit(this.state);
-      } 
+  submit(event) {
+    event.preventDefault();
+    if (this.validate()) {
+      this.props.onSubmit(this.state);
     }
   }
   change = e => {
@@ -157,7 +136,7 @@ class SignUpFields extends React.Component {
       ...errors
     });
 
-    return isError
+    return !isError
   }
   render() {
     return (
@@ -183,7 +162,6 @@ class SignUpFields extends React.Component {
           onChange={e => this.change(e)}
           error={this.state.emailError.length > 0}
           helperText={this.state.emailError}
-          floatingLabelFixed
           required
         />
         <TextField
@@ -196,7 +174,6 @@ class SignUpFields extends React.Component {
           onChange={e => this.change(e)}
           error={this.state.passwordError.length > 0}
           helperText={this.state.passwordError}
-          floatingLabelFixed
           required
         />
         <TextField
@@ -207,9 +184,13 @@ class SignUpFields extends React.Component {
           label="Confirm Password"
           value={this.state.confirmPassword}
           onChange={e => this.change(e)}
-          floatingLabelFixed
           required
         />
+        <div className="form-group">
+          <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+            Submit
+     </button>
+        </div>
       </React.Fragment>
     );
   }
@@ -218,6 +199,7 @@ class SignUpFields extends React.Component {
 class LoginFields extends React.Component {
   constructor(props) {
     super(props);
+    this.submit = this.submit.bind(this);
     this.state = {
       email: "",
       emailError: "",
@@ -225,12 +207,10 @@ class LoginFields extends React.Component {
       passwordError: "",
     }
   }
-  componentWillReceiveProps(newProps) {
-    if (newProps.submitting !== this.props.submitting && newProps.submitting) {
-      let hasError = this.validate();
-      if (!hasError) {
-        this.props.onSubmit(this.state);
-      } 
+  submit(event) {
+    event.preventDefault();
+    if (this.validate()) {
+      this.props.onSubmit(this.state);
     }
   }
   change = e => {
@@ -273,7 +253,6 @@ class LoginFields extends React.Component {
           onChange={e => this.change(e)}
           error={this.state.emailError.length > 0}
           helperText={this.state.emailError}
-          floatingLabelFixed
           required
         />
         <TextField
@@ -286,9 +265,13 @@ class LoginFields extends React.Component {
           onChange={e => this.change(e)}
           error={this.state.passwordError.length > 0}
           helperText={this.state.passwordError}
-          floatingLabelFixed
           required
         />
+        <div className="form-group">
+          <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+            Submit
+     </button>
+        </div>
       </React.Fragment>
     );
   }

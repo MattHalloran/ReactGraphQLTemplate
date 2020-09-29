@@ -17,7 +17,7 @@ function Modal(props) {
         document.querySelector('html').classList.toggle('scroll-lock');
     };
     const onClick = (event) => {
-        if (props.modalRef.current && props.modalRef.current.contains(event.target)) return;
+        if (props.modalRef.current && props.modalRef.current.contains(event.target)) return; //If clicked outside modal
         closeModal(event);
     }
     const onKeyDown = (event) => {
@@ -32,7 +32,7 @@ function Modal(props) {
                 tabIndex="-1"
                 aria-modal="true"
                 className="modal-cover"
-                onClick={onClick}
+                onMouseDown={onClick}
                 onKeyDown={onKeyDown}>
                 <div className="modal-area" ref={props.modalRef}>
                     <button

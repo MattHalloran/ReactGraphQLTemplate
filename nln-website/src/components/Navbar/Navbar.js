@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';

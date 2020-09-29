@@ -1,7 +1,7 @@
 import React from 'react';
 import './Spinner.css';
 import OakSpinner from '../../assets/img/oak-spinner.svg';
-import PubSub from '../../pubsub';
+import PubSub from '../../utils/pubsub';
 
 class Spinner extends React.Component {
     constructor(props) {

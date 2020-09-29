@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
-import logo from './logo.svg';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import HomePage from './components/HomePage/HomePage';

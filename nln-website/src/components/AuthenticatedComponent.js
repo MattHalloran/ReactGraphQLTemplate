@@ -1,5 +1,4 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import * as actionCreators from '../actions/auth';
 import { Redirect } from "react-router-dom";
 
