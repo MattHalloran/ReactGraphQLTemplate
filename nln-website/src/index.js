@@ -4,11 +4,12 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './assets/css/bootstrap.min.css'
 import './assets/css/one-page-wonder.min.css'
+import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.render(
-  <React.StrictMode>
+  <BrowserRouter>
     <App />
-  </React.StrictMode>,
+  </BrowserRouter>,
   document.getElementById('root')
 );
 

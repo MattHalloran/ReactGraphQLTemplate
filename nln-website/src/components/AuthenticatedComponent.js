@@ -2,55 +2,33 @@ import React from 'react';
 import * as actionCreators from '../actions/auth';
 import { Redirect } from "react-router-dom";
 
-export function requireAuthentication(Component) {
+export function requireAuthentication(Component, User) {
     class AuthenticatedComponent extends React.Component {
         constructor(props) {
             super(props);
+            this.checkAuth();
             this.state = {
-                loginUserSuccess: false,
-                isAuthenticated: false,
-                loaded_if_needed: false,
                 redirect: null,
             }
         }
 
-        componentDidMount() {
-            this.checkAuth();
-        }
-
-        componentWillReceiveProps(nextProps) {
-            this.checkAuth(nextProps);
-        }
-
         checkAuth() {
-            if (!this.state.isAuthenticated) {
-                actionCreators.checkJWT().then(() => {
-                    console.log('found jwt!')
-                    this.setState({
-                        loaded_if_needed: true,
-                        isAuthenticated: true,
-                    });
-                }).catch(() => {
-                    console.log('dang nabbit')
+            if (User.token == null) {
+                actionCreators.checkJWT().then().catch(() => {
                     this.setState({ redirect: '/' })
                 })
-            }
-            else {
-                this.setState({ loaded_if_needed: true });
             }
         }
 
         render() {
-            if (this.state.redirect) {
-                return <Redirect to={this.state.redirect} />
-            }
-            if (this.state.isAuthenticated && this.state.loaded_if_needed) {
+            if (User.token != null) {
                 return (
                     <Component {...this.props} />
                 );
+            } else if (this.state.redirect != null) {
+                return <Redirect to={this.state.redirect} />
             }
             return null;
-
         }
     }
 

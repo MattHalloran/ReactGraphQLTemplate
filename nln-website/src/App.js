@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Switch, Route, withRouter } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import HomePage from './components/HomePage/HomePage';
@@ -11,17 +11,20 @@ import ProfilePage from './components/ProfilePage';
 import Modal from './components/Modal';
 import Spinner from './components/Spinner';
 import Footer from './components/Footer';
+import PubSub from './utils/pubsub';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { theme } from './theme';
 //Provide user context
-import UserContext from './contexts/UserContext';
 import * as actionCreators from './actions/auth';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+    this.previousLocation = this.props.Location;
+    this.modalRef = React.createRef(null);
+    this.buttonRef = React.createRef(null);
     this.state = {
       user: {
         email: null,
@@ -31,76 +34,81 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    actionCreators.checkJWT().then(res => {
-      this.setState({
-        user: {
-          "email": res.email,
-          "token": res.token
-        }
-      })
-    }).catch(() => {
-      this.setState({ user: {
-        "email": null,
-        "token": null
-      } })
-    })
+    //If a user has logged in, update the global user prop
+    this.userSub = PubSub.subscribe('User', (_, data) => {
+      if (this.state.user != data) {
+        this.setState({ user: data })
+      }
+    });
+
+    if (this.state.user.token == null) {
+      actionCreators.checkJWT();
+    }
+  }
+
+  componentWillUpdate() {
+    let { location } = this.props;
+    if (!(location.state && location.state.modal) && 
+        this.previousLocation != location) {
+      this.previousLocation = location;
+    }
   }
 
   render() {
+    const { location } = this.props;
+    const isModal = (
+      location.state &&
+      location.state.modal &&
+      this.previousLocation !== location
+    );
+
     return (
-      <Router>
-        <UserContext.Provider value={this.state.user}>
-          <ThemeProvider theme={theme}>
-            <GlobalStyles />
-            <div className="App">
-              <div className="page-container">
-                <div className="content-wrap">
-                  <Navbar />
-                  <Spinner spinning={false} />
-                  <RouterWithModal />
-                </div>
-                <Footer />
-              </div>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles />
+        <div className="App">
+          <div className="page-container">
+            <div className="content-wrap">
+              <Navbar user={this.state.user} />
+              <Spinner spinning={false} />
+              <Switch location={isModal ? this.previousLocation : location}>
+                <Route exact path="/" component={HomePage} />
+                <Route exact path="/about" component={AboutPage} />
+                <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.user)} />
+                <Route exact path="/register" children={<Modal
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                  <RegisterForm isSignUp={true} />
+                </Modal>} />
+                <Route exact path="/login" children={<Modal
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                  <RegisterForm isSignUp={false} />
+                </Modal>} />
+                <Route component={NotFoundPage} />
+              </Switch>
+              {isModal
+                ? <Route exact path="/register" children={<Modal
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                  <RegisterForm isSignUp={true} />
+                </Modal>} />
+                : null
+              }
+              {isModal
+                ? <Route exact path="/login" children={<Modal
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                  <RegisterForm isSignUp={false} />
+                </Modal>} />
+                : null
+              }
             </div>
-          </ThemeProvider>
-        </UserContext.Provider>
-      </Router>
+            <Footer />
+          </div>
+        </div>
+      </ThemeProvider>
     );
   }
 }
 
-// Handles routing. Allows modal popups with their own urls
-function RouterWithModal() {
-  let location = useLocation();
-  let background = location.state && location.state.background;
-  const modalRef = useRef(null);
-  const buttonRef = useRef(null);
-  return (
-    <div>
-      <Switch location={background || location}>
-        <Route path="/" exact component={HomePage} />
-        <Route path="/about" component={AboutPage} />
-        <Route path="/profile" component={requireAuthentication(ProfilePage)} />
-        <Route path="/register" render={() =>
-          <RegisterForm isSignUp={true} />
-        } />
-        <Route path="/login" render={() =>
-          <RegisterForm isSignUp={false} />
-        } />
-        <Route component={NotFoundPage} />
-      </Switch>
-      {background && <Route path="/register" children={<Modal
-        modalRef={modalRef}
-        buttonRef={buttonRef}>
-        <RegisterForm isSignUp={true} />
-      </Modal>} />}
-      {background && <Route path="/login" children={<Modal
-        modalRef={modalRef}
-        buttonRef={buttonRef}>
-        <RegisterForm isSignUp={false} />
-      </Modal>} />}
-    </div>
-  );
-}
-
-export default App;
+export default withRouter(App);

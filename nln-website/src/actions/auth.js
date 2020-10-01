@@ -1,5 +1,6 @@
 import { useHistory } from 'react-router-dom';
 import { get_token, create_user } from '../utils/http_functions';
+import PubSub from '../utils/pubsub';
 
 const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
 const LOGIN_USER_FAILURE = 'LOGIN_USER_FAILURE';
@@ -12,6 +13,7 @@ const FETCH_PROTECTED_DATA_REQUEST = 'FETCH_PROTECTED_DATA_REQUEST';
 const RECEIVE_PROTECTED_DATA = 'RECEIVE_PROTECTED_DATA';
 
 export function checkJWT() {
+    console.log('checking for JWT...');
     return new Promise(function (resolve, reject) {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -28,6 +30,7 @@ export function checkJWT() {
             })
                 .then(res => {
                     if (res.status === 200) {
+                        console.log('found jwt');
                         resolve(loginUserSuccess(token));
                     } else {
                         reject(loginUserFailure('invalid token'));
@@ -41,6 +44,11 @@ export function checkJWT() {
 
 export function loginUserSuccess(token, status) {
     localStorage.setItem('token', token);
+    console.log('publishing user token');
+    PubSub.publish('User', {
+        email: 'todo',
+        token: token
+    });
     return {
         type: LOGIN_USER_SUCCESS,
         token: token,
@@ -51,6 +59,10 @@ export function loginUserSuccess(token, status) {
 export function loginUserFailure(error, status) {
     console.log('removing token3');
     localStorage.removeItem('token');
+    PubSub.publish('User', {
+        email: null,
+        token: null
+    });
     return {
         type: LOGIN_USER_FAILURE,
         error: error,
@@ -61,6 +73,10 @@ export function loginUserFailure(error, status) {
 export function logout() {
     console.log('removing token2');
     localStorage.removeItem('token');
+    PubSub.publish('User', {
+        email: null,
+        token: null
+    });
     return {
         type: LOGOUT_USER,
     };
@@ -103,6 +119,11 @@ export function loginUser(email, password) {
 
 export function registerUserSuccess(token, status) {
     localStorage.setItem('token', token);
+    console.log('publishing user token');
+    PubSub.publish('User', {
+        email: 'todo',
+        token: token
+    });
     return {
         type: REGISTER_USER_SUCCESS,
         token: token,
@@ -113,6 +134,10 @@ export function registerUserSuccess(token, status) {
 export function registerUserFailure(error, status) {
     console.log('removing token1');
     localStorage.removeItem('token');
+    PubSub.publish('User', {
+        email: null,
+        token: null
+    });
     return {
         type: REGISTER_USER_FAILURE,
         error: error,
