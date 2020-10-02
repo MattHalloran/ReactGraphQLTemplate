@@ -40,7 +40,7 @@ userRoles = db.Table('userRoles',
 #All users of the system, such as customers and admins
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, nullable=False)
+    name = db.Column(db.String(30), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), unique=True)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')

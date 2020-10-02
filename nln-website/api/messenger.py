@@ -17,6 +17,9 @@ import os
 import sys
 import smtplib
 from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from twilio.rest import Client
 import difflib
 
@@ -66,6 +69,66 @@ def numberToEmail(number:str):
     #Return {number without country code}@{carrier email extension}
     return f'{number[-10:]}@{carrier_extension}'
 
+
+#Arguments:
+#recipients - a list of recipients. Can contain phone numbers or emails
+#to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
+#subject - The subject of the message
+#alt_text - The plaintext message, in case the recipient has html emails disabled
+#html_file - Path to an html file
+#images - a list of MIMEImage (embedded images in the html file)
+#Notes:
+#1) Emojis work for emails, but not phone numbers
+#2) Please do not try sending an html file to an email
+def send_html_email(recipients:list, to_text:str = '', subject:str = '', alt_text:str = '', html_file:str = '', images:list=None):
+
+    if len(recipients) == 0:
+        print('No email addresses passed in')
+        return
+
+    #Fail if any recipients are phone numbers, as these cannot receive html texts
+    for r in recipients:
+        if not '@' in r:
+            print('A phone number was passed in. These are not supported for html emails')
+            return
+
+    if to_text == '':
+        if len(recipients) > 1:
+            to_text = ', '.join(recipients)
+        else:
+            to_text = recipients[0]
+
+    msg = MIMEMultipart('related')
+    msg['Subject'] = subject
+    msg['From'] = EMAIL_FROM
+    msg['To'] = to_text
+    #msg['Bcc'] = recipients #So recipients don't see other email addresses
+    msg.preamble = 'This is a multi-part message in MIME format. '
+
+    #Set plaintext and html versions as alternatives, so the email client can determine which to display
+    alternative = MIMEMultipart('alternative')
+    msg.attach(alternative)
+    altText = MIMEText(alt_text)
+    alternative.attach(altText)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(dir_path, html_file), 'rb') as f:
+            email_html = MIMEText(f.read().decode('utf8'), 'html')
+            alternative.attach(email_html)
+    
+    #Add embedded images
+    for i in images:
+        msg.attach(i)
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', PORT_NUM) as smtp:
+        try:
+            smtp.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+            to_string = ', '.join(recipients)
+            print(f'Sending email to {to_string}')
+            smtp.send_message(msg)
+        except Exception as e:
+            print('caught exception')
+            print(repr(e))
+
 #Arguments:
 #recipients - a list of recipients. Can contain phone numbers or emails
 #to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
@@ -76,7 +139,7 @@ def numberToEmail(number:str):
 #Notes:
 #1) Emojis work for emails, but not phone numbers
 #2) Please do not try sending an html file to an email
-def main(recipients:list, to_text:str = '', subject:str = '', message:str = '', html_file:str = ''):
+def send_plaintext_email(recipients:list, to_text:str = '', subject:str = '', message:str = ''):
 
     if len(recipients) == 0:
         print('No email addresses passed in')
@@ -97,17 +160,6 @@ def main(recipients:list, to_text:str = '', subject:str = '', message:str = '', 
     msg['To'] = to_text
     msg['Bcc'] = recipients #So recipients don't see other email addresses
     msg.set_content(message)
-    
-    if html_file == '':
-        if message == '':
-            print('No message or file passed in. One of these is needed to send the email')
-            return
-    else:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        #HTML template from https://www.crazyegg.com/blog/how-to-code-an-email-newsletter/
-        with open(os.path.join(dir_path, html_file), 'rb') as f:
-            email_html = f.read().decode('utf8')
-            msg.add_alternative(email_html, subtype = 'html')
 
     with smtplib.SMTP_SSL('smtp.gmail.com', PORT_NUM) as smtp:
         try:
@@ -119,7 +171,22 @@ def main(recipients:list, to_text:str = '', subject:str = '', message:str = '', 
             print('caught exception')
             print(repr(e))
 
+
+#Sends a welcome email. Used for newly-registered users
+def welcome(recipient:str):
+    #Define html location
+    html = 'emailTemplates/welcome.html'
+    #Load all embedded images into MIMEImage
+    fp = open('emailTemplates/img/Welcome-to-new-life.png', 'rb')
+    welcome_image_mime = MIMEImage(fp.read())
+    welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
+    fp.close()
+    #Define alt text in case recipient has html emails disabled
+    alt = f"These Hi [name],\n\nWelcome to New Life Nursery!\n\nYou're now registered for online ordering.\n\nWhat happens next?\n\nYou can view our inventory at [link]. After ordering, we will contact you for payment information."
+    sub = 'Welcome to New Life Nursery!'
+    send_html_email([recipient], subject=sub, alt_text=alt, html_file=html, images=[welcome_image_mime])
+
 if __name__ == '__main__':
     num_args_required = 2
     if len(sys.argv) > num_args_required:
-        main(sys.argv[1], sys.argv[2])
+        send_plaintext_email(sys.argv[1], sys.argv[2])

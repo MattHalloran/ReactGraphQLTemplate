@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, make_response
 from flask_cors import CORS, cross_origin
 from api import create_app
 from models import db, User
+from messenger import welcome
 from auth import generate_token, requires_auth, verify_token
 from sqlalchemy import exc
 import sys
@@ -30,6 +31,7 @@ def register():
         db.session.add(user)
         try:
             db.session.commit()
+            welcome(data['email'])
         except exc.IntegrityError as e:
             print(e)
             return {"error": "User with that email already exists!",
