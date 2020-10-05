@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, make_response
 from flask_cors import CORS, cross_origin
 from api import create_app
 from models import db, User
-from messenger import welcome
+from messenger import welcome, reset_password
 from auth import generate_token, requires_auth, verify_token
 from sqlalchemy import exc
 import sys
@@ -64,6 +64,21 @@ def get_token():
     except Exception as e:
         print(e)
         return {"error": "Failed to get token",
+                "status": 409}, 409
+
+@app.route('/api/reset_password_request', methods=['POST'])
+def send_password_reset_request():
+    try:
+        byte_data = request.data
+        dict_str = byte_data.decode('UTF-8')
+        data = ast.literal_eval(dict_str)
+        reset_password(data['email'])
+        return {
+            "status": 200
+        },200
+    except Exception as e:
+        print(e)
+        return {"error": "Failed to send email",
                 "status": 409}, 409
 
 

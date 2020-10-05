@@ -58,6 +58,22 @@ export function get_token(email, password) {
     }); 
 }
 
+export function send_password_reset_request(email) {
+    return new Promise(function (resolve, reject) {
+        fetch('api/reset_password_request', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+            body: JSON.stringify({
+                "email": email
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
 export function has_github_token(token) {
     return axios.get('/api/has_github_token', tokenConfig(token));
 }

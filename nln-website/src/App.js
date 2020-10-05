@@ -2,12 +2,12 @@ import React from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
-import HomePage from './components/HomePage/HomePage';
-import AboutPage from './components/AboutPage/AboutPage';
-import RegisterForm from './components/RegisterForm/RegisterForm';
+import HomePage from './components/Pages/HomePage/HomePage';
+import AboutPage from './components/Pages/AboutPage/AboutPage';
+import RegisterForm from './components/Forms/SignUpForm/SignUpForm';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import { requireAuthentication } from './components/AuthenticatedComponent';
-import ProfilePage from './components/ProfilePage';
+import ProfilePage from './components/Pages/ProfilePage';
 import Modal from './components/Modal';
 import Spinner from './components/Spinner';
 import Footer from './components/Footer';
@@ -18,6 +18,9 @@ import { GlobalStyles } from './global';
 import { theme } from './theme';
 //Provide user context
 import * as actionCreators from './actions/auth';
+import SignUpForm from './components/Forms/SignUpForm';
+import LogInForm from './components/Forms/LogInForm';
+import ForgotPasswordForm from './components/Forms/ForgotPasswordForm';
 
 class App extends React.Component {
   constructor(props) {
@@ -77,20 +80,25 @@ class App extends React.Component {
                 <Route exact path="/register" children={<Modal
                   modalRef={this.modalRef}
                   buttonRef={this.buttonRef}>
-                  <RegisterForm isSignUp={true} />
+                  <SignUpForm />
                 </Modal>} />
                 <Route exact path="/login" children={<Modal
                   modalRef={this.modalRef}
                   buttonRef={this.buttonRef}>
-                  <RegisterForm isSignUp={false} />
+                  <LogInForm />
                 </Modal>} />
+                <Route exact path="/forgot-password" children={<Modal 
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                    <ForgotPasswordForm />
+                  </Modal>} />
                 <Route component={NotFoundPage} />
               </Switch>
               {isModal
                 ? <Route exact path="/register" children={<Modal
                   modalRef={this.modalRef}
                   buttonRef={this.buttonRef}>
-                  <RegisterForm isSignUp={true} />
+                  <SignUpForm />
                 </Modal>} />
                 : null
               }
@@ -98,7 +106,15 @@ class App extends React.Component {
                 ? <Route exact path="/login" children={<Modal
                   modalRef={this.modalRef}
                   buttonRef={this.buttonRef}>
-                  <RegisterForm isSignUp={false} />
+                  <LogInForm />
+                </Modal>} />
+                : null
+              }
+              {isModal
+                ? <Route exact path="/forgot-password" children={<Modal
+                  modalRef={this.modalRef}
+                  buttonRef={this.buttonRef}>
+                  <ForgotPasswordForm />
                 </Modal>} />
                 : null
               }

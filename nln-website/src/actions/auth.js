@@ -1,5 +1,5 @@
 import { useHistory } from 'react-router-dom';
-import { get_token, create_user } from '../utils/http_functions';
+import { get_token, create_user, send_password_reset_request } from '../utils/http_functions';
 import PubSub from '../utils/pubsub';
 
 const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
@@ -106,7 +106,7 @@ export function loginUser(email, password) {
                     if (data.status == 200) {
                         resolve(loginUserSuccess(data.token, data.status));
                     } else {
-                        resolve(loginUserFailure(data.error, data.status));
+                        reject(loginUserFailure(data.error, data.status));
                     }
                 })
             });
@@ -147,23 +147,42 @@ export function registerUserFailure(error, status) {
 
 export function registerUser(name, email, password) {
     return new Promise(function (resolve, reject) {
-        let returnStatus;
         try {
             create_user(name, email, password)
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
                         if (data.status == 200) {
-                            returnStatus = registerUserSuccess(data.token, data.status);
+                            resolve(registerUserSuccess(data.token, data.status));
                         } else {
-                            returnStatus = registerUserFailure(data.error, data.status);
+                            reject(registerUserFailure(data.error, data.status));
                         }
-                        resolve(returnStatus);
                     })
                 });
         } catch (error) {
-            console.log(error);
+            console.error(error);
             reject(registerUserFailure(999, error));
+        }
+    });
+}
+
+export function resetPasswordRequest(email) {
+    return new Promise(function (resolve, reject) {
+        try {
+            send_password_reset_request(email)
+                .then(response => {
+                    response.json().then(data => {
+                        console.log(data);
+                        if(data.status == 200) {
+                            resolve('woop success')
+                        } else {
+                            reject('uh oh spaghetti o')
+                        }
+                    })
+                })
+        } catch (error) {
+            console.error(error);
+            reject('Failed to send reset password email');
         }
     });
 }

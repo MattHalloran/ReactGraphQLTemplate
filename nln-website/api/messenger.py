@@ -116,8 +116,9 @@ def send_html_email(recipients:list, to_text:str = '', subject:str = '', alt_tex
             alternative.attach(email_html)
     
     #Add embedded images
-    for i in images:
-        msg.attach(i)
+    if images:
+        for i in images:
+            msg.attach(i)
 
     with smtplib.SMTP_SSL('smtp.gmail.com', PORT_NUM) as smtp:
         try:
@@ -185,6 +186,15 @@ def welcome(recipient:str):
     alt = f"These Hi [name],\n\nWelcome to New Life Nursery!\n\nYou're now registered for online ordering.\n\nWhat happens next?\n\nYou can view our inventory at [link]. After ordering, we will contact you for payment information."
     sub = 'Welcome to New Life Nursery!'
     send_html_email([recipient], subject=sub, alt_text=alt, html_file=html, images=[welcome_image_mime])
+
+#Sends a password reset request to the specified email
+def reset_password(recipient:str):
+    #Define html location
+    html = 'emailTemplates/reset-password.html'
+    #Define alt text in case recipient has html emails disabled
+    alt = f"Too bad"
+    sub = 'New Life Nursery Password Reset'
+    send_html_email([recipient], subject=sub, alt_text=alt, html_file=html)
 
 if __name__ == '__main__':
     num_args_required = 2

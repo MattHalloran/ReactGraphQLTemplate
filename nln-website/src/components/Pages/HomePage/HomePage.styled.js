@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import HeroImage from '../../assets/img/hero-1.jpg';
+import HeroImage from '../../../assets/img/hero-1.jpg';
 
 export const StyledHero = styled.header`
     position: relative;
