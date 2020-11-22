@@ -5,6 +5,7 @@ import './App.css';
 import HomePage from './components/Pages/HomePage/HomePage';
 import AboutPage from './components/Pages/AboutPage/AboutPage';
 import RegisterForm from './components/Forms/SignUpForm/SignUpForm';
+import Snake from './components/Snake/Snake'
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import { requireAuthentication } from './components/AuthenticatedComponent';
 import ProfilePage from './components/Pages/ProfilePage';
@@ -77,6 +78,7 @@ class App extends React.Component {
                 <Route exact path="/" component={HomePage} />
                 <Route exact path="/about" component={AboutPage} />
                 <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.user)} />
+                <Route exact path="/smile" component={Snake} />
                 <Route exact path="/register" children={<Modal
                   modalRef={this.modalRef}
                   buttonRef={this.buttonRef}>

@@ -9,4 +9,5 @@ export { default as Navbar } from './Navbar';
 export { default as NotFoundPage } from './NotFoundPage';
 export { default as ProfilePage } from './Pages/ProfilePage';
 export { default as RegisterForm } from './Forms/SignUpForm';
+export { default as Snake } from './Snake/Snake';
 export { default as Spinner } from './Spinner';
