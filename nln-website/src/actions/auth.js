@@ -2,15 +2,22 @@ import { useHistory } from 'react-router-dom';
 import { get_token, create_user, send_password_reset_request } from '../utils/http_functions';
 import PubSub from '../utils/pubsub';
 
-const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
-const LOGIN_USER_FAILURE = 'LOGIN_USER_FAILURE';
-const LOGOUT_USER = 'LOGOUT_USER';
-
-const REGISTER_USER_SUCCESS = 'REGISTER_USER_SUCCESS';
-const REGISTER_USER_FAILURE = 'REGISTER_USER_FAILURE';
-
-const FETCH_PROTECTED_DATA_REQUEST = 'FETCH_PROTECTED_DATA_REQUEST';
-const RECEIVE_PROTECTED_DATA = 'RECEIVE_PROTECTED_DATA';
+export const AUTH_CODES = {
+    "LOGIN_SUCCESS": 100,
+    "LOGIN_ERROR_UNKNOWN": 200,
+    "REGISTER_SUCCESS": 300,
+    "REGISTER_ERROR_EMAIL_EXISTS": 400,
+    "REGISTER_ERROR_UNKNOWN": 500,
+    "FETCH_PROTECTED_DATA_REQUEST": 600,
+    "RECEIVE_PROTECTED_DATA": 700,
+    "TOKEN_FOUND": 800,
+    "TOKEN_NOT_FOUND_NO_USER": 900,
+    "TOKEN_NOT_FOUND_ERROR_UNKOWN": 1000,
+    "RESET_PASSWORD_SUCCESS": 1100,
+    "RESET_PASSWORD_ERROR_UNKNOWN": 1200,
+    "TOKEN_VERIFIED": 1300,
+    "TOKEN_NOT_VERIFIED": 1400
+}
 
 export function checkJWT() {
     console.log('checking for JWT...');
@@ -50,7 +57,6 @@ export function loginUserSuccess(token, status) {
         token: token
     });
     return {
-        type: LOGIN_USER_SUCCESS,
         token: token,
         status: status
     };
@@ -64,7 +70,6 @@ export function loginUserFailure(error, status) {
         token: null
     });
     return {
-        type: LOGIN_USER_FAILURE,
         error: error,
         status: status
     };
@@ -78,7 +83,6 @@ export function logout() {
         token: null
     });
     return {
-        type: LOGOUT_USER,
     };
 }
 
@@ -125,7 +129,6 @@ export function registerUserSuccess(token, status) {
         token: token
     });
     return {
-        type: REGISTER_USER_SUCCESS,
         token: token,
         status: status
     };
@@ -139,7 +142,6 @@ export function registerUserFailure(error, status) {
         token: null
     });
     return {
-        type: REGISTER_USER_FAILURE,
         error: error,
         status: status
     };

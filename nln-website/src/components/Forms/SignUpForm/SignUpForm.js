@@ -30,7 +30,12 @@ class SignUpForm extends React.Component {
     }).catch(error => {
       console.log('received error here hereh here')
       console.error(error);
-      PubSub.publish('Loading', false);
+      PubSub.publish('Loading', false)
+      if(error.status == actionCreators.AUTH_CODES.REGISTER_ERROR_EMAIL_EXISTS) {
+        alert('User with that email already exists! If you forgot your password, TODO')
+      } else {
+        alert('Unknown error occurred. Please try again')
+      }
     })
   }
   submit(event) {
