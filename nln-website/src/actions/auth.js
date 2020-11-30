@@ -1,10 +1,8 @@
 import { useHistory } from 'react-router-dom';
-import { get_token, create_user, send_password_reset_request } from '../utils/http_functions';
+import { get_token, create_user, send_password_reset_request, validate_token } from '../utils/http_functions';
 import PubSub from '../utils/pubsub';
 
 export const AUTH_CODES = {
-    "LOGIN_SUCCESS": 100,
-    "LOGIN_ERROR_UNKNOWN": 200,
     "REGISTER_SUCCESS": 300,
     "REGISTER_ERROR_EMAIL_EXISTS": 400,
     "REGISTER_ERROR_UNKNOWN": 500,
@@ -12,6 +10,8 @@ export const AUTH_CODES = {
     "RECEIVE_PROTECTED_DATA": 700,
     "TOKEN_FOUND": 800,
     "TOKEN_NOT_FOUND_NO_USER": 900,
+    "TOKEN_NOT_FOUND_SOFT_LOCKOUT": 910,
+    "TOKEN_NOT_FOUND_HARD_LOCKOUT": 920,
     "TOKEN_NOT_FOUND_ERROR_UNKOWN": 1000,
     "RESET_PASSWORD_SUCCESS": 1100,
     "RESET_PASSWORD_ERROR_UNKNOWN": 1200,
@@ -22,57 +22,28 @@ export const AUTH_CODES = {
 export function checkJWT() {
     console.log('checking for JWT...');
     return new Promise(function (resolve, reject) {
-        const token = localStorage.getItem('token');
+        //First, make sure there is a token to check
+        let token = localStorage.getItem('token');
         if (!token) {
-            reject(loginUserFailure('no token'));
+            reject(loginUserFailure(AUTH_CODES.TOKEN_NOT_VERIFIED));
         } else {
-            fetch('/api/is_token_valid', {
-                method: 'post',
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json', // eslint-disable-line quote-props
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token }),
-            })
-                .then(res => {
-                    if (res.status === 200) {
-                        console.log('found jwt');
-                        resolve(loginUserSuccess(token));
-                    } else {
-                        reject(loginUserFailure('invalid token'));
-                    }
-                }).catch(() => {
-                    reject(loginUserFailure('failed to validate token'));
+            try {
+                validate_token(token).then(response => {
+                    response.json().then(data => {
+                        console.log(data);
+                        if (data.status === AUTH_CODES.TOKEN_VERIFIED) {
+                            resolve(loginUserSuccess(token, data.status));
+                        } else {
+                            reject(loginUserFailure(data.status));
+                        }
+                    })
                 });
+            } catch (error) {
+                console.log(error);
+                reject(loginUserFailure(AUTH_CODES.TOKEN_NOT_VERIFIED));
+            }
         }
     });
-}
-
-export function loginUserSuccess(token, status) {
-    localStorage.setItem('token', token);
-    console.log('publishing user token');
-    PubSub.publish('User', {
-        email: 'todo',
-        token: token
-    });
-    return {
-        token: token,
-        status: status
-    };
-}
-
-export function loginUserFailure(error, status) {
-    console.log('removing token3');
-    localStorage.removeItem('token');
-    PubSub.publish('User', {
-        email: null,
-        token: null
-    });
-    return {
-        error: error,
-        status: status
-    };
 }
 
 export function logout() {
@@ -101,22 +72,63 @@ export function redirectToRoute(route) {
     };
 }
 
+export function loginUserSuccess(token, status) {
+    localStorage.setItem('token', token);
+    console.log('publishing user token');
+    PubSub.publish('User', {
+        email: 'todo',
+        token: token
+    });
+    return {
+        token: token,
+        status: status
+    };
+}
+
+export function loginUserFailure(status) {
+    console.log('removing token3');
+    localStorage.removeItem('token');
+    PubSub.publish('User', {
+        email: null,
+        token: null
+    });
+    let error;
+    switch(status) {
+        case AUTH_CODES.TOKEN_NOT_FOUND_NO_USER:
+            error = "Email or password incorrect. Please try again.";
+            break;
+        case AUTH_CODES.TOKEN_NOT_FOUND_SOFT_LOCKOUT:
+            error = "Incorrect password entered too many times. Please try again in 15 minutes";
+            break;
+        case AUTH_CODES.TOKEN_NOT_FOUND_HARD_LOCKOUT:
+            error = "Account locked. Please contact us";
+            break;
+        default:
+            error = "Unknown error occurred. Please try again";
+            break;
+    }
+    return {
+        error: error,
+        status: status
+    };
+}
+
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         try {
             get_token(email, password).then(response => {
                 response.json().then(data => {
                     console.log(data);
-                    if (data.status == 200) {
+                    if (data.status === AUTH_CODES.TOKEN_FOUND) {
                         resolve(loginUserSuccess(data.token, data.status));
                     } else {
-                        reject(loginUserFailure(data.error, data.status));
+                        reject(loginUserFailure(data.status));
                     }
                 })
             });
         } catch (error) {
             console.log(error);
-            reject(loginUserFailure(999, error));
+            reject(loginUserFailure(AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKOWN));
         }
     });
 }
@@ -134,13 +146,19 @@ export function registerUserSuccess(token, status) {
     };
 }
 
-export function registerUserFailure(error, status) {
+export function registerUserFailure(status) {
     console.log('removing token1');
     localStorage.removeItem('token');
     PubSub.publish('User', {
         email: null,
         token: null
     });
+    let error;
+    if(status === AUTH_CODES.REGISTER_ERROR_EMAIL_EXISTS) {
+        error = "User with that email already exists. If you would like to reset your password, TODO";
+    } else {
+        error = "Unknown error occurred. Please try again";
+    }
     return {
         error: error,
         status: status
@@ -154,18 +172,30 @@ export function registerUser(name, email, password) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if (data.status == 200) {
+                        if (data.status === AUTH_CODES.REGISTER_SUCCESS) {
                             resolve(registerUserSuccess(data.token, data.status));
                         } else {
-                            reject(registerUserFailure(data.error, data.status));
+                            reject(registerUserFailure(data.status));
                         }
                     })
                 });
         } catch (error) {
             console.error(error);
-            reject(registerUserFailure(999, error));
+            reject(registerUserFailure(AUTH_CODES.REGISTER_ERROR_UNKNOWN));
         }
     });
+}
+
+export function resetPasswordSuccess(status) {
+    return {
+        status: status
+    };
+}
+
+export function resetPasswordFailure(status) {
+    return {
+        status: status
+    };
 }
 
 export function resetPasswordRequest(email) {
@@ -175,16 +205,16 @@ export function resetPasswordRequest(email) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status == 200) {
-                            resolve('woop success')
+                        if(data.status === AUTH_CODES.RESET_PASSWORD_SUCCESS) {
+                            resolve(resetPasswordSuccess(data.status))
                         } else {
-                            reject('uh oh spaghetti o')
+                            reject(resetPasswordFailure(data.status))
                         }
                     })
                 })
         } catch (error) {
             console.error(error);
-            reject('Failed to send reset password email');
+            reject(resetPasswordFailure(AUTH_CODES.RESET_PASSWORD_ERROR_UNKNOWN));
         }
     });
 }

@@ -26,12 +26,12 @@ class Snake extends React.Component {
         //Create ref for canvas
         this.canvasRef = React.createRef();
         //Bind methods
-        this.handleKeyPress = this.handleKeyPress.bind(this)
+        this.handleKeyPress = this.handleKeyPress.bind(this);
         //Create state
-        this.snake_position = []
-        this.food_position = []
+        this.snake_position = [];
+        this.food_position = [];
+        this.last_game_state = null;
         this.state = {
-            last_game_state: null,
             game_state: STATES.NOT_STARTED,
             score: 0,
             direction: DIRECTIONS[39],
@@ -49,7 +49,7 @@ class Snake extends React.Component {
 
     componentDidUpdate() {
         //If the state of the game changed
-        if(this.state.last_game_state != this.state.game_state) {
+        if(this.last_game_state !== this.state.game_state) {
             switch(this.state.game_state) {
                 case STATES.NOT_STARTED:
                     this.resetGame()
@@ -70,7 +70,7 @@ class Snake extends React.Component {
                     console.error("Incorrect value passed into game state")
                     break
             }
-            this.state.last_game_state = this.state.game_state
+            this.last_game_state = this.state.game_state
         }
     }
 
@@ -84,12 +84,12 @@ class Snake extends React.Component {
             //up when currently going down, etc
             let x_check = this.state.direction[0] * new_direction[0]
             let y_check = this.state.direction[1] * new_direction[1]
-            if(x_check == 0 && y_check == 0) {
+            if(x_check === 0 && y_check === 0) {
                 this.setState({direction: new_direction})
             }
         }
         //Start game if needed
-        if(this.state.game_state != STATES.IN_PROGRESS) {
+        if(this.state.game_state !== STATES.IN_PROGRESS) {
             this.setState({game_state: STATES.IN_PROGRESS})
         }
     }
@@ -118,12 +118,16 @@ class Snake extends React.Component {
     }
 
     spawnFood() {
+        //Returns true if the food position is not a position in the snake
+        function is_valid_position(snake_pos, food_pos) {
+            return !snake_pos.some((pos) => JSON.stringify(pos) === JSON.stringify(food_pos))
+        }
         //Create new positions for the food
         let food_pos = [0, 0]
         let attempt = 0
         do {
             food_pos = [this.randomPos(), this.randomPos()]
-        } while(this.snake_position.some((pos) => JSON.stringify(pos) === JSON.stringify(food_pos)) && attempt < 100)
+        } while(!is_valid_position(this.snake_position, food_pos) && attempt < 100)
         let temp_food = this.food_position
         temp_food.push(food_pos)
         this.food_position = temp_food

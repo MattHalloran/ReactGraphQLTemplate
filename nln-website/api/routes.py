@@ -15,8 +15,6 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 #Must keep this in sync with the frontend auth code dictionary
 auth_codes_dict = {
-    "LOGIN_SUCCESS": 100,
-    "LOGIN_ERROR_UNKNOWN": 200,
     "REGISTER_SUCCESS": 300,
     "REGISTER_ERROR_EMAIL_EXISTS": 400,
     "REGISTER_ERROR_UNKNOWN": 500,
@@ -24,7 +22,9 @@ auth_codes_dict = {
     "RECEIVE_PROTECTED_DATA": 700,
     "TOKEN_FOUND": 800,
     "TOKEN_NOT_FOUND_NO_USER": 900,
-    "TOKEN_NOT_FOUND_ERROR_UNKOWN": 1000,
+    "TOKEN_NOT_FOUND_SOFT_LOCKOUT": 910,
+    "TOKEN_NOT_FOUND_HARD_LOCKOUT": 920,
+    "TOKEN_NOT_FOUND_ERROR_UNKNOWN": 1000,
     "RESET_PASSWORD_SUCCESS": 1100,
     "RESET_PASSWORD_ERROR_UNKNOWN": 1200,
     "TOKEN_VERIFIED": 1300,
@@ -77,18 +77,25 @@ def get_token():
         data = ast.literal_eval(dict_str)
         user = User.get_user_from_credentials(data['email'], data['password'])
         if user:
-            status = AUTH_CODES.TOKEN_FOUND
             return {
                 "id": user.id,
                 "token": generate_token(app, user),
-                "status": status
+                "status": AUTH_CODES.TOKEN_FOUND
             }
-        status = AUTH_CODES.TOKEN_NOT_FOUND_NO_USER
-        return jsonify(error=True), status
+        else:
+            account_status = User.get_user_lock_status(data['email'])
+            print(f'User account status is {account_status}')
+            status = AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKNOWN
+            if account_status == -1:
+                status = AUTH_CODES.TOKEN_NOT_FOUND_NO_USER
+            elif account_status == 1:
+                status = AUTH_CODES.TOKEN_NOT_FOUND_SOFT_LOCKOUT
+            elif account_status == 2:
+                status = AUTH_CODES.TOKEN_NOT_FOUND_HARD_LOCKOUT
+            return jsonify(status=status)
     except Exception as e:
         print(traceback.format_exc())
-        status = AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKNOWN
-        return {"status": status}
+        return {"status": AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKNOWN}
 
 @app.route('/api/reset_password_request', methods=['POST'])
 def send_password_reset_request():
@@ -112,10 +119,10 @@ def is_token_valid():
 
     if is_valid:
         status = AUTH_CODES.TOKEN_VERIFIED
-        return jsonify(token_is_valid=True), status
+        return jsonify(token_is_valid=True, status=status)
     else:
         status = AUTH_CODES.TOKEN_NOT_VERIFIED
-        return jsonify(token_is_valid=False), status
+        return jsonify(token_is_valid=False, status=status)
 
 
 if __name__ == '__main__':

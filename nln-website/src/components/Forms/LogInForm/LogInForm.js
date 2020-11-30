@@ -23,8 +23,10 @@ class LogInForm extends React.Component {
             PubSub.publish('Loading', false);
           this.setState({ redirect: '/profile' });
         }).catch(error => {
-          console.error(error);
-          PubSub.publish('Loading', false);
+            console.log("Failed to log in");
+            console.error(error);
+            PubSub.publish('Loading', false);
+            alert(error.error);
         })
       }
     submit(event) {

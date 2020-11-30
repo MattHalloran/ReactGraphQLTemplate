@@ -1,10 +1,3 @@
-#To create database,
-#1) navigate to this directory in terminal and open python
-#2) import models
-#3) from api import db, create_app
-#4) app = create_app()
-#5) with app.app_context():
-#       db.create_all()
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import declarative_base
@@ -30,6 +23,10 @@ growth_rates = ["Fast",
     "Slow",
     "Very Slow"]
 
+account_statuses = ["Unlocked",
+    "Soft lock",
+    "Hard lock"]
+
 
 userRoles = db.Table('userRoles',
     db.Column('id', db.Integer, primary_key=True),
@@ -45,12 +42,14 @@ class User(db.Model):
     phone_number = db.Column(db.String(20), unique=True)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(255), nullable=False)
-    last_login = db.Column(db.String(20), nullable=False, default=time.time()) #UTC seconds since epoch
+    login_attempts = db.Column(db.Integer, nullable=False, default=0)
+    last_login_attempt = db.Column(db.Float, nullable=False, default=time.time()) #UTC seconds since epoch
+    account_status = db.Column(db.Integer, nullable=False, default=0)
     orders = db.relationship('Order', backref='customer', lazy=True)
     roles = db.relationship('Role', secondary=userRoles, backref='user', lazy=True)
 
     def __init__(self, name, email, password):
-        self.last_login = time.time()
+        self.last_login_attempt = time.time()
         self.name = name
         self.email = email
         self.password = User.hashed_password(password)
@@ -60,13 +59,41 @@ class User(db.Model):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     @staticmethod
-    def get_user_from_credentials(email, password):
+    def get_user_from_credentials(email: str, password: str):
         user = User.query.filter_by(email=email).first()
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            user.last_login = time.time()
+        if user:
+            # Reset login attempts after 15 minutes
+            if (time.time() - user.last_login_attempt) > 15*60:
+                print('Resetting soft account lock')
+                user.login_attempts = 0
+                db.session.commit()
+            user.last_login_attempt = time.time()
+            user.login_attempts += 1
             db.session.commit()
-            return user
+            print(f'User login attempts: {user.login_attempts}')
+            # Return user if password is valid
+            if user.login_attempts <= 3 and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                user.login_attempts = 0
+                db.session.commit()
+                return user
+            if user.login_attempts > 3:
+                print(f'Soft-locking user {email}')
+                user.account_status = 1
+                db.session.commit()
         return None
+
+    @staticmethod
+    def get_user_lock_status(email: str):
+        '''Returns -1 if account doesn't exist,
+        0 if account not locked
+        1 if account soft-locked (incorrect password too many times),
+        2 if account hard-locked (need admin to unlock)'''
+        try:
+            user = User.query.filter_by(email=email).first()
+            return user.account_status
+        except Exception:
+            print(f'Could not find account status for {email}')
+            return -1
 
     def __repr__(self):
         return f"User('{self.id}', '{self.name}', '{self.email}')"
