@@ -4,6 +4,7 @@ import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import HomePage from './components/Pages/HomePage/HomePage';
 import AboutPage from './components/Pages/AboutPage/AboutPage';
+import PrivacyPolicyPage from './components/Pages/PrivacyPolicyPage';
 import RegisterForm from './components/Forms/SignUpForm/SignUpForm';
 import Snake from './components/Snake/Snake'
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
@@ -77,6 +78,7 @@ class App extends React.Component {
               <Switch location={isModal ? this.previousLocation : location}>
                 <Route exact path="/" component={HomePage} />
                 <Route exact path="/about" component={AboutPage} />
+                <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.user)} />
                 <Route exact path="/smile" component={Snake} />
                 <Route exact path="/register" children={<Modal

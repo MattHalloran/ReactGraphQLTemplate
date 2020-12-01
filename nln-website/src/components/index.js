@@ -1,4 +1,5 @@
 export { default as AboutPage } from './Pages/AboutPage';
+export { default as PrivacyPolicyPage } from './Pages/PrivacyPolicyPage';
 export { default as Burger } from './Burger';
 export { default as ContactInfo } from './ContactInfo';
 export { default as ContactPage } from './Pages/ContactPage';

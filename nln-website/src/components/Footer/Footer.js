@@ -43,7 +43,7 @@ class Footer extends React.Component {
                 <hr />
                 <div className="footer-row">
                     <p className="col-sm">
-                        &copy;{new Date().getFullYear()} New Life Nursery Inc. | Privacy Policy | Terms Of Service
+                        &copy;{new Date().getFullYear()} New Life Nursery Inc. | <Link to="/privacy-policy">Privacy Policy</Link> | Terms Of Service
                         </p>
                 </div>
             </footer >
