@@ -1,6 +1,6 @@
 export { default as AboutPage } from './Pages/AboutPage';
-export { default as PrivacyPolicyPage } from './Pages/PrivacyPolicyPage';
 export { default as Burger } from './Burger';
+export { default as Collapsible } from './Collapsible';
 export { default as ContactInfo } from './ContactInfo';
 export { default as ContactPage } from './Pages/ContactPage';
 export { default as HomePage } from './Pages/HomePage';
@@ -8,7 +8,8 @@ export { default as Menu } from './Menu';
 export { default as Modal } from './Modal/';
 export { default as Navbar } from './Navbar';
 export { default as NotFoundPage } from './NotFoundPage';
+export { default as PrivacyPolicyPage } from './Pages/PrivacyPolicyPage';
 export { default as ProfilePage } from './Pages/ProfilePage';
 export { default as RegisterForm } from './Forms/SignUpForm';
-export { default as Snake } from './Snake/Snake';
+export { default as Snake } from './Snake';
 export { default as Spinner } from './Spinner';

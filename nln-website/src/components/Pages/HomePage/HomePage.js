@@ -1,6 +1,7 @@
 import React from 'react'
 import { StyledHero } from './HomePage.styled';
 import { Link } from 'react-router-dom';
+import Collapsible from '../../Collapsible';
 
 class HomePage extends React.Component {
     componentDidMount() {
@@ -20,6 +21,12 @@ class HomePage extends React.Component {
                         </Link>
                     </div>
                 </StyledHero>
+                <Collapsible title="About">
+                    <ul>
+                        <li>Hello</li>
+                        <li>Mr. Bond</li>
+                    </ul>
+                </Collapsible>
             </div >
         );
     }
