@@ -1,11 +1,11 @@
 from flask import Flask
-from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import declarative_base
-from config import Config
+from .config import Config
 
 db = SQLAlchemy()
 Base = declarative_base()
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)

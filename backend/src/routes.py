@@ -1,19 +1,18 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import request, jsonify
 from flask_cors import CORS, cross_origin
-from api import create_app
-from models import db, User
-from messenger import welcome, reset_password
-from auth import generate_token, requires_auth, verify_token
+from .api import create_app
+from .models import db, User, account_statuses
+from .messenger import welcome, reset_password
+from .auth import generate_token, verify_token
 from sqlalchemy import exc
 import ast
-import sys
 from types import SimpleNamespace
 import traceback
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-#Must keep this in sync with the frontend auth code dictionary
+# Must keep this in sync with the frontend auth code dictionary
 auth_codes_dict = {
     "REGISTER_SUCCESS": 300,
     "REGISTER_ERROR_EMAIL_EXISTS": 400,
@@ -33,12 +32,6 @@ auth_codes_dict = {
 AUTH_CODES = SimpleNamespace(**auth_codes_dict)
 
 
-@app.route("/api/user", methods=["GET"])
-@requires_auth
-def get_user():
-    return jsonify(result=g.current_user)
-
-
 @app.route('/api/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def register():
@@ -54,7 +47,7 @@ def register():
             db.session.commit()
             welcome(data['email'])
         # Most likely means that a user with that email already exists
-        except exc.IntegrityError as e:
+        except exc.IntegrityError:
             print(traceback.format_exc())
             status = AUTH_CODES.REGISTER_ERROR_EMAIL_EXISTS
             return {"status": status}
@@ -62,7 +55,7 @@ def register():
         return {"id": user.id,
                 "token": generate_token(app, user),
                 "status": status}
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         status = AUTH_CODES.REGISTER_ERROR_UNKNOWN
         return {"status": status}
@@ -88,14 +81,15 @@ def get_token():
             status = AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKNOWN
             if account_status == -1:
                 status = AUTH_CODES.TOKEN_NOT_FOUND_NO_USER
-            elif account_status == 1:
+            elif account_status == account_statuses.SOFT_LOCK:
                 status = AUTH_CODES.TOKEN_NOT_FOUND_SOFT_LOCKOUT
-            elif account_status == 2:
+            elif account_status == account_statuses.HARD_LOCK:
                 status = AUTH_CODES.TOKEN_NOT_FOUND_HARD_LOCKOUT
             return jsonify(status=status)
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         return {"status": AUTH_CODES.TOKEN_NOT_FOUND_ERROR_UNKNOWN}
+
 
 @app.route('/api/reset_password_request', methods=['POST'])
 def send_password_reset_request():
@@ -106,7 +100,7 @@ def send_password_reset_request():
         reset_password(data['email'])
         status = AUTH_CODES.RESET_PASSWORD_SUCCESS
         return {"status": status}
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         status = AUTH_CODES.RESET_PASSWORD_ERROR_UNKNOWN
         return {"status": status}
