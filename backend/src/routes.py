@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
-from .api import create_app
-from .models import db, User, account_statuses
-from .messenger import welcome, reset_password
-from .auth import generate_token, verify_token
+from src.api import create_app
+from src.models import db, User, account_statuses
+from src.messenger import welcome, reset_password
+from src.auth import generate_token, verify_token
 from sqlalchemy import exc
 import ast
 from types import SimpleNamespace

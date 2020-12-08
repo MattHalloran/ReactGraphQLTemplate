@@ -1,10 +1,10 @@
 import time
 import bcrypt
-from .api import db
+from src.api import db
 from types import SimpleNamespace
 
-# Maps tables to their names. Hopefully minimizes typos,
-# since you are forced to choose from this list
+# Created this in an effort to minimize typos.
+# Please use this table to reference class names
 tables_dict = {
     "Plant": "Plant",
     "User": "User",
@@ -13,8 +13,6 @@ tables_dict = {
     "userRoles": "userRoles",
     "userDiscounts": "userDiscounts",
     "itemDiscounts": "itemDiscounts",
-    "UserDiscount": "UserDiscount",
-    "ItemDiscount": "ItemDiscount",
     "Discount": "Discount",
     "Order": "Order",
     "OrderItem": "OrderItem",
@@ -54,19 +52,21 @@ userRoles = db.Table(TABLES.userRoles,
                      db.Column('role_id', db.Integer, db.ForeignKey(f'{TABLES.Role}.id'))
                      )
 
-# A joining table for the many-to-many relationship between user discounts and users
+# A joining table for the many-to-many relationship
+# between user discounts and users
 userDiscounts = db.Table(TABLES.userDiscounts,
                          db.Column('id', db.Integer, primary_key=True),
                          db.Column('user_id', db.Integer, db.ForeignKey(f'{TABLES.User}.id')),
-                         db.Column('user_discount_id', db.Integer, db.ForeignKey(f'{TABLES.UserDiscount}.id'))
+                         db.Column('user_discount_id', db.Integer, db.ForeignKey(f'{TABLES.Discount}.id'))
                          )
 
-# A joining table for the many-to-many relationship between inventory discounts and inventory items
+# A joining table for the many-to-many relationship
+# between inventory discounts and inventory items
 itemDiscounts = db.Table(TABLES.itemDiscounts,
-                db.Column('id', db.Integer, primary_key=True),
-                db.Column('plant_id', db.Integer, db.ForeignKey(f'{TABLES.Plant}.id')),
-                db.Column('plant_discount_id', db.Integer, db.ForeignKey(f'{TABLES.ItemDiscount}.id'))
-                )
+                         db.Column('id', db.Integer, primary_key=True),
+                         db.Column('plant_id', db.Integer, db.ForeignKey(f'{TABLES.Plant}.id')),
+                         db.Column('plant_discount_id', db.Integer, db.ForeignKey(f'{TABLES.Discount}.id'))
+                         )
 
 
 # All users of the system, such as customers and admins
@@ -80,13 +80,17 @@ class User(db.Model):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(255), nullable=False)
     login_attempts = db.Column(db.Integer, nullable=False, default=0)
-    last_login_attempt = db.Column(db.Float, nullable=False, default=time.time()) #UTC seconds since epoch
+    last_login_attempt = db.Column(db.Float, nullable=False, default=time.time())  # UTC seconds since epoch
     account_status = db.Column(db.Integer, nullable=False, default=0)
+    # One-to-many relationship between a customer and their previous orders
     orders = db.relationship(f'{TABLES.Order}', backref='customer', lazy=True)
-    roles = db.relationship(f'{TABLES.Role}', secondary=userRoles, backref='user', lazy=True)
-    discounts = db.relationship(f'{TABLES.UserDiscount}', secondary=userDiscounts, backref='user')
+    # Many-to-many relationship between a customer and roles
+    roles = db.relationship(f'{TABLES.Role}', secondary=userRoles, backref='users', lazy=True)
+    # Many-to-many relation ship between a customer and discounts that apply to them
+    # (i.e. discounts they can apply to any discountable item)
+    discounts = db.relationship(f'{TABLES.Discount}', secondary=userDiscounts, backref='users')
     # One-to-one relationship between a customer and their current cart
-    cart = db.relationship(f'{TABLES.Order}', uselist=False, back_populates='Customer')
+    cart = db.relationship(f'{TABLES.Order}', uselist=False)
     # ----------------End columns-------------------
 
     LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3
@@ -108,7 +112,7 @@ class User(db.Model):
         user = User.query.filter_by(email=email).first()
         if user:
             # Reset login attempts after 15 minutes
-            if (time.time() - user.last_login_attempt) > SOFT_LOCKOUT_DURATION_SECONDS:
+            if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
                 print('Resetting soft account lock')
                 user.login_attempts = 0
                 db.session.commit()
@@ -117,15 +121,16 @@ class User(db.Model):
             db.session.commit()
             print(f'User login attempts: {user.login_attempts}')
             # Return user if password is valid
-            if user.login_attempts <= LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
+               bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
                 user.login_attempts = 0
                 db.session.commit()
                 return user
-            if user.login_attempts > LOGIN_ATTEMPS_TO_HARD_LOCKOUT:
+            if user.login_attempts > User.LOGIN_ATTEMPS_TO_HARD_LOCKOUT:
                 print(f'Hard-locking user {email}')
                 user.account_status = account_statuses.HARD_LOCK
                 db.session.commit()
-            elif user.login_attempts > LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT:
+            elif user.login_attempts > User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT:
                 print(f'Soft-locking user {email}')
                 user.account_status = account_statuses.SOFT_LOCK
                 db.session.commit()
@@ -145,6 +150,7 @@ class User(db.Model):
     def __repr__(self):
         return f"User('{self.id}', '{self.name}', '{self.email}')"
 
+
 # Roles assigned to an account, which are currently only customer and admin
 class Role(db.Model):
     __tablename__ = f'{TABLES.Role}'
@@ -152,29 +158,10 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(20), unique=True, nullable=False)
     description = db.Column(db.String(2000))
-    users = db.relationship(f'{TABLES.User}', secondary=userRoles, backref='role', lazy=True)
     # ----------------End columns-------------------
 
     def __repr__(self):
         return f"Role('{self.id}', '{self.title}')"
-
-
-# Discounts specifically for customers
-class UserDiscount(db.Model):
-    __tablename__ = f'{TABLES.UserDiscount}'
-    # ---------------Start columns-----------------
-    id = db.Column(db.Integer, primary_key=True)
-    discount_id = db.relationship('User', uselist=False)
-    # ----------------End columns-------------------
-
-
-# Discounts specifically for inventory items
-class ItemDiscount(db.Model):
-    __tablename__ = f'{TABLES.ItemDiscount}'
-    # ---------------Start columns-----------------
-    id = db.Column(db.Integer, primary_key=True)
-    discount_id = db.relationship(f'{TABLES.Plant}', uselist=False)
-    # ----------------End columns-------------------
 
 
 # A base class for discounts that can either be applied to:
@@ -199,7 +186,7 @@ class Plant(db.Model):
     # ---------------Start columns-----------------
     id = db.Column(db.Integer, primary_key=True)
     horticopia_id = db.Column(db.Integer, unique=True)
-    # ------------Start Horticopia fields--------------- 
+    # ------------Start Horticopia fields---------------
     # Added here in case the admin wants to change something
     latin_name = db.Column(db.String(50), unique=True, nullable=False)
     common_name = db.Column(db.String(50))
@@ -220,7 +207,9 @@ class Plant(db.Model):
     availability = db.Column(db.String(20))
     image_files = db.Column(db.String(1000))
     comment = db.Column(db.String(1000))
-    discounts = db.relationship(f'{TABLES.ItemDiscount}', secondary=itemDiscounts, backref='plant')
+    is_discountable = db.Column(db.Boolean, nullable=False, default=True)
+    # Many-to-many relation ship between an inventory item and discounts that apply to it
+    discounts = db.relationship(f'{TABLES.Discount}', secondary=itemDiscounts, backref='items')
     # ----------------End columns-------------------
 
     def add_horticopia_data(self, horticopia_id):
@@ -243,8 +232,8 @@ class Order(db.Model):
     items = db.relationship(f'{TABLES.OrderItem}', backref='Order', lazy=True)
     # ----------------End columns-------------------
 
-    def __init__(self, customer_id, delivery_address, special_instructions, desired_delivery_date, items):
-        self.customer_id = customer_id
+    def __init__(self, customer, delivery_address, special_instructions, desired_delivery_date, items):
+        self.customer_id = customer.id
         self.delivery_address = delivery_address
         self.special_instructions = special_instructions
         self.desired_delivery_date = desired_delivery_date

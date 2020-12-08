@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import declarative_base
-from .config import Config
+from src.config import Config
 
 db = SQLAlchemy()
 Base = declarative_base()

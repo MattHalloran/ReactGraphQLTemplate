@@ -22,11 +22,13 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from twilio.rest import Client
 import difflib
+import traceback
 
 PORT_NUM = 465
-# Stored in environment variables so it's not uploaded to GitHub. 
-EMAIL_USERNAME = os.environ.get("AFA_EMAIL_USERNAME") # What you login as
-EMAIL_FROM = os.environ.get("AFA_EMAIL_FROM") # Who the recipient thinks the email is from
+ASSET_LOCATION = f'../assets/messaging'
+# Stored in environment variables so it's not uploaded to GitHub.
+EMAIL_USERNAME = os.environ.get("AFA_EMAIL_USERNAME")  # What you login as
+EMAIL_FROM = os.environ.get("AFA_EMAIL_FROM")  # Who the recipient thinks the email is from
 EMAIL_PASSWORD = os.environ.get("AFA_EMAIL_PASSWORD")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
@@ -52,7 +54,7 @@ carrier_dict = {
 # Arguments:
 # 1) number - The phone number. This should preferrably include the country code (ex: '+16098675309')
 def numberToEmail(number: str):
-    #Already an email
+    # Already an email
     if '@' in number:
         return number
     carrier_info = twilio_client.lookups.phone_numbers(number).fetch(type=['carrier'])
@@ -81,7 +83,7 @@ def numberToEmail(number: str):
 # Notes:
 # 1) Emojis work for emails, but not phone numbers
 # 2) Please do not try sending an html file to an email
-def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_text: str = '', html_file: str = '', images: list=None):
+def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_text: str = '', html_file: str = '', images: list = None):
 
     if len(recipients) == 0:
         print('No email addresses passed in')
@@ -89,7 +91,7 @@ def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_
 
     # Fail if any recipients are phone numbers, as these cannot receive html texts
     for r in recipients:
-        if not '@' in r:
+        if '@' not in r:
             print('A phone number was passed in. These are not supported for html emails')
             return
 
@@ -113,8 +115,8 @@ def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_
     alternative.attach(altText)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(dir_path, html_file), 'rb') as f:
-            email_html = MIMEText(f.read().decode('utf8'), 'html')
-            alternative.attach(email_html)
+        email_html = MIMEText(f.read().decode('utf8'), 'html')
+        alternative.attach(email_html)
 
     # Add embedded images
     if images:
@@ -177,17 +179,20 @@ def send_plaintext_email(recipients: list, to_text: str = '', subject: str = '',
 
 # Sends a welcome email. Used for newly-registered users
 def welcome(recipient: str):
-    # Define html location
-    html = 'emailTemplates/welcome.html'
-    # Load all embedded images into MIMEImage
-    fp = open('emailTemplates/img/Welcome-to-new-life.png', 'rb')
-    welcome_image_mime = MIMEImage(fp.read())
-    welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
-    fp.close()
-    #Define alt text in case recipient has html emails disabled
-    alt = f"These Hi [name],\n\nWelcome to New Life Nursery!\n\nYou're now registered for online ordering.\n\nWhat happens next?\n\nYou can view our inventory at [link]. After ordering, we will contact you for payment information."
-    sub = 'Welcome to New Life Nursery!'
-    send_html_email([recipient], subject=sub, alt_text=alt, html_file=html, images=[welcome_image_mime])
+    try:
+        # Define html location
+        html = 'emailTemplates/welcome.html'
+        # Load all embedded images into MIMEImage
+        fp = open(f'{ASSET_LOCATION}/img/Welcome-to-new-life.png', 'rb')
+        welcome_image_mime = MIMEImage(fp.read())
+        welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
+        fp.close()
+        # Define alt text in case recipient has html emails disabled
+        alt = f"These Hi [name],\n\nWelcome to New Life Nursery!\n\nYou're now registered for online ordering.\n\nWhat happens next?\n\nYou can view our inventory at [link]. After ordering, we will contact you for payment information."
+        sub = 'Welcome to New Life Nursery!'
+        send_html_email([recipient], subject=sub, alt_text=alt, html_file=html, images=[welcome_image_mime])
+    except Exception:
+        print(traceback.format_exc())
 
 
 # Sends a password reset request to the specified email
