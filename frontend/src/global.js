@@ -2,8 +2,8 @@ import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
     body {
-        background: ${({ theme }) => theme.primaryDark};
-        color: ${({ theme }) => theme.primaryLight};
+        background: ${({ theme }) => theme.bodyPrimary};
+        color: ${({ theme }) => theme.textPrimary};
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
             'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -16,8 +16,19 @@ export const GlobalStyles = createGlobalStyle`
         font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
             monospace;
     }
+    /* Primary (default) link settings */
     a {
-        color: ${({ theme }) => theme.primaryHover};
+        transition: color 0.3s linear;
+        text-decoration: none;
+    }
+    a:link {
+        color: ${({ theme }) => theme.textPrimary};
+    }
+    a:visited {
+        color: ${({ theme }) => theme.textPrimary};
+    }
+    a:hover {
+        color: ${({ theme }) => theme.hoverPrimary};
         text-decoration: none;
     }
 `

@@ -52,8 +52,9 @@ def register():
             status = AUTH_CODES.REGISTER_ERROR_EMAIL_EXISTS
             return {"status": status}
         status = AUTH_CODES.REGISTER_SUCCESS
-        return {"id": user.id,
-                "token": generate_token(app, user),
+        return {"token": generate_token(app, user),
+                "name": user.name,
+                "theme": user.theme,
                 "status": status}
     except Exception:
         print(traceback.format_exc())
@@ -71,9 +72,10 @@ def get_token():
         user = User.get_user_from_credentials(data['email'], data['password'])
         if user:
             return {
-                "id": user.id,
                 "token": generate_token(app, user),
-                "status": AUTH_CODES.TOKEN_FOUND
+                "status": AUTH_CODES.TOKEN_FOUND,
+                "name": user.name,
+                "theme" user.theme
             }
         else:
             account_status = User.get_user_lock_status(data['email'])

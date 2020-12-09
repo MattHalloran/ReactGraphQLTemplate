@@ -5,7 +5,6 @@ import './App.css';
 import HomePage from './components/Pages/HomePage/HomePage';
 import AboutPage from './components/Pages/AboutPage/AboutPage';
 import PrivacyPolicyPage from './components/Pages/PrivacyPolicyPage';
-import RegisterForm from './components/Forms/SignUpForm/SignUpForm';
 import Snake from './components/Snake/Snake'
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import { requireAuthentication } from './components/AuthenticatedComponent';
@@ -17,7 +16,7 @@ import PubSub from './utils/pubsub';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
-import { theme } from './theme';
+import { getTheme, lightTheme } from './theme';
 //Provide user context
 import * as actionCreators from './actions/auth';
 import SignUpForm from './components/Forms/SignUpForm';
@@ -30,20 +29,29 @@ class App extends React.Component {
     this.previousLocation = this.props.Location;
     this.modalRef = React.createRef(null);
     this.buttonRef = React.createRef(null);
+    this.modalRoutes = ['/register', '/login', '/forgot-password']
+    this.isModalOpen = false;
     this.state = {
       user: {
-        email: null,
         token: null,
-      }
+        theme: null,
+        name: null
+      },
+      theme: lightTheme,
     }
   }
 
   componentDidMount() {
     //If a user has logged in, update the global user prop
     this.userSub = PubSub.subscribe('User', (_, data) => {
-      if (this.state.user != data) {
+      if (this.state.user !== data) {
         this.setState({ user: data })
       }
+    });
+
+    this.setState({theme: getTheme()});
+    this.themeSub = PubSub.subscribe('Theme', (_, data) => {
+      this.setState({theme: data});
     });
 
     if (this.state.user.token == null) {
@@ -51,77 +59,57 @@ class App extends React.Component {
     }
   }
 
-  componentWillUpdate() {
-    let { location } = this.props;
-    if (!(location.state && location.state.modal) && 
-        this.previousLocation != location) {
-      this.previousLocation = location;
-    }
-  }
-
   render() {
-    const { location } = this.props;
-    const isModal = (
-      location.state &&
-      location.state.modal &&
-      this.previousLocation !== location
-    );
-
+    let currentLocation = this.props.location;
+    let isModalOpen = this.modalRoutes.some(route => route === this.props.location.pathname);
+    if (!isModalOpen) {
+      this.previousLocation = this.props.location;
+    } else {
+      currentLocation = this.previousLocation;
+    }
+    // Happens when first navigated page is a modal
+    let loadDefaultPage = (currentLocation === undefined);
+    
     return (
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={this.state.theme}>
         <GlobalStyles />
         <div className="App">
           <div className="page-container">
             <div className="content-wrap">
               <Navbar user={this.state.user} />
               <Spinner spinning={false} />
-              <Switch location={isModal ? this.previousLocation : location}>
+              {/* Non-modal routes - only one can be loaded at a time */}
+              {loadDefaultPage ? 
+              <Switch>
+                <Route path="/" component={HomePage} />
+              </Switch>
+              :
+              <Switch location={currentLocation}>
                 <Route exact path="/" component={HomePage} />
                 <Route exact path="/about" component={AboutPage} />
                 <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.user)} />
                 <Route exact path="/smile" component={Snake} />
-                <Route exact path="/register" children={<Modal
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
+                <Route component={NotFoundPage} />
+              </Switch>
+              }
+              {/* Modal routes - will display above previous route, or homepage */}
+              {isModalOpen ? 
+                <Switch>
+                  <Route exact path="/register" children={<Modal
+                  history={this.props.history}>
                   <SignUpForm />
                 </Modal>} />
                 <Route exact path="/login" children={<Modal
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
+                  history={this.props.history}>
                   <LogInForm />
                 </Modal>} />
-                <Route exact path="/forgot-password" children={<Modal 
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
-                    <ForgotPasswordForm />
-                  </Modal>} />
-                <Route component={NotFoundPage} />
-              </Switch>
-              {isModal
-                ? <Route exact path="/register" children={<Modal
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
-                  <SignUpForm />
-                </Modal>} />
-                : null
-              }
-              {isModal
-                ? <Route exact path="/login" children={<Modal
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
-                  <LogInForm />
-                </Modal>} />
-                : null
-              }
-              {isModal
-                ? <Route exact path="/forgot-password" children={<Modal
-                  modalRef={this.modalRef}
-                  buttonRef={this.buttonRef}>
+                <Route exact path="/forgot-password" children={<Modal
+                  history={this.props.history}>
                   <ForgotPasswordForm />
                 </Modal>} />
-                : null
-              }
+                </Switch>
+              : null}
             </div>
             <Footer />
           </div>

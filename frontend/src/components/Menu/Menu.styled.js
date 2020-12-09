@@ -5,7 +5,7 @@ export const StyledMenu = styled.nav`
   flex-direction: column;
   transform: ${({ open }) => open ? 'translateX(-100%)' : 'translateX(0%)'};
   justify-content: center;
-  background: ${({ theme }) => theme.primaryLight};
+  background: ${({ theme }) => theme.bodySecondary};
   height: 100vh;
   text-align: left;
   padding: 2rem;
@@ -18,15 +18,23 @@ export const StyledMenu = styled.nav`
     width: 100%;
   }
 
+  /* Secondary link settings */
+  a:link {
+      color: ${({ theme }) => theme.textSecondary};
+  }
+  a:visited {
+      color: ${({ theme }) => theme.textSecondary};
+  }
+  a:hover {
+      color: ${({ theme }) => theme.textSecondary};
+  }
+
   a {
     font-size: 2rem;
     text-transform: uppercase;
     padding: 2rem 0;
     font-weight: bold;
     letter-spacing: 0.5rem;
-    color: ${({ theme }) => theme.primaryDark};
-    text-decoration: none;
-    transition: color 0.3s linear;
     width: max-content;
     
     @media (max-width: ${({ theme }) => theme.mobile}) {
@@ -35,7 +43,7 @@ export const StyledMenu = styled.nav`
     }
 
     &:hover {
-      color: ${({ theme }) => theme.primaryHover};
+      color: ${({ theme }) => theme.hoverPrimary};
     }
   }
 `;

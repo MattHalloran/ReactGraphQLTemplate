@@ -1,9 +1,9 @@
 import React from 'react';
-import './ForgotPasswordForm.css';
 import PubSub from '../../../utils/pubsub';
 import * as actionCreators from '../../../actions/auth'
 import TextField from '@material-ui/core/TextField';
 import { Redirect, Link } from "react-router-dom";
+import { StyledForgotPasswordForm } from './ForgotPasswordForm.styled';
 
 class ForgotPasswordForm extends React.Component {
     constructor(props) {
@@ -55,7 +55,7 @@ class ForgotPasswordForm extends React.Component {
     }
     render() {
         return (
-            <form onSubmit={this.props.onSubmit}>
+            <StyledForgotPasswordForm onSubmit={this.props.onSubmit}>
                 <h2>Log In</h2>
                 <Link to={{ pathname: "/register" }}>Sign Up</Link>
                 <TextField
@@ -75,7 +75,7 @@ class ForgotPasswordForm extends React.Component {
                         Submit
        </button>
                 </div>
-            </form>
+            </StyledForgotPasswordForm>
         );
     }
 }

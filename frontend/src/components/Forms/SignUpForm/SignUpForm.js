@@ -1,9 +1,10 @@
 import React from 'react';
-import './SignUpForm.css';
 import PubSub from '../../../utils/pubsub';
 import * as actionCreators from '../../../actions/auth'
 import TextField from '@material-ui/core/TextField';
 import { Redirect, Link } from "react-router-dom";
+import { StyledSignUpForm } from './SignUpForm.styled';
+import { lightTheme, getTheme } from '../../../theme';
 
 class SignUpForm extends React.Component {
   constructor(props) {
@@ -11,6 +12,9 @@ class SignUpForm extends React.Component {
     this.submit = this.submit.bind(this);
     this.state = {
       redirect: null,
+      textFieldTheme: {
+        color: lightTheme.textSecondary
+      },
       name: "",
       nameError: "",
       email: "",
@@ -20,6 +24,15 @@ class SignUpForm extends React.Component {
       confirmPassword: "",
     }
   }
+
+  componentDidMount() {
+    let theme = getTheme();
+    this.setState({textFieldTheme: { color: theme.textSecondary }});
+    this.themeSub = PubSub.subscribe('Theme', (_, data) => {
+      this.setState({textFieldTheme: { color: data.textSecondary }});
+    });
+  }
+
   register() {
     PubSub.publish('Loading', true);
     actionCreators.registerUser(this.state.name, this.state.email, this.state.password).then(response => {
@@ -83,12 +96,15 @@ class SignUpForm extends React.Component {
       return <Redirect to={this.state.redirect} />
     }
     return (
-      <form onSubmit={this.props.onSubmit}>
+      <StyledSignUpForm onSubmit={this.props.onSubmit}>
         <h2>Sign Up</h2>
         <Link to={{pathname:"/login"}}>Log In</Link>
         <TextField
           name="name"
           className="form-input"
+          InputProps={{
+            className: this.state.textFieldTheme
+          }}
           variant="outlined"
           label="Name"
           value={this.state.name}
@@ -136,7 +152,7 @@ class SignUpForm extends React.Component {
             Submit
      </button>
         </div>
-      </form>
+      </StyledSignUpForm>
     );
   }
 }

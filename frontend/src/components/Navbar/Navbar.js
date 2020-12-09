@@ -32,7 +32,7 @@ class Navbar extends React.Component {
         window.addEventListener("resize", this.updateWindowDimensions);
 
         this.userSub = PubSub.subscribe('User', (_, data) => {
-            if (this.state.user != data) {
+            if (this.state.user !== data) {
                 this.setState({ user: data })
             }
         });

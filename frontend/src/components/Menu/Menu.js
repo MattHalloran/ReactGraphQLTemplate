@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledMenu } from './Menu.styled';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import ContactInfo from '../ContactInfo';
 import PubSub from '../../utils/pubsub';
 import * as actionCreator from '../../actions/auth';
 
@@ -19,7 +20,7 @@ class Menu extends React.Component {
 
   componentDidMount() {
     this.userSub = PubSub.subscribe('User', (_, data) => {
-      if (this.state.user != data) {
+      if (this.state.user !== data) {
         this.setState({ user: data })
       }
     });
@@ -27,6 +28,7 @@ class Menu extends React.Component {
 
   render() {
     let options;
+    // Things displayed to users that are logged in
     if (this.state.user.token == null) {
       options = <React.Fragment>
         <Link to={{
@@ -36,7 +38,9 @@ class Menu extends React.Component {
           pathname: "/login"
         }}>Log In</Link>
       </React.Fragment>
-    } else {
+    } 
+    // Things displayed to users that are not logged in
+    else {
       options = <React.Fragment>
         <a href="/" onClick={() => actionCreator.logout()}>Log Out</a>
       </React.Fragment>
@@ -45,6 +49,8 @@ class Menu extends React.Component {
     return (
       <StyledMenu open={this.props.open}>
         {options}
+        {/* Things displayed no matter the login status */}
+        <ContactInfo />
       </StyledMenu>
     );
   }

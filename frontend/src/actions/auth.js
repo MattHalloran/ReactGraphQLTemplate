@@ -1,6 +1,7 @@
 import { useHistory } from 'react-router-dom';
 import { get_token, create_user, send_password_reset_request, validate_token } from '../utils/http_functions';
 import PubSub from '../utils/pubsub';
+import { setTheme } from '../theme';
 
 export const AUTH_CODES = {
     "REGISTER_SUCCESS": 300,
@@ -50,9 +51,10 @@ export function logout() {
     console.log('removing token2');
     localStorage.removeItem('token');
     PubSub.publish('User', {
-        email: null,
-        token: null
+        token: null,
+        name: null
     });
+    setTheme(null);
     return {
     };
 }
@@ -72,13 +74,14 @@ export function redirectToRoute(route) {
     };
 }
 
-export function loginUserSuccess(token, status) {
+export function loginUserSuccess(status, token, theme, name) {
     localStorage.setItem('token', token);
     console.log('publishing user token');
     PubSub.publish('User', {
-        email: 'todo',
-        token: token
+        token: token,
+        name: name
     });
+    setTheme(theme);
     return {
         token: token,
         status: status
@@ -89,9 +92,10 @@ export function loginUserFailure(status) {
     console.log('removing token3');
     localStorage.removeItem('token');
     PubSub.publish('User', {
-        email: null,
-        token: null
+        token: null,
+        name: null
     });
+    setTheme(null);
     let error;
     switch(status) {
         case AUTH_CODES.TOKEN_NOT_FOUND_NO_USER:
@@ -120,7 +124,7 @@ export function loginUser(email, password) {
                 response.json().then(data => {
                     console.log(data);
                     if (data.status === AUTH_CODES.TOKEN_FOUND) {
-                        resolve(loginUserSuccess(data.token, data.status));
+                        resolve(loginUserSuccess(data.status, data.token, data.theme, data.name));
                     } else {
                         reject(loginUserFailure(data.status));
                     }
@@ -133,13 +137,14 @@ export function loginUser(email, password) {
     });
 }
 
-export function registerUserSuccess(token, status) {
+export function registerUserSuccess(status, token, theme, name) {
     localStorage.setItem('token', token);
     console.log('publishing user token');
     PubSub.publish('User', {
-        email: 'todo',
-        token: token
+        token: token,
+        name: name
     });
+    setTheme(theme);
     return {
         token: token,
         status: status
@@ -150,9 +155,10 @@ export function registerUserFailure(status) {
     console.log('removing token1');
     localStorage.removeItem('token');
     PubSub.publish('User', {
-        email: null,
-        token: null
+        token: null,
+        name: null
     });
+    setTheme(null);
     let error;
     if(status === AUTH_CODES.REGISTER_ERROR_EMAIL_EXISTS) {
         error = "User with that email already exists. If you would like to reset your password, TODO";
@@ -173,7 +179,7 @@ export function registerUser(name, email, password) {
                     response.json().then(data => {
                         console.log(data);
                         if (data.status === AUTH_CODES.REGISTER_SUCCESS) {
-                            resolve(registerUserSuccess(data.token, data.status));
+                            resolve(registerUserSuccess(data.status, data.token, data.theme, data.name));
                         } else {
                             reject(registerUserFailure(data.status));
                         }

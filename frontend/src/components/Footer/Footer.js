@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Footer.css';
 import ProvenWinners from '../../assets/img/proven-winners.png';
+import { StyledFooter } from './Footer.styled';
 
 class Footer extends React.Component {
     render() {
         return (
-            <footer className="main-footer">
+            <StyledFooter>
                 <div className="footer-row">
                     {/* Column 1 */}
                     <div className="footer-col">
@@ -46,7 +46,7 @@ class Footer extends React.Component {
                         &copy;{new Date().getFullYear()} New Life Nursery Inc. | <Link to="/privacy-policy">Privacy Policy</Link> | Terms Of Service
                         </p>
                 </div>
-            </footer >
+            </StyledFooter >
         );
     }
 }

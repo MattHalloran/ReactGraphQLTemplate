@@ -1,9 +1,9 @@
 import React from 'react';
-import './LogInForm.css';
 import PubSub from '../../../utils/pubsub';
 import * as actionCreators from '../../../actions/auth'
 import TextField from '@material-ui/core/TextField';
-import { Redirect, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { StyledLogInForm } from './LogInForm.styled';
 
 class LogInForm extends React.Component {
     constructor(props) {
@@ -64,7 +64,7 @@ class LogInForm extends React.Component {
     }
     render() {
         return (
-            <form onSubmit={this.props.onSubmit}>
+            <StyledLogInForm onSubmit={this.props.onSubmit}>
                 <h2>Log In</h2>
                 <Link to={{pathname:"/register"}}>Sign Up</Link>
                 <TextField
@@ -97,7 +97,7 @@ class LogInForm extends React.Component {
        </button>
                 </div>
                 <Link to={{pathname:"/forgot-password"}}>Forgot Password?</Link>
-            </form>
+            </StyledLogInForm>
         );
     }
 }
