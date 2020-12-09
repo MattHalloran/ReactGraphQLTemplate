@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyledProfilePage } from './ProfilePage.styled';
 
-export default class ProfilePage extends React.Component {
+class ProfilePage extends React.Component {
     componentDidMount() {
         document.title = "Profile | New Life Nursery"
     }
@@ -30,3 +30,9 @@ export default class ProfilePage extends React.Component {
         );
     }
 }
+
+ProfilePage.propTypes = {
+    
+}
+
+export default ProfilePage;

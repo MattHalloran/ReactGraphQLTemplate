@@ -32,4 +32,8 @@ class HomePage extends React.Component {
     }
 }
 
+HomePage.propTypes = {
+    
+}
+
 export default HomePage;

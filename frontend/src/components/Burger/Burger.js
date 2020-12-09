@@ -1,5 +1,5 @@
 import React from 'react';
-import { bool, func } from 'prop-types';
+import PropTypes from 'prop-types';
 import { StyledBurger } from './Burger.styled';
 
 const Burger = ({ open, toggleOpen }) => {
@@ -13,8 +13,8 @@ const Burger = ({ open, toggleOpen }) => {
 }
 
 Burger.propTypes = {
-  open: bool.isRequired,
-  toggleOpen: func.isRequired,
+  open: PropTypes.bool.isRequired,
+  toggleOpen: PropTypes.func.isRequired,
 };
 
 export default Burger;

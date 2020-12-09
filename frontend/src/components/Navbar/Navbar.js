@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
@@ -11,20 +12,10 @@ const SHOW_HAMBURGER_AT = 800;
 class Navbar extends React.Component {
     constructor(props) {
         super(props);
-        this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
-        this.onLogInSubmit = this.onLogInSubmit.bind(this);
         this.state = {
             user: this.props.user,
-            signUp: this.props.signUp,
-            onSubmit: this.props.onSubmit,
             showHamburger: false,
         }
-    }
-    onSignUpSubmit = (event) => {
-        event.preventDefault(event);
-    }
-    onLogInSubmit = (event) => {
-        event.preventDefault(event);
     }
 
     componentDidMount() {
@@ -67,12 +58,15 @@ class Navbar extends React.Component {
     }
 }
 
+Navbar.propTypes = {
+    user: PropTypes.object.isRequired,
+}
+
 class Hamburger extends React.Component {
     constructor(props) {
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.state = {
-            user: this.props.user,
             open: false,
         }
     }
@@ -89,6 +83,10 @@ class Hamburger extends React.Component {
             </React.Fragment>
         );
     }
+}
+
+Hamburger.propTypes = {
+
 }
 
 function NavList(props) {
@@ -139,6 +137,10 @@ function NavList(props) {
             </div>
         </React.Fragment>
     );
+}
+
+NavList.propTypes = {
+    user: PropTypes.object.isRequired,
 }
 
 export default Navbar;

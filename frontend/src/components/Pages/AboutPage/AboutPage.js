@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyledAboutPage } from './AboutPage.styled';
 
-export default class AboutPage extends React.Component {
+class AboutPage extends React.Component {
     componentDidMount() {
         document.title = "About | New Life Nursery"
     }
@@ -23,3 +23,9 @@ The Gianaris Family</h3>
         );
     }
 }
+
+AboutPage.propTypes = {
+    
+}
+
+export default AboutPage;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { StyledCollapsible } from './Collapsible.styled';
 
 class Collapsible extends React.Component {
@@ -23,6 +24,11 @@ class Collapsible extends React.Component {
             ) : null}
         </StyledCollapsible>);
     }
+}
+
+Collapsible.propTypes = {
+    title: PropTypes.string.isRequired,
+    children: PropTypes.any,
 }
 
 export default Collapsible;

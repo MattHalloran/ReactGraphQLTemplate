@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import PubSub from '../../../utils/pubsub';
 import * as actionCreators from '../../../actions/auth'
 import TextField from '@material-ui/core/TextField';
@@ -75,6 +76,11 @@ class ForgotPasswordForm extends React.Component {
             </StyledForgotPasswordForm>
         );
     }
+}
+
+ForgotPasswordForm.propTypes = {
+    onSubmit: PropTypes.func,
+    history: PropTypes.object,
 }
 
 export default ForgotPasswordForm;

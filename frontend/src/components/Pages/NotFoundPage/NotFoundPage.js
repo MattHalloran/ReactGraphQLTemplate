@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
 
-export default class NotFoundPage extends React.Component {
+class NotFoundPage extends React.Component {
     componentDidMount() {
         document.title = "404 | New Life Nursery"
     }
@@ -21,3 +21,9 @@ export default class NotFoundPage extends React.Component {
         );
     }
 }
+
+NotFoundPage.propTypes = {
+    
+}
+
+export default NotFoundPage;

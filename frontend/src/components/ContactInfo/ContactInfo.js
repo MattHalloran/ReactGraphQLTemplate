@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { StyledContactInfo } from './ContactInfo.styled';
 
 class ContactInfo extends React.Component{
@@ -15,6 +15,10 @@ class ContactInfo extends React.Component{
             </StyledContactInfo>
         );
     }
+}
+
+ContactInfo.propTypes = {
+
 }
 
 export default ContactInfo;

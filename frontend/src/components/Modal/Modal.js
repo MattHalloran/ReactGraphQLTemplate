@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { StyledModal } from './Modal.styled';
 
 const ESCAPE_KEY = 27;
 
-export default class Modal extends Component {
+class Modal extends Component {
     constructor(props) {
         super(props);
 
@@ -68,3 +69,10 @@ export default class Modal extends Component {
         );
     }
 }
+
+Modal.propTypes = {
+    history: PropTypes.object.isRequired,
+    children: PropTypes.object.isRequired,
+}
+
+export default Modal;

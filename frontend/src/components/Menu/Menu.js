@@ -14,7 +14,6 @@ class Menu extends React.Component {
       user: this.props.user,
       open: this.props.open,
       closeMenu: this.props.closeMenu,
-      loggedIn: this.props.loggedIn,
     }
   }
 
@@ -59,6 +58,7 @@ class Menu extends React.Component {
 Menu.propTypes = {
   open: PropTypes.bool.isRequired,
   closeMenu: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
 }
 
 export default Menu;

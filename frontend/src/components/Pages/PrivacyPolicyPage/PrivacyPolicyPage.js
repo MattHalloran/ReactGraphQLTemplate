@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyledPrivacyPolicyPage } from './PrivacyPolicyPage.styled';
 
-export default class PrivacyPolicyPage extends React.Component {
+class PrivacyPolicyPage extends React.Component {
     componentDidMount() {
         document.title = "Privacy Policy | New Life Nursery"
     }
@@ -316,3 +316,9 @@ export default class PrivacyPolicyPage extends React.Component {
         );
     }
 }
+
+PrivacyPolicyPage.propTypes = {
+    
+}
+
+export default PrivacyPolicyPage;

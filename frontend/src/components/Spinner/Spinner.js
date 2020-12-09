@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import OakSpinner from '../../assets/img/oak-spinner.svg';
 import PubSub from '../../utils/pubsub';
 import { StyledSpinner } from './Spinner.styled';
@@ -25,6 +26,10 @@ class Spinner extends React.Component {
             </StyledSpinner>
         );
     }
+}
+
+Spinner.propTypes = {
+    spinning: PropTypes.bool.isRequired,
 }
 
 export default Spinner;
