@@ -6,7 +6,7 @@ import HomePage from './components/Pages/HomePage/HomePage';
 import AboutPage from './components/Pages/AboutPage/AboutPage';
 import PrivacyPolicyPage from './components/Pages/PrivacyPolicyPage';
 import Snake from './components/Snake/Snake'
-import NotFoundPage from './components/NotFoundPage/NotFoundPage';
+import NotFoundPage from './components/Pages/NotFoundPage/NotFoundPage';
 import { requireAuthentication } from './components/AuthenticatedComponent';
 import ProfilePage from './components/Pages/ProfilePage';
 import Modal from './components/Modal';
@@ -98,15 +98,15 @@ class App extends React.Component {
                 <Switch>
                   <Route exact path="/register" children={<Modal
                   history={this.props.history}>
-                  <SignUpForm />
+                  <SignUpForm history={this.props.history} />
                 </Modal>} />
                 <Route exact path="/login" children={<Modal
                   history={this.props.history}>
-                  <LogInForm />
+                  <LogInForm history={this.props.history} />
                 </Modal>} />
                 <Route exact path="/forgot-password" children={<Modal
                   history={this.props.history}>
-                  <ForgotPasswordForm />
+                  <ForgotPasswordForm history={this.props.history} />
                 </Modal>} />
                 </Switch>
               : null}

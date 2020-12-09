@@ -7,7 +7,7 @@ export { default as HomePage } from './Pages/HomePage';
 export { default as Menu } from './Menu';
 export { default as Modal } from './Modal/';
 export { default as Navbar } from './Navbar';
-export { default as NotFoundPage } from './NotFoundPage';
+export { default as NotFoundPage } from './Pages/NotFoundPage';
 export { default as PrivacyPolicyPage } from './Pages/PrivacyPolicyPage';
 export { default as ProfilePage } from './Pages/ProfilePage';
 export { default as RegisterForm } from './Forms/SignUpForm';

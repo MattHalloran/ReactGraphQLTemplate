@@ -1,14 +1,13 @@
-import React from 'react'
+import React from 'react';
+import { StyledContactPage } from './ContactPage.styled';
 
-class ContactPage extends React.Component {
+export default class ContactPage extends React.Component {
     componentDidMount() {
         document.title = "Contact | New Life Nursery"
     }
     render() {
         return (
-            <div></div>
+            <StyledContactPage></StyledContactPage>
         );
     }
 }
-
-export default ContactPage;

@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import FocusTrap from 'focus-trap-react';
-import { useHistory } from 'react-router-dom';
 import { StyledModal } from './Modal.styled';
 
 const ESCAPE_KEY = 27;
@@ -36,27 +34,6 @@ export default class Modal extends Component {
     closeModal() {
         this.props.history.goBack();
     }
-
-    // let history = useHistory();
-    // const closeModal = (event) => {
-    //     event.stopPropagation();
-    //     history.goBack();
-    //     toggleScrollLock();
-    // };
-    // const toggleScrollLock = () => {
-    //     document.querySelector('html').classList.toggle('scroll-lock');
-    // };
-    // const onClick = (event) => {
-    //     console.log('BREAT')
-    //     if (props.modalRef.current && props.modalRef.current.contains(event.target)) return; //If clicked outside modal
-    //     console.log('CLICKEN OUTSIDE MODAL')
-    //     closeModal(event);
-    // }
-    // const onKeyDown = (event) => {
-    //     if (event.keyCode !== ESCAPE_KEY) return;
-    //     closeModal(event);
-    // };
-
 
     // A portal is a way to render children into a DOM node that exists
     // outside the DOM hierarchy of the parent component

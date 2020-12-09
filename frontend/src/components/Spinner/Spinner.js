@@ -1,7 +1,7 @@
 import React from 'react';
-import './Spinner.css';
 import OakSpinner from '../../assets/img/oak-spinner.svg';
 import PubSub from '../../utils/pubsub';
+import { StyledSpinner } from './Spinner.styled';
 
 class Spinner extends React.Component {
     constructor(props) {
@@ -18,11 +18,11 @@ class Spinner extends React.Component {
     }
     render() {
         return (
-            <div>
+            <StyledSpinner>
                 {this.state.spinning ? <section className="spinner">
                     <img src={OakSpinner} className="spinner_component" alt="Designed by Creazilla" />
                 </section> : null}
-            </div>
+            </StyledSpinner>
         );
     }
 }

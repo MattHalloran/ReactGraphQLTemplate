@@ -1,12 +1,13 @@
 import React from 'react'
+import { StyledPrivacyPolicyPage } from './PrivacyPolicyPage.styled';
 
-class PrivacyPolicyPage extends React.Component {
+export default class PrivacyPolicyPage extends React.Component {
     componentDidMount() {
         document.title = "Privacy Policy | New Life Nursery"
     }
     render() {
         return (
-            <div>
+            <StyledPrivacyPolicyPage>
                 <h1>Privacy Policy</h1>
                 <p>Last updated: November 30, 2020</p>
                 <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
@@ -311,9 +312,7 @@ class PrivacyPolicyPage extends React.Component {
                 {/* =============================================================================================
                 =======================================End Contact Us============================================
                 =================================================================================================*/}
-            </div>
+            </StyledPrivacyPolicyPage>
         );
     }
 }
-
-export default PrivacyPolicyPage;

@@ -1,12 +1,13 @@
-import React from 'react'
+import React from 'react';
+import { StyledAboutPage } from './AboutPage.styled';
 
-class AboutPage extends React.Component {
+export default class AboutPage extends React.Component {
     componentDidMount() {
         document.title = "About | New Life Nursery"
     }
     render() {
         return (
-            <div>
+            <StyledAboutPage>
                 <h1>About New Life Nursery Inc</h1>
                 <br/>
                 <h3>For over thirty-five years, New Life Nursery, Inc has been striving to grow the most beautiful, healthy and consistent plant material at competitive prices. Family owned and operated by the Gianaris Family, we continue to hold to our original motto: "Growing top quality material for buyers who are interested in the best".
@@ -18,9 +19,7 @@ With over 70 acres in production, New Life Nursery, Inc has the trees and shrubs
 Warmest Wishes,
 
 The Gianaris Family</h3>
-            </div >
+            </StyledAboutPage >
         );
     }
 }
-
-export default AboutPage;

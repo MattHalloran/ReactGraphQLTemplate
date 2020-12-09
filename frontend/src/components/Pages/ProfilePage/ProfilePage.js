@@ -1,12 +1,13 @@
 import React from 'react'
+import { StyledProfilePage } from './ProfilePage.styled';
 
-class ProfilePage extends React.Component {
+export default class ProfilePage extends React.Component {
     componentDidMount() {
         document.title = "Profile | New Life Nursery"
     }
     render() {
         return (
-            <div>
+            <StyledProfilePage>
                 <h1>HELLO</h1>
                 <br/>
                 <h1>HELLO</h1>
@@ -25,9 +26,7 @@ class ProfilePage extends React.Component {
                 <br/>
                 <h1>HELLO</h1>
                 <br/>
-            </div >
+            </StyledProfilePage >
         );
     }
 }
-
-export default ProfilePage;

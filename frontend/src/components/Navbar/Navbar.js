@@ -2,9 +2,9 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
-import './Navbar.css';
 import PubSub from '../../utils/pubsub';
 import * as actionCreator from '../../actions/auth';
+import { StyledNavbar } from './Navbar.styled';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -54,7 +54,7 @@ class Navbar extends React.Component {
             menu = <NavList user={this.state.user} onSignUpSubmit={this.onSignUpSubmit} onLogInSubmit={this.onLogInSubmit} />
         }
         return (
-            <nav className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top" >
+            <StyledNavbar className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top" >
                 <div className="container">
                     <Link to="/" className="navbar-brand">
                         <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
@@ -62,7 +62,7 @@ class Navbar extends React.Component {
                 </Link>
                     {menu}
                 </div>
-            </nav>
+            </StyledNavbar>
         );
     }
 }

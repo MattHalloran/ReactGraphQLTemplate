@@ -9,6 +9,7 @@ class LogInForm extends React.Component {
     constructor(props) {
         super(props);
         this.submit = this.submit.bind(this);
+        this.toRegister = this.toRegister.bind(this);
         this.state = {
             redirect: null,
             email: "",
@@ -16,6 +17,9 @@ class LogInForm extends React.Component {
             password: "",
             passwordError: "",
         }
+    }
+    toRegister() {
+        this.props.history.replace('/register');
     }
     login() {
         PubSub.publish('Loading', true);
@@ -66,7 +70,7 @@ class LogInForm extends React.Component {
         return (
             <StyledLogInForm onSubmit={this.props.onSubmit}>
                 <h2>Log In</h2>
-                <Link to={{pathname:"/register"}}>Sign Up</Link>
+                <h5 onClick={this.toRegister}>Sign Up</h5>
                 <TextField
                     name="email"
                     className="form-input"

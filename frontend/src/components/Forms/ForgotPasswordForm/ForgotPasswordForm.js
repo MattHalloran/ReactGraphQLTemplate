@@ -2,7 +2,6 @@ import React from 'react';
 import PubSub from '../../../utils/pubsub';
 import * as actionCreators from '../../../actions/auth'
 import TextField from '@material-ui/core/TextField';
-import { Redirect, Link } from "react-router-dom";
 import { StyledForgotPasswordForm } from './ForgotPasswordForm.styled';
 
 class ForgotPasswordForm extends React.Component {
@@ -10,7 +9,6 @@ class ForgotPasswordForm extends React.Component {
         super(props);
         this.submit = this.submit.bind(this);
         this.state = {
-            redirect: null,
             email: "",
             emailError: "",
         }
@@ -19,7 +17,7 @@ class ForgotPasswordForm extends React.Component {
         PubSub.publish('Loading', true);
         actionCreators.resetPasswordRequest(this.state.email).then(response => {
             PubSub.publish('Loading', false);
-          this.setState({ redirect: '/' });
+          this.props.history.replace('/')
         }).catch(error => {
           console.error(error);
           PubSub.publish('Loading', false);
@@ -57,7 +55,6 @@ class ForgotPasswordForm extends React.Component {
         return (
             <StyledForgotPasswordForm onSubmit={this.props.onSubmit}>
                 <h2>Log In</h2>
-                <Link to={{ pathname: "/register" }}>Sign Up</Link>
                 <TextField
                     name="email"
                     className="form-input"

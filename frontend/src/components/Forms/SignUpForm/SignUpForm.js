@@ -10,6 +10,7 @@ class SignUpForm extends React.Component {
   constructor(props) {
     super(props);
     this.submit = this.submit.bind(this);
+    this.toLogin = this.toLogin.bind(this);
     this.state = {
       redirect: null,
       textFieldTheme: {
@@ -31,6 +32,10 @@ class SignUpForm extends React.Component {
     this.themeSub = PubSub.subscribe('Theme', (_, data) => {
       this.setState({textFieldTheme: { color: data.textSecondary }});
     });
+  }
+
+  toLogin() {
+    this.props.history.replace('/login');
   }
 
   register() {
@@ -98,7 +103,7 @@ class SignUpForm extends React.Component {
     return (
       <StyledSignUpForm onSubmit={this.props.onSubmit}>
         <h2>Sign Up</h2>
-        <Link to={{pathname:"/login"}}>Log In</Link>
+        <h5 onClick={this.toLogin}>Log In</h5>
         <TextField
           name="name"
           className="form-input"
