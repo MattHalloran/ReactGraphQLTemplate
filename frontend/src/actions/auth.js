@@ -67,13 +67,6 @@ export function logoutAndRedirect() {
     };
 }
 
-export function redirectToRoute(route) {
-    return () => {
-        let history = useHistory();
-        history.push(route);
-    };
-}
-
 export function loginUserSuccess(status, token, theme, name) {
     localStorage.setItem('token', token);
     console.log('publishing user token');
