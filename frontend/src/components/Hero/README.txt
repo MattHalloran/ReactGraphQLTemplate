@@ -1,0 +1,1 @@
+Slider code taken from https://github.com/rmolinamir/hero-slider
