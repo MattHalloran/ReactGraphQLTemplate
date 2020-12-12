@@ -15,6 +15,7 @@ export const StyledNavbar = styled.nav`
     .nav-item {
         position: relative;
         padding: 5px;
+        align-self: center
     }
 
     .nav-link {

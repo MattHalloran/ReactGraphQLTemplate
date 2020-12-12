@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PubSub from '../../../utils/pubsub';
-import * as actionCreators from '../../../actions/auth'
+import * as authQuery from '../../../query/auth';
 import TextField from '@material-ui/core/TextField';
 import { Link } from "react-router-dom";
 import { StyledLogInForm } from './LogInForm.styled';
@@ -24,7 +24,7 @@ class LogInForm extends React.Component {
     }
     login() {
         PubSub.publish('Loading', true);
-        actionCreators.loginUser(this.state.email, this.state.password).then(response => {
+        authQuery.loginUser(this.state.email, this.state.password).then(response => {
             PubSub.publish('Loading', false);
           this.setState({ redirect: '/profile' });
         }).catch(error => {

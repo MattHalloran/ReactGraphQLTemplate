@@ -4,10 +4,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import PubSub from '../../utils/pubsub';
-import * as actionCreator from '../../actions/auth';
+import * as authQuery from '../../query/auth';
 import { StyledNavbar } from './Navbar.styled';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const SHOW_HAMBURGER_AT = 800;
+
+const styles = {
+    shoppingCart: {
+        width: "1.5em",
+        height: "1.5em",
+    },
+}
 
 class Navbar extends React.Component {
     constructor(props) {
@@ -116,7 +124,12 @@ function NavList(props) {
         console.log('got the token')
         options = <React.Fragment>
             <li className="nav-item">
-                <a className="nav-link" href="/" onClick={() => actionCreator.logout()}>Log Out</a>
+                <a className="nav-link" href="/" onClick={() => authQuery.logout()}>Log Out</a>
+            </li>
+            <li className="nav-item">
+                <Link to="cart" >
+                    <ShoppingCartIcon style={styles.shoppingCart} />
+                </Link>
             </li>
         </React.Fragment>
     }

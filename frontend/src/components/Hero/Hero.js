@@ -4,12 +4,9 @@ import PropTypes from 'prop-types';
 import HeroSlider, {
   Nav,
   Slide,
-  OverlayContainer
 } from "hero-slider";
-import Wrapper from "./Wrapper/Wrapper";
-import Title from "./Title/Title";
-import Subtitle from "./Subtitle/Subtitle";
 import { Link } from 'react-router-dom';
+import { ContentWrapper, OverlayContainer, Title, Subtitle } from './Hero.styled';
 
 // Images
 const hallstatt = "https://images.pexels.com/photos/2749165/pexels-photo-2749165.jpeg?cs=srgb&dl=pexels-john-lambeth-2749165.jpg&fm=jpg";
@@ -17,16 +14,12 @@ const hvitserkur = "https://images.pexels.com/photos/2408649/pexels-photo-240864
 const jacksonville = "https://images.pexels.com/photos/5529597/pexels-photo-5529597.jpeg?cs=srgb&dl=pexels-zen-chung-5529597.jpg&fm=jpg";
 const moraineLake = "https://images.pexels.com/photos/3912947/pexels-photo-3912947.jpeg?cs=srgb&dl=pexels-thisisengineering-3912947.jpg&fm=jpg";
 
-// Text
-const HERO_TEXT = "Beautiful, healthy plants";
-const HERO_SUBTEXT = "At competitive prices";
-
 class Hero extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: this.props.text,
-      subtext: this.props.subtext,
+      text: props.text,
+      subtext: props.subtext,
     }
   }
 
@@ -53,15 +46,15 @@ class Hero extends React.Component {
         }}
       >
         <OverlayContainer>
-          <Wrapper>
-            <Title>{HERO_TEXT}</Title>
+          <ContentWrapper>
+            <Title>{this.props.text}</Title>
             <Subtitle>
-              {HERO_SUBTEXT}
+              {this.props.subtext}
             </Subtitle>
-            <Link to="/info">
+            <Link to="/shopping">
               <button className="primary">Order now</button>
             </Link>
-          </Wrapper>
+          </ContentWrapper>
         </OverlayContainer>
 
         <Slide

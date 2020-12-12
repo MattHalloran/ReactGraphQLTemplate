@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PubSub from '../../../utils/pubsub';
-import * as actionCreators from '../../../actions/auth'
+import * as authQuery from '../../../query/auth'
 import TextField from '@material-ui/core/TextField';
 import { Redirect, Link } from "react-router-dom";
 import { StyledSignUpForm } from './SignUpForm.styled';
@@ -41,7 +41,7 @@ class SignUpForm extends React.Component {
 
   register() {
     PubSub.publish('Loading', true);
-    actionCreators.registerUser(this.state.name, this.state.email, this.state.password).then(response => {
+    authQuery.registerUser(this.state.name, this.state.email, this.state.password).then(response => {
       console.log('woohoo registered!!!');
       console.log(response);
       PubSub.publish('Loading', false);

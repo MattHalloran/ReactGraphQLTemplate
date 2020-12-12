@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app
-from src.models import db, User, account_statuses
+from src.models import db, User, Plant, account_statuses
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from sqlalchemy import exc
@@ -27,7 +27,11 @@ auth_codes_dict = {
     "RESET_PASSWORD_SUCCESS": 1100,
     "RESET_PASSWORD_ERROR_UNKNOWN": 1200,
     "TOKEN_VERIFIED": 1300,
-    "TOKEN_NOT_VERIFIED": 1400
+    "TOKEN_NOT_VERIFIED": 1400,
+    "FETCH_INVENTORY_SUCCESS": 1500,
+    "FETCH_INVENTORY_ERROR_UNKNOWN": 1600,
+    "FETCH_INVENTORY_PAGE_SUCCESS": 1700,
+    "FETCH_INVENTORY_PAGE_ERROR_UNKNOWN": 1800
 }
 AUTH_CODES = SimpleNamespace(**auth_codes_dict)
 
@@ -75,7 +79,7 @@ def get_token():
                 "token": generate_token(app, user),
                 "status": AUTH_CODES.TOKEN_FOUND,
                 "name": user.name,
-                "theme" user.theme
+                "theme": user.theme
             }
         else:
             account_status = User.get_user_lock_status(data['email'])
@@ -100,12 +104,10 @@ def send_password_reset_request():
         dict_str = byte_data.decode('UTF-8')
         data = ast.literal_eval(dict_str)
         reset_password(data['email'])
-        status = AUTH_CODES.RESET_PASSWORD_SUCCESS
-        return {"status": status}
+        return {"status": AUTH_CODES.RESET_PASSWORD_SUCCESS}
     except Exception:
         print(traceback.format_exc())
-        status = AUTH_CODES.RESET_PASSWORD_ERROR_UNKNOWN
-        return {"status": status}
+        return {"status": AUTH_CODES.RESET_PASSWORD_ERROR_UNKNOWN}
 
 
 @app.route("/api/is_token_valid", methods=["POST"])
@@ -123,3 +125,23 @@ def is_token_valid():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# Returns IDs of all inventory items available to the customer.
+# Also returns required info to display the first page of results
+@app.route("/api/fetch_inventory", methods=["POST"])
+def fetch_inventory():
+    item_IDs = Plant.get_all_plant_ids()
+    page_results = [Plant.get_plant_from_id(id) for id in item_IDs]
+    return {
+        "all_plant_ids": item_IDs,
+        "page_results": page_results,
+        "status": AUTH_CODES.FETCH_INVENTORY_SUCCESS
+    }
+
+
+# Returns inventory data for the given inventory IDs
+@app.route("/api/fetch_inventory_page", methods=["POST"])
+def fetch_inventory_page():
+    incoming = request.get_json()
+    return [Plant.get_plant_from_id(id) for id in incoming['ids']]

@@ -4,7 +4,7 @@ import { StyledMenu } from './Menu.styled';
 import { Link } from 'react-router-dom';
 import ContactInfo from '../ContactInfo';
 import PubSub from '../../utils/pubsub';
-import * as actionCreator from '../../actions/auth';
+import * as authQuery from '../../query/auth';
 
 class Menu extends React.Component {
   //const location = useLocation();
@@ -41,7 +41,7 @@ class Menu extends React.Component {
     // Things displayed to users that are not logged in
     else {
       options = <React.Fragment>
-        <a href="/" onClick={() => actionCreator.logout()}>Log Out</a>
+        <a href="/" onClick={() => authQuery.logout()}>Log Out</a>
       </React.Fragment>
     }
 

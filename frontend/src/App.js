@@ -4,6 +4,7 @@ import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import HomePage from './components/Pages/HomePage/HomePage';
 import AboutPage from './components/Pages/AboutPage/AboutPage';
+import ShoppingPage from './components/Pages/ShoppingPage';
 import PrivacyPolicyPage from './components/Pages/PrivacyPolicyPage';
 import Snake from './components/Snake/Snake'
 import NotFoundPage from './components/Pages/NotFoundPage/NotFoundPage';
@@ -18,7 +19,7 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { getTheme, lightTheme } from './theme';
 //Provide user context
-import * as actionCreators from './actions/auth';
+import * as authQuery from './query/auth';
 import SignUpForm from './components/Forms/SignUpForm';
 import LogInForm from './components/Forms/LogInForm';
 import ForgotPasswordForm from './components/Forms/ForgotPasswordForm';
@@ -55,7 +56,7 @@ class App extends React.Component {
     });
 
     if (this.state.user.token == null) {
-      actionCreators.checkJWT();
+      authQuery.checkJWT();
     }
   }
 
@@ -89,6 +90,9 @@ class App extends React.Component {
                 <Route exact path="/about" component={AboutPage} />
                 <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.user)} />
+                <Route exact path="/shopping" render={() => (
+                  <ShoppingPage user={this.state.user} />
+                )} />
                 <Route exact path="/smile" component={Snake} />
                 <Route component={NotFoundPage} />
               </Switch>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PubSub from '../../../utils/pubsub';
-import * as actionCreators from '../../../actions/auth'
+import * as authQuery from '../../../query/auth';
 import TextField from '@material-ui/core/TextField';
 import { StyledForgotPasswordForm } from './ForgotPasswordForm.styled';
 
@@ -16,7 +16,7 @@ class ForgotPasswordForm extends React.Component {
     }
     forgotPassword() {
         PubSub.publish('Loading', true);
-        actionCreators.resetPasswordRequest(this.state.email).then(response => {
+        authQuery.resetPasswordRequest(this.state.email).then(response => {
             PubSub.publish('Loading', false);
           this.props.history.replace('/')
         }).catch(error => {

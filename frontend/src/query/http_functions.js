@@ -69,3 +69,35 @@ export function send_password_reset_request(email) {
         })
     });
 }
+
+export function fetch_inventory(filter_by) {
+    return new Promise(function (resolve, reject) {
+        fetch('api/fetch_inventory', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+            body: JSON.stringify({
+                "filter_by": filter_by
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
+export function fetch_inventory_page(item_ids) {
+    return new Promise(function (resolve, reject) {
+        fetch('api/fetch_inventory_page', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+            body: JSON.stringify({
+                "item_ids": item_ids
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}

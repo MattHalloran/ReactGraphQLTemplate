@@ -2,7 +2,7 @@ import React from 'react'
 import { StyledHero } from './HomePage.styled';
 import { Link } from 'react-router-dom';
 import Collapsible from '../../Collapsible';
-import Slider from '../../Hero/Hero';
+import Hero from '../../Hero/Hero';
 
 class HomePage extends React.Component {
     componentDidMount() {
@@ -11,7 +11,7 @@ class HomePage extends React.Component {
     render() {
         return (
             <div>
-                <Slider />
+                <Hero text="Beautiful, healthy plants" subtext="At competitive prices" />
                 <Collapsible title="About">
                     <ul>
                         <li>Hello</li>

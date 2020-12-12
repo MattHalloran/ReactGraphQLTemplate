@@ -1,5 +1,5 @@
 import React from 'react';
-import * as actionCreators from '../actions/auth';
+import * as authQuery from '../query/auth';
 import { Redirect } from "react-router-dom";
 
 export function requireAuthentication(Component, User) {
@@ -14,7 +14,7 @@ export function requireAuthentication(Component, User) {
 
         checkAuth() {
             if (User.token == null) {
-                actionCreators.checkJWT().then().catch(() => {
+                authQuery.checkJWT().then().catch(() => {
                     this.setState({ redirect: '/' })
                 })
             }

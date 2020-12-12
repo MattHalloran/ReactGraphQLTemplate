@@ -213,6 +213,17 @@ class Plant(db.Model):
     discounts = db.relationship(f'{TABLES.Discount}', secondary=itemDiscounts, backref='items')
     # ----------------End columns-------------------
 
+    @staticmethod
+    def get_plant_from_id(id: int):
+        plant = Plant.query.get(id)
+        if plant:
+            return plant
+        return None
+
+    @staticmethod
+    def get_all_plant_ids():
+        return db.session.query(Plant.id).all()
+
     def add_horticopia_data(self, horticopia_id):
         # TODO
         return False
