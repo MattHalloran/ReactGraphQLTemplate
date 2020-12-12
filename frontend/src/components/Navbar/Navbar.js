@@ -74,6 +74,8 @@ class Hamburger extends React.Component {
     constructor(props) {
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
+        this.setWrapperRef = this.setWrapperRef.bind(this);
+        this.handleClickOutside = this.handleClickOutside.bind(this);
         this.state = {
             open: false,
         }
@@ -81,10 +83,29 @@ class Hamburger extends React.Component {
     toggleOpen = () => {
         this.setState({ open: !this.state.open });
     }
+    componentDidMount() {
+        document.addEventListener('mousedown', this.handleClickOutside);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.handleClickOutside);
+    }
+
+    setWrapperRef(node) {
+        console.log('WOOPDEE DOO', this.node);
+        this.wrapperRef = node;
+    }
+
+    handleClickOutside(event) {
+        if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+            console.log('BOOPEBOOOOFHDUSHFKJHSFKJD');
+            this.setState({ open: false });
+        }
+    }
     render() {
         return (
             <React.Fragment>
-                <div>
+                <div ref={this.setWrapperRef}>
                     <Burger className="align-right" open={this.state.open} toggleOpen={this.toggleOpen} />
                     <Menu {...this.props} open={this.state.open} closeMenu={() => this.setState({ open: false })} />
                 </div>

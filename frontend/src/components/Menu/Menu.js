@@ -13,8 +13,8 @@ class Menu extends React.Component {
     this.state = {
       user: this.props.user,
       open: this.props.open,
-      closeMenu: this.props.closeMenu,
     }
+    this.closeMenu = this.props.closeMenu;
   }
 
   componentDidMount() {
@@ -32,16 +32,21 @@ class Menu extends React.Component {
       options = <React.Fragment>
         <Link to={{
           pathname: "/register"
-        }}>Sign Up</Link>
+        }} 
+        onClick={this.closeMenu}>Sign Up</Link>
         <Link to={{
           pathname: "/login"
-        }}>Log In</Link>
+        }}
+        onClick={this.closeMenu}>Log In</Link>
       </React.Fragment>
-    } 
+    }
     // Things displayed to users that are not logged in
     else {
       options = <React.Fragment>
-        <a href="/" onClick={() => authQuery.logout()}>Log Out</a>
+        <a href="/" onClick={() => { 
+          this.closeMenu();
+          authQuery.logout()
+          }}>Log Out</a>
       </React.Fragment>
     }
 

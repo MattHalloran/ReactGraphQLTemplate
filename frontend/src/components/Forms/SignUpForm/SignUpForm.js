@@ -6,12 +6,18 @@ import TextField from '@material-ui/core/TextField';
 import { Redirect, Link } from "react-router-dom";
 import { StyledSignUpForm } from './SignUpForm.styled';
 import { lightTheme, getTheme } from '../../../theme';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 class SignUpForm extends React.Component {
   constructor(props) {
     super(props);
     this.submit = this.submit.bind(this);
     this.toLogin = this.toLogin.bind(this);
+    this.handleRadioSelect = this.handleRadioSelect.bind(this);
     this.state = {
       redirect: null,
       textFieldTheme: {
@@ -24,14 +30,16 @@ class SignUpForm extends React.Component {
       password: "",
       passwordError: "",
       confirmPassword: "",
+      existingCustomer: null,
+      existingCustomerError: "",
     }
   }
 
   componentDidMount() {
     let theme = getTheme();
-    this.setState({textFieldTheme: { color: theme.textSecondary }});
+    this.setState({ textFieldTheme: { color: theme.textSecondary } });
     this.themeSub = PubSub.subscribe('Theme', (_, data) => {
-      this.setState({textFieldTheme: { color: data.textSecondary }});
+      this.setState({ textFieldTheme: { color: data.textSecondary } });
     });
   }
 
@@ -59,6 +67,10 @@ class SignUpForm extends React.Component {
       this.register();
     }
   }
+  handleRadioSelect(event) {
+    this.setState({ existingCustomer: event.target.value });
+    console.log(this.state, event.target.value);
+  }
   change = e => {
     this.setState({ [e.target.name]: e.target.value });
   }
@@ -67,7 +79,8 @@ class SignUpForm extends React.Component {
     const errors = {
       nameError: "",
       emailError: "",
-      passwordError: ""
+      passwordError: "",
+      existingCustomerError: "",
     }
 
     if (this.state.name === "") {
@@ -88,6 +101,11 @@ class SignUpForm extends React.Component {
     if (this.state.password.length < 8) {
       isError = true;
       errors.passwordError = "Password must be at least 8 characters long"
+    }
+
+    if (this.state.existingCustomer === null) {
+      isError = true;
+      errors.existingCustomerError = "Please make a selection"
     }
 
     this.setState({
@@ -153,6 +171,13 @@ class SignUpForm extends React.Component {
           onChange={e => this.change(e)}
           required
         />
+        <FormControl component="fieldset">
+          <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={this.state.existingCustomer} onChange={this.handleRadioSelect}>
+            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+          </RadioGroup>
+          <FormHelperText>{this.state.existingCustomerError}</FormHelperText>
+        </FormControl>
         <div className="form-group">
           <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
             Submit
