@@ -1,8 +1,5 @@
-import { useHistory } from 'react-router-dom';
 import { fetch_inventory, fetch_inventory_page } from './http_functions';
-import PubSub from '../utils/pubsub';
-import { setTheme } from '../theme';
-import { STATUS_CODES } from './constants';
+import { StatusCodes } from './constants';
 
 export function getInventorySuccess(status) {
     return {
@@ -23,7 +20,7 @@ export function getInventory(filter_by) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === STATUS_CODES.FETCH_INVENTORY_SUCCESS) {
+                        if(data.status === StatusCodes.FETCH_INVENTORY_SUCCESS) {
                             resolve(getInventorySuccess(data.status))
                         } else {
                             reject(getInventoryFailure(data.status))
@@ -32,7 +29,7 @@ export function getInventory(filter_by) {
                 })
         } catch (error) {
             console.error(error);
-            reject(getInventoryFailure(STATUS_CODES.FETCH_INVENTORY_ERROR_UNKNOWN));
+            reject(getInventoryFailure(StatusCodes.FETCH_INVENTORY_ERROR_UNKNOWN));
         }
     });
 }
@@ -56,7 +53,7 @@ export function getInventoryPage(item_ids) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === STATUS_CODES.FETCH_INVENTORY_PAGE_SUCCESS) {
+                        if(data.status === StatusCodes.FETCH_INVENTORY_PAGE_SUCCESS) {
                             resolve(getInventoryPageSuccess(data.status))
                         } else {
                             reject(getInventoryPageFailure(data.status))
@@ -65,7 +62,7 @@ export function getInventoryPage(item_ids) {
                 })
         } catch (error) {
             console.error(error);
-            reject(getInventoryPageFailure(STATUS_CODES.FETCH_INVENTORY_PAGE_ERROR_UNKNOWN));
+            reject(getInventoryPageFailure(StatusCodes.FETCH_INVENTORY_PAGE_ERROR_UNKNOWN));
         }
     });
 }

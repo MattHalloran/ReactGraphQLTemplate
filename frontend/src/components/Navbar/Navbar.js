@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
-import PubSub from '../../utils/pubsub';
 import * as authQuery from '../../query/auth';
 import { StyledNavbar } from './Navbar.styled';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
@@ -21,7 +20,6 @@ class Navbar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: this.props.user,
             showHamburger: false,
         }
     }
@@ -29,12 +27,6 @@ class Navbar extends React.Component {
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions);
-
-        this.userSub = PubSub.subscribe('User', (_, data) => {
-            if (this.state.user !== data) {
-                this.setState({ user: data })
-            }
-        });
     }
 
     componentWillUnmount() {
@@ -44,13 +36,14 @@ class Navbar extends React.Component {
     updateWindowDimensions = () => {
         this.setState({ showHamburger: window.innerWidth <= SHOW_HAMBURGER_AT });
     }
-    //End lifecycle methods
+
     render() {
+
         let menu;
         if (this.state.showHamburger) {
             menu = <Hamburger {...this.props} />
         } else {
-            menu = <NavList user={this.state.user} onSignUpSubmit={this.onSignUpSubmit} onLogInSubmit={this.onLogInSubmit} />
+            menu = <NavList {...this.props} onSignUpSubmit={this.onSignUpSubmit} onLogInSubmit={this.onLogInSubmit} />
         }
         return (
             <StyledNavbar className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top" >
@@ -67,7 +60,7 @@ class Navbar extends React.Component {
 }
 
 Navbar.propTypes = {
-    user: PropTypes.object.isRequired,
+    token: PropTypes.string,
 }
 
 class Hamburger extends React.Component {
@@ -92,13 +85,11 @@ class Hamburger extends React.Component {
     }
 
     setWrapperRef(node) {
-        console.log('WOOPDEE DOO', this.node);
         this.wrapperRef = node;
     }
 
     handleClickOutside(event) {
         if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-            console.log('BOOPEBOOOOFHDUSHFKJHSFKJD');
             this.setState({ open: false });
         }
     }
@@ -107,7 +98,7 @@ class Hamburger extends React.Component {
             <React.Fragment>
                 <div ref={this.setWrapperRef}>
                     <Burger className="align-right" open={this.state.open} toggleOpen={this.toggleOpen} />
-                    <Menu {...this.props} open={this.state.open} closeMenu={() => this.setState({ open: false })} />
+                    <Menu {...this.props}  open={this.state.open} closeMenu={() => this.setState({ open: false })} />
                 </div>
             </React.Fragment>
         );
@@ -120,11 +111,8 @@ Hamburger.propTypes = {
 
 function NavList(props) {
     let location = useLocation();
-
     let options;
-    if (props.user.token == null) {
-        console.log('null token dum dum')
-        console.log(props);
+    if (props.token == null) {
         options = <React.Fragment>
             <li className="nav-item">
                 <Link className="nav-link"
@@ -142,7 +130,6 @@ function NavList(props) {
             </li>
         </React.Fragment>
     } else {
-        console.log('got the token')
         options = <React.Fragment>
             <li className="nav-item">
                 <a className="nav-link" href="/" onClick={() => authQuery.logout()}>Log Out</a>
@@ -174,7 +161,8 @@ function NavList(props) {
 }
 
 NavList.propTypes = {
-    user: PropTypes.object.isRequired,
+    token: PropTypes.string,
+    user_roles: PropTypes.array,
 }
 
 export default Navbar;

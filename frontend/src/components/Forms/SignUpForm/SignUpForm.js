@@ -38,7 +38,7 @@ class SignUpForm extends React.Component {
   componentDidMount() {
     let theme = getTheme();
     this.setState({ textFieldTheme: { color: theme.textSecondary } });
-    this.themeSub = PubSub.subscribe('Theme', (_, data) => {
+    this.themeSub = PubSub.subscribe('theme', (_, data) => {
       this.setState({ textFieldTheme: { color: data.textSecondary } });
     });
   }
@@ -48,16 +48,16 @@ class SignUpForm extends React.Component {
   }
 
   register() {
-    PubSub.publish('Loading', true);
-    authQuery.registerUser(this.state.name, this.state.email, this.state.password).then(response => {
+    PubSub.publish('loading', true);
+    let existing_customer_bool = this.state.existingCustomer === "true"
+    authQuery.registerUser(this.state.name, this.state.email, this.state.password, existing_customer_bool).then(response => {
       console.log('woohoo registered!!!');
       console.log(response);
-      PubSub.publish('Loading', false);
+      PubSub.publish('loading', false);
       this.setState({ redirect: '/profile' });
     }).catch(error => {
-      console.log('received error here hereh here')
       console.error(error);
-      PubSub.publish('Loading', false)
+      PubSub.publish('loading', false)
       alert(error.error);
     })
   }

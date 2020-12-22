@@ -15,13 +15,13 @@ class ForgotPasswordForm extends React.Component {
         }
     }
     forgotPassword() {
-        PubSub.publish('Loading', true);
+        PubSub.publish('loading', true);
         authQuery.resetPasswordRequest(this.state.email).then(response => {
-            PubSub.publish('Loading', false);
+            PubSub.publish('loading', false);
           this.props.history.replace('/')
         }).catch(error => {
           console.error(error);
-          PubSub.publish('Loading', false);
+          PubSub.publish('loading', false);
         })
     }
     submit(event) {

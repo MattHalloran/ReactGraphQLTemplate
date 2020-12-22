@@ -23,14 +23,14 @@ class LogInForm extends React.Component {
         this.props.history.replace('/register');
     }
     login() {
-        PubSub.publish('Loading', true);
+        PubSub.publish('loading', true);
         authQuery.loginUser(this.state.email, this.state.password).then(response => {
-            PubSub.publish('Loading', false);
+            PubSub.publish('loading', false);
           this.setState({ redirect: '/profile' });
         }).catch(error => {
             console.log("Failed to log in");
             console.error(error);
-            PubSub.publish('Loading', false);
+            PubSub.publish('loading', false);
             alert(error.error);
         })
       }

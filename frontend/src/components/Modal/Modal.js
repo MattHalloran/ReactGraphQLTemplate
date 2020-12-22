@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { StyledModal } from './Modal.styled';
 
-const ESCAPE_KEY = 27;
+// const ESCAPE_KEY = 27;
 
 class Modal extends Component {
     constructor(props) {

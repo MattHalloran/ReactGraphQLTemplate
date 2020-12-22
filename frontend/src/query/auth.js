@@ -2,45 +2,80 @@ import { useHistory } from 'react-router-dom';
 import { get_token, create_user, send_password_reset_request, validate_token } from './http_functions';
 import PubSub from '../utils/pubsub';
 import { setTheme } from '../theme';
-import { STATUS_CODES } from './constants';
+import { StatusCodes } from './constants';
+// import { useRadioGroup } from '@material-ui/core';
 
-export function checkJWT() {
-    console.log('checking for JWT...');
+export const ROLES = {
+    UNLOCKED: 1,
+    WAITING_APPROVAL: 2,
+    SOFT_LOCK: 3,
+    HARD_LOCK: 4,
+}
+
+function setToken(token) {
+    localStorage.setItem('token', token);
+    PubSub.publish('token', token);
+}
+
+function setRoles(roles) {
+    localStorage.setItem('roles', JSON.stringify(roles));
+    PubSub.publish('roles', roles);
+}
+
+export function checkCookiesSuccess(token, status) {
+    setToken(token);
+    return {
+        token: token,
+        status: status
+    };
+}
+
+export function checkCookiesFailure(status) {
+    setToken(null);
+    return {
+        token: null,
+        status: status
+    };
+}
+
+export function checkCookies() {
     return new Promise(function (resolve, reject) {
-        //First, make sure there is a token to check
-        let token = localStorage.getItem('token');
-        if (!token) {
-            reject(loginUserFailure(STATUS_CODES.TOKEN_NOT_VERIFIED));
-        } else {
-            try {
+        try {
+            let roles = localStorage.getItem('roles');
+            if (roles !== null) {
+                setRoles(JSON.parse(roles));
+            }
+            let token = localStorage.getItem('token');
+            if (!token) {
+                reject(loginUserFailure(StatusCodes.TOKEN_NOT_VERIFIED));
+            } else {
                 validate_token(token).then(response => {
                     response.json().then(data => {
-                        console.log(data);
-                        if (data.status === STATUS_CODES.TOKEN_VERIFIED) {
-                            resolve(loginUserSuccess(token, data.status));
+                        if (data.status === StatusCodes.TOKEN_VERIFIED) {
+                            resolve(checkCookiesSuccess(token, data.status));
                         } else {
-                            reject(loginUserFailure(data.status));
+                            reject(checkCookiesFailure(data.status));
                         }
                     })
                 });
-            } catch (error) {
-                console.log(error);
-                reject(loginUserFailure(STATUS_CODES.TOKEN_NOT_VERIFIED));
             }
+        } catch (error) {
+            console.log(error);
+            reject(checkCookiesFailure(StatusCodes.TOKEN_NOT_VERIFIED));
         }
     });
 }
 
+export function login(token, user) {
+    setToken(token);
+    setRoles(user.roles);
+    setTheme(user.theme);
+}
+
 export function logout() {
-    console.log('removing token2');
-    localStorage.removeItem('token');
-    PubSub.publish('User', {
-        token: null,
-        name: null
-    });
+    setToken(null);
+    setRoles(null);
     setTheme(null);
-    return {
-    };
 }
 
 export function logoutAndRedirect() {
@@ -51,14 +86,8 @@ export function logoutAndRedirect() {
     };
 }
 
-export function loginUserSuccess(status, token, theme, name) {
-    localStorage.setItem('token', token);
-    console.log('publishing user token');
-    PubSub.publish('User', {
-        token: token,
-        name: name
-    });
-    setTheme(theme);
+export function loginUserSuccess(status, token, user) {
+    login(token, user);
     return {
         token: token,
         status: status
@@ -66,22 +95,16 @@ export function loginUserSuccess(status, token, theme, name) {
 }
 
 export function loginUserFailure(status) {
-    console.log('removing token3');
-    localStorage.removeItem('token');
-    PubSub.publish('User', {
-        token: null,
-        name: null
-    });
-    setTheme(null);
+    logout();
     let error;
-    switch(status) {
-        case STATUS_CODES.TOKEN_NOT_FOUND_NO_USER:
+    switch (status) {
+        case StatusCodes.TOKEN_NOT_FOUND_NO_USER:
             error = "Email or password incorrect. Please try again.";
             break;
-        case STATUS_CODES.TOKEN_NOT_FOUND_SOFT_LOCKOUT:
+        case StatusCodes.TOKEN_NOT_FOUND_SOFT_LOCKOUT:
             error = "Incorrect password entered too many times. Please try again in 15 minutes";
             break;
-        case STATUS_CODES.TOKEN_NOT_FOUND_HARD_LOCKOUT:
+        case StatusCodes.TOKEN_NOT_FOUND_HARD_LOCKOUT:
             error = "Account locked. Please contact us";
             break;
         default:
@@ -99,9 +122,8 @@ export function loginUser(email, password) {
         try {
             get_token(email, password).then(response => {
                 response.json().then(data => {
-                    console.log(data);
-                    if (data.status === STATUS_CODES.TOKEN_FOUND) {
-                        resolve(loginUserSuccess(data.status, data.token, data.theme, data.name));
+                    if (data.status === StatusCodes.TOKEN_FOUND) {
+                        resolve(loginUserSuccess(data.status, data.token, data.user));
                     } else {
                         reject(loginUserFailure(data.status));
                     }
@@ -109,19 +131,13 @@ export function loginUser(email, password) {
             });
         } catch (error) {
             console.log(error);
-            reject(loginUserFailure(STATUS_CODES.TOKEN_NOT_FOUND_ERROR_UNKOWN));
+            reject(loginUserFailure(StatusCodes.TOKEN_NOT_FOUND_ERROR_UNKOWN));
         }
     });
 }
 
-export function registerUserSuccess(status, token, theme, name) {
-    localStorage.setItem('token', token);
-    console.log('publishing user token');
-    PubSub.publish('User', {
-        token: token,
-        name: name
-    });
-    setTheme(theme);
+export function registerUserSuccess(status, token, user) {
+    login(token, user);
     return {
         token: token,
         status: status
@@ -129,15 +145,9 @@ export function registerUserSuccess(status, token, theme, name) {
 }
 
 export function registerUserFailure(status) {
-    console.log('removing token1');
-    localStorage.removeItem('token');
-    PubSub.publish('User', {
-        token: null,
-        name: null
-    });
-    setTheme(null);
+    logout();
     let error;
-    if(status === STATUS_CODES.REGISTER_ERROR_EMAIL_EXISTS) {
+    if (status === StatusCodes.REGISTER_ERROR_EMAIL_EXISTS) {
         error = "User with that email already exists. If you would like to reset your password, TODO";
     } else {
         error = "Unknown error occurred. Please try again";
@@ -148,14 +158,14 @@ export function registerUserFailure(status) {
     };
 }
 
-export function registerUser(name, email, password) {
+export function registerUser(name, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
         try {
-            create_user(name, email, password)
+            create_user(name, email, password, existing_customer)
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if (data.status === STATUS_CODES.REGISTER_SUCCESS) {
+                        if (data.status === StatusCodes.REGISTER_SUCCESS) {
                             resolve(registerUserSuccess(data.status, data.token, data.theme, data.name));
                         } else {
                             reject(registerUserFailure(data.status));
@@ -164,7 +174,7 @@ export function registerUser(name, email, password) {
                 });
         } catch (error) {
             console.error(error);
-            reject(registerUserFailure(STATUS_CODES.REGISTER_ERROR_UNKNOWN));
+            reject(registerUserFailure(StatusCodes.REGISTER_ERROR_UNKNOWN));
         }
     });
 }
@@ -188,7 +198,7 @@ export function resetPasswordRequest(email) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === STATUS_CODES.RESET_PASSWORD_SUCCESS) {
+                        if (data.status === StatusCodes.RESET_PASSWORD_SUCCESS) {
                             resolve(resetPasswordSuccess(data.status))
                         } else {
                             reject(resetPasswordFailure(data.status))
@@ -197,7 +207,7 @@ export function resetPasswordRequest(email) {
                 })
         } catch (error) {
             console.error(error);
-            reject(resetPasswordFailure(STATUS_CODES.RESET_PASSWORD_ERROR_UNKNOWN));
+            reject(resetPasswordFailure(StatusCodes.RESET_PASSWORD_ERROR_UNKNOWN));
         }
     });
 }

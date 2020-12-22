@@ -157,3 +157,6 @@ sketch
 
 #Database
 *.db
+
+#Postgres
+postgres/

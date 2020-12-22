@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { memo } from 'react'
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
-import SearchBar from '../../SearchBar';
-import ShoppingList from '../../ShoppingList';
+import SearchBar from '../../components/SearchBar';
+import ShoppingList from '../../components/ShoppingList';
 
 class ShoppingPage extends React.Component {
     constructor(props) {
@@ -22,8 +22,7 @@ class ShoppingPage extends React.Component {
     }
 
     checkAuth() {
-        let auth = this.props.user && this.props.user.token !== null;
-        console.log("BOOBIESSSS", auth, this.props);
+        let auth; //TODO - do something similar to menu.js
         if (auth !== this.state.authenticated) {
             this.setState({authenticated: auth});
         }
@@ -46,7 +45,7 @@ class ShoppingPage extends React.Component {
 }
 
 ShoppingPage.propTypes = {
-    user: PropTypes.object.isRequired,
+    roles: PropTypes.object.isRequired,
 }
 
-export default ShoppingPage;
+export default memo(ShoppingPage);

@@ -34,7 +34,7 @@ export function setTheme(themeString) {
       break;
   }
   localStorage.setItem('theme', JSON.stringify(theme));
-  PubSub.publish('Theme', theme);
+  PubSub.publish('theme', theme);
 }
 
 export function getTheme() {

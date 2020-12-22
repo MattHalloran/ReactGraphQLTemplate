@@ -17,7 +17,7 @@ export function validate_token(token) {
     }); 
 }
 
-export function create_user(name, email, password) {
+export function create_user(name, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
         fetch('api/register', {
             method: "POST",
@@ -26,7 +26,8 @@ export function create_user(name, email, password) {
             body: JSON.stringify({
                 "name": name,
                 "email": email,
-                "password": password
+                "password": password,
+                "existing_customer": existing_customer
             })
         }).then((response) => {
             resolve(response);
@@ -92,7 +93,50 @@ export function fetch_inventory_page(item_ids) {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({
-                "item_ids": item_ids
+                "ids": item_ids
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
+export function fetch_gallery() {
+    return new Promise(function (resolve, reject) {
+        fetch('api/fetch_gallery', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
+export function fetch_gallery_image(filename) {
+    return new Promise(function (resolve, reject) {
+        fetch('api/gallery/'+filename, {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
+export function update_contact_info(data, token) {
+    return new Promise(function (resolve, reject) {
+        fetch('api/update_contact_info', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+            body: JSON.stringify({
+                "data": data,
+                "token": token
             })
         }).then((response) => {
             resolve(response);

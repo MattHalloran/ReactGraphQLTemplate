@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { StyledItemCard } from './ItemCard.styled';
 
 class ItemCard extends React.Component {
@@ -15,4 +15,4 @@ ItemCard.propTypes = {
     
 }
 
-export default ItemCard;
+export default memo(ItemCard);

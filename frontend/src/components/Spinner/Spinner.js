@@ -12,10 +12,10 @@ class Spinner extends React.Component {
         }
     }
     componentDidMount() {
-        this.loadingSub = PubSub.subscribe('Loading', (_,data) => this.setState({spinning:data}))
+        this.loadingSub = PubSub.subscribe('loading', (_,data) => this.setState({spinning:data}))
     }
     componentWillUnmount() {
-        PubSub.unsubscribe(this.loadingSub)
+        PubSub.unsubscribe(this.loadingSub);
     }
     render() {
         return (

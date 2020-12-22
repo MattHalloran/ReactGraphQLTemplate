@@ -14,7 +14,7 @@ export function requireAuthentication(Component, User) {
 
         checkAuth() {
             if (User.token == null) {
-                authQuery.checkJWT().then().catch(() => {
+                authQuery.checkCookies().then().catch(() => {
                     this.setState({ redirect: '/' })
                 })
             }

@@ -1,8 +1,6 @@
 import React from 'react'
-import { StyledHero } from './HomePage.styled';
-import { Link } from 'react-router-dom';
-import Collapsible from '../../Collapsible';
-import Hero from '../../Hero/Hero';
+import Collapsible from '../../components/Collapsible';
+import Hero from '../../components/Hero/Hero';
 import { SocialIcon } from 'react-social-icons';
 
 class HomePage extends React.Component {

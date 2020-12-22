@@ -3,33 +3,53 @@ import PropTypes from 'prop-types';
 import { StyledMenu } from './Menu.styled';
 import { Link } from 'react-router-dom';
 import ContactInfo from '../ContactInfo';
-import PubSub from '../../utils/pubsub';
 import * as authQuery from '../../query/auth';
 
 class Menu extends React.Component {
   //const location = useLocation();
   constructor(props) {
     super(props);
-    this.state = {
-      user: this.props.user,
-      open: this.props.open,
-    }
     this.closeMenu = this.props.closeMenu;
+    this.handleTouchStart = this.handleTouchStart.bind(this);
+    this.handleTouchEnd = this.handleTouchEnd.bind(this);
+    this.handleTouchMove = this.handleTouchMove.bind(this);
+    this.touchStart = 0;
+    this.touchEnd = 0;
   }
 
-  componentDidMount() {
-    this.userSub = PubSub.subscribe('User', (_, data) => {
-      if (this.state.user !== data) {
-        this.setState({ user: data })
-      }
-    });
+  handleTouchStart(event) {
+    this.touchStart = event.targetTouches[0].clientX;
+  }
+
+  handleTouchMove(event) {
+    this.touchEnd = event.targetTouches[0].clientX;
+  }
+
+  handleTouchEnd(event) {
+    if (this.touchEnd - this.touchStart > 100) {
+      this.closeMenu();
+    }
+    console.log(this.touchStart, this.onTouchEnd, event);
   }
 
   render() {
-    let options;
-    // Things displayed to users that are logged in
-    if (this.state.user.token == null) {
-      options = <React.Fragment>
+    let admin_options;
+    let account_options;
+    let roles = this.props.user_roles;
+    if (roles instanceof Array) {
+      roles?.forEach(r => {
+        if (r.title === "Admin") {
+          admin_options = <React.Fragment>
+            <Link to={{
+              pathname: "/admin"
+            }}
+              onClick={this.closeMenu}>Admin</Link>
+          </React.Fragment>
+        }
+      })
+    }
+    if (this.props.token == null) {
+      account_options = <React.Fragment>
         <Link to={{
           pathname: "/register"
         }} 
@@ -39,10 +59,8 @@ class Menu extends React.Component {
         }}
         onClick={this.closeMenu}>Log In</Link>
       </React.Fragment>
-    }
-    // Things displayed to users that are not logged in
-    else {
-      options = <React.Fragment>
+    } else {
+      account_options = <React.Fragment>
         <a href="/" onClick={() => { 
           this.closeMenu();
           authQuery.logout()
@@ -51,8 +69,13 @@ class Menu extends React.Component {
     }
 
     return (
-      <StyledMenu open={this.props.open}>
-        {options}
+      
+      <StyledMenu open={this.props.open}
+        onTouchStart={this.handleTouchStart}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchMove={this.handleTouchMove}>
+        {admin_options}
+        {account_options}
         {/* Things displayed no matter the login status */}
         <ContactInfo />
       </StyledMenu>
@@ -63,7 +86,8 @@ class Menu extends React.Component {
 Menu.propTypes = {
   open: PropTypes.bool.isRequired,
   closeMenu: PropTypes.func.isRequired,
-  user: PropTypes.object.isRequired,
+  user_roles: PropTypes.array,
+  token: PropTypes.string,
 }
 
 export default Menu;

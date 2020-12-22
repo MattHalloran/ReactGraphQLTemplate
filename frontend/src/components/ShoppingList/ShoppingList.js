@@ -19,15 +19,16 @@ class ShoppingList extends React.Component {
     }
 
     queryItems() {
-        PubSub.publish('Loading', true);
+        PubSub.publish('loading', true);
         shoppingQuery.getInventory(this.state.filter_by).then(response => {
-            PubSub.publish('Loading', false);
+            PubSub.publish('loading', false);
           this.setState({ displayed_items: response.page_items,
                           item_ids: response.item_ids });
         }).catch(error => {
             console.log("Failed to load inventory");
             console.error(error);
-            PubSub.publish('Loading', false).then(() => alert(error.error));
+            PubSub.publishSync('loading', false);
+            alert(error.error);
         })
     }
 
