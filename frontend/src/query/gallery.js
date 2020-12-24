@@ -51,13 +51,9 @@ export function getGalleryImageFailure(status) {
 export function getGalleryImage(filename) {
     return new Promise(function (resolve, reject) {
         try {
-            console.log('GALLERY IMAGE ATTTEMP BOIIIII', filename);
             fetch_gallery_image(filename)
                 .then(response => {
-                    console.log('BLEEP BLOOP IM A GLOOP', response);
                     response.json().then(data => {
-                        console.log('sHEEEWOOOG');
-                        console.log(data);
                         if(data.image !== null) {
                             resolve(getGalleryImageSuccess(StatusCodes.FETCH_GALLERY_PAGE_SUCCESS, data.image))
                         } else {
@@ -89,7 +85,6 @@ export function uploadGalleryImages(formData) {
         try {
             upload_gallery_images(formData)
                 .then(response => {
-                    console.log('BOOOOOOOOOOODDDDDDDD', response);
                     response.json().then(data => {
                         if(data.status === StatusCodes.UPLOAD_GALLERY_IMAGES_SUCCESS) {
                             resolve(uploadGalleryImageSuccess(data.status))

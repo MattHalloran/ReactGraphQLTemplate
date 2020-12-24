@@ -19,7 +19,6 @@ class AdminGalleryPage extends React.Component {
     }
 
     fileSelectedHandler(event) {
-        console.log('I want soup', event.target.files[0].name);
         let newImages = event.target.files;
         if (newImages.length <= 0) {
             return;

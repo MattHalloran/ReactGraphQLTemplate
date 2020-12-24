@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 export const StyledGalleryPage = styled.div`
+    padding-top: 15vh;
+    
     .tile {
         min-width: 10%;
         min-height: 10%;

@@ -113,7 +113,7 @@ class App extends React.Component {
                 <Route exact path="/admin/orders" component={AdminOrderPage} />
                 <Route exact path="/admin/plant-info" component={AdminPlantPage} />
                 <Route exact path="/shopping" render={() => (
-                  <ShoppingPage roles={this.state.roles} />
+                  <ShoppingPage user_roles={this.state.user_roles} />
                 )} />
                 <Route exact path="/smile" component={Snake} />
                 <Route component={NotFoundPage} />

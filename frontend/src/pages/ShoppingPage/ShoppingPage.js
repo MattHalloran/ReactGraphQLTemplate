@@ -24,12 +24,21 @@ class ShoppingPage extends React.Component {
     checkAuth() {
         let auth; //TODO - do something similar to menu.js
         if (auth !== this.state.authenticated) {
-            this.setState({authenticated: auth});
+            this.setState({ authenticated: auth });
         }
     }
 
     render() {
-        if (this.state.authenticated) {
+        let is_customer = false;
+        let roles = this.props.user_roles;
+        if (roles instanceof Array) {
+            roles?.forEach(r => {
+                if (r.title === "Customer") {
+                    is_customer = true;
+                }
+            })
+        }
+        if (is_customer) {
             return (
                 <StyledShoppingPage>
                     <SearchBar />
@@ -38,14 +47,16 @@ class ShoppingPage extends React.Component {
             );
         } else {
             return (
-                <h1>Not for u :(</h1>
+                <StyledShoppingPage>
+                    <h1>Not for u :(</h1>
+                </StyledShoppingPage>
             );
         }
     }
 }
 
 ShoppingPage.propTypes = {
-    roles: PropTypes.object.isRequired,
+    user_roles: PropTypes.array,
 }
 
 export default memo(ShoppingPage);

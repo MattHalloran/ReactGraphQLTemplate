@@ -46,14 +46,12 @@ class Navbar extends React.Component {
             menu = <NavList {...this.props} onSignUpSubmit={this.onSignUpSubmit} onLogInSubmit={this.onLogInSubmit} />
         }
         return (
-            <StyledNavbar className="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top" >
-                <div className="container">
-                    <Link to="/" className="navbar-brand">
-                        <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
+            <StyledNavbar>
+                <Link to="/" className="navbar-brand">
+                    <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
                         New Life Nursery
                 </Link>
-                    {menu}
-                </div>
+                {menu}
             </StyledNavbar>
         );
     }
@@ -98,7 +96,7 @@ class Hamburger extends React.Component {
             <React.Fragment>
                 <div ref={this.setWrapperRef}>
                     <Burger className="align-right" open={this.state.open} toggleOpen={this.toggleOpen} />
-                    <Menu {...this.props}  open={this.state.open} closeMenu={() => this.setState({ open: false })} />
+                    <Menu {...this.props} open={this.state.open} closeMenu={() => this.setState({ open: false })} />
                 </div>
             </React.Fragment>
         );

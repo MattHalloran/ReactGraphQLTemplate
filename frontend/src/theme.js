@@ -1,7 +1,8 @@
 import PubSub from './utils/pubsub';
 
 export const lightTheme = {
-    bodyPrimary: '#557A48',
+    // bodyPrimary: '#557A48',
+    bodyPrimary: '#253A18',
     bodySecondary: '#249526',
     textPrimary: '#FFFFFF',
     textSecondary: '#FFFFFF',

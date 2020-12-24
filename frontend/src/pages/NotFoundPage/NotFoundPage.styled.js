@@ -10,6 +10,5 @@ export const StyledNotFoundPage = styled.div`
         top: 50%;
         left: 50%;
         transform: translateX(-50%) translateY(-50%);
-        width: fit-content;
     }
 `;

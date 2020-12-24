@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 export const StyledAdminMainPage = styled.div`
+    padding-top: 15vh;
+    
     .flexed {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -13,6 +15,7 @@ export const StyledAdminMainPage = styled.div`
         min-width: 150px;
         min-height: 50px;
         border: 1px solid #ccc;
+        border-radius: 1em;
     }
 
     .admin-card:hover {
