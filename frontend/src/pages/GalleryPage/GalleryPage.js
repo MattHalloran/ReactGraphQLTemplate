@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import PubSub from '../../utils/pubsub';
 import { StyledGalleryPage } from './GalleryPage.styled';
+import Gallery from 'react-photo-gallery';
 import * as imageQuery from '../../query/gallery';
 
 class GalleryPage extends React.Component {
@@ -21,6 +22,7 @@ class GalleryPage extends React.Component {
         PubSub.publish('loading', true);
         imageQuery.getGallery().then(response => {
             this.images_meta = JSON.parse(response.images_meta);
+            console.log('FINISHED IMAGES META', this.images_meta);
             this.loadPage();
         }).catch(error => {
             console.log("Failed to load gallery pictures");
@@ -31,17 +33,19 @@ class GalleryPage extends React.Component {
     }
 
     loadPage() {
+        console.log('LOADING PAGE', this.images_meta);
         if(this.images_meta === null) {
             this.setState({images: null});
             return;
         }
         this.images_meta.forEach(meta => {
             imageQuery.getGalleryImage(meta.location).then(response => {
-                this.setState((oldState) => {
-                    const newList = [...oldState.images];
-                    newList.push(response.image);
-                    return { images: newList };
-                  });
+                let imageData = {
+                    "src": `data:image/jpeg;base64,${response.image}`,
+                    "width": meta.width,
+                    "height": meta.height,
+                }
+                this.setState({ images: [...this.state.images, imageData]} )
             }).catch(error => {
                 PubSub.publishSync('loading', false);
                 console.error(error);
@@ -51,16 +55,20 @@ class GalleryPage extends React.Component {
     }
 
     render() {
-        let imageTags = []
-        this.state.images.forEach(b64 => {
-            console.log('OH YEAH BABYY')
-            imageTags.push(<img src={`data:image/jpeg;base64,${b64}`} width="100px" height="100px" />);
-        })
-        console.log('NIGGA', imageTags);
+        // let gallery = []
+        // let id = 0;
+        // this.state.images.forEach(img => {
+        //     gallery.push(<img key={id} src={img.src} width={img.width} height={img.height} className="tile" />);
+        //     id = id + 1;
+        // });
+        let gallery = null;
+        if (this.state.images.length > 0) {
+            gallery = <Gallery photos={this.state.images} />
+        }
         return (
             <StyledGalleryPage>
                 <h1>BOOOOP</h1>
-                {imageTags}
+                {gallery}
             </StyledGalleryPage>
         );
     }

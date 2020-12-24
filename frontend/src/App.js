@@ -1,12 +1,19 @@
 import React from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
-import Navbar from './components/Navbar/Navbar';
-import HomePage from './pages/HomePage/HomePage';
-import AboutPage from './pages/AboutPage/AboutPage';
-import GalleryPage from './pages/GalleryPage/GalleryPage';
+import Navbar from './components/Navbar';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import GalleryPage from './pages/GalleryPage';
 import ShoppingPage from './pages/ShoppingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import Snake from './components/Snake/Snake'
+import AdminMainPage from './pages/admin/AdminMainPage';
+import AdminContactPage from './pages/admin/AdminContactPage';
+import AdminCustomerPage from './pages/admin/AdminCustomerPage';
+import AdminGalleryPage from './pages/admin/AdminGalleryPage';
+import AdminInventoryPage from './pages/admin/AdminInventoryPage';
+import AdminOrderPage from './pages/admin/AdminOrderPage';
+import AdminPlantPage from './pages/admin/AdminPlantPage';
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
 import Modal from './components/Modal';
@@ -98,6 +105,13 @@ class App extends React.Component {
                 <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/gallery" component={GalleryPage} />
                 <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.token)} />
+                <Route exact path="/admin" component={AdminMainPage} />
+                <Route exact path="/admin/contact-info" component={AdminContactPage} />
+                <Route exact path="/admin/customers" component={AdminCustomerPage} />
+                <Route exact path="/admin/gallery" component={AdminGalleryPage} />
+                <Route exact path="/admin/inventory" component={AdminInventoryPage} />
+                <Route exact path="/admin/orders" component={AdminOrderPage} />
+                <Route exact path="/admin/plant-info" component={AdminPlantPage} />
                 <Route exact path="/shopping" render={() => (
                   <ShoppingPage roles={this.state.roles} />
                 )} />

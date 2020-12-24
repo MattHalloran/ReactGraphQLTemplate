@@ -160,3 +160,6 @@ sketch
 
 #Postgres
 postgres/
+
+#Assets
+Backend/assets/

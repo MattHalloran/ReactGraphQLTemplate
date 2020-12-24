@@ -1,4 +1,4 @@
-import { fetch_gallery, fetch_gallery_image } from './http_functions';
+import { fetch_gallery, fetch_gallery_image, upload_gallery_images } from './http_functions';
 import { StatusCodes } from './constants';
 
 export function getGallerySuccess(status, images_meta) {
@@ -68,6 +68,39 @@ export function getGalleryImage(filename) {
         } catch (error) {
             console.error(error);
             reject(getGalleryImageFailure(StatusCodes.FETCH_GALLERY_PAGE_ERROR_UNKNOWN));
+        }
+    });
+}
+
+export function uploadGalleryImageSuccess(status) {
+    return {
+        status: status
+    };
+}
+
+export function uploadGalleryImageFailure(status) {
+    return {
+        status: status
+    };
+}
+
+export function uploadGalleryImages(formData) {
+    return new Promise(function (resolve, reject) {
+        try {
+            upload_gallery_images(formData)
+                .then(response => {
+                    console.log('BOOOOOOOOOOODDDDDDDD', response);
+                    response.json().then(data => {
+                        if(data.status === StatusCodes.UPLOAD_GALLERY_IMAGES_SUCCESS) {
+                            resolve(uploadGalleryImageSuccess(data.status))
+                        } else {
+                            reject(uploadGalleryImageFailure(data.status))
+                        }
+                    })
+                })
+        } catch (error) {
+            console.error(error);
+            reject(uploadGalleryImageFailure(StatusCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN));
         }
     });
 }

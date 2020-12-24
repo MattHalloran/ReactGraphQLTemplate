@@ -19,7 +19,7 @@ export function validate_token(token) {
 
 export function create_user(name, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
-        fetch('api/register', {
+        fetch('/api/register', {
             method: "POST",
             credentials: "include",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
@@ -39,7 +39,7 @@ export function create_user(name, email, password, existing_customer) {
 
 export function get_token(email, password) {
     return new Promise(function (resolve, reject) {
-        fetch('api/get_token', {
+        fetch('/api/get_token', {
             method: "POST",
             credentials: "include",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
@@ -57,7 +57,7 @@ export function get_token(email, password) {
 
 export function send_password_reset_request(email) {
     return new Promise(function (resolve, reject) {
-        fetch('api/reset_password_request', {
+        fetch('/api/reset_password_request', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({
@@ -73,7 +73,7 @@ export function send_password_reset_request(email) {
 
 export function fetch_inventory(filter_by) {
     return new Promise(function (resolve, reject) {
-        fetch('api/fetch_inventory', {
+        fetch('/api/fetch_inventory', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({
@@ -89,7 +89,7 @@ export function fetch_inventory(filter_by) {
 
 export function fetch_inventory_page(item_ids) {
     return new Promise(function (resolve, reject) {
-        fetch('api/fetch_inventory_page', {
+        fetch('/api/fetch_inventory_page', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({
@@ -105,7 +105,7 @@ export function fetch_inventory_page(item_ids) {
 
 export function fetch_gallery() {
     return new Promise(function (resolve, reject) {
-        fetch('api/fetch_gallery', {
+        fetch('/api/fetch_gallery', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' }
         }).then((response) => {
@@ -129,9 +129,22 @@ export function fetch_gallery_image(filename) {
     });
 }
 
+export function upload_gallery_images(formData) {
+    return new Promise(function (resolve, reject) {
+        fetch('/api/upload_gallery_image/', {
+            method: "POST",
+            body: formData
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
 export function update_contact_info(data, token) {
     return new Promise(function (resolve, reject) {
-        fetch('api/update_contact_info', {
+        fetch('/api/update_contact_info', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({

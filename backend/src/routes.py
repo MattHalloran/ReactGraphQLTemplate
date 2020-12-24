@@ -1,16 +1,18 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app
-from src.models import db, User, Plant, AccountStatuses, Image
+from src.models import db, User, Plant, AccountStatuses, Image, ImageUses
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
+from src.utils import get_image_meta
 from sqlalchemy import exc
 import ast
 import traceback
 from enum import Enum
-from base64 import b64encode
+from base64 import b64encode, b64decode
 import json
+from os import path
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -40,6 +42,9 @@ class AuthCodes(Enum):
     FETCH_GALLERY_ERROR_UNKNOWN = 2000
     FETCH_GALLERY_IMAGE_SUCCESS = 2100
     FETCH_GALLERY_IMAGE_ERROR_UNKNOWN = 2200
+    UPLOAD_GALLERY_IMAGES_SUCCESS = 2300
+    UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN = 2400
+    UPLOAD_GALLERY_ERROR_IMAGE_ALREADY_UPLOADED = 2500
 
 
 @app.route('/api/register', methods=['POST'])
@@ -186,6 +191,50 @@ def gallery_image(filename):
         "image": base64_string,
         "status": AuthCodes.FETCH_GALLERY_IMAGE_SUCCESS.value
     }
+
+
+# TODO - check image size and extension to make sure it is valid
+@app.route("/api/upload_gallery_image/", methods=["POST"])
+def upload_gallery_image():
+    try:
+        print('boop le boot')
+        # Grab data from request form
+        names = request.form.getlist('name')
+        extensions = request.form.getlist('extension')
+        images = request.form.getlist('image')
+        # Iterate through images
+        for i in range(len(images)):
+            img_name = names[i]
+            img_extension = extensions[i]
+            # Data is stored in base64, and the beginning of the
+            # string is not needed
+            img_data = images[i][len('data:image/jpeg;base64,'):]
+            # If image hash matches a row in the database, then the
+            # image was uploaded already
+            (img_hash, img_width, img_height) = get_image_meta(b64decode(img_data))
+            if Image.is_hash_used(img_hash):
+                print('Image already in backend!')
+                return {"status": AuthCodes.UPLOAD_GALLERY_ERROR_IMAGE_ALREADY_UPLOADED.value}
+            # Create a path to store the image, that doesn't already exist
+            img_path = ''
+            path_attempts = 0
+            while True and path_attempts < 100:
+                img_path = f'{Config.GALLERY_DIR}/{img_name}.{img_extension}'
+                if not path.exists(img_path):
+                    break
+                img_name = f'image{path_attempts}'
+                path_attempts = path_attempts + 1
+            # Save image
+            with open(img_path, 'wb') as f:
+                f.write(b64decode(img_data))
+            # Add image data to database
+            img_row = Image(f'{img_name}.{img_extension}', 'TODO', img_hash, ImageUses.GALLERY.value, img_width, img_height)
+            db.session.add(img_row)
+            db.session.commit()
+        return {"status": AuthCodes.UPLOAD_GALLERY_IMAGES_SUCCESS.value}
+    except Exception:
+        print(traceback.format_exc())
+        return {"status": AuthCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN.value}
 
 
 # First verifies that the user is an admin, then updates company contact info

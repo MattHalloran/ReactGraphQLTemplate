@@ -23,6 +23,6 @@ with app.app_context():
                  password='password', existing_customer=True)
     admin_account.roles.append(admin)
     db.session.add(admin_account)
-    gallery_image = Image('sponge.jpeg', 'test gallery image', ImageUses.GALLERY.value)
+    gallery_image = Image('sponge.jpeg', 'test gallery image', 'fake hash', ImageUses.GALLERY.value, 100, 100)
     db.session.add(gallery_image)
     db.session.commit()

@@ -319,15 +319,25 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     location = db.Column(db.String(250), nullable=False)
     alt = db.Column(db.String(100))
-    used_for = db.Column(db.String(100), unique=True)
+    hash = db.Column(db.String(100), unique=True, nullable=False)
+    used_for = db.Column(db.String(100), nullable=False)
+    width = db.Column(db.Integer, nullable=False)
+    height = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, location: str, alt: str, used_for: ImageUses):
+    def __init__(self, location: str, alt: str, hash: str, used_for: ImageUses, width: int, height: int):
         self.location = location
         self.alt = alt
+        self.hash = hash
         self.used_for = used_for
+        self.width = width
+        self.height = height
+
+    @staticmethod
+    def is_hash_used(hash: str):
+        return db.session.query(Image.id).filter_by(hash=hash).scalar() is not None
 
     def to_json(self):
-        return {"location": self.location, "alt": self.alt, "used_for": self.used_for}
+        return {"location": self.location, "alt": self.alt, "used_for": self.used_for, "width": self.width, "height": self.height}
 
     def __repr__(self):
         return f"{self.__tablename__}('{self.id}', '{self.location}')"
