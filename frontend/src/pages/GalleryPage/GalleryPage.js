@@ -1,6 +1,8 @@
-import React, { lazy, memo } from 'react';
+import React, { memo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import PubSub from '../../utils/pubsub';
-import { StyledGalleryPage } from './GalleryPage.styled';
+import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
 import * as imageQuery from '../../query/gallery';
 
@@ -8,13 +10,14 @@ class GalleryPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            images: [],
-            loading: true,
-            first_load: true,
+            thumbnails: [],
         }
+        //Prevents scroll listener from loading next page
+        this.loading = true;
         this.images_meta = null;
         //Estimates how many images will fill the screen
         this.page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
+        this.openImage = this.openImage.bind(this);
         this.queryImages();
     }
 
@@ -27,18 +30,18 @@ class GalleryPage extends React.Component {
         document.removeEventListener('scroll', this.trackScrolling);
     }
 
-    // Determines when to load the next page of images
+    // Determines when to load the next page of thumbnails
     trackScrolling = () => {
         const divElement = document.getElementById('main-div');
-        if (!this.state.loading && this.hitReloadPoint(divElement)) {
+        if (!this.loading && this.hitReloadPoint(divElement)) {
             console.log('header bottom reached!!!!!!!!!!!');
-            this.setState({ loading: true })
+            this.loading = true;
             this.loadNextPage();
         }
     };
 
     hitReloadPoint(el) {
-        return el.getBoundingClientRect().bottom <= 1.5*window.innerHeight;
+        return el.getBoundingClientRect().bottom <= 1.5 * window.innerHeight;
     }
 
     queryImages() {
@@ -55,44 +58,50 @@ class GalleryPage extends React.Component {
     }
 
     loadNextPage() {
-        if (this.images_meta === null || 
-            this.images_meta.length === this.state.images.length) {
+        //Check to make sure loading needs to be done
+        if (this.images_meta === null ||
+            this.images_meta.length === this.state.thumbnails.length) {
             return;
         }
         PubSub.publish('loading', true);
-        let images_processed = this.state.images.length;
-        console.log('STARTING IMAGE QUERY', this.images_meta);
-        let load_to = Math.min(images_processed + this.page_size, this.images_meta.length);
-        for (let i = images_processed; i < load_to; i++) {
-            let meta = this.images_meta[i];
-            imageQuery.getGalleryImage(meta.location).then(response => {
-                let imageData = {
-                    "src": `data:image/jpeg;base64,${response.image}`,
+        let num_previously_procesed = this.state.thumbnails.length;
+        //Grab all thumbnail images
+        let thumbnail_images = null;
+        let hashes = this.images_meta.map(meta => meta.hash);
+        let load_to = Math.min(this.images_meta.length, num_previously_procesed + this.page_size - 1);
+        hashes = hashes.slice(num_previously_procesed, load_to);
+        imageQuery.getGalleryThumbnails(hashes).then(response => {
+            thumbnail_images = response.thumbnails;
+            let combined_data = [];
+            //Combine metadata with thumbnail images
+            for (let i = 0; i < hashes.length; i++) {
+                let meta = this.images_meta[num_previously_procesed + i];
+                let img = thumbnail_images[i];
+                combined_data.push({
+                    "key": meta.hash,
+                    "src": `data:image/jpeg;base64,${img}`,
                     "width": meta.width,
                     "height": meta.height,
-                }
-                this.setState({ images: [...this.state.images, imageData] });
-                images_processed = images_processed + 1;
-                console.log('PROCESSED IMAGE', images_processed);
-                // After all images in the page finish loading
-                if (i === load_to - 1) {
-                    PubSub.publish('loading', false);
-                    this.setState({ loading: false,
-                                    first_load: false });
-                    console.log('FINISHED PROCESSING')
-                }
-            }).catch(error => {
-                PubSub.publishSync('loading', false);
-                console.error(error);
-            });
-        }
+                });
+            }
+            this.setState({ thumbnails: this.state.thumbnails.concat(combined_data) });
+            PubSub.publish('loading', false);
+            this.loading = false;
+        }).catch(error => {
+            console.log("Failed to load thumbnails");
+            console.error(error);
+            PubSub.publishSync('loading', false);
+            alert(error.error);
+            return;
+        });
+    }
+
+    openImage(event, { photo, index }) {
+        this.props.history.push('/gallery/' + this.state.thumbnails[index].key);
     }
 
     render() {
-        let gallery = null;
-        if (!this.state.first_load && this.state.images.length > 0) {
-            gallery = <Gallery photos={this.state.images} />
-        }
+        let gallery = <Gallery photos={this.state.thumbnails} onClick={this.openImage} />
         return (
             <StyledGalleryPage id="main-div">
                 <h1>BOOOOP</h1>
@@ -107,3 +116,27 @@ GalleryPage.propTypes = {
 }
 
 export default memo(GalleryPage);
+
+function GalleryImage() {
+    const [src, setSrc] = useState(0);
+    let hash = useParams();
+    imageQuery.getGalleryImage(hash.id).then(response => {
+        console.log("GOT FULL IMAGEEEE", response);
+        setSrc(`data:image/jpeg;base64,${response.image}`);
+    }).catch(error => {
+        console.log('FAILED TO LOAD FULL IMAGE')
+        console.error(error);
+    });
+
+    return (
+        <StyledGalleryImage>
+            <img src={src} className="full-image" />
+        </StyledGalleryImage>
+    );
+}
+
+GalleryImage.propTypes = {
+
+}
+
+export { GalleryImage };

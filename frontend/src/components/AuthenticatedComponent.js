@@ -2,7 +2,7 @@ import React from 'react';
 import * as authQuery from '../query/auth';
 import { Redirect } from "react-router-dom";
 
-export function requireAuthentication(Component, User) {
+export function requireAuthentication(Component, token) {
     class AuthenticatedComponent extends React.Component {
         constructor(props) {
             super(props);
@@ -13,7 +13,7 @@ export function requireAuthentication(Component, User) {
         }
 
         checkAuth() {
-            if (User.token == null) {
+            if (token === null) {
                 authQuery.checkCookies().then().catch(() => {
                     this.setState({ redirect: '/' })
                 })
@@ -21,7 +21,7 @@ export function requireAuthentication(Component, User) {
         }
 
         render() {
-            if (User.token != null) {
+            if (token !== null) {
                 return (
                     <Component {...this.props} />
                 );

@@ -1,4 +1,4 @@
 import styled from 'styled-components';
-export const StyledAdminInventoryPage = styled.div`
+export const StyledCartPage = styled.div`
     padding-top: 12vh;
 `;

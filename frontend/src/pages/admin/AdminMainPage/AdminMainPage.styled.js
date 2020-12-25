@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 export const StyledAdminMainPage = styled.div`
-    padding-top: 15vh;
+    padding-top: 12vh;
     
     .flexed {
         display: grid;

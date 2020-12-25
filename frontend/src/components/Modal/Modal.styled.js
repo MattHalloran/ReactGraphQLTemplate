@@ -36,7 +36,7 @@ export const StyledModal = styled.aside`
     box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    z-index: 100;
+    z-index: 1000;
     }
     
     @media screen and (min-width: 500px) {

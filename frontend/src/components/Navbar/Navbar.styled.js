@@ -4,14 +4,15 @@ export const StyledNavbar = styled.nav`
     top: 0;
     right: 0;
     left: 0;
-    z-index: 1030;
+    z-index: 500;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding: .5rem 1rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    height: 12vh;
+    padding: 2vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
     background-color: rgba(0,0,0,0.7);
     
     .right-align {

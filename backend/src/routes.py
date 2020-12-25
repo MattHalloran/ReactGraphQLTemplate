@@ -13,6 +13,7 @@ from enum import Enum
 from base64 import b64encode, b64decode
 import json
 from os import path
+from PIL import Image as PImage
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -44,7 +45,9 @@ class AuthCodes(Enum):
     FETCH_GALLERY_IMAGE_ERROR_UNKNOWN = 2200
     UPLOAD_GALLERY_IMAGES_SUCCESS = 2300
     UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN = 2400
-    UPLOAD_GALLERY_ERROR_IMAGE_ALREADY_UPLOADED = 2500
+    UPLOAD_GALLERY_IMAGES_ERROR_SOME_IMAGES_ALREADY_UPLOADED = 2500
+    FETCH_GALLERY_THUMBNAILS_SUCCESS = 2600
+    FETCH_GALLERY_THUMBNAILS_ERROR_UNKNOWN = 2700
 
 
 @app.route('/api/register', methods=['POST'])
@@ -159,12 +162,6 @@ def fetch_inventory_page():
     return [Plant.from_id(id) for id in incoming['ids']]
 
 
-@app.route("/api/upload_image", methods=["POST"])
-def upload_image():
-    incoming = request.get_json()
-    print('TODO')
-
-
 # Returns display information of all gallery photos.
 @app.route("/api/fetch_gallery", methods=["POST"])
 def fetch_gallery():
@@ -177,14 +174,45 @@ def fetch_gallery():
     }
 
 
-# Returns an image stored in the gallery folder
-@app.route("/api/gallery/<path:filename>", methods=["POST"])
-def gallery_image(filename):
-    print('IN GALLERY IMAGE METHOD YAY')
-    print(filename)
-    with open(f'{Config.GALLERY_DIR}/{filename}', 'rb') as open_file:
-        print('BOOP in the file read WOOOOOO BABYYYYY')
+# Returns thumbnails for a list of images
+@app.route("/api/image_thumbnails", methods=["POST"])
+def image_thumbnails():
+    incoming = request.get_json()
+    print('here boopy boop')
+    print(incoming)
+    hashes = incoming['hashes']
+    thumbnail_data = []
+    for hash in hashes:
+        img = Image.from_hash(hash)
+        if not img:
+            thumbnail_data.append([])
+            continue
+        with open(f'{img.directory}/{img.thumbnail_file_name}.{img.extension}', 'rb') as open_file:
+            byte_content = open_file.read()
+        base64_bytes = b64encode(byte_content)
+        base64_string = base64_bytes.decode('utf-8')
+        thumbnail_data.append(base64_string)
+    return {
+        "thumbnails": thumbnail_data,
+        "status": AuthCodes.FETCH_GALLERY_THUMBNAILS_SUCCESS.value
+    }
+
+
+# Returns an image from its hash
+@app.route("/api/image", methods=["POST"])
+def image():
+    incoming = request.get_json()
+    print('trying to get image')
+    print(incoming)
+    img_hash = incoming['hash']
+    # Get image data from its hash
+    img = Image.from_hash(img_hash)
+    if not img:
+        return {"status": AuthCodes.FETCH_GALLERY_IMAGE_ERROR_UNKNOWN.value}
+    # Read image file
+    with open(f'{img.directory}/{img.file_name}.{img.extension}', 'rb') as open_file:
         byte_content = open_file.read()
+    # Convert image to a base64 string
     base64_bytes = b64encode(byte_content)
     base64_string = base64_bytes.decode('utf-8')
     return {
@@ -197,7 +225,8 @@ def gallery_image(filename):
 @app.route("/api/upload_gallery_image/", methods=["POST"])
 def upload_gallery_image():
     try:
-        print('boop le boot')
+        status = AuthCodes.UPLOAD_GALLERY_IMAGES_SUCCESS.value
+        failed_indexes = []
         # Grab data from request form
         names = request.form.getlist('name')
         extensions = request.form.getlist('extension')
@@ -205,33 +234,43 @@ def upload_gallery_image():
         # Iterate through images
         for i in range(len(images)):
             img_name = names[i]
+            thumbnail_name = f'{img_name}-thumb'
             img_extension = extensions[i]
             # Data is stored in base64, and the beginning of the
             # string is not needed
             img_data = images[i][len('data:image/jpeg;base64,'):]
+            (img_hash, thumbnail, img_width, img_height) = get_image_meta(b64decode(img_data))
             # If image hash matches a row in the database, then the
             # image was uploaded already
-            (img_hash, img_width, img_height) = get_image_meta(b64decode(img_data))
             if Image.is_hash_used(img_hash):
                 print('Image already in backend!')
-                return {"status": AuthCodes.UPLOAD_GALLERY_ERROR_IMAGE_ALREADY_UPLOADED.value}
-            # Create a path to store the image, that doesn't already exist
+                status = AuthCodes.UPLOAD_GALLERY_IMAGES_ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
+                failed_indexes.append(i)
+                continue
+            # Create a path to store the image and thumbnail, that don't already exist
+            img_dir = Config.GALLERY_DIR
             img_path = ''
+            thumbnail_path = ''
             path_attempts = 0
             while True and path_attempts < 100:
-                img_path = f'{Config.GALLERY_DIR}/{img_name}.{img_extension}'
-                if not path.exists(img_path):
+                img_path = f'{img_dir}/{img_name}.{img_extension}'
+                thumbnail_path = f'{img_dir}/{thumbnail_name}.{img_extension}'
+                if not path.exists(img_path) and not path.exists(thumbnail_path):
                     break
                 img_name = f'image{path_attempts}'
+                thumbnail_name = f'{img_name}-thumb'
                 path_attempts = path_attempts + 1
             # Save image
             with open(img_path, 'wb') as f:
                 f.write(b64decode(img_data))
+            # Save image thumbnail
+            thumbnail.save(thumbnail_path)
             # Add image data to database
-            img_row = Image(f'{img_name}.{img_extension}', 'TODO', img_hash, ImageUses.GALLERY.value, img_width, img_height)
+            img_row = Image(Config.GALLERY_DIR, img_name, thumbnail_name, img_extension, 'TODO', img_hash, ImageUses.GALLERY.value, img_width, img_height)
             db.session.add(img_row)
             db.session.commit()
-        return {"status": AuthCodes.UPLOAD_GALLERY_IMAGES_SUCCESS.value}
+        return {"failed_indexes": failed_indexes,
+                "status": status}
     except Exception:
         print(traceback.format_exc())
         return {"status": AuthCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN.value}

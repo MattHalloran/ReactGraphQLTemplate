@@ -7,11 +7,11 @@ class AdminGalleryPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            images: [],
+            selected_images: [],
         }
         this.applyChanges = this.applyChanges.bind(this);
         this.fileSelectedHandler = this.fileSelectedHandler.bind(this);
-        this.uploadImage = this.uploadImage.bind(this);
+        this.uploadImages = this.uploadImages.bind(this);
     }
 
     componentDidMount() {
@@ -23,6 +23,7 @@ class AdminGalleryPage extends React.Component {
         if (newImages.length <= 0) {
             return;
         }
+        this.setState({ selected_images: [] });
         for(let i = 0; i < newImages.length; i++) {
             let fileSplit = newImages[i].name.split('.');
             this.processImage(newImages[i], fileSplit[0], fileSplit[1]);
@@ -38,18 +39,18 @@ class AdminGalleryPage extends React.Component {
                 extension: extension,
                 data: reader.result
             };
-            this.setState({ images: [...this.state.images, imageData] });
+            this.setState({ selected_images: [...this.state.selected_images, imageData] });
         }
         reader.readAsDataURL(file);
     }
 
-    uploadImage() {
-        if(this.state.images.length <= 0) {
+    uploadImages() {
+        if(this.state.selected_images.length <= 0) {
             alert('No images selected!');
             return;
         }
         let form = new FormData();
-        this.state.images.forEach(img => {
+        this.state.selected_images.forEach(img => {
             form.append('name', img.name);
             form.append('extension', img.extension);
             form.append('image', img.data);
@@ -73,7 +74,7 @@ class AdminGalleryPage extends React.Component {
                 <div>
                     <h2>Select image(s) for upload</h2>
                     <input type="file" onChange={this.fileSelectedHandler} multiple/>
-                    <button onClick={this.uploadImage}>Upload</button>
+                    <button onClick={this.uploadImages}>Upload</button>
                 </div>
                 <div>
                     <h2>Reorder and delete images</h2>

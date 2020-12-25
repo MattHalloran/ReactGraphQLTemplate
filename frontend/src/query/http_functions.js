@@ -116,16 +116,35 @@ export function fetch_gallery() {
     });
 }
 
-export function fetch_gallery_image(filename) {
+export function fetch_image(hash) {
     return new Promise(function (resolve, reject) {
-        fetch('api/gallery/'+filename, {
+        fetch('/api/image', {
             method: "POST",
-            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "hash": hash
+            })
         }).then((response) => {
             resolve(response);
         }).catch((error) => {
             reject(error);
-        })
+        });
+    });
+}
+
+export function fetch_image_thumbnails(hashes) {
+    return new Promise(function (resolve, reject) {
+        fetch('/api/image_thumbnails', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "hashes": hashes
+            })
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        });
     });
 }
 

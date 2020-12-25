@@ -3,7 +3,7 @@ import { Switch, Route, withRouter } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
-import GalleryPage from './pages/GalleryPage';
+import GalleryPage, { GalleryImage } from './pages/GalleryPage';
 import ShoppingPage from './pages/ShoppingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import Snake from './components/Snake/Snake'
@@ -76,7 +76,7 @@ class App extends React.Component {
 
   render() {
     let currentLocation = this.props.location;
-    let isModalOpen = this.modalRoutes.some(route => route === this.props.location.pathname);
+    let isModalOpen = this.modalRoutes.some(route => route === this.props.location.pathname) || this.props.location.pathname.includes('/gallery/'); //TODO make better check for gallery image modal
     if (!isModalOpen) {
       this.previousLocation = this.props.location;
     } else {
@@ -134,6 +134,10 @@ class App extends React.Component {
                   history={this.props.history}>
                   <ForgotPasswordForm history={this.props.history} />
                 </Modal>} />
+                <Route path="/gallery/:id" children={<Modal
+                  history={this.props.history}>
+                    <GalleryImage {...this.props} />
+                  </Modal>} />
                 </Switch>
               : null}
             </div>

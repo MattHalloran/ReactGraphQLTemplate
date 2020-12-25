@@ -1,9 +1,11 @@
 import styled from 'styled-components';
-
 export const StyledNotFoundPage = styled.div`
+    padding-top: 12vh;
+
     position: relative;
     min-height: 100vh;
     padding: 2em;
+    padding-top: 0vh;
 
     .center {
         position: absolute;

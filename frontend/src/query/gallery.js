@@ -1,18 +1,5 @@
-import { fetch_gallery, fetch_gallery_image, upload_gallery_images } from './http_functions';
+import { fetch_gallery, fetch_image, fetch_image_thumbnails, upload_gallery_images } from './http_functions';
 import { StatusCodes } from './constants';
-
-export function getGallerySuccess(status, images_meta) {
-    return {
-        images_meta: images_meta,
-        status: status
-    };
-}
-
-export function getGalleryFailure(status) {
-    return {
-        status: status
-    };
-}
 
 export function getGallery() {
     return new Promise(function (resolve, reject) {
@@ -22,62 +9,57 @@ export function getGallery() {
                     response.json().then(data => {
                         console.log(data);
                         if(data.status === StatusCodes.FETCH_GALLERY_SUCCESS) {
-                            resolve(getGallerySuccess(data.status, data.images_meta))
+                            resolve(data);
                         } else {
-                            reject(getGalleryFailure(data.status))
+                            reject(data);
                         }
                     })
                 })
         } catch (error) {
             console.error(error);
-            reject(getGalleryFailure(StatusCodes.FETCH_GALLERY_ERROR_UNKNOWN));
+            reject({ status: StatusCodes.FETCH_GALLERY_ERROR_UNKNOWN });
         }
     });
 }
 
-export function getGalleryImageSuccess(status, image) {
-    return {
-        image: image,
-        status: status
-    };
-}
-
-export function getGalleryImageFailure(status) {
-    return {
-        status: status
-    };
-}
-
-export function getGalleryImage(filename) {
+export function getGalleryThumbnails(hashes) {
     return new Promise(function (resolve, reject) {
         try {
-            fetch_gallery_image(filename)
+            fetch_image_thumbnails(hashes)
+                .then(response => {
+                    response.json().then(data => {
+                        if(data.status === StatusCodes.FETCH_GALLERY_THUMBNAILS_SUCCESS) {
+                            resolve(data);
+                        } else {
+                            reject(data);
+                        }
+                    })
+                })
+        } catch (error) {
+            console.error(error);
+            reject({ status: StatusCodes.FETCH_GALLERY_THUMBNAILS_ERROR_UNKNOWN });
+        }
+    });
+}
+
+export function getGalleryImage(hash) {
+    return new Promise(function (resolve, reject) {
+        try {
+            fetch_image(hash)
                 .then(response => {
                     response.json().then(data => {
                         if(data.image !== null) {
-                            resolve(getGalleryImageSuccess(StatusCodes.FETCH_GALLERY_PAGE_SUCCESS, data.image))
+                            resolve(data);
                         } else {
-                            reject(getGalleryImageFailure(StatusCodes.FETCH_GALLERY_PAGE_ERROR_UNKNOWN))
+                            reject(data);
                         }
                     })
                 })
         } catch (error) {
             console.error(error);
-            reject(getGalleryImageFailure(StatusCodes.FETCH_GALLERY_PAGE_ERROR_UNKNOWN));
+            reject({ status: StatusCodes.FETCH_GALLERY_PAGE_ERROR_UNKNOWN });
         }
     });
-}
-
-export function uploadGalleryImageSuccess(status) {
-    return {
-        status: status
-    };
-}
-
-export function uploadGalleryImageFailure(status) {
-    return {
-        status: status
-    };
 }
 
 export function uploadGalleryImages(formData) {
@@ -87,15 +69,15 @@ export function uploadGalleryImages(formData) {
                 .then(response => {
                     response.json().then(data => {
                         if(data.status === StatusCodes.UPLOAD_GALLERY_IMAGES_SUCCESS) {
-                            resolve(uploadGalleryImageSuccess(data.status))
+                            resolve(data);
                         } else {
-                            reject(uploadGalleryImageFailure(data.status))
+                            reject(data);
                         }
                     })
                 })
         } catch (error) {
             console.error(error);
-            reject(uploadGalleryImageFailure(StatusCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN));
+            reject({ status: StatusCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN });
         }
     });
 }

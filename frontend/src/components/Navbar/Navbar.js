@@ -5,6 +5,7 @@ import { Burger, Menu } from '..';
 import Logo from '../../assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import * as authQuery from '../../query/auth';
 import { StyledNavbar } from './Navbar.styled';
+import Modal from '../Modal';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const SHOW_HAMBURGER_AT = 800;
@@ -108,6 +109,19 @@ Hamburger.propTypes = {
 }
 
 function NavList(props) {
+    let admin_options;
+    let roles = props.user_roles;
+    if (roles instanceof Array) {
+        roles?.forEach(r => {
+            if (r.title === "Admin") {
+                admin_options = <React.Fragment>
+                    <li className="nav-item">
+                        <Link to={{ pathname: "/admin" }}>Admin</Link>
+                    </li>
+                </React.Fragment>
+            }
+        })
+    }
     let location = useLocation();
     let options;
     if (props.token == null) {
@@ -144,6 +158,7 @@ function NavList(props) {
         <React.Fragment>
             <div>
                 <ul className="nav-list">
+                    {admin_options}
                     <li className="nav-item">
                         <Link className="nav-link"
                             to={{
