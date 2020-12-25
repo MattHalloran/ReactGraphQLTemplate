@@ -47,7 +47,7 @@ class Navbar extends React.Component {
             menu = <NavList {...this.props} onSignUpSubmit={this.onSignUpSubmit} onLogInSubmit={this.onLogInSubmit} />
         }
         return (
-            <StyledNavbar>
+            <StyledNavbar visible={this.props.visible}>
                 <Link to="/" className="navbar-brand">
                     <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
                         New Life Nursery

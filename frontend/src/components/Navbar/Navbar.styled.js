@@ -14,6 +14,8 @@ export const StyledNavbar = styled.nav`
     padding-top: 1vh;
     padding-bottom: 1vh;
     background-color: rgba(0,0,0,0.7);
+    transform: ${({ visible }) => visible ? 'translateY(0%)' : 'translateY(-100%)'};
+    transition: transform 0.3s ease-in-out;
     
     .right-align {
         position: relative;

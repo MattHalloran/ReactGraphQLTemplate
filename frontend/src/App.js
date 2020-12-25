@@ -40,6 +40,7 @@ class App extends React.Component {
     this.modalRoutes = ['/register', '/login', '/forgot-password']
     this.isModalOpen = false;
     this.state = {
+      nav_visible: true,
       token: null,
       user_roles: null,
       theme: getTheme(),
@@ -66,13 +67,31 @@ class App extends React.Component {
     if (this.state.token == null) {
       authQuery.checkCookies();
     }
+    //Tracks when nav became visible or invisible
+    this.nav_visible_y = window.pageYOffset;
+    document.addEventListener('scroll', this.trackScrolling);
   }
 
   componentWillUnmount() {
     PubSub.unsubscribe(this.tokenSub);
     PubSub.unsubscribe(this.themeSub);
     PubSub.unsubscribe(this.roleSub);
+    document.addEventListener('scroll', this.trackScrolling);
   }
+
+  // Determines when to load the next page of thumbnails
+  trackScrolling = () => {
+    let distance_scrolled = window.pageYOffset - this.nav_visible_y;
+    if (distance_scrolled > 0 && !this.state.nav_visible ||
+        distance_scrolled < 0 && this.state.nav_visible) {
+      this.nav_visible_y = window.pageYOffset;
+    }
+    if (distance_scrolled > 50 && this.state.nav_visible) {
+      this.setState({ nav_visible: false });
+    } else if (distance_scrolled <= -50 && !this.state.nav_visible) {
+      this.setState({ nav_visible: true });
+    }
+  };
 
   render() {
     let currentLocation = this.props.location;
@@ -91,7 +110,7 @@ class App extends React.Component {
         <div className="App">
           <div className="page-container">
             <div className="content-wrap">
-              <Navbar token={this.state.token} user_roles={this.state.user_roles}/>
+              <Navbar visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
               <Spinner spinning={false} />
               {/* Non-modal routes - only one can be loaded at a time */}
               {loadDefaultPage ? 
