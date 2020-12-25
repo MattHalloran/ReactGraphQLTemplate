@@ -2,6 +2,16 @@ import styled from 'styled-components';
 export const StyledModal = styled.aside`
     background-color: ${({ theme }) => theme.bodySecondary};
     color: ${({ theme }) => theme.textSecondary}
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    
 
     /* Secondary color links */
     a:link {
@@ -12,17 +22,6 @@ export const StyledModal = styled.aside`
     }
     a:hover {
         color: ${({ theme }) => theme.textSecondary};
-    }
-
-    .modal-cover {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10000;
-    transform: translateZ(0);
-    background-color: rgba(0, 0, 0, 0.8);
     }
     
     .modal-area {
@@ -44,17 +43,16 @@ export const StyledModal = styled.aside`
     .modal-area {
         left: 50%;
         top: 50%;
-        height: auto;
         transform: translate(-50%, -50%);
-        max-width: 30em;
         max-height: calc(100% - 1em);
     }
     }
     
-    ._modal-close {
+    .x-button {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -20px;
+    right: -20px;
+    border-radius: 100%;
     padding: 0.5em;
     line-height: 1;
     background: #A3333D;
@@ -77,7 +75,15 @@ export const StyledModal = styled.aside`
     }
     
     .modal-body {
-    padding-top: 0.25em;
+        top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        position: absolute;
+        width: fit-content;
+        max-width: 90%;
+        height: fit-content;
+        max-height: 90%;
+        background-color: ${({ theme }) => theme.bodySecondary};
+        color: ${({ theme }) => theme.textSecondary}
     }
     ._hide-visual {
     border: 0 !important;

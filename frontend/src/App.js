@@ -86,7 +86,7 @@ class App extends React.Component {
         distance_scrolled < 0 && this.state.nav_visible) {
       this.nav_visible_y = window.pageYOffset;
     }
-    if (distance_scrolled > 50 && this.state.nav_visible) {
+    if (distance_scrolled > 50 && this.state.nav_visible && window.pageYOffset > 100) {
       this.setState({ nav_visible: false });
     } else if (distance_scrolled <= -50 && !this.state.nav_visible) {
       this.setState({ nav_visible: true });

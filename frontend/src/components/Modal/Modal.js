@@ -9,7 +9,6 @@ class Modal extends Component {
     constructor(props) {
         super(props);
 
-        this.setWrapperRef = this.setWrapperRef.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
         this.closeModal = this.closeModal.bind(this);
     }
@@ -22,12 +21,10 @@ class Modal extends Component {
         document.removeEventListener('mousedown', this.handleClickOutside);
     }
 
-    setWrapperRef(node) {
-        this.wrapperRef = node;
-    }
-
     handleClickOutside(event) {
-        if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+        console.log('HANDLE CLICK OUTSIDE', event);
+        if (event.target.id  === "modal-aside") {
+            console.log('CLOSING MODAL');
             this.closeModal();
         }
     }
@@ -41,17 +38,16 @@ class Modal extends Component {
     render() {
         return ReactDOM.createPortal(
             <StyledModal
-                ref={this.setWrapperRef}
+                id="modal-aside"
                 tag="aside"
                 role="dialog"
                 tabIndex="-1"
-                aria-modal="true"
-                className="modal-cover">
-                <div className="modal-area">
+                aria-modal="true">
+                <div className="modal-body">
                     <button
                         aria-label="Close Modal"
                         aria-labelledby="close-modal"
-                        className="_modal-close"
+                        className="x-button"
                         onClick={this.closeModal}>
                         <span id="close-modal" className="_hide-visual">
                             Close
@@ -60,9 +56,7 @@ class Modal extends Component {
                             <path d="M 10,10 L 30,30 M 30,10 L 10,30" />
                         </svg>
                     </button>
-                    <div className="modal-body">
-                        {this.props.children}
-                    </div>
+                    {this.props.children}
                 </div>
             </StyledModal>,
             document.body

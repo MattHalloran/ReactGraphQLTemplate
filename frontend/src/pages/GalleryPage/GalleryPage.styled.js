@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-export const StyledGalleryPage = styled.div`
+export const StyledGalleryPage = styled.span`
     padding-top: 12vh;
 
     .tile {
