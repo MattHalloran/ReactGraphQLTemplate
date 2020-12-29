@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PubSub from '../../../utils/pubsub';
-import * as authQuery from '../../../query/auth';
-import TextField from '@material-ui/core/TextField';
+import PubSub from 'utils/pubsub';
+import * as authQuery from 'query/auth';
+import TextField from 'components/shared/inputs/TextField';
 import { Link } from "react-router-dom";
 import { StyledLogInForm } from './LogInForm.styled';
 
@@ -12,7 +12,6 @@ class LogInForm extends React.Component {
         this.submit = this.submit.bind(this);
         this.toRegister = this.toRegister.bind(this);
         this.state = {
-            redirect: null,
             email: "",
             emailError: "",
             password: "",
@@ -26,14 +25,14 @@ class LogInForm extends React.Component {
         PubSub.publish('loading', true);
         authQuery.loginUser(this.state.email, this.state.password).then(response => {
             PubSub.publish('loading', false);
-          this.setState({ redirect: '/profile' });
+            this.props.history.push('/profile');
         }).catch(error => {
             console.log("Failed to log in");
             console.error(error);
             PubSub.publish('loading', false);
             alert(error.error);
         })
-      }
+    }
     submit(event) {
         event.preventDefault();
         if (this.validate()) {
@@ -41,6 +40,7 @@ class LogInForm extends React.Component {
         }
     }
     change = e => {
+        console.log('IN CHANGEEEEE', e.target, this.state.email);
         this.setState({ [e.target.name]: e.target.value });
     }
     validate() {
@@ -70,38 +70,36 @@ class LogInForm extends React.Component {
     render() {
         return (
             <StyledLogInForm onSubmit={this.props.onSubmit}>
-                <h2>Log In</h2>
-                <h5 onClick={this.toRegister}>Sign Up</h5>
-                <TextField
-                    name="email"
-                    className="form-input"
-                    type="email"
-                    variant="outlined"
-                    label="Email"
-                    value={this.state.email}
-                    onChange={e => this.change(e)}
-                    error={this.state.emailError.length > 0}
-                    helperText={this.state.emailError}
-                    required
-                />
-                <TextField
-                    name="password"
-                    className="form-input"
-                    type="password"
-                    variant="outlined"
-                    label="Password"
-                    value={this.state.password}
-                    onChange={e => this.change(e)}
-                    error={this.state.passwordError.length > 0}
-                    helperText={this.state.passwordError}
-                    required
-                />
-                <div className="form-group">
-                    <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
-                        Submit
-       </button>
+                <div className="form-header">
+                    <h2>Log In</h2>
+                    <h5 onClick={this.toRegister}>Sign Up</h5>
                 </div>
-                <Link to={{pathname:"/forgot-password"}}>Forgot Password?</Link>
+                <div className="form-body">
+                    <TextField
+                        name="email"
+                        type="email"
+                        label="Email"
+                        autocomplete="username"
+                        value={this.state.email}
+                        onChange={e => this.change(e)}
+                        error={this.state.emailError}
+                    />
+                    <TextField
+                        name="password"
+                        type="password"
+                        label="Password"
+                        autoComplete="current-password"
+                        value={this.state.password}
+                        onChange={e => this.change(e)}
+                        error={this.state.passwordError}
+                    />
+                    <div className="form-group">
+                        <button className="primary" type="submit" onClick={this.submit}>
+                            Submit
+                        </button>
+                    </div>
+                    <Link to={{ pathname: "/forgot-password" }}>Forgot Password?</Link>
+                </div>
             </StyledLogInForm>
         );
     }

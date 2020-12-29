@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PubSub from '../../../utils/pubsub';
-import * as authQuery from '../../../query/auth'
-import TextField from '@material-ui/core/TextField';
-import { Redirect, Link } from "react-router-dom";
+import PubSub from 'utils/pubsub';
+import * as authQuery from 'query/auth';
+import TextField from 'components/shared/inputs/TextField';
 import { StyledSignUpForm } from './SignUpForm.styled';
-import { lightTheme, getTheme } from '../../../theme';
+import { lightTheme, getTheme } from 'theme';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -19,10 +18,6 @@ class SignUpForm extends React.Component {
     this.toLogin = this.toLogin.bind(this);
     this.handleRadioSelect = this.handleRadioSelect.bind(this);
     this.state = {
-      redirect: null,
-      textFieldTheme: {
-        color: lightTheme.textSecondary
-      },
       name: "",
       nameError: "",
       email: "",
@@ -54,7 +49,7 @@ class SignUpForm extends React.Component {
       console.log('woohoo registered!!!');
       console.log(response);
       PubSub.publish('loading', false);
-      this.setState({ redirect: '/profile' });
+      this.props.history.push('/profile');
     }).catch(error => {
       console.error(error);
       PubSub.publish('loading', false)
@@ -116,60 +111,45 @@ class SignUpForm extends React.Component {
     return !isError
   }
   render() {
-    if (this.state.redirect) {
-      return <Redirect to={this.state.redirect} />
-    }
     return (
       <StyledSignUpForm onSubmit={this.props.onSubmit}>
         <h2>Sign Up</h2>
         <h5 onClick={this.toLogin}>Log In</h5>
         <TextField
           name="name"
-          className="form-input"
-          InputProps={{
-            className: this.state.textFieldTheme
-          }}
-          variant="outlined"
+          type="text"
           label="Name"
+          autocomplete="name"
           value={this.state.name}
           onChange={e => this.change(e)}
-          error={this.state.nameError.length > 0}
-          helperText={this.state.nameError}
-          required
+          error={this.state.nameError}
         />
         <TextField
           name="email"
-          className="form-input"
           type="email"
-          variant="outlined"
           label="Email"
+          autocomplete="username"
           value={this.state.email}
           onChange={e => this.change(e)}
-          error={this.state.emailError.length > 0}
-          helperText={this.state.emailError}
-          required
+          error={this.state.emailError}
         />
         <TextField
           name="password"
-          className="form-input"
           type="password"
-          variant="outlined"
           label="Password"
+          autocomplete="password"
           value={this.state.password}
           onChange={e => this.change(e)}
-          error={this.state.passwordError.length > 0}
-          helperText={this.state.passwordError}
-          required
+          error={this.state.passwordError}
         />
         <TextField
-          name="confirmPassword"
-          className="form-input"
+          name="comfirmPassword"
           type="password"
-          variant="outlined"
           label="Confirm Password"
+          autocomplete="password"
           value={this.state.confirmPassword}
           onChange={e => this.change(e)}
-          required
+          error={false}
         />
         <FormControl component="fieldset">
           <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={this.state.existingCustomer} onChange={this.handleRadioSelect}>
@@ -179,7 +159,7 @@ class SignUpForm extends React.Component {
           <FormHelperText>{this.state.existingCustomerError}</FormHelperText>
         </FormControl>
         <div className="form-group">
-          <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+          <button className="primary" type="submit" onClick={this.submit}>
             Submit
      </button>
         </div>

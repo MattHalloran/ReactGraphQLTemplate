@@ -1,35 +1,35 @@
 import React from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import GalleryPage, { GalleryImage } from './pages/GalleryPage';
-import ShoppingPage from './pages/ShoppingPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import Snake from './components/Snake/Snake'
-import AdminMainPage from './pages/admin/AdminMainPage';
-import AdminContactPage from './pages/admin/AdminContactPage';
-import AdminCustomerPage from './pages/admin/AdminCustomerPage';
-import AdminGalleryPage from './pages/admin/AdminGalleryPage';
-import AdminInventoryPage from './pages/admin/AdminInventoryPage';
-import AdminOrderPage from './pages/admin/AdminOrderPage';
-import AdminPlantPage from './pages/admin/AdminPlantPage';
-import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
-import ProfilePage from './pages/ProfilePage';
-import Modal from './components/Modal';
-import Spinner from './components/Spinner';
-import Footer from './components/Footer';
+import Navbar from './components/shared/Navbar';
+import HomePage from './components/HomePage';
+import AboutPage from './components/AboutPage';
+import GalleryPage, { GalleryImage } from './components/GalleryPage';
+import ShoppingPage from './components/shopping/ShoppingPage';
+import PrivacyPolicyPage from './components/PrivacyPolicyPage';
+import Snake from './components/shared/Snake/Snake'
+import AdminMainPage from './components/admin/AdminMainPage';
+import AdminContactPage from './components/admin/AdminContactPage';
+import AdminCustomerPage from './components/admin/AdminCustomerPage';
+import AdminGalleryPage from './components/admin/AdminGalleryPage';
+import AdminInventoryPage from './components/admin/AdminInventoryPage';
+import AdminOrderPage from './components/admin/AdminOrderPage';
+import AdminPlantPage from './components/admin/AdminPlantPage';
+import NotFoundPage from './components/NotFoundPage/NotFoundPage';
+import ProfilePage from './components/ProfilePage';
+import Modal from './components/shared/Modal';
+import Spinner from './components/shared/Spinner';
+import Footer from './components/shared/Footer';
 import PubSub from './utils/pubsub';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { getTheme } from './theme';
 //Authentication
-import { requireAuthentication } from './components/AuthenticatedComponent';
+import { requireAuthentication } from './components/shared/hoc/requireAuthentication';
 import * as authQuery from './query/auth';
-import SignUpForm from './components/Forms/SignUpForm';
-import LogInForm from './components/Forms/LogInForm';
-import ForgotPasswordForm from './components/Forms/ForgotPasswordForm';
+import SignUpForm from './components/forms/SignUpForm';
+import LogInForm from './components/forms/LogInForm';
+import ForgotPasswordForm from './components/forms/ForgotPasswordForm';
 
 class App extends React.Component {
   constructor(props) {
@@ -110,7 +110,7 @@ class App extends React.Component {
         <div className="App">
           <div className="page-container">
             <div className="content-wrap">
-              <Navbar visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
+              <Navbar history={this.props.history} visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
               <Spinner spinning={false} />
               {/* Non-modal routes - only one can be loaded at a time */}
               {loadDefaultPage ? 

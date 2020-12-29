@@ -28,8 +28,4 @@ export const StyledSignUpForm = styled.form`
     .toggle-inactive {
         color:black
     }
-
-    .form-input {
-        padding-bottom: 20px !important;
-    }
 `;

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PubSub from '../../../utils/pubsub';
-import * as authQuery from '../../../query/auth';
+import PubSub from 'utils/pubsub';
+import * as authQuery from 'query/auth';
 import TextField from '@material-ui/core/TextField';
 import { StyledForgotPasswordForm } from './ForgotPasswordForm.styled';
 
@@ -69,7 +69,7 @@ class ForgotPasswordForm extends React.Component {
                     required
                 />
                 <div className="form-group">
-                    <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+                    <button className="primary" type="submit" onClick={this.submit}>
                         Submit
        </button>
                 </div>
