@@ -15,6 +15,7 @@ export const StyledTextField = styled.div`
         height: 7vh;
         width: 100%;
         box-sizing: border-box;
+        padding-top: ${({ large_placeholder }) => large_placeholder ? '0vh' : '2vh'};
     }
 
     input:focus {
@@ -30,9 +31,10 @@ export const StyledTextField = styled.div`
         line-height: normal;
         outline: none;
         transition: 0.3s ease-in-out;
-        top: ${({ large_placeholder }) => large_placeholder ? '2.5vh' : '2px'};
+        top: ${({ large_placeholder }) => large_placeholder ? '2.5vh' : '3px'};
         left: 10px;
         transform: ${({ large_placeholder }) => large_placeholder ? 'transformY(0.5em) scale(1)' : 'scale(0.75)'};
+        transform-origin: top left;
         pointer-events: none;
         color: ${({ has_error }) => has_error > 0 ? 'red' : 'blue'};
     }

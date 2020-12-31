@@ -44,7 +44,9 @@ class App extends React.Component {
       token: null,
       user_roles: null,
       theme: getTheme(),
+      menu_open: false,
     }
+    this.menuClicked = this.menuClicked.bind(this);
   }
 
   componentDidMount() {
@@ -93,6 +95,11 @@ class App extends React.Component {
     }
   };
 
+  menuClicked(is_open) {
+    console.log("MENU CLICKEEDDD!!!!", is_open);
+    this.setState({ menu_open: is_open });
+  }
+
   render() {
     let currentLocation = this.props.location;
     let isModalOpen = this.modalRoutes.some(route => route === this.props.location.pathname) || this.props.location.pathname.includes('/gallery/'); //TODO make better check for gallery image modal
@@ -106,11 +113,11 @@ class App extends React.Component {
     
     return (
       <ThemeProvider theme={this.state.theme}>
-        <GlobalStyles />
+        <GlobalStyles menu_open={this.state.menu_open}/>
         <div className="App">
           <div className="page-container">
             <div className="content-wrap">
-              <Navbar history={this.props.history} visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
+              <Navbar menuClicked={this.menuClicked} history={this.props.history} visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
               <Spinner spinning={false} />
               {/* Non-modal routes - only one can be loaded at a time */}
               {loadDefaultPage ? 
@@ -141,20 +148,16 @@ class App extends React.Component {
               {/* Modal routes - will display above previous route, or homepage */}
               {isModalOpen ? 
                 <Switch>
-                  <Route exact path="/register" children={<Modal
-                  history={this.props.history}>
-                  <SignUpForm history={this.props.history} />
+                  <Route exact path="/register" children={<Modal>
+                  <SignUpForm />
                 </Modal>} />
-                <Route exact path="/login" children={<Modal
-                  history={this.props.history}>
-                  <LogInForm history={this.props.history} />
+                <Route exact path="/login" children={<Modal>
+                  <LogInForm />
                 </Modal>} />
-                <Route exact path="/forgot-password" children={<Modal
-                  history={this.props.history}>
-                  <ForgotPasswordForm history={this.props.history} />
+                <Route exact path="/forgot-password" children={<Modal>
+                  <ForgotPasswordForm />
                 </Modal>} />
-                <Route path="/gallery/:id" children={<Modal
-                  history={this.props.history}>
+                <Route path="/gallery/:id" children={<Modal>
                     <GalleryImage {...this.props} />
                   </Modal>} />
                 </Switch>

@@ -25,21 +25,38 @@ class BurgerMenu extends React.Component {
   }
 
   toggleOpen = () => {
-    console.log("TOGGLE OPEN", this.state.open);
-    this.setState({ open: !this.state.open }, () => console.log('BLEEOP', this.state.open));
+    this.setMenu(!this.state.open);
   }
 
   closeMenu = () => {
-    this.setState({ open: false });
+    this.setMenu(false);
+  }
+
+  setMenu(open) {
+    this.setState({ open: open });
+    if (this.props.menuClicked) {
+      this.props.menuClicked(open);
+    }
   }
 
   render() {
     return (
       <StyledBurgerMenu open={this.state.open}>
-        <ClickOutside {...this.props} on_click_outside={this.closeMenu} >
+        <ClickOutside {...this.props} active={this.state.open} on_click_outside={this.closeMenu} >
           <Burger toggle={this.toggleOpen} />
           <MenuContainer open={this.state.open} closeMenu={this.closeMenu}>
             {this.props.children}
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
+            <p>AAAAAAAAAAAAA</p>
           </MenuContainer>
         </ClickOutside>
       </StyledBurgerMenu>
@@ -49,6 +66,7 @@ class BurgerMenu extends React.Component {
 
 BurgerMenu.propTypes = {
   history: PropTypes.object.isRequired,
+  menuClicked: PropTypes.func
 };
 
 class Burger extends React.Component {

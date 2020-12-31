@@ -143,18 +143,14 @@ function NavList(props) {
     }
 
     return (
-        <React.Fragment>
-            <div>
-                <ul className="nav-list">
-                    {admin_options}
-                    <li className="nav-item">
-                        <Link className="nav-link"
-                            to="/info">Info</Link>
-                    </li>
-                    {options}
-                </ul>
-            </div>
-        </React.Fragment>
+        <ul className="nav-list">
+            {admin_options}
+            <li className="nav-item">
+                <Link className="nav-link"
+                    to="/info">Info</Link>
+            </li>
+            {options}
+        </ul>
     );
 }
 

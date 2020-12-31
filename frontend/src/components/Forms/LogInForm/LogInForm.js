@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
@@ -71,8 +72,9 @@ class LogInForm extends React.Component {
         return (
             <StyledLogInForm onSubmit={this.props.onSubmit}>
                 <div className="form-header">
-                    <h2>Log In</h2>
-                    <h5 onClick={this.toRegister}>Sign Up</h5>
+                    <h1 className="form-header-text">Log In</h1>
+                    <h5 className="form-header-text"
+                        onClick={this.toRegister}>&#8594;Sign Up</h5>
                 </div>
                 <div className="form-body">
                     <TextField
@@ -94,7 +96,7 @@ class LogInForm extends React.Component {
                         error={this.state.passwordError}
                     />
                     <div className="form-group">
-                        <button className="primary" type="submit" onClick={this.submit}>
+                        <button className="primary submit" type="submit" onClick={this.submit}>
                             Submit
                         </button>
                     </div>
@@ -110,4 +112,4 @@ LogInForm.propTypes = {
     history: PropTypes.object,
 }
 
-export default LogInForm;
+export default withRouter(LogInForm);

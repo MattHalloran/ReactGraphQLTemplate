@@ -1,10 +1,11 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import TextField from 'components/shared/inputs/TextField';
 import { StyledSignUpForm } from './SignUpForm.styled';
-import { lightTheme, getTheme } from 'theme';
+import { getTheme } from 'theme';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -113,55 +114,60 @@ class SignUpForm extends React.Component {
   render() {
     return (
       <StyledSignUpForm onSubmit={this.props.onSubmit}>
-        <h2>Sign Up</h2>
-        <h5 onClick={this.toLogin}>Log In</h5>
-        <TextField
-          name="name"
-          type="text"
-          label="Name"
-          autocomplete="name"
-          value={this.state.name}
-          onChange={e => this.change(e)}
-          error={this.state.nameError}
-        />
-        <TextField
-          name="email"
-          type="email"
-          label="Email"
-          autocomplete="username"
-          value={this.state.email}
-          onChange={e => this.change(e)}
-          error={this.state.emailError}
-        />
-        <TextField
-          name="password"
-          type="password"
-          label="Password"
-          autocomplete="password"
-          value={this.state.password}
-          onChange={e => this.change(e)}
-          error={this.state.passwordError}
-        />
-        <TextField
-          name="comfirmPassword"
-          type="password"
-          label="Confirm Password"
-          autocomplete="password"
-          value={this.state.confirmPassword}
-          onChange={e => this.change(e)}
-          error={false}
-        />
-        <FormControl component="fieldset">
-          <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={this.state.existingCustomer} onChange={this.handleRadioSelect}>
-            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-          </RadioGroup>
-          <FormHelperText>{this.state.existingCustomerError}</FormHelperText>
-        </FormControl>
-        <div className="form-group">
-          <button className="primary" type="submit" onClick={this.submit}>
-            Submit
+        <div className="form-header">
+          <h1 className="form-header-text">Sign Up</h1>
+          <h5 className="form-header-text"
+            onClick={this.toLogin}>&#8594;Log In</h5>
+        </div>
+        <div className="form-body">
+          <TextField
+            name="name"
+            type="text"
+            label="Name"
+            autocomplete="name"
+            value={this.state.name}
+            onChange={e => this.change(e)}
+            error={this.state.nameError}
+          />
+          <TextField
+            name="email"
+            type="email"
+            label="Email"
+            autocomplete="username"
+            value={this.state.email}
+            onChange={e => this.change(e)}
+            error={this.state.emailError}
+          />
+          <TextField
+            name="password"
+            type="password"
+            label="Password"
+            autocomplete="password"
+            value={this.state.password}
+            onChange={e => this.change(e)}
+            error={this.state.passwordError}
+          />
+          <TextField
+            name="comfirmPassword"
+            type="password"
+            label="Confirm Password"
+            autocomplete="password"
+            value={this.state.confirmPassword}
+            onChange={e => this.change(e)}
+            error={false}
+          />
+          <FormControl component="fieldset">
+            <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={this.state.existingCustomer} onChange={this.handleRadioSelect}>
+              <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+              <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+            </RadioGroup>
+            <FormHelperText>{this.state.existingCustomerError}</FormHelperText>
+          </FormControl>
+          <div className="form-group">
+            <button className="primary submit" type="submit" onClick={this.submit}>
+              Submit
      </button>
+          </div>
         </div>
       </StyledSignUpForm>
     );
@@ -173,4 +179,4 @@ SignUpForm.propTypes = {
   history: PropTypes.object,
 }
 
-export default SignUpForm;
+export default withRouter(SignUpForm);

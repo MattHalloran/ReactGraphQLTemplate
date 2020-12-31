@@ -1,5 +1,14 @@
 import { createGlobalStyle } from 'styled-components';
 
+const menu_app_style = `position: fixed; 
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%; 
+    overflow: hidden;
+    `
+
 export const GlobalStyles = createGlobalStyle`
     body {
         background: ${({ theme }) => theme.bodyPrimary};
@@ -34,6 +43,7 @@ export const GlobalStyles = createGlobalStyle`
 
     .App {
         text-align: center;
+        ${({ menu_open }) => menu_open ? menu_app_style : ''};
     }
     
     .App-header {

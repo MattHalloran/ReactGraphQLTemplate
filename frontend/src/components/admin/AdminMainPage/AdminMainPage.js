@@ -1,11 +1,22 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { StyledAdminMainPage } from './AdminMainPage.styled';
 
 class AdminMainPage extends React.Component {
-    componentDidMount() {
-        document.title = "Admin Portal | New Life Nursery"
+    constructor(props) {
+        super(props);
+        this.cardClicked = this.cardClicked.bind(this);
     }
+
+    componentDidMount() {
+        document.title = "Admin Portal | New Life Nursery";
+    }
+
+    cardClicked(link) {
+        this.props.history.push(link);
+    }
+    
     render() {
         return (
             <StyledAdminMainPage>
@@ -14,14 +25,17 @@ class AdminMainPage extends React.Component {
                     <AdminCard 
                         link="/admin/orders"
                         title="Orders" 
+                        onClick={this.cardClicked}
                         description="Approve, create, and edit customer's orders" />
                     <AdminCard 
                         link="/admin/customers"
                         title="Customers" 
+                        onClick={this.cardClicked}
                         description="Approve new customers, edit customer information" />
                     <AdminCard 
                         link="/admin/inventory"
                         title="Inventory"
+                        onClick={this.cardClicked}
                         description="Add, remove, and update inventory"/>
                     <AdminCard 
                         link="/admin/plant-info" 
@@ -30,10 +44,12 @@ class AdminMainPage extends React.Component {
                     <AdminCard 
                         link="/admin/gallery" 
                         title="Gallery" 
+                        onClick={this.cardClicked}
                         description="Add, remove, and rearrange gallery images" />
                     <AdminCard 
                         link="/admin/contact-info" 
                         title="Contact Info" 
+                        onClick={this.cardClicked}
                         description="Edit business hours and other contact information" />
                 </div>
             </StyledAdminMainPage >
@@ -45,7 +61,7 @@ AdminMainPage.propTypes = {
 
 }
 
-export default AdminMainPage;
+export default withRouter(AdminMainPage);
 
 class AdminCard extends React.Component {
     constructor(props) {
@@ -54,7 +70,7 @@ class AdminCard extends React.Component {
     }
 
     clicked() {
-        this.props.history.push(this.props.link);
+        this.props.onClick(this.props.link);
     }
 
     render() {
@@ -70,4 +86,5 @@ class AdminCard extends React.Component {
 AdminCard.propTypes = {
     link: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
 }

@@ -27,6 +27,9 @@ export const StyledNavbar = styled.nav`
         list-style: none;
         margin-top: 0px;
         margin-bottom: 0px;
+        right: 0px;
+        position: fixed;
+        padding-right: 10px;
     }
 
     .nav-item {
@@ -41,7 +44,8 @@ export const StyledNavbar = styled.nav`
     }
 
     .nav-brand {
-        white-space: nowrap
+        white-space: nowrap;
+        position: absolute;
     }
 
     .nav-logo {

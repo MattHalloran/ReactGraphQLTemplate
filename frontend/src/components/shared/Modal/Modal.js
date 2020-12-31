@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { StyledModal } from './Modal.styled';
@@ -13,6 +14,7 @@ class Modal extends Component {
     }
 
     closeModal() {
+        console.log('CLOSING MODALLL');
         this.props.history.goBack();
     }
 
@@ -51,4 +53,4 @@ Modal.propTypes = {
     children: PropTypes.any.isRequired,
 }
 
-export default Modal;
+export default withRouter(Modal);

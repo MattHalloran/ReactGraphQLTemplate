@@ -1,21 +1,23 @@
 import styled from 'styled-components';
-
+// transform: ${({ open }) => open ? 'translateX(-100%)' : 'translateX(0%)' };
+// padding: 1rem 0.5rem 0.5rem 1rem;
 export const StyledMenuContainer = styled.nav`
-  display: flex;
+  transform: ${({ open }) => open ? 'translateX(0%)' : 'translateX(100%)' };
+  display: grid;
   flex-direction: column;
-  transform: ${({ open }) => open ? 'translateX(-100%)' : 'translateX(0%)' };
   justify-content: center;
   background: ${({ theme }) => theme.bodySecondary};
   height: 100vh;
   text-align: left;
-  padding: 2rem;
-  position: absolute;
+  overflow: scroll;
+  width: 400px;
+  position: fixed;
   top: 0;
-  left: 100%;
+  right: 0;
   transition: transform 0.3s ease-in-out;
-  
+
   @media (max-width: ${({ theme }) => theme.mobile}) {
-    width: 100%;
+    width: -webkit-fill-available;
   }
 
   /* Secondary link settings */
@@ -32,7 +34,8 @@ export const StyledMenuContainer = styled.nav`
   a {
     font-size: 2rem;
     text-transform: uppercase;
-    padding: 2rem 0;
+    padding: 0.5rem;
+    margin-bottom: 15px;
     font-weight: bold;
     letter-spacing: 0.5rem;
     width: max-content;

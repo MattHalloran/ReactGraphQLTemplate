@@ -1,13 +1,14 @@
 import styled from 'styled-components';
 export const StyledBurgerMenu = styled.div`
-
   .burger {
-    display: inline-block;
     border: none;
     cursor: pointer;
     padding: 0;
     z-index: 100;
-    position: relative;
+    position: fixed;
+    right: 1em;
+    top: 50%;
+    transform: translate(0, -50%);
     transition: all 0.3s ease-in-out;
     transform-origin: 1px
   }
