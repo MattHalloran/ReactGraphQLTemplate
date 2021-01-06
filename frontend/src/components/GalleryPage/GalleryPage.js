@@ -4,7 +4,16 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
+import { SortableGalleryPhoto } from "components/shared/GalleryPhoto";
 import * as imageQuery from 'query/gallery';
+import { SortableContainer } from 'react-sortable-hoc';
+import arrayMove from "array-move";
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+
+const SortableGallery = SortableContainer(({ items, handleClick }) => (
+  <Gallery photos={items} renderImage={props => <SortableGalleryPhoto handleClick={handleClick} {...props} />} />
+));
 
 class GalleryPage extends React.Component {
     constructor(props) {
@@ -18,6 +27,7 @@ class GalleryPage extends React.Component {
         //Estimates how many images will fill the screen
         this.page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
         this.openImage = this.openImage.bind(this);
+        this.onSortEnd = this.onSortEnd.bind(this);
         this.queryImages();
     }
 
@@ -96,16 +106,22 @@ class GalleryPage extends React.Component {
         });
     }
 
-    openImage(event, { photo, index }) {
-        this.props.history.push('/gallery/' + this.state.thumbnails[index].key);
+    openImage(event, photo, index) {
+        console.log('OPEN IMAGEEEE', event, photo, index);
+        this.props.history.push('/gallery/' + photo.key);
+    }
+
+    onSortEnd({oldIndex, newIndex}) {
+        console.log('SORTINGGGGGGGG', this.state);
+        console.log(oldIndex, newIndex);
+        this.setState({ thumbnails: arrayMove(this.state.thumbnails, oldIndex, newIndex) });
+        console.log('FINISHEDDDDD', this.state);
     }
 
     render() {
-        let gallery = <Gallery photos={this.state.thumbnails} onClick={this.openImage} />
         return (
             <StyledGalleryPage id="main-div">
-                <h1>BOOOOP</h1>
-                {gallery}
+                <SortableGallery distance={5} items={this.state.thumbnails} handleClick={this.openImage} onSortEnd={this.onSortEnd} axis={"xy"} />
             </StyledGalleryPage>
         );
     }
@@ -117,10 +133,10 @@ GalleryPage.propTypes = {
 
 export default memo(GalleryPage);
 
-function GalleryImage() {
+function GalleryImage(props) {
     const [src, setSrc] = useState(0);
-    let hash = useParams();
-    imageQuery.getGalleryImage(hash.id).then(response => {
+    let url_params = useParams();
+    imageQuery.getGalleryImage(url_params.img).then(response => {
         console.log("GOT FULL IMAGEEEE", response);
         setSrc(`data:image/jpeg;base64,${response.image}`);
     }).catch(error => {
@@ -130,13 +146,16 @@ function GalleryImage() {
 
     return (
         <StyledGalleryImage>
+            <ChevronLeftIcon className="arrow left" onClick={props.goLeft}/>
+            <ChevronRightIcon className="arrow right" onClick={props.goRight}/>
             <img src={src} className="full-image" />
         </StyledGalleryImage>
     );
 }
 
 GalleryImage.propTypes = {
-
+    goLeft: PropTypes.func.isRequired,
+    goRight: PropTypes.func.isRequired,
 }
 
 export { GalleryImage };

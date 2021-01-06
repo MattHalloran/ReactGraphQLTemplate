@@ -48,16 +48,16 @@ export const StyledModal = styled.aside`
     }
     
     .x-button {
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    border-radius: 100%;
-    padding: 0.5em;
-    line-height: 1;
-    background: #A3333D;
-    border: 0;
-    box-shadow: 0;
-    cursor: pointer;
+        position: fixed;
+        right: 30px;
+        top: -20px;
+        border-radius: 100%;
+        padding: 0.5em;
+        line-height: 1;
+        background: #A3333D;
+        border: 0;
+        box-shadow: 0;
+        cursor: pointer;
     }
 
     ._modal-close:hover {
@@ -74,16 +74,26 @@ export const StyledModal = styled.aside`
     }
     
     .modal-body {
+        padding-left: 50px;
+        padding-right: 50px;
+        background-color: transparent;
         top: 50%; left: 50%;
         transform: translate(-50%,-50%);
         position: absolute;
         width: fit-content;
-        max-width: 90%;
+        display: block;
+        max-width: 100%;
         height: fit-content;
-        max-height: 90%;
-        background-color: ${({ theme }) => theme.bodySecondary};
-        color: ${({ theme }) => theme.textSecondary}
+        max-height: 100%;
     }
+
+    @media (max-width: ${({ theme }) => theme.mobile}) {
+        .modal-body {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+    }
+
     ._hide-visual {
     border: 0 !important;
     clip: rect(0 0 0 0) !important;

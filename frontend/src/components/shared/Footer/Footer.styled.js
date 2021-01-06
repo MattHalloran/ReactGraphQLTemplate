@@ -8,48 +8,38 @@ export const StyledFooter = styled.footer`
     width: 100%;
     overflow: hidden;
 
-    /* Remove extra left and right margins, due to padding */
-    .footer-row {
-        margin: 0 -5px;
+    .flexed {
+        display: grid;
+        padding: 5px;
+        grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+        grid-gap: 10px;
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
     }
 
-    /* Clear floats after the columns */
-    .footer-row:after {
-        content: "";
-        display: table;
-        clear: both;
+    @media (max-width: 319px) {
+        .footer-group {
+            border-color: transparent;
+            border-bottom-color: darkgreen;
+            border-style: solid;
+        }
     }
 
-    /* Float four columns side by side */
-    .footer-col {
-        float: left;
-        width: 25%;
+    .footer-group {
         padding: 0 10px;
-        text-align: center;
+        min-width: 150px;
     }
 
-    /* Responsive columns */
-    @media screen and (max-width: 700px) {
-        .footer-col {
-        width: 50%;
-        display: block;
-        margin-bottom: 20px;
-        }
-    }
-
-    /* Responsive columns */
-    @media screen and (max-width: 500px) {
-        .footer-col {
-        width: 100%;
-        display: block;
-        margin-bottom: 20px;
-        }
+    .winner-div {
+        display: flex;
     }
 
     .proven-winner {
-        position: relative;
-        max-height: 200px;
-        max-width: 200px;
+        max-height: min(100%,150px);
+        max-width: min(100%,150px);
+        margin: auto;
     }
 
     .footer-ul {

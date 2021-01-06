@@ -6,7 +6,6 @@ import AboutPage from './components/AboutPage';
 import GalleryPage, { GalleryImage } from './components/GalleryPage';
 import ShoppingPage from './components/shopping/ShoppingPage';
 import PrivacyPolicyPage from './components/PrivacyPolicyPage';
-import Snake from './components/shared/Snake/Snake'
 import AdminMainPage from './components/admin/AdminMainPage';
 import AdminContactPage from './components/admin/AdminContactPage';
 import AdminCustomerPage from './components/admin/AdminCustomerPage';
@@ -130,7 +129,7 @@ class App extends React.Component {
                 <Route exact path="/about" component={AboutPage} />
                 <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/gallery" component={GalleryPage} />
-                <Route exact path="/profile" component={requireAuthentication(ProfilePage, this.state.token)} />
+                <Route exact path="/profile/:edit?" component={requireAuthentication(ProfilePage, this.state.token)} />
                 <Route exact path="/admin" component={AdminMainPage} />
                 <Route exact path="/admin/contact-info" component={AdminContactPage} />
                 <Route exact path="/admin/customers" component={AdminCustomerPage} />
@@ -141,7 +140,6 @@ class App extends React.Component {
                 <Route exact path="/shopping" render={() => (
                   <ShoppingPage user_roles={this.state.user_roles} />
                 )} />
-                <Route exact path="/smile" component={Snake} />
                 <Route component={NotFoundPage} />
               </Switch>
               }
@@ -157,7 +155,7 @@ class App extends React.Component {
                 <Route exact path="/forgot-password" children={<Modal>
                   <ForgotPasswordForm />
                 </Modal>} />
-                <Route path="/gallery/:id" children={<Modal>
+                <Route path="/gallery/:img" children={<Modal>
                     <GalleryImage {...this.props} />
                   </Modal>} />
                 </Switch>

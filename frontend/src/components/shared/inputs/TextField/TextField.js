@@ -11,8 +11,11 @@ class TextField extends React.Component {
     }
 
     render() {
+        let large_placeholder = this.props.value === undefined ||
+                                    (this.props.value.length === 0 && !this.state.active);
+        let has_error = this.props.error !== undefined && this.props.error.length > 0
         return (
-            <StyledTextField large_placeholder={this.props.value.length === 0 && !this.state.active} has_error={this.props.error.length > 0}>
+            <StyledTextField large_placeholder={large_placeholder} has_error={has_error}>
                 <input
                     name={this.props.name}
                     type={this.props.type}

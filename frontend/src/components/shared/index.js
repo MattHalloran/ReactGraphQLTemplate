@@ -11,5 +11,4 @@ export { default as NotFoundPage } from '../components/NotFoundPage';
 export { default as PrivacyPolicyPage } from '../components/PrivacyPolicyPage';
 export { default as ProfilePage } from '../components/ProfilePage';
 export { default as RegisterForm } from '../forms/SignUpForm';
-export { default as Snake } from './Snake';
 export { default as Spinner } from './Spinner';

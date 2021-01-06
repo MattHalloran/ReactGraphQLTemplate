@@ -76,8 +76,9 @@ class AdminGalleryPage extends React.Component {
                     <input type="file" onChange={this.fileSelectedHandler} multiple/>
                     <button onClick={this.uploadImages}>Upload</button>
                 </div>
+                <h2>Reorder and delete images</h2>
                 <div>
-                    <h2>Reorder and delete images</h2>
+                    
                 </div>
                 <button onClick={this.applyChanges}>Apply Changes</button>
             </StyledAdminGalleryPage>
