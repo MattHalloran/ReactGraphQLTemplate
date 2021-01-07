@@ -49,7 +49,7 @@ export const StyledModal = styled.aside`
     
     .x-button {
         position: fixed;
-        right: 30px;
+        right: -20px;
         top: -20px;
         border-radius: 100%;
         padding: 0.5em;

@@ -1,44 +1,65 @@
-import React from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import PropTypes from 'prop-types';
 import { StyledTextField } from "./TextField.styled";
 
-class TextField extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            active: this.props.locked ?? false,
+function TextField(props) {
+    const [value, setValue] = useState(null);
+    const [error, setError] = useState(null);
+    const [has_error, setHasError] = useState(false);
+    const [ever_active, setEverActive] = useState(false);
+    let [active, setActive] = useState(false);
+
+    useLayoutEffect(() => {
+        if (props.validate) updateError(value);
+    })
+
+    useEffect(() => {
+        if (active) setEverActive(true);
+    }, [active])
+
+    const updateError = (value) => {
+        function checkError(error) {
+            if (props.showErrors && error) return true;
+            if (!ever_active) return false;
+            return error;
         }
+        let err = props.validate(value);
+        props.onChange(props.errorField, err);
+        setError(err);
+        setHasError(checkError(err))
     }
 
-    render() {
-        let large_placeholder = this.props.value === undefined ||
-                                    (this.props.value.length === 0 && !this.state.active);
-        let has_error = this.props.error !== undefined && this.props.error.length > 0
-        return (
-            <StyledTextField large_placeholder={large_placeholder} has_error={has_error}>
-                <input
-                    name={this.props.name}
-                    type={this.props.type}
-                    value={this.props.value}
-                    autocomplete={this.props.autocomplete ?? 'auto'}
-                    onChange={this.props.onChange}
-                    onFocus={() => !this.props.locked && this.setState({ active: true })}
-                    onBlur={() => !this.props.locked && this.setState({ active: false })}
-                />
-                <label className="text-label">{this.props.label ?? "Label"}</label>
-                <label className="error-label">{this.props.error}</label>
-            </StyledTextField>
-        );
+    const updateValue = (event) => {
+        let e_value = event.target.value;
+        setValue(e_value);
+        props.onChange(props.nameField, e_value);
     }
+
+    return (
+        <StyledTextField large_placeholder={(value === null || value.length === 0) && !active} has_error={has_error}>
+            <input
+                name={props.nameField}
+                type={props.type}
+                autoComplete={props.autocomplete ?? 'auto'}
+                onChange={updateValue}
+                onFocus={() => !props.locked && setActive(true)}
+                onBlur={() => !props.locked && setActive(false)}
+            />
+            <label className="text-label">{props.label}</label>
+            <label className="error-label">{error}</label>
+        </StyledTextField>
+    );
 }
 
 TextField.propTypes = {
-    name: PropTypes.string.isRequired,
+    nameField: PropTypes.string.isRequired,
+    errorField: PropTypes.string,
     type: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
     locked: PropTypes.bool,
-    error: PropTypes.string,
+    validate: PropTypes.func,
     onChange: PropTypes.func.isRequired,
+    showErrors: PropTypes.bool,
 }
 
 export default TextField;

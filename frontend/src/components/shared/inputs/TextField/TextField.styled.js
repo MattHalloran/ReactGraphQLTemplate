@@ -51,6 +51,6 @@ export const StyledTextField = styled.div`
         pointer-events: none;
         top: 7vh;
         height: 3vh;
-        color: ${({ has_error }) => has_error ? 'red' : 'blue'};
+        color: ${({ has_error }) => has_error ? 'red' : 'transparent'};
     }
 `;

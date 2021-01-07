@@ -1,18 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useLayoutEffect } from 'react';
 import { StyledAdminInventoryPage } from './AdminInventoryPage.styled';
 
-class AdminInventoryPage extends React.Component {
-    componentDidMount() {
-        document.title = "Edit Inventory Info"
-    }
-    render() {
-        return (
-            <StyledAdminInventoryPage>
-                
-            </StyledAdminInventoryPage >
-        );
-    }
+function AdminInventoryPage() {
+    useLayoutEffect(() => {
+        document.title = "Edit Inventory Info";
+    })
+    return (
+        <StyledAdminInventoryPage>
+
+        </StyledAdminInventoryPage >
+    );
 }
 
 AdminInventoryPage.propTypes = {

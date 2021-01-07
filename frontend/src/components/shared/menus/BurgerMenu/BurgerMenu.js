@@ -1,84 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer';
 import ClickOutside from 'components/shared/wrappers/ClickOutside';
 
-class BurgerMenu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-    }
-    this.toggleOpen = this.toggleOpen.bind(this);
-    this.closeMenu = this.closeMenu.bind(this);
+function BurgerMenu(props) {
+  let history = useHistory();
+  let [open, setOpen] = useState(false);
+
+  const toggleOpen = () => {
+    setMenu(open => !open);
   }
 
-  componentDidMount() {
-    this.unlisten = this.props.history.listen(() => {
-      this.closeMenu();
-    })
-  }
+  const setMenu = useCallback((is_open) => {
+    setOpen(is_open);
+    props?.menuClicked(is_open);
+  },[props]);
 
-  componentWillUnmount() {
-    this.unlisten();
-  }
+  const closeMenu = useCallback(() => {
+    setMenu(false);
+  },[setMenu]);
 
-  toggleOpen = () => {
-    this.setMenu(!this.state.open);
-  }
+  useEffect(() => {
+    //Closes menu on url change
+    let unlisten = history.listen(() => closeMenu());
+    return () => unlisten();
+  },[history, closeMenu])
 
-  closeMenu = () => {
-    this.setMenu(false);
-  }
-
-  setMenu(open) {
-    this.setState({ open: open });
-    if (this.props.menuClicked) {
-      this.props.menuClicked(open);
-    }
-  }
-
-  render() {
-    return (
-      <StyledBurgerMenu open={this.state.open}>
-        <ClickOutside {...this.props} active={this.state.open} on_click_outside={this.closeMenu} >
-          <Burger toggle={this.toggleOpen} />
-          <MenuContainer open={this.state.open} closeMenu={this.closeMenu}>
-            {this.props.children}
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-            <p>AAAAAAAAAAAAA</p>
-          </MenuContainer>
-        </ClickOutside>
-      </StyledBurgerMenu>
-    );
-  }
+  return (
+    <StyledBurgerMenu open={open}>
+      <ClickOutside {...props} active={open} on_click_outside={closeMenu} >
+        <Burger toggle={toggleOpen} />
+        <MenuContainer open={open} closeMenu={closeMenu}>
+          {props.children}
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+          <p>AAAAAAAAAAAAA</p>
+        </MenuContainer>
+      </ClickOutside>
+    </StyledBurgerMenu>
+  );
 }
 
 BurgerMenu.propTypes = {
-  history: PropTypes.object.isRequired,
-  menuClicked: PropTypes.func
+  menuClicked: PropTypes.func,
 };
 
-class Burger extends React.Component {
-  render() {
-    return (
-      <div className="burger" onClick={this.props.toggle}>
-        <div />
-        <div />
-        <div />
-      </div>
-    );
-  }
+function Burger(props) {
+  return (
+    <div className="burger" onClick={props.toggle}>
+      <div />
+      <div />
+      <div />
+    </div>
+  );
+}
+
+Burger.propTypes = {
+  toggle: PropTypes.func.isRequired,
 }
 
 export default BurgerMenu;

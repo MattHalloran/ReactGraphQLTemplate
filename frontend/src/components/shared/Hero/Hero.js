@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 // JSX
 import HeroSlider, {
@@ -15,58 +15,49 @@ const images = [
   ["https://images.pexels.com/photos/3912947/pexels-photo-3912947.jpeg?cs=srgb&dl=pexels-thisisengineering-3912947.jpg&fm=jpg", "zoom"]
 ]
 
-class Hero extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      text: props.text,
-      subtext: props.subtext,
-    }
-  }
+function Hero(props) {
 
-  render() {
-    let slides = []
-    images.forEach(i => {
-      slides.push(<Slide 
-        background={{
-          backgroundImage: i[0],
-          backgroundAnimation: i[1]
-        }}
-      />)
-    })
-    return (
-      <HeroSlider
-        orientation="horizontal"
-        initialSlide={1}
-        style={{
-          backgroundColor: "#000"
-        }}
-        settings={{
-          slidingDuration: 500,
-          slidingDelay: 100,
-          shouldAutoplay: true,
-          shouldDisplayButtons: true,
-          autoplayDuration: 5000,
-          height: "100vh"
-        }}
-      >
-        <OverlayContainer>
-          <ContentWrapper>
-            <Title>{this.props.text}</Title>
-            <Subtitle>
-              {this.props.subtext}
-            </Subtitle>
-            <Link to="/shopping">
-              <button className="primary">Order now</button>
-            </Link>
-          </ContentWrapper>
-        </OverlayContainer>
+  let slides = []
+  images.forEach(i => {
+    slides.push(<Slide
+      background={{
+        backgroundImage: i[0],
+        backgroundAnimation: i[1]
+      }}
+    />)
+  })
 
-        {slides}
-        <Nav />
-      </HeroSlider>
-    );
-  }
+  return (
+    <HeroSlider
+      orientation="horizontal"
+      initialSlide={1}
+      style={{
+        backgroundColor: "#000"
+      }}
+      settings={{
+        slidingDuration: 500,
+        slidingDelay: 100,
+        shouldAutoplay: true,
+        shouldDisplayButtons: true,
+        autoplayDuration: 5000,
+        height: "100vh"
+      }}
+    >
+      <OverlayContainer>
+        <ContentWrapper>
+          <Title>{props.text}</Title>
+          <Subtitle>
+            {props.subtext}
+          </Subtitle>
+          <Link to="/shopping">
+            <button className="primary">Order now</button>
+          </Link>
+        </ContentWrapper>
+      </OverlayContainer>
+      {slides}
+      <Nav />
+    </HeroSlider>
+  );
 };
 
 Hero.propTypes = {

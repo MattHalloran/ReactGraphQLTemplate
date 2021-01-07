@@ -1,60 +1,45 @@
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../SearchBar';
 import ShoppingMenu from '../ShoppingMenu';
 import ShoppingList from '../ShoppingList';
 
-class ShoppingPage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            authenticated: false,
-        }
-    }
+function ShoppingPage(props) {
 
-    componentDidMount() {
+    useEffect(() => {
         document.title = "Shop | New Life Nursery";
-        this.checkAuth();
+    }, [])
+
+    let display;
+    let is_customer = false;
+    let roles = props.user_roles;
+    if (roles instanceof Array) {
+        roles?.forEach(r => {
+            if (r.title === "Customer") {
+                is_customer = true;
+            }
+        })
+    }
+    if (is_customer) {
+        display =
+            <React.Fragment>
+                <ShoppingMenu />
+                <SearchBar />
+                <ShoppingList />
+            </React.Fragment >
+    } else {
+        display =
+            <React.Fragment>
+                <h1>Not for u :(</h1>
+            </React.Fragment>
     }
 
-    componentDidUpdate() {
-        this.checkAuth();
-    }
-
-    checkAuth() {
-        let auth; //TODO - do something similar to menu.js
-        if (auth !== this.state.authenticated) {
-            this.setState({ authenticated: auth });
-        }
-    }
-
-    render() {
-        let is_customer = false;
-        let roles = this.props.user_roles;
-        if (roles instanceof Array) {
-            roles?.forEach(r => {
-                if (r.title === "Customer") {
-                    is_customer = true;
-                }
-            })
-        }
-        if (is_customer) {
-            return (
-                <StyledShoppingPage>
-                    <ShoppingMenu />
-                    <SearchBar />
-                    <ShoppingList />
-                </StyledShoppingPage >
-            );
-        } else {
-            return (
-                <StyledShoppingPage>
-                    <h1>Not for u :(</h1>
-                </StyledShoppingPage>
-            );
-        }
-    }
+    return (
+        <StyledShoppingPage>
+            { display }
+        </StyledShoppingPage>
+    );
 }
 
 ShoppingPage.propTypes = {

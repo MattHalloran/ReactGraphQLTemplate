@@ -1,32 +1,31 @@
-import React from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
+import * as validation from 'utils/validations';
 import TextField from 'components/shared/inputs/TextField';
-import { Link } from "react-router-dom";
 import { StyledLogInForm } from './LogInForm.styled';
 
-class LogInForm extends React.Component {
-    constructor(props) {
-        super(props);
-        this.submit = this.submit.bind(this);
-        this.toRegister = this.toRegister.bind(this);
-        this.state = {
-            email: "",
-            emailError: "",
-            password: "",
-            passwordError: "",
-        }
-    }
-    toRegister() {
-        this.props.history.replace('/register');
-    }
-    login() {
+function LogInForm(props) {
+    let history = useHistory();
+    let ref = useRef({
+        email: "",
+        emailError: "",
+        password: "",
+        passwordError: "",
+    })
+    const [showErrors, setShowErrors] = useState(false);
+
+    const toRegister = () => history.replace('/register');
+
+    const toForgotPassword = () => history.replace('/forgot-password');
+
+    const login = () => {
         PubSub.publish('loading', true);
-        authQuery.loginUser(this.state.email, this.state.password).then(response => {
+        authQuery.loginUser(ref.current.email, ref.current.password).then(() => {
             PubSub.publish('loading', false);
-            this.props.history.push('/profile');
+            history.push('/profile');
         }).catch(error => {
             console.log("Failed to log in");
             console.error(error);
@@ -34,82 +33,59 @@ class LogInForm extends React.Component {
             alert(error.error);
         })
     }
-    submit(event) {
+
+    const submit = (event) => {
         event.preventDefault();
-        if (this.validate()) {
-            this.login();
+        setShowErrors(true);
+        if (!ref.current.emailError && !ref.current.passwordError) {
+            login();
         }
     }
-    change = e => {
-        console.log('IN CHANGEEEEE', e.target, this.state.email);
-        this.setState({ [e.target.name]: e.target.value });
+
+    const change = (name, value) => {
+        ref.current[name] = value;
+        console.log(ref.current[name])
     }
-    validate() {
-        let isError = false;
-        const errors = {
-            emailError: "",
-            passwordError: ""
-        }
 
-        if (this.state.email.length === 0) {
-            isError = true;
-            errors.emailError = "Must enter email"
-        }
-
-        if (this.state.password.length === 0) {
-            isError = true;
-            errors.passwordError = "Must enter password"
-        }
-
-        this.setState({
-            ...this.state,
-            ...errors
-        });
-
-        return !isError
-    }
-    render() {
-        return (
-            <StyledLogInForm onSubmit={this.props.onSubmit}>
-                <div className="form-header">
-                    <h1 className="form-header-text">Log In</h1>
-                    <h5 className="form-header-text"
-                        onClick={this.toRegister}>&#8594;Sign Up</h5>
+    return (
+        <StyledLogInForm onSubmit={props.onSubmit}>
+            <div className="form-header">
+                <h1 className="form-header-text">Log In</h1>
+                <h5 className="form-header-text"
+                    onClick={toRegister}>&#8594;Sign Up</h5>
+            </div>
+            <div className="form-body">
+                <TextField
+                    nameField="email"
+                    errorField="emailError"
+                    type="email"
+                    label="Email"
+                    onChange={change}
+                    validate={validation.emailValidation}
+                    showErrors={showErrors}
+                />
+                <TextField
+                    nameField="password"
+                    errorField="passwordError"
+                    type="password"
+                    label="Password"
+                    onChange={change}
+                    validate={validation.passwordValidation}
+                    showErrors={showErrors}
+                />
+                <div className="form-group">
+                    <button className="primary submit" type="submit" onClick={submit}>
+                        Submit
+                    </button>
                 </div>
-                <div className="form-body">
-                    <TextField
-                        name="email"
-                        type="email"
-                        label="Email"
-                        autocomplete="username"
-                        value={this.state.email}
-                        onChange={e => this.change(e)}
-                        error={this.state.emailError}
-                    />
-                    <TextField
-                        name="password"
-                        type="password"
-                        label="Password"
-                        autoComplete="current-password"
-                        value={this.state.password}
-                        onChange={e => this.change(e)}
-                        error={this.state.passwordError}
-                    />
-                    <div className="form-group">
-                        <button className="primary submit" type="submit" onClick={this.submit}>
-                            Submit
-                        </button>
-                    </div>
-                    <Link to={{ pathname: "/forgot-password" }}>Forgot Password?</Link>
-                </div>
-            </StyledLogInForm>
-        );
-    }
+                <h5 onClick={toForgotPassword}>Forgot Password?</h5>
+            </div>
+        </StyledLogInForm>
+    );
 }
 
 LogInForm.propTypes = {
     onSubmit: PropTypes.func,
-    history: PropTypes.object,
 }
 
-export default withRouter(LogInForm);
+export default LogInForm;

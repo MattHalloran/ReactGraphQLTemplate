@@ -148,7 +148,7 @@ function GalleryImage(props) {
         <StyledGalleryImage>
             <ChevronLeftIcon className="arrow left" onClick={props.goLeft}/>
             <ChevronRightIcon className="arrow right" onClick={props.goRight}/>
-            <img src={src} className="full-image" />
+            <img src={src} alt="TODO" className="full-image" />
         </StyledGalleryImage>
     );
 }

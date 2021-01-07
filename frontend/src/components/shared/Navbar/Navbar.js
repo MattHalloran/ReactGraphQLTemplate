@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import BurgerMenu from '../menus/BurgerMenu';
@@ -17,49 +17,33 @@ const styles = {
     },
 }
 
-class Navbar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            showHamburger: false,
-        }
-    }
+function Navbar(props) {
+    let [show_hamburger, setShowHamburger] = useState(false);
 
-    componentDidMount() {
-        this.updateWindowDimensions();
-        window.addEventListener("resize", this.updateWindowDimensions);
-    }
+    useEffect(() => {
+        updateWindowDimensions();
+        window.addEventListener("resize", updateWindowDimensions);
 
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.updateWindowDimensions);
-    }
+        return () => window.removeEventListener("resize", updateWindowDimensions);
+    }, []);
 
-    updateWindowDimensions = () => {
-        this.setState({ showHamburger: window.innerWidth <= SHOW_HAMBURGER_AT });
-    }
+    const updateWindowDimensions = () => setShowHamburger(window.innerWidth <= SHOW_HAMBURGER_AT);
 
-    render() {
-
-        let menu;
-        if (this.state.showHamburger) {
-            menu = <Hamburger {...this.props} />
-        } else {
-            menu = <NavList {...this.props} />
-        }
-        return (
-            <StyledNavbar visible={this.props.visible}>
-                <Link to="/" className="nav-brand">
-                    <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
-                    <span className="nav-name">New Life Nursery</span>
-                </Link>
-                {menu}
-            </StyledNavbar>
-        );
-    }
+    return (
+        <StyledNavbar visible={props.visible}>
+            <Link to="/" className="nav-brand">
+                <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
+                <span className="nav-name">New Life Nursery</span>
+            </Link>
+            {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
+        </StyledNavbar>
+    );
 }
 
 Navbar.propTypes = {
     token: PropTypes.string,
+    visible: PropTypes.bool.isRequired,
+    user_roles: PropTypes.object,
 }
 
 function Hamburger(props) {
@@ -116,17 +100,11 @@ function NavList(props) {
         options = <React.Fragment>
             <li className="nav-item">
                 <Link className="nav-link"
-                    to={{
-                        pathname: "/register",
-                        state: { background: location }
-                    }}>Sign Up</Link>
+                    to="/register">Sign Up</Link>
             </li>
             <li className="nav-item">
                 <Link className="nav-link"
-                    to={{
-                        pathname: "/login",
-                        state: { background: location }
-                    }}>Log In</Link>
+                    to="/login">Log In</Link>
             </li>
         </React.Fragment>
     } else {

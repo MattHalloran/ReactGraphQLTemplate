@@ -1,19 +1,17 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { StyledCartPage } from './ContactPage.styled';
 
-class CartPage extends React.Component {
-    componentDidMount() {
+function CartPage() {
+    useLayoutEffect(() => {
         document.title = "Cart | New Life Nursery";
-    }
-    render() {
-        return (
-            <StyledCartPage></StyledCartPage>
-        );
-    }
+    })
+    return (
+        <StyledCartPage></StyledCartPage>
+    );
 }
 
 CartPage.propTypes = {
-    
+
 }
 
 export default CartPage;

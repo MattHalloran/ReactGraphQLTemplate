@@ -1,29 +1,27 @@
-import React from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledShoppingList } from './ShoppingList.styled';
 import ItemCard from 'components/shared/ItemCard';
 import PubSub from 'utils/pubsub';
 import * as shoppingQuery from 'query/shopping';
 
-class ShoppingList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.page_size = props.page_size ? props.page_size : 25;
-        this.default_filter = props.default_filter ? props.default_filter : "A-Z";
-        this.state = {
-            displayed_items: [],
-            item_ids: [],
-            filter_by: this.default_filter, //A-Z, Z-A, Best-Seller, Low to High, High to Low
-        }
-        this.queryItems();
-    }
+function ShoppingList(props) {
+    let page_size = props.page_size ? props.page_size : 25;
+    let default_filter = props.default_filter ? props.default_filter : "A-Z";
+    let [displayed_items, setDisplayedItems] = useState([]);
+    let [item_ids, setItemIDs] = useState([]);
+    let [filter_by, setFilterBy] = useState(default_filter);
 
-    queryItems() {
+    useLayoutEffect(() => {
+        queryItems();
+    }, [])
+
+    const queryItems = () => {
         PubSub.publish('loading', true);
-        shoppingQuery.getInventory(this.state.filter_by).then(response => {
+        shoppingQuery.getInventory(filter_by).then(response => {
             PubSub.publish('loading', false);
-          this.setState({ displayed_items: response.page_items,
-                          item_ids: response.item_ids });
+            setDisplayedItems(response.page_items);
+            setItemIDs(response.item_ids);
         }).catch(error => {
             console.log("Failed to load inventory");
             console.error(error);
@@ -32,10 +30,10 @@ class ShoppingList extends React.Component {
         })
     }
 
-    loadNextPage() {
-        shoppingQuery.getInventoryPage().then(response => {
-          this.setState({ displayed_items: response.page_items,
-                          item_ids: response.item_ids });
+    const loadNextPage = () => {
+        shoppingQuery.getInventoryPage(page_size).then(response => {
+            setDisplayedItems(response.page_items);
+            setItemIDs(response.item_ids);
         }).catch(error => {
             console.log("Failed to load inventory page");
             console.error(error);
@@ -43,19 +41,17 @@ class ShoppingList extends React.Component {
         })
     }
 
-    render() {
-        let cardList = null;
-        if (this.state.displayed_items instanceof Array) {
-            this.state.displayed_items.forEach(item => {
-                cardList.push(<ItemCard data={item} />);
-            })
-        }
-        return (
-            <StyledShoppingList>
-                {cardList}
-            </StyledShoppingList >
-        );
+    let cardList = null;
+    if (displayed_items instanceof Array) {
+        displayed_items.forEach(item => {
+            cardList.push(<ItemCard data={item} />);
+        })
     }
+    return (
+        <StyledShoppingList>
+            {cardList}
+        </StyledShoppingList >
+    );
 }
 
 ShoppingList.propTypes = {

@@ -1,6 +1,11 @@
-import React from 'react';
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Switch, Route } from 'react-router-dom';
 import Navbar from './components/shared/Navbar';
+import Modal from './components/shared/Modal';
+import Spinner from './components/shared/Spinner';
+import Footer from './components/shared/Footer';
+import PubSub from './utils/pubsub';
+//Routes
 import HomePage from './components/HomePage';
 import AboutPage from './components/AboutPage';
 import GalleryPage, { GalleryImage } from './components/GalleryPage';
@@ -15,10 +20,9 @@ import AdminOrderPage from './components/admin/AdminOrderPage';
 import AdminPlantPage from './components/admin/AdminPlantPage';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import ProfilePage from './components/ProfilePage';
-import Modal from './components/shared/Modal';
-import Spinner from './components/shared/Spinner';
-import Footer from './components/shared/Footer';
-import PubSub from './utils/pubsub';
+import SignUpForm from './components/forms/SignUpForm';
+import LogInForm from './components/forms/LogInForm';
+import ForgotPasswordForm from './components/forms/ForgotPasswordForm';
 //Provide global themes
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
@@ -26,110 +30,81 @@ import { getTheme } from './theme';
 //Authentication
 import { requireAuthentication } from './components/shared/hoc/requireAuthentication';
 import * as authQuery from './query/auth';
-import SignUpForm from './components/forms/SignUpForm';
-import LogInForm from './components/forms/LogInForm';
-import ForgotPasswordForm from './components/forms/ForgotPasswordForm';
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.previousLocation = this.props.Location;
-    this.modalRef = React.createRef(null);
-    this.buttonRef = React.createRef(null);
-    this.modalRoutes = ['/register', '/login', '/forgot-password']
-    this.isModalOpen = false;
-    this.state = {
-      nav_visible: true,
-      token: null,
-      user_roles: null,
-      theme: getTheme(),
-      menu_open: false,
-    }
-    this.menuClicked = this.menuClicked.bind(this);
+function App(props) {
+  let [non_modal_location, setNonModalLocation] = useState(null);
+  let [nav_visible, setNavVisible] = useState(true);
+  const nav_visible_y = useRef(-1);
+  let [token, setToken] = useState(null);
+  let [user_roles, setUserRoles] = useState(null);
+  let [theme, setTheme] = useState(getTheme());
+  let [menu_open, setMenuOpen] = useState(false);
+
+  let modalRoutes = ['/register', '/login', '/forgot-password', '/gallery/'];
+  let isModalOpen = modalRoutes.some(route => window.location.pathname.includes(route));
+  if (!isModalOpen && non_modal_location === null) {
+    setNonModalLocation(window.location);
   }
+  console.log('EEEEEEEEE')
 
-  componentDidMount() {
-    this.tokenSub = PubSub.subscribe('token', (_, token) => {
-      if (this.state.token !== token) {
-        this.setState({ token: token });
-      }
-    });
-    this.themeSub = PubSub.subscribe('theme', (_, theme) => {
-      if (this.state.theme !== theme) {
-        this.setState({ theme: theme });
-      }
-    });
-    this.roleSub = PubSub.subscribe('roles', (_, roles) => {
-      if (this.state.user_roles !== roles) {
-        this.setState({ user_roles: roles });
-      }
-    });
-
-    if (this.state.token == null) {
-      authQuery.checkCookies();
+  // Determines when the nav becomes visible/invisible
+  const trackScrolling = useCallback(() => {
+    console.log('DDDDDDDDD')
+    if (nav_visible_y === -1) nav_visible_y.current = window.pageYOffset;
+    let distance_scrolled = window.pageYOffset - nav_visible_y;
+    if ((distance_scrolled > 0 && !nav_visible) ||
+      (distance_scrolled < 0 && nav_visible)) {
+        nav_visible_y.current = window.pageYOffset;
     }
-    //Tracks when nav became visible or invisible
-    this.nav_visible_y = window.pageYOffset;
-    document.addEventListener('scroll', this.trackScrolling);
-  }
-
-  componentWillUnmount() {
-    PubSub.unsubscribe(this.tokenSub);
-    PubSub.unsubscribe(this.themeSub);
-    PubSub.unsubscribe(this.roleSub);
-    document.addEventListener('scroll', this.trackScrolling);
-  }
-
-  // Determines when to load the next page of thumbnails
-  trackScrolling = () => {
-    let distance_scrolled = window.pageYOffset - this.nav_visible_y;
-    if (distance_scrolled > 0 && !this.state.nav_visible ||
-        distance_scrolled < 0 && this.state.nav_visible) {
-      this.nav_visible_y = window.pageYOffset;
+    if (distance_scrolled > 50 && nav_visible && window.pageYOffset > 100) {
+      setNavVisible(false);
+    } else if (distance_scrolled <= -50 && !nav_visible) {
+      setNavVisible(true);
     }
-    if (distance_scrolled > 50 && this.state.nav_visible && window.pageYOffset > 100) {
-      this.setState({ nav_visible: false });
-    } else if (distance_scrolled <= -50 && !this.state.nav_visible) {
-      this.setState({ nav_visible: true });
-    }
-  };
+  }, [nav_visible]);
 
-  menuClicked(is_open) {
-    console.log("MENU CLICKEEDDD!!!!", is_open);
-    this.setState({ menu_open: is_open });
-  }
+  const menuClicked = (is_open) => setMenuOpen(is_open);
 
-  render() {
-    let currentLocation = this.props.location;
-    let isModalOpen = this.modalRoutes.some(route => route === this.props.location.pathname) || this.props.location.pathname.includes('/gallery/'); //TODO make better check for gallery image modal
-    if (!isModalOpen) {
-      this.previousLocation = this.props.location;
-    } else {
-      currentLocation = this.previousLocation;
-    }
-    // Happens when first navigated page is a modal
-    let loadDefaultPage = (currentLocation === undefined);
-    
-    return (
-      <ThemeProvider theme={this.state.theme}>
-        <GlobalStyles menu_open={this.state.menu_open}/>
-        <div className="App">
-          <div className="page-container">
-            <div className="content-wrap">
-              <Navbar menuClicked={this.menuClicked} history={this.props.history} visible={this.state.nav_visible} token={this.state.token} user_roles={this.state.user_roles}/>
-              <Spinner spinning={false} />
-              {/* Non-modal routes - only one can be loaded at a time */}
-              {loadDefaultPage ? 
+  useEffect(() => {
+    console.log('AAAAAAAAAAA')
+    let tokenSub = PubSub.subscribe('token', (_, t) => setToken(t));
+    let themeSub = PubSub.subscribe('theme', (_, t) => setTheme(t));
+    let roleSub = PubSub.subscribe('roles', (_, r) => setUserRoles(r));
+    document.addEventListener('scroll', trackScrolling);
+    return (() => {
+      console.log('BBBBBBBB')
+      PubSub.unsubscribe(tokenSub);
+      PubSub.unsubscribe(themeSub);
+      PubSub.unsubscribe(roleSub);
+      document.removeEventListener('scroll', trackScrolling);
+    })
+  }, [trackScrolling])
+
+  useEffect(() => {
+    console.log('CCCCCCCCC')
+    if (token == null) authQuery.checkCookies();
+  }, [token])
+
+  return (
+    <ThemeProvider theme={theme}>
+      <GlobalStyles menu_open={menu_open} />
+      <div className="App">
+        <div className="page-container">
+          <div className="content-wrap">
+            <Navbar menuClicked={menuClicked} visible={nav_visible} token={token} user_roles={user_roles} />
+            <Spinner spinning={false} />
+            {/* Non-modal routes - only one can be loaded at a time */}
+            {non_modal_location === null ?
               <Switch>
                 <Route path="/" component={HomePage} />
               </Switch>
               :
-              <Switch location={currentLocation}>
+              <Switch location={non_modal_location}>
                 <Route exact path="/" component={HomePage} />
                 <Route exact path="/about" component={AboutPage} />
                 <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route exact path="/gallery" component={GalleryPage} />
-                <Route exact path="/profile/:edit?" component={requireAuthentication(ProfilePage, this.state.token)} />
+                <Route exact path="/profile/:edit?" component={requireAuthentication(ProfilePage, token)} />
                 <Route exact path="/admin" component={AdminMainPage} />
                 <Route exact path="/admin/contact-info" component={AdminContactPage} />
                 <Route exact path="/admin/customers" component={AdminCustomerPage} />
@@ -138,15 +113,15 @@ class App extends React.Component {
                 <Route exact path="/admin/orders" component={AdminOrderPage} />
                 <Route exact path="/admin/plant-info" component={AdminPlantPage} />
                 <Route exact path="/shopping" render={() => (
-                  <ShoppingPage user_roles={this.state.user_roles} />
+                  <ShoppingPage user_roles={user_roles} />
                 )} />
                 <Route component={NotFoundPage} />
               </Switch>
-              }
-              {/* Modal routes - will display above previous route, or homepage */}
-              {isModalOpen ? 
-                <Switch>
-                  <Route exact path="/register" children={<Modal>
+            }
+            {/* Modal routes - will display above previous route, or homepage */}
+            {isModalOpen ?
+              <Switch>
+                <Route exact path="/register" children={<Modal>
                   <SignUpForm />
                 </Modal>} />
                 <Route exact path="/login" children={<Modal>
@@ -156,17 +131,16 @@ class App extends React.Component {
                   <ForgotPasswordForm />
                 </Modal>} />
                 <Route path="/gallery/:img" children={<Modal>
-                    <GalleryImage {...this.props} />
-                  </Modal>} />
-                </Switch>
+                  <GalleryImage {...props} />
+                </Modal>} />
+              </Switch>
               : null}
-            </div>
-            <Footer />
           </div>
+          <Footer />
         </div>
-      </ThemeProvider>
-    );
-  }
+      </div>
+    </ThemeProvider>
+  );
 }
 
-export default withRouter(App);
+export default App;

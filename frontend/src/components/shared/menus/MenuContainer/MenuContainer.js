@@ -2,45 +2,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledMenuContainer } from './MenuContainer.styled';
 
-class MenuContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleTouchStart = this.handleTouchStart.bind(this);
-    this.handleTouchEnd = this.handleTouchEnd.bind(this);
-    this.handleTouchMove = this.handleTouchMove.bind(this);
-    this.touchStart = 0;
-    this.touchEnd = 0;
-  }
+function MenuContainer(props) {
+  let touchStart = 0;
+  let touchEnd = 0;
 
-  handleTouchStart(event) {
-    this.touchStart = event.targetTouches[0].clientX;
-  }
+  const handleTouchStart = (event) => touchStart = event.targetTouches[0].clientX;
 
-  handleTouchMove(event) {
-    this.touchEnd = event.targetTouches[0].clientX;
-  }
+  const handleTouchMove = (event) => touchEnd = event.targetTouches[0].clientX;
 
-  handleTouchEnd() {
-    if (this.touchEnd - this.touchStart > 100) {
-      this.props.closeMenu();
+  const handleTouchEnd = () => {
+    if (touchEnd - touchStart > 100) {
+      props.closeMenu();
     }
   }
 
-  render() {
-    return (
-      <StyledMenuContainer
-        open={this.props.open}
-        onTouchStart={this.handleTouchStart}
-        onTouchEnd={this.handleTouchEnd}
-        onTouchMove={this.handleTouchMove}>
-        {this.props.children}
-      </StyledMenuContainer>
-    );
-  }
+  return (
+    <StyledMenuContainer
+      open={props.open}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}>
+      {props.children}
+    </StyledMenuContainer>
+  );
 }
 
 MenuContainer.propTypes = {
   open: PropTypes.bool.isRequired,
+  closeMenu: PropTypes.func.isRequired,
 }
 
 export default MenuContainer;

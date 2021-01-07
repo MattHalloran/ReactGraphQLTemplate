@@ -1,29 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { StyledCollapsible } from './Collapsible.styled';
 
-class Collapsible extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            open: false,
-        }
-        this.togglePanel = this.togglePanel.bind(this);
+function Collapsible(props) {
+
+    let [open, setOpen] = useState(false);
+
+    const togglePanel = () => {
+        setOpen(open => !open);
     }
-    togglePanel(e) {
-        this.setState({ open: !this.state.open })
-    }
-    render() {
-        return (<StyledCollapsible>
-            <div onClick={(e) => this.togglePanel(e)} className="header">
-                {this.props.title}</div>
-            {this.state.open ? (
-                <div className="content">
-                    {this.props.children}
-                </div>
-            ) : null}
-        </StyledCollapsible>);
-    }
+    return (<StyledCollapsible>
+        <div onClick={() => togglePanel()} className="header">
+            {props.title}</div>
+        {open ? (
+            <div className="content">
+                {props.children}
+            </div>
+        ) : null}
+    </StyledCollapsible>);
 }
 
 Collapsible.propTypes = {

@@ -1,18 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useLayoutEffect } from 'react';
 import { StyledAdminPlantPage } from './AdminPlantPage.styled';
 
-class AdminPlantPage extends React.Component {
-    componentDidMount() {
-        document.title = "Something here"
-    }
-    render() {
-        return (
-            <StyledAdminPlantPage>
-                
-            </StyledAdminPlantPage >
-        );
-    }
+function AdminPlantPage() {
+    useLayoutEffect(() => {
+        document.title = "Something here";
+    })
+    return (
+        <StyledAdminPlantPage>
+
+        </StyledAdminPlantPage>
+    );
 }
 
 AdminPlantPage.propTypes = {

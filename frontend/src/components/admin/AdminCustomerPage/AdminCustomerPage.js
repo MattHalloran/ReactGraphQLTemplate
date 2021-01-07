@@ -1,18 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useLayoutEffect } from 'react';
 import { StyledAdminCustomerPage } from './AdminCustomerPage.styled';
 
-class AdminCustomerPage extends React.Component {
-    componentDidMount() {
-        document.title = "Something here"
-    }
-    render() {
-        return (
-            <StyledAdminCustomerPage>
-                
-            </StyledAdminCustomerPage >
-        );
-    }
+function AdminCustomerPage() {
+    useLayoutEffect(() => {
+        document.title = "Something here";
+    })
+    return (
+        <StyledAdminCustomerPage>
+
+        </StyledAdminCustomerPage >
+    );
 }
 
 AdminCustomerPage.propTypes = {
