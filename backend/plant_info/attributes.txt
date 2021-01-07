@@ -1,0 +1,31 @@
+**NOTE*** Plants can be listed multiple times if they have a different size
+
+REQUIRED ATTRIBUTES
+
+latin name		1							
+common name		1							
+
+plant type		2			
+zone			2			
+width			2			
+height			2			
+deer resistant	1
+soil type		2				
+growth rate		2		
+bark type		"Exfoliating"			
+exposure		2		
+bloom time		2			
+shape			"Broad Upright"			
+leaf color		"Green"			
+fall color		"Red, Orange"			
+
+
+size			"#15"				
+avail			"8"
+comment			"small"
+
+EXTRA ATTRIBUTES
+type			1
+
+1 - https://njaes.rutgers.edu/deer-resistant-plants/ | plant-rutgers.json
+2 - https://www.jerseyyards.org/plant/ | JerseyYards | Attribute descriptions - https://www.jerseyyards.org/jersey-friendly-plants/plant-characteristics/

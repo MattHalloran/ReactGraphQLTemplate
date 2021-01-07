@@ -1,83 +1,71 @@
-import React from 'react';
-import './ForgotPasswordForm.css';
-import PubSub from '../../../utils/pubsub';
-import * as actionCreators from '../../../actions/auth'
+import React, { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import PubSub from 'utils/pubsub';
+import * as authQuery from 'query/auth';
+import * as validation from 'utils/validations';
 import TextField from '@material-ui/core/TextField';
-import { Redirect, Link } from "react-router-dom";
+import { StyledForgotPasswordForm } from './ForgotPasswordForm.styled';
 
-class ForgotPasswordForm extends React.Component {
-    constructor(props) {
-        super(props);
-        this.submit = this.submit.bind(this);
-        this.state = {
-            redirect: null,
-            email: "",
-            emailError: "",
-        }
-    }
-    forgotPassword() {
-        PubSub.publish('Loading', true);
-        actionCreators.resetPasswordRequest(this.state.email).then(response => {
-            PubSub.publish('Loading', false);
-          this.setState({ redirect: '/' });
+function ForgotPasswordForm(props) {
+    let history = useHistory();
+    let ref = useRef({
+        email: "",
+        emailError: "",
+    })
+    const [showErrors, setShowErrors] = useState(false);
+
+    const forgotPassword = () => {
+        PubSub.publish('loading', true);
+        authQuery.resetPasswordRequest(ref.current.email).then(() => {
+            PubSub.publish('loading', false);
+            history.replace('/');
         }).catch(error => {
-          console.error(error);
-          PubSub.publish('Loading', false);
+            console.error(error);
+            PubSub.publish('loading', false);
         })
     }
-    submit(event) {
+
+    const submit = (event) => {
         event.preventDefault();
-        if (this.validate()) {
-            this.forgotPassword();
+        setShowErrors(true);
+        if (!ref.current.emailError) {
+            forgotPassword();
         }
     }
-    change = e => {
-        this.setState({ [e.target.name]: e.target.value });
+
+    const change = (name, value) => {
+        ref.current[name] = value;
+        console.log('BUTTTT', ref.current);
     }
-    validate() {
-        let isError = false;
-        const errors = {
-            emailError: "",
-            passwordError: ""
-        }
 
-        if (this.state.email.length === 0) {
-            isError = true;
-            errors.emailError = "Must enter email"
-        }
-
-        this.setState({
-            ...this.state,
-            ...errors
-        });
-
-        return !isError
-    }
-    render() {
-        return (
-            <form onSubmit={this.props.onSubmit}>
-                <h2>Log In</h2>
-                <Link to={{ pathname: "/register" }}>Sign Up</Link>
+    return (
+        <StyledForgotPasswordForm onSubmit={props.onSubmit}>
+            <div className="form-header">
+                <h1 className="form-header-text">Forgot Password</h1>
+            </div>
+            <div className="form-body">
                 <TextField
-                    name="email"
-                    className="form-input"
+                    nameField="email"
+                    errorField="emailError"
                     type="email"
-                    variant="outlined"
                     label="Email"
-                    value={this.state.email}
-                    onChange={e => this.change(e)}
-                    error={this.state.emailError.length > 0}
-                    helperText={this.state.emailError}
-                    required
+                    onChange={change}
+                    validate={validation.emailValidation}
+                    showErrors={showErrors}
                 />
                 <div className="form-group">
-                    <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+                    <button className="primary submit" type="submit" onClick={submit}>
                         Submit
-       </button>
+                    </button>
                 </div>
-            </form>
-        );
-    }
+            </div>
+        </StyledForgotPasswordForm>
+    );
+}
+
+ForgotPasswordForm.propTypes = {
+    onSubmit: PropTypes.func,
 }
 
 export default ForgotPasswordForm;

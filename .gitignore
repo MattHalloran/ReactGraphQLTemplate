@@ -157,3 +157,9 @@ sketch
 
 #Database
 *.db
+
+#Postgres
+postgres/
+
+#Assets
+Backend/assets/

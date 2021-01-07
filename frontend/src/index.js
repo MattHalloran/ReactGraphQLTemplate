@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import './assets/css/bootstrap.min.css'
 import './assets/css/one-page-wonder.min.css'
 import { BrowserRouter } from "react-router-dom";
 

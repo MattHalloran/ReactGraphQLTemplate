@@ -1,144 +1,129 @@
-import React from 'react';
-import './SignUpForm.css';
-import PubSub from '../../../utils/pubsub';
-import * as actionCreators from '../../../actions/auth'
-import TextField from '@material-ui/core/TextField';
-import { Redirect, Link } from "react-router-dom";
+import React, { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import PubSub from 'utils/pubsub';
+import * as authQuery from 'query/auth';
+import * as validation from 'utils/validations';
+import TextField from 'components/shared/inputs/TextField';
+import { StyledSignUpForm } from './SignUpForm.styled';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
-class SignUpForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.submit = this.submit.bind(this);
-    this.state = {
-      redirect: null,
-      name: "",
-      nameError: "",
-      email: "",
-      emailError: "",
-      password: "",
-      passwordError: "",
-      confirmPassword: "",
-    }
+function SignUpForm(props) {
+  let history = useHistory();
+  let ref = useRef({
+    name: "",
+    nameError: "",
+    email: "",
+    emailError: "",
+    password: "",
+    passwordError: "",
+    confirmPassword: "",
+    existingCustomer: null,
+    existingCustomerError: "",
+  })
+  const [showErrors, setShowErrors] = useState(false);
+
+  const toLogin = () => {
+    history.replace('/login');
   }
-  register() {
-    PubSub.publish('Loading', true);
-    actionCreators.registerUser(this.state.name, this.state.email, this.state.password).then(response => {
+
+  const register = () => {
+    PubSub.publish('loading', true);
+    let existing_customer_bool = ref.current.existingCustomer === "true";
+    authQuery.registerUser(ref.current.name, ref.current.email, ref.current.password, existing_customer_bool).then(response => {
       console.log('woohoo registered!!!');
       console.log(response);
-      PubSub.publish('Loading', false);
-      this.setState({ redirect: '/profile' });
+      PubSub.publish('loading', false);
+      history.push('/profile');
     }).catch(error => {
-      console.log('received error here hereh here')
       console.error(error);
-      PubSub.publish('Loading', false)
+      PubSub.publish('loading', false)
       alert(error.error);
     })
   }
-  submit(event) {
+
+  const submit = (event) => {
     event.preventDefault();
-    if (this.validate()) {
-      this.register();
+    setShowErrors(true);
+    if (!ref.current.nameError && !ref.current.emailError && !ref.current.passwordError) {
+      register();
     }
   }
-  change = e => {
-    this.setState({ [e.target.name]: e.target.value });
+
+  const handleRadioSelect = (event) => {
+    ref.current.existingCustomer = event.target.value;
   }
-  validate() {
-    let isError = false;
-    const errors = {
-      nameError: "",
-      emailError: "",
-      passwordError: ""
-    }
 
-    if (this.state.name === "") {
-      isError = true;
-      errors.nameError = "Name cannot be blank";
-    }
-
-    if (this.state.email.indexOf("@") === -1) {
-      isError = true;
-      errors.emailError = "Requires valid email"
-    }
-
-    if (this.state.password !== this.state.confirmPassword) {
-      isError = true;
-      errors.passwordError = "Passwords do not match"
-    }
-
-    if (this.state.password.length < 8) {
-      isError = true;
-      errors.passwordError = "Password must be at least 8 characters long"
-    }
-
-    this.setState({
-      ...this.state,
-      ...errors
-    });
-
-    return !isError
+  const change = (name, value) => {
+    ref.current[name] = value;
   }
-  render() {
-    if (this.state.redirect) {
-      return <Redirect to={this.state.redirect} />
-    }
-    return (
-      <form onSubmit={this.props.onSubmit}>
-        <h2>Sign Up</h2>
-        <Link to={{pathname:"/login"}}>Log In</Link>
+
+  return (
+    <StyledSignUpForm onSubmit={props.onSubmit}>
+      <div className="form-header">
+        <h1 className="form-header-text">Sign Up</h1>
+        <h5 className="form-header-text"
+          onClick={toLogin}>&#8594;Log In</h5>
+      </div>
+      <div className="form-body">
         <TextField
-          name="name"
-          className="form-input"
-          variant="outlined"
+          nameField="name"
+          errorField="nameError"
+          type="text"
           label="Name"
-          value={this.state.name}
-          onChange={e => this.change(e)}
-          error={this.state.nameError.length > 0}
-          helperText={this.state.nameError}
-          required
+          onChange={change}
+          validate={validation.nameValidation}
+          showErrors={showErrors}
         />
         <TextField
-          name="email"
-          className="form-input"
+          nameField="email"
+          errorField="emailError"
           type="email"
-          variant="outlined"
           label="Email"
-          value={this.state.email}
-          onChange={e => this.change(e)}
-          error={this.state.emailError.length > 0}
-          helperText={this.state.emailError}
-          required
+          autocomplete="username"
+          onChange={change}
+          validate={validation.emailValidation}
+          showErrors={showErrors}
         />
         <TextField
-          name="password"
-          className="form-input"
+          nameField="password"
+          errorField="passwordError"
           type="password"
-          variant="outlined"
           label="Password"
-          value={this.state.password}
-          onChange={e => this.change(e)}
-          error={this.state.passwordError.length > 0}
-          helperText={this.state.passwordError}
-          required
+          autocomplete="password"
+          onChange={change}
+          validate={validation.passwordValidation}
+          showErrors={showErrors}
         />
         <TextField
-          name="confirmPassword"
-          className="form-input"
+          nameField="confirmPassword"
           type="password"
-          variant="outlined"
           label="Confirm Password"
-          value={this.state.confirmPassword}
-          onChange={e => this.change(e)}
-          required
+          onChange={change}
         />
+        <FormControl component="fieldset">
+          <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={ref.current.existingCustomer} onChange={handleRadioSelect}>
+            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+          </RadioGroup>
+          <FormHelperText>{ref.current.existingCustomerError}</FormHelperText>
+        </FormControl>
         <div className="form-group">
-          <button className="form-control btn btn-primary" type="submit" onClick={this.submit}>
+          <button className="primary submit" type="submit" onClick={submit}>
             Submit
      </button>
         </div>
-      </form>
-    );
-  }
+      </div>
+    </StyledSignUpForm>
+  );
+}
+
+SignUpForm.propTypes = {
+  onSubmit: PropTypes.func,
 }
 
 export default SignUpForm;
