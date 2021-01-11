@@ -1,9 +1,9 @@
 import React, { memo, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
-import SearchBar from '../SearchBar';
-import ShoppingMenu from '../ShoppingMenu';
-import ShoppingList from '../ShoppingList';
+import SearchBar from '../SearchBar/SearchBar';
+import ShoppingMenu from '../ShoppingMenu/ShoppingMenu';
+import ShoppingList from '../ShoppingList/ShoppingList';
 
 function ShoppingPage(props) {
 

@@ -36,7 +36,9 @@ function TextField(props) {
     }
 
     return (
-        <StyledTextField large_placeholder={(value === null || value.length === 0) && !active} has_error={has_error}>
+        <StyledTextField large_placeholder={(value === null || value.length === 0) && !active} 
+                         has_error={has_error} 
+                         locked={props.locked}>
             <input
                 name={props.nameField}
                 type={props.type}
@@ -44,6 +46,7 @@ function TextField(props) {
                 onChange={updateValue}
                 onFocus={() => !props.locked && setActive(true)}
                 onBlur={() => !props.locked && setActive(false)}
+                readOnly={props.locked}
             />
             <label className="text-label">{props.label}</label>
             <label className="error-label">{error}</label>

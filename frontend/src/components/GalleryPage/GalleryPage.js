@@ -4,12 +4,15 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
-import { SortableGalleryPhoto } from "components/shared/GalleryPhoto";
+import { SortableGalleryPhoto } from "components/shared/GalleryPhoto/GalleryPhoto";
 import * as imageQuery from 'query/gallery';
 import { SortableContainer } from 'react-sortable-hoc';
 import arrayMove from "array-move";
+import Modal from 'components/shared/Modal/Modal';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+
+//TODO add gallery modal part if url match (/gallery/:img)
 
 const SortableGallery = SortableContainer(({ items, handleClick }) => (
   <Gallery photos={items} renderImage={props => <SortableGalleryPhoto handleClick={handleClick} {...props} />} />

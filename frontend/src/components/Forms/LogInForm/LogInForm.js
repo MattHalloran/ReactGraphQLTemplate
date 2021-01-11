@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
-import TextField from 'components/shared/inputs/TextField';
+import TextField from 'components/shared/inputs/TextField/TextField';
 import { StyledLogInForm } from './LogInForm.styled';
 
 function LogInForm(props) {

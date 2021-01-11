@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from 'react';
-import Collapsible from 'components/shared/Collapsible';
-import Hero from 'components/shared/Hero';
+import Collapsible from 'components/shared/Collapsible/Collapsible';
+import Hero from 'components/shared/Hero/Hero';
 import { SocialIcon } from 'react-social-icons';
 
 function HomePage() {

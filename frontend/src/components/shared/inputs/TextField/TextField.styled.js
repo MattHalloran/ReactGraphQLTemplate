@@ -11,11 +11,11 @@ export const StyledTextField = styled.div`
     input {
         border: 4px solid ${({ has_error }) => has_error ? 'red' : 'blue'};
         border-radius: 5px;
-        position: absolute;
         height: 7vh;
         width: 100%;
         box-sizing: border-box;
         padding-top: ${({ large_placeholder }) => large_placeholder ? '0vh' : '2vh'};
+        background: ${({ locked }) => locked ? 'lightgrey' : 'white'};
     }
 
     input:focus {
@@ -40,7 +40,6 @@ export const StyledTextField = styled.div`
     }
 
     .error-label {
-        position: absolute;
         border: none;
         font-size: 16px;
         font-weight: 400;

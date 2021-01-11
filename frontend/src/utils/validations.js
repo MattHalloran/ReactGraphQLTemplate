@@ -41,3 +41,13 @@ export const passwordValidation = password => {
   }
   return "";
 }
+
+// TODO make more robust
+export const addressValidation = address => {
+  return defaultStringValidation('address', address);
+}
+
+// TODO make more robust
+export const phoneNumberValidation = phone => {
+  return defaultStringValidation('phone number', phone);
+}

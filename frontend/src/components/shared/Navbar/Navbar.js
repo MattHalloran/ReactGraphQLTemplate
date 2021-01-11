@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
-import BurgerMenu from '../menus/BurgerMenu';
+import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import * as authQuery from 'query/auth';
 import { StyledNavbar } from './Navbar.styled';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import ContactInfo from 'components/shared/ContactInfo';
+import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -54,19 +54,19 @@ function Hamburger(props) {
         roles?.forEach(r => {
             if (r.title === "Admin") {
                 admin_options = <React.Fragment>
-                    <Link to="/admin">Admin</Link>
+<p><Link to="/admin">Admin</Link></p>
                 </React.Fragment>
             }
         })
     }
     if (props.token == null) {
         account_options = <React.Fragment>
-            <Link to="/register">Sign Up</Link>
-            <Link to="/login">Log In</Link>
+            <p><Link to="/register">Sign Up</Link></p>
+            <p><Link to="/login">Log In</Link></p>
         </React.Fragment>
     } else {
         account_options = <React.Fragment>
-            <Link to="/" onClick={authQuery.logout}>Log Out</Link>
+            <p><Link to="/" onClick={authQuery.logout}>Log Out</Link></p>
         </React.Fragment>
     }
 
@@ -94,7 +94,6 @@ function NavList(props) {
             }
         })
     }
-    let location = useLocation();
     let options;
     if (props.token == null) {
         options = <React.Fragment>

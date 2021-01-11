@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';

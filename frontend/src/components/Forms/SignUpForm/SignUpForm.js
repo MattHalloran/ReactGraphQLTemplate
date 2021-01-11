@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
-import TextField from 'components/shared/inputs/TextField';
+import TextField from 'components/shared/inputs/TextField/TextField';
 import { StyledSignUpForm } from './SignUpForm.styled';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
