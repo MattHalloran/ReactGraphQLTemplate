@@ -1,4 +1,5 @@
 import PubSub from './utils/pubsub';
+import { LOCAL_STORAGE, PUBS } from 'consts';
 
 export const lightTheme = {
     // bodyPrimary: '#557A48',
@@ -34,13 +35,13 @@ export function setTheme(themeString) {
       theme = lightTheme;
       break;
   }
-  localStorage.setItem('theme', JSON.stringify(theme));
-  PubSub.publish('theme', theme);
+  localStorage.setItem(LOCAL_STORAGE.Theme, JSON.stringify(theme));
+  PubSub.publish(PUBS.Theme, theme);
 }
 
 export function getTheme() {
   try {
-    let theme = localStorage.getItem('theme');
+    let theme = localStorage.getItem(LOCAL_STORAGE.Theme);
     return theme !== null
         ? JSON.parse(theme)
         : lightTheme;

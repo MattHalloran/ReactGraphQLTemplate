@@ -3,6 +3,8 @@ import { get_token, create_user, send_password_reset_request, validate_token } f
 import PubSub from '../utils/pubsub';
 import { setTheme } from '../theme';
 import { StatusCodes } from './status';
+import _ from 'lodash';
+import { LOCAL_STORAGE, PUBS, LINKS } from 'consts';
 // import { useRadioGroup } from '@material-ui/core';
 
 export const ROLES = {
@@ -13,55 +15,36 @@ export const ROLES = {
 }
 
 function setToken(token) {
-    localStorage.setItem('token', token);
-    PubSub.publish('token', token);
+    localStorage.setItem(LOCAL_STORAGE.Token, token);
+    PubSub.publish(PUBS.Token, token);
 }
 
 function setRoles(roles) {
-    localStorage.setItem('roles', JSON.stringify(roles));
-    PubSub.publish('roles', roles);
-}
-
-export function checkCookiesSuccess(token, status) {
-    setToken(token);
-    return {
-        token: token,
-        status: status
-    };
-}
-
-export function checkCookiesFailure(status) {
-    setToken(null);
-    return {
-        token: null,
-        status: status
-    };
+    localStorage.setItem(LOCAL_STORAGE.Roles, JSON.stringify(roles));
+    PubSub.publish(PUBS.Roles, roles);
 }
 
 export function checkCookies() {
     return new Promise(function (resolve, reject) {
-        try {
-            let roles = localStorage.getItem('roles');
-            if (roles !== null) {
-                setRoles(JSON.parse(roles));
-            }
-            let token = localStorage.getItem('token');
-            if (!token) {
-                reject(loginUserFailure(StatusCodes.FAILURE_NOT_VERIFIED));
-            } else {
-                validate_token(token).then(response => {
-                    response.json().then(data => {
-                        if (data.status === StatusCodes.SUCCESS) {
-                            resolve(checkCookiesSuccess(token, data.status));
-                        } else {
-                            reject(checkCookiesFailure(data.status));
-                        }
-                    })
-                });
-            }
-        } catch (error) {
-            console.log(error);
-            reject(checkCookiesFailure(StatusCodes.FAILURE_NOT_VERIFIED));
+        let roles = localStorage.getItem(LOCAL_STORAGE.Roles);
+        console.log('ROLES ARE......', roles);
+        if (roles) setRoles(JSON.parse(roles));
+        console.log('GETTTING TOKEN FROM LOCAL STORAGE', LOCAL_STORAGE.Token)
+        let token = localStorage.getItem(LOCAL_STORAGE.Token);
+        console.log('TOKEN ISSSSSS', token);
+        if (!token) {
+            reject(loginUserFailure(StatusCodes.FAILURE_NOT_VERIFIED));
+        } else {
+            validate_token(token).then(data => {
+                if (data.ok) {
+                    console.log('SETTING TOKENNNNNN', token)
+                    setToken(token);
+                    resolve(data);
+                } else {
+                    setToken(null);
+                    reject(data);
+                }
+            })
         }
     });
 }
@@ -82,132 +65,65 @@ export function logoutAndRedirect() {
     return (dispatch) => {
         let history = useHistory();
         dispatch(logout());
-        history.push('/');
-    };
-}
-
-export function loginUserSuccess(status, token, user) {
-    login(token, user);
-    return {
-        token: token,
-        status: status
-    };
-}
-
-export function loginUserFailure(status) {
-    logout();
-    let error;
-    switch (status) {
-        case StatusCodes.FAILURE_NO_USER:
-            error = "Email or password incorrect. Please try again.";
-            break;
-        case StatusCodes.FAILURE_SOFT_LOCKOUT:
-            error = "Incorrect password entered too many times. Please try again in 15 minutes";
-            break;
-        case StatusCodes.FAILURE_HARD_LOCKOUT:
-            error = "Account locked. Please contact us";
-            break;
-        default:
-            error = "Unknown error occurred. Please try again";
-            break;
-    }
-    return {
-        error: error,
-        status: status
+        history.push(LINKS.Home);
     };
 }
 
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
-        try {
-            get_token(email, password).then(response => {
-                response.json().then(data => {
-                    if (data.status === StatusCodes.SUCCESS) {
-                        resolve(loginUserSuccess(data.status, data.token, data.user));
-                    } else {
-                        reject(loginUserFailure(data.status));
-                    }
-                })
-            });
-        } catch (error) {
-            console.log(error);
-            reject(loginUserFailure(StatusCodes.ERROR_UNKOWN));
-        }
+        get_token(email, password).then(data => {
+            if (data.ok) {
+                login(token, user);
+                resolve(data);
+            } else {
+                logout();
+                switch (data.status) {
+                    case StatusCodes.FAILURE_NO_USER:
+                        data.error = "Email or password incorrect. Please try again.";
+                        break;
+                    case StatusCodes.FAILURE_SOFT_LOCKOUT:
+                        data.error = "Incorrect password entered too many times. Please try again in 15 minutes";
+                        break;
+                    case StatusCodes.FAILURE_HARD_LOCKOUT:
+                        data.error = "Account locked. Please contact us";
+                        break;
+                    default:
+                        data.error = "Unknown error occurred. Please try again";
+                        break;
+                }
+                reject(data);
+            }
+        })
     });
-}
-
-export function registerUserSuccess(status, token, user) {
-    login(token, user);
-    return {
-        token: token,
-        status: status
-    };
-}
-
-export function registerUserFailure(status) {
-    logout();
-    let error;
-    if (status === StatusCodes.FAILURE_EMAIL_EXISTS) {
-        error = "User with that email already exists. If you would like to reset your password, TODO";
-    } else {
-        error = "Unknown error occurred. Please try again";
-    }
-    return {
-        error: error,
-        status: status
-    };
 }
 
 export function registerUser(name, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
-        try {
-            create_user(name, email, password, existing_customer)
-                .then(response => {
-                    response.json().then(data => {
-                        console.log(data);
-                        if (data.status === StatusCodes.SUCCESS) {
-                            resolve(registerUserSuccess(data.status, data.token, data.theme, data.name));
-                        } else {
-                            reject(registerUserFailure(data.status));
-                        }
-                    })
-                });
-        } catch (error) {
-            console.error(error);
-            reject(registerUserFailure(StatusCodes.ERROR_UNKNOWN));
-        }
+        create_user(name, email, password, existing_customer).then(data => {
+            if (data.ok) {
+                login(data.token, data.user);
+                resolve(data);
+            } else {
+                logout();
+                if (status === StatusCodes.FAILURE_EMAIL_EXISTS) {
+                    data.error = "User with that email already exists. If you would like to reset your password, TODO";
+                } else {
+                    data.error = "Unknown error occurred. Please try again";
+                }
+                reject(data);
+            }
+        })
     });
-}
-
-export function resetPasswordSuccess(status) {
-    return {
-        status: status
-    };
-}
-
-export function resetPasswordFailure(status) {
-    return {
-        status: status
-    };
 }
 
 export function resetPasswordRequest(email) {
     return new Promise(function (resolve, reject) {
-        try {
-            send_password_reset_request(email)
-                .then(response => {
-                    response.json().then(data => {
-                        console.log(data);
-                        if (data.status === StatusCodes.SUCCESS) {
-                            resolve(resetPasswordSuccess(data.status))
-                        } else {
-                            reject(resetPasswordFailure(data.status))
-                        }
-                    })
-                })
-        } catch (error) {
-            console.error(error);
-            reject(resetPasswordFailure(StatusCodes.ERROR_UNKNOWN));
-        }
+        send_password_reset_request(email).then(data => {
+            if (data.ok) {
+                resolve(data);
+            } else {
+                reject(data);
+            }
+        })
     });
 }

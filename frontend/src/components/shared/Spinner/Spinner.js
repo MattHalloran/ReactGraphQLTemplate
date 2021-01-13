@@ -3,12 +3,13 @@ import PropTypes from 'prop-types';
 import OakSpinner from 'assets/img/oak-spinner.svg';
 import PubSub from 'utils/pubsub';
 import { StyledSpinner } from './Spinner.styled';
+import { PUBS } from 'consts';
 
 function Spinner(props) {
     let [spinning, setSpinning] = useState(props.spinning);
 
     useEffect(() => {
-        let loading_sub = PubSub.subscribe('loading', (_, data) => setSpinning(data));
+        let loading_sub = PubSub.subscribe(PUBS.Loading, (_, data) => setSpinning(data));
         return () => PubSub.unsubscribe(loading_sub);
     }, [])
 

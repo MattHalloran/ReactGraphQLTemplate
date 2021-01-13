@@ -5,6 +5,7 @@ import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
+import { PUBS, LINKS } from 'consts';
 
 function LogInForm() {
     let history = useHistory();
@@ -19,14 +20,14 @@ function LogInForm() {
     const toForgotPassword = () => history.replace('/forgot-password');
 
     const login = () => {
-        PubSub.publish('loading', true);
+        PubSub.publish(PUBS.Loading, true);
         authQuery.loginUser(email, password).then(() => {
-            PubSub.publish('loading', false);
-            history.push('/profile');
+            PubSub.publish(PUBS.Loading, false);
+            history.push(LINKS.Profile);
         }).catch(error => {
             console.log("Failed to log in");
             console.error(error);
-            PubSub.publish('loading', false);
+            PubSub.publish(PUBS.Loading, false);
             alert(error.error);
         })
     }

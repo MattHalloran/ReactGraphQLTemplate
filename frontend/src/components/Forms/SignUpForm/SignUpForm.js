@@ -10,6 +10,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { useHistoryState } from 'utils/useHistoryState';
+import { PUBS, LINKS } from 'consts';
 
 function SignUpForm() {
   let history = useHistory();
@@ -29,13 +30,13 @@ function SignUpForm() {
   }
 
   const register = () => {
-    PubSub.publish('loading', true);
-    authQuery.registerUser(name, email, password, existingCustomer).then(response => {
-      PubSub.publish('loading', false);
-      history.push('/profile');
+    PubSub.publish(PUBS.Loading, true);
+    authQuery.registerUser(name, email, password, existingCustomer).then(() => {
+      PubSub.publish(PUBS.Loading, false);
+      history.push(LINKS.Profile);
     }).catch(error => {
       console.error(error);
-      PubSub.publish('loading', false)
+      PubSub.publish(PUBS.Loading, false)
       alert(error.error);
     })
   }
@@ -83,7 +84,7 @@ function SignUpForm() {
       <InputText
         label="Confirm Password"
         type="password"
-        valueFunc={setPassword}
+        valueFunc={setConfirmPassword}
       />
       <FormControl component="fieldset">
         <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>

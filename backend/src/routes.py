@@ -107,6 +107,8 @@ def send_password_reset_request():
 @app.route("/api/is_token_valid", methods=["POST"])
 def is_token_valid():
     incoming = request.get_json()
+    print('GOT INCOMINGGGGGGGGGGGGGGGGGGG')
+    print(incoming)
     token = incoming['token']
     is_valid = verify_token(app, token) if (token is not None) else False
 

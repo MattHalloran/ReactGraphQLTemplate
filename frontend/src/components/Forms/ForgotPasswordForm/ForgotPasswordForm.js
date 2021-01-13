@@ -5,6 +5,7 @@ import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
+import { PUBS } from 'consts';
 
 function ForgotPasswordForm() {
     let history = useHistory();
@@ -13,13 +14,13 @@ function ForgotPasswordForm() {
     const [showErrors, setShowErrors] = useState(false);
 
     const forgotPassword = () => {
-        PubSub.publish('loading', true);
+        PubSub.publish(PUBS.Loading, true);
         authQuery.resetPasswordRequest(email).then(() => {
-            PubSub.publish('loading', false);
+            PubSub.publish(PUBS.Loading, false);
             history.replace('/');
         }).catch(error => {
             console.error(error);
-            PubSub.publish('loading', false);
+            PubSub.publish(PUBS.Loading, false);
         })
     }
 

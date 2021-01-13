@@ -4,6 +4,7 @@ import { StyledShoppingList } from './ShoppingList.styled';
 import ItemCard from 'components/shared/ItemCard/ItemCard';
 import PubSub from 'utils/pubsub';
 import * as shoppingQuery from 'query/shopping';
+import { PUBS } from 'consts';
 
 function ShoppingList(props) {
     let page_size = props.page_size ? props.page_size : 25;
@@ -17,15 +18,15 @@ function ShoppingList(props) {
     }, [])
 
     const queryItems = () => {
-        PubSub.publish('loading', true);
+        PubSub.publish(PUBS.Loading, true);
         shoppingQuery.getInventory(filter_by).then(response => {
-            PubSub.publish('loading', false);
+            PubSub.publish(PUBS.Loading, false);
             setDisplayedItems(response.page_items);
             setItemIDs(response.item_ids);
         }).catch(error => {
             console.log("Failed to load inventory");
             console.error(error);
-            PubSub.publishSync('loading', false);
+            PubSub.publishSync(PUBS.Loading, false);
             alert(error.error);
         })
     }

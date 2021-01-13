@@ -11,7 +11,7 @@ import arrayMove from "array-move";
 import Modal from 'components/shared/wrappers/Modal/Modal';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { BUSINESS_NAME } from 'consts';
+import { BUSINESS_NAME, PUBS, LINKS } from 'consts';
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
@@ -50,7 +50,7 @@ function GalleryPage() {
     }, [thumbnails])
 
     useEffect(() => {
-        PubSub.publishSync('loading', loading_thumbnails.current);
+        PubSub.publishSync(PUBS.Loading, loading_thumbnails.current);
     }, [loading_thumbnails.current])
 
     useEffect(() => {
@@ -63,7 +63,7 @@ function GalleryPage() {
     }, [images_meta.current])
 
     useEffect(() => {
-        if (loading_gallery.current) PubSub.publishSync('loading', true);
+        if (loading_gallery.current) PubSub.publishSync(PUBS.Loading, true);
     }, [loading_gallery.current])
 
     const readyToLoadPage = () => {
@@ -126,12 +126,12 @@ function GalleryPage() {
         if (num_loaded.current <= 0) return;
         // Default to last image if none open
         if (!curr_img) {
-            history.push('/gallery/' + images_meta.current[num_loaded.current - 1].hash);
+            history.push(LINKS.Gallery + '/' + images_meta.current[num_loaded.current - 1].hash);
         } else {
             findCurrentImageIndex();
             // Find previous image index using modulus
             let prev_index = (curr_img_index.current + images_meta.current.length - 1) % images_meta.current.length;
-            history.replace('/gallery/' + images_meta.current[prev_index].hash);
+            history.replace(LINKS.Gallery + '/' + images_meta.current[prev_index].hash);
         }
     }
 
@@ -139,18 +139,18 @@ function GalleryPage() {
         if (num_loaded.current <= 0) return;
         // Default to first image if none open
         if (!curr_img) {
-            history.push('/gallery/' + images_meta.current[0].hash);
+            history.push(LINKS.Gallery + '/' + images_meta.current[0].hash);
         } else {
             findCurrentImageIndex();
             // Find next image index using modulus
             let next_index = (curr_img_index.current + 1) % images_meta.current.length;
-            history.replace('/gallery/' + images_meta.current[next_index].hash);
+            history.replace(LINKS.Gallery + '/' + images_meta.current[next_index].hash);
         }
     }
 
     const openImage = (_event, photo, index) => {
         curr_img_index.current = index;
-        history.push('/gallery/' + photo.key);
+        history.push(LINKS.Gallery + '/' + photo.key);
     }
 
     const onSortEnd = ({ oldIndex, newIndex }) => {

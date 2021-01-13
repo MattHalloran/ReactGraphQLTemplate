@@ -4,6 +4,7 @@ import Navbar from 'components/shared/Navbar/Navbar';
 import Spinner from 'components/shared/Spinner/Spinner';
 import Footer from 'components/shared/Footer/Footer';
 import PubSub from 'utils/pubsub';
+import { PUBS, LINKS } from 'consts';
 import FormPage from 'components/shared/wrappers/FormPage/FormPage';
 //Routes
 import HomePage from 'components/HomePage/HomePage';
@@ -60,9 +61,9 @@ function App() {
   const menuClicked = (is_open) => setMenuOpen(is_open);
 
   useEffect(() => {
-    let tokenSub = PubSub.subscribe('token', (_, t) => setToken(t));
-    let themeSub = PubSub.subscribe('theme', (_, t) => setTheme(t));
-    let roleSub = PubSub.subscribe('roles', (_, r) => setUserRoles(r));
+    let tokenSub = PubSub.subscribe(PUBS.Token, (_, t) => setToken(t));
+    let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t));
+    let roleSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
     document.addEventListener('scroll', trackScrolling);
     return (() => {
       PubSub.unsubscribe(tokenSub);
@@ -90,44 +91,44 @@ function App() {
             <Spinner spinning={false} />
             <Switch>
               {/* public pages */}
-              <Route exact path="/" component={HomePage} />
-              <Route exact path="/about" component={AboutPage} />
-              <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
-              <Route exact path="/gallery/:img?" component={GalleryPage} />
-              <Route exact path="/register" render={() => (
+              <Route exact path={LINKS.Home} component={HomePage} />
+              <Route exact path={LINKS.About} component={AboutPage} />
+              <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} />
+              <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} />
+              <Route exact path={LINKS.Register} render={() => (
                 <FormPage header="Sign Up">
                   <SignUpForm />
                 </FormPage>
               )} />
-              <Route exact path="/login" render={() => (
+              <Route exact path={LINKS.LogIn} render={() => (
                 <FormPage header="Log In">
                   <LogInForm />
                 </FormPage>
               )} />
-              <Route exact path="/forgot-password" render={() => (
+              <Route exact path={LINKS.ForgotPassword} render={() => (
                 <FormPage header="Forgot Password">
                   <ForgotPasswordForm />
                 </FormPage>
               )} />
               {/* customer pages */}
-              <Route exact path="/profile" render={() => (
+              <Route exact path={LINKS.Profile} render={() => (
                 <RequireAuthentication token={token}>
                   <FormPage header="Profile">
                     <ProfileForm />
                   </FormPage>
                 </RequireAuthentication>
               )} />
-              <Route exact path="/shopping" render={() => (
+              <Route exact path={LINKS.Shopping} render={() => (
                 <ShoppingPage user_roles={user_roles} />
               )} />
               {/* admin pages */}
-              <Route exact path="/admin" component={AdminMainPage} />
-              <Route exact path="/admin/contact-info" component={AdminContactPage} />
-              <Route exact path="/admin/customers" component={AdminCustomerPage} />
-              <Route exact path="/admin/gallery" component={AdminGalleryPage} />
-              <Route exact path="/admin/inventory" component={AdminInventoryPage} />
-              <Route exact path="/admin/orders" component={AdminOrderPage} />
-              <Route exact path="/admin/plant-info" component={AdminPlantPage} />
+              <Route exact path={LINKS.Admin} component={AdminMainPage} />
+              <Route exact path={LINKS.AdminContactInfo} component={AdminContactPage} />
+              <Route exact path={LINKS.AdminCustomers} component={AdminCustomerPage} />
+              <Route exact path={LINKS.AdminGallery} component={AdminGalleryPage} />
+              <Route exact path={LINKS.AdminInventory} component={AdminInventoryPage} />
+              <Route exact path={LINKS.AdminOrders} component={AdminOrderPage} />
+              <Route exact path={LINKS.AdminPlantInfo} component={AdminPlantPage} />
               {/* 404 page */}
               <Route component={NotFoundPage} />
             </Switch>

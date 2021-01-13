@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import * as authQuery from 'query/auth';
+import { LINKS } from 'consts';
 
 function RequireAuthentication(props) {
     let history = useHistory();
@@ -9,7 +10,7 @@ function RequireAuthentication(props) {
     useLayoutEffect(() => {
         if (props.token) return;
         authQuery.checkCookies().then().catch(() => {
-            history.push('/');
+            history.push(LINKS.Home);
         })
     })
 
