@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { BUSINESS_NAME } from 'consts';
 
 function ProfileForm() {
-    const urlParams = useParams();
-    const [editing, setEditing] = useState(urlParams.edit === 'editing');
+    const [editing, setEditing] = useState(false);
     const [firstName, setFirstName] = useState("")
     const [firstNameError, setFirstNameError] = useState(null);
     const [lastName, setLastName] = useState("")
@@ -30,13 +28,18 @@ function ProfileForm() {
         console.log('TODO!!!')
     }
 
+    const toggleEdit = (event) => {
+        event.preventDefault();
+        setEditing(edit => !edit);
+    }
+
     const submit = (event) => {
         event.preventDefault();
         setShowErrors(true);
-        if (!firstNameError && !lastNameError && !emailError && 
+        if (!firstNameError && !lastNameError && !emailError &&
             !phoneError && !addressError && !passwordError && password === confirmPassword) {
-                updateProfile();
-            }
+            updateProfile();
+        }
     }
 
     return (
@@ -115,6 +118,14 @@ function ProfileForm() {
                 valueFunc={setConfirmPassword}
                 disabled={!editing}
             />
+            <div className="buttons-div">
+                <button className="primary" onClick={toggleEdit}>
+                    { editing ? "Cancel" : "Edit" }
+            </button>
+                <button className="primary" type="submit" onClick={submit}>
+                    Submit
+            </button>
+            </div>
         </React.Fragment>
     );
 }

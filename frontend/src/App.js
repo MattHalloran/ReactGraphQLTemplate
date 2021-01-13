@@ -110,7 +110,7 @@ function App() {
                 </FormPage>
               )} />
               {/* customer pages */}
-              <Route exact path="/profile/:edit?" render={() => (
+              <Route exact path="/profile" render={() => (
                 <RequireAuthentication token={token}>
                   <FormPage header="Profile">
                     <ProfileForm />
