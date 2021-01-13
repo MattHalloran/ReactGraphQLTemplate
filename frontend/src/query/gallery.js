@@ -1,5 +1,5 @@
 import { fetch_gallery, fetch_image, fetch_image_thumbnails, upload_gallery_images } from './http_functions';
-import { StatusCodes } from './constants';
+import { StatusCodes } from './status';
 
 export function getGallery() {
     return new Promise(function (resolve, reject) {
@@ -8,7 +8,7 @@ export function getGallery() {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === StatusCodes.FETCH_GALLERY_SUCCESS) {
+                        if(data.status === StatusCodes.SUCCESS) {
                             resolve(data);
                         } else {
                             reject(data);
@@ -17,7 +17,7 @@ export function getGallery() {
                 })
         } catch (error) {
             console.error(error);
-            reject({ status: StatusCodes.FETCH_GALLERY_ERROR_UNKNOWN });
+            reject({ status: StatusCodes.ERROR_UNKNOWN });
         }
     });
 }
@@ -28,7 +28,7 @@ export function getGalleryThumbnails(hashes) {
             fetch_image_thumbnails(hashes)
                 .then(response => {
                     response.json().then(data => {
-                        if(data.status === StatusCodes.FETCH_GALLERY_THUMBNAILS_SUCCESS) {
+                        if(data.status === StatusCodes.SUCCESS) {
                             resolve(data);
                         } else {
                             reject(data);
@@ -37,7 +37,7 @@ export function getGalleryThumbnails(hashes) {
                 })
         } catch (error) {
             console.error(error);
-            reject({ status: StatusCodes.FETCH_GALLERY_THUMBNAILS_ERROR_UNKNOWN });
+            reject({ status: StatusCodes.ERROR_UNKNOWN });
         }
     });
 }
@@ -57,7 +57,7 @@ export function getGalleryImage(hash) {
                 })
         } catch (error) {
             console.error(error);
-            reject({ status: StatusCodes.FETCH_GALLERY_PAGE_ERROR_UNKNOWN });
+            reject({ status: StatusCodes.ERROR_UNKNOWN });
         }
     });
 }
@@ -68,7 +68,7 @@ export function uploadGalleryImages(formData) {
             upload_gallery_images(formData)
                 .then(response => {
                     response.json().then(data => {
-                        if(data.status === StatusCodes.UPLOAD_GALLERY_IMAGES_SUCCESS) {
+                        if(data.status === StatusCodes.SUCCESS) {
                             resolve(data);
                         } else {
                             reject(data);
@@ -77,7 +77,7 @@ export function uploadGalleryImages(formData) {
                 })
         } catch (error) {
             console.error(error);
-            reject({ status: StatusCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN });
+            reject({ status: StatusCodes.ERROR_UNKNOWN });
         }
     });
 }

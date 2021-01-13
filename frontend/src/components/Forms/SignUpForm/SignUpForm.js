@@ -1,30 +1,27 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
-import TextField from 'components/shared/inputs/TextField/TextField';
-import { StyledSignUpForm } from './SignUpForm.styled';
+import InputText from 'components/shared/inputs/InputText/InputText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { useHistoryState } from 'utils/useHistoryState';
 
-function SignUpForm(props) {
+function SignUpForm() {
   let history = useHistory();
-  let ref = useRef({
-    name: "",
-    nameError: "",
-    email: "",
-    emailError: "",
-    password: "",
-    passwordError: "",
-    confirmPassword: "",
-    existingCustomer: null,
-    existingCustomerError: "",
-  })
+  const [name, setName] = useHistoryState("su_name", "");
+  const [nameError, setNameError] = useHistoryState("su_name_error", null);
+  const [email, setEmail] = useHistoryState("su_email", "");
+  const [emailError, setEmailError] = useHistoryState("su_email_error", null);
+  const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
+  const [existingCustomerError, setExistingCustomerError] = useHistoryState("su_existing_error", null);
   const [showErrors, setShowErrors] = useState(false);
 
   const toLogin = () => {
@@ -33,10 +30,7 @@ function SignUpForm(props) {
 
   const register = () => {
     PubSub.publish('loading', true);
-    let existing_customer_bool = ref.current.existingCustomer === "true";
-    authQuery.registerUser(ref.current.name, ref.current.email, ref.current.password, existing_customer_bool).then(response => {
-      console.log('woohoo registered!!!');
-      console.log(response);
+    authQuery.registerUser(name, email, password, existingCustomer).then(response => {
       PubSub.publish('loading', false);
       history.push('/profile');
     }).catch(error => {
@@ -49,81 +43,68 @@ function SignUpForm(props) {
   const submit = (event) => {
     event.preventDefault();
     setShowErrors(true);
-    if (!ref.current.nameError && !ref.current.emailError && !ref.current.passwordError) {
+    if (!nameError && !emailError && !passwordError && password === confirmPassword && !existingCustomerError) {
       register();
     }
   }
 
   const handleRadioSelect = (event) => {
-    ref.current.existingCustomer = event.target.value;
-  }
-
-  const change = (name, value) => {
-    ref.current[name] = value;
+    setExistingCustomer(event.target.value);
   }
 
   return (
-    <StyledSignUpForm onSubmit={props.onSubmit}>
-      <div className="form-header">
-        <h1 className="form-header-text">Sign Up</h1>
+    <React.Fragment>
+      <InputText
+        label="Name"
+        type="text"
+        value={name}
+        valueFunc={setName}
+        errorFunc={setNameError}
+        validate={validation.nameValidation}
+        showErrors={showErrors}
+      />
+      <InputText
+        label="Email"
+        type="email"
+        value={email}
+        valueFunc={setEmail}
+        errorFunc={setEmailError}
+        validate={validation.emailValidation}
+        showErrors={showErrors}
+      />
+      <InputText
+        label="Password"
+        type="password"
+        valueFunc={setPassword}
+        errorFunc={setPasswordError}
+        validate={validation.passwordValidation}
+        showErrors={showErrors}
+      />
+      <InputText
+        label="Confirm Password"
+        type="password"
+        valueFunc={setPassword}
+      />
+      <FormControl component="fieldset">
+        <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
+          <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+          <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+        </RadioGroup>
+        <FormHelperText>{existingCustomerError}</FormHelperText>
+      </FormControl>
+      <div className="form-group">
+        <button className="primary submit" type="submit" onClick={submit}>
+          Submit
+     </button>
         <h5 className="form-header-text"
           onClick={toLogin}>&#8594;Log In</h5>
       </div>
-      <div className="form-body">
-        <TextField
-          nameField="name"
-          errorField="nameError"
-          type="text"
-          label="Name"
-          onChange={change}
-          validate={validation.nameValidation}
-          showErrors={showErrors}
-        />
-        <TextField
-          nameField="email"
-          errorField="emailError"
-          type="email"
-          label="Email"
-          autocomplete="username"
-          onChange={change}
-          validate={validation.emailValidation}
-          showErrors={showErrors}
-        />
-        <TextField
-          nameField="password"
-          errorField="passwordError"
-          type="password"
-          label="Password"
-          autocomplete="password"
-          onChange={change}
-          validate={validation.passwordValidation}
-          showErrors={showErrors}
-        />
-        <TextField
-          nameField="confirmPassword"
-          type="password"
-          label="Confirm Password"
-          onChange={change}
-        />
-        <FormControl component="fieldset">
-          <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={ref.current.existingCustomer} onChange={handleRadioSelect}>
-            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-          </RadioGroup>
-          <FormHelperText>{ref.current.existingCustomerError}</FormHelperText>
-        </FormControl>
-        <div className="form-group">
-          <button className="primary submit" type="submit" onClick={submit}>
-            Submit
-     </button>
-        </div>
-      </div>
-    </StyledSignUpForm>
+    </React.Fragment>
   );
 }
 
 SignUpForm.propTypes = {
-  onSubmit: PropTypes.func,
+
 }
 
 export default SignUpForm;

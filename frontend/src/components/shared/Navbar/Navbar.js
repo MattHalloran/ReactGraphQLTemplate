@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import * as authQuery from 'query/auth';
 import { StyledNavbar } from './Navbar.styled';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
+import { BUSINESS_NAME, USER_ROLES } from 'consts';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -32,8 +33,8 @@ function Navbar(props) {
     return (
         <StyledNavbar visible={props.visible}>
             <Link to="/" className="nav-brand">
-                <img src={Logo} alt="New Life Nursery Logo" className="nav-logo" />
-                <span className="nav-name">New Life Nursery</span>
+                <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
+                <span className="nav-name">{BUSINESS_NAME}</span>
             </Link>
             {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
         </StyledNavbar>
@@ -52,7 +53,7 @@ function Hamburger(props) {
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            if (r.title === "Admin") {
+            if (r.title === USER_ROLES.Admin) {
                 admin_options = <React.Fragment>
 <p><Link to="/admin">Admin</Link></p>
                 </React.Fragment>
@@ -85,7 +86,7 @@ function NavList(props) {
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            if (r.title === "Admin") {
+            if (r.title === USER_ROLES.Admin) {
                 admin_options = <React.Fragment>
                     <li className="nav-item">
                         <Link to="/admin">Admin</Link>

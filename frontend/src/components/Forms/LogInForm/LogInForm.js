@@ -1,20 +1,17 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import { useHistoryState } from 'utils/useHistoryState';
 import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
-import TextField from 'components/shared/inputs/TextField/TextField';
-import { StyledLogInForm } from './LogInForm.styled';
+import InputText from 'components/shared/inputs/InputText/InputText';
 
-function LogInForm(props) {
+function LogInForm() {
     let history = useHistory();
-    let ref = useRef({
-        email: "",
-        emailError: "",
-        password: "",
-        passwordError: "",
-    })
+    const [email, setEmail] = useHistoryState("li_email", "");
+    const [emailError, setEmailError] = useHistoryState("li_email_error", null);
+    const [password, setPassword] = useState("")
+    const [passwordError, setPasswordError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
 
     const toRegister = () => history.replace('/register');
@@ -23,7 +20,7 @@ function LogInForm(props) {
 
     const login = () => {
         PubSub.publish('loading', true);
-        authQuery.loginUser(ref.current.email, ref.current.password).then(() => {
+        authQuery.loginUser(email, password).then(() => {
             PubSub.publish('loading', false);
             history.push('/profile');
         }).catch(error => {
@@ -37,55 +34,40 @@ function LogInForm(props) {
     const submit = (event) => {
         event.preventDefault();
         setShowErrors(true);
-        if (!ref.current.emailError && !ref.current.passwordError) {
-            login();
-        }
-    }
-
-    const change = (name, value) => {
-        ref.current[name] = value;
-        console.log(ref.current[name])
+        if (!emailError && !passwordError) login();
     }
 
     return (
-        <StyledLogInForm onSubmit={props.onSubmit}>
-            <div className="form-header">
-                <h1 className="form-header-text">Log In</h1>
-                <h5 className="form-header-text"
-                    onClick={toRegister}>&#8594;Sign Up</h5>
-            </div>
-            <div className="form-body">
-                <TextField
-                    nameField="email"
-                    errorField="emailError"
-                    type="email"
-                    label="Email"
-                    onChange={change}
-                    validate={validation.emailValidation}
-                    showErrors={showErrors}
-                />
-                <TextField
-                    nameField="password"
-                    errorField="passwordError"
-                    type="password"
-                    label="Password"
-                    onChange={change}
-                    validate={validation.passwordValidation}
-                    showErrors={showErrors}
-                />
-                <div className="form-group">
-                    <button className="primary submit" type="submit" onClick={submit}>
-                        Submit
-                    </button>
-                </div>
-                <h5 onClick={toForgotPassword}>Forgot Password?</h5>
-            </div>
-        </StyledLogInForm>
+        <React.Fragment>
+            <InputText
+                label="Email"
+                type="email"
+                value={email}
+                valueFunc={setEmail}
+                errorFunc={setEmailError}
+                validate={validation.emailValidation}
+                showErrors={showErrors}
+            />
+            <InputText
+                label="Password"
+                type="password"
+                valueFunc={setPassword}
+                errorFunc={setPasswordError}
+                validate={validation.passwordValidation}
+                showErrors={showErrors}
+            />
+            <button className="primary submit" type="submit" onClick={submit}>
+                Submit
+            </button>
+            <h5 className="form-header-text"
+                onClick={toRegister}>&#8594;Sign Up</h5>
+            <h5 onClick={toForgotPassword}>Forgot Password?</h5>
+        </React.Fragment>
     );
 }
 
 LogInForm.propTypes = {
-    onSubmit: PropTypes.func,
+
 }
 
 export default LogInForm;

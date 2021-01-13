@@ -161,14 +161,26 @@ export function upload_gallery_images(formData) {
     });
 }
 
-export function update_contact_info(data, token) {
+export function fetch_contact_info() {
+    return new Promise(function (resolve, reject) {
+        fetch('/api/fetch_contact_info', {
+            method: "POST",
+            headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+        }).then((response) => {
+            resolve(response);
+        }).catch((error) => {
+            reject(error);
+        })
+    });
+}
+
+export function update_contact_info(data) {
     return new Promise(function (resolve, reject) {
         fetch('/api/update_contact_info', {
             method: "POST",
             headers: { 'Content-Type': 'text/html; charset=UTF-8' },
             body: JSON.stringify({
                 "data": data,
-                "token": token
             })
         }).then((response) => {
             resolve(response);

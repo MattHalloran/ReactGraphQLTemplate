@@ -1,5 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 
+// Removes scrolling from App when menu is open,
+// so only the menu scrolls
 const menu_app_style = `position: fixed; 
     bottom: 0;
     left: 0;
@@ -39,33 +41,18 @@ export const GlobalStyles = createGlobalStyle`
         text-decoration: none;
     }
 
-    .App {
+    #App {
         text-align: center;
         ${({ menu_open }) => menu_open ? menu_app_style : ''};
     }
     
-    .App-header {
-    background-color: #282c34;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
-    }
-    
-    .App-link {
-    color: #61dafb;
-    }
-    
-    .page-container {
+    #page-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     }
     
-    .content-wrap{
+    #content-wrap{
     flex:1;
     position: relative;
     }

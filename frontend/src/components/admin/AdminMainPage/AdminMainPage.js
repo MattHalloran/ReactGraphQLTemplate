@@ -2,12 +2,13 @@ import React, { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminMainPage } from './AdminMainPage.styled';
 import { useHistory } from "react-router-dom";
+import { BUSINESS_NAME } from 'consts';
 
 function AdminMainPage() {
     let history = useHistory();
 
     useLayoutEffect(() => {
-        document.title = "Admin Portal | New Life Nursery";
+        document.title = `Admin Portal | ${BUSINESS_NAME}`;
     })
 
     const cardClicked = (link) => {

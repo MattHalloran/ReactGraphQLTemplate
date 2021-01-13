@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { StyledModal } from './Modal.styled';
-import ClickOutside from '../wrappers/ClickOutside';
+import ClickOutside from '../ClickOutside/ClickOutside';
 
 // const ESCAPE_KEY = 27;
 

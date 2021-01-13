@@ -1,5 +1,5 @@
 import { fetch_inventory, fetch_inventory_page } from './http_functions';
-import { StatusCodes } from './constants';
+import { StatusCodes } from './status';
 
 export function getInventorySuccess(status) {
     return {
@@ -20,7 +20,7 @@ export function getInventory(filter_by) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === StatusCodes.FETCH_INVENTORY_SUCCESS) {
+                        if(data.status === StatusCodes.SUCCESS) {
                             resolve(getInventorySuccess(data.status))
                         } else {
                             reject(getInventoryFailure(data.status))
@@ -29,7 +29,7 @@ export function getInventory(filter_by) {
                 })
         } catch (error) {
             console.error(error);
-            reject(getInventoryFailure(StatusCodes.FETCH_INVENTORY_ERROR_UNKNOWN));
+            reject(getInventoryFailure(StatusCodes.ERROR_UNKNOWN));
         }
     });
 }
@@ -53,7 +53,7 @@ export function getInventoryPage(item_ids) {
                 .then(response => {
                     response.json().then(data => {
                         console.log(data);
-                        if(data.status === StatusCodes.FETCH_INVENTORY_PAGE_SUCCESS) {
+                        if(data.status === StatusCodes.SUCCESS) {
                             resolve(getInventoryPageSuccess(data.status))
                         } else {
                             reject(getInventoryPageFailure(data.status))
@@ -62,7 +62,7 @@ export function getInventoryPage(item_ids) {
                 })
         } catch (error) {
             console.error(error);
-            reject(getInventoryPageFailure(StatusCodes.FETCH_INVENTORY_PAGE_ERROR_UNKNOWN));
+            reject(getInventoryPageFailure(StatusCodes.ERROR_UNKNOWN));
         }
     });
 }
