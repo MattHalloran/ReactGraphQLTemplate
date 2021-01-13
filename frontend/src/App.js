@@ -36,8 +36,8 @@ function App() {
   console.log('RENDERING APPPPPP')
   let [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
-  let [token, setToken] = useState(null);
-  let token_attempts = useRef(0);
+  let [session, setSession] = useState(null);
+  let session_attempts = useRef(0);
   let [user_roles, setUserRoles] = useState(null);
   let [theme, setTheme] = useState(getTheme());
   let [menu_open, setMenuOpen] = useState(false);
@@ -61,12 +61,12 @@ function App() {
   const menuClicked = (is_open) => setMenuOpen(is_open);
 
   useEffect(() => {
-    let tokenSub = PubSub.subscribe(PUBS.Token, (_, t) => setToken(t));
+    let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
     let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t));
     let roleSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
     document.addEventListener('scroll', trackScrolling);
     return (() => {
-      PubSub.unsubscribe(tokenSub);
+      PubSub.unsubscribe(sessionSub);
       PubSub.unsubscribe(themeSub);
       PubSub.unsubscribe(roleSub);
       document.removeEventListener('scroll', trackScrolling);
@@ -74,12 +74,12 @@ function App() {
   }, [trackScrolling])
 
   useEffect(() => {
-    if (token == null && token_attempts.current < 5) {
-      token_attempts.current += 1;
-      console.log('TOKEN ATTEMPTS IS', token_attempts.current)
+    if (session == null && session_attempts.current < 5) {
+      session_attempts.current++;
+      console.log('SESSION ATTEMPTS IS', session_attempts.current)
       authQuery.checkCookies();
     }
-  }, [token])
+  }, [session])
 
   return (
     <ThemeProvider theme={theme}>
@@ -87,7 +87,7 @@ function App() {
       <div id="App">
         <div id="page-container">
           <div id="content-wrap">
-            <Navbar menuClicked={menuClicked} visible={nav_visible} token={token} user_roles={user_roles} />
+            <Navbar menuClicked={menuClicked} visible={nav_visible} session={session} user_roles={user_roles} />
             <Spinner spinning={false} />
             <Switch>
               {/* public pages */}
@@ -112,9 +112,9 @@ function App() {
               )} />
               {/* customer pages */}
               <Route exact path={LINKS.Profile} render={() => (
-                <RequireAuthentication token={token}>
+                <RequireAuthentication session={session}>
                   <FormPage header="Profile">
-                    <ProfileForm />
+                    <ProfileForm session={session}/>
                   </FormPage>
                 </RequireAuthentication>
               )} />

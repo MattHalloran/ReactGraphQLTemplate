@@ -70,9 +70,13 @@ def get_token():
         data = ast.literal_eval(dict_str)
         user = User.get_user_from_credentials(data['email'], data['password'])
         if user:
+            token = generate_token(app, user)
+            print('RECEIVED TOKEN!!!!!!')
+            print(token)
+            user.set_token(token)
             return {
                 "user": user.to_json(),
-                "token": generate_token(app, user),
+                "token": token,
                 "status": AuthCodes.SUCCESS.value,
             }
         else:
@@ -270,3 +274,23 @@ def update_contact_info():
     incoming = request.get_json()
     print('TODOOOOOOO')
     return False
+
+
+# First verifies that the us
+@app.route("/api/fetch_profile_info", methods=["POST"])
+def fetch_profile_info():
+    incoming = request.get_json()
+    email = incoming['email']
+    token = incoming['token']
+    print('boopies')
+    print(email)
+    print(token)
+    user_data = User.get_profile_data(email, token, app)
+    if user_data is str:
+        print('FAILEDDDD')
+        print(user_data)
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+    print('SUCESS BABYYYYY')
+    print(user_data)
+    user_data['status'] = AuthCodes.SUCCESS.value
+    return user_data

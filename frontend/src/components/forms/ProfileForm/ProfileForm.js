@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import PropTypes from 'prop-types';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
+import * as profileQuery from 'query/profile';
 import { BUSINESS_NAME } from 'consts';
 
-function ProfileForm() {
+function ProfileForm(props) {
     const [editing, setEditing] = useState(false);
     const [firstName, setFirstName] = useState("")
     const [firstNameError, setFirstNameError] = useState(null);
@@ -19,9 +21,25 @@ function ProfileForm() {
     const [address, setAddress] = useState("")
     const [addressError, setAddressError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
+    const sendingRequest = useRef(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         document.title = `Profile | ${BUSINESS_NAME}`;
+        console.log('PROPSSSS', props);
+        if (!sendingRequest.current && props.session) {
+            sendingRequest.current = true;
+            profileQuery.getProfileInfo(props.session).then(response => {
+                console.log('GOT PROFILE INFOO!!!!!!', response);
+                if (!editing) {
+                    if (response.email) setEmail(response.email);
+                    if (response.phone_number) setPhone(response.phone_number)
+                }
+                sendingRequest.current = false;
+            }).catch(err => {
+                console.error(err);
+                sendingRequest.current = false;
+            })
+        }
     }, [])
 
     const updateProfile = () => {
@@ -131,7 +149,7 @@ function ProfileForm() {
 }
 
 ProfileForm.propTypes = {
-
+    session: PropTypes.object,
 }
 
 export default ProfileForm;

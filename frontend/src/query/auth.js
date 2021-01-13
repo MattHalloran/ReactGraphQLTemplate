@@ -3,7 +3,6 @@ import { get_token, create_user, send_password_reset_request, validate_token } f
 import PubSub from '../utils/pubsub';
 import { setTheme } from '../theme';
 import { StatusCodes } from './status';
-import _ from 'lodash';
 import { LOCAL_STORAGE, PUBS, LINKS } from 'consts';
 // import { useRadioGroup } from '@material-ui/core';
 
@@ -14,9 +13,9 @@ export const ROLES = {
     HARD_LOCK: 4,
 }
 
-function setToken(token) {
-    localStorage.setItem(LOCAL_STORAGE.Token, token);
-    PubSub.publish(PUBS.Token, token);
+function setSession(session) {
+    localStorage.setItem(LOCAL_STORAGE.Session, JSON.stringify(session));
+    PubSub.publish(PUBS.Session, session);
 }
 
 function setRoles(roles) {
@@ -27,21 +26,19 @@ function setRoles(roles) {
 export function checkCookies() {
     return new Promise(function (resolve, reject) {
         let roles = localStorage.getItem(LOCAL_STORAGE.Roles);
-        console.log('ROLES ARE......', roles);
         if (roles) setRoles(JSON.parse(roles));
-        console.log('GETTTING TOKEN FROM LOCAL STORAGE', LOCAL_STORAGE.Token)
-        let token = localStorage.getItem(LOCAL_STORAGE.Token);
-        console.log('TOKEN ISSSSSS', token);
-        if (!token) {
-            reject(loginUserFailure(StatusCodes.FAILURE_NOT_VERIFIED));
+        let session = localStorage.getItem(LOCAL_STORAGE.Session);
+        if (session) session = JSON.parse(session);
+        if (!session || !session.email || !session.token) {
+            setSession(null);
+            reject({ok: false, status: StatusCodes.FAILURE_NOT_VERIFIED});
         } else {
-            validate_token(token).then(data => {
+            validate_token(session.token).then(data => {
                 if (data.ok) {
-                    console.log('SETTING TOKENNNNNN', token)
-                    setToken(token);
+                    setSession(session);
                     resolve(data);
                 } else {
-                    setToken(null);
+                    setSession(null);
                     reject(data);
                 }
             })
@@ -49,14 +46,14 @@ export function checkCookies() {
     });
 }
 
-export function login(token, user) {
-    setToken(token);
+export function login(session, user) {
+    setSession(session);
     setRoles(user.roles);
     setTheme(user.theme);
 }
 
 export function logout() {
-    setToken(null);
+    setSession(null);
     setRoles(null);
     setTheme(null);
 }
@@ -73,7 +70,7 @@ export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         get_token(email, password).then(data => {
             if (data.ok) {
-                login(token, user);
+                login({email: email, token: data.token}, data.user);
                 resolve(data);
             } else {
                 logout();
@@ -101,11 +98,11 @@ export function registerUser(name, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
         create_user(name, email, password, existing_customer).then(data => {
             if (data.ok) {
-                login(data.token, data.user);
+                login({email: email, token: data.token }, data.user);
                 resolve(data);
             } else {
                 logout();
-                if (status === StatusCodes.FAILURE_EMAIL_EXISTS) {
+                if (data.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
                     data.error = "User with that email already exists. If you would like to reset your password, TODO";
                 } else {
                     data.error = "Unknown error occurred. Please try again";

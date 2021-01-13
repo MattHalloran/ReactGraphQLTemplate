@@ -8,18 +8,18 @@ function RequireAuthentication(props) {
     let history = useHistory();
 
     useLayoutEffect(() => {
-        if (props.token) return;
+        if (props.session) return;
         authQuery.checkCookies().then().catch(() => {
             history.push(LINKS.Home);
         })
     })
 
-    if (props.token) return props.children;
+    if (props.session) return props.children;
     return null;
 }
 
 RequireAuthentication.propTypes = {
-    token: PropTypes.string.isRequired,
+    session: PropTypes.object,
 }
 
 export default RequireAuthentication;

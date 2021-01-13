@@ -2,6 +2,7 @@ import time
 import bcrypt
 from src.api import db
 from enum import Enum
+from src.auth import verify_token
 
 
 # Enum = class name, value = table nameƒ
@@ -86,6 +87,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     login_attempts = db.Column(db.Integer, nullable=False, default=0)
     last_login_attempt = db.Column(db.Float, nullable=False, default=time.time())  # UTC seconds since epoch
+    session_token = db.Column(db.String(250))
     account_status = db.Column(db.Integer, nullable=False, default=0)
     # One-to-many relationship between a customer and their previous orders
     orders = db.relationship('Order', backref='customer', lazy=True)
@@ -127,7 +129,6 @@ class User(db.Model):
             if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
                 print('Resetting soft account lock')
                 user.login_attempts = 0
-                db.session.commit()
             user.last_login_attempt = time.time()
             user.login_attempts += 1
             db.session.commit()
@@ -135,7 +136,7 @@ class User(db.Model):
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
                bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
-                user.login_attempts = 0
+                user.login_attempts = 0  # Reset login attemps
                 db.session.commit()
                 return user
             if user.login_attempts > User.LOGIN_ATTEMPS_TO_HARD_LOCKOUT:
@@ -147,6 +148,38 @@ class User(db.Model):
                 user.account_status = AccountStatuses.SOFT_LOCK.value
                 db.session.commit()
         return None
+
+    def set_token(self, token: str):
+        '''Sets session token, which is used to validate
+        near-term authenticated requests'''
+        self.session_token = token
+        db.session.commit()
+
+    @staticmethod
+    def get_profile_data(email, token, app):
+        '''Returns user profile data, after
+        verifying the session token'''
+        # Check if user esists
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return 'No user with that email'
+        # Check if supplied token is equal to the user's token
+        if not token == user.session_token:
+            return 'Tokens do not match'
+        # Check if user token is still valid
+        if not verify_token(app, user.session_token):
+            return 'Token could not be verified'
+        # If all checks pass, return profile data
+        return {
+            "name": user.name,
+            "theme": user.theme,
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "image_file": user.image_file,
+            "orders": [order.to_json() for order in user.orders],
+            "roles": [role.to_json() for role in user.roles],
+            "discounts": [discount.to_json() for discount in user.discounts]
+        }
 
     @staticmethod
     def get_user_lock_status(email: str):

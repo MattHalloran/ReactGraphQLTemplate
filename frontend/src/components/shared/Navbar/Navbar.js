@@ -42,9 +42,9 @@ function Navbar(props) {
 }
 
 Navbar.propTypes = {
-    token: PropTypes.string,
+    session: PropTypes.object,
     visible: PropTypes.bool.isRequired,
-    user_roles: PropTypes.object,
+    user_roles: PropTypes.array,
 }
 
 function Hamburger(props) {
@@ -60,7 +60,7 @@ function Hamburger(props) {
             }
         })
     }
-    if (props.token == null) {
+    if (props.session == null) {
         account_options = <React.Fragment>
             <p><Link to="/register">Sign Up</Link></p>
             <p><Link to="/login">Log In</Link></p>
@@ -96,7 +96,7 @@ function NavList(props) {
         })
     }
     let options;
-    if (props.token == null) {
+    if (props.session == null) {
         options = <React.Fragment>
             <li className="nav-item">
                 <Link className="nav-link"
@@ -133,7 +133,7 @@ function NavList(props) {
 }
 
 NavList.propTypes = {
-    token: PropTypes.string,
+    session: PropTypes.string,
     user_roles: PropTypes.array,
 }
 

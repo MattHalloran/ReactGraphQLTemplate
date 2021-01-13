@@ -8,13 +8,13 @@ export const USER_ROLES = {
 
 export const LOCAL_STORAGE = {
     Theme: "theme",
-    Token: "token",
+    Session: "session",
     Roles: "roles",
 }
 
 export const PUBS = {
     Theme: "theme",
-    Token: "token",
+    Session: "session",
     Roles: "roles",
     Loading: "loading",
 }
