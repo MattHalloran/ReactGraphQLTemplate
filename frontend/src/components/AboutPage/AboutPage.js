@@ -1,13 +1,14 @@
 import React, { useLayoutEffect } from 'react';
 import { StyledAboutPage } from './AboutPage.styled';
+import { BUSINESS_NAME } from 'consts';
 
 function AboutPage() {
     useLayoutEffect(() => {
-        document.title = "About | New Life Nursery";
+        document.title = `About | ${BUSINESS_NAME}`;
     })
     return (
         <StyledAboutPage>
-            <h1>About New Life Nursery Inc</h1>
+            <h1>About {BUSINESS_NAME} Inc</h1>
             <br />
             <h3>For over thirty-five years, New Life Nursery, Inc has been striving to grow the most beautiful, healthy and consistent plant material at competitive prices. Family owned and operated by the Gianaris Family, we continue to hold to our original motto: "Growing top quality material for buyers who are interested in the best".
 

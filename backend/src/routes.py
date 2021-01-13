@@ -13,7 +13,6 @@ from enum import Enum
 from base64 import b64encode, b64decode
 import json
 from os import path
-from PIL import Image as PImage
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -21,33 +20,14 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Must keep this in sync with the frontend auth code enums
 class AuthCodes(Enum):
-    REGISTER_SUCCESS = 300
-    REGISTER_ERROR_EMAIL_EXISTS = 400
-    REGISTER_ERROR_UNKNOWN = 500
-    FETCH_PROTECTED_DATA_REQUEST = 600
-    RECEIVE_PROTECTED_DATA = 700
-    TOKEN_FOUND = 800
-    TOKEN_NOT_FOUND_NO_USER = 900
-    TOKEN_NOT_FOUND_SOFT_LOCKOUT = 910
-    TOKEN_NOT_FOUND_HARD_LOCKOUT = 920
-    TOKEN_NOT_FOUND_ERROR_UNKNOWN = 1000
-    RESET_PASSWORD_SUCCESS = 1100
-    RESET_PASSWORD_ERROR_UNKNOWN = 1200
-    TOKEN_VERIFIED = 1300
-    TOKEN_NOT_VERIFIED = 1400
-    FETCH_INVENTORY_SUCCESS = 1500
-    FETCH_INVENTORY_ERROR_UNKNOWN = 1600
-    FETCH_INVENTORY_PAGE_SUCCESS = 1700
-    FETCH_INVENTORY_PAGE_ERROR_UNKNOWN = 1800
-    FETCH_GALLERY_SUCCESS = 1900
-    FETCH_GALLERY_ERROR_UNKNOWN = 2000
-    FETCH_GALLERY_IMAGE_SUCCESS = 2100
-    FETCH_GALLERY_IMAGE_ERROR_UNKNOWN = 2200
-    UPLOAD_GALLERY_IMAGES_SUCCESS = 2300
-    UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN = 2400
-    UPLOAD_GALLERY_IMAGES_ERROR_SOME_IMAGES_ALREADY_UPLOADED = 2500
-    FETCH_GALLERY_THUMBNAILS_SUCCESS = 2600
-    FETCH_GALLERY_THUMBNAILS_ERROR_UNKNOWN = 2700
+    SUCCESS = 100
+    ERROR_UNKNOWN = 200
+    FAILURE_EMAIL_EXISTS = 400
+    FAILURE_NO_USER = 900
+    FAILURE_SOFT_LOCKOUT = 910
+    FAILURE_HARD_LOCKOUT = 920
+    FAILURE_NOT_VERIFIED = 1400
+    ERROR_SOME_IMAGES_ALREADY_UPLOADED = 2500
 
 
 @app.route('/api/register', methods=['POST'])
@@ -67,15 +47,15 @@ def register():
         # Most likely means that a user with that email already exists
         except exc.IntegrityError:
             print(traceback.format_exc())
-            status = AuthCodes.REGISTER_ERROR_EMAIL_EXISTS.value
+            status = AuthCodes.FAILURE_EMAIL_EXISTS.value
             return {"status": status}
-        status = AuthCodes.REGISTER_SUCCESS.value
+        status = AuthCodes.SUCCESS.value
         return {"token": generate_token(app, user),
                 "user": user.to_json(),
                 "status": status}
     except Exception:
         print(traceback.format_exc())
-        status = AuthCodes.REGISTER_ERROR_UNKNOWN.value
+        status = AuthCodes.ERROR_UNKNOWN.value
         return {"status": status}
 
 
@@ -93,22 +73,22 @@ def get_token():
             return {
                 "user": user.to_json(),
                 "token": generate_token(app, user),
-                "status": AuthCodes.TOKEN_FOUND.value,
+                "status": AuthCodes.SUCCESS.value,
             }
         else:
             account_status = User.get_user_lock_status(data['email'])
             print(f'User account status is {account_status}')
-            status = AuthCodes.TOKEN_NOT_FOUND_ERROR_UNKNOWN.value
+            status = AuthCodes.ERROR_UNKNOWN.value
             if account_status == -1:
-                status = AuthCodes.TOKEN_NOT_FOUND_NO_USER.value
+                status = AuthCodes.FAILURE_NO_USER.value
             elif account_status == AccountStatuses.SOFT_LOCK.value:
-                status = AuthCodes.TOKEN_NOT_FOUND_SOFT_LOCKOUT.value
+                status = AuthCodes.FAILURE_SOFT_LOCKOUT.value
             elif account_status == AccountStatuses.HARD_LOCK.value:
-                status = AuthCodes.TOKEN_NOT_FOUND_HARD_LOCKOUT.value
+                status = AuthCodes.FAILURE_HARD_LOCKOUT.value
             return jsonify(status=status)
     except Exception:
         print(traceback.format_exc())
-        return {"status": AuthCodes.TOKEN_NOT_FOUND_ERROR_UNKNOWN.value}
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
 
 
 @app.route('/api/reset_password_request', methods=['POST'])
@@ -118,10 +98,10 @@ def send_password_reset_request():
         dict_str = byte_data.decode('UTF-8')
         data = ast.literal_eval(dict_str)
         reset_password(data['email'])
-        return {"status": AuthCodes.RESET_PASSWORD_SUCCESS.value}
+        return {"status": AuthCodes.SUCCESS.value}
     except Exception:
         print(traceback.format_exc())
-        return {"status": AuthCodes.RESET_PASSWORD_ERROR_UNKNOWN.value}
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
 
 
 @app.route("/api/is_token_valid", methods=["POST"])
@@ -131,10 +111,10 @@ def is_token_valid():
     is_valid = verify_token(app, token) if (token is not None) else False
 
     if is_valid:
-        status = AuthCodes.TOKEN_VERIFIED.value
+        status = AuthCodes.SUCCESS.value
         return jsonify(token_is_valid=True, status=status)
     else:
-        status = AuthCodes.TOKEN_NOT_VERIFIED.value
+        status = AuthCodes.FAILURE_NOT_VERIFIED.value
         return jsonify(token_is_valid=False, status=status)
 
 
@@ -151,7 +131,7 @@ def fetch_inventory():
     return {
         "all_plant_ids": item_IDs,
         "page_results": page_results,
-        "status": AuthCodes.FETCH_INVENTORY_SUCCESS.value
+        "status": AuthCodes.SUCCESS.value
     }
 
 
@@ -170,7 +150,7 @@ def fetch_gallery():
     print(images_data)
     return {
         "images_meta": json.dumps(images_data),
-        "status": AuthCodes.FETCH_GALLERY_SUCCESS.value
+        "status": AuthCodes.SUCCESS.value
     }
 
 
@@ -194,7 +174,7 @@ def image_thumbnails():
         thumbnail_data.append(base64_string)
     return {
         "thumbnails": thumbnail_data,
-        "status": AuthCodes.FETCH_GALLERY_THUMBNAILS_SUCCESS.value
+        "status": AuthCodes.SUCCESS.value
     }
 
 
@@ -208,7 +188,7 @@ def image():
     # Get image data from its hash
     img = Image.from_hash(img_hash)
     if not img:
-        return {"status": AuthCodes.FETCH_GALLERY_IMAGE_ERROR_UNKNOWN.value}
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
     # Read image file
     with open(f'{img.directory}/{img.file_name}.{img.extension}', 'rb') as open_file:
         byte_content = open_file.read()
@@ -217,7 +197,7 @@ def image():
     base64_string = base64_bytes.decode('utf-8')
     return {
         "image": base64_string,
-        "status": AuthCodes.FETCH_GALLERY_IMAGE_SUCCESS.value
+        "status": AuthCodes.SUCCESS.value
     }
 
 
@@ -225,7 +205,7 @@ def image():
 @app.route("/api/upload_gallery_image/", methods=["POST"])
 def upload_gallery_image():
     try:
-        status = AuthCodes.UPLOAD_GALLERY_IMAGES_SUCCESS.value
+        status = AuthCodes.SUCCESS.value
         failed_indexes = []
         # Grab data from request form
         names = request.form.getlist('name')
@@ -244,7 +224,7 @@ def upload_gallery_image():
             # image was uploaded already
             if Image.is_hash_used(img_hash):
                 print('Image already in backend!')
-                status = AuthCodes.UPLOAD_GALLERY_IMAGES_ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
+                status = AuthCodes.ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
                 failed_indexes.append(i)
                 continue
             # Create a path to store the image and thumbnail, that don't already exist
@@ -273,12 +253,18 @@ def upload_gallery_image():
                 "status": status}
     except Exception:
         print(traceback.format_exc())
-        return {"status": AuthCodes.UPLOAD_GALLERY_IMAGES_ERROR_UNKNOWN.value}
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+
+
+@app.route("/api/fetch_contact_info", methods=["POST"])
+def fetch_contact_info():
+    print('TODOOOO')
+    return False
 
 
 # First verifies that the user is an admin, then updates company contact info
 @app.route("/api/update_contact_info", methods=["POST"])
 def update_contact_info():
     incoming = request.get_json()
-    print('TODO')
+    print('TODOOOOOOO')
     return False

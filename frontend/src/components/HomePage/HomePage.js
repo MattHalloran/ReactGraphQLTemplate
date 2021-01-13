@@ -1,11 +1,12 @@
 import React, { useLayoutEffect } from 'react';
-import Collapsible from 'components/shared/Collapsible';
-import Hero from 'components/shared/Hero';
+import Collapsible from 'components/shared/wrappers/Collapsible/Collapsible';
+import Hero from 'components/shared/Hero/Hero';
 import { SocialIcon } from 'react-social-icons';
+import { BUSINESS_NAME } from 'consts';
 
 function HomePage() {
     useLayoutEffect(() => {
-        document.title = "Home | New Life Nursery";
+        document.title = `Home | ${BUSINESS_NAME}`;
     }, [])
 
     return (

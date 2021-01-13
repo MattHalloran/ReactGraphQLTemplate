@@ -1,14 +1,15 @@
 import React, { memo, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
-import SearchBar from '../SearchBar';
-import ShoppingMenu from '../ShoppingMenu';
-import ShoppingList from '../ShoppingList';
+import SearchBar from '../SearchBar/SearchBar';
+import ShoppingMenu from '../ShoppingMenu/ShoppingMenu';
+import ShoppingList from '../ShoppingList/ShoppingList';
+import { BUSINESS_NAME, USER_ROLES } from 'consts';
 
 function ShoppingPage(props) {
 
     useEffect(() => {
-        document.title = "Shop | New Life Nursery";
+        document.title = `Shop | ${BUSINESS_NAME}`;
     }, [])
 
     let display;
@@ -16,7 +17,7 @@ function ShoppingPage(props) {
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            if (r.title === "Customer") {
+            if (r.title === USER_ROLES.Customer) {
                 is_customer = true;
             }
         })

@@ -1,10 +1,11 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
+import { BUSINESS_NAME } from 'consts';
 
 function NotFoundPage() {
     useLayoutEffect(() => {
-        document.title = "404 | New Life Nursery";
+        document.title = `404 | ${BUSINESS_NAME}`;
     })
 
     return (

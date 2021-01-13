@@ -8,7 +8,8 @@ export const StyledMenuContainer = styled.nav`
   justify-content: center;
   background: ${({ theme }) => theme.bodySecondary};
   height: 100vh;
-  text-align: left;
+  padding-top: 12vh;
+  text-align: center;
   overflow: scroll;
   width: 400px;
   position: fixed;
@@ -37,7 +38,7 @@ export const StyledMenuContainer = styled.nav`
     padding: 0.5rem;
     margin-bottom: 15px;
     font-weight: bold;
-    letter-spacing: 0.5rem;
+    letter-spacing: 0.1rem;
     width: max-content;
     
     @media (max-width: ${({ theme }) => theme.mobile}) {

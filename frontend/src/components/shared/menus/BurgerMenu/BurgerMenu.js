@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
-import MenuContainer from '../MenuContainer';
-import ClickOutside from 'components/shared/wrappers/ClickOutside';
+import MenuContainer from '../MenuContainer/MenuContainer';
+import ClickOutside from 'components/shared/wrappers/ClickOutside/ClickOutside';
 
 function BurgerMenu(props) {
   let history = useHistory();

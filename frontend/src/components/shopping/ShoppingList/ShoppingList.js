@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledShoppingList } from './ShoppingList.styled';
-import ItemCard from 'components/shared/ItemCard';
+import ItemCard from 'components/shared/ItemCard/ItemCard';
 import PubSub from 'utils/pubsub';
 import * as shoppingQuery from 'query/shopping';
 

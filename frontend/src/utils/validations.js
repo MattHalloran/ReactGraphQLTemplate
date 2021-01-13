@@ -5,7 +5,7 @@ export const emailValidation = email => {
       email,
     )
   ) {
-    return "";
+    return null;
   }
   if (email.trim() === '') {
     return 'Email is required';
@@ -14,7 +14,7 @@ export const emailValidation = email => {
 }
 
 const defaultStringValidation = (str, word) => {
-  return (str === null || str === undefined || str.length === 0) ? `Must enter ${word}` : "";
+  return (str === null || str === undefined || str.length === 0) ? `Must enter ${word}` : null;
 }
 
 export const firstNameValidation = name => {
@@ -39,5 +39,15 @@ export const passwordValidation = password => {
     password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) {
     return `Must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters`;
   }
-  return "";
+  return null;
+}
+
+// TODO make more robust
+export const addressValidation = address => {
+  return defaultStringValidation('address', address);
+}
+
+// TODO make more robust
+export const phoneNumberValidation = phone => {
+  return defaultStringValidation('phone number', phone);
 }
