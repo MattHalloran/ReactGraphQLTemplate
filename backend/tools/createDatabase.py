@@ -1,12 +1,13 @@
-# Sets up test database for use. Good idea to delete database file first
+# Sets up test database for use. Good idea to delete database file first. See docs
 
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import src.models
-from src.models import Role, User, Image, ImageUses
-from src.api import db, create_app
-from src.config import Config
+from src.models.role import Role                # noqa E402
+from src.models.user import User                # noqa E402
+from src.models.image import Image, ImageUses   # noqa E402
+from src.api import db, create_app              # noqa E402
+from src.config import Config                   # noqa E402
 
 app = create_app()
 with app.app_context():

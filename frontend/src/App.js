@@ -33,7 +33,6 @@ import RequireAuthentication from 'components/shared/wrappers/RequireAuthenticat
 import * as authQuery from 'query/auth';
 
 function App() {
-  console.log('RENDERING APPPPPP')
   let [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
   let [session, setSession] = useState(null);

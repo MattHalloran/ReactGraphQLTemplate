@@ -94,9 +94,9 @@ export function loginUser(email, password) {
     });
 }
 
-export function registerUser(name, email, password, existing_customer) {
+export function registerUser(firstName, lastName, pronouns, email, password, existing_customer) {
     return new Promise(function (resolve, reject) {
-        create_user(name, email, password, existing_customer).then(data => {
+        create_user(firstName, lastName, pronouns, email, password, existing_customer).then(data => {
             if (data.ok) {
                 login({email: email, token: data.token }, data.user);
                 resolve(data);

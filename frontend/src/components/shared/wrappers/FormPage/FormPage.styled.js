@@ -37,4 +37,25 @@ export const StyledFormPage = styled.div`
     .submit {
         width: -webkit-fill-available;
     }
+
+    .horizontal-input-container {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        width: 100%;
+    }
+    
+    .horizontal-input-container > * {
+        margin-left: 5px;
+        margin-right: 5px;
+        width: 100%;
+    }
+
+    .horizontal-input-container > *:first-child {
+        margin-left: 0px;
+    }
+
+    .horizontal-input-container > *:last-child {
+        margin-right: 0px;
+    }
 `

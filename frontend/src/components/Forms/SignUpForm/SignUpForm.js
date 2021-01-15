@@ -9,13 +9,20 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import MenuItem from '@material-ui/core/MenuItem';
 import { useHistoryState } from 'utils/useHistoryState';
-import { PUBS, LINKS } from 'consts';
+import { PUBS, LINKS, DEFAULT_PRONOUNS } from 'consts';
 
 function SignUpForm() {
   let history = useHistory();
-  const [name, setName] = useHistoryState("su_name", "");
-  const [nameError, setNameError] = useHistoryState("su_name_error", null);
+  const [firstName, setFirstName] = useHistoryState("su_first_name", "");
+  const [firstNameError, setFirstNameError] = useHistoryState("su_first_name_error", null);
+  const [lastName, setLastName] = useHistoryState("su_last_name", "");
+  const [lastNameError, setLastNameError] = useHistoryState("su_last_name_error", null);
+  const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
+  const [pronounsError, setPronounsError] = useHistoryState("su_pronoun_error", null);
+  const [customPronouns, setCustomPronouns] = useHistoryState("su_custom_pronoun", "");
+  const [customPronounsError, setCustomPronounsError] = useHistoryState("su_custom_pronoun_error", null);
   const [email, setEmail] = useHistoryState("su_email", "");
   const [emailError, setEmailError] = useHistoryState("su_email_error", null);
   const [password, setPassword] = useState("")
@@ -31,7 +38,7 @@ function SignUpForm() {
 
   const register = () => {
     PubSub.publish(PUBS.Loading, true);
-    authQuery.registerUser(name, email, password, existingCustomer).then(() => {
+    authQuery.registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
       PubSub.publish(PUBS.Loading, false);
       history.push(LINKS.Profile);
     }).catch(error => {
@@ -44,7 +51,10 @@ function SignUpForm() {
   const submit = (event) => {
     event.preventDefault();
     setShowErrors(true);
-    if (!nameError && !emailError && !passwordError && password === confirmPassword && !existingCustomerError) {
+    console.log('PRONOUNSSSS', pronouns, pronounsError);
+    return;
+    if (!firstNameError && !lastNameError && !pronounsError && !emailError &&
+      !passwordError && password === confirmPassword && !existingCustomerError) {
       register();
     }
   }
@@ -55,15 +65,53 @@ function SignUpForm() {
 
   return (
     <React.Fragment>
-      <InputText
-        label="Name"
-        type="text"
-        value={name}
-        valueFunc={setName}
-        errorFunc={setNameError}
-        validate={validation.nameValidation}
-        showErrors={showErrors}
-      />
+      <div className="horizontal-input-container">
+        <InputText
+          label="First Name"
+          type="text"
+          value={firstName}
+          valueFunc={setFirstName}
+          errorFunc={setFirstNameError}
+          validate={validation.firstNameValidation}
+          showErrors={showErrors}
+        />
+        <InputText
+          label="Last Name"
+          type="text"
+          value={lastName}
+          valueFunc={setLastName}
+          errorFunc={setLastNameError}
+          validate={validation.lastNameValidation}
+          showErrors={showErrors}
+        />
+      </div>
+      <div className="horizontal-input-container">
+        <InputText
+          label="Pronouns"
+          value={pronouns}
+          valueFunc={setPronouns}
+          select
+          SelectProps={{
+            native: true,
+          }} >
+          {DEFAULT_PRONOUNS.map((pro) => (
+            <option key={pro} value={pro}>
+              {pro}
+            </option>
+          ))}
+        </InputText>
+        {pronouns === DEFAULT_PRONOUNS[0] ?
+          <InputText
+            label="Enter pronouns"
+            type="text"
+            value={customPronouns}
+            valueFunc={setCustomPronouns}
+            errorFunc={setCustomPronounsError}
+            validate={validation.pronounValidation}
+            showErrors={showErrors}
+          />
+          : null}
+      </div>
       <InputText
         label="Email"
         type="email"

@@ -1,6 +1,15 @@
 export const BUSINESS_NAME = "New Life Nursery";
 export const FULL_BUSINESS_NAME = "New Life Nursery Inc.";
 
+export const DEFAULT_PRONOUNS = [
+    "Custom",
+    "he/him/his",
+    "she/her/hers",
+    "they/them/theirs",
+    "ze/zir/zirs",
+    "ze/hir/hirs",
+]
+
 export const USER_ROLES = {
     Customer: "Customer",
     Admin: "Admin",

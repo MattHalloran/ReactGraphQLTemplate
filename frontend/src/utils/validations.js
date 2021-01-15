@@ -30,6 +30,10 @@ export const nameValidation = name => {
   return defaultStringValidation('Name', name);
 }
 
+export const pronounValidation = pronouns => {
+  return defaultStringValidation('Pronouns', pronouns);
+}
+
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 50;
 

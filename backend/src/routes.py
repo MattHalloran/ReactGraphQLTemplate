@@ -37,7 +37,7 @@ def register():
         byte_data = request.data
         dict_str = byte_data.decode('UTF-8')
         data = ast.literal_eval(dict_str)
-        user = User(name=data['name'], email=data['email'],
+        user = User(first_name=data['first_name'], last_name=data['last_name'], pronouns=['pronouns'], email=data['email'],
                     password=data['password'], existing_customer=data['existing_customer'])
         print(f'here4 {data["name"]} {data["email"]} {hash} {user}')
         db.session.add(user)

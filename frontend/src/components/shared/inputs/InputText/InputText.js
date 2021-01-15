@@ -9,6 +9,9 @@ const useStyledInputText = makeStyles({
         minHeight: '10vh',
         display: 'flex',
         marginBottom: '2vh',
+        '& .MuiOutlinedInput-root': {
+            display: 'flex',
+        }
     },
   });
 
@@ -45,7 +48,7 @@ function InputText(props) {
             error={error && error.length > 0}
             helperText={error}
             onChange={updateValue}
-        />
+        >{props.children}</TextField>
     );
 }
 

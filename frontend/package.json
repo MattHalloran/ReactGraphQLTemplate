@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.2",
     "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
     "array-move": "^3.0.1",
     "chai": "^4.2.0",
     "hero-slider": "^2.0.3",
