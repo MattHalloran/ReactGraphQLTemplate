@@ -1,7 +1,11 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
-from src.api import create_app
-from src.models import db, User, Plant, AccountStatuses, Image, ImageUses
+from src.api import create_app, db
+from src.models import User, AccountStatus, Plant, Image, ImageUses, ContactInfo
+from src.handlers.userHandler import UserHandler
+from src.handlers.plantHandler import PlantHandler
+from src.handlers.imageHandler import ImageHandler
+from src.handlers.contactInfoHandler import ContactInfoHandler
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
@@ -29,21 +33,51 @@ class AuthCodes(Enum):
     FAILURE_NOT_VERIFIED = 1400
     ERROR_SOME_IMAGES_ALREADY_UPLOADED = 2500
 
+# ============= Helper Methods ========================
+
+
+# Helper method for grabbing form data from the request
+def getForm(*names):
+    if (len(names) == 1):
+        return request.form.getlist(names[0])
+    return [request.form.getlist(name) for name in names]
+
+
+# Helper method for grabbing json data from the request
+def getJson(*names):
+    incoming = request.get_json()
+    if (len(names) == 1):
+        return incoming[names[0]]
+    return [incoming[name] for name in names]
+
+
+# Helper method for grabbing data from the request
+def getData(*names):
+    byte_data = request.data
+    dict_str = byte_data.decode('UTF-8')
+    data = ast.literal_eval(dict_str)
+    if (len(names) == 1):
+        return data[names[0]]
+    return [data[name] for name in names]
+
+# =========== End Helper Methods ========================
+
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def register():
     try:
-        byte_data = request.data
-        dict_str = byte_data.decode('UTF-8')
-        data = ast.literal_eval(dict_str)
-        user = User(first_name=data['first_name'], last_name=data['last_name'], pronouns=['pronouns'], email=data['email'],
-                    password=data['password'], existing_customer=data['existing_customer'])
-        print(f'here4 {data["name"]} {data["email"]} {hash} {user}')
+        data = getData('first_name', 'last_name', 'pronouns', 'email', 'password', 'existing_customer')
+        user = User(first_name=data[0],
+                    last_name=data[1],
+                    pronouns=data[2],
+                    email=data[3],
+                    password=data[4],
+                    existing_customer=data[5])
         db.session.add(user)
         try:
             db.session.commit()
-            welcome(data['email'])
+            welcome(data[3])
         # Most likely means that a user with that email already exists
         except exc.IntegrityError:
             print(traceback.format_exc())
@@ -51,7 +85,7 @@ def register():
             return {"status": status}
         status = AuthCodes.SUCCESS.value
         return {"token": generate_token(app, user),
-                "user": user.to_json(),
+                "user": UserHandler.to_dict(user),
                 "status": status}
     except Exception:
         print(traceback.format_exc())
@@ -63,31 +97,26 @@ def register():
 @cross_origin(supports_credentials=True)
 def get_token():
     try:
-        incoming = request.get_json()
-        print(incoming)
-        byte_data = request.data
-        dict_str = byte_data.decode('UTF-8')
-        data = ast.literal_eval(dict_str)
-        user = User.get_user_from_credentials(data['email'], data['password'])
+        (email, password) = getData('email', 'password')
+        user = User.get_user_from_credentials(email, password)
         if user:
             token = generate_token(app, user)
-            print('RECEIVED TOKEN!!!!!!')
-            print(token)
+            print(f'RECEIVED TOKEN!!!!!! {token}')
             user.set_token(token)
             return {
-                "user": user.to_json(),
+                "user": UserHandler.to_dict(user),
                 "token": token,
                 "status": AuthCodes.SUCCESS.value,
             }
         else:
-            account_status = User.get_user_lock_status(data['email'])
+            account_status = User.get_user_lock_status(email)
             print(f'User account status is {account_status}')
             status = AuthCodes.ERROR_UNKNOWN.value
             if account_status == -1:
                 status = AuthCodes.FAILURE_NO_USER.value
-            elif account_status == AccountStatuses.SOFT_LOCK.value:
+            elif account_status == AccountStatus.SOFT_LOCK.value:
                 status = AuthCodes.FAILURE_SOFT_LOCKOUT.value
-            elif account_status == AccountStatuses.HARD_LOCK.value:
+            elif account_status == AccountStatus.HARD_LOCK.value:
                 status = AuthCodes.FAILURE_HARD_LOCKOUT.value
             return jsonify(status=status)
     except Exception:
@@ -98,10 +127,8 @@ def get_token():
 @app.route('/api/reset_password_request', methods=['POST'])
 def send_password_reset_request():
     try:
-        byte_data = request.data
-        dict_str = byte_data.decode('UTF-8')
-        data = ast.literal_eval(dict_str)
-        reset_password(data['email'])
+        email = getData('email')
+        reset_password(email)
         return {"status": AuthCodes.SUCCESS.value}
     except Exception:
         print(traceback.format_exc())
@@ -110,10 +137,8 @@ def send_password_reset_request():
 
 @app.route("/api/is_token_valid", methods=["POST"])
 def is_token_valid():
-    incoming = request.get_json()
-    print('GOT INCOMINGGGGGGGGGGGGGGGGGGG')
-    print(incoming)
-    token = incoming['token']
+    token = getJson('token')
+    print(f'GOT INCOMINGGGGGGGGGGGGGGGGGGG {token}')
     is_valid = verify_token(app, token) if (token is not None) else False
 
     if is_valid:
@@ -133,7 +158,7 @@ if __name__ == '__main__':
 @app.route("/api/fetch_inventory", methods=["POST"])
 def fetch_inventory():
     item_IDs = Plant.all_plant_ids()
-    page_results = [Plant.from_id(id) for id in item_IDs]
+    page_results = [Plant.from_id(type(Plant), id) for id in item_IDs]
     return {
         "all_plant_ids": item_IDs,
         "page_results": page_results,
@@ -144,14 +169,14 @@ def fetch_inventory():
 # Returns inventory data for the given inventory IDs
 @app.route("/api/fetch_inventory_page", methods=["POST"])
 def fetch_inventory_page():
-    incoming = request.get_json()
-    return [Plant.from_id(id) for id in incoming['ids']]
+    ids = getJson('ids')
+    return [Plant.from_id(type(Plant), id) for id in ids]
 
 
 # Returns display information of all gallery photos.
 @app.route("/api/fetch_gallery", methods=["POST"])
 def fetch_gallery():
-    images_data = [img.to_json() for img in Image.query.all()]
+    images_data = [ImageHandler.to_dict(img) for img in Image.query.all()]
     print('boop le snoot')
     print(images_data)
     return {
@@ -163,10 +188,8 @@ def fetch_gallery():
 # Returns thumbnails for a list of images
 @app.route("/api/image_thumbnails", methods=["POST"])
 def image_thumbnails():
-    incoming = request.get_json()
-    print('here boopy boop')
-    print(incoming)
-    hashes = incoming['hashes']
+    hashes = getJson('hashes')
+    print(f'here boopy boop {hashes}')
     thumbnail_data = []
     for hash in hashes:
         img = Image.from_hash(hash)
@@ -187,10 +210,8 @@ def image_thumbnails():
 # Returns an image from its hash
 @app.route("/api/image", methods=["POST"])
 def image():
-    incoming = request.get_json()
-    print('trying to get image')
-    print(incoming)
-    img_hash = incoming['hash']
+    img_hash = getJson('hash')
+    print(f'trying to get image {img_hash}')
     # Get image data from its hash
     img = Image.from_hash(img_hash)
     if not img:
@@ -211,12 +232,9 @@ def image():
 @app.route("/api/upload_gallery_image/", methods=["POST"])
 def upload_gallery_image():
     try:
+        (names, extensions, images) = getForm('names', 'extensions', 'images')
         status = AuthCodes.SUCCESS.value
         failed_indexes = []
-        # Grab data from request form
-        names = request.form.getlist('name')
-        extensions = request.form.getlist('extension')
-        images = request.form.getlist('image')
         # Iterate through images
         for i in range(len(images)):
             img_name = names[i]
@@ -271,20 +289,17 @@ def fetch_contact_info():
 # First verifies that the user is an admin, then updates company contact info
 @app.route("/api/update_contact_info", methods=["POST"])
 def update_contact_info():
-    incoming = request.get_json()
-    print('TODOOOOOOO')
+    (id, name, time_set, monday, tuesday, wednesday, thursday, friday, saturday, sunday) = getForm('id', 'name', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+    contact = ContactInfo.from_id(type(ContactInfo), id)
+    if contact is str:
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
     return False
 
 
-# First verifies that the us
 @app.route("/api/fetch_profile_info", methods=["POST"])
 def fetch_profile_info():
-    incoming = request.get_json()
-    email = incoming['email']
-    token = incoming['token']
-    print('boopies')
-    print(email)
-    print(token)
+    (email, token) = getJson('email', 'token')
+    print(f'boopies {email} {token}')
     user_data = User.get_profile_data(email, token, app)
     if user_data is str:
         print('FAILEDDDD')
