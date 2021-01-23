@@ -8,14 +8,14 @@ class EmailHandler(Handler):
     def model_type():
         return Email
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['email_address', 'received_delivery_updates']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['email_address']
 
     @staticmethod
     def to_dict(model: Email):
-        return Handler.simple_fields_to_dict(model, EmailHandler.all_fields)
+        return Handler.simple_fields_to_dict(model, EmailHandler.all_fields())

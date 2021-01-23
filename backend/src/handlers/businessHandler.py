@@ -14,17 +14,17 @@ class BusinessDiscountHandler(Handler):
     def model_type():
         return BusinessDiscount
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['discount', 'title', 'comment', 'terms']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['discount', 'title']
 
     @staticmethod
     def to_dict(model: BusinessDiscount):
-        return Handler.simple_fields_to_dict(model, BusinessDiscountHandler.all_fields)
+        return Handler.simple_fields_to_dict(model, BusinessDiscountHandler.all_fields())
 
 
 class BusinessHandler(Handler):
@@ -33,12 +33,12 @@ class BusinessHandler(Handler):
     def model_type():
         return Business
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['name', 'email', 'Email', 'phone', 'subscribed_to_newsletters']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['name']
 
     @staticmethod

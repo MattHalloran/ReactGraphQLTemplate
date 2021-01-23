@@ -8,14 +8,14 @@ class FeedbackHandler(Handler):
     def model_type():
         return Feedback
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['text']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['text']
 
     @staticmethod
     def to_dict(model: Feedback):
-        return Handler.simple_fields_to_dict(model, FeedbackHandler.all_fields)
+        return Handler.simple_fields_to_dict(model, FeedbackHandler.all_fields())

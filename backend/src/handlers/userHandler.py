@@ -2,6 +2,8 @@ from src.api import db
 from src.handlers.handler import Handler
 from src.handlers.roleHandler import RoleHandler
 from src.handlers.orderHandler import OrderHandler
+from src.handlers.emailHandler import EmailHandler
+from src.handlers.phoneHandler import PhoneHandler
 from src.models import User, AccountStatus
 from src.auth import verify_token
 import time
@@ -14,16 +16,16 @@ class UserHandler(Handler):
     def model_type():
         return User
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['first_name', 'last_name', 'pronouns', 'password', 'existing_customer']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['first_name', 'last_name', 'pronouns', 'password', 'existing_customer']
 
-    @property
-    def protected_fields(self):
+    @staticmethod
+    def protected_fields():
         return ['existing_customer', 'password', 'login_attempts']
 
     @staticmethod
@@ -34,13 +36,17 @@ class UserHandler(Handler):
 
     @staticmethod
     def to_dict(model: User):
-        as_dict = Handler.simple_fields_to_dict(model, ['name', 'theme'])
+        as_dict = Handler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
         as_dict['roles'] = [RoleHandler.to_dict(r) for r in model.roles]
         return as_dict
 
     @staticmethod
+    def from_email(email: str):
+        return User.query.filter(User.personal_email.any(email_address=email)).first()
+
+    @staticmethod
     def get_user_from_credentials(email: str, password: str):
-        user = User.query.filter_by(email=email).first()
+        user = UserHandler.from_email(email)
         if user:
             # Reset login attempts after 15 minutes
             if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
@@ -77,7 +83,7 @@ class UserHandler(Handler):
         '''Returns user profile data, after
         verifying the session token'''
         # Check if user esists
-        user = User.query.filter_by(email=email).first()
+        user = UserHandler.from_email(email)
         if not user:
             return 'No user with that email'
         # Check if supplied token is equal to the user's token
@@ -92,8 +98,8 @@ class UserHandler(Handler):
             "last_name": user.last_name,
             "pronouns": user.pronouns,
             "theme": user.theme,
-            "email": user.email,
-            "phone_number": user.phone_number,
+            "personal_email": [EmailHandler.to_dict(email) for email in user.personal_email],
+            "personal_phone": [PhoneHandler.to_dict(number) for number in user.personal_phone],
             "image_file": user.image_file,
             "orders": [OrderHandler.to_dict(order) for order in user.orders],
             "roles": [RoleHandler.to_dict(role) for role in user.roles]
@@ -104,7 +110,7 @@ class UserHandler(Handler):
         '''Returns -1 if account doesn't exist,
         account status otherwise'''
         try:
-            user = User.query.filter_by(email=email).first()
+            user = UserHandler.from_email(email)
             return user.account_status
         except Exception:
             print(f'Could not find account status for {email}')

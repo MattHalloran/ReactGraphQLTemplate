@@ -2,6 +2,7 @@ from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
 from src.models import User, AccountStatus, Plant, Image, ImageUses, ContactInfo
+from src.handlers.handler import Handler
 from src.handlers.userHandler import UserHandler
 from src.handlers.plantHandler import PlantHandler
 from src.handlers.imageHandler import ImageHandler
@@ -17,6 +18,7 @@ from enum import Enum
 from base64 import b64encode, b64decode
 import json
 from os import path
+from functools import wraps
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -60,82 +62,87 @@ def getData(*names):
         return data[names[0]]
     return [data[name] for name in names]
 
+
+# Wraps functions in try/except
+def handle_exception(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            print(traceback.format_exc())
+            return {"status": AuthCodes.ERROR_UNKNOWN.value}
+
+    return decorated
+
 # =========== End Helper Methods ========================
 
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
+@handle_exception
 def register():
+    data = getData('first_name', 'last_name', 'pronouns', 'email', 'password', 'existing_customer')
+    user = User(first_name=data[0],
+                last_name=data[1],
+                pronouns=data[2],
+                email=data[3],
+                password=data[4],
+                existing_customer=data[5])
+    db.session.add(user)
     try:
-        data = getData('first_name', 'last_name', 'pronouns', 'email', 'password', 'existing_customer')
-        user = User(first_name=data[0],
-                    last_name=data[1],
-                    pronouns=data[2],
-                    email=data[3],
-                    password=data[4],
-                    existing_customer=data[5])
-        db.session.add(user)
-        try:
-            db.session.commit()
-            welcome(data[3])
-        # Most likely means that a user with that email already exists
-        except exc.IntegrityError:
-            print(traceback.format_exc())
-            status = AuthCodes.FAILURE_EMAIL_EXISTS.value
-            return {"status": status}
-        status = AuthCodes.SUCCESS.value
-        return {"token": generate_token(app, user),
-                "user": UserHandler.to_dict(user),
-                "status": status}
-    except Exception:
+        db.session.commit()
+        welcome(data[3])
+    # Most likely means that a user with that email already exists
+    except exc.IntegrityError:
         print(traceback.format_exc())
-        status = AuthCodes.ERROR_UNKNOWN.value
+        status = AuthCodes.FAILURE_EMAIL_EXISTS.value
         return {"status": status}
+    status = AuthCodes.SUCCESS.value
+    return {"token": generate_token(app, user),
+            "user": UserHandler.to_dict(user),
+            "status": status}
 
 
 @app.route('/api/get_token', methods=['POST'])
 @cross_origin(supports_credentials=True)
+@handle_exception
 def get_token():
-    try:
-        (email, password) = getData('email', 'password')
-        user = User.get_user_from_credentials(email, password)
-        if user:
-            token = generate_token(app, user)
-            print(f'RECEIVED TOKEN!!!!!! {token}')
-            user.set_token(token)
-            return {
-                "user": UserHandler.to_dict(user),
-                "token": token,
-                "status": AuthCodes.SUCCESS.value,
-            }
-        else:
-            account_status = User.get_user_lock_status(email)
-            print(f'User account status is {account_status}')
-            status = AuthCodes.ERROR_UNKNOWN.value
-            if account_status == -1:
-                status = AuthCodes.FAILURE_NO_USER.value
-            elif account_status == AccountStatus.SOFT_LOCK.value:
-                status = AuthCodes.FAILURE_SOFT_LOCKOUT.value
-            elif account_status == AccountStatus.HARD_LOCK.value:
-                status = AuthCodes.FAILURE_HARD_LOCKOUT.value
-            return jsonify(status=status)
-    except Exception:
-        print(traceback.format_exc())
-        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+    (email, password) = getData('email', 'password')
+    user = UserHandler.get_user_from_credentials(email, password)
+    if user:
+        token = generate_token(app, user)
+        print(f'RECEIVED TOKEN!!!!!! {token}')
+        UserHandler.set_token(user, token)
+        db.session.commit()
+        return {
+            "user": UserHandler.to_dict(user),
+            "token": token,
+            "status": AuthCodes.SUCCESS.value,
+        }
+    else:
+        account_status = User.get_user_lock_status(email)
+        print(f'User account status is {account_status}')
+        status = AuthCodes.ERROR_UNKNOWN.value
+        if account_status == -1:
+            status = AuthCodes.FAILURE_NO_USER.value
+        elif account_status == AccountStatus.SOFT_LOCK.value:
+            status = AuthCodes.FAILURE_SOFT_LOCKOUT.value
+        elif account_status == AccountStatus.HARD_LOCK.value:
+            status = AuthCodes.FAILURE_HARD_LOCKOUT.value
+        return jsonify(status=status)
 
 
 @app.route('/api/reset_password_request', methods=['POST'])
+@handle_exception
 def send_password_reset_request():
-    try:
-        email = getData('email')
-        reset_password(email)
-        return {"status": AuthCodes.SUCCESS.value}
-    except Exception:
-        print(traceback.format_exc())
-        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+    email = getData('email')
+    reset_password(email)
+    return {"status": AuthCodes.SUCCESS.value}
 
 
 @app.route("/api/is_token_valid", methods=["POST"])
+@handle_exception
 def is_token_valid():
     token = getJson('token')
     print(f'GOT INCOMINGGGGGGGGGGGGGGGGGGG {token}')
@@ -156,6 +163,7 @@ if __name__ == '__main__':
 # Returns IDs of all inventory items available to the customer.
 # Also returns required info to display the first page of results
 @app.route("/api/fetch_inventory", methods=["POST"])
+@handle_exception
 def fetch_inventory():
     item_IDs = Plant.all_plant_ids()
     page_results = [Plant.from_id(type(Plant), id) for id in item_IDs]
@@ -168,6 +176,7 @@ def fetch_inventory():
 
 # Returns inventory data for the given inventory IDs
 @app.route("/api/fetch_inventory_page", methods=["POST"])
+@handle_exception
 def fetch_inventory_page():
     ids = getJson('ids')
     return [Plant.from_id(type(Plant), id) for id in ids]
@@ -175,6 +184,7 @@ def fetch_inventory_page():
 
 # Returns display information of all gallery photos.
 @app.route("/api/fetch_gallery", methods=["POST"])
+@handle_exception
 def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in Image.query.all()]
     print('boop le snoot')
@@ -187,6 +197,7 @@ def fetch_gallery():
 
 # Returns thumbnails for a list of images
 @app.route("/api/image_thumbnails", methods=["POST"])
+@handle_exception
 def image_thumbnails():
     hashes = getJson('hashes')
     print(f'here boopy boop {hashes}')
@@ -209,6 +220,7 @@ def image_thumbnails():
 
 # Returns an image from its hash
 @app.route("/api/image", methods=["POST"])
+@handle_exception
 def image():
     img_hash = getJson('hash')
     print(f'trying to get image {img_hash}')
@@ -230,57 +242,64 @@ def image():
 
 # TODO - check image size and extension to make sure it is valid
 @app.route("/api/upload_gallery_image/", methods=["POST"])
+@handle_exception
 def upload_gallery_image():
-    try:
-        (names, extensions, images) = getForm('names', 'extensions', 'images')
-        status = AuthCodes.SUCCESS.value
-        failed_indexes = []
-        # Iterate through images
-        for i in range(len(images)):
-            img_name = names[i]
+    (names, extensions, images) = getForm('names', 'extensions', 'images')
+    status = AuthCodes.SUCCESS.value
+    failed_indexes = []
+    # Iterate through images
+    for i in range(len(images)):
+        img_name = names[i]
+        thumbnail_name = f'{img_name}-thumb'
+        img_extension = extensions[i]
+        # Data is stored in base64, and the beginning of the
+        # string is not needed
+        img_data = images[i][len('data:image/jpeg;base64,'):]
+        (img_hash, thumbnail, img_width, img_height) = get_image_meta(b64decode(img_data))
+        # If image hash matches a row in the database, then the
+        # image was uploaded already
+        if Image.is_hash_used(img_hash):
+            print('Image already in backend!')
+            status = AuthCodes.ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
+            failed_indexes.append(i)
+            continue
+        # Create a path to store the image and thumbnail, that don't already exist
+        img_dir = Config.GALLERY_DIR
+        img_path = ''
+        thumbnail_path = ''
+        path_attempts = 0
+        while True and path_attempts < 100:
+            img_path = f'{img_dir}/{img_name}.{img_extension}'
+            thumbnail_path = f'{img_dir}/{thumbnail_name}.{img_extension}'
+            if not path.exists(img_path) and not path.exists(thumbnail_path):
+                break
+            img_name = f'image{path_attempts}'
             thumbnail_name = f'{img_name}-thumb'
-            img_extension = extensions[i]
-            # Data is stored in base64, and the beginning of the
-            # string is not needed
-            img_data = images[i][len('data:image/jpeg;base64,'):]
-            (img_hash, thumbnail, img_width, img_height) = get_image_meta(b64decode(img_data))
-            # If image hash matches a row in the database, then the
-            # image was uploaded already
-            if Image.is_hash_used(img_hash):
-                print('Image already in backend!')
-                status = AuthCodes.ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
-                failed_indexes.append(i)
-                continue
-            # Create a path to store the image and thumbnail, that don't already exist
-            img_dir = Config.GALLERY_DIR
-            img_path = ''
-            thumbnail_path = ''
-            path_attempts = 0
-            while True and path_attempts < 100:
-                img_path = f'{img_dir}/{img_name}.{img_extension}'
-                thumbnail_path = f'{img_dir}/{thumbnail_name}.{img_extension}'
-                if not path.exists(img_path) and not path.exists(thumbnail_path):
-                    break
-                img_name = f'image{path_attempts}'
-                thumbnail_name = f'{img_name}-thumb'
-                path_attempts = path_attempts + 1
-            # Save image
-            with open(img_path, 'wb') as f:
-                f.write(b64decode(img_data))
-            # Save image thumbnail
-            thumbnail.save(thumbnail_path)
-            # Add image data to database
-            img_row = Image(Config.GALLERY_DIR, img_name, thumbnail_name, img_extension, 'TODO', img_hash, ImageUses.GALLERY.value, img_width, img_height)
-            db.session.add(img_row)
-            db.session.commit()
-        return {"failed_indexes": failed_indexes,
-                "status": status}
-    except Exception:
-        print(traceback.format_exc())
-        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+            path_attempts = path_attempts + 1
+        # Save image
+        with open(img_path, 'wb') as f:
+            f.write(b64decode(img_data))
+        # Save image thumbnail
+        thumbnail.save(thumbnail_path)
+        # Add image data to database
+        img_row = Handler.create(ImageHandler,
+                                 Config.GALLERY_DIR,
+                                 img_name,
+                                 thumbnail_name,
+                                 img_extension,
+                                 'TODO',
+                                 img_hash,
+                                 ImageUses.GALLERY.value,
+                                 img_width,
+                                 img_height)
+        db.session.add(img_row)
+        db.session.commit()
+    return {"failed_indexes": failed_indexes,
+            "status": status}
 
 
 @app.route("/api/fetch_contact_info", methods=["POST"])
+@handle_exception
 def fetch_contact_info():
     print('TODOOOO')
     return False
@@ -288,19 +307,24 @@ def fetch_contact_info():
 
 # First verifies that the user is an admin, then updates company contact info
 @app.route("/api/update_contact_info", methods=["POST"])
+@handle_exception
 def update_contact_info():
-    (id, name, time_set, monday, tuesday, wednesday, thursday, friday, saturday, sunday) = getForm('id', 'name', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
-    contact = ContactInfo.from_id(type(ContactInfo), id)
-    if contact is str:
+    json = request.form.to_dict(flat=False)
+    id = json['id']
+    contact = Handler.from_id(ContactInfo, id)
+    if contact is None:
         return {"status": AuthCodes.ERROR_UNKNOWN.value}
-    return False
+    Handler.update(ContactInfoHandler, json)
+    db.session.commit()
+    return {"status": AuthCodes.SUCCESS.value}
 
 
 @app.route("/api/fetch_profile_info", methods=["POST"])
+@handle_exception
 def fetch_profile_info():
     (email, token) = getJson('email', 'token')
     print(f'boopies {email} {token}')
-    user_data = User.get_profile_data(email, token, app)
+    user_data = UserHandler.get_profile_data(email, token, app)
     if user_data is str:
         print('FAILEDDDD')
         print(user_data)

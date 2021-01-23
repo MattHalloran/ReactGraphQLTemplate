@@ -5,35 +5,35 @@ from src.models import SkuDiscount, Sku, Size
 
 class SkuDiscountHandler(Handler):
 
-    @property
+    @staticmethod
     def model_type():
         return SkuDiscount
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['discount', 'title', 'comment', 'terms']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['discount', 'title']
 
     @staticmethod
     def to_dict(model: SkuDiscount):
-        return Handler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields)
+        return Handler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields())
 
 
 class SizeHandler(Handler):
 
-    @property
+    @staticmethod
     def model_type():
         return Size
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['size']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['size']
 
     @staticmethod
@@ -43,16 +43,16 @@ class SizeHandler(Handler):
 
 class SkuHandler(Handler):
 
-    @property
+    @staticmethod
     def model_type():
         return Sku
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['availability', 'is_discountable', 'plant']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['plant']
 
     @staticmethod

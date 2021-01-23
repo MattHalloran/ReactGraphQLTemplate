@@ -9,13 +9,13 @@ class ImageHandler(Handler):
     def model_type():
         return Image
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['directory', 'file_name', 'thumbnail_file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['directory', 'file_name', 'thumbnail_file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 

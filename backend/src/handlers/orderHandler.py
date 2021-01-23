@@ -9,17 +9,17 @@ class OrderItemHandler(Handler):
     def model_type():
         return OrderItem
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['quantity', 'sku']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['quantity', 'sku']
 
     @staticmethod
     def to_dict(model: OrderItem):
-        return Handler.simple_fields_to_dict(model, OrderItemHandler.all_fields)
+        return Handler.simple_fields_to_dict(model, OrderItemHandler.all_fields())
 
 
 class OrderHandler(Handler):
@@ -28,12 +28,12 @@ class OrderHandler(Handler):
     def model_type():
         return Order
 
-    @property
-    def all_fields(self):
+    @staticmethod
+    def all_fields():
         return ['delivery_address', 'special_instructions', 'desired_delivery_date', 'items']
 
-    @property
-    def required_fields(self):
+    @staticmethod
+    def required_fields():
         return ['delivery_address', 'desired_delivery_date', 'items']
 
     @staticmethod
