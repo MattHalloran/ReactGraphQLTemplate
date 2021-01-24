@@ -1,7 +1,7 @@
 import json
 import os
 
-block_attributes = {
+block_traits = {
     'plant_type': 'Plant Type',
     'jersey_native': 'New Jersey Native',
     'bloom_times': 'Bloom Times',
@@ -38,7 +38,7 @@ def merge_yards_files():
             curr_data = json_data['page'][0]['plant_data']
             # Convert data to usable json fields
             for plant in curr_data:
-                # If extra attributes are missing from this plant, skip
+                # If extra traits are missing from this plant, skip
                 if 'block_data' not in plant:
                     plants_data.append(plant)
                     continue
@@ -46,20 +46,20 @@ def merge_yards_files():
                 block = plant['block_data'].splitlines()
                 block = [b for b in block if ':' in b]
                 del plant['block_data']
-                # Locate add and each attribute from the block_attributes dict
-                for attribute_name, attribute_label in block_attributes.items():
+                # Locate add and each trait from the block_traits dict
+                for trait_name, trait_label in block_traits.items():
                     # Find the correct line
-                    matching_indices = [i for i, elem in enumerate(block) if attribute_label in elem]
+                    matching_indices = [i for i, elem in enumerate(block) if trait_label in elem]
                     if len(matching_indices) <= 0:
                         continue
                     matching_line = block[matching_indices[0]]
-                    # Remove attribute label, so we're left with just the attribute text
-                    filtered_line = matching_line[matching_line.find(f'{attribute_label}: ')+len(attribute_label)+2:]
+                    # Remove trait label, so we're left with just the trait text
+                    filtered_line = matching_line[matching_line.find(f'{trait_label}: ')+len(trait_label)+2:]
                     # If there are commas, split data into a list
                     if filtered_line.find(', ') >= 0:
-                        plant[attribute_name] = filtered_line.split(', ')
+                        plant[trait_name] = filtered_line.split(', ')
                     else:
-                        plant[attribute_name] = filtered_line
+                        plant[trait_name] = filtered_line
                 plants_data.append(plant)
     # Save the combined data to the output file
     with open(os.path.join(curr_dir, "output.txt"), 'w') as outfile:

@@ -5,6 +5,9 @@ from sqlalchemy import Column, Integer, String, DECIMAL, Float, Boolean, Foreign
 import time
 
 
+# Used to help prevent typos. You may be wondering if you could
+# use TABLE.__tablename__ instead, and the answer is no. This would
+# cause two-way coupling, and python doesn't support forward declarations
 # Enum = class name, value = table name
 class Tables(Enum):
     # Normal tables
@@ -19,6 +22,8 @@ class Tables(Enum):
     ORDER_ITEM = 'order_item'
     PHONE = 'phone'
     PLANT = 'plant'
+    PLANT_TRAIT = 'plant_trait'
+    PLANT_TRAIT_ASSOCIATION = 'plant_trait_association'
     ROLE = 'role'
     SIZE = 'size'
     SKU = 'sku'
@@ -26,6 +31,7 @@ class Tables(Enum):
     USER = 'user'
     # Joining tables
     BUSINESS_DISCOUNTS = 'business_discounts'
+    PLANT_TRAITS = 'plant_traits'
     SKU_DISCOUNTS = 'sku_discounts'
     SKU_SIZES = 'sku_sizes'
     USER_ROLES = 'user_roles'
@@ -55,12 +61,19 @@ skuDiscounts = db.Table(Tables.SKU_DISCOUNTS.value,
                         Column('sku_discount_id', Integer, ForeignKey(f'{Tables.SKU_DISCOUNT.value}.id'))
                         )
 
-# A joining table for the two-way relationship between plants and sizes.
+# A joining table for the two-way relationship between skus and sizes.
 skuSizes = db.Table(Tables.SKU_SIZES.value,
                     Column('id', Integer, primary_key=True),
                     Column('sku_id', Integer, ForeignKey(f'{Tables.SKU.value}.id')),
                     Column('size_id', Integer, ForeignKey(f'{Tables.SIZE.value}.id'))
                     )
+
+# A joining table for the two-way relationship between skus and sizes.
+plantTraits = db.Table(Tables.PLANT_TRAITS.value,
+                       Column('id', Integer, primary_key=True),
+                       Column('plant_id', Integer, ForeignKey(f'{Tables.PLANT.value}.id')),
+                       Column('trait_id', Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+                       )
 
 
 # One of the delivery addresses associated with a business
@@ -238,7 +251,7 @@ class ImageUses(Enum):
     PLANT_HABIT = 7
 
 
-# Stores metadata for images used on website (gallery, hero, etc), but NOT profile pictures
+# Stores metadata for images used on website (gallery, plants, etc), but NOT profile pictures
 class Image(db.Model):
     __tablename__ = Tables.IMAGE.value
     # ---------------Start columns-----------------
@@ -321,27 +334,84 @@ class Phone(db.Model):
         return f"{self.__tablename__}({self.unformatted_number()})"
 
 
+class PlantTraitOptions(Enum):
+    DROUGHT_TOLERANCE = 'Drought tolerance'
+    GROWN_HEIGHT = 'Grown height'
+    GROWN_SPREAD = 'Grown spread'
+    GROWTH_RATE = 'Growth rate'
+    JERSERY_NATIVE = 'Jersey native'
+    OPTIMAL_LIGHT = 'Optimal light'
+    PLANT_TYPE = 'Plant type'
+    SALT_TOLERANCE = 'Salt tolerance'
+    ATTRACTS_POLLINATORS_AND_WILDLIFE = 'Attracts pollinators and wildlife'
+    BLOOM_TIME = 'Bloom time'
+    BLOOM_COLOR = 'Bloom color'
+    ZONE = 'Zone'
+    PHYSIOGRAPHIC_REGION = 'Physiographic Region'
+    SOIL_MOISTURE = 'Soil Moisture'
+    SOIL_PH = 'Soil PH'
+    SOIL_TYPE = 'Soil Type'
+    LIGHT_RANGE = 'Light Range'
+
+
+# class PlantTraitAssociation(db.Model):
+#     __tablename__ = Tables.PLANT_TRAIT_ASSOCIATION
+#     # ---------------Start columns-----------------
+#     plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'), primary_key=True)
+#     trait_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'), primary_key=True)
+#     # ----------------End columns-------------------
+#     plant = db.relationship('Plant', uselist=False)
+#     trait = db.relationship('PlantTrait', back_populates='plants')
+
+#     def __repr__(self):
+#         return f"{self.__tablename__}({self.plant_id}, {self.trait_id})"
+
+
+class PlantTrait(db.Model):
+    __tablename__ = Tables.PLANT_TRAIT.value
+    # ---------------Start columns-----------------
+    id = Column(Integer, primary_key=True)
+    trait = Column(String(50), nullable=False)
+    value = Column(String(250), nullable=False)
+    # ----------------End columns-------------------
+    #plants = db.relationship('PlantTraitAssociation', back_populates='trait')
+
+    def __init__(self, trait: str, value: str):
+        self.trait = trait
+        self.value = value
+
+    def __repr__(self):
+        return f"{self.__tablename__}({self.id}, {self.trait}, {self.value})"
+
+
 class Plant(db.Model):
     __tablename__ = Tables.PLANT.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
-    latin_name = Column(String(50), unique=True, nullable=False)
-    common_name = Column(String(50))
-    description = Column(String(2000))
-    fragrant = Column(String(20))
-    zone = Column(String(20))
-    width = Column(String(20))
-    height = Column(String(20))
-    deer_resistant = Column(String(20))
-    growth_rate = Column(Integer)
-    attract = Column(String(20))
-    bark_type = Column(String(20))
-    exposure = Column(Integer)
-    bloom_type = Column(Integer)
-    leaf_color = Column(String(20))
-    fall_leaf_color = Column(String(20))
+    latin_name = Column(String(100), unique=True, nullable=False)
+    common_name = Column(String(100))
+    plantnet_url = Column(String(250))
+    yards_url = Column(String(250))
+    description = Column(String(5000))
+    jersey_native = Column(Boolean)
+
+    deer_resistance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    drought_tolerance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    grown_height_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    grown_spread_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    growth_rate_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    optimal_light_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    salt_tolerance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
+    # One-to-one relationships
+    deer_resistance = db.relationship('PlantTrait', uselist=False, foreign_keys=[deer_resistance_id])
+    drought_tolerance = db.relationship('PlantTrait', uselist=False, foreign_keys=[drought_tolerance_id])
+    grown_height = db.relationship('PlantTrait', uselist=False, foreign_keys=[grown_height_id])
+    grown_spread = db.relationship('PlantTrait', uselist=False, foreign_keys=[grown_spread_id])
+    growth_rate = db.relationship('PlantTrait', uselist=False, foreign_keys=[growth_rate_id])
+    optimal_light = db.relationship('PlantTrait', uselist=False, foreign_keys=[optimal_light_id])
+    salt_tolerance = db.relationship('PlantTrait', uselist=False, foreign_keys=[salt_tolerance_id])
     # One-to-many relationships
     flower_images = db.relationship('Image', lazy=True,
                                     primaryjoin=f"and_(Plant.id==Image.plant_id, Image.used_for=='{ImageUses.PLANT_FLOWER.value}')")
@@ -353,39 +423,61 @@ class Plant(db.Model):
                                   primaryjoin=f"and_(Plant.id==Image.plant_id, Image.used_for=='{ImageUses.PLANT_BARK.value}')")
     habit_images = db.relationship('Image', lazy=True,
                                    primaryjoin=f"and_(Plant.id==Image.plant_id, Image.used_for=='{ImageUses.PLANT_HABIT.value}')")
+    # Many-to-many relationships
+    attracts_pollinators_and_wildlifes = db.relationship('PlantTrait',
+                                                         secondary=plantTraits,
+                                                         primaryjoin=id == plantTraits.c.plant_id,
+                                                         secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                                         PlantTrait.trait == PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE.value)
+    bloom_times = db.relationship('PlantTrait',
+                                  secondary=plantTraits,
+                                  primaryjoin=id == plantTraits.c.plant_id,
+                                  secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                  PlantTrait.trait == PlantTraitOptions.BLOOM_TIME.value)
+    bloom_colors = db.relationship('PlantTrait',
+                                   secondary=plantTraits,
+                                   primaryjoin=id == plantTraits.c.plant_id,
+                                   secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                   PlantTrait.trait == PlantTraitOptions.BLOOM_COLOR.value)
+    zones = db.relationship('PlantTrait',
+                            secondary=plantTraits,
+                            primaryjoin=id == plantTraits.c.plant_id,
+                            secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                            PlantTrait.trait == PlantTraitOptions.ZONE.value)
+    plant_types = db.relationship('PlantTrait',
+                                  secondary=plantTraits,
+                                  primaryjoin=id == plantTraits.c.plant_id,
+                                  secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                  PlantTrait.trait == PlantTraitOptions.PLANT_TYPE.value)
+    physiographic_regions = db.relationship('PlantTrait',
+                                            secondary=plantTraits,
+                                            primaryjoin=id == plantTraits.c.plant_id,
+                                            secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                            PlantTrait.trait == PlantTraitOptions.PHYSIOGRAPHIC_REGION.value)
+    soil_moistures = db.relationship('PlantTrait',
+                                     secondary=plantTraits,
+                                     primaryjoin=id == plantTraits.c.plant_id,
+                                     secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                     PlantTrait.trait == PlantTraitOptions.SOIL_MOISTURE.value)
+    soil_phs = db.relationship('PlantTrait',
+                               secondary=plantTraits,
+                               primaryjoin=id == plantTraits.c.plant_id,
+                               secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                               PlantTrait.trait == PlantTraitOptions.SOIL_PH.value)
+    soil_types = db.relationship('PlantTrait',
+                                 secondary=plantTraits,
+                                 primaryjoin=id == plantTraits.c.plant_id,
+                                 secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                 PlantTrait.trait == PlantTraitOptions.SOIL_TYPE.value)
+    light_ranges = db.relationship('PlantTrait',
+                                   secondary=plantTraits,
+                                   primaryjoin=id == plantTraits.c.plant_id,
+                                   secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
+                                   PlantTrait.trait == PlantTraitOptions.LIGHT_RANGE.value)
     # -------------End relationships----------------
 
-    def __init__(self,
-                 latin_name: str,
-                 common_name: str,
-                 description: str,
-                 fragrant: str,
-                 zone: str,
-                 width: str,
-                 height: str,
-                 deer_resistant: str,
-                 growth_rate: int,
-                 attract: str,
-                 bark_type: str,
-                 exposure: int,
-                 bloom_type: int,
-                 leaf_color: str,
-                 fall_leaf_color: str):
+    def __init__(self, latin_name: str):
         self.latin_name = latin_name
-        self.common_name = common_name
-        self.description = description
-        self.fragrant = fragrant
-        self.zone = zone
-        self.width = width
-        self.height = height
-        self.deer_resistant = deer_resistant
-        self.growth_rate = growth_rate
-        self.attract = attract
-        self.bark_type = bark_type
-        self.exposure = exposure
-        self.bloom_type = bloom_type
-        self.leaf_color = leaf_color
-        self.fall_leaf_color = fall_leaf_color
 
     def __repr__(self):
         return f"{self.__tablename__}('{self.id}', '{self.latin_name}', '{self.common_name}')"

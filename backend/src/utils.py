@@ -3,6 +3,25 @@ from PIL.Image import ANTIALIAS
 import numpy as np
 from io import BytesIO
 
+
+def find_available_file_names(directory: str, img_name: str, extension: str):
+    '''Using suggested image file name, returns image and thumbnail file names
+    that are not being used'''
+    suggested_img_name = img_name
+    suggested_thumb_name = thumb_name
+    path_attempts = 0
+    while True and path_attempts < 100:
+        img_path = f'{directory}/{img_name}.{extension}'
+        thumb_path = f'{directory}/{thum_name}.{extension}'
+        # If both paths are available
+        if not path.exists(img_path) and not path.exists(thumb_path):
+            return (img_name, thumb_name)
+        img_name = f'{suggested_img_name}({path_attempts})'
+        thumbnail_name = f'{img_name}-thumb'
+        path_attempts += 1
+    raise Exception('Could not find an available file name!')
+
+
 def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     """ Returns metadata about the image:
     1) Image hash, using the average hash algorithm

@@ -47,14 +47,15 @@ class Handler(ABC):
         All keysnot in keep are removed.
         All keys in remove are removed'''
         keeped_filter = {key: data.get(key) for key in keep}
-        for k in remove:
-            keeped_filter.pop(k, None)
+        if remove:
+            for k in remove:
+                keeped_filter.pop(k, None)
         return keeped_filter
 
     @staticmethod
     def data_has_required(required_fields: list, data: dict):
         '''Returns true if the dictionary contains all specified fields'''
-        all([key in required_fields for key in data.keys()])
+        return all([field in data for field in required_fields])
 
     @staticmethod
     def create_from_dict(handler, data: dict):
@@ -80,7 +81,7 @@ class Handler(ABC):
     def create(handler, *args):
         '''Create a new model object'''
         # If a dict of values is passed in
-        if len(args) == 1 and args[0] is dict:
+        if len(args) == 1 and type(args[0]) is dict:
             return Handler.create_from_dict(handler, args[0])
         # If arguments are passed in to match the model's __init___
         else:
@@ -97,7 +98,7 @@ class Handler(ABC):
     def update(handler, obj, *args):
         '''Update an existing model object'''
         # Ensure a dict of values is passed in
-        if len(args) == 1 and args[0] is dict:
+        if len(args) == 1 and type(args[0]) is dict:
             Handler.update_from_dict(handler, obj, args[0])
         else:
             raise Exception('Updates can only be performed using dicts')

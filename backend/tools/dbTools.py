@@ -8,9 +8,12 @@ from src.config import Config  # NOQA
 
 app = create_app()
 
+DROP_DATABASE_BEFORE_CREATING = True
 
-def try_create_database(url: str, db_name: str):
-    '''Attempts to create the database, but not its contents'''
+
+def database_commands(url: str, command: str):
+    '''Wrapper function for SQL commands relating to the database itself
+    (ex: create database, drop database)'''
     try:
         # 1) Open a transaction with the database
         engine = create_engine(url)
@@ -22,7 +25,7 @@ def try_create_database(url: str, db_name: str):
             # so you have to end the open transaction with a commit
             conn.execute('commit')
             # 4) Now the database can be created
-            conn.execute(f'create database {db_name}')
+            conn.execute(command)
         except Exception:
             pass
         # 5) Make sure to close the connection
@@ -30,6 +33,18 @@ def try_create_database(url: str, db_name: str):
     except Exception:
         print(traceback.format_exc())
         pass
+
+
+def try_drop_database(url: str, db_name: str):
+    '''Attempts to drop the entire database'''
+    database_commands(url, f'drop database {db_name}')
+
+
+def try_create_database(url: str, db_name: str):
+    '''Attempts to create the database, but not its contents'''
+    if DROP_DATABASE_BEFORE_CREATING:
+        try_drop_database(url, db_name)
+    database_commands(url, f'create database {db_name}')
 
 
 def try_create_models(app):
@@ -68,7 +83,6 @@ def create_mock_data(app):
                                'This role grants administrative access. This comes with the ability to \
                                approve new customers, change customer information, modify inventory and \
                                contact hours, and more.')
-        print('PPPPPPPPPPPPPPPPPPPPPPP')
         print(admin)
         try:
             db.session.add(customer)

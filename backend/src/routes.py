@@ -263,19 +263,9 @@ def upload_gallery_image():
             status = AuthCodes.ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
             failed_indexes.append(i)
             continue
-        # Create a path to store the image and thumbnail, that don't already exist
-        img_dir = Config.GALLERY_DIR
-        img_path = ''
-        thumbnail_path = ''
-        path_attempts = 0
-        while True and path_attempts < 100:
-            img_path = f'{img_dir}/{img_name}.{img_extension}'
-            thumbnail_path = f'{img_dir}/{thumbnail_name}.{img_extension}'
-            if not path.exists(img_path) and not path.exists(thumbnail_path):
-                break
-            img_name = f'image{path_attempts}'
-            thumbnail_name = f'{img_name}-thumb'
-            path_attempts = path_attempts + 1
+        (img_name, thumb_name) = find_available_file_names(Config.GALLERY_DIR, img_name, img_extension)
+        img_path = f'{Config.GALLERY_DIR}/{img_name}.{img_extension}'
+        thumbnail_path = f'{Config.GALLERY_DIR}/{thumb_name}.{img_extension}'
         # Save image
         with open(img_path, 'wb') as f:
             f.write(b64decode(img_data))
@@ -289,7 +279,7 @@ def upload_gallery_image():
                                  img_extension,
                                  'TODO',
                                  img_hash,
-                                 ImageUses.GALLERY.value,
+                                 ImageUses.GALLERY,
                                  img_width,
                                  img_height)
         db.session.add(img_row)

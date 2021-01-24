@@ -9,4 +9,5 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f'{DB_LANGUAGE}://{DB_HOST}/{DB_NAME}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     BASE_IMAGE_DIR = '/Users/matthewhalloran/Documents/NLNWebsite/backend/assets'
+    PLANT_DIR = f'{BASE_IMAGE_DIR}/plant'
     GALLERY_DIR = f'{BASE_IMAGE_DIR}/gallery'

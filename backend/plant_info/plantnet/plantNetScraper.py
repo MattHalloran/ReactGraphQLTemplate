@@ -3,7 +3,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import selenium.common.exceptions as sel_ex
 
-selenium_exceptions = (sel_ex.ElementClickInterceptedException, sel_ex.ElementNotInteractableException, sel_ex.StaleElementReferenceException)
+selenium_exceptions = (sel_ex.ElementClickInterceptedException,
+                       sel_ex.ElementNotInteractableException,
+                       sel_ex.StaleElementReferenceException)
 image_categories = ['flower', 'leaf', 'fruit', 'bark', 'habit']
 IMAGES_PER_TAB = 10
 
