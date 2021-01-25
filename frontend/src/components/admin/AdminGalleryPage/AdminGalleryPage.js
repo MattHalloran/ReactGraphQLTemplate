@@ -56,7 +56,7 @@ class AdminGalleryPage extends React.Component {
             form.append('image', img.data);
         });
         imageQuery.uploadGalleryImages(form).then(response => {
-            alert('Upload success!');
+            alert('Successfully uploaded ' + response.passed_indexes?.length + ' images!');
         }).catch(error => {
             console.error(error);
             alert('Error uploading images!');

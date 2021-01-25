@@ -17,7 +17,9 @@ function ShoppingPage(props) {
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            if (r.title === USER_ROLES.Customer) {
+            console.log('SHOPPING PAGE FOUND ROLEEEEE', r)
+            if (r.title === USER_ROLES.Customer ||
+                r.title === USER_ROLES.Admin) {
                 is_customer = true;
             }
         })

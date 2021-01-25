@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 export const StyledModal = styled.aside`
     background-color: ${({ theme }) => theme.bodySecondary};
-    color: ${({ theme }) => theme.textSecondary}
+    color: ${({ theme }) => theme.textSecondary};
     position: fixed;
     left: 50%;
     top: 50%;
@@ -49,7 +49,7 @@ export const StyledModal = styled.aside`
     
     .x-button {
         position: fixed;
-        right: -20px;
+        right: 30px;
         top: -20px;
         border-radius: 100%;
         padding: 0.5em;
@@ -74,8 +74,7 @@ export const StyledModal = styled.aside`
     }
     
     .modal-body {
-        padding-left: 50px;
-        padding-right: 50px;
+        padding: 25px 50px 25px 50px;
         background-color: transparent;
         top: 50%; left: 50%;
         transform: translate(-50%,-50%);
@@ -89,8 +88,7 @@ export const StyledModal = styled.aside`
 
     @media (max-width: ${({ theme }) => theme.mobile}) {
         .modal-body {
-            padding-left: 0px;
-            padding-right: 0px;
+            padding: 0px;
         }
     }
 

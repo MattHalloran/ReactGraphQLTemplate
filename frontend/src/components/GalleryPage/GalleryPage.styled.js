@@ -17,9 +17,11 @@ export const StyledGalleryImage = styled.div`
     width: 100%;
     height: 100%;
 
-    .full-image {
+    img {
         max-height: 100%;
         max-width: 100%;
+        height: 100%;
+        width: 100%;
         display: block;
     }
 
@@ -36,10 +38,10 @@ export const StyledGalleryImage = styled.div`
     }
 
     .left {
-        left: -20px;
+        left: -100px;
     }
 
     .right {
-        right: -20px;
+        right: -100px;
     }
 `;

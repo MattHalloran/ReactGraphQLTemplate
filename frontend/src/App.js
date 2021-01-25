@@ -117,7 +117,7 @@ function App() {
                   </FormPage>
                 </RequireAuthentication>
               )} />
-              <Route exact path={LINKS.Shopping} render={() => (
+              <Route exact path={`${LINKS.Shopping}/:sku?`} render={() => (
                 <ShoppingPage user_roles={user_roles} />
               )} />
               {/* admin pages */}

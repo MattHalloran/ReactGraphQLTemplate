@@ -8,7 +8,7 @@ class Handler(ABC):
     @staticmethod
     @abstractmethod
     def model_type():
-        raise Exception('Hander class must overrde model_type method')
+        raise Exception('Handler class must overrde model_type method')
 
     @staticmethod
     @abstractmethod
@@ -21,7 +21,7 @@ class Handler(ABC):
     def required_fields():
         '''Specifies fields required by the model's constructor
         **NOTE: Fields order must match constructor signature'''
-        raise Exception('Hander class must overrde required_fields method')
+        raise Exception('Handler class must overrde required_fields method')
 
     @staticmethod
     def protected_fields():

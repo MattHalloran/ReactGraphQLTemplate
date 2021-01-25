@@ -3,6 +3,7 @@ from src.api import db
 from enum import Enum
 from sqlalchemy import Column, Integer, String, DECIMAL, Float, Boolean, ForeignKey
 import time
+from src.utils import salt
 
 
 # Used to help prevent typos. You may be wondering if you could
@@ -536,6 +537,7 @@ class Sku(db.Model):
     __tablename__ = Tables.SKU.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
+    sku = Column(String(32), nullable=False)
     availability = Column(Integer, nullable=False, default=defaults['availability'])
     is_discountable = Column(Boolean, nullable=False, default=defaults['is_discountable'])
     plant_id = db.Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
@@ -549,6 +551,7 @@ class Sku(db.Model):
     # -------------End relationships----------------
 
     def __init__(self, availability: int, is_discountable: bool, plant: Plant):
+        self.sku = salt(32)
         self.availability = availability
         self.is_discountable = is_discountable
         self.plant = plant

@@ -10,10 +10,13 @@ from src.api import db, create_app   # NOQA
 from src.config import Config   # NOQA
 from src.models import PlantTraitOptions, ImageUses  # NOQA
 from src.handlers.handler import Handler  # NOQA
+from src.handlers.skuHandler import SkuHandler  # NOQA
 from src.handlers.imageHandler import ImageHandler  # NOQA
 from src.handlers.plantHandler import PlantTraitHandler, PlantHandler  # NOQA
 from src.utils import get_image_meta, find_available_file_names  # NOQA
 
+# Will create a SKU for every plant added
+AUTO_CREATE_SKU = True
 IN_FILE = '/Users/matthewhalloran/Documents/NLNWebsite/backend/plant_info/combined-output.json'
 
 app = create_app()
@@ -59,7 +62,9 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
         # If image has already been downloaded
         if glob.glob(f'{Config.PLANT_DIR}/{file_name}.*'):
             print(f'Image already downloaded: {file_name}')
-            image_objects.append(None)
+            # TODO if database was dropped, this will return None instead of creating a new object
+            image = ImageHandler.from_file_name(file_name)
+            image_objects.append(image)
             continue
         # Request image from url
         response = requests.get(url)
@@ -183,20 +188,29 @@ def plants_to_model():
                                       PlantTraitOptions.LIGHT_RANGE,
                                       plant_obj,
                                       'light_ranges')
-            # TODO images!!!!
             if (image_dict := plant.get('plantnet_images', None)):
-                if (flower_images := image_dict.get('flower', None)):
-                    download_and_store_imgs(flower_images, f"Flowers of {plant_args['latin_name']}", ImageUses.PLANT_FLOWER)
-                if (leaf_images := image_dict.get('leaf', None)):
-                    download_and_store_imgs(leaf_images, f"Leaves of {plant_args['latin_name']}", ImageUses.PLANT_LEAF)
-                if (fruit_images := image_dict.get('fruit', None)):
-                    download_and_store_imgs(fruit_images, f"Fruits of {plant_args['latin_name']}", ImageUses.PLANT_FRUIT)
-                if (bark_images := image_dict.get('bark', None)):
-                    download_and_store_imgs(bark_images, f"Bark of {plant_args['latin_name']}", ImageUses.PLANT_BARK)
-                if (habit_images := image_dict.get('habit', None)):
-                    download_and_store_imgs(habit_images, f"{plant_args['latin_name']} in its habitat", ImageUses.PLANT_HABIT)
+                def download_helper(key: str, field: str, alt: str, use: ImageUses):
+                    '''Helper method for downloading images and adding relationships
+                    to those images in the plant object'''
+                    if (images := image_dict.get(key, None)):
+                        rows = download_and_store_imgs(images, alt, use)
+                        for row in rows:
+                            getattr(plant_obj, field).append(row)
+                latin_name = plant_args['latin_name']
+                field_arguments = [
+                    # [key in dict, name of model's field, image alt, ImageUses]
+                    ['flower', 'flower_images', f'Flowers of {latin_name}', ImageUses.PLANT_FLOWER],
+                    ['leaf', 'leaf_images', f'Leaves of {latin_name}', ImageUses.PLANT_LEAF],
+                    ['fruit', 'fruit_images', f'Fruits of {latin_name}', ImageUses.PLANT_FRUIT],
+                    ['bark', 'bark_images', f'Bark of {latin_name}', ImageUses.PLANT_BARK],
+                    ['habit', 'habit_images', f'{latin_name} in its habitat', ImageUses.PLANT_HABIT]
+                ]
+                [download_helper(*args) for args in field_arguments]
             print(f'Adding plant to db session: {plant_obj}')
             db.session.add(plant_obj)
+            if AUTO_CREATE_SKU:
+                sku_obj = Handler.create(SkuHandler, 100, True, plant_obj)
+                db.session.add(sku_obj)
             db.session.commit()
             print('YESSSS')
         db.session.commit()

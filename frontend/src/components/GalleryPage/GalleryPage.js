@@ -20,15 +20,14 @@ const SortableGallery = SortableContainer(({ items, handleClick }) => (
 ));
 
 function GalleryPage() {
-    let history = useHistory();
-    const urlParams = useParams();
-    const curr_img = urlParams.img;
-    const curr_img_index = useRef(-1);
     const [thumbnails, setThumbnails] = useState([]);
     const images_meta = useRef(null);
+    let history = useHistory();
+    let urlParams = useParams();
+    let curr_img = urlParams.img;
+    let curr_img_index = images_meta.current?.findIndex(m => m.hash === curr_img) ?? -1;
     const num_loaded = useRef(0);
-    const loading_thumbnails = useRef(false);
-    const loading_gallery = useRef(false);
+    const loading = useRef(false);
     const track_scrolling_id = 'scroll-tracked';
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
@@ -36,40 +35,21 @@ function GalleryPage() {
     useLayoutEffect(() => {
         document.title = `Gallery | ${BUSINESS_NAME}`;
         document.addEventListener('scroll', trackScrolling);
-        return (() => {
-            document.removeEventListener('scroll', trackScrolling);
-        })
+        return (() => document.removeEventListener('scroll', trackScrolling));
     })
 
-    const trackScrolling = useCallback(() => {
-        loadNextPage();
-    })
+    const trackScrolling = useCallback(() => loadNextPage());
 
     useEffect(() => {
-        loading_thumbnails.current = false;
+        loading.current = false;
+        PubSub.publishSync(PUBS.Loading, false);
     }, [thumbnails])
 
-    useEffect(() => {
-        PubSub.publishSync(PUBS.Loading, loading_thumbnails.current);
-    }, [loading_thumbnails.current])
-
-    useEffect(() => {
-        loading_gallery.current = false;
-        if (images_meta.current === null) {
-            setThumbnails([]);
-        } else {
-            loadNextPage();
-        }
-    }, [images_meta.current])
-
-    useEffect(() => {
-        if (loading_gallery.current) PubSub.publishSync(PUBS.Loading, true);
-    }, [loading_gallery.current])
-
     const readyToLoadPage = () => {
+        console.log('IN READTY TO LOAD PAGE', loading.current)
         //If the image metadata hasn't been received, or
         //the next page is still loading
-        if (loading_gallery.current || loading_thumbnails.current) return false;
+        if (loading.current) return false;
         //If all image thumbnails have already been loaded
         if (images_meta.current === null ||
             images_meta.current.length === num_loaded.current) {
@@ -84,7 +64,8 @@ function GalleryPage() {
 
     const loadNextPage = () => {
         if (!readyToLoadPage()) return;
-        loading_thumbnails.current = true;
+        loading.current = true;
+        PubSub.publishSync(PUBS.Loading, true);
         //Grab all thumbnail images
         let load_to = Math.min(images_meta.current.length, num_loaded.current + page_size - 1);
         let hashes = images_meta.current.map(meta => meta.hash).slice(num_loaded.current, load_to);
@@ -109,17 +90,10 @@ function GalleryPage() {
             }
             setThumbnails(thumbs => thumbs.concat(combined_data));
         }).catch(error => {
-            console.log("Failed to load thumbnails!", error);
-            loading_thumbnails.current = false;
+            console.error("Failed to load thumbnails!", error);
+            loading.current = false;
+            PubSub.publishSync(PUBS.Loading, false);
         });
-    }
-
-    // If image url loaded directly (i.e. opened from link instead of navigated),
-    // then we must search for its index in the gallery
-    const findCurrentImageIndex = () => {
-        if (curr_img_index.current <= 0) {
-            curr_img_index.current = images_meta.current.findIndex(m => m.hash === curr_img);
-        }
     }
 
     const prevImage = () => {
@@ -128,28 +102,30 @@ function GalleryPage() {
         if (!curr_img) {
             history.push(LINKS.Gallery + '/' + images_meta.current[num_loaded.current - 1].hash);
         } else {
-            findCurrentImageIndex();
             // Find previous image index using modulus
-            let prev_index = (curr_img_index.current + images_meta.current.length - 1) % images_meta.current.length;
+            let prev_index = (curr_img_index + images_meta.current.length - 1) % images_meta.current.length;
+            console.log('Prevvv INDEX SSSSS', prev_index)
             history.replace(LINKS.Gallery + '/' + images_meta.current[prev_index].hash);
         }
     }
 
     const nextImage = () => {
+        console.log('NEXT IMAGEEEEEE', num_loaded.current, curr_img)
         if (num_loaded.current <= 0) return;
         // Default to first image if none open
         if (!curr_img) {
             history.push(LINKS.Gallery + '/' + images_meta.current[0].hash);
         } else {
-            findCurrentImageIndex();
             // Find next image index using modulus
-            let next_index = (curr_img_index.current + 1) % images_meta.current.length;
+            console.log('SOMEBODY SUCK ME', curr_img_index, images_meta.current)
+            let next_index = (curr_img_index + 1) % images_meta.current.length;
+            console.log('NEXT INDEX SSSSS', next_index)
             history.replace(LINKS.Gallery + '/' + images_meta.current[next_index].hash);
         }
     }
 
     const openImage = (_event, photo, index) => {
-        curr_img_index.current = index;
+        curr_img_index = index;
         history.push(LINKS.Gallery + '/' + photo.key);
     }
 
@@ -158,13 +134,21 @@ function GalleryPage() {
     }
 
     useEffect(() => {
-        if (loading_gallery.current || images_meta.current) return;
-        loading_gallery.current = true;
+        if (loading.current || images_meta.current) return;
+        loading.current = true;
+        PubSub.publishSync(PUBS.Loading, true);
         imageQuery.getGallery().then(response => {
+            loading.current = false;
+            console.log('SETTING IMAGES METAAAAA', JSON.parse(response.images_meta))
             images_meta.current = JSON.parse(response.images_meta);
+            if (images_meta.current === null) {
+                setThumbnails([]);
+            } else {
+                loadNextPage();
+            }
         }).catch(error => {
             console.error("Failed to load gallery pictures!", error);
-            loading_gallery.current = false;
+            loading.current = false;
         })
     }, [])
 
@@ -172,7 +156,7 @@ function GalleryPage() {
     let popup = curr_img ? <Modal><GalleryImage img_id={curr_img} goLeft={prevImage} goRight={nextImage} /></Modal> : null;
     return (
         <StyledGalleryPage id={track_scrolling_id}>
-            { popup}
+            { popup }
             <SortableGallery distance={5} items={thumbnails} handleClick={openImage} onSortEnd={onSortEnd} axis={"xy"} />
         </StyledGalleryPage>
     );
@@ -196,7 +180,7 @@ function GalleryImage(props) {
         <StyledGalleryImage>
             <ChevronLeftIcon className="arrow left" onClick={props.goLeft} />
             <ChevronRightIcon className="arrow right" onClick={props.goRight} />
-            <img src={src} alt="TODO" className="full-image" />
+            <img src={src} alt="TODO" />
         </StyledGalleryImage>
     );
 }

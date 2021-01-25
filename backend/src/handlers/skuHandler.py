@@ -57,7 +57,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def to_dict(model: Sku):
-        as_dict = Handler.simple_fields_to_dict(model, ['availability', 'is_discountable'])
+        as_dict = Handler.simple_fields_to_dict(model, ['availability', 'is_discountable', 'sku'])
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
         as_dict['sizes'] = [SizeHandler.to_dict(size) for size in model.sizes]
         as_dict['discounts'] = [SkuDiscountHandler.to_dict(discount) for discount in model.discounts]

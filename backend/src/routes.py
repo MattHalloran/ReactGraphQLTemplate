@@ -1,16 +1,17 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
-from src.models import User, AccountStatus, Plant, Image, ImageUses, ContactInfo
+from src.models import User, AccountStatus, Plant, Sku, Image, ImageUses, ContactInfo
 from src.handlers.handler import Handler
 from src.handlers.userHandler import UserHandler
+from src.handlers.skuHandler import SkuHandler
 from src.handlers.plantHandler import PlantHandler
 from src.handlers.imageHandler import ImageHandler
 from src.handlers.contactInfoHandler import ContactInfoHandler
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
-from src.utils import get_image_meta
+from src.utils import get_image_meta, find_available_file_names
 from sqlalchemy import exc
 import ast
 import traceback
@@ -165,10 +166,10 @@ if __name__ == '__main__':
 @app.route("/api/fetch_inventory", methods=["POST"])
 @handle_exception
 def fetch_inventory():
-    item_IDs = Plant.all_plant_ids()
-    page_results = [Plant.from_id(type(Plant), id) for id in item_IDs]
+    ids = Handler.all_ids(Sku)
+    page_results = [SkuHandler.to_dict(Handler.from_id(Sku, id)) for id in ids]
     return {
-        "all_plant_ids": item_IDs,
+        "all_sku_ids": ids,
         "page_results": page_results,
         "status": AuthCodes.SUCCESS.value
     }
@@ -179,14 +180,14 @@ def fetch_inventory():
 @handle_exception
 def fetch_inventory_page():
     ids = getJson('ids')
-    return [Plant.from_id(type(Plant), id) for id in ids]
+    return [Handler.from_id(Sku, id) for id in ids]
 
 
 # Returns display information of all gallery photos.
 @app.route("/api/fetch_gallery", methods=["POST"])
 @handle_exception
 def fetch_gallery():
-    images_data = [ImageHandler.to_dict(img) for img in Image.query.all()]
+    images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
     print('boop le snoot')
     print(images_data)
     return {
@@ -203,7 +204,7 @@ def image_thumbnails():
     print(f'here boopy boop {hashes}')
     thumbnail_data = []
     for hash in hashes:
-        img = Image.from_hash(hash)
+        img = ImageHandler.from_hash(hash)
         if not img:
             thumbnail_data.append([])
             continue
@@ -225,7 +226,7 @@ def image():
     img_hash = getJson('hash')
     print(f'trying to get image {img_hash}')
     # Get image data from its hash
-    img = Image.from_hash(img_hash)
+    img = ImageHandler.from_hash(img_hash)
     if not img:
         return {"status": AuthCodes.ERROR_UNKNOWN.value}
     # Read image file
@@ -244,8 +245,10 @@ def image():
 @app.route("/api/upload_gallery_image/", methods=["POST"])
 @handle_exception
 def upload_gallery_image():
-    (names, extensions, images) = getForm('names', 'extensions', 'images')
+    (names, extensions, images) = getForm('name', 'extension', 'image')
+    print(f'NUMBER OF IMAGESSSS: {len(images)}')
     status = AuthCodes.SUCCESS.value
+    passed_indexes = []
     failed_indexes = []
     # Iterate through images
     for i in range(len(images)):
@@ -258,7 +261,7 @@ def upload_gallery_image():
         (img_hash, thumbnail, img_width, img_height) = get_image_meta(b64decode(img_data))
         # If image hash matches a row in the database, then the
         # image was uploaded already
-        if Image.is_hash_used(img_hash):
+        if ImageHandler.is_hash_used(img_hash):
             print('Image already in backend!')
             status = AuthCodes.ERROR_SOME_IMAGES_ALREADY_UPLOADED.value
             failed_indexes.append(i)
@@ -284,7 +287,9 @@ def upload_gallery_image():
                                  img_height)
         db.session.add(img_row)
         db.session.commit()
-    return {"failed_indexes": failed_indexes,
+        passed_indexes.append(i)
+    return {"passed_indexes": passed_indexes,
+            "failed_indexes": failed_indexes,
             "status": status}
 
 
