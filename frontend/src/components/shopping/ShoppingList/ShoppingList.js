@@ -44,7 +44,6 @@ function ShoppingList(props) {
       .getInventory(filter_by)
       .then((response) => {
         PubSub.publish(PUBS.Loading, false);
-        console.log("SEND ME BOOTY PIC GURL", response);
         let list_data = response.page_results;
         setCardListData(list_data);
         setCardList(

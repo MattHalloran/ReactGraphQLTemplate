@@ -242,6 +242,7 @@ def image():
     base64_string = base64_bytes.decode('utf-8')
     return {
         "image": base64_string,
+        "alt": img.alt,
         "status": AuthCodes.SUCCESS.value
     }
 
