@@ -2,7 +2,7 @@ from src.handlers.handler import Handler
 from src.handlers.addressHandler import AddressHandler
 from src.handlers.userHandler import UserHandler
 from src.handlers.phoneHandler import PhoneHandler
-from src.handler.emailHandler import EmailHandler
+from src.handlers.emailHandler import EmailHandler
 from src.models import BusinessDiscount, Business
 from src.models import Address
 from src.models import User

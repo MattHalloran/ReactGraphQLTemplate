@@ -17,15 +17,15 @@ const images = [
 
 function Hero(props) {
 
-  let slides = []
-  images.forEach(i => {
-    slides.push(<Slide
+  let slides = images.map((img, index) => (
+    <Slide
+      key={index}
       background={{
-        backgroundImage: i[0],
-        backgroundAnimation: i[1]
+        backgroundImage: img[0],
+        backgroundAnimation: img[1]
       }}
-    />)
-  })
+    />
+  ))
 
   return (
     <HeroSlider
@@ -36,7 +36,6 @@ function Hero(props) {
       }}
       settings={{
         slidingDuration: 500,
-        slidingDelay: 100,
         shouldAutoplay: true,
         shouldDisplayButtons: true,
         autoplayDuration: 5000,

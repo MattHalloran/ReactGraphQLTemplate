@@ -15,11 +15,9 @@ import CardActions from "@material-ui/core/CardActions";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import { red } from "@material-ui/core/colors";
-import FavoriteIcon from "@material-ui/icons/Favorite";
-import FullscreenIcon from "@material-ui/icons/Fullscreen";
-import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import { BsArrowsFullscreen } from 'react-icons/bs';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 function ShoppingList(props) {
   let history = useHistory();
@@ -145,10 +143,10 @@ function SkuCard(props) {
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+          <AiOutlineHeart />
         </IconButton>
         <IconButton onClick={handleExpandClick} aria-label="show more">
-          <FullscreenIcon />
+          <BsArrowsFullscreen />
         </IconButton>
       </CardActions>
     </Card>
@@ -180,8 +178,8 @@ function ExpandedSku(props) {
 
   return (
     <StyledExpandedSku>
-      <ChevronLeftIcon className="arrow left" onClick={props.goLeft} />
-      <ChevronRightIcon className="arrow right" onClick={props.goRight} />
+      <FaChevronLeft className="arrow left" onClick={props.goLeft} />
+      <FaChevronRight className="arrow right" onClick={props.goRight} />
       <div className="main-content">
         <div>
           <h1>{props.latin_name}</h1>

@@ -19,7 +19,6 @@ function Modal(props) {
     // outside the DOM hierarchy of the parent component
     return ReactDOM.createPortal(
         <StyledModal
-            tag="aside"
             role="dialog"
             tabIndex="-1"
             aria-modal="true">

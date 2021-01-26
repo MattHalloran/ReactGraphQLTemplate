@@ -314,6 +314,7 @@ class Phone(db.Model):
     # ex: could be (555) 867-5309, 555-867-5309, 5558675309, etc. DOES NOT INCLUDE COUNTRY CODE
     unformatted_number = Column(String(50), nullable=False, unique=True)
     country_code = Column(String(10), default=defaults['country_code'])
+    extension = Column(String(10))
     carrier = Column(String(50))  # Currently unused
     is_mobile = Column(Boolean, default=defaults['is_mobile'])
     receives_delivery_updates = Column(Boolean, default=defaults['receives_delivery_updates'])
@@ -324,10 +325,12 @@ class Phone(db.Model):
     def __init__(self,
                  unformatted_number: str,
                  country_code: str,
+                 extension: str,
                  is_mobile: bool,
                  receives_delivery_updates: bool):
         self.unformatted_number = unformatted_number
         self.country_code = country_code
+        self.extension = extension
         self.is_mobile = is_mobile
         self.receives_delivery_updates = receives_delivery_updates
 

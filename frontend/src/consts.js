@@ -29,20 +29,22 @@ export const PUBS = {
 }
 
 export const LINKS = {
-    Home: "/",
     About: "/about",
-    PrivacyPolicy: "/privacy-policy",
-    Gallery: "/gallery",
-    Register: "/register",
-    LogIn: "/login",
-    ForgotPassword: "/forgot-password",
-    Profile: "/profile",
-    Shopping: "/shopping",
     Admin: "/admin",
     AdminContactInfo: "/admin/contact-info",
     AdminCustomers: "/admin/customers",
     AdminGallery: "/admin/gallery",
     AdminInventory: "/admin/inventory",
     AdminOrders: "/admin/orders",
-    AdminPlantInfo: "/admin/plant-info"
+    AdminPlantInfo: "/admin/plant-info",
+    Cart: "/cart",
+    Contact: "/contact",
+    ForgotPassword: "/forgot-password",
+    Gallery: "/gallery",
+    Home: "/",
+    LogIn: "/login",
+    PrivacyPolicy: "/privacy-policy",
+    Profile: "/profile",
+    Register: "/register",
+    Shopping: "/shopping",
 }

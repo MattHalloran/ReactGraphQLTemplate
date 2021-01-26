@@ -5,18 +5,11 @@ import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import * as authQuery from 'query/auth';
 import { StyledNavbar } from './Navbar.styled';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import { FaShoppingCart } from 'react-icons/fa';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
-import { BUSINESS_NAME, USER_ROLES } from 'consts';
+import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
 
 const SHOW_HAMBURGER_AT = 800;
-
-const styles = {
-    shoppingCart: {
-        width: "1.5em",
-        height: "1.5em",
-    },
-}
 
 function Navbar(props) {
     let [show_hamburger, setShowHamburger] = useState(false);
@@ -32,7 +25,7 @@ function Navbar(props) {
 
     return (
         <StyledNavbar visible={props.visible}>
-            <Link to="/" className="nav-brand">
+            <Link to={LINKS.Home} className="nav-brand">
                 <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
                 <span className="nav-name">{BUSINESS_NAME}</span>
             </Link>
@@ -48,86 +41,73 @@ Navbar.propTypes = {
 }
 
 function Hamburger(props) {
-    let admin_options;
-    let account_options;
+    let nav_options = [];
+
+    // If an admin is logged in, display admin links
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
             if (r.title === USER_ROLES.Admin) {
-                admin_options = <React.Fragment>
-<p><Link to="/admin">Admin</Link></p>
-                </React.Fragment>
+                nav_options.push([LINKS.Admin, 'Admin']);
             }
         })
     }
+
+    // If someone is not logged in, display sign up/log in links
     if (props.session == null) {
-        account_options = <React.Fragment>
-            <p><Link to="/register">Sign Up</Link></p>
-            <p><Link to="/login">Log In</Link></p>
-        </React.Fragment>
+        nav_options.push([LINKS.Register, 'Sign Up'],
+                         [LINKS.LogIn, 'Log In']);
     } else {
-        account_options = <React.Fragment>
-            <p><Link to="/" onClick={authQuery.logout}>Log Out</Link></p>
-        </React.Fragment>
+        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
     }
 
+    nav_options.push([LINKS.Gallery, 'Gallery'],
+                     [LINKS.About, 'About Us'],
+                     [LINKS.Contact, 'Contact Us']);
+    
     return (
         <BurgerMenu {...props}>
-            {admin_options}
-            {account_options}
-            {/* Things displayed no matter the login status */}
+            { nav_options.map(([link, text, onClick], index) => (
+                <p key={index}><Link to={link} onClick={onClick ? onClick() : null}>{text}</Link></p>
+            ))}
             <ContactInfo />
         </BurgerMenu>
     );
 }
 
 function NavList(props) {
-    let admin_options;
+    // Link, Link text, onClick function
+    let nav_options = [
+        [LINKS.Gallery, 'Gallery'],
+        [LINKS.About, 'About Us'],
+        [LINKS.Contact, 'Contact Us']
+    ];
+    
+    // If an admin is logged in, display admin links
     let roles = props.user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
             if (r.title === USER_ROLES.Admin) {
-                admin_options = <React.Fragment>
-                    <li className="nav-item">
-                        <Link to="/admin">Admin</Link>
-                    </li>
-                </React.Fragment>
+                nav_options.push([LINKS.Admin, 'Admin']);
             }
         })
     }
-    let options;
+    
+    // If someone is not logged in, display sign up/log in links
     if (props.session == null) {
-        options = <React.Fragment>
-            <li className="nav-item">
-                <Link className="nav-link"
-                    to="/register">Sign Up</Link>
-            </li>
-            <li className="nav-item">
-                <Link className="nav-link"
-                    to="/login">Log In</Link>
-            </li>
-        </React.Fragment>
+        nav_options.push([LINKS.Register, 'Sign Up'],
+                         [LINKS.LogIn, 'Log In']);
     } else {
-        options = <React.Fragment>
-            <li className="nav-item">
-                <a className="nav-link" href="/" onClick={() => authQuery.logout()}>Log Out</a>
-            </li>
-            <li className="nav-item">
-                <Link to="/cart" >
-                    <ShoppingCartIcon style={styles.shoppingCart} />
-                </Link>
-            </li>
-        </React.Fragment>
+        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
     }
 
     return (
         <ul className="nav-list">
-            {admin_options}
-            <li className="nav-item">
-                <Link className="nav-link"
-                    to="/info">Info</Link>
-            </li>
-            {options}
+            { nav_options.map(([link, text, onClick], index) => (
+                <li className="nav-item" key={index}>
+                    <Link className="nav-link" to={link} onClick={onClick ? onClick() : null}>{text}</Link>
+                </li>
+            ))}
         </ul>
     );
 }

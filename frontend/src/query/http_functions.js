@@ -53,12 +53,13 @@ export async function validate_token(token) {
     return await fetchWrapper(`${PREFIX}/is_token_valid`, options);
 }
 
-export async function create_user(firstName, lastName, pronouns, email, password, existing_customer) {
+export async function create_user(firstName, lastName, business, email, phone, password, existing_customer) {
     let json = JSON.stringify({
         "first_name": firstName,
         "last_name": lastName,
-        "pronouns": pronouns,
+        "business": business,
         "email": email,
+        "phone": phone,
         "password": password,
         "existing_customer": existing_customer
     });

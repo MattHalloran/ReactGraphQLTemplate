@@ -30,14 +30,17 @@ export function checkCookies() {
         let session = localStorage.getItem(LOCAL_STORAGE.Session);
         if (session) session = JSON.parse(session);
         if (!session || !session.email || !session.token) {
+            console.log('SETTING SESSION TO NULL')
             setSession(null);
             reject({ok: false, status: StatusCodes.FAILURE_NOT_VERIFIED});
         } else {
             validate_token(session.token).then(data => {
                 if (data.ok) {
+                    console.log('COOKIE SUCCESS! SeTting session', session)
                     setSession(session);
                     resolve(data);
                 } else {
+                    console.log('COOKIE FAILURE! session setting to null')
                     setSession(null);
                     reject(data);
                 }
@@ -94,9 +97,9 @@ export function loginUser(email, password) {
     });
 }
 
-export function registerUser(firstName, lastName, pronouns, email, password, existing_customer) {
+export function registerUser(firstName, lastName, business, email, phone, password, existing_customer) {
     return new Promise(function (resolve, reject) {
-        create_user(firstName, lastName, pronouns, email, password, existing_customer).then(data => {
+        create_user(firstName, lastName, business, email, phone, password, existing_customer).then(data => {
             if (data.ok) {
                 login({email: email, token: data.token }, data.user);
                 resolve(data);

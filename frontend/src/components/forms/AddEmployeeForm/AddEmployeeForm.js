@@ -4,27 +4,21 @@ import PubSub from 'utils/pubsub';
 import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import MenuItem from '@material-ui/core/MenuItem';
 import { useHistoryState } from 'utils/useHistoryState';
-import { PUBS, LINKS } from 'consts';
+import { PUBS, LINKS, DEFAULT_PRONOUNS } from 'consts';
 
-function SignUpForm() {
+function AddEmployeeForm() {
   let history = useHistory();
   const [firstName, setFirstName] = useHistoryState("su_first_name", "");
   const [firstNameError, setFirstNameError] = useHistoryState("su_first_name_error", null);
   const [lastName, setLastName] = useHistoryState("su_last_name", "");
   const [lastNameError, setLastNameError] = useHistoryState("su_last_name_error", null);
-  const [business, setBusiness] = useHistoryState("su_bizz", null);
-  const [businessError, setBusinessError] = useHistoryState("su_bizz_error", null);
+  const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
+  const [pronounsError, setPronounsError] = useHistoryState("su_pronoun_error", null);
+  const [customPronouns, setCustomPronouns] = useHistoryState("su_custom_pronoun", "");
+  const [customPronounsError, setCustomPronounsError] = useHistoryState("su_custom_pronoun_error", null);
   const [email, setEmail] = useHistoryState("su_email", "");
   const [emailError, setEmailError] = useHistoryState("su_email_error", null);
-  const [phone, setPhone] = useHistoryState("su_phone", "");
-  const [phoneError, setPhoneError] = useHistoryState("su_phone_error", null);
   const [password, setPassword] = useState("")
   const [passwordError, setPasswordError] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,7 +32,7 @@ function SignUpForm() {
 
   const register = () => {
     PubSub.publish(PUBS.Loading, true);
-    authQuery.registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
+    authQuery.registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
       PubSub.publish(PUBS.Loading, false);
       history.push(LINKS.Profile);
     }).catch(error => {
@@ -51,7 +45,9 @@ function SignUpForm() {
   const submit = (event) => {
     event.preventDefault();
     setShowErrors(true);
-    if (!firstNameError && !lastNameError && !businessError && !emailError &&
+    console.log('PRONOUNSSSS', pronouns, pronounsError);
+    return;
+    if (!firstNameError && !lastNameError && !pronounsError && !emailError &&
       !passwordError && password === confirmPassword && !existingCustomerError) {
       register();
     }
@@ -83,15 +79,33 @@ function SignUpForm() {
           showErrors={showErrors}
         />
       </div>
-      <InputText
-        label="Business"
-        type="text"
-        value={business}
-        valueFunc={setBusiness}
-        errorFunc={setBusinessError}
-        validate={validation.businessValidation}
-        showErrors={showErrors}
-      />
+      <div className="horizontal-input-container">
+        <InputText
+          label="Pronouns"
+          value={pronouns}
+          valueFunc={setPronouns}
+          select
+          SelectProps={{
+            native: true,
+          }} >
+          {DEFAULT_PRONOUNS.map((pro) => (
+            <option key={pro} value={pro}>
+              {pro}
+            </option>
+          ))}
+        </InputText>
+        {pronouns === DEFAULT_PRONOUNS[0] ?
+          <InputText
+            label="Enter pronouns"
+            type="text"
+            value={customPronouns}
+            valueFunc={setCustomPronouns}
+            errorFunc={setCustomPronounsError}
+            validate={validation.pronounValidation}
+            showErrors={showErrors}
+          />
+          : null}
+      </div>
       <InputText
         label="Email"
         type="email"
@@ -99,15 +113,6 @@ function SignUpForm() {
         valueFunc={setEmail}
         errorFunc={setEmailError}
         validate={validation.emailValidation}
-        showErrors={showErrors}
-      />
-      <InputText
-        label="Phone"
-        type="text"
-        value={phone}
-        valueFunc={setPhone}
-        errorFunc={setPhoneError}
-        validate={validation.phoneNumberValidation}
         showErrors={showErrors}
       />
       <InputText
@@ -123,13 +128,6 @@ function SignUpForm() {
         type="password"
         valueFunc={setConfirmPassword}
       />
-      <FormControl component="fieldset">
-        <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
-          <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-          <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-        </RadioGroup>
-        <FormHelperText>{existingCustomerError}</FormHelperText>
-      </FormControl>
       <div className="form-group">
         <button className="primary submit" type="submit" onClick={submit}>
           Submit
@@ -141,8 +139,8 @@ function SignUpForm() {
   );
 }
 
-SignUpForm.propTypes = {
+AddEmployeeForm.propTypes = {
 
 }
 
-export default SignUpForm;
+export default AddEmployeeForm;

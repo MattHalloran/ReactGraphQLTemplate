@@ -30,6 +30,7 @@ function BurgerMenu(props) {
 
   return (
     <StyledBurgerMenu open={open}>
+      <div id="overlay"/>
       <ClickOutside {...props} active={open} on_click_outside={closeMenu} >
         <Burger toggle={toggleOpen} />
         <MenuContainer open={open} closeMenu={closeMenu}>

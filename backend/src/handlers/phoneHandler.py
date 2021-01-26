@@ -10,7 +10,7 @@ class PhoneHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['unformatted_number', 'country_code', 'is_mobile', 'receives_delivery_updates']
+        return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
 
     @staticmethod
     def required_fields():

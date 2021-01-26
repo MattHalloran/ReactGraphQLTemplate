@@ -1,14 +1,7 @@
 import React from 'react';
 import { StyledArrowMenu } from './ArrowMenu.styled';
 import { MenuContainer } from '../../Menu';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
-
-const styles = {
-    forwardIcon: {
-        width: "1.5em",
-        height: "1.5em",
-    },
-}
+import { FiArrowRight } from 'react-icons/fi';
 
 class ArrowMenu extends React.Component {
     constructor(props) {
@@ -38,7 +31,7 @@ class Arrow extends React.Component {
     render() {
         return (
             <div className="arrow-container">
-                <ArrowForwardIosIcon style={styles.forwardIcon} />
+                <FiArrowRight />
             </div>
         );
     }

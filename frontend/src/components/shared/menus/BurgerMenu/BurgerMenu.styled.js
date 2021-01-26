@@ -1,10 +1,29 @@
 import styled from 'styled-components';
+
+// Darkens everything besides the open menu
+const overlay_style = `
+    position: fixed; 
+    left: 0;
+    top: 0;
+    width: 100vh; 
+    height: 100vh;
+    overflow: hidden;
+    z-index: 10;
+    background-color: rgba(0,0,0,.5);
+`
+
 export const StyledBurgerMenu = styled.div`
+
+  #overlay {
+    transition: 0.3s ease-in-out;
+    ${({ open }) => open ? overlay_style : ''};
+  }
+
   .burger {
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 100;
+    z-index: 101;
     position: fixed;
     right: 1em;
     top: 50%;

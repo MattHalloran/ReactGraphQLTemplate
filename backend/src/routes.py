@@ -3,8 +3,11 @@ from flask_cors import CORS, cross_origin
 from src.api import create_app, db
 from src.models import User, AccountStatus, Plant, Sku, Image, ImageUses, ContactInfo
 from src.handlers.handler import Handler
+from src.handlers.businessHandler import BusinessHandler
 from src.handlers.userHandler import UserHandler
 from src.handlers.skuHandler import SkuHandler
+from src.handlers.emailHandler import EmailHandler
+from src.handlers.phoneHandler import PhoneHandler
 from src.handlers.plantHandler import PlantHandler
 from src.handlers.imageHandler import ImageHandler
 from src.handlers.contactInfoHandler import ContactInfoHandler
@@ -83,13 +86,15 @@ def handle_exception(func):
 @cross_origin(supports_credentials=True)
 @handle_exception
 def register():
-    data = getData('first_name', 'last_name', 'pronouns', 'email', 'password', 'existing_customer')
-    user = User(first_name=data[0],
-                last_name=data[1],
-                pronouns=data[2],
-                email=data[3],
-                password=data[4],
-                existing_customer=data[5])
+    data = getData('first_name', 'last_name', 'business', 'email', 'phone', 'password', 'existing_customer')
+    email = Handler.create(EmailHandler, data[3], True)
+    phone = Handler.create(PhoneHandler, data[4], '+1', '', True, True)
+    business = Handler.create(BusinessHandler, data[2], email, phone, True)
+    user = Handler.create(UserHandler, data[0], data[1], '', data[5], data[6])
+    user.personal_email.append(email)
+    db.session.add(email)
+    db.session.add(phone)
+    db.session.add(business)
     db.session.add(user)
     try:
         db.session.commit()
@@ -122,7 +127,7 @@ def get_token():
             "status": AuthCodes.SUCCESS.value,
         }
     else:
-        account_status = User.get_user_lock_status(email)
+        account_status = UserHandler.get_user_lock_status(email)
         print(f'User account status is {account_status}')
         status = AuthCodes.ERROR_UNKNOWN.value
         if account_status == -1:

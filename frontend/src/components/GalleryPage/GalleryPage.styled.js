@@ -18,19 +18,19 @@ export const StyledGalleryImage = styled.div`
     height: 100%;
 
     img {
-        max-height: 100%;
+        max-height: 90vh;
         max-width: 100%;
-        height: 100%;
-        width: 100%;
         display: block;
+        border-radius: 10px;
     }
 
     .arrow {
-        width: 100px;
-        height: 100px;
+        width: 50px;
+        height: 50px;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
+        color: white;
     }
 
     .arrow:hover {
@@ -38,10 +38,10 @@ export const StyledGalleryImage = styled.div`
     }
 
     .left {
-        left: -100px;
+        left: -50px;
     }
 
     .right {
-        right: -100px;
+        right: -50px;
     }
 `;

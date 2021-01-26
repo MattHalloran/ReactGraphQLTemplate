@@ -1,16 +1,28 @@
 import styled from 'styled-components';
 export const StyledModal = styled.aside`
-    background-color: ${({ theme }) => theme.bodySecondary};
-    color: ${({ theme }) => theme.textSecondary};
+    background-color: rgba(0, 0, 0, .8);
     position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     z-index: 10000;
-    background-color: rgba(0, 0, 0, 0.8);
-    position: fixed;
+
+    .modal-body {
+        background-color: ${({ theme }) => theme.bodySecondary};
+        color: ${({ theme }) => theme.textSecondary};
+        box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        max-width: calc(100% - 100px);
+        max-height: calc(100% - 50px);
+        width: fit-content;
+        height: fit-content;
+        border: 3px solid white;
+        border-radius: 10px;
+    }
     
 
     /* Secondary color links */
@@ -24,32 +36,9 @@ export const StyledModal = styled.aside`
         color: ${({ theme }) => theme.textSecondary};
     }
     
-    .modal-area {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: ${({ theme }) => theme.bodySecondary};
-    box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    z-index: 1000;
-    }
-    
-    @media screen and (min-width: 500px) {
-    /* Center the Modal! */
-    .modal-area {
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        max-height: calc(100% - 1em);
-    }
-    }
-    
     .x-button {
         position: fixed;
-        right: 30px;
+        right: -20px;
         top: -20px;
         border-radius: 100%;
         padding: 0.5em;
@@ -71,19 +60,6 @@ export const StyledModal = styled.aside`
     stroke: white;
     stroke-linecap: round;
     stroke-width: 3;
-    }
-    
-    .modal-body {
-        padding: 25px 50px 25px 50px;
-        background-color: transparent;
-        top: 50%; left: 50%;
-        transform: translate(-50%,-50%);
-        position: absolute;
-        width: fit-content;
-        display: block;
-        max-width: 100%;
-        height: fit-content;
-        max-height: 100%;
     }
 
     @media (max-width: ${({ theme }) => theme.mobile}) {

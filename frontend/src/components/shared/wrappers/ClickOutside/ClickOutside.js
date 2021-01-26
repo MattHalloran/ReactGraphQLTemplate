@@ -36,6 +36,7 @@ export class ClickOutside extends React.Component {
 
   handleClickOutside(event) {
     if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      event.stopPropagation();
       this.props.on_click_outside();
     }
   }

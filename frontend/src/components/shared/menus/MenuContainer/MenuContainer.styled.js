@@ -7,6 +7,7 @@ export const StyledMenuContainer = styled.nav`
   flex-direction: column;
   justify-content: center;
   background: ${({ theme }) => theme.bodySecondary};
+  border-left: 2px solid black;
   height: 100vh;
   padding-top: 12vh;
   text-align: center;
@@ -15,6 +16,7 @@ export const StyledMenuContainer = styled.nav`
   position: fixed;
   top: 0;
   right: 0;
+  z-index: 100 !important;
   transition: transform 0.3s ease-in-out;
 
   @media (max-width: ${({ theme }) => theme.mobile}) {
