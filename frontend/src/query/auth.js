@@ -50,18 +50,21 @@ export function checkCookies() {
 }
 
 export function login(session, user) {
+    console.log("IN LOGINDDDD", user);
     setSession(session);
     setRoles(user.roles);
     setTheme(user.theme);
 }
 
 export function logout() {
+    console.log('LOGGING OUT')
     setSession(null);
     setRoles(null);
     setTheme(null);
 }
 
 export function logoutAndRedirect() {
+    console.log("LOGGIN OUT AND REDIRECTING")
     return (dispatch) => {
         let history = useHistory();
         dispatch(logout());
@@ -73,9 +76,11 @@ export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         get_token(email, password).then(data => {
             if (data.ok) {
+                console.log('LOGIN OKAY')
                 login({email: email, token: data.token}, data.user);
                 resolve(data);
             } else {
+                console.log('DATA NOT OKAY, logging out')
                 logout();
                 switch (data.status) {
                     case StatusCodes.FAILURE_NO_USER:
@@ -104,6 +109,7 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
                 login({email: email, token: data.token }, data.user);
                 resolve(data);
             } else {
+                console.log('REGISTER FAIL LOGGING OUT')
                 logout();
                 if (data.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
                     data.error = "User with that email already exists. If you would like to reset your password, TODO";

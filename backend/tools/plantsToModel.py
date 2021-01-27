@@ -209,7 +209,7 @@ def plants_to_model():
             print(f'Adding plant to db session: {plant_obj}')
             db.session.add(plant_obj)
             if AUTO_CREATE_SKU:
-                sku_obj = Handler.create(SkuHandler, 100, True, plant_obj)
+                sku_obj = Handler.create(SkuHandler, True, plant_obj)
                 db.session.add(sku_obj)
             db.session.commit()
             print('YESSSS')

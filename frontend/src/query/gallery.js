@@ -1,4 +1,4 @@
-import { fetch_gallery, fetch_image, fetch_image_thumbnails, upload_gallery_images } from './http_functions';
+import { fetch_gallery, fetch_image_from_hash, fetch_image_thumbnails, upload_gallery_images } from './http_functions';
 
 export function getGallery() {
     return new Promise(function (resolve, reject) {
@@ -26,7 +26,7 @@ export function getGalleryThumbnails(hashes) {
 
 export function getGalleryImage(hash) {
     return new Promise(function (resolve, reject) {
-        fetch_image(hash).then(data => {
+        fetch_image_from_hash(hash).then(data => {
             if (data.ok && data.image !== null) {
                 resolve(data);
             } else {

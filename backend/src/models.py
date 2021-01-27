@@ -107,9 +107,9 @@ class Address(db.Model):
     premise = Column(String(20))
     # Any special delivery instructions the user would like to add
     delivery_instructions = Column(String(1000))
-    user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
+    # ------------Start relationships---------------
 
     def __init__(self,
                  tag: str,
@@ -516,14 +516,21 @@ class SkuDiscount(db.Model):
 
 
 class Size(db.Model):
+    # Default values for fields in __init__
+    defaults = {
+        'availability': 0
+    }
+
     __tablename__ = Tables.SIZE.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     size = Column(String(25), nullable=False, unique=True)
+    availability = Column(Integer, nullable=False, default=0)
     # ----------------End columns-------------------
 
-    def __init__(self, size: str):
+    def __init__(self, size: str, availability: int):
         self.size = size
+        self.availability = availability
 
     def __repr__(self):
         return f"{self.__tablename__}('{self.id}', '{self.size}')"
@@ -533,7 +540,6 @@ class Size(db.Model):
 class Sku(db.Model):
     # Default values for fields in __init__
     defaults = {
-        'availability': 0,
         'is_discountable': True
     }
 
@@ -541,21 +547,21 @@ class Sku(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     sku = Column(String(32), nullable=False)
-    availability = Column(Integer, nullable=False, default=defaults['availability'])
     is_discountable = Column(Boolean, nullable=False, default=defaults['is_discountable'])
-    plant_id = db.Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
+    plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
+    display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    # One-to-one relationship
+    # One-to-one relationships
     plant = db.relationship('Plant', uselist=False, foreign_keys=[plant_id])
+    display_img = db.relationship('Image', uselist=False, foreign_keys=[display_img_id])
     # Many-to-many relationships
     sizes = db.relationship('Size', secondary=skuSizes, backref='users')
     discounts = db.relationship('SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------
 
-    def __init__(self, availability: int, is_discountable: bool, plant: Plant):
+    def __init__(self, is_discountable: bool, plant: Plant):
         self.sku = salt(32)
-        self.availability = availability
         self.is_discountable = is_discountable
         self.plant = plant
 
@@ -564,13 +570,27 @@ class Sku(db.Model):
 
 
 class OrderStatus(Enum):
-    CANCELED = -2
+    # Admin canceled the order at any point before delivery
+    CANCELED_BY_ADMIN = -4
+    # 1) User canceled the order before it was approved (i.e. no admin approval needed), OR
+    # 2) PENDING_CANCEL was approved by admin
+    CANCELED_BY_USER = -3
+    # User canceled the order after it was approved (i.e. admin approval needed)
+    PENDING_CANCEL = -2
+    # Order was pending, but admin denied it
     REJECTED = -1
-    PENDING = 0
-    APPROVED = 1
-    SCHEDULED = 2
-    IN_TRANSIT = 3
-    DELIVERED = 4
+    # Order that hasn't been submitted yet (i.e. cart)
+    DRAFT = 0
+    # Order that has been submitted, but not approved by admin yet
+    PENDING = 1
+    # Order that has been approved by admin
+    APPROVED = 2
+    # Order has been scheduled for delivery
+    SCHEDULED = 3
+    # Order is currently being delivered
+    IN_TRANSIT = 4
+    # Order has been delivered
+    DELIVERED = 5
 
 
 class OrderItem(db.Model):
@@ -603,14 +623,15 @@ class Order(db.Model):
     __tablename__ = Tables.ORDER.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
-    status = Column(Integer, nullable=False, default=OrderStatus.PENDING.value)
+    status = Column(Integer, nullable=False, default=OrderStatus.DRAFT.value)
     special_instructions = Column(String)
     desired_delivery_date = Column(Float, nullable=False)
     delivery_address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
+    address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    # One-to-one relationship
+    # One-to-one relatinoship
     delivery_address = db.relationship('Address', uselist=False, foreign_keys=[delivery_address_id])
     # One-to-many relationship
     items = db.relationship('OrderItem', backref='Order', lazy=True)
@@ -657,6 +678,7 @@ class AccountStatus(Enum):
 
 
 # All users of the system, such as customers and admins
+# Their "cart" is the last order in their orders list
 class User(db.Model):
     # Default values for fields in __init__
     defaults = {
@@ -679,11 +701,8 @@ class User(db.Model):
     session_token = Column(String(250))
     account_status = Column(Integer, nullable=False, default=0)
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
-    cart_id = db.Column(Integer, ForeignKey(f'{Tables.ORDER.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    # One-to-one relationship
-    cart = db.relationship('Order', uselist=False, foreign_keys=[cart_id])
     # One-to-many relationships
     personal_phone = db.relationship('Phone', backref='user')
     personal_email = db.relationship('Email', backref='user')

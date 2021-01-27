@@ -47,6 +47,7 @@ export const StyledModal = styled.aside`
         border: 0;
         box-shadow: 0;
         cursor: pointer;
+        z-index: 2;
     }
 
     ._modal-close:hover {

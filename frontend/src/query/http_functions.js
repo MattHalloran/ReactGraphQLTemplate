@@ -105,14 +105,14 @@ export async function fetch_inventory(filter_by) {
     let options = {
         body: json,
         method: 'post',
-        headers: HEADERS.Text,
+        headers: HEADERS.ApplicationJson,
     }
     return await fetchWrapper(`${PREFIX}/fetch_inventory`, options);
 }
 
-export async function fetch_inventory_page(item_ids) {
+export async function fetch_inventory_page(skus) {
     let json = JSON.stringify({
-        "ids": item_ids,
+        "skus": skus,
     });
     let options = {
         body: json,
@@ -130,7 +130,7 @@ export async function fetch_gallery() {
     return await fetchWrapper(`${PREFIX}/fetch_gallery`, options);
 }
 
-export async function fetch_image(hash) {
+export async function fetch_image_from_hash(hash) {
     let json = JSON.stringify({
         "hash": hash,
     });
@@ -139,7 +139,19 @@ export async function fetch_image(hash) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image`, options);
+    return await fetchWrapper(`${PREFIX}/image_hash`, options);
+}
+
+export async function fetch_image_from_sku(sku) {
+    let json = JSON.stringify({
+        "sku": sku,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicationJson,
+    }
+    return await fetchWrapper(`${PREFIX}/image_sku`, options);
 }
 
 export async function fetch_image_thumbnails(hashes) {

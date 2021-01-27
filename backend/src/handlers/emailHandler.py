@@ -10,7 +10,7 @@ class EmailHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['email_address', 'received_delivery_updates']
+        return ['email_address', 'receives_delivery_updates']
 
     @staticmethod
     def required_fields():

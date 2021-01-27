@@ -20,15 +20,45 @@ export const StyledShoppingList = styled.div`
     }
 `;
 
+export const StyledSkuCard = styled.div`
+    background-color: white;
+    color: black;
+
+    .title {
+        
+    }
+
+    .size {
+        
+    }
+
+    img {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+    }
+`;
+
 export const StyledExpandedSku = styled.div`
     display: flex;
     width: 100%;
     height: 100%;
 
-    .main-content {
-        max-height: 100%;
+    .title {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        background-color: rgba(0,0,0,.4);
+        margin: 0;
+        border-radius: 10px 10px 0 0;
+        padding: 0.5em 0 0.5em 0;
+    }
+
+    img {
+        max-height: 90vh;
         max-width: 100%;
         display: block;
+        border-radius: 10px 10px 0 0;
     }
 
     .arrow {

@@ -171,10 +171,10 @@ if __name__ == '__main__':
 @app.route("/api/fetch_inventory", methods=["POST"])
 @handle_exception
 def fetch_inventory():
-    ids = Handler.all_ids(Sku)
-    page_results = [SkuHandler.to_dict(Handler.from_id(Sku, id)) for id in ids]
+    skus = SkuHandler.all_skus()
+    page_results = [SkuHandler.to_dict(SkuHandler.from_sku(sku)) for sku in skus]
     return {
-        "all_sku_ids": ids,
+        "all_skus": skus,
         "page_results": page_results,
         "status": AuthCodes.SUCCESS.value
     }
@@ -184,8 +184,11 @@ def fetch_inventory():
 @app.route("/api/fetch_inventory_page", methods=["POST"])
 @handle_exception
 def fetch_inventory_page():
-    ids = getJson('ids')
-    return [Handler.from_id(Sku, id) for id in ids]
+    skus = getJson('skus')
+    return {
+        "data": [SkuHandler.to_dict(sku) for sku in skus],
+        "status": AuthCodes.SUCCESS.value
+    }
 
 
 # Returns display information of all gallery photos.
@@ -225,24 +228,41 @@ def image_thumbnails():
 
 
 # Returns an image from its hash
-@app.route("/api/image", methods=["POST"])
+@app.route("/api/image_hash", methods=["POST"])
 @handle_exception
-def image():
+def image_from_hash():
     img_hash = getJson('hash')
-    print(f'trying to get image {img_hash}')
+    print(f'trying to get image from hash {img_hash}')
     # Get image data from its hash
     img = ImageHandler.from_hash(img_hash)
     if not img:
         return {"status": AuthCodes.ERROR_UNKNOWN.value}
-    # Read image file
-    with open(f'{img.directory}/{img.file_name}.{img.extension}', 'rb') as open_file:
-        byte_content = open_file.read()
-    # Convert image to a base64 string
-    base64_bytes = b64encode(byte_content)
-    base64_string = base64_bytes.decode('utf-8')
+    b64 = ImageHandler.get_b64(img)
     return {
-        "image": base64_string,
+        "image": b64,
         "alt": img.alt,
+        "status": AuthCodes.SUCCESS.value
+    }
+
+
+# Returns an image from its hash
+@app.route("/api/image_sku", methods=["POST"])
+@handle_exception
+def image_from_sku():
+    sku_code = getJson('sku')
+    print(f'trying to get image from sku {sku_code}')
+    # Get image data from its hash
+    sku = SkuHandler.from_sku(sku_code)
+    if not sku:
+        print('FAILED TO FIND SKU ROW')
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+    b64 = SkuHandler.get_display_image(sku)
+    if not b64:
+        print(' NO B64444444 ')
+        return {"status": AuthCodes.ERROR_UNKNOWN.value}
+    return {
+        "image": b64,
+        "alt": 'TODO',
         "status": AuthCodes.SUCCESS.value
     }
 

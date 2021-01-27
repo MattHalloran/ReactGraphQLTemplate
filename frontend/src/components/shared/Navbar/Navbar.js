@@ -54,21 +54,26 @@ function Hamburger(props) {
     }
 
     // If someone is not logged in, display sign up/log in links
-    if (props.session == null) {
+    if (props.session === null) {
         nav_options.push([LINKS.Register, 'Sign Up'],
                          [LINKS.LogIn, 'Log In']);
     } else {
-        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
+        nav_options.push([LINKS.Shopping, 'Shopping'])
+        nav_options.push([LINKS.Profile, 'Profile']);
     }
 
     nav_options.push([LINKS.Gallery, 'Gallery'],
                      [LINKS.About, 'About Us'],
                      [LINKS.Contact, 'Contact Us']);
+
+    if (props.session !== null) {
+        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
+    }
     
     return (
         <BurgerMenu {...props}>
             { nav_options.map(([link, text, onClick], index) => (
-                <p key={index}><Link to={link} onClick={onClick ? onClick() : null}>{text}</Link></p>
+                <p key={index}><Link to={link} onClick={onClick}>{text}</Link></p>
             ))}
             <ContactInfo />
         </BurgerMenu>
@@ -77,11 +82,16 @@ function Hamburger(props) {
 
 function NavList(props) {
     // Link, Link text, onClick function
-    let nav_options = [
-        [LINKS.Gallery, 'Gallery'],
-        [LINKS.About, 'About Us'],
-        [LINKS.Contact, 'Contact Us']
-    ];
+    let nav_options = [];
+
+    if (props.session !== null) {
+        nav_options.push([LINKS.Shopping, 'Shopping']);
+        nav_options.push([LINKS.Profile, 'Profile']);
+    }
+
+    nav_options.push([LINKS.Gallery, 'Gallery'],
+                     [LINKS.About, 'About Us'],
+                     [LINKS.Contact, 'Contact Us']);
     
     // If an admin is logged in, display admin links
     let roles = props.user_roles;
@@ -94,7 +104,7 @@ function NavList(props) {
     }
     
     // If someone is not logged in, display sign up/log in links
-    if (props.session == null) {
+    if (props.session === null) {
         nav_options.push([LINKS.Register, 'Sign Up'],
                          [LINKS.LogIn, 'Log In']);
     } else {
@@ -105,7 +115,7 @@ function NavList(props) {
         <ul className="nav-list">
             { nav_options.map(([link, text, onClick], index) => (
                 <li className="nav-item" key={index}>
-                    <Link className="nav-link" to={link} onClick={onClick ? onClick() : null}>{text}</Link>
+                    <Link className="nav-link" to={link} onClick={onClick}>{text}</Link>
                 </li>
             ))}
         </ul>
@@ -113,7 +123,7 @@ function NavList(props) {
 }
 
 NavList.propTypes = {
-    session: PropTypes.string,
+    session: PropTypes.object,
     user_roles: PropTypes.array,
 }
 

@@ -1,97 +1,169 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { StyledShoppingList, StyledExpandedSku } from "./ShoppingList.styled";
-import PubSub from "utils/pubsub";
-import * as shoppingQuery from "query/shopping";
-import { BUSINESS_NAME, PUBS, LINKS } from "consts";
-import { makeStyles } from "@material-ui/core/styles";
+import useHotkeys from '@reecelucas/react-use-hotkeys';
+import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
+import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } from "query/shopping";
+import { BUSINESS_NAME, LINKS } from "consts";
 import Modal from "components/shared/wrappers/Modal/Modal";
-import Card from "@material-ui/core/Card";
-import CardHeader from "@material-ui/core/CardHeader";
-import CardMedia from "@material-ui/core/CardMedia";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
 import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import { red } from "@material-ui/core/colors";
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 function ShoppingList(props) {
   let history = useHistory();
-  const urlParams = useParams();
-  const curr_sku = urlParams.sku;
-  let page_size = props.page_size ? props.page_size : 25;
+  const [popup, setPopup] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [all_skus, setAllSkus] = useState([]);
+  // [sku, base64 data, alt]
+  const [curr_sku, setCurrSku] = useState(null);
   let default_filter = props.default_filter ? props.default_filter : "A-Z";
-  let [card_list, setCardList] = useState([]);
-  let [card_list_data, setCardListData] = useState([]);
-  let [item_ids, setItemIDs] = useState([]);
-  let [filter_by, setFilterBy] = useState(default_filter);
+  const [filter_by, setFilterBy] = useState(default_filter);
+  const track_scrolling_id = 'scroll-tracked';
+  const full_images = useRef({});
+  const urlParams = useParams();
+  const curr_index = useMemo(() => cards.current?.findIndex(c => c.sku === urlParams.sku) ?? -1, [cards, urlParams]);
+  const loading = useRef(false);
+  const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
-  useLayoutEffect(() => {
-    queryItems();
-  }, []);
+  useHotkeys('Escape', () => setCurrSku([null, null, null]));
+  useHotkeys('arrowLeft', () => prevImage());
+  useHotkeys('arrowRight', () => nextImage());
 
-  useLayoutEffect(() => {
-    document.title = `Gallery | ${BUSINESS_NAME}`;
-  });
+  const loading_full_image = useRef(false);
+  const loadImage = useCallback((index, sku) => {
+    // If this function hasn't finished yet
+    if (loading_full_image.current) return;
+    // If there is an image to load
+    if (!sku) return;
+    // First check if the image data has already been retrieved
+    if (index in full_images.current) {
+      setCurrSku(full_images.current[index]);
+    } else {
+      loading_full_image.current = true;
+      // Request the image from the backend
+      getImageFromSku(sku).then(response => {
+        let image_data = [sku, `data:image/jpeg;base64,${response.image}`, response.alt];
+        console.log('SETTING URR SKU', image_data)
+        setCurrSku(image_data);
+        full_images.current[index] = image_data;
+      }).catch(error => {
+        console.error('FAILED TO LOAD FULL IMAGE', error)
+      }).finally(() => loading_full_image.current = false);
+    }
+  }, [loading_full_image, full_images])
 
-  const queryItems = () => {
-    PubSub.publish(PUBS.Loading, true);
-    shoppingQuery
-      .getInventory(filter_by)
+  useEffect(() => {
+    if (urlParams.sku) {
+      loadImage(curr_index, urlParams.sku);
+    } else {
+      setCurrSku([null, null, null]);
+    }
+  }, [urlParams, curr_index, loadImage])
+
+  useEffect(() => {
+    let mounted = true;
+    getInventory(filter_by)
       .then((response) => {
-        PubSub.publish(PUBS.Loading, false);
-        let list_data = response.page_results;
-        setCardListData(list_data);
-        setCardList(
-          list_data.map((item) => <SkuCard onClick={expandSku} data={item} />)
-        );
-        setItemIDs(response.all_sku_ids);
+        if (!mounted) return;
+        setCards(response.page_results);
+        console.log('SETING ALL SKUS', response)
+        setAllSkus(skus => skus.concat(response.all_skus));
+        console.log('SET ALL SKUS', response.all_skus)
       })
       .catch((error) => {
         console.log("Failed to load inventory");
         console.error(error);
-        PubSub.publishSync(PUBS.Loading, false);
         alert(error.error);
       });
-  };
 
-  //   const loadNextPage = () => {
-  //     shoppingQuery
-  //       .getInventoryPage(page_size)
-  //       .then((response) => {
-  //         setDisplayedItems(response.page_items);
-  //         setItemIDs(response.item_ids);
-  //       })
-  //       .catch((error) => {
-  //         console.log("Failed to load inventory page");
-  //         console.error(error);
-  //         alert(error.error);
-  //       });
-  //   };
+    return () => mounted = false;
+  }, [filter_by]);
+
+  useLayoutEffect(() => {
+    document.title = `Shopping | ${BUSINESS_NAME}`;
+    document.addEventListener('scroll', loadNextPage);
+    return (() => document.removeEventListener('scroll', loadNextPage));
+  })
+
+  const readyToLoadPage = useCallback(() => {
+    //If the image metadata hasn't been received, or
+    //the next page is still loading
+    if (loading.current) return false;
+    //If all cards have already been loaded
+    if (cards === null || cards.length === all_skus.length) {
+      return false;
+    }
+    //If the first page hasn't loaded
+    if (cards.length < page_size) return true;
+    //If the scrollbar is near the bottom
+    const divElement = document.getElementById(track_scrolling_id);
+    return divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight;
+  }, [cards, all_skus, page_size]);
+
+  const loadNextPage = useCallback(() => {
+    if (!readyToLoadPage()) return;
+    loading.current = true;
+    //Grab all card thumbnail images
+    let load_to = Math.min(all_skus.length, cards.length + page_size - 1);
+    let page_skus = all_skus.splice(cards.length, load_to);
+    getInventoryPage(page_skus).then(response => {
+      setCards(c => c.concat(...response.data));
+    }).catch(error => {
+      console.error("Failed to load cards!", error);
+      loading.current = false;
+    });
+  }, [cards, page_size, readyToLoadPage, all_skus]);
+
+  const prevImage = useCallback(() => {
+    if (cards.length <= 0) return;
+    // Default to last image if none open
+    if (curr_index < 0) {
+      history.push(LINKS.Shopping + '/' + all_skus[cards.length - 1]);
+    } else {
+      // Find previous image index using modulus
+      let prev_index = (curr_index + cards.length - 1) % all_skus.length;
+      history.replace(LINKS.Shopping + '/' + all_skus[prev_index]);
+    }
+  }, [cards, all_skus, curr_index, history]);
+
+  const nextImage = useCallback(() => {
+    if (cards.length <= 0) return;
+    // Default to first image if none open
+    if (curr_index < 0) {
+      history.push(LINKS.Shopping + '/' + all_skus[0]);
+    } else {
+      // Find next image index using modulus
+      let next_index = (curr_index + 1) % all_skus.length;
+      history.replace(LINKS.Shopping + '/' + all_skus[next_index]);
+    }
+  }, [cards, all_skus, curr_index, history]);
+
 
   const expandSku = (sku) => {
     history.push(LINKS.Shopping + "/" + sku);
   };
 
-  let popup;
-  let popup_data;
-  if (curr_sku) {
-    let index = card_list_data.map((e) => e.sku).indexOf(curr_sku);
-    popup_data = card_list_data[index];
-    popup = (
-      <Modal>
-        <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
-      </Modal>
-    );
-  }
+  useEffect(() => {
+    console.log('ALL SKUS UPDATEDDDDDDDDD', curr_sku)
+    if (!curr_sku || !curr_sku[0]) return;
+    all_skus.map(([e]) => console.log(e))
+    let index = all_skus.map(([e]) => e).indexOf(curr_sku[0]);
+      let popup_data = cards[index];
+      console.log('ALL SKUS', all_skus)
+      console.log('POPUP DATA', index, popup_data)
+      setPopup(
+        <Modal>
+          <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
+        </Modal>
+      );
+  }, [all_skus, curr_sku])
+
   return (
-    <StyledShoppingList>
+    <StyledShoppingList id={track_scrolling_id}>
       {popup}
-      {card_list.length > 0 ? card_list : null}
+      {cards.map((item, index) => <SkuCard key={index} onClick={expandSku} data={item} goLeft={prevImage} goRight={nextImage} />)}
     </StyledShoppingList>
   );
 }
@@ -103,52 +175,33 @@ ShoppingList.propTypes = {
 
 export default ShoppingList;
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    maxWidth: 345,
-  },
-  media: {
-    height: 0,
-    paddingTop: "56.25%", // 16:9
-  },
-  avatar: {
-    backgroundColor: red[500],
-  },
-}));
-
 function SkuCard(props) {
-  const latin_name = props.data.plant.latin_name;
-  const common_name = props.data.plant.common_name;
-  const plant = props.data.plant;
-  const classes = useStyles();
+  //console.log('IN SKU CARDDDD', props.data);
+  const sku = props.data;
+  const plant = sku.plant;
 
   const handleExpandClick = () => {
-    props.onClick(props.data.sku);
+    props.onClick(sku.sku);
   };
+
+  let sizes = sku.sizes?.map(size => (
+    <div className="size">{size}</div>
+  ));
+
   return (
-    <Card className={classes.root} onClick={handleExpandClick}>
-      <CardHeader title={latin_name} subheader={common_name} />
-      <CardMedia
-        className={classes.media}
-        image="/static/images/cards/paella.jpg"
-        title="Paella dish"
-      />
-      <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the
-          mussels, if you like.
-        </Typography>
-      </CardContent>
-      <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
+    <StyledSkuCard>
+      <h1 className="title">{plant.latin_name}</h1>
+      <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO"/>
+      SOME TEXT
+      { sizes }
+      Availability: hfhdkjaf
+      <IconButton aria-label="add to favorites">
           <AiOutlineHeart />
         </IconButton>
         <IconButton onClick={handleExpandClick} aria-label="show more">
           <BsArrowsFullscreen />
         </IconButton>
-      </CardActions>
-    </Card>
+    </StyledSkuCard>
   );
 }
 
@@ -163,16 +216,16 @@ export { SkuCard };
 function ExpandedSku(props) {
   console.log('EEEEEE', props)
   const plant = props?.data?.plant;
-  const [src, setSrc] = useState(0);
+  const [src, setSrc] = useState(null);
 
   if (plant) {
-    shoppingQuery.getShoppingImage(plant.flower_images[0].hash)
-    .then((response) => {
-      setSrc(`data:image/jpeg;base64,${response.image}`);
-    })
-    .catch((error) => {
-      console.error("FAILED TO LOAD FULL IMAGE", error);
-    });
+    getImageFromHash(plant.flower_images[0].hash)
+      .then((response) => {
+        setSrc(`data:image/jpeg;base64,${response.image}`);
+      })
+      .catch((error) => {
+        console.error("FAILED TO LOAD FULL IMAGE", error);
+      });
   }
 
   return (
@@ -180,12 +233,8 @@ function ExpandedSku(props) {
       <FaChevronLeft className="arrow left" onClick={props.goLeft} />
       <FaChevronRight className="arrow right" onClick={props.goRight} />
       <div className="main-content">
-        <div>
-          <h1>{props.latin_name}</h1>
-        </div>
-        <div>
-          <img src={src} alt="TODO" className="full-image" />
-        </div>
+        <h1 className="title">{props.latin_name}fdafs</h1>
+        <img src={src} alt="TODO" className="full-image" />
         <div>
           <p>TODO</p>
         </div>

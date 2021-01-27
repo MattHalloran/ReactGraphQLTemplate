@@ -143,7 +143,7 @@ function GalleryPage() {
             let hash = images_meta.current[prev_index].hash
             history.replace(LINKS.Gallery + '/' + hash);
         }
-    }, [thumbnails, images_meta, curr_index]);
+    }, [thumbnails, images_meta, curr_index, history]);
 
     const nextImage = useCallback(() => {
         if (thumbnails.length <= 0) return;
@@ -156,7 +156,7 @@ function GalleryPage() {
             let hash = images_meta.current[next_index].hash;
             history.replace(LINKS.Gallery + '/' + hash);
         }
-    }, [thumbnails, images_meta, curr_index]);
+    }, [thumbnails, images_meta, curr_index, history]);
 
     const openImage = (_event, photo, index) => {
         let hash = photo.key;
