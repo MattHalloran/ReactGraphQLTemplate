@@ -2,44 +2,61 @@ import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import PropTypes from 'prop-types';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
-import * as profileQuery from 'query/profile';
-import { BUSINESS_NAME } from 'consts';
+import { getProfileInfo } from 'query/http_promises';
+import { BUSINESS_NAME, DEFAULT_PRONOUNS } from 'consts';
 
+// Profile fields:
+// first_name: str
+// last_name: str
+// image_file: object
+// pronouns: str
+// theme: str
+// personal_email: array
+// personal_phone: array
+// orders: array (last order is cart)
 function ProfileForm(props) {
     const [editing, setEditing] = useState(false);
+    const [showErrors, setShowErrors] = useState(false);
+    // String profile fields
+    const [picSrc, setPicSrc] = useState(null);
     const [firstName, setFirstName] = useState("")
     const [firstNameError, setFirstNameError] = useState(null);
     const [lastName, setLastName] = useState("")
     const [lastNameError, setLastNameError] = useState(null);
-    const [email, setEmail] = useState("")
-    const [emailError, setEmailError] = useState(null);
+    const [pronouns, setPronouns] = useState("")
+    const [pronounsError, setPronounsError] = useState(null);
+    const [customPronouns, setCustomPronouns] = useState("")
+    const [customPronounsError, setCustomPronounsError] = useState(null);
     const [password, setPassword] = useState("")
     const [passwordError, setPasswordError] = useState(null);
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [phone, setPhone] = useState("")
-    const [phoneError, setPhoneError] = useState(null);
-    const [address, setAddress] = useState("")
-    const [addressError, setAddressError] = useState(null);
-    const [showErrors, setShowErrors] = useState(false);
-    const sendingRequest = useRef(false);
+    // Array profile fields
+    const [emails, setEmails] = useState([""])
+    const [emailErrors, setEmailErrors] = useState(null);
+    const [phones, setPhones] = useState([""])
+    const [phoneErrors, setPhoneErrors] = useState(null);
 
     useLayoutEffect(() => {
+        let mounted = true;
         document.title = `Profile | ${BUSINESS_NAME}`;
-        console.log('PROPSSSS', props);
-        if (!sendingRequest.current && props.session) {
-            sendingRequest.current = true;
-            profileQuery.getProfileInfo(props.session).then(response => {
+        if (props.session) {
+            getProfileInfo(props.session).then(response => {
                 console.log('GOT PROFILE INFOO!!!!!!', response);
-                if (!editing) {
-                    if (response.email) setEmail(response.email);
-                    if (response.phone_number) setPhone(response.phone_number)
+                if (!mounted || editing) return;
+                if (response.first_name) setFirstName(response.first_name);
+                if (response.last_name) setLastName(response.last_name)
+                // TODO convert emails and phones to strings first
+                if (response.personal_email) {
+                    setEmails(response.personal_email.map(o => o.email_address));
                 }
-                sendingRequest.current = false;
+                if (response.personal_phone) {
+                    setPhones(response.personal_phone.map(o => o.unformatted_number));
+                }
             }).catch(err => {
                 console.error(err);
-                sendingRequest.current = false;
             })
         }
+        return () => mounted = false;
     }, [])
 
     const updateProfile = () => {
@@ -54,10 +71,15 @@ function ProfileForm(props) {
     const submit = (event) => {
         event.preventDefault();
         setShowErrors(true);
-        if (!firstNameError && !lastNameError && !emailError &&
-            !phoneError && !addressError && !passwordError && password === confirmPassword) {
+        if (validation.passwordValidation(firstNameError, lastNameError, pronounsError, 
+            passwordError, emailErrors, phoneErrors) && !passwordError && password === confirmPassword) {
             updateProfile();
         }
+    }
+
+    // Helper method for updating InputText objects created through a map
+    const updateFieldArray = (stateFunc, value, index) => {
+        console.log('TODO')
     }
 
     return (
@@ -86,39 +108,57 @@ function ProfileForm(props) {
                 autocomplete="Doe"
                 disabled={!editing}
             />
-            <InputText
-                label="Email"
-                type="email"
-                value={email}
-                valueFunc={setEmail}
-                errorFunc={setEmailError}
-                validate={validation.emailValidation}
-                showErrors={showErrors}
-                autocomplete="john.doe@gmail.com"
-                disabled={!editing}
-            />
-            <InputText
-                label="Phone Number"
-                type="text"
-                value={phone}
-                valueFunc={setPhone}
-                errorFunc={setPhoneError}
-                validate={validation.phoneNumberValidation}
-                showErrors={showErrors}
-                autocomplete="555-867-5309"
-                disabled={!editing}
-            />
-            <InputText
-                label="Delivery Address"
-                type="text"
-                value={address}
-                valueFunc={setAddress}
-                errorFunc={setAddressError}
-                validate={validation.addressValidation}
-                showErrors={showErrors}
-                autocomplete="123 Fake Street Philadelphia PA"
-                disabled={!editing}
-            />
+            <div className="horizontal-input-container">
+        <InputText
+          label="Pronouns"
+          value={pronouns}
+          valueFunc={setPronouns}
+          select
+          SelectProps={{
+            native: true,
+          }} >
+          {DEFAULT_PRONOUNS.map((pro) => (
+            <option key={pro} value={pro}>
+              {pro}
+            </option>
+          ))}
+        </InputText>
+        {pronouns === DEFAULT_PRONOUNS[0] ?
+          <InputText
+            label="Enter pronouns"
+            type="text"
+            value={customPronouns}
+            valueFunc={setCustomPronouns}
+            errorFunc={setCustomPronounsError}
+            validate={validation.pronounValidation}
+            showErrors={showErrors}
+          />
+          : null}
+      </div>
+      {emails.map((email, index) => (
+          <InputText
+          index={index}
+          label={`Email #${index+1}`}
+          type="text"
+          value={email}
+          valueFunc={(v, i) => updateFieldArray(setEmails, v, i)}
+          errorFunc={(v, i) => updateFieldArray(setEmailErrors, v, i)}
+          validate={validation.pronounValidation}
+          showErrors={showErrors}
+        />
+      ))}
+      {phones.map((phone, index) => (
+          <InputText
+          index={index}
+          label={`Phone #${index+1}`}
+          type="text"
+          value={phone}
+          valueFunc={(v, i) => updateFieldArray(setPhones, v, i)}
+          errorFunc={(v, i) => updateFieldArray(setPhoneErrors, v, i)}
+          validate={validation.pronounValidation}
+          showErrors={showErrors}
+        />
+      ))}
             <InputText
                 label="Password"
                 type="password"

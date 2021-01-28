@@ -47,8 +47,8 @@ function AddEmployeeForm() {
     setShowErrors(true);
     console.log('PRONOUNSSSS', pronouns, pronounsError);
     return;
-    if (!firstNameError && !lastNameError && !pronounsError && !emailError &&
-      !passwordError && password === confirmPassword && !existingCustomerError) {
+    if (validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError,
+    passwordError) && password === confirmPassword && !existingCustomerError) {
       register();
     }
   }

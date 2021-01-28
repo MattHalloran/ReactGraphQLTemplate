@@ -2,7 +2,7 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMe
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
-import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } from "query/shopping";
+import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { BUSINESS_NAME, LINKS, PUBS } from "consts";
 import Modal from "components/shared/wrappers/Modal/Modal";
@@ -166,7 +166,7 @@ function ShoppingList(props) {
     console.log('ALL SKUS', all_skus)
     console.log('POPUP DATA', index, popup_data)
     setPopup(
-      <Modal>
+      <Modal onClose={() => history.goBack()}>
         <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
       </Modal>
     );

@@ -2,6 +2,20 @@
 // Many of the validations return the default validation. It is set up
 // this way to make changing the behavior for individual input types much easier
 
+// Helper function for checking that all validated fields passed
+export const passedValidation = (...args) => {
+  args.forEach(arg => {
+    if (Array.isArray(arg)) {
+      // If an array of errors has a value that is not empty
+      if (arg.filter(v => v).length > 0)
+        return false;
+    } else if (arg !== null && arg !== "") {
+      return false;
+    }
+  })
+  return true;
+}
+
 // =============================== String validations ======================================
 
 export const emailValidation = email => {

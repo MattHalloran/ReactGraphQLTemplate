@@ -1,5 +1,3 @@
-import React from 'react';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { StyledModal } from './Modal.styled';
@@ -8,13 +6,6 @@ import ClickOutside from '../ClickOutside/ClickOutside';
 // const ESCAPE_KEY = 27;
 
 function Modal(props) {
-    let history = useHistory();
-
-    const closeModal = () => {
-        console.log('CLOSING MODALLL');
-        history.goBack();
-    }
-
     // A portal is a way to render children into a DOM node that exists
     // outside the DOM hierarchy of the parent component
     return (
@@ -22,12 +13,12 @@ function Modal(props) {
             role="dialog"
             tabIndex="-1"
             aria-modal="true">
-            <ClickOutside className="modal-body" on_click_outside={closeModal}>
+            <ClickOutside className="modal-body" on_click_outside={props.onClose}>
                 <button
                     aria-label="Close Modal"
                     aria-labelledby="close-modal"
                     className="x-button"
-                    onClick={closeModal}>
+                    onClick={props.onClose}>
                     <span id="close-modal" className="_hide-visual">
                         Close
                         </span>
@@ -42,6 +33,7 @@ function Modal(props) {
 
 Modal.propTypes = {
     children: PropTypes.any.isRequired,
+    onClose: PropTypes.func.isRequired,
 }
 
 export default Modal;

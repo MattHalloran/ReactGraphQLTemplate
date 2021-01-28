@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
+import { createIndexedAccessTypeNode } from "typescript";
 
 const useStyledInputText = makeStyles({
     root: {
@@ -21,7 +22,12 @@ function InputText(props) {
     const classes = useStyledInputText();
 
     useLayoutEffect(() => {
-        if (props.validate) updateError(value);
+        if (props.validate) {
+            if (props.index)
+                updateError(value, props.index);
+            else
+                updateError(value);
+        }
     })
 
     const updateError = (value) => {
@@ -30,14 +36,24 @@ function InputText(props) {
         if (props.validate && (props.showErrors || value)) {
             err = props.validate(value);
         }
-        if (props.errorFunc) props.errorFunc(err);
+        if (props.errorFunc) {
+            if (props.index)
+                props.errorFunc(err, createIndexedAccessTypeNode);
+            else
+                props.errorFunc(err);
+        } 
         setError(err);
     }
 
     const updateValue = (event) => {
         let e_value = event.target.value;
         setValue(e_value);
-        if (props.valueFunc) props.valueFunc(e_value);
+        if (props.valueFunc) {
+            if (props.index)
+                props.valueFunc(e_value, props.index);
+            else
+                props.valueFunc(e_value)
+        }
     }
 
     return (
@@ -47,15 +63,17 @@ function InputText(props) {
             { ..._.omit(props, ['valueFunc', 'valueRef', 'errorFunc', 'errorRef', 'validate', 'showErrors']) }
             error={error && error.length > 0}
             helperText={error}
-            onChange={updateValue}
+            onChange={(e) => props.index ? updateValue(e, props.index) : updateValue(e)}
         >{props.children}</TextField>
     );
 }
 
+// index - Index of textbox, if created with a map
 // valueFunc - updater function for TextField value
 // errorFunc - updater function for TextField error
 // validate - a function for validating the input string
 InputText.propTypes = {
+    index: PropTypes.func,
     valueFunc: PropTypes.func,
     errorFunc: PropTypes.func,
     validate: PropTypes.func,

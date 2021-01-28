@@ -6,7 +6,7 @@ import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
 import { SortableGalleryPhoto } from "components/shared/GalleryPhoto/GalleryPhoto";
-import { getGallery, getGalleryThumbnails, getGalleryImage } from 'query/gallery';
+import { getGallery, getGalleryThumbnails, getImageFromHash } from 'query/http_promises';
 import { SortableContainer } from 'react-sortable-hoc';
 import arrayMove from "array-move";
 import Modal from 'components/shared/wrappers/Modal/Modal';
@@ -50,7 +50,7 @@ function GalleryPage() {
         } else {
             loading_full_image.current = true;
             // Request the image from the backend
-            getGalleryImage(hash).then(response => {
+            getImageFromHash(hash).then(response => {
                 let image_data = [`data:image/jpeg;base64,${response.image}`, response.alt];
                 setCurrImg(image_data);
                 full_images.current[index] = image_data;
@@ -187,7 +187,7 @@ function GalleryPage() {
     }, [])
 
     let popup = (curr_img && curr_img[0]) ? (
-        <Modal>
+        <Modal onClose={() => history.goBack()}>
             <GalleryImage
                 src={curr_img[0]}
                 alt={curr_img[1]}

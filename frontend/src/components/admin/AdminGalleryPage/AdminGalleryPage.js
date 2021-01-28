@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
-import * as imageQuery from 'query/gallery';
+import { uploadGalleryImages } from 'query/http_promises';
 
 class AdminGalleryPage extends React.Component {
     constructor(props) {
@@ -55,7 +55,7 @@ class AdminGalleryPage extends React.Component {
             form.append('extension', img.extension);
             form.append('image', img.data);
         });
-        imageQuery.uploadGalleryImages(form).then(response => {
+        uploadGalleryImages(form).then(response => {
             alert('Successfully uploaded ' + response.passed_indexes?.length + ' images!');
         }).catch(error => {
             console.error(error);
