@@ -1,15 +1,22 @@
 import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import useHotkeys from '@reecelucas/react-use-hotkeys';
 import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
 import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } from "query/shopping";
-import { BUSINESS_NAME, LINKS } from "consts";
+import PubSub from 'utils/pubsub';
+import { BUSINESS_NAME, LINKS, PUBS } from "consts";
 import Modal from "components/shared/wrappers/Modal/Modal";
 import IconButton from "@material-ui/core/IconButton";
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import PollinatorIcon from 'assets/img/bee.svg';
+import RegionIcon from 'assets/img/map.svg';
+import SaltIcon from 'assets/img/salt.svg';
+import SunIcon from 'assets/img/sun.svg';
+import ColorIcon from 'assets/img/color-circle.svg';
+import CalendarIcon from 'assets/img/calendar.svg';
+import MoistureIcon from 'assets/img/moisture-wicking-fabric.svg';
 
 function ShoppingList(props) {
   let history = useHistory();
@@ -27,9 +34,9 @@ function ShoppingList(props) {
   const loading = useRef(false);
   const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
-  useHotkeys('Escape', () => setCurrSku([null, null, null]));
-  useHotkeys('arrowLeft', () => prevImage());
-  useHotkeys('arrowRight', () => nextImage());
+  // useHotkeys('Escape', () => setCurrSku([null, null, null]));
+  // useHotkeys('arrowLeft', () => prevImage());
+  // useHotkeys('arrowRight', () => nextImage());
 
   const loading_full_image = useRef(false);
   const loadImage = useCallback((index, sku) => {
@@ -57,8 +64,10 @@ function ShoppingList(props) {
   useEffect(() => {
     if (urlParams.sku) {
       loadImage(curr_index, urlParams.sku);
+      PubSub.publish(PUBS.PopupOpen, true);
     } else {
       setCurrSku([null, null, null]);
+      PubSub.publish(PUBS.PopupOpen, false);
     }
   }, [urlParams, curr_index, loadImage])
 
@@ -147,17 +156,20 @@ function ShoppingList(props) {
 
   useEffect(() => {
     console.log('ALL SKUS UPDATEDDDDDDDDD', curr_sku)
-    if (!curr_sku || !curr_sku[0]) return;
+    if (!curr_sku || !curr_sku[0]) {
+      setPopup(null);
+      return;
+    }
     all_skus.map(([e]) => console.log(e))
     let index = all_skus.map(([e]) => e).indexOf(curr_sku[0]);
-      let popup_data = cards[index];
-      console.log('ALL SKUS', all_skus)
-      console.log('POPUP DATA', index, popup_data)
-      setPopup(
-        <Modal>
-          <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
-        </Modal>
-      );
+    let popup_data = cards[index];
+    console.log('ALL SKUS', all_skus)
+    console.log('POPUP DATA', index, popup_data)
+    setPopup(
+      <Modal>
+        <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
+      </Modal>
+    );
   }, [all_skus, curr_sku])
 
   return (
@@ -191,16 +203,16 @@ function SkuCard(props) {
   return (
     <StyledSkuCard>
       <h1 className="title">{plant.latin_name}</h1>
-      <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO"/>
+      <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
       SOME TEXT
-      { sizes }
+      { sizes}
       Availability: hfhdkjaf
       <IconButton aria-label="add to favorites">
-          <AiOutlineHeart />
-        </IconButton>
-        <IconButton onClick={handleExpandClick} aria-label="show more">
-          <BsArrowsFullscreen />
-        </IconButton>
+        <AiOutlineHeart />
+      </IconButton>
+      <IconButton onClick={handleExpandClick} aria-label="show more">
+        <BsArrowsFullscreen />
+      </IconButton>
     </StyledSkuCard>
   );
 }
@@ -218,6 +230,18 @@ function ExpandedSku(props) {
   const plant = props?.data?.plant;
   const [src, setSrc] = useState(null);
 
+  // const iconFactory = (src, alt) => {
+  //   return (
+  //     <img className="" src={src} alt={alt}/>
+  //   );
+  // }
+
+  // const bloomColorFactory = (color) => {
+  //   return (
+  //     <div className="circle" style={{color: color}}/>
+  //   )
+  // }
+
   if (plant) {
     getImageFromHash(plant.flower_images[0].hash)
       .then((response) => {
@@ -228,15 +252,72 @@ function ExpandedSku(props) {
       });
   }
 
+  const traitList = (field, text) => {
+    if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
+      plant[field].length === 0) return null;
+    let field_map = plant[field].map((f) => f.value)
+    return (
+      <div className="trait-container">
+        <p>{text}: {field_map.join(', ')}</p>
+      </div>
+    )
+  }
+
+  const traitIconList = (field, src, title, alt) => {
+    if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
+      plant[field].length === 0) return null;
+    if (!alt) alt = title;
+    let field_map = plant[field].map((f) => f.value)
+    return (
+      <div className="trait-container">
+        <img src={src} className="trait-icon" title={title} alt={alt} />
+        <p>: {field_map.join(', ')}</p>
+      </div>
+    )
+  }
+
   return (
     <StyledExpandedSku>
       <FaChevronLeft className="arrow left" onClick={props.goLeft} />
       <FaChevronRight className="arrow right" onClick={props.goRight} />
       <div className="main-content">
-        <h1 className="title">{props.latin_name}fdafs</h1>
+        <h1 className="title">{plant?.latin_name}</h1>
+        {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
         <img src={src} alt="TODO" className="full-image" />
-        <div>
-          <p>TODO</p>
+        {plant?.description ?
+          <div className="description-container">
+            <p className="center">Description</p>
+            <p>{plant.description}</p>
+          </div>
+          : null}
+        <div className="trait-list">
+          <div className="sku">
+            {/* TODO availability, sizes */}
+          </div>
+          <div className="general">
+            <p>General Information</p>
+          {traitIconList("zones", null, "Zones")}
+          {traitIconList("physiographic_regions", RegionIcon, "Physiographic Region")}
+          {traitIconList("attracts_pollinators_and_wildlifes", PollinatorIcon, "Attracted Pollinators and Wildlife")}
+          {traitIconList("drought_tolerance", null, "Drought Tolerance")}
+          {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+          </div>
+          <div className="bloom">
+            <p>Bloom</p>
+            {traitIconList("bloom_colors", ColorIcon, "Bloom Colors")}
+            {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+          </div>
+          <div className="light">
+            <p>Light</p>
+          {traitIconList("light_ranges", null, "Light Range")}
+          {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+          </div>
+          <div className="soil">
+            <p>Soil</p>
+          {traitIconList("soil_moistures", MoistureIcon, "Soil Moisture")}
+          {traitIconList("soil_phs", null, "Soil PH")}
+          {traitIconList("soil_types", null, "Soil Type")}
+          </div>
         </div>
       </div>
     </StyledExpandedSku>

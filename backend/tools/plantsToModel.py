@@ -119,35 +119,26 @@ def plants_to_model():
                 'description': plant.get('description', None),
                 'jersey_native': plant.get('jersey_native', False)
             }
+
             # Now collect one-to-one relationship ids
-            drought_tolerance = get_trait(PlantTraitOptions.DROUGHT_TOLERANCE,
-                                          plant.get('drought_tolerance', None))
-            if drought_tolerance:
-                plant_args['drought_tolerance_id'] = drought_tolerance.id
-            grown_height = get_trait(PlantTraitOptions.GROWN_HEIGHT,
-                                     plant.get('grown_height', None))
-            if grown_height:
-                plant_args['grown_height_id'] = grown_height.id
-            grown_spread = get_trait(PlantTraitOptions.GROWN_SPREAD,
-                                     plant.get('grown_spread', None))
-            if grown_spread:
-                plant_args['grown_spread_id'] = grown_spread.id
-            growth_rate = get_trait(PlantTraitOptions.GROWTH_RATE,
-                                    plant.get('growth_rate', None))
-            if growth_rate:
-                plant_args['growth_rate_id'] = growth_rate.id
-            optimal_light = get_trait(PlantTraitOptions.OPTIMAL_LIGHT,
-                                      plant.get('optimal_light', None))
-            if optimal_light:
-                plant_args['optimal_light_id'] = optimal_light.id
-            salt_tolerance = get_trait(PlantTraitOptions.SALT_TOLERANCE,
-                                       plant.get('salt_tolerance', None))
-            if salt_tolerance:
-                plant_args['salt_tolerance_id'] = salt_tolerance.id
+            def o2oHelper(key: str, field: str, trait_option: PlantTraitOptions):
+                trait = get_trait(trait_option, plant.get(field, None))
+                if trait:
+                    plant_args[key] = trait.id
+            field_arguments = [
+                ['drought_tolerance_id', 'drought_tolerance', PlantTraitOptions.DROUGHT_TOLERANCE],
+                ['grown_height_id', 'grown_height', PlantTraitOptions.GROWN_HEIGHT],
+                ['grown_spread_id', 'grown_spread', PlantTraitOptions.GROWN_SPREAD],
+                ['growth_rate_id', 'growth_rate', PlantTraitOptions.GROWTH_RATE],
+                ['optimal_light_id', 'optimal_light', PlantTraitOptions.OPTIMAL_LIGHT],
+                ['salt_tolerance_id', 'salt_tolerance', PlantTraitOptions.SALT_TOLERANCE],
+            ]
+            [o2oHelper(*args) for args in field_arguments]
+
             # Create a plant object using the collected data
             plant_obj = Handler.create(PlantHandler, plant_args['latin_name'])
             Handler.update(PlantHandler, plant_obj, plant_args)
-            # Collect other plant data
+            # Now collect many-to-many relationship data
             update_relationship_field(plant.get('attracts_pollinators_and_wildlife', None),
                                       PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE,
                                       plant_obj,

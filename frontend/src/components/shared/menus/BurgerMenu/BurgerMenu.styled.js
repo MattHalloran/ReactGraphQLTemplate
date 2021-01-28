@@ -26,10 +26,10 @@ export const StyledBurgerMenu = styled.div`
     z-index: 101;
     position: fixed;
     right: 1em;
-    top: 50%;
-    transform: translate(0, -50%);
+    top: 4.5vh;
     transition: all 0.3s ease-in-out;
-    transform-origin: 1px
+    transform-origin: 1px;
+    transform: ${({ visible }) => visible ? 'translateY(0%)' : 'translateY(-200%)'};
   }
 
   &:focus {

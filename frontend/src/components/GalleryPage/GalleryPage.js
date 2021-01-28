@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import useHotkeys from '@reecelucas/react-use-hotkeys';
+import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
@@ -34,9 +34,9 @@ function GalleryPage() {
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
-    useHotkeys('escape', () => setCurrImg([null, null]));
-    useHotkeys('arrowLeft', () => prevImage());
-    useHotkeys('arrowRight', () => nextImage());
+    // useHotkeys('escape', () => setCurrImg([null, null]));
+    // useHotkeys('arrowLeft', () => prevImage());
+    // useHotkeys('arrowRight', () => nextImage());
 
     const loading_full_image = useRef(false);
     const loadImage = useCallback((index, hash) => {
@@ -63,8 +63,10 @@ function GalleryPage() {
     useEffect(() => {
         if (urlParams.img) {
             loadImage(curr_index, urlParams.img);
+            PubSub.publish(PUBS.PopupOpen, true);
         } else {
             setCurrImg([null, null]);
+            PubSub.publish(PUBS.PopupOpen, false);
         }
     }, [urlParams, curr_index, loadImage])
 
@@ -184,13 +186,14 @@ function GalleryPage() {
         return () => mounted = false;
     }, [])
 
-
     let popup = (curr_img && curr_img[0]) ? (
         <Modal>
-            <GalleryImage src={curr_img[0]}
+            <GalleryImage
+                src={curr_img[0]}
                 alt={curr_img[1]}
                 goLeft={prevImage}
-                goRight={nextImage} />
+                goRight={nextImage} >
+            </GalleryImage>
         </Modal>
     ) : null;
     return (
@@ -209,12 +212,31 @@ export default GalleryPage;
 
 function GalleryImage(props) {
 
+    const keyMap = {
+        PREVIOUS: "left",
+        NEXT: "right",
+    };
+
+    const handlers = {
+        PREVIOUS: () => {
+            console.log('TRIGGA FINGA');
+            props.goLeft()
+        },
+        NEXT: () => props.goRight(),
+    };
+
+    useEffect(() => {
+        document.getElementById('boop').focus()
+    }, [])
+
     return (
-        <StyledGalleryImage>
-            <FaChevronLeft className="arrow left" onClick={props.goLeft} />
-            <FaChevronRight className="arrow right" onClick={props.goRight} />
-            <img src={props.src} alt={props.alt} />
-        </StyledGalleryImage>
+        <HotKeys keyMap={keyMap} handlers={handlers}>
+            <StyledGalleryImage id='boop'>
+                <FaChevronLeft className="arrow left" onClick={props.goLeft} />
+                <FaChevronRight className="arrow right" onClick={props.goRight} />
+                <img src={props.src} alt={props.alt} />
+            </StyledGalleryImage>
+        </HotKeys>
     );
 }
 

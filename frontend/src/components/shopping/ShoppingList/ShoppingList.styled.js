@@ -5,15 +5,6 @@ export const StyledShoppingList = styled.div`
     grid-gap: 20px;
     align-items: stretch;
 
-    > * {
-        margin: 20px;
-        padding: 10px;
-        min-width: 150px;
-        min-height: 50px;
-        border: 1px solid #ccc;
-        border-radius: 1em;
-    }
-
     > *:hover {
         cursor: pointer;
         box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
@@ -23,13 +14,19 @@ export const StyledShoppingList = styled.div`
 export const StyledSkuCard = styled.div`
     background-color: white;
     color: black;
+    margin: 20px;
+    padding: 10px;
+    min-width: 150px;
+    min-height: 50px;
+    border: 1px solid #ccc;
+    border-radius: 1em;
 
     .title {
         
     }
 
     .size {
-        
+
     }
 
     img {
@@ -44,6 +41,47 @@ export const StyledExpandedSku = styled.div`
     width: 100%;
     height: 100%;
 
+    .trait-list {
+        overflow-y: auto;
+        display: block;
+        max-height: 15%;
+    }
+
+    .trait-container {
+        margin: 0.5em;
+        padding: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .trait-icon {
+        max-height: 25px;
+        max-width: 25px;
+        padding: 1px;
+        vertical-align: middle;
+        display: inline-block;
+    }
+
+    p {
+        margin-block-start: 0.5em;
+        margin-block-end: 0.5em;
+    }
+
+    li {
+        list-style-type: none;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .description-container {
+        max-height: 15%;
+        overflow-y: auto;
+        border-top: 2px solid white;
+        border-bottom: 2px solid white;
+    }
+
     .title {
         position: absolute;
         width: 100%;
@@ -55,7 +93,7 @@ export const StyledExpandedSku = styled.div`
     }
 
     img {
-        max-height: 90vh;
+        max-height: 60vh;
         max-width: 100%;
         display: block;
         border-radius: 10px 10px 0 0;

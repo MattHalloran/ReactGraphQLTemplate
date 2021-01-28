@@ -1,26 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import PubSub from 'utils/pubsub';
+import { PUBS } from 'consts';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
 import ClickOutside from 'components/shared/wrappers/ClickOutside/ClickOutside';
 
 function BurgerMenu(props) {
+  console.log('BURGER PROPS', props)
   let history = useHistory();
   let [open, setOpen] = useState(false);
 
-  const toggleOpen = () => {
-    setMenu(open => !open);
-  }
+  useEffect(() => {
+    let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
+      console.log('I GOTTA PEEE', b)
+      setOpen(open => b === 'toggle' ? !open : b);
+    });
+    return (() => {
+      PubSub.unsubscribe(openSub);
+    })
+  }, [])
 
-  const setMenu = useCallback((is_open) => {
-    setOpen(is_open);
-    props?.menuClicked(is_open);
-  },[props]);
-
-  const closeMenu = useCallback(() => {
-    setMenu(false);
-  },[setMenu]);
+  const toggleOpen = () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle');
+  const closeMenu = () => PubSub.publish(PUBS.BurgerMenuOpen, false);
 
   useEffect(() => {
     //Closes menu on url change
@@ -28,11 +32,11 @@ function BurgerMenu(props) {
     return () => unlisten();
   },[history, closeMenu])
 
-  return (
-    <StyledBurgerMenu open={open}>
+  return ReactDOM.createPortal(
+    <StyledBurgerMenu open={open} {...props}>
       <div id="overlay"/>
       <ClickOutside {...props} active={open} on_click_outside={closeMenu} >
-        <Burger toggle={toggleOpen} />
+        <Burger onClick={toggleOpen} />
         <MenuContainer open={open} closeMenu={closeMenu}>
           {props.children}
           <p>AAAAAAAAAAAAA</p>
@@ -48,17 +52,17 @@ function BurgerMenu(props) {
           <p>AAAAAAAAAAAAA</p>
         </MenuContainer>
       </ClickOutside>
-    </StyledBurgerMenu>
+    </StyledBurgerMenu>,
+    document.body
   );
 }
 
 BurgerMenu.propTypes = {
-  menuClicked: PropTypes.func,
 };
 
 function Burger(props) {
   return (
-    <div className="burger" onClick={props.toggle}>
+    <div className="burger" onClick={props.onClick}>
       <div />
       <div />
       <div />
@@ -67,7 +71,7 @@ function Burger(props) {
 }
 
 Burger.propTypes = {
-  toggle: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
 }
 
 export default BurgerMenu;

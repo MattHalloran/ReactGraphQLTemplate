@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 export const StyledModal = styled.aside`
-    background-color: rgba(0, 0, 0, .8);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 10000;
+    background-color: rgba(0,0,0,.8);
 
     .modal-body {
         background-color: ${({ theme }) => theme.bodySecondary};
@@ -18,7 +18,7 @@ export const StyledModal = styled.aside`
         transform: translate(-50%, -50%);
         max-width: calc(100% - 100px);
         max-height: calc(100% - 50px);
-        width: fit-content;
+        width: auto;
         height: fit-content;
         border: 3px solid white;
         border-radius: 10px;

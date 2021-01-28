@@ -9,7 +9,7 @@ const menu_app_style = `position: fixed;
     top: 0;
     width: 100%; 
     overflow: hidden;
-    `
+`
 
 export const GlobalStyles = createGlobalStyle`
     body {
@@ -43,7 +43,7 @@ export const GlobalStyles = createGlobalStyle`
 
     #App {
         text-align: center;
-        ${({ menu_open }) => menu_open ? menu_app_style : ''};
+        ${({ menu_or_popup_open }) => menu_or_popup_open ? menu_app_style : ''};
     }
     
     #page-container {

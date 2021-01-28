@@ -17,7 +17,7 @@ function Modal(props) {
 
     // A portal is a way to render children into a DOM node that exists
     // outside the DOM hierarchy of the parent component
-    return ReactDOM.createPortal(
+    return (
         <StyledModal
             role="dialog"
             tabIndex="-1"
@@ -37,9 +37,7 @@ function Modal(props) {
                 </button>
                 {props.children}
             </ClickOutside>
-        </StyledModal>,
-        document.body
-    );
+        </StyledModal>);
 }
 
 Modal.propTypes = {

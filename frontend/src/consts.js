@@ -26,6 +26,9 @@ export const PUBS = {
     Session: "session",
     Roles: "roles",
     Loading: "loading",
+    PopupOpen: "popupOpen",
+    BurgerMenuOpen: "burgerMenuOpen",
+    ArrowMenuOpen: "arrowMenuOpen",
 }
 
 export const LINKS = {

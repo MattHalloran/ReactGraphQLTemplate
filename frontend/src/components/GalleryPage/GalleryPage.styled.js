@@ -22,6 +22,7 @@ export const StyledGalleryImage = styled.div`
         max-width: 100%;
         display: block;
         border-radius: 10px;
+        object-fit: contain;
     }
 
     .arrow {

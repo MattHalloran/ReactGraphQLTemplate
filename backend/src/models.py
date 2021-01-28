@@ -42,38 +42,48 @@ class Tables(Enum):
 # A user can have many roles, and a role can be shared by many users
 userRoles = db.Table(Tables.USER_ROLES.value,
                      Column('id', Integer, primary_key=True),
-                     Column('user_id', Integer, ForeignKey(f'{Tables.USER.value}.id')),
-                     Column('role_id', Integer, ForeignKey(f'{Tables.ROLE.value}.id'))
+                     Column('user_id', Integer, ForeignKey(
+                         f'{Tables.USER.value}.id')),
+                     Column('role_id', Integer, ForeignKey(
+                         f'{Tables.ROLE.value}.id'))
                      )
 
 # A joining table for the many-to-many relationship
 # between user discounts and businesses
 businessDiscounts = db.Table(Tables.BUSINESS_DISCOUNTS.value,
                              Column('id', Integer, primary_key=True),
-                             Column('business_id', Integer, ForeignKey(f'{Tables.BUSINESS.value}.id')),
-                             Column('business_discount_id', Integer, ForeignKey(f'{Tables.BUSINESS_DISCOUNT.value}.id'))
+                             Column('business_id', Integer, ForeignKey(
+                                 f'{Tables.BUSINESS.value}.id')),
+                             Column('business_discount_id', Integer, ForeignKey(
+                                 f'{Tables.BUSINESS_DISCOUNT.value}.id'))
                              )
 
 # A joining table for the many-to-many relationship
 # between SKUs and their discounts
 skuDiscounts = db.Table(Tables.SKU_DISCOUNTS.value,
                         Column('id', Integer, primary_key=True),
-                        Column('sku_id', Integer, ForeignKey(f'{Tables.SKU.value}.id')),
-                        Column('sku_discount_id', Integer, ForeignKey(f'{Tables.SKU_DISCOUNT.value}.id'))
+                        Column('sku_id', Integer, ForeignKey(
+                            f'{Tables.SKU.value}.id')),
+                        Column('sku_discount_id', Integer, ForeignKey(
+                            f'{Tables.SKU_DISCOUNT.value}.id'))
                         )
 
 # A joining table for the two-way relationship between skus and sizes.
 skuSizes = db.Table(Tables.SKU_SIZES.value,
                     Column('id', Integer, primary_key=True),
-                    Column('sku_id', Integer, ForeignKey(f'{Tables.SKU.value}.id')),
-                    Column('size_id', Integer, ForeignKey(f'{Tables.SIZE.value}.id'))
+                    Column('sku_id', Integer, ForeignKey(
+                        f'{Tables.SKU.value}.id')),
+                    Column('size_id', Integer, ForeignKey(
+                        f'{Tables.SIZE.value}.id'))
                     )
 
 # A joining table for the two-way relationship between skus and sizes.
 plantTraits = db.Table(Tables.PLANT_TRAITS.value,
                        Column('id', Integer, primary_key=True),
-                       Column('plant_id', Integer, ForeignKey(f'{Tables.PLANT.value}.id')),
-                       Column('trait_id', Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+                       Column('plant_id', Integer, ForeignKey(
+                           f'{Tables.PLANT.value}.id')),
+                       Column('trait_id', Integer, ForeignKey(
+                           f'{Tables.PLANT_TRAIT.value}.id'))
                        )
 
 
@@ -145,7 +155,8 @@ class BusinessDiscount(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     # A number between 0 < 1, representing the discount percent in dollars (at least currently)
-    discount = Column(DECIMAL(4, 4), nullable=False, default=defaults['discount'])
+    discount = Column(DECIMAL(4, 4), nullable=False,
+                      default=defaults['discount'])
     # A short string explaining what the discount is for
     title = Column(String(100), nullable=False)
     comment = Column(String(1000))
@@ -169,7 +180,8 @@ class ContactInfo(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
-    time_set = Column(Float, nullable=False, default=time.time())  # In UTC seconds
+    time_set = Column(Float, nullable=False,
+                      default=time.time())  # In UTC seconds
     monday = Column(String(200), nullable=False)
     tuesday = Column(String(200), nullable=False)
     wednesday = Column(String(200), nullable=False)
@@ -213,7 +225,8 @@ class Email(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     email_address = Column(String(100), nullable=False, unique=True)
-    receives_delivery_updates = Column(Boolean, default=defaults['receives_delivery_updates'])
+    receives_delivery_updates = Column(
+        Boolean, default=defaults['receives_delivery_updates'])
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
@@ -317,7 +330,8 @@ class Phone(db.Model):
     extension = Column(String(10))
     carrier = Column(String(50))  # Currently unused
     is_mobile = Column(Boolean, default=defaults['is_mobile'])
-    receives_delivery_updates = Column(Boolean, default=defaults['receives_delivery_updates'])
+    receives_delivery_updates = Column(
+        Boolean, default=defaults['receives_delivery_updates'])
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
@@ -399,23 +413,37 @@ class Plant(db.Model):
     description = Column(String(5000))
     jersey_native = Column(Boolean)
 
-    deer_resistance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    drought_tolerance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    grown_height_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    grown_spread_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    growth_rate_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    optimal_light_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
-    salt_tolerance_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    deer_resistance_id = Column(
+        Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    drought_tolerance_id = Column(
+        Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'))
+    grown_height_id = Column(Integer, ForeignKey(
+        f'{Tables.PLANT_TRAIT.value}.id'))
+    grown_spread_id = Column(Integer, ForeignKey(
+        f'{Tables.PLANT_TRAIT.value}.id'))
+    growth_rate_id = Column(Integer, ForeignKey(
+        f'{Tables.PLANT_TRAIT.value}.id'))
+    optimal_light_id = Column(Integer, ForeignKey(
+        f'{Tables.PLANT_TRAIT.value}.id'))
+    salt_tolerance_id = Column(Integer, ForeignKey(
+        f'{Tables.PLANT_TRAIT.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-one relationships
-    deer_resistance = db.relationship('PlantTrait', uselist=False, foreign_keys=[deer_resistance_id])
-    drought_tolerance = db.relationship('PlantTrait', uselist=False, foreign_keys=[drought_tolerance_id])
-    grown_height = db.relationship('PlantTrait', uselist=False, foreign_keys=[grown_height_id])
-    grown_spread = db.relationship('PlantTrait', uselist=False, foreign_keys=[grown_spread_id])
-    growth_rate = db.relationship('PlantTrait', uselist=False, foreign_keys=[growth_rate_id])
-    optimal_light = db.relationship('PlantTrait', uselist=False, foreign_keys=[optimal_light_id])
-    salt_tolerance = db.relationship('PlantTrait', uselist=False, foreign_keys=[salt_tolerance_id])
+    deer_resistance = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[deer_resistance_id])
+    drought_tolerance = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[drought_tolerance_id])
+    grown_height = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[grown_height_id])
+    grown_spread = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[grown_spread_id])
+    growth_rate = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[growth_rate_id])
+    optimal_light = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[optimal_light_id])
+    salt_tolerance = db.relationship(
+        'PlantTrait', uselist=False, foreign_keys=[salt_tolerance_id])
     # One-to-many relationships
     flower_images = db.relationship('Image', lazy=True,
                                     primaryjoin=f"and_(Plant.id==Image.plant_id, Image.used_for=='{ImageUses.PLANT_FLOWER.value}')")
@@ -431,53 +459,53 @@ class Plant(db.Model):
     attracts_pollinators_and_wildlifes = db.relationship('PlantTrait',
                                                          secondary=plantTraits,
                                                          primaryjoin=id == plantTraits.c.plant_id,
-                                                         secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                                         PlantTrait.trait == PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE.value)
+                                                         secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                                         f"PlantTrait.trait=='{PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE.value}')")
     bloom_times = db.relationship('PlantTrait',
                                   secondary=plantTraits,
                                   primaryjoin=id == plantTraits.c.plant_id,
-                                  secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                  PlantTrait.trait == PlantTraitOptions.BLOOM_TIME.value)
+                                  secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                  f"PlantTrait.trait=='{PlantTraitOptions.BLOOM_TIME.value}')")
     bloom_colors = db.relationship('PlantTrait',
                                    secondary=plantTraits,
                                    primaryjoin=id == plantTraits.c.plant_id,
-                                   secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                   PlantTrait.trait == PlantTraitOptions.BLOOM_COLOR.value)
+                                   secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                   f"PlantTrait.trait=='{PlantTraitOptions.BLOOM_COLOR.value}')")
     zones = db.relationship('PlantTrait',
                             secondary=plantTraits,
                             primaryjoin=id == plantTraits.c.plant_id,
-                            secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                            PlantTrait.trait == PlantTraitOptions.ZONE.value)
+                            secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                            f"PlantTrait.trait=='{PlantTraitOptions.ZONE.value}')")
     plant_types = db.relationship('PlantTrait',
                                   secondary=plantTraits,
                                   primaryjoin=id == plantTraits.c.plant_id,
-                                  secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                  PlantTrait.trait == PlantTraitOptions.PLANT_TYPE.value)
+                                  secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                  f"PlantTrait.trait=='{PlantTraitOptions.PLANT_TYPE.value}')")
     physiographic_regions = db.relationship('PlantTrait',
                                             secondary=plantTraits,
                                             primaryjoin=id == plantTraits.c.plant_id,
-                                            secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                            PlantTrait.trait == PlantTraitOptions.PHYSIOGRAPHIC_REGION.value)
+                                            secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                            f"PlantTrait.trait=='{PlantTraitOptions.PHYSIOGRAPHIC_REGION.value}')")
     soil_moistures = db.relationship('PlantTrait',
                                      secondary=plantTraits,
                                      primaryjoin=id == plantTraits.c.plant_id,
-                                     secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                     PlantTrait.trait == PlantTraitOptions.SOIL_MOISTURE.value)
+                                     secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                     f"PlantTrait.trait=='{PlantTraitOptions.SOIL_MOISTURE.value}')")
     soil_phs = db.relationship('PlantTrait',
                                secondary=plantTraits,
                                primaryjoin=id == plantTraits.c.plant_id,
-                               secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                               PlantTrait.trait == PlantTraitOptions.SOIL_PH.value)
+                               secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                               f"PlantTrait.trait=='{PlantTraitOptions.SOIL_PH.value}')")
     soil_types = db.relationship('PlantTrait',
                                  secondary=plantTraits,
                                  primaryjoin=id == plantTraits.c.plant_id,
-                                 secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                 PlantTrait.trait == PlantTraitOptions.SOIL_TYPE.value)
+                                 secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                 f"PlantTrait.trait=='{PlantTraitOptions.SOIL_TYPE.value}')")
     light_ranges = db.relationship('PlantTrait',
                                    secondary=plantTraits,
                                    primaryjoin=id == plantTraits.c.plant_id,
-                                   secondaryjoin=PlantTrait.id == plantTraits.c.trait_id and
-                                   PlantTrait.trait == PlantTraitOptions.LIGHT_RANGE.value)
+                                   secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
+                                   f"PlantTrait.trait=='{PlantTraitOptions.LIGHT_RANGE.value}')")
     # -------------End relationships----------------
 
     def __init__(self, latin_name: str):
@@ -497,7 +525,8 @@ class SkuDiscount(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     # A number between 0 < 1, representing the discount percent in dollars (at least currently)
-    discount = Column(DECIMAL(4, 4), nullable=False, default=defaults['discount'])
+    discount = Column(DECIMAL(4, 4), nullable=False,
+                      default=defaults['discount'])
     # A short string explaining what the discount is for
     title = Column(String(100), nullable=False)
     comment = Column(String(1000))
@@ -547,17 +576,20 @@ class Sku(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     sku = Column(String(32), nullable=False)
-    is_discountable = Column(Boolean, nullable=False, default=defaults['is_discountable'])
+    is_discountable = Column(Boolean, nullable=False,
+                             default=defaults['is_discountable'])
     plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
     display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-one relationships
     plant = db.relationship('Plant', uselist=False, foreign_keys=[plant_id])
-    display_img = db.relationship('Image', uselist=False, foreign_keys=[display_img_id])
+    display_img = db.relationship(
+        'Image', uselist=False, foreign_keys=[display_img_id])
     # Many-to-many relationships
     sizes = db.relationship('Size', secondary=skuSizes, backref='users')
-    discounts = db.relationship('SkuDiscount', secondary=skuDiscounts, backref='plants')
+    discounts = db.relationship(
+        'SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------
 
     def __init__(self, is_discountable: bool, plant: Plant):
@@ -626,13 +658,15 @@ class Order(db.Model):
     status = Column(Integer, nullable=False, default=OrderStatus.DRAFT.value)
     special_instructions = Column(String)
     desired_delivery_date = Column(Float, nullable=False)
-    delivery_address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
+    delivery_address_id = db.Column(
+        Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-one relatinoship
-    delivery_address = db.relationship('Address', uselist=False, foreign_keys=[delivery_address_id])
+    delivery_address = db.relationship(
+        'Address', uselist=False, foreign_keys=[delivery_address_id])
     # One-to-many relationship
     items = db.relationship('OrderItem', backref='Order', lazy=True)
     # -------------End relationships----------------
@@ -694,10 +728,12 @@ class User(db.Model):
     last_name = Column(String(30), nullable=False)
     pronouns = Column(String(50), nullable=False, default=defaults['pronouns'])
     theme = Column(String(20), nullable=False, default=defaults['theme'])
-    image_file = Column(String(20), nullable=False, default=defaults['image_file'])
+    image_file = Column(String(20), nullable=False,
+                        default=defaults['image_file'])
     password = Column(String(255), nullable=False)
     login_attempts = Column(Integer, nullable=False, default=0)
-    last_login_attempt = Column(Float, nullable=False, default=time.time())  # UTC seconds since epoch
+    # UTC seconds since epoch
+    last_login_attempt = Column(Float, nullable=False, default=time.time())
     session_token = Column(String(250))
     account_status = Column(Integer, nullable=False, default=0)
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
@@ -706,10 +742,12 @@ class User(db.Model):
     # One-to-many relationships
     personal_phone = db.relationship('Phone', backref='user')
     personal_email = db.relationship('Email', backref='user')
-    orders = db.relationship('Order', backref='customer', foreign_keys=[Order.user_id], lazy=True)
+    orders = db.relationship('Order', backref='customer', foreign_keys=[
+                             Order.user_id], lazy=True)
     feedbacks = db.relationship('Feedback', backref='user')
     # Many-to-many relationship
-    roles = db.relationship('Role', secondary=userRoles, backref='users', lazy=True)
+    roles = db.relationship('Role', secondary=userRoles,
+                            backref='users', lazy=True)
     # -------------End relationships----------------
 
     LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3
@@ -755,7 +793,8 @@ class Business(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    subscribed_to_newsletters = Column(Boolean, default=defaults['subscribed_to_newsletters'])
+    subscribed_to_newsletters = Column(
+        Boolean, default=defaults['subscribed_to_newsletters'])
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-many relationships
@@ -765,7 +804,8 @@ class Business(db.Model):
     employees = db.relationship('User', backref='employer', lazy=True)
     # Many-to-many relationship
     # Discounts only apply to discountable items
-    discounts = db.relationship('BusinessDiscount', secondary=businessDiscounts, backref='businesses')
+    discounts = db.relationship(
+        'BusinessDiscount', secondary=businessDiscounts, backref='businesses')
     # -------------End relationships----------------
 
     def __init__(self, name: str, email: Email, phone: Phone, subscribed_to_newsletters: bool):
