@@ -26,12 +26,10 @@ export const StyledGalleryImage = styled.div`
     }
 
     .arrow {
-        width: 50px;
-        height: 50px;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        color: white;
+        stroke: white;
     }
 
     .arrow:hover {

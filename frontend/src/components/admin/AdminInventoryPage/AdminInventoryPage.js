@@ -8,16 +8,15 @@ import { StyledAdminInventoryPage, StyledSkuPopup, StyledSkuCard } from './Admin
 import PropTypes from 'prop-types';
 import Modal from 'components/shared/wrappers/Modal/Modal';
 import { getInventory } from 'query/http_promises';
+import Button from 'components/shared/Button/Button';
 // Icons
-import { IoTrashOutline } from 'react-icons/io5';
-import { AiOutlineEdit } from 'react-icons/ai';
-import { BiHide } from 'react-icons/bi';
+import TrashIcon from 'assets/img/TrashIcon';
+import EditIcon from 'assets/img/EditIcon';
+import HideIcon from 'assets/img/HideIcon';
 
 function AdminInventoryPage() {
     // Holds the existing SKUs list
     const [skuCards, setSkuCards] = useState([]);
-    // Holds the plant templates list
-    const [plantCards, setPlantCards] = useState([]);
     // Dictionary of sku and plant data, or an empty dictionary
     const [currSku, setCurrSku] = useState(null);
 
@@ -76,7 +75,7 @@ function AdminInventoryPage() {
                 <li>Delete a SKU</li>
             </ul>
             <div>
-                <button onClick={newEmptySku}>Create Empty SKU</button>
+                <Button onClick={newEmptySku}>Create Empty SKU</Button>
             </div>
 
             <div className="flexed">
@@ -110,9 +109,9 @@ function SkuCard(props) {
             <h3>{plant?.latin_name}</h3>
             <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
             <div className="icon-container">
-                <AiOutlineEdit className="icon" title="Edit SKU" onClick={props.onEdit}/>
-                <BiHide className="icon" title="Hide SKU" onClick={props.onHide}/>
-                <IoTrashOutline className="icon" title="Delete SKU" onClick={props.onDelete}/>
+                <EditIcon className="icon" width="30px" height="30px" onClick={props.onEdit}/>
+                <HideIcon className="icon" width="30px" height="30px" onClick={props.onHide}/>
+                <TrashIcon className="icon" width="30px" height="30px" onClick={props.onDelete}/>
             </div>
         </StyledSkuCard>
     );

@@ -10,7 +10,8 @@ import { getGallery, getGalleryThumbnails, getImageFromHash } from 'query/http_p
 import { SortableContainer } from 'react-sortable-hoc';
 import arrayMove from "array-move";
 import Modal from 'components/shared/wrappers/Modal/Modal';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import ChevronLeftIcon from 'assets/img/ChevronLeftIcon';
+import ChevronRightIcon from 'assets/img/ChevronRightIcon';
 import { BUSINESS_NAME, PUBS, LINKS } from 'consts';
 
 //TODO add gallery modal part if url match (/gallery/:img)
@@ -167,7 +168,7 @@ function GalleryPage() {
 
     const onSortEnd = useCallback(({ oldIndex, newIndex }) => {
         setThumbnails(thumbs => arrayMove(thumbs, oldIndex, newIndex))
-    }, [thumbnails]);
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -184,7 +185,7 @@ function GalleryPage() {
         })
 
         return () => mounted = false;
-    }, [])
+    }, [loadNextPage])
 
     let popup = (curr_img && curr_img[0]) ? (
         <Modal onClose={() => history.goBack()}>
@@ -232,8 +233,8 @@ function GalleryImage(props) {
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
             <StyledGalleryImage id='boop'>
-                <FaChevronLeft className="arrow left" onClick={props.goLeft} />
-                <FaChevronRight className="arrow right" onClick={props.goRight} />
+                <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={props.goLeft} />
+                <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={props.goRight} />
                 <img src={props.src} alt={props.alt} />
             </StyledGalleryImage>
         </HotKeys>

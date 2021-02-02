@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import React, { useEffect, useState, useLayoutEffect } from 'react'
 import PropTypes from 'prop-types';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { getProfileInfo } from 'query/http_promises';
-import { BUSINESS_NAME, DEFAULT_PRONOUNS } from 'consts';
+import { BUSINESS_NAME } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 // Profile fields:
 // first_name: str
@@ -25,8 +26,6 @@ function ProfileForm(props) {
     const [lastNameError, setLastNameError] = useState(null);
     const [pronouns, setPronouns] = useState("")
     const [pronounsError, setPronounsError] = useState(null);
-    const [customPronouns, setCustomPronouns] = useState("")
-    const [customPronounsError, setCustomPronounsError] = useState(null);
     const [password, setPassword] = useState("")
     const [passwordError, setPasswordError] = useState(null);
     const [confirmPassword, setConfirmPassword] = useState("")
@@ -35,6 +34,10 @@ function ProfileForm(props) {
     const [emailErrors, setEmailErrors] = useState(null);
     const [phones, setPhones] = useState([""])
     const [phoneErrors, setPhoneErrors] = useState(null);
+
+    useEffect(() => {
+        console.log('PRONOUNS ARE', pronouns)
+    }, [pronouns])
 
     useLayoutEffect(() => {
         let mounted = true;
@@ -51,6 +54,9 @@ function ProfileForm(props) {
                 }
                 if (response.personal_phone) {
                     setPhones(response.personal_phone.map(o => o.unformatted_number));
+                }
+                if (response.pronouns) {
+                    setPronouns(response.pronouns);
                 }
             }).catch(err => {
                 console.error(err);
@@ -108,33 +114,16 @@ function ProfileForm(props) {
                 autocomplete="Doe"
                 disabled={!editing}
             />
-            <div className="horizontal-input-container">
-        <InputText
-          label="Pronouns"
-          value={pronouns}
-          valueFunc={setPronouns}
-          select
-          SelectProps={{
-            native: true,
-          }} >
-          {DEFAULT_PRONOUNS.map((pro) => (
-            <option key={pro} value={pro}>
-              {pro}
-            </option>
-          ))}
-        </InputText>
-        {pronouns === DEFAULT_PRONOUNS[0] ?
-          <InputText
-            label="Enter pronouns"
+            <InputText
+            label="Pronouns"
             type="text"
-            value={customPronouns}
-            valueFunc={setCustomPronouns}
-            errorFunc={setCustomPronounsError}
+            value={pronouns}
+            valueFunc={setPronouns}
+            errorFunc={setPronounsError}
             validate={validation.pronounValidation}
             showErrors={showErrors}
+            disabled={!editing}
           />
-          : null}
-      </div>
       {emails.map((email, index) => (
           <InputText
           index={index}
@@ -145,6 +134,7 @@ function ProfileForm(props) {
           errorFunc={(v, i) => updateFieldArray(setEmailErrors, v, i)}
           validate={validation.pronounValidation}
           showErrors={showErrors}
+          disabled={!editing}
         />
       ))}
       {phones.map((phone, index) => (
@@ -157,6 +147,7 @@ function ProfileForm(props) {
           errorFunc={(v, i) => updateFieldArray(setPhoneErrors, v, i)}
           validate={validation.pronounValidation}
           showErrors={showErrors}
+          disabled={!editing}
         />
       ))}
             <InputText
@@ -177,12 +168,12 @@ function ProfileForm(props) {
                 disabled={!editing}
             />
             <div className="buttons-div">
-                <button className="primary" onClick={toggleEdit}>
+                <Button className="primary" onClick={toggleEdit}>
                     { editing ? "Cancel" : "Edit" }
-            </button>
-                <button className="primary" type="submit" onClick={submit}>
+            </Button>
+                <Button className="primary" type="submit" onClick={submit}>
                     Submit
-            </button>
+            </Button>
             </div>
         </React.Fragment>
     );

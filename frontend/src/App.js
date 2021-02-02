@@ -26,7 +26,6 @@ import SignUpForm from 'components/forms/SignUpForm/SignUpForm';
 import LogInForm from 'components/forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'components/forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
-import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
 import { getTheme } from './theme';
 //Authentication
@@ -105,10 +104,9 @@ function App() {
   }, [session])
 
   return (
-      <ThemeProvider theme={theme}>
-        <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-        <GlobalStyles menu_or_popup_open={menu_open || popup_open} />
         <div id="App">
+        <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+        <GlobalStyles theme={theme} menu_or_popup_open={menu_open || popup_open} />
           <div id="page-container">
             <div id="content-wrap">
               <Navbar visible={nav_visible} session={session} user_roles={user_roles} />
@@ -160,7 +158,6 @@ function App() {
             <Footer />
           </div>
         </div>
-      </ThemeProvider>
   );
 }
 

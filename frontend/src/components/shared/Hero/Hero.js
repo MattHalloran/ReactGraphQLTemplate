@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
+import Button from 'components/shared/Button/Button';
 // JSX
 import HeroSlider, {
   Nav,
@@ -49,7 +50,7 @@ function Hero(props) {
             {props.subtext}
           </Subtitle>
           <Link to="/shopping">
-            <button className="primary">Order now</button>
+            <Button className="primary">Order now</Button>
           </Link>
         </ContentWrapper>
       </OverlayContainer>

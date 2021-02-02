@@ -166,6 +166,69 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
+# Returns list of filters to sort the inventory by
+@app.route("/api/fetch_inventory_filters", methods=["POST"])
+@handle_exception
+def fetch_inventory_filters():
+    skus = Sku.query.with_entities(Sku).all()
+    plants = []
+    all_sizes = []
+    optimal_lights = []
+    pollinators = []
+    lights = []
+    moistures = []
+    phs = []
+    soil_types = []
+    zones = []
+    # Grab SKU-related filters
+    for sku in skus:
+        sku_sizes = [size.size for size in sku.sizes]
+        new_skus = set(sku_sizes) - set(all_sizes)
+        all_sizes = all_sizes + list(new_skus)
+        plants.append(PlantHandler.from_id(Plant, sku.plant_id))
+    # Grab plant-related filters
+    for plant in plants:
+        # Single value fields
+        if plant.optimal_light and plant.optimal_light.value not in optimal_lights:
+            optimal_lights.append(plant.optimal_light.value)
+        # Multi value fields
+        if plant.attracts_pollinators_and_wildlifes:
+            for pollinator in plant.attracts_pollinators_and_wildlifes:
+                if pollinator.value not in pollinators:
+                    pollinators.append(pollinator.value)
+        if plant.light_ranges:
+            for light in plant.light_ranges:
+                if light.value not in lights:
+                    lights.append(light.value)
+        if plant.soil_moistures:
+            for moisture in plant.soil_moistures:
+                if moisture.value not in moistures:
+                    moistures.append(moisture.value)
+        if plant.soil_phs:
+            for ph in plant.soil_phs:
+                if ph.value not in phs:
+                    phs.append(ph.value)
+        if plant.soil_types:
+            for soil_type in plant.soil_types:
+                if soil_type.value not in soil_types:
+                    soil_types.append(soil_type.value)
+        if plant.zones:
+            for zone in plant.zones:
+                if zone.value not in zones:
+                    zones.append(zone.value)
+
+    return {
+        "sizes": all_sizes,
+        "optimal_lights": optimal_lights,
+        "attracts_polinators_and_wildlife": pollinators,
+        "soil_moistures": moistures,
+        "soil_phs": phs,
+        "soil_types": soil_types,
+        "zones": zones,
+        "status": AuthCodes.SUCCESS.value
+    }
+
+
 # Returns IDs of all inventory items available to the customer.
 # Also returns required info to display the first page of results
 @app.route("/api/fetch_inventory", methods=["POST"])

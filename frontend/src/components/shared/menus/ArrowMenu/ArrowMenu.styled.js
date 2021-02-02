@@ -1,27 +1,40 @@
 import styled from 'styled-components';
+
+// Darkens everything besides the open menu
+const overlay_style = `
+    position: fixed; 
+    left: 0;
+    top: 0;
+    width: 100vh; 
+    height: 100vh;
+    overflow: hidden;
+    z-index: 10;
+    background-color: rgba(0,0,0,.5);
+`
+
 export const StyledArrowMenu = styled.div`
-    .arrow-container {
-        top: 5%;
-        right: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        width: 2rem;
-        height: 2rem;
-        background: transparent;
+  #overlay {
+    transition: 0.3s ease-in-out;
+    ${({ open }) => open ? overlay_style : ''};
+  }
+
+    .arrow {
         border: none;
         cursor: pointer;
-        padding: 0;
-        z-index: 10;
-        position: relative;
-        width: 2rem;
-        height: 0.25rem;
-        background: ${({ theme, open }) => open ? theme.textPrimary : theme.textPrimary};
-        border-radius: 10px;
+        z-index: 200;
         transition: all 0.3s linear;
-        position: relative;
-        transform-origin: 1px;
+        position: fixed;
+        transform: ${({ open }) => open ? 'translateX(400px) scaleX(-1)' : 'transformX(0px) scaleX(1)'};
+        fill: 'white';
+        stroke: black;
+        stroke-width: 0.5px;
+        padding: 5px;
     }
+
+    .arrow > * {
+        margin: 0;
+        transition: 0.4s;
+      }
 
     &:focus {
         outline: none;

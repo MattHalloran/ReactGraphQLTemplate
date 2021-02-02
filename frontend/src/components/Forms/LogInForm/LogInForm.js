@@ -6,6 +6,7 @@ import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import { PUBS, LINKS } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 function LogInForm() {
     let history = useHistory();
@@ -57,9 +58,9 @@ function LogInForm() {
                 validate={validation.passwordValidation}
                 showErrors={showErrors}
             />
-            <button className="primary submit" type="submit" onClick={submit}>
+            <Button className="primary submit" type="submit" onClick={submit}>
                 Submit
-            </button>
+            </Button>
             <h5 className="form-header-text"
                 onClick={toRegister}>&#8594;Sign Up</h5>
             <h5 onClick={toForgotPassword}>Forgot Password?</h5>

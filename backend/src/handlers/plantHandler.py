@@ -52,7 +52,6 @@ class PlantHandler(Handler):
             if not key:
                 key = field
             data = getattr(model, field, None)
-            print(f'ARRAY TO DICT: {key}, {data}')
             if not data:
                 return
             if len(data) > 0:

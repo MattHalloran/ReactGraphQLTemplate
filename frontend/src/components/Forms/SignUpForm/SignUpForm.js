@@ -12,6 +12,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useHistoryState } from 'utils/useHistoryState';
 import { PUBS, LINKS } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 function SignUpForm() {
   let history = useHistory();
@@ -131,9 +132,9 @@ function SignUpForm() {
         <FormHelperText>{existingCustomerError}</FormHelperText>
       </FormControl>
       <div className="form-group">
-        <button className="primary submit" type="submit" onClick={submit}>
+        <Button className="primary submit" type="submit" onClick={submit}>
           Submit
-     </button>
+     </Button>
         <h5 className="form-header-text"
           onClick={toLogin}>&#8594;Log In</h5>
       </div>

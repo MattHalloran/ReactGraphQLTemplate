@@ -55,8 +55,6 @@ export const StyledExpandedSku = styled.div`
     }
 
     .trait-icon {
-        max-height: 25px;
-        max-width: 25px;
         padding: 1px;
         vertical-align: middle;
         display: inline-block;

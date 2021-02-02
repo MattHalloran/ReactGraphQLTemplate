@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages } from 'query/http_promises';
+import Button from 'components/shared/Button/Button';
 
 class AdminGalleryPage extends React.Component {
     constructor(props) {
@@ -74,13 +75,13 @@ class AdminGalleryPage extends React.Component {
                 <div>
                     <h2>Select image(s) for upload</h2>
                     <input type="file" onChange={this.fileSelectedHandler} multiple/>
-                    <button onClick={this.uploadImages}>Upload</button>
+                    <Button onClick={this.uploadImages}>Upload</Button>
                 </div>
                 <h2>Reorder and delete images</h2>
                 <div>
                     
                 </div>
-                <button onClick={this.applyChanges}>Apply Changes</button>
+                <Button onClick={this.applyChanges}>Apply Changes</Button>
             </StyledAdminGalleryPage>
         );
     }
@@ -109,7 +110,7 @@ class ImageCard extends React.Component {
         return(
             <div className={this.state.delete ? "" : ""}>
                 <img src={`data:image/jpeg;base64,${this.props.b64}`} width="100px" height="100px" />
-                <button onClick={this.deleteClicked}/>
+                <Button onClick={this.deleteClicked}/>
             </div>
         );
     }

@@ -46,8 +46,6 @@ export const StyledSkuCard = styled.div`
         > .icon {
             display: inline-block;
             text-align: center;
-            width: 30px;
-            height: 30px;
             color: black;
             cursor: pointer;
         }

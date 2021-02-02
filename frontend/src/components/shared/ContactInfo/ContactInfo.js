@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyledContactInfo } from './ContactInfo.styled';
-import { ImPhone } from 'react-icons/im';
+import PhoneIcon from 'assets/img/PhoneIcon';
 
 function ContactInfo() {
     return (
@@ -15,7 +15,7 @@ function ContactInfo() {
                     <tr><td>Note: Closed daily from 12:00 pm to 1:00 pm</td></tr>
                 </tbody>
             </table>
-            <p><a href="tel:+18564553601"><ImPhone className="phone" />(856) 455-3601</a></p>
+            <p><a href="tel:+18564553601"><PhoneIcon className="phone" />(856) 455-3601</a></p>
         </StyledContactInfo>
     );
 }

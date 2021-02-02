@@ -2,6 +2,7 @@ import React, { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
 import { BUSINESS_NAME } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 function NotFoundPage() {
     useLayoutEffect(() => {
@@ -15,7 +16,7 @@ function NotFoundPage() {
                 <h3>Looks like you've followed a broken link or entered a URL that doesn't exist on this site</h3>
                 <br />
                 <Link to="/">
-                    <button className="primary">Go to Home</button>
+                    <Button className="primary">Go to Home</Button>
                 </Link>
             </div>
         </StyledNotFoundPage>

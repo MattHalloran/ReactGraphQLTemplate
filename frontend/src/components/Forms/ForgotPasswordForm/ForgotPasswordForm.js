@@ -6,6 +6,7 @@ import * as authQuery from 'query/auth';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import { PUBS } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 function ForgotPasswordForm() {
     let history = useHistory();
@@ -44,9 +45,9 @@ function ForgotPasswordForm() {
                 showErrors={showErrors}
             />
             <div className="form-group">
-                <button className="primary submit" type="submit" onClick={submit}>
+                <Button className="primary submit" type="submit" onClick={submit}>
                     Submit
-                </button>
+                </Button>
             </div>
         </React.Fragment>
     );

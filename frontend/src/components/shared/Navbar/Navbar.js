@@ -5,7 +5,6 @@ import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
 import * as authQuery from 'query/auth';
 import { StyledNavbar } from './Navbar.styled';
-import { FaShoppingCart } from 'react-icons/fa';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
 import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import OakSpinner from 'assets/img/oak-spinner.svg';
 import PubSub from 'utils/pubsub';
 import { StyledSpinner } from './Spinner.styled';
 import { PUBS } from 'consts';
@@ -15,9 +14,18 @@ function Spinner(props) {
 
     return (
         <StyledSpinner>
-            {spinning ? <section className="spinner">
-                <img src={OakSpinner} className="spinner_component" alt="Designed by Creazilla" />
-            </section> : null}
+            {spinning ? <span className="spinner">
+                <div style={{color: '#68a174'}} className="la-ball-spin-clockwise la-3x">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </span> : null}
         </StyledSpinner>
     );
 }

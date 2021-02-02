@@ -110,6 +110,14 @@ export async function fetch_inventory(filter_by) {
     return await fetchWrapper(`${PREFIX}/fetch_inventory`, options);
 }
 
+export async function fetch_inventory_filters() {
+    let options = {
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_inventory_filters`, options);
+}
+
 export async function fetch_inventory_page(skus) {
     let json = JSON.stringify({
         "skus": skus,

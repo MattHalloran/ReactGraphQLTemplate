@@ -2,7 +2,7 @@ from src.api import db
 from src.handlers.handler import Handler
 from src.handlers.imageHandler import ImageHandler
 from src.handlers.plantHandler import PlantHandler
-from src.models import SkuDiscount, Sku, Size, skuSizes, Image
+from src.models import SkuDiscount, Sku, Size, Image
 
 
 class SkuDiscountHandler(Handler):
@@ -40,7 +40,7 @@ class SizeHandler(Handler):
 
     @staticmethod
     def to_dict(model: Size):
-        Handler.simple_fields_to_dict(model, SkuSizesHandler.all_fields())
+        Handler.simple_fields_to_dict(model, SizeHandler.all_fields())
 
 
 class SkuHandler(Handler):
@@ -110,4 +110,3 @@ class SkuHandler(Handler):
     @staticmethod
     def from_sku(sku: str):
         return db.session.query(Sku).filter_by(sku=sku).one_or_none()
-

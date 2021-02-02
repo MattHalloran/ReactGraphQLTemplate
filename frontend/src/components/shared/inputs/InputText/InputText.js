@@ -1,25 +1,12 @@
 import React, { useState, useLayoutEffect } from "react";
 import PropTypes from 'prop-types';
-import _ from 'lodash';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles } from '@material-ui/core/styles';
-import { createIndexedAccessTypeNode } from "typescript";
-
-const useStyledInputText = makeStyles({
-    root: {
-        minHeight: '10vh',
-        display: 'flex',
-        marginBottom: '2vh',
-        '& .MuiOutlinedInput-root': {
-            display: 'flex',
-        }
-    },
-  });
+import { getTheme } from 'theme';
+import { StyledInputText } from  './InputText.styled';
 
 function InputText(props) {
+    let theme = props.theme ?? getTheme();
     const [value, setValue] = useState(props.value ? props.value : null);
     const [error, setError] = useState(null);
-    const classes = useStyledInputText();
 
     useLayoutEffect(() => {
         if (props.validate) {
@@ -38,7 +25,7 @@ function InputText(props) {
         }
         if (props.errorFunc) {
             if (props.index)
-                props.errorFunc(err, createIndexedAccessTypeNode);
+                props.errorFunc(err, props.index);
             else
                 props.errorFunc(err);
         } 
@@ -57,15 +44,18 @@ function InputText(props) {
     }
 
     return (
-        <TextField
-            className={classes.root}
-            variant="outlined"
-            { ..._.omit(props, ['valueFunc', 'valueRef', 'errorFunc', 'errorRef', 'validate', 'showErrors']) }
-            error={error && error.length > 0}
-            helperText={error}
+        <StyledInputText icon={props.icon} theme={theme}>
+          <input
+            type={props.type ?? "text"}
+            value={value}
+            placeholder={props.label}
             onChange={(e) => props.index ? updateValue(e, props.index) : updateValue(e)}
-        >{props.children}</TextField>
-    );
+          />
+          <label htmlFor={1} className={error && "error"}>
+            {error || props.label}
+          </label>
+        </StyledInputText>
+      );
 }
 
 // index - Index of textbox, if created with a map
@@ -73,11 +63,15 @@ function InputText(props) {
 // errorFunc - updater function for TextField error
 // validate - a function for validating the input string
 InputText.propTypes = {
+    theme: PropTypes.object,
     index: PropTypes.func,
+    label: PropTypes.string,
     valueFunc: PropTypes.func,
     errorFunc: PropTypes.func,
     validate: PropTypes.func,
+    icon: PropTypes.func, // TODO!!!
     showErrors: PropTypes.bool,
+    locked: PropTypes.bool,
 }
 
 export default InputText;

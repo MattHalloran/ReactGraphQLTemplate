@@ -23,3 +23,4 @@ export const getInventory = (filter_by) => promiseWrapper(http.fetch_inventory, 
 export const getInventoryPage = (skus) => promiseWrapper(http.fetch_inventory_page, skus);
 export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);
 export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
+export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);

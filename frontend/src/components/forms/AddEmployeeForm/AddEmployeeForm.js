@@ -6,6 +6,7 @@ import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import { useHistoryState } from 'utils/useHistoryState';
 import { PUBS, LINKS, DEFAULT_PRONOUNS } from 'consts';
+import Button from 'components/shared/Button/Button';
 
 function AddEmployeeForm() {
   let history = useHistory();
@@ -129,9 +130,7 @@ function AddEmployeeForm() {
         valueFunc={setConfirmPassword}
       />
       <div className="form-group">
-        <button className="primary submit" type="submit" onClick={submit}>
-          Submit
-     </button>
+        <Button className="primary submit" type="submit" onClick={submit}>Submit</Button>
         <h5 className="form-header-text"
           onClick={toLogin}>&#8594;Log In</h5>
       </div>

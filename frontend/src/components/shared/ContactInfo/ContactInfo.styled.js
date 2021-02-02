@@ -19,6 +19,10 @@ export const StyledContactInfo = styled.li`
     .phone {
         font-size: inherit;
         vertical-align: middle;
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        fill: white;
     }
 
     td {

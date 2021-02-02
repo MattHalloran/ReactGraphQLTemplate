@@ -7,6 +7,7 @@ export const lightTheme = {
     bodySecondary: '#249526',
     textPrimary: '#FFFFFF',
     textSecondary: '#FFFFFF',
+    containerPrimary: 'pink',
     hoverPrimary: '#92817A',
     mobile: '576px',
   }
@@ -16,6 +17,7 @@ export const darkTheme = {
   bodySecondary: '#4A4A4A',
   textPrimary: '#FFFFFF',
   textSecondary: '#D2C8C2',
+  containerPrimary: 'aliceblue',
   hoverPrimary: '#EEEEEE',
   mobile: '576px',
 }
@@ -48,5 +50,13 @@ export function getTheme() {
   } catch(err) {
     console.error('Failed trying to get theme from local storage');
     return lightTheme;
+  }
+}
+
+export function getThemeString() {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE.Theme);
+  } catch(error) {
+    return 'lightTheme';
   }
 }

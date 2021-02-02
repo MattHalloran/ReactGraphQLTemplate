@@ -1,16 +1,48 @@
-import React, { memo, useEffect } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../SearchBar/SearchBar';
-import ShoppingMenu from '../ShoppingMenu/ShoppingMenu';
 import ShoppingList from '../ShoppingList/ShoppingList';
+import ArrowMenu from 'components/shared/menus/ArrowMenu/ArrowMenu';
+import Button from 'components/shared/Button/Button';
 import { BUSINESS_NAME, USER_ROLES } from 'consts';
+import { getInventoryFilters } from "query/http_promises";
 
 function ShoppingPage(props) {
+    const [filters, setFilters] = useState(null);
 
     useEffect(() => {
         document.title = `Shop | ${BUSINESS_NAME}`;
-    }, [])
+        let mounted = true;
+        getInventoryFilters()
+            .then((response) => {
+                if (!mounted) return;
+                setFilters(response);
+                console.log('SETING FILTERSSSSSSSSSS', response);
+            })
+            .catch((error) => {
+                console.error("Failed to load filters", error);
+            });
+
+        return () => mounted = false;
+    }, []);
+
+    const filters_to_checkbox = (list, title, onChange) => {
+        if (!list || !Array.isArray(list) || list.length <= 0) return null;
+        let filters = list.map((value, index) => (
+            <tr key={index}>
+                <td><input type="checkbox" value={value} name={title} /> {value}</td>
+            </tr>
+        ))
+        return <React.Fragment>
+            <table className="checkbox-group" onChange={onChange}>
+                <tbody>
+                    <tr><td>{title}</td></tr>
+                    {filters}
+                </tbody>
+            </table>
+        </React.Fragment>
+    }
 
     let display;
     let is_customer = false;
@@ -27,8 +59,21 @@ function ShoppingPage(props) {
     if (is_customer) {
         display =
             <React.Fragment>
-                <ShoppingMenu />
-                <SearchBar />
+                <ArrowMenu >
+                    <h2>Search</h2>
+                    <SearchBar />
+                    <h2>Filters</h2>
+                    {filters_to_checkbox(filters?.sizes, 'Sizes')}
+                    {filters_to_checkbox(filters?.optimal_lights, 'Optimal Light')}
+                    {filters_to_checkbox(filters?.attracts_polinators_and_wildlife, 'Pollinator')}
+                    {filters_to_checkbox(filters?.light_ranges, 'Light Range')}
+                    {filters_to_checkbox(filters?.soil_moistures, 'Soil Moisture')}
+                    {filters_to_checkbox(filters?.soil_phs, 'Soil PH')}
+                    {filters_to_checkbox(filters?.soil_types, 'Soil Type')}
+                    {filters_to_checkbox(filters?.zones, 'Zone')}
+                    {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
+                    {filters_to_checkbox(['Yes', 'No'], 'Discountable')}
+                </ArrowMenu>
                 <ShoppingList />
             </React.Fragment >
     } else {
@@ -40,7 +85,7 @@ function ShoppingPage(props) {
 
     return (
         <StyledShoppingPage>
-            { display }
+            { display}
         </StyledShoppingPage>
     );
 }

@@ -6,17 +6,17 @@ import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } fro
 import PubSub from 'utils/pubsub';
 import { BUSINESS_NAME, LINKS, PUBS } from "consts";
 import Modal from "components/shared/wrappers/Modal/Modal";
-import IconButton from "@material-ui/core/IconButton";
-import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import { BsArrowsFullscreen } from 'react-icons/bs';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import PollinatorIcon from 'assets/img/bee.svg';
-import RegionIcon from 'assets/img/map.svg';
-import SaltIcon from 'assets/img/salt.svg';
-import SunIcon from 'assets/img/sun.svg';
-import ColorIcon from 'assets/img/color-circle.svg';
-import CalendarIcon from 'assets/img/calendar.svg';
-import MoistureIcon from 'assets/img/moisture-wicking-fabric.svg';
+import HeartIcon from 'assets/img/HeartIcon';
+import FullscreenIcon from 'assets/img/FullscreenIcon';
+import ChevronLeftIcon from 'assets/img/ChevronLeftIcon';
+import ChevronRightIcon from 'assets/img/ChevronRightIcon';
+import Bee from 'assets/img/BeeIcon';
+import MapIcon from 'assets/img/MapIcon';
+import SaltIcon from 'assets/img/SaltIcon';
+import SunIcon from 'assets/img/SunIcon';
+import ColorWheelIcon from 'assets/img/ColorWheelIcon';
+import CalendarIcon from 'assets/img/CalendarIcon';
+import EvaporationIcon from 'assets/img/EvaporationIcon';
 
 function ShoppingList(props) {
   let history = useHistory();
@@ -207,12 +207,8 @@ function SkuCard(props) {
       SOME TEXT
       { sizes}
       Availability: hfhdkjaf
-      <IconButton aria-label="add to favorites">
-        <AiOutlineHeart />
-      </IconButton>
-      <IconButton onClick={handleExpandClick} aria-label="show more">
-        <BsArrowsFullscreen />
-      </IconButton>
+      <HeartIcon width="50px" height="50px" />
+      <FullscreenIcon width="50px" height="50px" title="Show more" onClick={handleExpandClick} />
     </StyledSkuCard>
   );
 }
@@ -252,25 +248,14 @@ function ExpandedSku(props) {
       });
   }
 
-  const traitList = (field, text) => {
-    if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
-      plant[field].length === 0) return null;
-    let field_map = plant[field].map((f) => f.value)
-    return (
-      <div className="trait-container">
-        <p>{text}: {field_map.join(', ')}</p>
-      </div>
-    )
-  }
-
-  const traitIconList = (field, src, title, alt) => {
+  const traitIconList = (field, Icon, title, alt) => {
     if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
       plant[field].length === 0) return null;
     if (!alt) alt = title;
     let field_map = plant[field].map((f) => f.value)
     return (
       <div className="trait-container">
-        <img src={src} className="trait-icon" title={title} alt={alt} />
+        <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
         <p>: {field_map.join(', ')}</p>
       </div>
     )
@@ -278,8 +263,8 @@ function ExpandedSku(props) {
 
   return (
     <StyledExpandedSku>
-      <FaChevronLeft className="arrow left" onClick={props.goLeft} />
-      <FaChevronRight className="arrow right" onClick={props.goRight} />
+      <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={props.goRight} />
+      <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={props.goRight} />
       <div className="main-content">
         <h1 className="title">{plant?.latin_name}</h1>
         {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
@@ -297,14 +282,14 @@ function ExpandedSku(props) {
           <div className="general">
             <p>General Information</p>
           {traitIconList("zones", null, "Zones")}
-          {traitIconList("physiographic_regions", RegionIcon, "Physiographic Region")}
-          {traitIconList("attracts_pollinators_and_wildlifes", PollinatorIcon, "Attracted Pollinators and Wildlife")}
+          {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+          {traitIconList("attracts_pollinators_and_wildlifes", Bee, "Attracted Pollinators and Wildlife")}
           {traitIconList("drought_tolerance", null, "Drought Tolerance")}
           {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
           </div>
           <div className="bloom">
             <p>Bloom</p>
-            {traitIconList("bloom_colors", ColorIcon, "Bloom Colors")}
+            {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
             {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
           </div>
           <div className="light">
@@ -314,7 +299,7 @@ function ExpandedSku(props) {
           </div>
           <div className="soil">
             <p>Soil</p>
-          {traitIconList("soil_moistures", MoistureIcon, "Soil Moisture")}
+          {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
           {traitIconList("soil_phs", null, "Soil PH")}
           {traitIconList("soil_types", null, "Soil Type")}
           </div>
