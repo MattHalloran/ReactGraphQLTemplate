@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import PubSub from 'utils/pubsub';
-import * as authQuery from 'query/auth';
+import { resetPasswordRequest } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import { PUBS } from 'consts';
@@ -16,7 +16,7 @@ function ForgotPasswordForm() {
 
     const forgotPassword = () => {
         PubSub.publish(PUBS.Loading, true);
-        authQuery.resetPasswordRequest(email).then(() => {
+        resetPasswordRequest(email).then(() => {
             PubSub.publish(PUBS.Loading, false);
             history.replace('/');
         }).catch(error => {

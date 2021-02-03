@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 
 function ColorWheelIcon(props) {
 	return (
-        <svg viewBox="0 0 64 64" className={props.className} xmlns="http://www.w3.org/2000/svg" aria-labelledby="title" width={props.width} height={props.height}>
+        <svg viewBox="0 0 64 64" 
+            xmlns="http://www.w3.org/2000/svg"
+            className={props.className} 
+            aria-labelledby="title" 
+            width={props.width} 
+            height={props.height}
+            onClick={() => typeof props.onClick === 'function' && props.onClick()}>
             <title id="title">{props.iconTitle ?? 'Color Wheel'}</title>
             <path d="M63 32H53c0-5.801-2.35-11.051-6.15-14.851l7.07-7.069C59.53 15.689 63 23.439 63 32z" fill="#f6bb42"/>
             <path d="M53 32h10c0 8.55-3.46 16.3-9.08 21.909l-7.07-7.06C50.65 43.05 53 37.8 53 32z" fill="#8cc152"/>
@@ -27,6 +33,7 @@ function ColorWheelIcon(props) {
 ColorWheelIcon.propTypes = {
     iconTitle: PropTypes.string,
     className: PropTypes.string,
+    onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

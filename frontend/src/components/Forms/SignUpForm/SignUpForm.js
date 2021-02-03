@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PubSub from 'utils/pubsub';
-import * as authQuery from 'query/auth';
+import { registerUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -39,7 +39,7 @@ function SignUpForm() {
 
   const register = () => {
     PubSub.publish(PUBS.Loading, true);
-    authQuery.registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
+    registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
       PubSub.publish(PUBS.Loading, false);
       history.push(LINKS.Profile);
     }).catch(error => {

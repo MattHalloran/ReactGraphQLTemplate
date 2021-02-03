@@ -15,7 +15,6 @@ function AdminMainPage() {
         ['orders', 'Orders', "Approve, create, and edit customer's orders"],
         ['customers', 'Customers', "Approve new customers, edit customer information"],
         ['inventory', 'Inventory', "Add, remove, and update inventory"],
-        ['plant-info', 'Plant Info', "Edit details and images for plants"],
         ['gallery', 'Gallery', "Add, remove, and rearrange gallery images"],
         ['contact-info', 'Contact Info', "Edit business hours and other contact information"],
     ]

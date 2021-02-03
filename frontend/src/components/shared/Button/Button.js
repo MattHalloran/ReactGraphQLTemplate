@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { getTheme } from 'theme';
+import { getTheme } from 'storage';
 import { StyledButton } from './Button.styled';
 
 function Button(props) {

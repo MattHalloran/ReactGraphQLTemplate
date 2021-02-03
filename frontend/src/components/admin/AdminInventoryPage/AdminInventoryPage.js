@@ -7,7 +7,7 @@ import React, { useLayoutEffect, useState } from 'react';
 import { StyledAdminInventoryPage, StyledSkuPopup, StyledSkuCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/shared/wrappers/Modal/Modal';
-import { getInventory } from 'query/http_promises';
+import { getInventory, getPlants } from 'query/http_promises';
 import Button from 'components/shared/Button/Button';
 // Icons
 import TrashIcon from 'assets/img/TrashIcon';
@@ -17,6 +17,8 @@ import HideIcon from 'assets/img/HideIcon';
 function AdminInventoryPage() {
     // Holds the existing SKUs list
     const [skuCards, setSkuCards] = useState([]);
+    // Holds the existing plants list
+    const [plantCards, setPlantCards] = useState([]);
     // Dictionary of sku and plant data, or an empty dictionary
     const [currSku, setCurrSku] = useState(null);
 
@@ -32,8 +34,17 @@ function AdminInventoryPage() {
                 //console.log('SET ALL SKUS', response.all_skus)
             })
             .catch((error) => {
-                console.log("Failed to load inventory");
-                console.error(error);
+                console.error("Failed to load inventory", error);
+                alert(error.error);
+            });
+        getPlants('A-Z')
+            .then((response) => {
+                if (!mounted) return;
+                setPlantCards(response.page_results);
+                console.log('SETTING PLANTSSSS', response.page_results)
+            })
+            .catch((error) => {
+                console.error("Failed to load plants", error);
                 alert(error.error);
             });
         return () => mounted = false;
@@ -82,12 +93,16 @@ function AdminInventoryPage() {
                 <div className="flex-content">
                     <p>Select existing SKU to open editor</p>
                     <div className="card-flex">
-                    {skuCards.map((data, index) => <SkuCard key={index} 
-                        data={data} onEdit={editSku} onHide={hideSku} onDelete={deleteSku}/>)}
+                        {skuCards.map((data, index) => <SkuCard key={index}
+                            data={data} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} />)}
                     </div>
                 </div>
                 <div className="flex-content">
                     <p>Select plant template to create a new SKU</p>
+                    <div className="card-flex">
+                        {plantCards.map((data, index) => <SkuCard key={index}
+                            data={data} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} />)}
+                    </div>
                 </div>
             </div>
         </StyledAdminInventoryPage >
@@ -109,9 +124,9 @@ function SkuCard(props) {
             <h3>{plant?.latin_name}</h3>
             <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
             <div className="icon-container">
-                <EditIcon className="icon" width="30px" height="30px" onClick={props.onEdit}/>
-                <HideIcon className="icon" width="30px" height="30px" onClick={props.onHide}/>
-                <TrashIcon className="icon" width="30px" height="30px" onClick={props.onDelete}/>
+                <EditIcon width="30px" height="30px" onClick={props.onEdit} />
+                <HideIcon width="30px" height="30px" onClick={props.onHide} />
+                <TrashIcon width="30px" height="30px" onClick={props.onDelete} />
             </div>
         </StyledSkuCard>
     );
@@ -127,8 +142,8 @@ SkuCard.propTypes = {
 function SkuPopup(props) {
     return (
         <StyledSkuPopup>
-        
-      </StyledSkuPopup>
+
+        </StyledSkuPopup>
     );
 }
 

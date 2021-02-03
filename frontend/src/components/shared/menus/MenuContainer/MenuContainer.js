@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { StyledMenuContainer } from './MenuContainer.styled';
-import { getTheme } from 'theme';
+import { getTheme } from 'storage';
 
 function MenuContainer(props) {
   let theme = props.theme ?? getTheme();

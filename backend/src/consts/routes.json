@@ -1,0 +1,18 @@
+{
+    "register": "register",
+    "get_token": "get_token",
+    "reset_password_request": "reset_password_request",
+    "is_token_valid": "is_token_valid",
+    "fetch_inventory_filters": "fetch_inventory_filters",
+    "fetch_inventory": "fetch_inventory",
+    "fetch_plants": "fetch_plants",
+    "fetch_inventory_page": "fetch_inventory_page",
+    "fetch_gallery": "fetch_gallery",
+    "image_thumbnails": "image_thumbnails",
+    "image_hash": "image_hash",
+    "image_sku": "image_sku",
+    "upload_gallery_image": "upload_gallery_image",
+    "fetch_contact_info": "fetch_contact_info",
+    "update_contact_info": "update_contact_info",
+    "fetch_profile_info": "fetch_profile_info"
+}

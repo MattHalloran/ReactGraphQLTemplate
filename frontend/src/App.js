@@ -19,7 +19,6 @@ import AdminCustomerPage from 'components/admin/AdminCustomerPage/AdminCustomerP
 import AdminGalleryPage from 'components/admin/AdminGalleryPage/AdminGalleryPage';
 import AdminInventoryPage from 'components/admin/AdminInventoryPage/AdminInventoryPage';
 import AdminOrderPage from 'components/admin/AdminOrderPage/AdminOrderPage';
-import AdminPlantPage from 'components/admin/AdminPlantPage/AdminPlantPage';
 import NotFoundPage from 'components/NotFoundPage/NotFoundPage/';
 import ProfileForm from 'components/forms/ProfileForm/ProfileForm';
 import SignUpForm from 'components/forms/SignUpForm/SignUpForm';
@@ -27,10 +26,10 @@ import LogInForm from 'components/forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'components/forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getTheme } from './theme';
+import { getTheme } from './storage';
 //Authentication
 import RequireAuthentication from 'components/shared/wrappers/RequireAuthentication/RequireAuthentication';
-import * as authQuery from 'query/auth';
+import { checkCookies } from 'query/http_promises';
 
 const keyMap = {
   OPEN_MENU: "left",
@@ -99,7 +98,7 @@ function App() {
     if (session == null && session_attempts.current < 5) {
       session_attempts.current++;
       console.log('SESSION ATTEMPTS IS', session_attempts.current)
-      authQuery.checkCookies();
+      checkCookies();
     }
   }, [session])
 
@@ -141,7 +140,7 @@ function App() {
                   </RequireAuthentication>
                 )} />
                 <Route exact path={`${LINKS.Shopping}/:sku?`} render={() => (
-                  <ShoppingPage user_roles={user_roles} />
+                  <ShoppingPage user_roles={user_roles} session={session} />
                 )} />
                 {/* admin pages */}
                 <Route exact path={LINKS.Admin} component={AdminMainPage} />
@@ -150,7 +149,6 @@ function App() {
                 <Route exact path={LINKS.AdminGallery} component={AdminGalleryPage} />
                 <Route exact path={LINKS.AdminInventory} component={AdminInventoryPage} />
                 <Route exact path={LINKS.AdminOrders} component={AdminOrderPage} />
-                <Route exact path={LINKS.AdminPlantInfo} component={AdminPlantPage} />
                 {/* 404 page */}
                 <Route component={NotFoundPage} />
               </Switch>

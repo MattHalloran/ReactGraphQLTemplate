@@ -1,7 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import * as authQuery from 'query/auth';
+import { checkCookies } from 'query/http_promises';
 import { LINKS } from 'consts';
 
 function RequireAuthentication(props) {
@@ -9,7 +9,7 @@ function RequireAuthentication(props) {
 
     useLayoutEffect(() => {
         if (props.session) return;
-        authQuery.checkCookies().then().catch(() => {
+        checkCookies().then().catch(() => {
             history.push(LINKS.Home);
         })
     })

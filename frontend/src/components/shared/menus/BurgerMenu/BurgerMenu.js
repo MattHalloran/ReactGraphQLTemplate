@@ -9,7 +9,7 @@ import { PUBS } from 'consts';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
 import ClickOutside from 'components/shared/wrappers/ClickOutside/ClickOutside';
-import { getTheme } from 'theme';
+import { getTheme } from 'storage';
 
 function BurgerMenu(props) {
   let theme = props.theme ?? getTheme();

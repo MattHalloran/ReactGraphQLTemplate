@@ -38,18 +38,6 @@ export const StyledSkuCard = styled.div`
         max-width: 100%;
         max-height: 100%;
     }
-
-    .icon-container {
-        display: flex;
-        justify-content: space-between;
-
-        > .icon {
-            display: inline-block;
-            text-align: center;
-            color: black;
-            cursor: pointer;
-        }
-    }
 `;
 
 export const StyledSkuPopup = styled.div`

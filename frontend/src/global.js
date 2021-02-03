@@ -25,6 +25,7 @@ export const GlobalStyles = createGlobalStyle`
         font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
             monospace;
     }
+
     /* Primary (default) link settings */
     a {
         transition: color 0.3s linear;
@@ -47,22 +48,25 @@ export const GlobalStyles = createGlobalStyle`
     }
     
     #page-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
     
     #content-wrap{
-    flex:1;
-    position: relative;
+        flex:1;
+        position: relative;
     }
-    
-    @keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+
+    .icon-container {
+        display: flex;
+        justify-content: space-between;
+
+        > svg, img {
+            display: inline-block;
+            text-align: center;
+            color: black;
+            cursor: pointer;
+        }
     }
 `

@@ -1,7 +1,7 @@
 import React from 'react';
 import InputText from './InputText';
 import * as validation from 'utils/validations';
-import { themes } from 'theme';
+import { themes } from 'storage';
 
 const themeConverter = (themeString) => {
     return themes[themeString];

@@ -8,7 +8,7 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from src.api import db, create_app  # NOQA
 from src.config import Config  # NOQA
 from src.models import Image # NOQA
-from src.handlers.handler import Handler # NOQA
+from src.handlers import ImageHandler # NOQA
 
 app = create_app()
 
@@ -18,9 +18,9 @@ def find_unused_images():
     img_files = [join(Config.PLANT_DIR, f) for f in listdir(Config.PLANT_DIR) if isfile(join(Config.PLANT_DIR, f))] + \
                 [join(Config.GALLERY_DIR, f) for f in listdir(Config.GALLERY_DIR) if isfile(join(Config.GALLERY_DIR, f))]
     with app.app_context():
-        image_ids = Handler.all_ids(Image)
+        image_ids = ImageHandler.all_ids()
         for id in image_ids:
-            image_obj = Handler.from_id(Image, id)
+            image_obj = ImageHandler.from_id(id)
             file_path = f'{image_obj.directory}/{image_obj.file_name}.{image_obj.extension}'
             if file_path in img_files:
                 img_files.remove(file_path)

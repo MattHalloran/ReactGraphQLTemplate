@@ -1,6 +1,6 @@
 import React, { useState, useLayoutEffect } from "react";
 import PropTypes from 'prop-types';
-import { getTheme } from 'theme';
+import { getTheme } from 'storage';
 import { StyledInputText } from  './InputText.styled';
 
 function InputText(props) {

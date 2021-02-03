@@ -2,11 +2,14 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMe
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
-import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage } from "query/http_promises";
+import { getImageFromHash, getImageFromSku, getInventory, getInventoryPage, setLikeSku, setSkuInCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { BUSINESS_NAME, LINKS, PUBS } from "consts";
 import Modal from "components/shared/wrappers/Modal/Modal";
 import HeartIcon from 'assets/img/HeartIcon';
+import HeartFilledIcon from 'assets/img/HeartFilledIcon';
+import BagPlusIcon from 'assets/img/BagPlusIcon';
+import BagCheckFillIcon from 'assets/img/BagCheckFillIcon';
 import FullscreenIcon from 'assets/img/FullscreenIcon';
 import ChevronLeftIcon from 'assets/img/ChevronLeftIcon';
 import ChevronRightIcon from 'assets/img/ChevronRightIcon';
@@ -17,9 +20,12 @@ import SunIcon from 'assets/img/SunIcon';
 import ColorWheelIcon from 'assets/img/ColorWheelIcon';
 import CalendarIcon from 'assets/img/CalendarIcon';
 import EvaporationIcon from 'assets/img/EvaporationIcon';
+import NoImageIcon from 'assets/img/NoImageIcon';
 
 function ShoppingList(props) {
   let history = useHistory();
+  const [likes, setLikes] = useState([]);
+  const [cart, setCart] = useState([]);
   const [popup, setPopup] = useState(null);
   const [cards, setCards] = useState([]);
   const [all_skus, setAllSkus] = useState([]);
@@ -38,12 +44,23 @@ function ShoppingList(props) {
   // useHotkeys('arrowLeft', () => prevImage());
   // useHotkeys('arrowRight', () => nextImage());
 
+  useEffect(() => {
+    console.log('CART HAS BEEN SET', cart);
+  }, cart)
+
+  useEffect(() => {
+    let likesSub = PubSub.subscribe(PUBS.Likes, (_, l) => setLikes(l));
+    let cartSub = PubSub.subscribe(PUBS.Cart, (_, c) => setCart(c));
+    return (() => {
+      PubSub.unsubscribe(likesSub);
+      PubSub.unsubscribe(cartSub);
+    })
+  }, [])
+
   const loading_full_image = useRef(false);
   const loadImage = useCallback((index, sku) => {
-    // If this function hasn't finished yet
-    if (loading_full_image.current) return;
-    // If there is an image to load
-    if (!sku) return;
+    // If this function hasn't finished yet, or there is no sku to load
+    if (loading_full_image.current || !sku) return;
     // First check if the image data has already been retrieved
     if (index in full_images.current) {
       setCurrSku(full_images.current[index]);
@@ -154,6 +171,16 @@ function ShoppingList(props) {
     history.push(LINKS.Shopping + "/" + sku);
   };
 
+  const setLike = (sku, liked) => {
+    if (!props.session?.email || !props.session?.token) return;
+    setLikeSku(props.session.email, props.session.token, sku, liked);
+  }
+
+  const setInCart = (sku, quantity, in_cart) => {
+    if (!props.session?.email || !props.session?.token) return;
+    setSkuInCart(props.session.email, props.session.token, sku, quantity, in_cart);
+  }
+
   useEffect(() => {
     console.log('ALL SKUS UPDATEDDDDDDDDD', curr_sku)
     if (!curr_sku || !curr_sku[0]) {
@@ -175,7 +202,16 @@ function ShoppingList(props) {
   return (
     <StyledShoppingList id={track_scrolling_id}>
       {popup}
-      {cards.map((item, index) => <SkuCard key={index} onClick={expandSku} data={item} goLeft={prevImage} goRight={nextImage} />)}
+      {cards.map((item, index) => 
+        <SkuCard key={index} 
+          likes={likes}
+          cart={cart}
+          onClick={expandSku} 
+          data={item} 
+          goLeft={prevImage} 
+          goRight={nextImage} 
+          onSetLike={setLike}
+          onSetInCart={setInCart}/>)}
     </StyledShoppingList>
   );
 }
@@ -183,6 +219,7 @@ function ShoppingList(props) {
 ShoppingList.propTypes = {
   page_size: PropTypes.number,
   default_filter: PropTypes.string,
+  session: PropTypes.object,
 };
 
 export default ShoppingList;
@@ -192,31 +229,81 @@ function SkuCard(props) {
   const sku = props.data;
   const plant = sku.plant;
 
-  const handleExpandClick = () => {
-    props.onClick(sku.sku);
-  };
-
   let sizes = sku.sizes?.map(size => (
     <div className="size">{size}</div>
   ));
 
+  let display_image;
+  if (sku.display_image) {
+    display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
+  } else {
+    display_image = <NoImageIcon className="display-image" />
+  }
+
+  let heartIcon;
+  if (!props.likes?.some(l => l.sku === sku.sku)) {
+    heartIcon = (
+      <HeartIcon 
+          width="40px" 
+          height="40px" 
+          onClick={() => props.onSetLike(sku.sku, true)} />
+    )
+  } else {
+    heartIcon = (
+      <HeartFilledIcon 
+          width="40px" 
+          height="40px" 
+          onClick={() => props.onSetLike(sku.sku, false)} />
+    )
+  }
+
+  let cartIcon;
+  if (!props.cart?.some(c => c.sku === sku.sku)) {
+    cartIcon = (
+      <BagPlusIcon 
+          width="40px" 
+          height="40px" 
+          onClick={() => props.onSetInCart(sku.sku, 1, true)} />
+    )
+  } else {
+    cartIcon = (
+      <BagCheckFillIcon 
+          width="40px" 
+          height="40px" 
+          onClick={() => props.onSetInCart(sku.sku, 1, false)} />
+    )
+  }
+
   return (
     <StyledSkuCard>
       <h1 className="title">{plant.latin_name}</h1>
-      <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+      <div className="display-image-container">
+        {display_image}
+      </div>
       SOME TEXT
       { sizes}
       Availability: hfhdkjaf
-      <HeartIcon width="50px" height="50px" />
-      <FullscreenIcon width="50px" height="50px" title="Show more" onClick={handleExpandClick} />
+      <div className="icon-container">
+        { heartIcon }
+        { cartIcon }
+        <FullscreenIcon 
+          width="40px" 
+          height="40px" 
+          title="Show more" 
+          onClick={() => props.onClick(sku.sku)} />
+      </div>
     </StyledSkuCard>
   );
 }
 
 SkuCard.propTypes = {
+  likes: PropTypes.array,
+  cart: PropTypes.array,
   data: PropTypes.object.isRequired,
   goLeft: PropTypes.func.isRequired,
   goRight: PropTypes.func.isRequired,
+  onSetLike: PropTypes.func.isRequired,
+  onSetInCart: PropTypes.func.isRequired,
 };
 
 export { SkuCard };
@@ -281,11 +368,11 @@ function ExpandedSku(props) {
           </div>
           <div className="general">
             <p>General Information</p>
-          {traitIconList("zones", null, "Zones")}
-          {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-          {traitIconList("attracts_pollinators_and_wildlifes", Bee, "Attracted Pollinators and Wildlife")}
-          {traitIconList("drought_tolerance", null, "Drought Tolerance")}
-          {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+            {traitIconList("zones", null, "Zones")}
+            {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+            {traitIconList("attracts_pollinators_and_wildlifes", Bee, "Attracted Pollinators and Wildlife")}
+            {traitIconList("drought_tolerance", null, "Drought Tolerance")}
+            {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
           </div>
           <div className="bloom">
             <p>Bloom</p>
@@ -294,14 +381,14 @@ function ExpandedSku(props) {
           </div>
           <div className="light">
             <p>Light</p>
-          {traitIconList("light_ranges", null, "Light Range")}
-          {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+            {traitIconList("light_ranges", null, "Light Range")}
+            {traitIconList("optimal_light", SunIcon, "Optimal Light")}
           </div>
           <div className="soil">
             <p>Soil</p>
-          {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-          {traitIconList("soil_phs", null, "Soil PH")}
-          {traitIconList("soil_types", null, "Soil Type")}
+            {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
+            {traitIconList("soil_phs", null, "Soil PH")}
+            {traitIconList("soil_types", null, "Soil Type")}
           </div>
         </div>
       </div>

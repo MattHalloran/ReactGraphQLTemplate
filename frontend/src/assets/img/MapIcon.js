@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 
 function MapIcon(props) {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" className={props.className} viewBox="0 0 297.5 297.5" aria-labelledby="title" width={props.width} height={props.height}>
+		<svg xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 297.5 297.5" 
+			className={props.className}
+			aria-labelledby="title"
+			width={props.width}
+			height={props.height}
+			onClick={() => typeof props.onClick === 'function' && props.onClick()}>
 			<title id="title">{props.iconTitle ?? 'Map'}</title>
 			<path d="M88.3 51.92a6.34 6.34 0 110 12.68 6.34 6.34 0 010-12.68z" fill="#1abc9c"/>
 			<path d="M88.3 19.75a38.54 38.54 0 0138.52 38.5c0 31.99-27.13 58.36-38.85 68.26-11.7-8.95-38.16-33.11-38.16-68.26a38.54 38.54 0 0138.5-38.5zm25.84 38.5A25.86 25.86 0 0088.3 32.42a25.86 25.86 0 00-25.83 25.83A25.86 25.86 0 0088.3 84.09a25.87 25.87 0 0025.84-25.84z" fill="#ffa800"/>
@@ -21,6 +27,7 @@ function MapIcon(props) {
 MapIcon.propTypes = {
 	iconTitle: PropTypes.string,
 	className: PropTypes.string,
+	onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

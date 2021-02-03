@@ -1,4 +1,4 @@
-import { StatusCodes } from './status';
+import StatusCodes from './consts/codes.json';
 
 // URL prefix used to signify calls to backend
 const PREFIX = '/api';
@@ -96,6 +96,18 @@ export async function send_password_reset_request(email) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
+}
+
+export async function fetch_plants(filter_by) {
+    let json = JSON.stringify({
+        "filter_by": filter_by,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicationJson,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_plants`, options);
 }
 
 export async function fetch_inventory(filter_by) {
@@ -212,4 +224,36 @@ export async function fetch_profile_info(session) {
         credentials: 'include',
     }
     return await fetchWrapper(`${PREFIX}/fetch_profile_info`, options);
+}
+
+export async function set_like_sku(email, token, sku, liked) {
+    console.log('SET LIKE SKU', liked)
+    let json = JSON.stringify({
+        "email": email,
+        "token": token,
+        "sku": sku,
+        "liked": liked
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
+}
+
+export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
+    let json = JSON.stringify({
+        "email": email,
+        "token": token,
+        "sku": sku,
+        "quantity": quantity,
+        "in_cart": in_cart
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
 }

@@ -29,13 +29,14 @@ class Tables(Enum):
     SIZE = 'size'
     SKU = 'sku'
     SKU_DISCOUNT = 'sku_discount'
-    USER = 'user'
+    USER = 'customer'  # 'user' is a reserved word in many databases
     # Joining tables
     BUSINESS_DISCOUNTS = 'business_discounts'
     PLANT_TRAITS = 'plant_traits'
     SKU_DISCOUNTS = 'sku_discounts'
     SKU_SIZES = 'sku_sizes'
     USER_ROLES = 'user_roles'
+    USER_LIKES = 'user_likes'
 
 
 # A joining table for the two-way relationship between users and roles.
@@ -46,6 +47,16 @@ userRoles = db.Table(Tables.USER_ROLES.value,
                          f'{Tables.USER.value}.id')),
                      Column('role_id', Integer, ForeignKey(
                          f'{Tables.ROLE.value}.id'))
+                     )
+
+# A joining table for the two-way relationship between users and SKUs they like.
+# A user can have many likes, and a SKU can be liked by many users
+userLikes = db.Table(Tables.USER_LIKES.value,
+                     Column('id', Integer, primary_key=True),
+                     Column('user_id', Integer, ForeignKey(
+                         f'{Tables.USER.value}.id')),
+                     Column('sku_id', Integer, ForeignKey(
+                         f'{Tables.SKU.value}.id'))
                      )
 
 # A joining table for the many-to-many relationship
@@ -565,6 +576,12 @@ class Size(db.Model):
         return f"{self.__tablename__}('{self.id}', '{self.size}')"
 
 
+class SkuStatus(Enum):
+    DELETED = -2
+    INACTIVE = -1
+    ACTIVE = 1
+
+
 # An item available for sale
 class Sku(db.Model):
     # Default values for fields in __init__
@@ -578,6 +595,7 @@ class Sku(db.Model):
     sku = Column(String(32), nullable=False)
     is_discountable = Column(Boolean, nullable=False,
                              default=defaults['is_discountable'])
+    status = Column(Integer, nullable=False, default=SkuStatus.ACTIVE.value)
     plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
     display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
@@ -598,7 +616,7 @@ class Sku(db.Model):
         self.plant = plant
 
     def __repr__(self):
-        return f"{self.__tablename__}('{self.id}', '{self.availability}')"
+        return f"{self.__tablename__}('{self.id}')"
 
 
 class OrderStatus(Enum):
@@ -657,7 +675,7 @@ class Order(db.Model):
     id = Column(Integer, primary_key=True)
     status = Column(Integer, nullable=False, default=OrderStatus.DRAFT.value)
     special_instructions = Column(String)
-    desired_delivery_date = Column(Float, nullable=False)
+    desired_delivery_date = Column(Float)
     delivery_address_id = db.Column(
         Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
@@ -671,15 +689,8 @@ class Order(db.Model):
     items = db.relationship('OrderItem', backref='Order', lazy=True)
     # -------------End relationships----------------
 
-    def __init__(self,
-                 delivery_address: Address,
-                 special_instructions: str,
-                 desired_delivery_date: float,
-                 items):
-        self.delivery_address = delivery_address
-        self.special_instructions = special_instructions
-        self.desired_delivery_date = desired_delivery_date
-        self.items = items
+    def __init__(self, user_id: int):
+        self.user_id = user_id
 
     def __repr__(self):
         return f"{self.__tablename__}({self.id})"
@@ -705,6 +716,7 @@ class Role(db.Model):
 
 
 class AccountStatus(Enum):
+    DELETED = -1
     UNLOCKED = 1
     WAITING_APPROVAL = 2
     SOFT_LOCK = 3
@@ -735,7 +747,7 @@ class User(db.Model):
     # UTC seconds since epoch
     last_login_attempt = Column(Float, nullable=False, default=time.time())
     session_token = Column(String(250))
-    account_status = Column(Integer, nullable=False, default=0)
+    account_status = Column(Integer, nullable=False, default=AccountStatus.WAITING_APPROVAL.value)
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
@@ -747,6 +759,8 @@ class User(db.Model):
     feedbacks = db.relationship('Feedback', backref='user')
     # Many-to-many relationship
     roles = db.relationship('Role', secondary=userRoles,
+                            backref='users', lazy=True)
+    likes = db.relationship('Sku', secondary=userLikes,
                             backref='users', lazy=True)
     # -------------End relationships----------------
 

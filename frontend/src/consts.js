@@ -16,15 +16,15 @@ export const USER_ROLES = {
 }
 
 export const LOCAL_STORAGE = {
+    Likes: "likes",
+    Cart: "cart",
     Theme: "theme",
     Session: "session",
     Roles: "roles",
 }
 
 export const PUBS = {
-    Theme: "theme",
-    Session: "session",
-    Roles: "roles",
+    ...LOCAL_STORAGE,
     Loading: "loading",
     PopupOpen: "popupOpen",
     BurgerMenuOpen: "burgerMenuOpen",
@@ -39,7 +39,6 @@ export const LINKS = {
     AdminGallery: "/admin/gallery",
     AdminInventory: "/admin/inventory",
     AdminOrders: "/admin/orders",
-    AdminPlantInfo: "/admin/plant-info",
     Cart: "/cart",
     Contact: "/contact",
     ForgotPassword: "/forgot-password",

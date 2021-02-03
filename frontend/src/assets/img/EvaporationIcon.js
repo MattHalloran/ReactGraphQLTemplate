@@ -3,9 +3,15 @@ import PropTypes from 'prop-types';
 
 function EvaporationIcon(props) {
 	return (
-        <svg viewBox="0 0 60 60" className={props.className} xmlns="http://www.w3.org/2000/svg" aria-labelledby="title" width={props.width} height={props.height}>
+        <svg viewBox="0 0 60 60" 
+            xmlns="http://www.w3.org/2000/svg"
+            className={props.className}
+            aria-labelledby="title" 
+            width={props.width} 
+            height={props.height}
+            onClick={() => typeof props.onClick === 'function' && props.onClick()}>
             <title id="title">{props.iconTitle ?? 'Evaporation'}</title>
-            <g fill-rule="nonzero" fill="none">
+            <g fillRule="nonzero" fill="none">
                 <rect fill="#ffdc00" height="4" rx="2" width="58" x="1" y="33"/>
                 <path d="M57 33h-3a2 2 0 110 4h3a2 2 0 100-4z" fill="#fec108"/>
                 <path d="M15.969 1l-7 8h2.912a1 1 0 01.992 1.13 15.306 15.306 0 01-4.025 8.749C4.9 22.823 4.145 29.321 4 31.94A1 1 0 005 33h4.009a.992.992 0 001-.924c.159-2.361.884-6.759 3.085-8.96a21.492 21.492 0 005.831-13.202 1 1 0 011-.914h3.048z" fill="#e91e63"/>
@@ -35,6 +41,7 @@ function EvaporationIcon(props) {
 EvaporationIcon.propTypes = {
     iconTitle: PropTypes.string,
     className: PropTypes.string,
+    onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

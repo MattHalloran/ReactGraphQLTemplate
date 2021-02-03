@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 
 function SunIcon(props) {
 	return (
-    <svg viewBox="0 0 128 128" className={props.className} xmlns="http://www.w3.org/2000/svg" aria-labelledby="title" width={props.width} height={props.height}>
+    <svg viewBox="0 0 128 128"
+      xmlns="http://www.w3.org/2000/svg" 
+      className={props.className}
+      aria-labelledby="title"
+      width={props.width}
+      height={props.height}
+      onClick={() => typeof props.onClick === 'function' && props.onClick()}>
       <title id="title">{props.iconTitle ?? 'Sun'}</title>
       <circle cx="64" cy="64" fill="#fedb41" r="39.2"/>
       <g fill="#fea832">
@@ -15,6 +21,7 @@ function SunIcon(props) {
 SunIcon.propTypes = {
   iconTitle: PropTypes.string,
   className: PropTypes.string,
+  onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

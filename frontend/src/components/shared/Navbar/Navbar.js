@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
-import * as authQuery from 'query/auth';
+import { clearStorage } from 'storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
 import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
@@ -66,7 +66,7 @@ function Hamburger(props) {
                      [LINKS.Contact, 'Contact Us']);
 
     if (props.session !== null) {
-        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
+        nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
     }
     
     return (
@@ -107,7 +107,7 @@ function NavList(props) {
         nav_options.push([LINKS.Register, 'Sign Up'],
                          [LINKS.LogIn, 'Log In']);
     } else {
-        nav_options.push([LINKS.Home, 'Log Out', authQuery.logout]);
+        nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
     }
 
     return (

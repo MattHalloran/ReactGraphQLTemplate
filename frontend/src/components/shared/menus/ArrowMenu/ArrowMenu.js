@@ -1,12 +1,12 @@
 // Menu for a specific page
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { StyledArrowMenu } from './ArrowMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
-import { getTheme } from 'theme';
+import { getTheme } from 'storage';
 import Draggable from 'components/shared/Draggable/Draggable';
-import { ArrowRightCircle } from 'react-bootstrap-icons';
+import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
 
 function ArrowMenu(props) {
     let theme = props.theme ?? getTheme();
@@ -43,7 +43,7 @@ function Arrow(props) {
     const handleDrag = (event) => event.stopPropagation();
     return (
         <Draggable x={0} y={yPos} onMove={(_,y) => setYPos(y-100)}>
-            <ArrowRightCircle size={50} className="arrow" onClick={props.onClick} onDrag={handleDrag} onDragEnd={handleDrag} />
+            <span onClick={props.onClick}><ArrowRightCircleIcon width="50px" height="50px" className="arrow" onDrag={handleDrag} onDragEnd={handleDrag} /></span>
         </Draggable>
     );
 }

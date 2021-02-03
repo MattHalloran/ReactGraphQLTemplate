@@ -1,6 +1,6 @@
 import React from 'react';
 import BurgerMenu from './BurgerMenu';
-import { themes } from 'theme';
+import { themes } from 'storage';
 
 const themeConverter = (themeString) => {
     return themes[themeString];

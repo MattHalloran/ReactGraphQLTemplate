@@ -29,10 +29,19 @@ export const StyledSkuCard = styled.div`
 
     }
 
-    img {
+    .display-image-container {
+        border: 1px solid black;
+        width: 100%;
+        position: relative; /* Ensures 1:1 Aspect Ratio */
+        height: 0; /* Ensures 1:1 Aspect Ratio */
+        padding-top: 100%; /* Ensures 1:1 Aspect Ratio */
+    }
+
+    .display-image {
         display: block;
-        max-width: 100%;
-        max-height: 100%;
+        position: absolute;
+        width: 100%;
+        top: 0%;
     }
 `;
 

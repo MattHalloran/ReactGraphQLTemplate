@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 
 function SaltIcon(props) {
 	return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={props.className} viewBox="0 0 297.8 297.8" aria-labelledby="title" width={props.width} height={props.height}>
+    <svg xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 297.8 297.8" 
+      className={props.className}
+      aria-labelledby="title"
+      width={props.width}
+      height={props.height}
+      onClick={() => typeof props.onClick === 'function' && props.onClick()}>
       <title id="title">{props.iconTitle ?? 'Salt'}</title>
       <path d="M243 262c0 4-1 8-3 11-3 3-7 5-11 5H69c-5 0-8-2-11-5-2-3-4-7-3-11L76 93h146l21 169zm-35-16V131a10 10 0 10-20 0v115a10 10 0 0020 0zm-49 0V131a10 10 0 10-20 0v115a10 10 0 0020 0zm-50 0V131a10 10 0 10-20 0v115a10 10 0 0020 0z" fill="#046b90"/>
       <path d="M230 63l-2 10H70l-2-10c0-23 37-43 81-43s81 20 81 43zm-55-23a10 10 0 00-10-10 10 10 0 00-10 10 10 10 0 0010 10 10 10 0 0010-10zm-33 0a10 10 0 00-10-10 10 10 0 00-10 10 10 10 0 0010 10 10 10 0 0010-10z" fill="#80aab8"/>
@@ -15,6 +21,7 @@ function SaltIcon(props) {
 SaltIcon.propTypes = {
   iconTitle: PropTypes.string,
   className: PropTypes.string,
+  onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

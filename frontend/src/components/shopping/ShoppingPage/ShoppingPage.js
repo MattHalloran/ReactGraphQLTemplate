@@ -27,11 +27,15 @@ function ShoppingPage(props) {
         return () => mounted = false;
     }, []);
 
+    const handleCheckboxChange = (title, value) => {
+        console.log('YOOOOOOOOO', title, value)
+    }
+
     const filters_to_checkbox = (list, title, onChange) => {
         if (!list || !Array.isArray(list) || list.length <= 0) return null;
         let filters = list.map((value, index) => (
             <tr key={index}>
-                <td><input type="checkbox" value={value} name={title} /> {value}</td>
+                <td><input type="checkbox" value={value} name={title} onChange={(e) => handleCheckboxChange(title, e.target.value)} /> {value}</td>
             </tr>
         ))
         return <React.Fragment>
@@ -65,6 +69,11 @@ function ShoppingPage(props) {
                     <h2>Filters</h2>
                     {filters_to_checkbox(filters?.sizes, 'Sizes')}
                     {filters_to_checkbox(filters?.optimal_lights, 'Optimal Light')}
+                    {filters_to_checkbox(filters?.drought_tolerances, 'Drought Tolerance')}
+                    {filters_to_checkbox(filters?.grown_heights, 'Grown Height')}
+                    {filters_to_checkbox(filters?.grown_spreads, 'Grown Spread')}
+                    {filters_to_checkbox(filters?.growth_rates, 'Growth Rate')}
+                    {filters_to_checkbox(filters?.salt_tolerances, 'Salt Tolerance')}
                     {filters_to_checkbox(filters?.attracts_polinators_and_wildlife, 'Pollinator')}
                     {filters_to_checkbox(filters?.light_ranges, 'Light Range')}
                     {filters_to_checkbox(filters?.soil_moistures, 'Soil Moisture')}
@@ -74,7 +83,7 @@ function ShoppingPage(props) {
                     {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')}
                 </ArrowMenu>
-                <ShoppingList />
+                <ShoppingList session={props.session} />
             </React.Fragment >
     } else {
         display =
@@ -92,6 +101,7 @@ function ShoppingPage(props) {
 
 ShoppingPage.propTypes = {
     user_roles: PropTypes.array,
+    session: PropTypes.object,
 }
 
 export default memo(ShoppingPage);

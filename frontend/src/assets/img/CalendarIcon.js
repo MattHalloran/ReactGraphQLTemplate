@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 
 function BeeIcon(props) {
 	return (
-		<svg viewBox="0 0 299.1 299.1" className={props.className} xmlns="http://www.w3.org/2000/svg" aria-labelledby="title" width={props.width} height={props.height}>
+            <svg viewBox="0 0 299.1 299.1" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className={props.className} 
+                  aria-labelledby="title" 
+                  width={props.width} 
+                  height={props.height}
+                  onClick={() => typeof props.onClick === 'function' && props.onClick()}>
             <title id="title">{props.iconTitle ?? 'Calendar'}</title>
             <path d="M258 27H41C22 27 6 43 6 62v202c0 19 16 35 35 35h217c20 0 35-16 35-35V62c0-19-15-35-35-35z" 
                   fill="#ebf0f3"/>
@@ -36,6 +42,7 @@ function BeeIcon(props) {
 BeeIcon.propTypes = {
       iconTitle: PropTypes.string,
       className: PropTypes.string,
+      onClick: PropTypes.func,
 	width: PropTypes.string,
 	height: PropTypes.string,
 }

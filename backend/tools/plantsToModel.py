@@ -5,14 +5,12 @@ import os
 import sys
 import glob
 import requests
+import traceback
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.api import db, create_app   # NOQA
 from src.config import Config   # NOQA
 from src.models import PlantTraitOptions, ImageUses  # NOQA
-from src.handlers.handler import Handler  # NOQA
-from src.handlers.skuHandler import SkuHandler  # NOQA
-from src.handlers.imageHandler import ImageHandler  # NOQA
-from src.handlers.plantHandler import PlantTraitHandler, PlantHandler  # NOQA
+from src.handlers import Handler, ImageHandler, PlantHandler, PlantTraitHandler, SkuHandler  # NOQA
 from src.utils import get_image_meta, find_available_file_names  # NOQA
 
 # Will create a SKU for every plant added
@@ -29,7 +27,7 @@ def get_trait(trait: PlantTraitOptions, value: str):
         return None
     trait_obj = PlantTraitHandler.from_values(trait, value)
     if trait_obj is None:
-        trait_obj = Handler.create(PlantTraitHandler, trait.value, value)
+        trait_obj = PlantTraitHandler.create(trait.value, value)
         db.session.add(trait_obj)
         # ID is not created until the object is committed
         db.session.commit()
@@ -60,41 +58,62 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
         file_name = url[url.rindex('/')+1:]
         thumb_file_name = f'{file_name}-thumb'
         # If image has already been downloaded
-        if glob.glob(f'{Config.PLANT_DIR}/{file_name}.*'):
+        if len(glob_results := glob.glob(f'{Config.PLANT_DIR}/{file_name}.*')) > 0:
             print(f'Image already downloaded: {file_name}')
-            # TODO if database was dropped, this will return None instead of creating a new object
-            image = ImageHandler.from_file_name(file_name)
-            image_objects.append(image)
-            continue
+            # Try to get existing image object from database
+            img_row = ImageHandler.from_file_name(file_name)
+            # If object in database
+            if img_row is not None:
+                image_objects.append(img_row)
+                continue
+            else:
+                print(f'Could not find image in database. Attempting to create row from {file_name}')
+                with open(glob_results[0], 'rb') as f:
+                    image = f.read()
+                (img_hash, thumbnail, img_width, img_height) = get_image_meta(image)
+                if ImageHandler.is_hash_used(img_hash):
+                    print(f'Hash collision! For image {url}')
+                    continue
+                extension = glob_results[0][glob_results[0].rindex('.')+1:]
+                img_row = ImageHandler.create(Config.PLANT_DIR,
+                                              file_name,
+                                              thumb_file_name,
+                                              extension,
+                                              alt,
+                                              img_hash,
+                                              use,
+                                              img_width,
+                                              img_height)
+                image_objects.append(img_row)
         # Request image from url
-        response = requests.get(url)
-        if not response.ok:
-            print(f'Failed to retrieve image from {url}')
-            image_objects.append(None)
-            continue
-        image = response.content
-        content_type = response.headers['Content-Type']
-        extension = content_type[content_type.rindex('/')+1:]
-        (img_hash, thumbnail, img_width, img_height) = get_image_meta(image)
-        if ImageHandler.is_hash_used(img_hash):
-            print(f'Hash collision! For image {url}')
-            image_objects.append(None)
-            continue
-        # Save image and thumbnail to files
-        with open(f'{Config.PLANT_DIR}/{file_name}.{extension}', 'wb') as f:
-            f.write(image)
-        thumbnail.save(f'{Config.PLANT_DIR}/{thumb_file_name}.{extension}')
-        # Now create a model object to associate with the image
-        img_row = Handler.create(ImageHandler,
-                                 Config.PLANT_DIR,
-                                 file_name,
-                                 thumb_file_name,
-                                 extension,
-                                 alt,
-                                 img_hash,
-                                 use,
-                                 img_width,
-                                 img_height)
+        else:
+            print(f'Requesting image from {url}')
+            response = requests.get(url)
+            if not response.ok:
+                print(f'Failed to retrieve image from {url}')
+                continue
+            image = response.content
+            content_type = response.headers['Content-Type']
+            extension = content_type[content_type.rindex('/')+1:]
+            (img_hash, thumbnail, img_width, img_height) = get_image_meta(image)
+            if ImageHandler.is_hash_used(img_hash):
+                print(f'Hash collision! For image {url}')
+                continue
+            # Save image and thumbnail to files
+            with open(f'{Config.PLANT_DIR}/{file_name}.{extension}', 'wb') as f:
+                f.write(image)
+            thumbnail.save(f'{Config.PLANT_DIR}/{thumb_file_name}.{extension}')
+            # Now create a model object to associate with the image
+            img_row = ImageHandler.create(Config.PLANT_DIR,
+                                          file_name,
+                                          thumb_file_name,
+                                          extension,
+                                          alt,
+                                          img_hash,
+                                          use,
+                                          img_width,
+                                          img_height)
+            image_objects.append(img_row)
         db.session.add(img_row)
         db.session.commit()
     return image_objects
@@ -103,7 +122,6 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
 def plants_to_model():
     # Load dependencies
     from src.models import ImageUses
-    from src.handlers.handler import Handler
 
     # Load json from file
     with open(IN_FILE, 'rb') as infile:
@@ -135,9 +153,14 @@ def plants_to_model():
             ]
             [o2oHelper(*args) for args in field_arguments]
 
-            # Create a plant object using the collected data
-            plant_obj = Handler.create(PlantHandler, plant_args['latin_name'])
-            Handler.update(PlantHandler, plant_obj, plant_args)
+            # Create a new plant object, or find an existing one with the same latin name
+            latin = plant_args['latin_name']
+            is_new_plant = False
+            plant_obj = PlantHandler.from_latin(latin)
+            if plant_obj is None:
+                is_new_plant = True
+                plant_obj = PlantHandler.create(latin)
+            PlantHandler.update(plant_obj, plant_args)
             # Now collect many-to-many relationship data
             update_relationship_field(plant.get('attracts_pollinators_and_wildlife', None),
                                       PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE,
@@ -198,13 +221,16 @@ def plants_to_model():
                 ]
                 [download_helper(*args) for args in field_arguments]
             print(f'Adding plant to db session: {plant_obj}')
-            db.session.add(plant_obj)
+            if is_new_plant:
+                db.session.add(plant_obj)
             if AUTO_CREATE_SKU:
-                sku_obj = Handler.create(SkuHandler, True, plant_obj)
+                sku_obj = SkuHandler.create(True, plant_obj)
                 db.session.add(sku_obj)
-            db.session.commit()
-            print('YESSSS')
-        db.session.commit()
+            try:
+                db.session.commit()
+            except Exception:
+                print(f'Failed to commit {plant_obj}')
+                print(traceback.format_exc())
 
 
 if __name__ == '__main__':

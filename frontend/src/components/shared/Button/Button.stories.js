@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from './Button';
-import { lightTheme, darkTheme } from 'theme';
+import { lightTheme, darkTheme } from 'storage';
 
 export default {
     title: 'Button',
