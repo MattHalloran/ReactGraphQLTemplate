@@ -1,12 +1,14 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useRef } from "react";
 import PropTypes from 'prop-types';
 import { getTheme } from 'storage';
 import { StyledInputText } from  './InputText.styled';
+import makeID from 'utils/makeID';
 
 function InputText(props) {
-    let theme = props.theme ?? getTheme();
+    const theme = props.theme ?? getTheme();
     const [value, setValue] = useState(props.value ? props.value : null);
     const [error, setError] = useState(null);
+    const id = useRef(props.id ?? makeID(10));
 
     useLayoutEffect(() => {
         if (props.validate) {
@@ -43,16 +45,22 @@ function InputText(props) {
         }
     }
 
+    let displayed_label = props.label ?? '';
+    if (error?.length > 0) {
+        displayed_label += ' - ' + error;
+    }
+
     return (
-        <StyledInputText icon={props.icon} theme={theme}>
+        <StyledInputText icon={props.icon} theme={theme} has_error={error?.length > 0} show_label={value?.length > 0}>
           <input
+            id={id.current}
             type={props.type ?? "text"}
             value={value}
             placeholder={props.label}
             onChange={(e) => props.index ? updateValue(e, props.index) : updateValue(e)}
           />
-          <label htmlFor={1} className={error && "error"}>
-            {error || props.label}
+          <label type={props.type ?? "text"} htmlFor={id.current}>
+            {displayed_label}
           </label>
         </StyledInputText>
       );
@@ -63,6 +71,7 @@ function InputText(props) {
 // errorFunc - updater function for TextField error
 // validate - a function for validating the input string
 InputText.propTypes = {
+    id: PropTypes.string,
     theme: PropTypes.object,
     index: PropTypes.func,
     label: PropTypes.string,

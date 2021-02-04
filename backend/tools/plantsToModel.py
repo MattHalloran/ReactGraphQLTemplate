@@ -224,7 +224,7 @@ def plants_to_model():
             if is_new_plant:
                 db.session.add(plant_obj)
             if AUTO_CREATE_SKU:
-                sku_obj = SkuHandler.create(True, plant_obj)
+                sku_obj = SkuHandler.create(5000, True, plant_obj)
                 db.session.add(sku_obj)
             try:
                 db.session.commit()

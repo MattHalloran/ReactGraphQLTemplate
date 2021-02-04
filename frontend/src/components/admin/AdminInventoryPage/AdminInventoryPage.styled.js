@@ -41,5 +41,8 @@ export const StyledSkuCard = styled.div`
 `;
 
 export const StyledSkuPopup = styled.div`
-    
+    background: ${({ theme }) => theme.bodyPrimary};
+    display: block;
+    padding: 1em;
+    width: 500px;
 `;

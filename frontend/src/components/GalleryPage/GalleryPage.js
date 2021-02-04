@@ -79,7 +79,6 @@ function GalleryPage() {
 
     useEffect(() => {
         loading.current = false;
-        PubSub.publishSync(PUBS.Loading, false);
     }, [thumbnails])
 
     const readyToLoadPage = useCallback(() => {
@@ -101,7 +100,6 @@ function GalleryPage() {
     const loadNextPage = useCallback(() => {
         if (!readyToLoadPage()) return;
         loading.current = true;
-        PubSub.publishSync(PUBS.Loading, true);
         //Grab all thumbnail images
         let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
         let hashes = images_meta.current.map(meta => meta.hash).slice(thumbnails.length, load_to);
@@ -131,7 +129,6 @@ function GalleryPage() {
         }).catch(error => {
             console.error("Failed to load thumbnails!", error);
             loading.current = false;
-            PubSub.publishSync(PUBS.Loading, false);
         });
     }, [thumbnails, page_size, readyToLoadPage]);
 

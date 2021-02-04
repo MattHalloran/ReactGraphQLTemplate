@@ -98,9 +98,9 @@ export async function send_password_reset_request(email) {
     return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
 }
 
-export async function fetch_plants(filter_by) {
+export async function fetch_plants(sort) {
     let json = JSON.stringify({
-        "filter_by": filter_by,
+        "sort": sort,
     });
     let options = {
         body: json,
@@ -110,9 +110,10 @@ export async function fetch_plants(filter_by) {
     return await fetchWrapper(`${PREFIX}/fetch_plants`, options);
 }
 
-export async function fetch_inventory(filter_by) {
+export async function fetch_inventory(sorter, page_size) {
     let json = JSON.stringify({
-        "filter_by": filter_by,
+        "sorter": sorter,
+        "page_size": page_size,
     });
     let options = {
         body: json,

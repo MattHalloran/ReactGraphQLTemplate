@@ -12,9 +12,9 @@ import ClickOutside from 'components/shared/wrappers/ClickOutside/ClickOutside';
 import { getTheme } from 'storage';
 
 function BurgerMenu(props) {
-  let theme = props.theme ?? getTheme();
-  let history = useHistory();
-  let [open, setOpen] = useState(false);
+  const theme = props.theme ?? getTheme();
+  const history = useHistory();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import PubSub from 'utils/pubsub';
 import { loginUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
-import { PUBS, LINKS } from 'consts';
+import { LINKS } from 'consts';
 import Button from 'components/shared/Button/Button';
 
 function LogInForm() {
@@ -21,14 +20,11 @@ function LogInForm() {
     const toForgotPassword = () => history.replace('/forgot-password');
 
     const login = () => {
-        PubSub.publish(PUBS.Loading, true);
         loginUser(email, password).then(() => {
-            PubSub.publish(PUBS.Loading, false);
             history.push(LINKS.Profile);
         }).catch(error => {
             console.log("Failed to log in");
             console.error(error);
-            PubSub.publish(PUBS.Loading, false);
             alert(error.error);
         })
     }

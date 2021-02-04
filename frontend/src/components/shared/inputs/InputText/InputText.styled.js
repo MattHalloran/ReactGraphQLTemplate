@@ -2,10 +2,11 @@ import styled from 'styled-components';
 
 export const StyledInputText = styled.div`
     width: 100%;
-    height: 56px;
-    border-radius: 4px;
+    height: 40px;
+    border: 1px solid black;
+    border-radius: 10px;
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     background-color: rgba(255, 255, 255, 0.3);
     transition: 0.3s background-color ease-in-out, 0.3s box-shadow ease-in-out;
     ${({ locked }) => locked ? 'pointer-events: none;' : ''};
@@ -28,7 +29,7 @@ export const StyledInputText = styled.div`
   
   input {
     width: 100%;
-    height: 56px;
+    height: 40px;
     position: relative;
     padding: 0px 16px;
     border: none;
@@ -61,20 +62,16 @@ export const StyledInputText = styled.div`
   
   input + label {
     position: absolute;
-    top: 24px;
-    left: 16px;
+    top: 36px;
+    left: 6px;
     font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
     font-size: 12px;
     font-weight: 600;
     line-height: 24px;
-    color: #ffffff;
-    opacity: 0;
+    opacity: ${({ show_label }) => show_label ? '1' : '0'};
+    color: ${({ has_error }) => has_error ? '#ec392f' : 'white'};
     pointer-events: none;
     transition: 0.1s all ease-in-out;
-  }
-  
-  input + label.error {
-    color: #ec392f;
   }
   
 `;

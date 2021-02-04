@@ -10,6 +10,37 @@ export const DEFAULT_PRONOUNS = [
     "ze/hir/hirs",
 ]
 
+export const SORT_OPTIONS = [
+    {
+        label: 'A-Z',
+        value: 'az',
+    },
+    {
+        label: 'Z-A',
+        value: 'za',
+    },
+    {
+        label: 'Price: Low to High',
+        value: 'lth',
+    },
+    {
+        label: 'Price: High to Low',
+        value: 'htl',
+    },
+    {
+        label: 'Featured',
+        value: 'feat',
+    },
+    {
+        label: 'Newest',
+        value: 'new',
+    },
+    {
+        label: 'Oldest',
+        value: 'old',
+    }
+]
+
 export const USER_ROLES = {
     Customer: "Customer",
     Admin: "Admin",

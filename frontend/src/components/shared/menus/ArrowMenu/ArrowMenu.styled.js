@@ -5,8 +5,8 @@ const overlay_style = `
     position: fixed; 
     left: 0;
     top: 0;
-    width: 100vh; 
-    height: 100vh;
+    width: -webkit-fill-available; 
+    height: -webkit-fill-available;
     overflow: hidden;
     z-index: 10;
     background-color: rgba(0,0,0,.5);

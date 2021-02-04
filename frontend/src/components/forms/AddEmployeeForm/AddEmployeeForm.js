@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import PubSub from 'utils/pubsub';
 import { registerUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
 import { useHistoryState } from 'utils/useHistoryState';
-import { PUBS, LINKS, DEFAULT_PRONOUNS } from 'consts';
+import { LINKS, DEFAULT_PRONOUNS } from 'consts';
 import Button from 'components/shared/Button/Button';
 
 function AddEmployeeForm() {
@@ -32,13 +31,10 @@ function AddEmployeeForm() {
   }
 
   const register = () => {
-    PubSub.publish(PUBS.Loading, true);
     registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
-      PubSub.publish(PUBS.Loading, false);
       history.push(LINKS.Profile);
     }).catch(error => {
       console.error(error);
-      PubSub.publish(PUBS.Loading, false)
       alert(error.error);
     })
   }

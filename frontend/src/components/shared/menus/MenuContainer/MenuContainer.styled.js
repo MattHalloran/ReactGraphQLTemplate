@@ -12,12 +12,12 @@ const getSideStyle = (side) => {
   if (side === 'right') {
     return `
       right: 0;
-      border-right: 2px solid black;
+      border-left: 2px solid black;
     `
   } else {
     return `
       left: 0;
-      border-left: 2px solid black;
+      border-right: 2px solid black;
     `
   }
 }
@@ -34,6 +34,7 @@ export const StyledMenuContainer = styled.nav`
   padding-top: 12vh;
   text-align: center;
   overflow: scroll;
+  overflow-x: hidden;
   width: 400px;
   position: fixed;
   top: 0;

@@ -1,11 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import ProvenWinners from 'assets/img/proven-winners.png';
 import { StyledFooter } from './Footer.styled';
+import { getTheme } from 'storage';
 
-function Footer() {
+function Footer(props) {
+    const theme = props.theme ?? getTheme();
     return (
-        <StyledFooter>
+        <StyledFooter theme={theme}>
             <div className="flexed">
                 <div className="footer-group">
                     <ul className="footer-ul">
@@ -42,7 +45,7 @@ function Footer() {
 }
 
 Footer.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default Footer;

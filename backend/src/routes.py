@@ -48,9 +48,11 @@ def getData(*names):
     byte_data = request.data
     print(f'AAAAAAAA {byte_data}')
     dict_str = byte_data.decode('UTF-8')
+    # if isinstance(dict_str, str)
     print(f'BBBBBBBBBB {dict_str}')
     print(f'CCCCCCCCCCC {type(dict_str)}')
     data = json.loads(dict_str)
+    print(f'DDDDDDDDD {type(data)}')
     if (len(names) == 1):
         return data[names[0]]
     return [data[name] for name in names]
@@ -244,10 +246,31 @@ def fetch_inventory_filters():
 @app.route(f'{PREFIX}/fetch_inventory', methods=["POST"])
 @handle_exception
 def fetch_inventory():
-    skus = SkuHandler.all_skus()
-    page_results = [SkuHandler.to_dict(SkuHandler.from_sku(sku)) for sku in skus]
+    # Grab sort option
+    (sorter, page_size) = getData('sorter', 'page_size')
+    # Find all SKUs available to the customer
+    skus = SkuHandler.all_available_skus()
+    print('GOT ALL SKUS')
+    print(skus[0])
+    sort_map = {
+        'az': (lambda s: s.plant.latin_name, False),
+        'za': (lambda s: s.plant.latin_name, True),
+        'lth': (lambda s: s.price, False),
+        'htl': (lambda s: s.price, True),
+        'new': (lambda s: s.date_added, True),
+        'old': (lambda s: s.date_added, True),
+    }
+    print(f'SORTER ISSSSS {sorter}')
+    # Sort the SKUs
+    sort_data = sort_map.get(sorter, None)
+    if sort_data is None:
+        print('Could not find the correct sorter')
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    skus.sort(key=sort_data[0], reverse=sort_data[1])
+    sku_page = skus[0: min(len(skus), page_size)]
+    page_results = [SkuHandler.to_dict(sku) for sku in sku_page]
     return {
-        "all_skus": skus,
+        "all_skus": [sku.sku for sku in skus],
         "page_results": page_results,
         "status": StatusCodes['SUCCESS']
     }
@@ -271,9 +294,9 @@ def fetch_plants():
 @app.route(f'{PREFIX}/fetch_inventory_page', methods=["POST"])
 @handle_exception
 def fetch_inventory_page():
-    skus = getJson('skus')
+    skus = getData('skus')
     return {
-        "data": [SkuHandler.to_dict(sku) for sku in skus],
+        "data": [SkuHandler.to_dict(SkuHandler.from_sku(sku)) for sku in skus],
         "status": StatusCodes['SUCCESS']
     }
 

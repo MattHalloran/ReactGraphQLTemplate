@@ -9,15 +9,14 @@ import Draggable from 'components/shared/Draggable/Draggable';
 import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
 
 function ArrowMenu(props) {
-    let theme = props.theme ?? getTheme();
-    let [open, setOpen] = useState(false);
+    const theme = props.theme ?? getTheme();
+    const [open, setOpen] = useState(false);
 
     const closeMenu = () => {
         setOpen(false);
     }
 
     const toggleOpen = () => {
-        console.log('BOOOOOOOOO')
         setOpen(o => !o);
     }
 

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from src.models import AccountStatus, Address, ContactInfo, Business, BusinessDiscount, Email, Feedback
 from src.models import Image, ImageUses, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
-from src.models import PlantTraitOptions, Role, Size, Sku, SkuDiscount, User
+from src.models import PlantTraitOptions, Role, Size, Sku, SkuStatus, SkuDiscount, User
 from src.api import db
 from base64 import b64encode
 from src.auth import verify_token
@@ -471,7 +471,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['is_discountable', 'plant']
+        return ['price', 'is_discountable', 'plant']
 
     @staticmethod
     def required_fields():
@@ -479,7 +479,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def to_dict(model: Sku):
-        as_dict = SkuHandler.simple_fields_to_dict(model, ['is_discountable', 'sku'])
+        as_dict = SkuHandler.simple_fields_to_dict(model, ['price', 'is_discountable', 'sku'])
         as_dict['display_image'] = SkuHandler.get_display_image(model)
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
         as_dict['sizes'] = [SizeHandler.to_dict(size) for size in model.sizes]
@@ -524,8 +524,8 @@ class SkuHandler(Handler):
         return True
 
     @staticmethod
-    def all_skus():
-        return Sku.query.with_entities(Sku.sku).all()
+    def all_available_skus():
+        return db.session.query(Sku).filter_by(status=SkuStatus.ACTIVE.value).all()
 
     @staticmethod
     def from_sku(sku: str):

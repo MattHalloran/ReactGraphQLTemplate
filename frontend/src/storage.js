@@ -49,7 +49,6 @@ export function getTheme() {
     // Make sure theme contains the correct data
     if (theme !== null && theme !== undefined) {
       theme = JSON.parse(theme)
-      console.log('THEME RIGHT HERE ISS', theme)
       let expected_keys = Object.keys(lightTheme).sort()
       let stored_keys = Object.keys(theme).sort()
       if (JSON.stringify(expected_keys) === JSON.stringify(stored_keys)) {

@@ -11,7 +11,7 @@ import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
 const SHOW_HAMBURGER_AT = 800;
 
 function Navbar(props) {
-    let [show_hamburger, setShowHamburger] = useState(false);
+    const [show_hamburger, setShowHamburger] = useState(false);
 
     useEffect(() => {
         updateWindowDimensions();

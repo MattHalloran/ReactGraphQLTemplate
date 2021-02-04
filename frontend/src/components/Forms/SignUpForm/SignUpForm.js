@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import PubSub from 'utils/pubsub';
 import { registerUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/shared/inputs/InputText/InputText';
@@ -9,9 +8,8 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import MenuItem from '@material-ui/core/MenuItem';
 import { useHistoryState } from 'utils/useHistoryState';
-import { PUBS, LINKS } from 'consts';
+import { LINKS } from 'consts';
 import Button from 'components/shared/Button/Button';
 
 function SignUpForm() {
@@ -38,13 +36,10 @@ function SignUpForm() {
   }
 
   const register = () => {
-    PubSub.publish(PUBS.Loading, true);
     registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
-      PubSub.publish(PUBS.Loading, false);
       history.push(LINKS.Profile);
     }).catch(error => {
       console.error(error);
-      PubSub.publish(PUBS.Loading, false)
       alert(error.error);
     })
   }

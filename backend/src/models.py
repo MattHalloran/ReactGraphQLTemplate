@@ -593,8 +593,12 @@ class Sku(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     sku = Column(String(32), nullable=False)
+    # Date SKU was created in UTC seconds
+    date_added = Column(Float, nullable=False, default=time.time())
     is_discountable = Column(Boolean, nullable=False,
                              default=defaults['is_discountable'])
+    # Price in cents, before discounts
+    price = Column(Integer)
     status = Column(Integer, nullable=False, default=SkuStatus.ACTIVE.value)
     plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
     display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
@@ -610,8 +614,9 @@ class Sku(db.Model):
         'SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------
 
-    def __init__(self, is_discountable: bool, plant: Plant):
+    def __init__(self, price: int, is_discountable: bool, plant: Plant):
         self.sku = salt(32)
+        self.price = price
         self.is_discountable = is_discountable
         self.plant = plant
 

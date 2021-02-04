@@ -39,14 +39,14 @@ const keyMap = {
 };
 
 function App() {
-  let [nav_visible, setNavVisible] = useState(true);
+  const [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
-  let [session, setSession] = useState(null);
-  let session_attempts = useRef(0);
-  let [user_roles, setUserRoles] = useState(null);
-  let [theme, setTheme] = useState(getTheme());
-  let [menu_open, setMenuOpen] = useState(false);
-  let [popup_open, setPopupOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const session_attempts = useRef(0);
+  const [user_roles, setUserRoles] = useState(null);
+  const [theme, setTheme] = useState(getTheme());
+  const [menu_open, setMenuOpen] = useState(false);
+  const [popup_open, setPopupOpen] = useState(false);
 
   const handlers = {
     OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
