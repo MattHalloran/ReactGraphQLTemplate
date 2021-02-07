@@ -29,12 +29,14 @@ export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_image_
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
 export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
-export const getInventory = (sorter, page_size) => promiseWrapper(http.fetch_inventory, sorter, page_size);
+export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (skus) => promiseWrapper(http.fetch_inventory_page, skus);
 export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);
 export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
+export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
+export const modifySku = (sku, operation) => promiseWrapper(http.modify_sku, sku, operation);
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {
@@ -42,7 +44,7 @@ export const checkCookies = () => {
         if (roles) PubSub.publish(PUBS.Roles, roles);
         let session = getItem(LOCAL_STORAGE.Session);
         if (!session || !session.email || !session.token) {
-            console.log('SETTING SESSION TO NULL')
+            console.log('SETTING SESSION TO NULL', session)
             storeItem(LOCAL_STORAGE.Session, null)
             reject({ok: false, status: StatusCodes.FAILURE_NOT_VERIFIED});
         } else {

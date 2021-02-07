@@ -1,6 +1,10 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import Button from 'components/shared/Button/Button';
+import Hero1 from 'assets/img/hero-chicks.jpg';
+import Hero2 from 'assets/img/hero-rainbow.jpg';
+import Hero3 from 'assets/img/hero-plants.jpg';
+import Hero4 from 'assets/img/hero-butterfly.jpg';
 // JSX
 import HeroSlider, {
   Nav,
@@ -10,13 +14,16 @@ import { Link } from 'react-router-dom';
 import { ContentWrapper, OverlayContainer, Title, Subtitle } from './Hero.styled';
 
 const images = [
-  ["https://images.pexels.com/photos/2749165/pexels-photo-2749165.jpeg?cs=srgb&dl=pexels-john-lambeth-2749165.jpg&fm=jpg", "zoom"],
-  ["https://images.pexels.com/photos/2408649/pexels-photo-2408649.jpeg?cs=srgb&dl=pexels-mithul-varshan-2408649.jpg&fm=jpg", "zoom"],
-  ["https://images.pexels.com/photos/5529597/pexels-photo-5529597.jpeg?cs=srgb&dl=pexels-zen-chung-5529597.jpg&fm=jpg", "zoom"],
-  ["https://images.pexels.com/photos/3912947/pexels-photo-3912947.jpeg?cs=srgb&dl=pexels-thisisengineering-3912947.jpg&fm=jpg", "zoom"]
+  [Hero1, "zoom"],
+  [Hero2, "zoom"],
+  [Hero3, "zoom"],
+  [Hero4, "zoom"]
 ]
 
-function Hero(props) {
+function Hero({
+    text,
+    subtext,
+}) {
 
   let slides = images.map((img, index) => (
     <Slide
@@ -45,9 +52,9 @@ function Hero(props) {
     >
       <OverlayContainer>
         <ContentWrapper>
-          <Title>{props.text}</Title>
+          <Title>{text}</Title>
           <Subtitle>
-            {props.subtext}
+            {subtext}
           </Subtitle>
           <Link to="/shopping">
             <Button className="primary">Order now</Button>

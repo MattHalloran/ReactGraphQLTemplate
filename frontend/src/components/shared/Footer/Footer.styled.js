@@ -17,6 +17,14 @@ export const StyledFooter = styled.footer`
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
         align-items: stretch;
+
+        > * {
+            border-right: 1px solid black;
+        }
+
+        > *:last-child {
+            border-right: none;
+        }
     }
 
     @media (max-width: 319px) {
@@ -30,6 +38,10 @@ export const StyledFooter = styled.footer`
     .footer-group {
         padding: 0 10px;
         min-width: 150px;
+
+        li {
+            padding-bottom: 10px;
+        }
     }
 
     .winner-div {
@@ -44,7 +56,7 @@ export const StyledFooter = styled.footer`
 
     .footer-ul {
         display: grid;
-        padding: 0px
+        padding: 0px;
     }
 
     li {
@@ -52,6 +64,7 @@ export const StyledFooter = styled.footer`
     }
 
     .addy { 
+        padding-bottom: 10px;
         display: flex;
         flex-direction: column;
         white-space: pre-wrap;      /* CSS3 */   

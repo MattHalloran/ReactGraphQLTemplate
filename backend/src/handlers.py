@@ -484,6 +484,14 @@ class SkuHandler(Handler):
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
         as_dict['sizes'] = [SizeHandler.to_dict(size) for size in model.sizes]
         as_dict['discounts'] = [SkuDiscountHandler.to_dict(discount) for discount in model.discounts]
+        if model.status == SkuStatus.DELETED.value:
+            as_dict['status'] = 'DELETED'
+        elif model.status == SkuStatus.INACTIVE.value:
+            as_dict['status'] = 'INACTIVE'
+        elif model.status == SkuStatus.ACTIVE.value:
+            as_dict['status'] = 'ACTIVE'
+        else:
+            as_dict['status'] = 'UNKNOWN STATUS'
         return as_dict
 
     @staticmethod

@@ -9,7 +9,6 @@
     "array-move": "^3.0.1",
     "chai": "^4.2.0",
     "hero-slider": "github:MattHalloran/hero-slider",
-    "lodash": "^4.17.20",
     "mocha": "^8.2.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",

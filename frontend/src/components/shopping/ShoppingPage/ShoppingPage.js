@@ -8,8 +8,13 @@ import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS } from 'consts';
 import { getInventoryFilters } from "query/http_promises";
 import DropDown from 'components/shared/inputs/DropDown/DropDown';
 import CheckBox from 'components/shared/inputs/CheckBox/CheckBox';
+import { getTheme } from 'storage';
 
-function ShoppingPage(props) {
+function ShoppingPage({
+    user_roles,
+    session,
+    theme = getTheme(),
+}) {
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
 
@@ -74,7 +79,7 @@ function ShoppingPage(props) {
 
     let display;
     let is_customer = false;
-    let roles = props.user_roles;
+    let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
             console.log('SHOPPING PAGE FOUND ROLEEEEE', r)
@@ -109,7 +114,7 @@ function ShoppingPage(props) {
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </ArrowMenu>
-                <ShoppingList session={props.session} sort={sortBy} filters={filters} />
+                <ShoppingList session={session} sort={sortBy} filters={filters} />
             </React.Fragment >
     } else {
         display =
@@ -119,7 +124,7 @@ function ShoppingPage(props) {
     }
 
     return (
-        <StyledShoppingPage>
+        <StyledShoppingPage theme={theme}>
             { display}
         </StyledShoppingPage>
     );
@@ -128,6 +133,7 @@ function ShoppingPage(props) {
 ShoppingPage.propTypes = {
     user_roles: PropTypes.array,
     session: PropTypes.object,
+    theme: PropTypes.object,
 }
 
 export default memo(ShoppingPage);

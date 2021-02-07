@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef } from "react";
+import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
 import PropTypes from 'prop-types';
 import { getTheme } from 'storage';
 import { StyledInputText } from  './InputText.styled';
@@ -7,31 +7,20 @@ import makeID from 'utils/makeID';
 function InputText(props) {
     const theme = props.theme ?? getTheme();
     const [value, setValue] = useState(props.value ? props.value : null);
-    const [error, setError] = useState(null);
+    let error = null;
     const id = useRef(props.id ?? makeID(10));
 
-    useLayoutEffect(() => {
-        if (props.validate) {
-            if (props.index)
-                updateError(value, props.index);
-            else
-                updateError(value);
-        }
-    })
-
-    const updateError = (value) => {
-        let err;
+    if (props.validate) {
         // Only show an error if form submit was clicked, or if a value was entered
         if (props.validate && (props.showErrors || value)) {
-            err = props.validate(value);
+            error = props.validate(value);
         }
         if (props.errorFunc) {
             if (props.index)
-                props.errorFunc(err, props.index);
+                props.errorFunc(error, props.index);
             else
-                props.errorFunc(err);
-        } 
-        setError(err);
+                props.errorFunc(error);
+        }
     }
 
     const updateValue = (event) => {

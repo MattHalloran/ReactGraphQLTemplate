@@ -4,11 +4,11 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { StyledAdminInventoryPage, StyledSkuPopup, StyledSkuCard } from './AdminInventoryPage.styled';
+import { StyledAdminInventoryPage, StyledSkuPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import { useHistoryState } from 'utils/useHistoryState';
 import Modal from 'components/shared/wrappers/Modal/Modal';
-import { getInventory, getPlants, getInventoryFilters } from 'query/http_promises';
+import { getInventory, getPlants, getInventoryFilters, modifySku } from 'query/http_promises';
 import Button from 'components/shared/Button/Button';
 import { SORT_OPTIONS } from 'consts';
 import { getTheme } from 'storage';
@@ -19,8 +19,9 @@ import TrashIcon from 'assets/img/TrashIcon';
 import EditIcon from 'assets/img/EditIcon';
 import HideIcon from 'assets/img/HideIcon';
 
-function AdminInventoryPage(props) {
-    const theme = props.theme ?? getTheme();
+function AdminInventoryPage({
+    theme = getTheme(),
+}) {
     // Holds the existing SKUs list
     const [skuCards, setSkuCards] = useState([]);
     // Holds the existing plants list
@@ -33,7 +34,7 @@ function AdminInventoryPage(props) {
     useLayoutEffect(() => {
         let mounted = true;
         document.title = "Edit Inventory Info";
-        getInventory(SORT_OPTIONS[0].value, page_size)
+        getInventory(SORT_OPTIONS[0].value, page_size, true)
             .then((response) => {
                 if (!mounted) return;
                 setSkuCards(response.page_results);
@@ -67,17 +68,33 @@ function AdminInventoryPage(props) {
         return () => mounted = false;
     }, [])
 
-    const deleteSku = () => {
+    const deleteSku = (sku) => {
         if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        console.log('TODO')
+        modifySku(sku.sku, 'DELETE')
+            .then((response) => {
+                //TODO update list to reflect status chagne
+                console.log('TODOOO')
+            })
+            .catch((error) => {
+                console.error(error);
+                alert("Failed to delte sku");
+            });
     }
 
     const editSku = () => {
 
     }
 
-    const hideSku = () => {
-
+    const hideSku = (sku) => {
+        let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
+        modifySku(sku.sku, operation)
+            .then((response) => {
+                //TODO update list to reflect status chagne
+                console.log('TODOOO')
+            })
+            .catch((error) => {
+                console.error("Failed to modify sku", error);
+            });
     }
 
     const newEmptySku = () => setCurrSku({});
@@ -110,15 +127,13 @@ function AdminInventoryPage(props) {
                 <div className="flex-content">
                     <p>Select existing SKU to open editor</p>
                     <div className="card-flex">
-                        {skuCards.map((data, index) => <SkuCard key={index}
-                            data={data} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} />)}
+                        {skuCards.map((data, index) => <SkuCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} sku={data} />)}
                     </div>
                 </div>
                 <div className="flex-content">
                     <p>Select plant template to create a new SKU</p>
                     <div className="card-flex">
-                        {plantCards.map((data, index) => <SkuCard key={index}
-                            data={data} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} />)}
+                        {plantCards.map((data, index) => <PlantCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} plant={data}/>)}
                     </div>
                 </div>
             </div>
@@ -132,20 +147,25 @@ AdminInventoryPage.propTypes = {
 
 export default AdminInventoryPage;
 
-function SkuCard(props) {
-    let sku = props?.data;
+function SkuCard({ 
+    onEdit,
+    onHide,
+    onDelete,
+    sku,
+    theme = getTheme(),
+}) {
     let plant = sku?.plant;
 
     return (
-        <StyledSkuCard onClick={props.onEdit}>
+        <StyledCard theme={theme} onClick={onEdit} status={sku?.status}>
             <h3>{plant?.latin_name}</h3>
             <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
             <div className="icon-container">
-                <EditIcon width="30px" height="30px" onClick={props.onEdit} />
-                <HideIcon width="30px" height="30px" onClick={props.onHide} />
-                <TrashIcon width="30px" height="30px" onClick={props.onDelete} />
+                <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
+                <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />
+                <TrashIcon width="30px" height="30px" onClick={() => onDelete(sku)} />
             </div>
-        </StyledSkuCard>
+        </StyledCard>
     );
 }
 
@@ -156,9 +176,27 @@ SkuCard.propTypes = {
     onDelete: PropTypes.func.isRequired,
 }
 
-function SkuPopup(props) {
-    console.log('PROP UPPPPPPPP', props.data);
-    const theme = props.theme ?? getTheme();
+function PlantCard({
+    plant,
+    }) {
+
+    return (
+        <StyledCard>
+            <h3>{plant?.latin_name}</h3>
+        </StyledCard>
+    );
+}
+
+SkuCard.propTypes = {
+    plant: PropTypes.object.isRequired
+}
+
+function SkuPopup({
+    data,
+    theme = getTheme(),
+    trait_options
+}) {
+    console.log('PROP UPPPPPPPP', data);
     const [latin_name, setLatinName] = useHistoryState("ai_latin_name", "");
     const [common_name, setCommonName] = useHistoryState("ai_common_name", "");
     const [drought_tolerance, setDroughtTolerance] = useHistoryState("ai_drought_tolerance", "");
@@ -170,8 +208,7 @@ function SkuPopup(props) {
 
     // Returns an input text or a dropdown, depending on if the field is in the trait options
     const getInput = (field, label, value, valueFunc) => {
-        console.log('IN GET INPUT', props.trait_options)
-        if (!props.trait_options || !props.trait_options[field] || props.trait_options[field].length <= 0) return (
+        if (!trait_options || !trait_options[field] || trait_options[field].length <= 0) return (
             <InputText
                 label={label}
                 type="text"
@@ -179,14 +216,14 @@ function SkuPopup(props) {
                 valueFunc={valueFunc}
             />
         )
-        let options = props.trait_options[field]
+        let options = trait_options[field].map((o, index) => {return {label: o, value: index} })
         return (
             <DropDown
+                multi_select={true}
                 allow_custom_input={true}
                 className="sorter"
                 options={options}
-                onChange={(e) => valueFunc(e.value)}
-                initial_value={options[0]} />
+                onChange={(e) => valueFunc(e.value)} />
         )
     }
 

@@ -25,8 +25,17 @@ import NoWaterIcon from 'assets/img/NoWaterIcon';
 import RangeIcon from 'assets/img/RangeIcon';
 import PHIcon from 'assets/img/PHIcon';
 import SoilTypeIcon from 'assets/img/SoilTypeIcon';
+import { getTheme } from "storage";
 
-function ShoppingList(props) {
+function ShoppingList({
+    page_size,
+    sort = SORT_OPTIONS[0].value,
+    filters,
+    session,
+    theme = getTheme(),
+}) {
+    console.log('SESSION IN SHOPPING LIST IS', session);
+    page_size = page_size ?? Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
     let history = useHistory();
     const [likes, setLikes] = useState([]);
     const [cart, setCart] = useState([]);
@@ -35,14 +44,11 @@ function ShoppingList(props) {
     const [all_skus, setAllSkus] = useState([]);
     // [sku, base64 data, alt]
     const [curr_sku, setCurrSku] = useState(null);
-    // What the page results should be ordered by
-    const sort = props.sort ?? SORT_OPTIONS[0].value;
     const track_scrolling_id = 'scroll-tracked';
     const full_images = useRef({});
     const urlParams = useParams();
     const curr_index = useMemo(() => cards.current?.findIndex(c => c.sku === urlParams.sku) ?? -1, [cards, urlParams]);
     const loading = useRef(false);
-    const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
     // useHotkeys('arrowLeft', () => prevImage());
@@ -93,7 +99,7 @@ function ShoppingList(props) {
         console.log('GRABBING ALL SKUS', sort)
         console.log(typeof sort);
         let mounted = true;
-        getInventory(sort, page_size)
+        getInventory(sort, page_size, false)
             .then((response) => {
                 if (!mounted) return;
                 setCards(response.page_results);
@@ -175,13 +181,13 @@ function ShoppingList(props) {
     };
 
     const setLike = (sku, liked) => {
-        if (!props.session?.email || !props.session?.token) return;
-        setLikeSku(props.session.email, props.session.token, sku, liked);
+        if (!session?.email || !session?.token) return;
+        setLikeSku(session.email, session.token, sku, liked);
     }
 
     const setInCart = (sku, quantity, in_cart) => {
-        if (!props.session?.email || !props.session?.token) return;
-        setSkuInCart(props.session.email, props.session.token, sku, quantity, in_cart);
+        if (!session?.email || !session?.token) return;
+        setSkuInCart(session.email, session.token, sku, quantity, in_cart);
     }
 
     useEffect(() => {
@@ -197,7 +203,7 @@ function ShoppingList(props) {
         console.log('POPUP DATA', index, popup_data)
         setPopup(
             <Modal onClose={() => history.goBack()}>
-                <ExpandedSku data={popup_data} goLeft={() => { }} goRight={() => { }} />
+                <ExpandedSku sku={popup_data} goLeft={prevImage} goRight={nextImage} theme={theme}/>
             </Modal>
         );
     }, [all_skus, curr_sku])
@@ -207,12 +213,11 @@ function ShoppingList(props) {
             {popup}
             {cards.map((item, index) =>
                 <SkuCard key={index}
+                    theme={theme}
                     likes={likes}
                     cart={cart}
                     onClick={expandSku}
-                    data={item}
-                    goLeft={prevImage}
-                    goRight={nextImage}
+                    sku={item}
                     onSetLike={setLike}
                     onSetInCart={setInCart} />)}
         </StyledShoppingList>
@@ -224,14 +229,21 @@ ShoppingList.propTypes = {
     sort: PropTypes.string,
     filters: PropTypes.object,
     session: PropTypes.object,
+    theme: PropTypes.object,
 };
 
 export default ShoppingList;
 
-function SkuCard(props) {
-    //console.log('IN SKU CARDDDD', props.data);
-    const sku = props.data;
-    const plant = sku.plant;
+function SkuCard({
+    likes,
+    cart,
+    sku,
+    onClick,
+    onSetLike,
+    onSetInCart,
+    theme = getTheme(),
+}) {
+    const plant = sku?.plant;
 
     let sizes = sku.sizes?.map(size => (
         <div className="size">{size}</div>
@@ -245,41 +257,41 @@ function SkuCard(props) {
     }
 
     let heartIcon;
-    if (!props.likes?.some(l => l.sku === sku.sku)) {
+    if (!likes?.some(l => l.sku === sku.sku)) {
         heartIcon = (
             <HeartIcon
                 width="40px"
                 height="40px"
-                onClick={() => props.onSetLike(sku.sku, true)} />
+                onClick={() => onSetLike(sku.sku, true)} />
         )
     } else {
         heartIcon = (
             <HeartFilledIcon
                 width="40px"
                 height="40px"
-                onClick={() => props.onSetLike(sku.sku, false)} />
+                onClick={() => onSetLike(sku.sku, false)} />
         )
     }
 
     let cartIcon;
-    if (!props.cart?.some(c => c.sku === sku.sku)) {
+    if (!cart?.some(c => c.sku === sku.sku)) {
         cartIcon = (
             <BagPlusIcon
                 width="40px"
                 height="40px"
-                onClick={() => props.onSetInCart(sku.sku, 1, true)} />
+                onClick={() => onSetInCart(sku.sku, 1, true)} />
         )
     } else {
         cartIcon = (
             <BagCheckFillIcon
                 width="40px"
                 height="40px"
-                onClick={() => props.onSetInCart(sku.sku, 1, false)} />
+                onClick={() => onSetInCart(sku.sku, 1, false)} />
         )
     }
 
     return (
-        <StyledSkuCard>
+        <StyledSkuCard theme={theme}>
             <h1 className="title">{plant.latin_name}</h1>
             <div className="display-image-container">
                 {display_image}
@@ -294,7 +306,7 @@ function SkuCard(props) {
                     width="40px"
                     height="40px"
                     title="Show more"
-                    onClick={() => props.onClick(sku.sku)} />
+                    onClick={() => onClick(sku.sku)} />
             </div>
         </StyledSkuCard>
     );
@@ -304,17 +316,22 @@ SkuCard.propTypes = {
     likes: PropTypes.array,
     cart: PropTypes.array,
     data: PropTypes.object.isRequired,
-    goLeft: PropTypes.func.isRequired,
-    goRight: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
     onSetLike: PropTypes.func.isRequired,
     onSetInCart: PropTypes.func.isRequired,
+    theme: PropTypes.object,
 };
 
 export { SkuCard };
 
-function ExpandedSku(props) {
-    console.log('EEEEEE', props)
-    const plant = props?.data?.plant;
+function ExpandedSku({
+    sku,
+    goLeft,
+    goRight,
+    theme = getTheme(),
+}) {
+    console.log('EEEEEE', sku)
+    const plant = sku?.plant;
     const [src, setSrc] = useState(null);
 
     // const iconFactory = (src, alt) => {
@@ -353,9 +370,9 @@ function ExpandedSku(props) {
     }
 
     return (
-        <StyledExpandedSku>
-            <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={props.goRight} />
-            <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={props.goRight} />
+        <StyledExpandedSku theme={theme}>
+            <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={goLeft} />
+            <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={goRight} />
             <div className="main-content">
                 <h1 className="title">{plant?.latin_name}</h1>
                 {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
@@ -400,6 +417,11 @@ function ExpandedSku(props) {
     );
 }
 
-ExpandedSku.propTypes = {};
+ExpandedSku.propTypes = {
+    sku: PropTypes.object.isRequired,
+    goLeft: PropTypes.func.isRequired,
+    goRight: PropTypes.func.isRequired,
+    theme: PropTypes.object,
+};
 
 export { ExpandedSku };

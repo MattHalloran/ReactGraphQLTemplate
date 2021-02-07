@@ -1,14 +1,18 @@
-import React, { useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
+import PropTypes from 'prop-types';
+import { getTheme } from 'storage';
 import { StyledPrivacyPolicyPage } from './PrivacyPolicyPage.styled';
 import { BUSINESS_NAME, FULL_BUSINESS_NAME } from 'consts';
 
-function PrivacyPolicyPage() {
+function PrivacyPolicyPage({
+    theme=getTheme(),
+}) {
     useLayoutEffect(() => {
         document.title = `Privacy Policy | ${BUSINESS_NAME}`;
     })
 
     return (
-        <StyledPrivacyPolicyPage>
+        <StyledPrivacyPolicyPage theme={theme}>
             <h1>Privacy Policy</h1>
             <p>Last updated: November 30, 2020</p>
             <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
@@ -318,7 +322,7 @@ function PrivacyPolicyPage() {
 }
 
 PrivacyPolicyPage.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default PrivacyPolicyPage;

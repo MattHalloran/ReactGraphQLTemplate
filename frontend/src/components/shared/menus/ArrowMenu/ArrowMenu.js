@@ -8,8 +8,10 @@ import { getTheme } from 'storage';
 import Draggable from 'components/shared/Draggable/Draggable';
 import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
 
-function ArrowMenu(props) {
-    const theme = props.theme ?? getTheme();
+function ArrowMenu({
+    theme=getTheme(),
+    children,
+}) {
     const [open, setOpen] = useState(false);
 
     const closeMenu = () => {
@@ -25,7 +27,7 @@ function ArrowMenu(props) {
             <div id="overlay"/>
             <Arrow onClick={toggleOpen} />
             <MenuContainer side="left" open={open} closeMenu={closeMenu}>
-                {props.children}
+                {children}
             </MenuContainer>
         </StyledArrowMenu>
     );
@@ -33,16 +35,17 @@ function ArrowMenu(props) {
 
 ArrowMenu.propTypes = {
     theme: PropTypes.object,
+    children: PropTypes.any,
 }
 
 export default ArrowMenu;
 
-function Arrow(props) {
+function Arrow({onClick}) {
     const [yPos, setYPos] = useState(0);
     const handleDrag = (event) => event.stopPropagation();
     return (
         <Draggable x={0} y={yPos} onMove={(_,y) => setYPos(y-100)}>
-            <span onClick={props.onClick}><ArrowRightCircleIcon width="50px" height="50px" className="arrow" onDrag={handleDrag} onDragEnd={handleDrag} /></span>
+            <span onClick={onClick}><ArrowRightCircleIcon width="50px" height="50px" className="arrow" onDrag={handleDrag} onDragEnd={handleDrag} /></span>
         </Draggable>
     );
 }

@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
-import Logo from 'assets/img/NLN-logo-v4-orange2-not-transparent-xl.png';
-import { clearStorage } from 'storage';
+import Logo from 'assets/img/nln-logo-colorized.png';
+import { clearStorage, getTheme } from 'storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
 import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
 
 const SHOW_HAMBURGER_AT = 800;
 
-function Navbar(props) {
+function Navbar({
+    theme = getTheme(),
+    visible,
+    ...props
+}) {
     const [show_hamburger, setShowHamburger] = useState(false);
 
     useEffect(() => {
@@ -23,27 +27,34 @@ function Navbar(props) {
     const updateWindowDimensions = () => setShowHamburger(window.innerWidth <= SHOW_HAMBURGER_AT);
 
     return (
-        <StyledNavbar visible={props.visible}>
+        <StyledNavbar theme={theme} visible={visible}>
             <Link to={LINKS.Home} className="nav-brand">
-                <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
+            <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
                 <span className="nav-name">{BUSINESS_NAME}</span>
             </Link>
-            {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
+            {show_hamburger ? <Hamburger visible={visible} theme={theme} {...props} /> : <NavList {...props} />}
         </StyledNavbar>
     );
 }
 
 Navbar.propTypes = {
+    theme: PropTypes.object,
     session: PropTypes.object,
     visible: PropTypes.bool.isRequired,
     user_roles: PropTypes.array,
 }
 
-function Hamburger(props) {
+function Hamburger({
+    session,
+    user_roles,
+    visible,
+    theme = getTheme(),
+    ...props
+}) {
     let nav_options = [];
 
     // If an admin is logged in, display admin links
-    let roles = props.user_roles;
+    let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
             if (r.title === USER_ROLES.Admin) {
@@ -53,7 +64,7 @@ function Hamburger(props) {
     }
 
     // If someone is not logged in, display sign up/log in links
-    if (props.session === null) {
+    if (session === null) {
         nav_options.push([LINKS.Register, 'Sign Up'],
                          [LINKS.LogIn, 'Log In']);
     } else {
@@ -65,12 +76,12 @@ function Hamburger(props) {
                      [LINKS.About, 'About Us'],
                      [LINKS.Contact, 'Contact Us']);
 
-    if (props.session !== null) {
+    if (session !== null) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
     }
     
     return (
-        <BurgerMenu {...props}>
+        <BurgerMenu theme={theme} {...props} visible={visible}>
             { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link to={link} onClick={onClick}>{text}</Link></p>
             ))}
@@ -79,11 +90,21 @@ function Hamburger(props) {
     );
 }
 
-function NavList(props) {
+Hamburger.propTypes = {
+    theme: PropTypes.object,
+    session: PropTypes.object,
+    user_roles: PropTypes.array,
+    visible: PropTypes.bool,
+}
+
+function NavList({
+    session,
+    user_roles,
+}) {
     // Link, Link text, onClick function
     let nav_options = [];
 
-    if (props.session !== null) {
+    if (session !== null) {
         nav_options.push([LINKS.Shopping, 'Shopping']);
         nav_options.push([LINKS.Profile, 'Profile']);
     }
@@ -93,7 +114,7 @@ function NavList(props) {
                      [LINKS.Contact, 'Contact Us']);
     
     // If an admin is logged in, display admin links
-    let roles = props.user_roles;
+    let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
             if (r.title === USER_ROLES.Admin) {
@@ -103,7 +124,7 @@ function NavList(props) {
     }
     
     // If someone is not logged in, display sign up/log in links
-    if (props.session === null) {
+    if (session === null) {
         nav_options.push([LINKS.Register, 'Sign Up'],
                          [LINKS.LogIn, 'Log In']);
     } else {

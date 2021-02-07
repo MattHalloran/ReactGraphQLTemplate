@@ -2,6 +2,7 @@
 
 import PubSub from './utils/pubsub';
 import { LOCAL_STORAGE, PUBS } from 'consts';
+import { deepEqual } from 'utils/deepEqual';
 
 export const lightTheme = {
     // bodyPrimary: '#557A48',
@@ -70,6 +71,8 @@ export const storeItem = (key, value) => {
       value = JSON.parse(value)
     } catch(e){}
   }
+  if (deepEqual(getItem(key), value)) return;
+  console.log("STORING ITEMMMM", key, value);
   localStorage.setItem(key, JSON.stringify(value));
   PubSub.publish(key, value);
 }

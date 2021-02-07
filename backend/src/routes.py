@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
-from src.models import AccountStatus, Plant, Sku, Image, ImageUses, ContactInfo
+from src.models import AccountStatus, Plant, Sku, SkuStatus, Image, ImageUses, ContactInfo
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler
 from src.handlers import PhoneHandler, PlantHandler, ImageHandler, ContactInfoHandler, OrderItemHandler
 from src.messenger import welcome, reset_password
@@ -247,11 +247,13 @@ def fetch_inventory_filters():
 @handle_exception
 def fetch_inventory():
     # Grab sort option
-    (sorter, page_size) = getData('sorter', 'page_size')
+    (sorter, page_size, admin) = getData('sorter', 'page_size', 'admin')
     # Find all SKUs available to the customer
-    skus = SkuHandler.all_available_skus()
-    print('GOT ALL SKUS')
-    print(skus[0])
+    skus = None
+    if (admin):
+        skus = [SkuHandler.from_id(id) for id in SkuHandler.all_ids()]
+    else:
+        skus = SkuHandler.all_available_skus()
     sort_map = {
         'az': (lambda s: s.plant.latin_name, False),
         'za': (lambda s: s.plant.latin_name, True),
@@ -465,6 +467,19 @@ def fetch_profile_info():
     return user_data
 
 
+@app.route(f'{PREFIX}/fetch_customers', methods=["POST"])
+@handle_exception
+def fetch_customers():
+    # Check to make sure requestor is an admin TODO
+    (email, token) = getJson('email', 'token')
+    user = UserHandler.from_email(email)
+    customers = [UserHandler.to_dict(UserHandler.from_id(id)) for id in UserHandler.all_ids()]
+    return {
+        "customers": customers,
+        "status": StatusCodes['SUCCESS']
+    }
+
+
 @app.route(f'{PREFIX}/set_like_sku', methods=["POST"])
 @handle_exception
 def set_like_sku():
@@ -524,3 +539,24 @@ def set_sku_in_cart():
     user_data = UserHandler.to_dict(user)
     user_data['status'] = StatusCodes['SUCCESS']
     return user_data
+
+
+# Hide/Unhide or delete a SKU
+@app.route(f'{PREFIX}/modify_sku', methods=["POST"])
+@handle_exception
+def modify_sku():
+    '''Like or unlike an inventory item'''
+    (sku, operation) = getData('sku', 'operation')
+    sku_obj = SkuHandler.from_sku(sku)
+    if sku_obj is None:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if operation == 'HIDE':
+        sku_obj.status = SkuStatus.INACTIVE.value
+        db.session.commit()
+    if operation == 'UNHIDE':
+        sku_obj.status = SkuStatus.ACTIVE.value
+        db.session.commit()
+    if operation == 'DELTE':
+        sku_obj.status = SkuStatus.DELETED.value
+        db.session.commit()
+    return {"status": StatusCodes['SUCCESS']}

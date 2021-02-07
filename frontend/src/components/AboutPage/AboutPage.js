@@ -1,13 +1,17 @@
-import React, { useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
+import PropTypes from 'prop-types';
 import { StyledAboutPage } from './AboutPage.styled';
 import { BUSINESS_NAME } from 'consts';
+import { getTheme } from 'storage';
 
-function AboutPage() {
+function AboutPage({
+    theme=getTheme(),
+}) {
     useLayoutEffect(() => {
         document.title = `About | ${BUSINESS_NAME}`;
     })
     return (
-        <StyledAboutPage>
+        <StyledAboutPage theme={theme}>
             <h1>About {BUSINESS_NAME} Inc</h1>
             <br />
             <h3>For over thirty-five years, New Life Nursery, Inc has been striving to grow the most beautiful, healthy and consistent plant material at competitive prices. Family owned and operated by the Gianaris Family, we continue to hold to our original motto: "Growing top quality material for buyers who are interested in the best".
@@ -24,7 +28,7 @@ The Gianaris Family</h3>
 }
 
 AboutPage.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default AboutPage;

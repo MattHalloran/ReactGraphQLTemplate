@@ -2,21 +2,27 @@ import PropTypes from 'prop-types';
 import { StyledModal } from './Modal.styled';
 import ClickOutside from '../ClickOutside/ClickOutside';
 import Button from 'components/shared/Button/Button';
+import { getTheme } from 'storage';
 
 // const ESCAPE_KEY = 27;
 
-function Modal(props) {
+function Modal({
+    theme = getTheme(),
+    onClose,
+    children,
+}) {
     return (
         <StyledModal
+            theme={theme}
             role="dialog"
             tabIndex="-1"
             aria-modal="true">
-            <ClickOutside className="modal-body" on_click_outside={props.onClose}>
+            <ClickOutside className="modal-body" on_click_outside={onClose}>
                 <Button
                     aria-label="Close Modal"
                     aria-labelledby="close-modal"
                     className="x-button"
-                    onClick={props.onClose}>
+                    onClick={onClose}>
                     <span id="close-modal" className="_hide-visual">
                         Close
                         </span>
@@ -24,7 +30,7 @@ function Modal(props) {
                         <path d="M 10,10 L 30,30 M 30,10 L 10,30" />
                     </svg>
                 </Button>
-                {props.children}
+                {children}
             </ClickOutside>
         </StyledModal>);
 }

@@ -2,10 +2,15 @@ import PropTypes from 'prop-types';
 import { StyledMenuContainer } from './MenuContainer.styled';
 import { getTheme } from 'storage';
 
-function MenuContainer(props) {
+function MenuContainer({
+    theme=getTheme(),
+    side = 'right',
+    open = false,
+    closeMenu,
+    children,
+    ...props
+}) {
     const MIN_SWIPE_DELTA = 100;
-    const theme = props.theme ?? getTheme();
-    let side = props.side ?? 'right';
     let touchStart = 0;
     let touchEnd = 0;
 
@@ -19,19 +24,20 @@ function MenuContainer(props) {
     const handleTouchEnd = () => {
         if ((side === 'right' && touchEnd - touchStart > MIN_SWIPE_DELTA) ||
             (side === 'left' && touchStart - touchEnd > MIN_SWIPE_DELTA)) {
-            props.closeMenu();
+            closeMenu();
         }
     }
 
     return (
         <StyledMenuContainer
             theme={theme}
-            open={props.open}
             side={side}
+            open={open}
+            {...props}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             onTouchMove={handleTouchMove}>
-            {props.children}
+                {children}
         </StyledMenuContainer>
     );
 }
@@ -41,6 +47,7 @@ MenuContainer.propTypes = {
     side: PropTypes.string,
     open: PropTypes.bool.isRequired,
     closeMenu: PropTypes.func.isRequired,
+    children: PropTypes.any,
 }
 
 export default MenuContainer;

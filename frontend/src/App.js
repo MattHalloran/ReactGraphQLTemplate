@@ -4,7 +4,7 @@ import Navbar from 'components/shared/Navbar/Navbar';
 import Spinner from 'components/shared/Spinner/Spinner';
 import Footer from 'components/shared/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import { PUBS, LINKS } from 'consts';
+import { PUBS, LINKS, USER_ROLES } from 'consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import FormPage from 'components/shared/wrappers/FormPage/FormPage';
 //Routes
@@ -133,7 +133,7 @@ function App() {
                 )} />
                 {/* customer pages */}
                 <Route exact path={LINKS.Profile} render={() => (
-                  <RequireAuthentication session={session}>
+                  <RequireAuthentication session={session} role={USER_ROLES.Customer}>
                     <FormPage header="Profile">
                       <ProfileForm session={session} />
                     </FormPage>
@@ -143,12 +143,36 @@ function App() {
                   <ShoppingPage user_roles={user_roles} session={session} />
                 )} />
                 {/* admin pages */}
-                <Route exact path={LINKS.Admin} component={AdminMainPage} />
-                <Route exact path={LINKS.AdminContactInfo} component={AdminContactPage} />
-                <Route exact path={LINKS.AdminCustomers} component={AdminCustomerPage} />
-                <Route exact path={LINKS.AdminGallery} component={AdminGalleryPage} />
-                <Route exact path={LINKS.AdminInventory} component={AdminInventoryPage} />
-                <Route exact path={LINKS.AdminOrders} component={AdminOrderPage} />
+                <Route exact path={LINKS.Admin} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminMainPage session={session} />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminContactInfo} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminContactPage session={session} />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminCustomers} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminCustomerPage session={session} />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminGallery} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminGalleryPage session={session} />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminInventory} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminInventoryPage session={session} />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminOrders} render={() => (
+                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                    <AdminOrderPage session={session} />
+                  </RequireAuthentication>
+                )} />
                 {/* 404 page */}
                 <Route component={NotFoundPage} />
               </Switch>

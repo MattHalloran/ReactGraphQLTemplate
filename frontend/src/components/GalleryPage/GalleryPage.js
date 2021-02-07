@@ -13,6 +13,7 @@ import Modal from 'components/shared/wrappers/Modal/Modal';
 import ChevronLeftIcon from 'assets/img/ChevronLeftIcon';
 import ChevronRightIcon from 'assets/img/ChevronRightIcon';
 import { BUSINESS_NAME, PUBS, LINKS } from 'consts';
+import { getTheme } from 'storage';
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
@@ -20,7 +21,9 @@ const SortableGallery = SortableContainer(({ items, handleClick }) => (
     <Gallery photos={items} renderImage={props => <SortableGalleryPhoto handleClick={handleClick} {...props} />} />
 ));
 
-function GalleryPage() {
+function GalleryPage({
+    theme = getTheme(),
+}) {
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
@@ -195,7 +198,7 @@ function GalleryPage() {
         </Modal>
     ) : null;
     return (
-        <StyledGalleryPage id={track_scrolling_id}>
+        <StyledGalleryPage theme={theme} id={track_scrolling_id}>
             {popup}
             <SortableGallery distance={5} items={thumbnails} handleClick={openImage} onSortEnd={onSortEnd} axis={"xy"} />
         </StyledGalleryPage>
@@ -203,7 +206,7 @@ function GalleryPage() {
 }
 
 GalleryPage.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default GalleryPage;

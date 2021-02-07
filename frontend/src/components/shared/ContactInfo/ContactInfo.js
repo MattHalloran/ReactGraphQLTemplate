@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { StyledContactInfo } from './ContactInfo.styled';
 import PhoneIcon from 'assets/img/PhoneIcon';
 
-function ContactInfo() {
+function ContactInfo({theme}) {
     return (
-        <StyledContactInfo>
+        <StyledContactInfo theme={theme}>
             <table className="hours-content-div">
                 <tbody>
                     <tr><th className="contact-header"><b>Hours</b></th></tr>
@@ -21,7 +22,7 @@ function ContactInfo() {
 }
 
 ContactInfo.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default ContactInfo;

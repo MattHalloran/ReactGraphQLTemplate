@@ -1,5 +1,12 @@
 import styled from 'styled-components';
 
+const getMaxMenuHeight = (data) => {
+    let window_height = data[0];
+    let control_y = data[1];
+    console.log('MAX MENU HEIGHTTT', data);
+    return `${window_height - control_y - 50}px`;
+}
+
 export const StyledDropDown = styled.div`
     position: relative;
     background-color: rgba(255,255,255,0.3);
@@ -65,7 +72,7 @@ export const StyledDropDown = styled.div`
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
         box-sizing: border-box;
         margin-top: -1px;
-        max-height: calc(80vh);
+        max-height: ${({ size_data }) => getMaxMenuHeight(size_data)};
         overflow-y: auto;
         position: absolute;
         top: 100%;

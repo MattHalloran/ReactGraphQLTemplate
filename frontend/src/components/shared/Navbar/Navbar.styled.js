@@ -49,13 +49,17 @@ export const StyledNavbar = styled.nav`
     }
 
     .nav-logo {
-        max-height: 50px;
-        vertical-align: middle
+        vertical-align: middle;
+        fill: black;
+        margin-top: 5px;
+        margin-bottom: 7px;
+        max-height: 12vh;
+        //filter: invert(1);
     }
     
     .nav-name {
         font-size: 1.5em;
         vertical-align: middle;
-        margin-left: 10px;
+        margin-left: -10px;
     }
 `;

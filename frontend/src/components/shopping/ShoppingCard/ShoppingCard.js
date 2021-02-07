@@ -1,16 +1,19 @@
-import React from 'react'
+import PropTypes from 'prop-types';
+import { getTheme } from 'storage';
 import { StyledShoppingCard } from './ShoppingCard.styled';
 
-function ShoppingCard() {
+function ShoppingCard({
+    theme = getTheme(),
+}) {
     return (
-        <StyledShoppingCard>
+        <StyledShoppingCard theme={theme}>
             <h1>HELLO THERE</h1>
         </StyledShoppingCard >
     );
 }
 
 ShoppingCard.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default ShoppingCard;

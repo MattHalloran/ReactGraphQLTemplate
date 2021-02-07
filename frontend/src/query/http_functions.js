@@ -98,6 +98,19 @@ export async function send_password_reset_request(email) {
     return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
 }
 
+export async function fetch_customers(email, token) {
+    let json = JSON.stringify({
+        "email": email,
+        "token": token,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicationJson,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_customers`, options);
+}
+
 export async function fetch_plants(sort) {
     let json = JSON.stringify({
         "sort": sort,
@@ -110,10 +123,11 @@ export async function fetch_plants(sort) {
     return await fetchWrapper(`${PREFIX}/fetch_plants`, options);
 }
 
-export async function fetch_inventory(sorter, page_size) {
+export async function fetch_inventory(sorter, page_size, admin) {
     let json = JSON.stringify({
         "sorter": sorter,
         "page_size": page_size,
+        "admin": admin,
     });
     let options = {
         body: json,
@@ -257,4 +271,17 @@ export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
+}
+
+export async function modify_sku(sku, operation) {
+    let json = JSON.stringify({
+        "sku": sku,
+        "operation": operation
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }

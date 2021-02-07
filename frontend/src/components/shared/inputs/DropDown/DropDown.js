@@ -1,28 +1,62 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledDropDown } from './DropDown.styled';
 import useOutsideClick from 'utils/useOutsideClick';
 import { getTheme } from 'storage';
+import makeID from 'utils/makeID';
 
-function DropDown(props) {
-    const theme = props.theme ?? getTheme();
+function DropDown({ allow_custom_input = false,
+    multi_select = false,
+    options,
+    disabled = false,
+    arrowClosed,
+    arrowOpen,
+    onChange,
+    onFocus,
+    initial_value,
+    placeholder,
+    theme=getTheme(),
+}) {
     const [is_open, setIsOpen] = useState(false);
+    const [y, setY] = useState(0);
     const clickRef = useRef();
     const menuRef = useRef();
+    const dropID = useRef(makeID(8));
     let mouse_start = 0;
     let mouse_end = 0;
 
-    const [selected, setSelected] = useState(props.initial_value ?? props.options[0])
+    const [custom, setCustom] = useState('');
+    const [selected, setSelected] = useState(() => {
+        let value = initial_value ?? options[0];
+        return multi_select ? [value] : value;
+    })
+
+    console.log('DROPDOWN OPTIONS AREEEE', options, selected);
 
     useEffect(() => {
-        if (selected?.length <= 0) return;
+        setY(document.getElementById(dropID.current)?.getBoundingClientRect()?.y ?? 0);
+    },[])
+
+    useEffect(() => {
+        if (multi_select) {
+            if (custom.length > 0) 
+                onChange([...selected, custom]);
+            else
+                onChange(selected);
+        } else {
+            onChange(selected);
+            setIsOpen(false);
+        }
+
+
+        onChange(selected);
+        if (multi_select || selected?.length <= 0) return;
         setIsOpen(false);
-        props.onChange(selected);
-    }, [selected])
+    }, [selected, custom])
 
     // Start tracking drag variables for dropdown menu
     const handleMouseDown = (event) => {
-        if (props.disabled || !menuRef.current.contains(event.target)) return;
+        if (disabled || !menuRef.current.contains(event.target)) return;
         mouse_start = [event.pageX, event.pageY];
         mouse_end = mouse_start;
     }
@@ -41,45 +75,78 @@ function DropDown(props) {
         setIsOpen(false)
     });
 
-    const setValue = (value, label) => {
-        if (was_drag()) return;
-        setSelected({ value, label });
+    const findIndex = (arr, opt) => {
+        if (!multi_select) return -1;
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].label === opt.label && arr[i].value === opt.value) {
+                console.log('GOT INDEX', i)
+                return i;
+            }
+        }
+        return -1;
     }
 
-    const renderOption = (option) => {
-        let value = option.value ?? option.label ?? option;
-        let label = option.label ?? option.value ?? option;
+    const setValue = useCallback((option) => {
+        if (was_drag()) return;
+        if (multi_select) {
+            let index = findIndex(selected, option);
+            if (index >= 0) {
+                let new_selection = selected.splice(index, 1);
+                console.log('A NEW SELECTION IS', index, new_selection);
+                setSelected(s => s.splice(index, 1));
+            } else {
+                console.log('B NEW SELECTINO IS', index, [...selected, option])
+                setSelected(s => [...s, option]);
+            }
+        } else {
+            setSelected(option);
+        }
+    }, [selected])
+
+    const renderOption = useCallback((option) => {
+        let is_selected = false;
+        if (multi_select) {
+            is_selected = findIndex(selected, option) >= 0;
+            console.log('RENDERRERRR', option, findIndex(selected,option))
+        } else if (selected.value === option.value) {
+            is_selected = true;
+        }
         return (
             <div
-                key={value}
-                className={'DropDown-option ' + (selected.value === value ? 'is-selected' : '')}
+                key={option.value}
+                className={'DropDown-option ' + (is_selected ? 'is-selected' : '')}
                 role='option'
-                onClick={() => setValue(value, label)}
-                onTouchEnd={() => setValue(value, label)}
-                aria-selected={selected.value === value ? 'true' : 'false'}>
-                {label}
+                onClick={() => setValue(option)}
+                onTouchEnd={() => setValue(option)}
+                aria-selected={is_selected}>
+                {option.label}
             </div>
         )
+    }, [selected]);
+
+    let control_text;
+    if (multi_select) {
+        control_text = custom;
+    } else {
+        control_text = typeof selected === 'string' ? selected : selected.label;
     }
 
-    const { arrowClosed, arrowOpen } = props
-
-    let control_text = typeof selected === 'string' ? selected : selected.label;
-    let control = props.allow_custom_input ? (
-        <input type="text" className="DropDown-custom" value={control_text} onChange={(e) => setValue(e.target.value, e.target.value)} />
+    let any_selected = (multi_select && selected.length > 0) || (!multi_select && selected.value?.length > 0);
+    let control = allow_custom_input ? (
+        <input type="text" className="DropDown-custom" placeholder={placeholder} value={control_text} onChange={(e) => setCustom(e.target.value)} />
     ) : (
-            <div className={'DropDown-placeholder' + (selected.value?.length > 0 ? 'is-selected' : '')}>
+            <div className={'DropDown-placeholder' + (any_selected ? 'is-selected' : '')}>
                 {control_text}
             </div>
         );
 
     let menu = is_open ? (<div className='DropDown-menu' aria-expanded='true' ref={menuRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
-        {props.options?.map((item) => renderOption(item))}
+        {options?.map((item) => renderOption(item))}
     </div>) : null
 
     return (
-        <StyledDropDown theme={theme} className={(is_open ? 'is-open' : null)} ref={clickRef}>
-            <div className={'DropDown-control' + (props.disabled ? 'DropDown-disabled' : '')} onClick={() => setIsOpen(is => !is)} aria-haspopup='listbox'>
+        <StyledDropDown id={dropID.current} theme={theme} className={(is_open ? 'is-open' : null)} ref={clickRef} size_data={[window.innerHeight, y]}>
+            <div className={'DropDown-control' + (disabled ? 'DropDown-disabled' : '')} onClick={() => setIsOpen(is => !is)} aria-haspopup='listbox'>
                 {control}
                 <div className='DropDown-arrow-wrapper'>
                     {arrowOpen && arrowClosed
@@ -94,6 +161,8 @@ function DropDown(props) {
 
 DropDown.propTypes = {
     allow_custom_input: PropTypes.bool,
+    // Allow multiple options to be selected at the same time
+    multi_select: PropTypes.bool,
     // Options is an array of {label, value} pairs
     options: PropTypes.array.isRequired,
     disabled: PropTypes.bool,

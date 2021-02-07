@@ -1,17 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledCheckBox } from './CheckBox.styled';
 import { getTheme } from 'storage';
 
-function CheckBox(props) {
-    const theme = props.theme ?? getTheme();
+function CheckBox({
+    theme=getTheme(),
+    group,
+    label,
+    value,
+    checked,
+    onChange,
+}) {
 
     return (
         <StyledCheckBox theme={theme}>
-            <div className="border" onClick={() => props.onChange(props.group, props.value ?? props.label, !props.checked)}>
-                <div className={`indicator ${props.checked ? "checked" : ""}`}/>
+            <div className="border" onClick={() => onChange(group, value ?? label, !checked)}>
+                <div className={`indicator ${checked ? "checked" : ""}`}/>
             </div>
-            <div className="label">{props.label}</div>
+            <div className="label">{label}</div>
         </StyledCheckBox>
     )
 }

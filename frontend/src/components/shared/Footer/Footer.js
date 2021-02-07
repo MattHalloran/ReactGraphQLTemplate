@@ -1,12 +1,12 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ProvenWinners from 'assets/img/proven-winners.png';
 import { StyledFooter } from './Footer.styled';
 import { getTheme } from 'storage';
 
-function Footer(props) {
-    const theme = props.theme ?? getTheme();
+function Footer({
+    theme=getTheme(),
+}) {
     return (
         <StyledFooter theme={theme}>
             <div className="flexed">

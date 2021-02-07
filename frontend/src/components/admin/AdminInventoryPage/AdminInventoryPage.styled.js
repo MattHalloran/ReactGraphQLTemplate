@@ -1,5 +1,12 @@
 import styled from 'styled-components';
 
+const getStatusColor = (status) => {
+    if (status === 'DELTED') return 'red';
+    if (status === 'INACTIVE') return 'grey';
+    if (status === 'ACTIVE') return 'lightgreen';
+    return '';
+}
+
 export const StyledAdminInventoryPage = styled.div`
     padding-top: 12vh;
 
@@ -22,14 +29,14 @@ export const StyledAdminInventoryPage = styled.div`
     }
 `;
 
-export const StyledSkuCard = styled.div`
+export const StyledCard = styled.div`
     background-color: white;
     color: black;
     margin: 20px;
     padding: 10px;
     min-width: 150px;
     min-height: 50px;
-    border: 1px solid #ccc;
+    border: 5px solid ${({ status }) => getStatusColor(status)};
     border-radius: 1em;
     cursor: pointer;
 

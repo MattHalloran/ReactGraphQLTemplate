@@ -1,10 +1,13 @@
-import React, { useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminMainPage } from './AdminMainPage.styled';
 import { useHistory } from "react-router-dom";
 import { BUSINESS_NAME, LINKS } from 'consts';
+import { getTheme } from 'storage';
 
-function AdminMainPage() {
+function AdminMainPage({
+    theme = getTheme(),
+}) {
     let history = useHistory();
 
     useLayoutEffect(() => {
@@ -20,7 +23,7 @@ function AdminMainPage() {
     ]
 
     return (
-        <StyledAdminMainPage>
+        <StyledAdminMainPage theme={theme}>
             <h1>Admin Portal</h1>
             <div className="flexed">
                 {card_data.map(([link, title, description]) => (
@@ -36,7 +39,7 @@ function AdminMainPage() {
 }
 
 AdminMainPage.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default AdminMainPage;

@@ -1,18 +1,20 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { getTheme } from 'storage';
 import { StyledFormPage } from './FormPage.styled';
 
-function FormPage(props) {
-    const theme = props.theme ?? getTheme();
+function FormPage({
+    header,
+    children,
+    theme = getTheme(),
+}) {
     return (
         <StyledFormPage theme={theme}>
             <form className="form">
                 <div className="form-header">
-                    <h1>{props.header}</h1>
+                    <h1>{header}</h1>
                 </div>
                 <div className="form-body">
-                    {props.children}
+                    {children}
                 </div>
             </form>
         </StyledFormPage>
@@ -22,6 +24,7 @@ function FormPage(props) {
 FormPage.propTypes = {
     header: PropTypes.string.isRequired,
     theme: PropTypes.object,
+    children: PropTypes.any,
 }
 
 export default FormPage;

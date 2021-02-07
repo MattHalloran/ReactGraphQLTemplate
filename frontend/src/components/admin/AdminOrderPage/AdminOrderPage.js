@@ -1,19 +1,25 @@
-import React, { useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
+import PropTypes from 'prop-types';
 import { StyledAdminOrderPage } from './AdminOrderPage.styled';
+import { getTheme } from 'storage';
 
-function AdminOrderPage() {
+function AdminOrderPage({
+    theme = getTheme(),
+}) {
+
     useLayoutEffect(() => {
-        document.title = "Something here";
+        document.title = "Order Page";
     })
+
     return (
-        <StyledAdminOrderPage>
+        <StyledAdminOrderPage theme={theme}>
 
         </StyledAdminOrderPage >
     );
 }
 
 AdminOrderPage.propTypes = {
-
+    theme: PropTypes.object,
 }
 
 export default AdminOrderPage;
