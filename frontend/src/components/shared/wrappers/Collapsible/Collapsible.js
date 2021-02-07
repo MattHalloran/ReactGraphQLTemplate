@@ -16,7 +16,11 @@ function Collapsible({
     }
     return (<StyledCollapsible theme={theme}>
         <div onClick={() => togglePanel()} className="header">
-            {title}</div>
+            {title}
+            <div className="arrow-wrapper">
+                <span className='arrow' />
+            </div>
+        </div>
         {open ? (
             <div className="content">
                 {children}

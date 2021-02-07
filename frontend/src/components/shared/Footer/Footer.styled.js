@@ -27,17 +27,22 @@ export const StyledFooter = styled.footer`
         }
     }
 
-    @media (max-width: 319px) {
+    @media (max-width: ${({ theme }) => theme.mobile}) {
         .footer-group {
-            border-color: transparent;
-            border-bottom-color: darkgreen;
-            border-style: solid;
+            border: 1px solid black;
+        }
+
+        .flexed {
+            > *:last-child {
+                border-right: 1px solid black;
+            }
         }
     }
 
     .footer-group {
         padding: 0 10px;
         min-width: 150px;
+        height: auto;
 
         li {
             padding-bottom: 10px;
@@ -45,7 +50,7 @@ export const StyledFooter = styled.footer`
     }
 
     .winner-div {
-        display: flex;
+        display: grid;
     }
 
     .proven-winner {

@@ -4,7 +4,7 @@ import Navbar from 'components/shared/Navbar/Navbar';
 import Spinner from 'components/shared/Spinner/Spinner';
 import Footer from 'components/shared/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import { PUBS, LINKS, USER_ROLES } from 'consts';
+import { PUBS, LINKS, USER_ROLES, LOCAL_STORAGE } from 'consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import FormPage from 'components/shared/wrappers/FormPage/FormPage';
 //Routes
@@ -26,7 +26,7 @@ import LogInForm from 'components/forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'components/forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getTheme } from './storage';
+import { getItem, getTheme } from './storage';
 //Authentication
 import RequireAuthentication from 'components/shared/wrappers/RequireAuthentication/RequireAuthentication';
 import { checkCookies } from 'query/http_promises';
@@ -41,7 +41,7 @@ const keyMap = {
 function App() {
   const [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(getItem(LOCAL_STORAGE.Session));
   const session_attempts = useRef(0);
   const [user_roles, setUserRoles] = useState(null);
   const [theme, setTheme] = useState(getTheme());
@@ -79,7 +79,7 @@ function App() {
 
   useEffect(() => {
     let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
-    let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t));
+    let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t ?? getTheme()));
     let roleSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
     let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, p) => setPopupOpen(open => p === 'toggle' ? !open : p));
     let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => setMenuOpen(open => b === 'toggle' ? !open : b));
@@ -97,7 +97,7 @@ function App() {
   useEffect(() => {
     if (session == null && session_attempts.current < 5) {
       session_attempts.current++;
-      console.log('SESSION ATTEMPTS IS', session_attempts.current)
+      console.log('SESSION UPDATED IN APP', session)
       checkCookies();
     }
   }, [session])
@@ -145,32 +145,32 @@ function App() {
                 {/* admin pages */}
                 <Route exact path={LINKS.Admin} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminMainPage session={session} />
+                    <AdminMainPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminContactInfo} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminContactPage session={session} />
+                    <AdminContactPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminCustomers} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminCustomerPage session={session} />
+                    <AdminCustomerPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminGallery} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminGalleryPage session={session} />
+                    <AdminGalleryPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminInventory} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminInventoryPage session={session} />
+                    <AdminInventoryPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminOrders} render={() => (
                   <RequireAuthentication session={session} role={USER_ROLES.Admin}>
-                    <AdminOrderPage session={session} />
+                    <AdminOrderPage />
                   </RequireAuthentication>
                 )} />
                 {/* 404 page */}

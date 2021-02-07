@@ -16,7 +16,7 @@ function HomePage({
     return (
         <div theme={theme}>
             <Hero text="Beautiful, healthy plants" subtext="At competitive prices" />
-            <Collapsible title="Social Media">
+            <Collapsible title="Follow Us on Social Media!">
                 <SocialIcon fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </Collapsible>

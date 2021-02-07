@@ -52,4 +52,9 @@ export const StyledSkuPopup = styled.div`
     display: block;
     padding: 1em;
     width: 500px;
+
+    .half {
+        display: inline-block;
+        width: 50%;
+    }
 `;

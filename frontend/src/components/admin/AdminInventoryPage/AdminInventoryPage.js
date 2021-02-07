@@ -133,7 +133,7 @@ function AdminInventoryPage({
                 <div className="flex-content">
                     <p>Select plant template to create a new SKU</p>
                     <div className="card-flex">
-                        {plantCards.map((data, index) => <PlantCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} plant={data}/>)}
+                        {plantCards.map((data, index) => <PlantCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} plant={data} />)}
                     </div>
                 </div>
             </div>
@@ -147,7 +147,7 @@ AdminInventoryPage.propTypes = {
 
 export default AdminInventoryPage;
 
-function SkuCard({ 
+function SkuCard({
     onEdit,
     onHide,
     onDelete,
@@ -178,7 +178,7 @@ SkuCard.propTypes = {
 
 function PlantCard({
     plant,
-    }) {
+}) {
 
     return (
         <StyledCard>
@@ -216,14 +216,17 @@ function SkuPopup({
                 valueFunc={valueFunc}
             />
         )
-        let options = trait_options[field].map((o, index) => {return {label: o, value: index} })
+        let options = trait_options[field].map((o, index) => { return { label: o, value: index } })
         return (
-            <DropDown
-                multi_select={true}
-                allow_custom_input={true}
-                className="sorter"
-                options={options}
-                onChange={(e) => valueFunc(e.value)} />
+            <div>
+                <label>{label}</label>
+                <DropDown
+                    multi_select={true}
+                    allow_custom_input={true}
+                    className="sorter"
+                    options={options}
+                    onChange={(e) => valueFunc(e.value)} />
+            </div>
         )
     }
 
@@ -242,12 +245,17 @@ function SkuPopup({
                     value={common_name}
                     valueFunc={setCommonName}
                 />
-                { getInput('drought_tolerances', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
-                { getInput('grown_heights', 'Grown Height', grown_height, setGrownHeight)}
-                { getInput('grown_spreads', 'Grown Spread', grown_spread, setGrownSpread)}
-                { getInput('growth_rates', 'Growth Rate', growth_rate, setGrowthRate)}
-                { getInput('optimal_lights', 'Optimal Light', optimal_light, setOptimalLight)}
-                { getInput('salt_tolerances', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
+                <div className="half">
+                    {getInput('drought_tolerances', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
+                    {getInput('grown_heights', 'Grown Height', grown_height, setGrownHeight)}
+                    {getInput('grown_spreads', 'Grown Spread', grown_spread, setGrownSpread)}
+                    {getInput('growth_rates', 'Growth Rate', growth_rate, setGrowthRate)}
+                    {getInput('optimal_lights', 'Optimal Light', optimal_light, setOptimalLight)}
+                    {getInput('salt_tolerances', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
+                </div>
+                <div className="half">
+
+                </div>
             </div>
         </StyledSkuPopup>
     );

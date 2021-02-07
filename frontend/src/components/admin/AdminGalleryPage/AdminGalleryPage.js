@@ -1,37 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages } from 'query/http_promises';
 import Button from 'components/shared/Button/Button';
 
-class AdminGalleryPage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selected_images: [],
-        }
-        this.applyChanges = this.applyChanges.bind(this);
-        this.fileSelectedHandler = this.fileSelectedHandler.bind(this);
-        this.uploadImages = this.uploadImages.bind(this);
-    }
+function AdminGalleryPage(props) {
+    const [selected, setSelected] = useState([]);
 
-    componentDidMount() {
+    useLayoutEffect(() => {
         document.title = "Edit Gallery";
-    }
+    },[])
 
-    fileSelectedHandler(event) {
+    const fileSelectedHandler = (event) => {
         let newImages = event.target.files;
         if (newImages.length <= 0) {
             return;
         }
-        this.setState({ selected_images: [] });
+        setSelected([]);
         for(let i = 0; i < newImages.length; i++) {
             let fileSplit = newImages[i].name.split('.');
-            this.processImage(newImages[i], fileSplit[0], fileSplit[1]);
+            processImage(newImages[i], fileSplit[0], fileSplit[1]);
         }
     }
 
-    processImage(file, name, extension) {
+    const processImage = (file, name, extension) => {
         let imageData = []
         let reader = new FileReader();
         reader.onloadend = () => {
@@ -40,18 +32,18 @@ class AdminGalleryPage extends React.Component {
                 extension: extension,
                 data: reader.result
             };
-            this.setState({ selected_images: [...this.state.selected_images, imageData] });
+            setSelected(images => [...images, imageData])
         }
         reader.readAsDataURL(file);
     }
 
-    uploadImages() {
-        if(this.state.selected_images.length <= 0) {
+    const uploadImages = useCallback(() => {
+        if(selected.length <= 0) {
             alert('No images selected!');
             return;
         }
         let form = new FormData();
-        this.state.selected_images.forEach(img => {
+        selected.forEach(img => {
             form.append('name', img.name);
             form.append('extension', img.extension);
             form.append('image', img.data);
@@ -62,29 +54,27 @@ class AdminGalleryPage extends React.Component {
             console.error(error);
             alert('Error uploading images!');
         });
-    }
+    }, [selected])
 
-    applyChanges() {
+    const applyChanges = () => {
         
     }
 
-    render() {
-        return (
-            <StyledAdminGalleryPage>
-                <h1>Gallery Edit</h1>
-                <div>
-                    <h2>Select image(s) for upload</h2>
-                    <input type="file" onChange={this.fileSelectedHandler} multiple/>
-                    <Button onClick={this.uploadImages}>Upload</Button>
-                </div>
-                <h2>Reorder and delete images</h2>
-                <div>
-                    
-                </div>
-                <Button onClick={this.applyChanges}>Apply Changes</Button>
-            </StyledAdminGalleryPage>
-        );
-    }
+    return (
+        <StyledAdminGalleryPage>
+            <h1>Gallery Edit</h1>
+            <div>
+                <h2>Select image(s) for upload</h2>
+                <input type="file" onChange={fileSelectedHandler} multiple/>
+                <Button onClick={uploadImages}>Upload</Button>
+            </div>
+            <h2>Reorder and delete images</h2>
+            <div>
+                
+            </div>
+            <Button onClick={applyChanges}>Apply Changes</Button>
+        </StyledAdminGalleryPage>
+    );
 }
 
 AdminGalleryPage.propTypes = {
@@ -93,27 +83,13 @@ AdminGalleryPage.propTypes = {
 
 export default AdminGalleryPage;
 
-class ImageCard extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            delete: false,
-        }
-        this.deleteClicked = this.deleteClicked.bind(this);
-    }
-
-    deleteClicked() {
-        this.setState({ delete: !this.state.delete });
-    }
-
-    render() {
-        return(
-            <div className={this.state.delete ? "" : ""}>
-                <img src={`data:image/jpeg;base64,${this.props.b64}`} width="100px" height="100px" />
-                <Button onClick={this.deleteClicked}/>
-            </div>
-        );
-    }
+function ImageCard(props) {
+    return(
+        <div>
+            <img src={`data:image/jpeg;base64,${props.b64}`} width="100px" height="100px" />
+            <Button/>
+        </div>
+    );
 }
 
 ImageCard.propTypes = {

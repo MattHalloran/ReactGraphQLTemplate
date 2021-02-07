@@ -81,3 +81,11 @@ export const LINKS = {
     Register: "/register",
     Shopping: "/shopping",
 }
+
+export const ACCOUNT_STATUS = {
+    Deleted: -1,
+    Unlocked: 1,
+    WaitingApproval: 2,
+    SoftLock: 3,
+    HardLock: 4,
+}

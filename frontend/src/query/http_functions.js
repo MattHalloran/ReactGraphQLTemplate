@@ -285,3 +285,16 @@ export async function modify_sku(sku, operation) {
     }
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }
+
+export async function modify_user(id, operation) {
+    let json = JSON.stringify({
+        "id": id,
+        "operation": operation
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/modify_user`, options);
+}

@@ -85,5 +85,6 @@ export const getItem = (key) => {
 export const clearStorage = () => {
   Object.values(LOCAL_STORAGE).forEach(entry => {
     localStorage.setItem(entry, null);
+    PubSub.publish(entry, null);
   })
 }

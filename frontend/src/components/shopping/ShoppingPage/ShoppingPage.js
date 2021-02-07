@@ -1,10 +1,11 @@
-import React, { memo, useState, useEffect, useRef, useCallback } from 'react'
+import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import ArrowMenu from 'components/shared/menus/ArrowMenu/ArrowMenu';
-import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS } from 'consts';
+import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS, LINKS } from 'consts';
 import { getInventoryFilters } from "query/http_promises";
 import DropDown from 'components/shared/inputs/DropDown/DropDown';
 import CheckBox from 'components/shared/inputs/CheckBox/CheckBox';
@@ -17,9 +18,12 @@ function ShoppingPage({
 }) {
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
+    let history = useHistory();
+    const authenticated = useRef(false);
 
     useEffect(() => {
         document.title = `Shop | ${BUSINESS_NAME}`;
+        if (!authenticated.current) return;
         let mounted = true;
         getInventoryFilters()
             .then((response) => {
@@ -77,7 +81,6 @@ function ShoppingPage({
         </React.Fragment>
     }
 
-    let display;
     let is_customer = false;
     let roles = user_roles;
     if (roles instanceof Array) {
@@ -89,10 +92,16 @@ function ShoppingPage({
             }
         })
     }
-    if (is_customer) {
-        display =
-            <React.Fragment>
-                <ArrowMenu >
+    if (is_customer && session) {
+        console.log('IS AUTHENTICATED')
+        authenticated.current = true;
+    } else {
+        history.push(LINKS.LogIn);
+    }
+
+    return (
+        <StyledShoppingPage theme={theme}>
+            <ArrowMenu >
                     <h2>Sort</h2>
                     <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
                     <h2>Search</h2>
@@ -115,17 +124,6 @@ function ShoppingPage({
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </ArrowMenu>
                 <ShoppingList session={session} sort={sortBy} filters={filters} />
-            </React.Fragment >
-    } else {
-        display =
-            <React.Fragment>
-                <h1>Not for u :(</h1>
-            </React.Fragment>
-    }
-
-    return (
-        <StyledShoppingPage theme={theme}>
-            { display}
         </StyledShoppingPage>
     );
 }

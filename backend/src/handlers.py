@@ -569,6 +569,8 @@ class UserHandler(Handler):
     @staticmethod
     def to_dict(model: User):
         as_dict = UserHandler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
+        as_dict['id'] = model.id
+        as_dict['account_status'] = model.account_status
         as_dict['roles'] = [RoleHandler.to_dict(r) for r in model.roles]
         if len(model.orders) > 0:
             as_dict['cart'] = [OrderItemHandler.to_dict(o) for o in model.orders[-1].items]

@@ -37,6 +37,7 @@ export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_fil
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
 export const modifySku = (sku, operation) => promiseWrapper(http.modify_sku, sku, operation);
+export const modifyUser = (id, operation) => promiseWrapper(http.modify_user, id, operation);
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {

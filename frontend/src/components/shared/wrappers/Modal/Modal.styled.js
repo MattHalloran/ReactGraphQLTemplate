@@ -66,6 +66,8 @@ export const StyledModal = styled.aside`
     @media (max-width: ${({ theme }) => theme.mobile}) {
         .modal-body {
             padding: 0px;
+            width: -webkit-fill-available;
+            height: -webkit-fill-available;
         }
     }
 

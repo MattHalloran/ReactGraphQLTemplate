@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import BurgerMenu from '../menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { clearStorage, getTheme } from 'storage';
+import { clearStorage, getTheme, getItem } from 'storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/shared/ContactInfo/ContactInfo';
-import { BUSINESS_NAME, USER_ROLES, LINKS } from 'consts';
+import { BUSINESS_NAME, USER_ROLES, LINKS, LOCAL_STORAGE } from 'consts';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -103,6 +103,7 @@ function NavList({
 }) {
     // Link, Link text, onClick function
     let nav_options = [];
+    console.log('IN NAVLIST', session, user_roles)
 
     if (session !== null) {
         nav_options.push([LINKS.Shopping, 'Shopping']);

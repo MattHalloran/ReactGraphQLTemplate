@@ -25,8 +25,18 @@ export const StyledSkuCard = styled.div`
         
     }
 
-    .size {
+    .size-container {
+        display: block;
+        margin: 5px;
 
+        > * {
+            display: inline;
+            background-color: lightskyblue;
+            border-radius: 10px;
+            max-width: 70px;
+            padding: 0 10px 0 10px;
+            margin: 5px 0 0 5px;
+        }
     }
 
     .display-image-container {

@@ -25,7 +25,9 @@ import NoWaterIcon from 'assets/img/NoWaterIcon';
 import RangeIcon from 'assets/img/RangeIcon';
 import PHIcon from 'assets/img/PHIcon';
 import SoilTypeIcon from 'assets/img/SoilTypeIcon';
+import Tooltip from 'components/shared/Tooltip/Tooltip';
 import { getTheme } from "storage";
+import makeid from "utils/makeID";
 
 function ShoppingList({
     page_size,
@@ -41,6 +43,7 @@ function ShoppingList({
     const [cart, setCart] = useState([]);
     const [popup, setPopup] = useState(null);
     const [cards, setCards] = useState([]);
+    const [visible_cards, setVisibleCards] = useState([]);
     const [all_skus, setAllSkus] = useState([]);
     // [sku, base64 data, alt]
     const [curr_sku, setCurrSku] = useState(null);
@@ -98,18 +101,17 @@ function ShoppingList({
     useEffect(() => {
         console.log('GRABBING ALL SKUS', sort)
         console.log(typeof sort);
+        if (!session) return;
         let mounted = true;
         getInventory(sort, page_size, false)
             .then((response) => {
                 if (!mounted) return;
                 setCards(response.page_results);
-                console.log('SETING ALL SKUS', response)
                 setAllSkus(skus => skus.concat(response.all_skus));
                 console.log('SET ALL SKUS', response.all_skus)
             })
             .catch((error) => {
-                console.log("Failed to load inventory");
-                console.error(error);
+                console.error("Failed to load inventory", error);
                 alert(error.error);
             });
 
@@ -121,6 +123,65 @@ function ShoppingList({
         document.addEventListener('scroll', loadNextPage);
         return (() => document.removeEventListener('scroll', loadNextPage));
     })
+
+    // Determine which skus will be visible to the user (i.e. not filtered out)
+    useEffect(() => {
+        if (!filters) {
+            setVisibleCards(all_skus);
+            return;
+        }
+        
+        //Find all applied filters
+        let applied_filters = [];
+        console.log('fdsiafhdsaufkdks filter', filters)
+        for (const key in filters) {
+            console.log('CURR KEY IS', key)
+            let filter_group = filters[key];
+            console.log('FILTER GROUP IS', filter_group)
+            for(let i = 0; i < filter_group.length; i++) {
+                if (filter_group[i].checked) {
+                    applied_filters.push([key, filter_group[i].label]);
+                }
+            }
+        }
+        //If no filters are set, show all plants
+        if (applied_filters.length == 0) {
+            setVisibleCards(cards);
+            return;
+        }
+        //Select all skus that contain the filters
+        let filtered_cards = [];
+        for (let i = 0; i < cards.length; i++) {
+            let curr_plant = cards[i].plant;
+            console.log('ALL CARDS IS', cards);
+            console.log('CURR PLANT ISSS', curr_plant, i)
+            filterloop:
+            for (let j = 0; j < applied_filters.length; j++) {
+                let trait = applied_filters[j][0];
+                let value = applied_filters[j][1];
+
+                // Grab data depending on if the field is for the sku or its associated plant
+                let data;
+                if (trait === 'sizes') {
+                    data = cards[i][trait];
+                } else {
+                    data = curr_plant[trait];
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    if (data.some(o => o.value === value)) {
+                        filtered_cards.push(cards[i]);
+                        break filterloop;
+                    }
+                } else if (data?.value === value) {
+                    filtered_cards.push(cards[i]);
+                    break filterloop;
+                }
+            }
+        }
+        console.log('SETTING FILTERED CARDS TOOOOOO', filtered_cards);
+        setVisibleCards(filtered_cards);
+    }, [cards, filters])
 
     const readyToLoadPage = useCallback(() => {
         //If the image metadata hasn't been received, or
@@ -141,39 +202,39 @@ function ShoppingList({
         if (!readyToLoadPage()) return;
         loading.current = true;
         //Grab all card thumbnail images
-        let load_to = Math.min(all_skus.length, cards.length + page_size - 1);
-        let page_skus = all_skus.splice(cards.length, load_to);
+        let load_to = Math.min(visible_cards.length, cards.length + page_size - 1);
+        let page_skus = visible_cards.splice(cards.length, load_to).map(c => c.sku);
         getInventoryPage(page_skus).then(response => {
             setCards(c => c.concat(...response.data));
         }).catch(error => {
             console.error("Failed to load cards!", error);
             loading.current = false;
         });
-    }, [cards, page_size, readyToLoadPage, all_skus]);
+    }, [cards, page_size, readyToLoadPage, visible_cards]);
 
     const prevImage = useCallback(() => {
         if (cards.length <= 0) return;
         // Default to last image if none open
         if (curr_index < 0) {
-            history.push(LINKS.Shopping + '/' + all_skus[cards.length - 1]);
+            history.push(LINKS.Shopping + '/' + visible_cards[cards.length - 1].sku);
         } else {
             // Find previous image index using modulus
-            let prev_index = (curr_index + cards.length - 1) % all_skus.length;
-            history.replace(LINKS.Shopping + '/' + all_skus[prev_index]);
+            let prev_index = (curr_index + cards.length - 1) % visible_cards.length;
+            history.replace(LINKS.Shopping + '/' + visible_cards[prev_index].sku);
         }
-    }, [cards, all_skus, curr_index, history]);
+    }, [cards, visible_cards, curr_index, history]);
 
     const nextImage = useCallback(() => {
         if (cards.length <= 0) return;
         // Default to first image if none open
         if (curr_index < 0) {
-            history.push(LINKS.Shopping + '/' + all_skus[0]);
+            history.push(LINKS.Shopping + '/' + visible_cards[0].sku);
         } else {
             // Find next image index using modulus
-            let next_index = (curr_index + 1) % all_skus.length;
-            history.replace(LINKS.Shopping + '/' + all_skus[next_index]);
+            let next_index = (curr_index + 1) % visible_cards.length;
+            history.replace(LINKS.Shopping + '/' + visible_cards[next_index].sku);
         }
-    }, [cards, all_skus, curr_index, history]);
+    }, [cards, visible_cards, curr_index, history]);
 
 
     const expandSku = (sku) => {
@@ -196,22 +257,19 @@ function ShoppingList({
             setPopup(null);
             return;
         }
-        all_skus.map(([e]) => console.log(e))
-        let index = all_skus.map(([e]) => e).indexOf(curr_sku[0]);
+        let index = visible_cards.map(c => c.sku).indexOf(curr_sku[0]);
         let popup_data = cards[index];
-        console.log('ALL SKUS', all_skus)
-        console.log('POPUP DATA', index, popup_data)
         setPopup(
             <Modal onClose={() => history.goBack()}>
-                <ExpandedSku sku={popup_data} goLeft={prevImage} goRight={nextImage} theme={theme}/>
+                <ExpandedSku sku={popup_data} goLeft={prevImage} goRight={nextImage} theme={theme} />
             </Modal>
         );
-    }, [all_skus, curr_sku])
+    }, [visible_cards, curr_sku])
 
     return (
         <StyledShoppingList id={track_scrolling_id}>
             {popup}
-            {cards.map((item, index) =>
+            {visible_cards.map((item, index) =>
                 <SkuCard key={index}
                     theme={theme}
                     likes={likes}
@@ -245,8 +303,9 @@ function SkuCard({
 }) {
     const plant = sku?.plant;
 
-    let sizes = sku.sizes?.map(size => (
-        <div className="size">{size}</div>
+    let temp_sizes = [['1', 2234], ['2', 1], ['3', 23]];//sku.sizes
+    let sizes = temp_sizes?.map(data => (
+        <div>#{data[0]}: {data[1]}</div>
     ));
 
     let display_image;
@@ -296,9 +355,9 @@ function SkuCard({
             <div className="display-image-container">
                 {display_image}
             </div>
-      SOME TEXT
-            { sizes}
-      Availability: hfhdkjaf
+            <div className="size-container">
+                {sizes}
+            </div>
             <div className="icon-container">
                 {heartIcon}
                 {cartIcon}
@@ -332,7 +391,13 @@ function ExpandedSku({
 }) {
     console.log('EEEEEE', sku)
     const plant = sku?.plant;
-    const [src, setSrc] = useState(null);
+
+    let display_image;
+    if (sku.display_image) {
+        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
+    } else {
+        display_image = <NoImageIcon className="display-image" />
+    }
 
     // const iconFactory = (src, alt) => {
     //   return (
@@ -346,16 +411,6 @@ function ExpandedSku({
     //   )
     // }
 
-    if (plant) {
-        getImageFromHash(plant.flower_images[0].hash)
-            .then((response) => {
-                setSrc(`data:image/jpeg;base64,${response.image}`);
-            })
-            .catch((error) => {
-                console.error("FAILED TO LOAD FULL IMAGE", error);
-            });
-    }
-
     const traitIconList = (field, Icon, title, alt) => {
         if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
             plant[field].length === 0) return null;
@@ -363,8 +418,10 @@ function ExpandedSku({
         let field_map = plant[field].map((f) => f.value)
         return (
             <div className="trait-container">
+                <Tooltip content={title}>
                 <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
-                <p>: {field_map.join(', ')}</p>
+                    <p>: {field_map.join(', ')}</p>
+                </Tooltip>
             </div>
         )
     }
@@ -376,7 +433,7 @@ function ExpandedSku({
             <div className="main-content">
                 <h1 className="title">{plant?.latin_name}</h1>
                 {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
-                <img src={src} alt="TODO" className="full-image" />
+                {display_image}
                 {plant?.description ?
                     <div className="description-container">
                         <p className="center">Description</p>
@@ -389,7 +446,7 @@ function ExpandedSku({
                     </div>
                     <div className="general">
                         <p>General Information</p>
-                        {traitIconList("zones", null, "Zones")}
+                        {traitIconList("zones", MapIcon, "Zones")}
                         {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
                         {traitIconList("attracts_pollinators_and_wildlifes", Bee, "Attracted Pollinators and Wildlife")}
                         {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
@@ -411,6 +468,9 @@ function ExpandedSku({
                         {traitIconList("soil_phs", PHIcon, "Soil PH")}
                         {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
                     </div>
+                </div>
+                <div className="order-div">
+
                 </div>
             </div>
         </StyledExpandedSku>

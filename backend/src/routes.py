@@ -224,15 +224,16 @@ def fetch_inventory_filters():
                 if zone.value not in zones:
                     zones.append(zone.value)
 
+    # NOTE: keys must match the field names in user (besides sizes and status)
     return {
         "sizes": all_sizes,
-        "optimal_lights": optimal_lights,
-        "drought_tolerances": drought_tolerances,
-        "grown_heights": grown_heights,
-        "grown_spreads": grown_spreads,
-        "growth_rates": growth_rates,
-        "salt_tolerances": salt_tolerances,
-        "attracts_polinators_and_wildlife": pollinators,
+        "optimal_light": optimal_lights,
+        "drought_tolerance": drought_tolerances,
+        "grown_height": grown_heights,
+        "grown_spread": grown_spreads,
+        "growth_rate": growth_rates,
+        "salt_tolerance": salt_tolerances,
+        "attracts_pollinators_and_wildlifes": pollinators,
         "soil_moistures": moistures,
         "soil_phs": phs,
         "soil_types": soil_types,
@@ -556,7 +557,33 @@ def modify_sku():
     if operation == 'UNHIDE':
         sku_obj.status = SkuStatus.ACTIVE.value
         db.session.commit()
-    if operation == 'DELTE':
+    if operation == 'DELETE':
         sku_obj.status = SkuStatus.DELETED.value
+        db.session.commit()
+    return {"status": StatusCodes['SUCCESS']}
+
+
+# Change the account status of a use
+@app.route(f'{PREFIX}/modify_user', methods=["POST"])
+@handle_exception
+def modify_user():
+    '''Like or unlike an inventory item'''
+    (id, operation) = getData('id', 'operation')
+    user = UserHandler.from_id(id)
+    if user is None:
+        print('USER NOT FOUND')
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if operation == 'LOCK':
+        print('LOCKING USER')
+        user.account_status = AccountStatus.HARD_LOCK.value
+        db.session.commit()
+    if operation == 'UNLOCK':
+        user.account_status = AccountStatus.UNLOCKED.value
+        db.session.commit()
+    if operation == 'APPROVE':
+        user.account_status = AccountStatus.UNLOCKED.value
+        db.session.commit()
+    if operation == 'DELETE':
+        user.account_status = AccountStatus.DELETED.value
         db.session.commit()
     return {"status": StatusCodes['SUCCESS']}

@@ -54,12 +54,16 @@ export const StyledNavbar = styled.nav`
         margin-top: 5px;
         margin-bottom: 7px;
         max-height: 12vh;
+        transform: rotate(20deg);
+        margin-left: -30px;
         //filter: invert(1);
     }
     
     .nav-name {
-        font-size: 1.5em;
+        font-size: 3vh;
         vertical-align: middle;
         margin-left: -10px;
+        font-family: fantasy;
+        font-style: normal;
     }
 `;
