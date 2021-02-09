@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from src.models import AccountStatus, Address, ContactInfo, Business, BusinessDiscount, Email, Feedback
 from src.models import Image, ImageUses, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
-from src.models import PlantTraitOptions, Role, Size, Sku, SkuStatus, SkuDiscount, User
+from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, User
 from src.api import db
 from base64 import b64encode
 from src.auth import verify_token
@@ -49,11 +49,14 @@ class Handler(ABC):
         '''Prepares dict for creating/updating model.
         All keys not in keep are removed.
         All keys in remove are removed'''
-        keeped_filter = {key: data.get(key) for key in keep}
+        filtered = {}
+        for key in keep:
+            if key in data.keys():
+                filtered[key] = data[key]
         if remove:
             for k in remove:
-                keeped_filter.pop(k, None)
-        return keeped_filter
+                filtered.pop(k, None)
+        return filtered
 
     @staticmethod
     def data_has_required(required_fields: list, data: dict):
@@ -85,17 +88,23 @@ class Handler(ABC):
         '''Create a new model object'''
         # If a dict of values is passed in
         if len(args) == 1 and type(args[0]) is dict:
+            print(f'CREATING OBJECT FROM DICT... {args[0]}')
             return cls.create_from_dict(args[0])
         # If arguments are passed in to match the model's __init___
         else:
+            print('CREATING OBJECT FROM ARGS...')
             return cls.create_from_args(*args)
 
     @classmethod
     def update_from_dict(cls, obj, data: dict):
         '''Used to create a new model, if data has passed preprocess checks'''
+        print(f'update_from_dict start {obj}')
+        print(obj.__dict__)
         filtered_data = cls.filter_data(data, cls.all_fields(), cls.protected_fields())
         for key in filtered_data.keys():
-            obj.__dict__[key] = filtered_data[key]
+            setattr(obj, key, filtered_data[key])
+            print(f'SET! {obj.__dict__[key]}')
+        print(f'update_from_dict end {obj}')
 
     @classmethod
     def update(cls, obj, *args):
@@ -113,7 +122,12 @@ class Handler(ABC):
 
     @classmethod
     def all_ids(cls):
-        return cls.ModelType.query.with_entities(cls.ModelType.id).all()
+        return [o[0] for o in cls.ModelType.query.with_entities(cls.ModelType.id).all()]
+
+    @classmethod
+    def uniques(cls, column):
+        '''Return all unique values for a column'''
+        return [o[0] for o in cls.ModelType.query.with_entities(column).distinct(column).all()]
 
 
 class AddressHandler(Handler):
@@ -357,6 +371,11 @@ class PlantTraitHandler(Handler):
         '''Returns the PlantTrait object that matches the specified values, or None'''
         return db.session.query(PlantTrait).filter_by(trait=trait.value, value=value).one_or_none()
 
+    @classmethod
+    def uniques_by_trait(cls, trait: PlantTraitOptions):
+        '''Return all unique values for a given trait'''
+        return [o[0] for o in cls.ModelType.query.with_entities(PlantTrait.value).filter_by(trait=trait.value).distinct(PlantTrait.value).all()]
+
 
 class PlantHandler(Handler):
     ModelType = Plant
@@ -450,48 +469,24 @@ class SkuDiscountHandler(Handler):
         return SkuDiscountHandler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields())
 
 
-class SizeHandler(Handler):
-    ModelType = Size
-
-    @staticmethod
-    def all_fields():
-        return ['size', 'availability']
-
-    @staticmethod
-    def required_fields():
-        return ['size']
-
-    @staticmethod
-    def to_dict(model: Size):
-        SizeHandler.simple_fields_to_dict(model, SizeHandler.all_fields())
-
-
 class SkuHandler(Handler):
     ModelType = Sku
 
     @staticmethod
     def all_fields():
-        return ['price', 'is_discountable', 'plant']
+        return ['size', 'sku', 'price', 'availability', 'is_discountable']
 
     @staticmethod
     def required_fields():
-        return ['plant']
+        return []
 
     @staticmethod
     def to_dict(model: Sku):
-        as_dict = SkuHandler.simple_fields_to_dict(model, ['price', 'is_discountable', 'sku'])
+        as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
         as_dict['display_image'] = SkuHandler.get_display_image(model)
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
-        as_dict['sizes'] = [SizeHandler.to_dict(size) for size in model.sizes]
         as_dict['discounts'] = [SkuDiscountHandler.to_dict(discount) for discount in model.discounts]
-        if model.status == SkuStatus.DELETED.value:
-            as_dict['status'] = 'DELETED'
-        elif model.status == SkuStatus.INACTIVE.value:
-            as_dict['status'] = 'INACTIVE'
-        elif model.status == SkuStatus.ACTIVE.value:
-            as_dict['status'] = 'ACTIVE'
-        else:
-            as_dict['status'] = 'UNKNOWN STATUS'
+        as_dict['status'] = model.status
         return as_dict
 
     @staticmethod
@@ -530,6 +525,10 @@ class SkuHandler(Handler):
             return False
         model.discounts.append(discount)
         return True
+
+    @staticmethod
+    def set_plant(model: Sku, plant: Plant):
+        model.plant = plant
 
     @staticmethod
     def all_available_skus():

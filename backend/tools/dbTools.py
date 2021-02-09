@@ -1,7 +1,7 @@
-import sys
-import os
 from sqlalchemy import create_engine
 import traceback
+import sys
+import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.api import db, create_app  # NOQA
 from src.config import Config  # NOQA
@@ -75,9 +75,9 @@ def create_mock_data(app):
         # Add Roles for users
         customer = RoleHandler.create('Customer', 'This role allows a user to order products')
         admin = RoleHandler.create('Admin',
-                               'This role grants administrative access. This comes with the ability to \
-                               approve new customers, change customer information, modify inventory and \
-                               contact hours, and more.')
+                                   'This role grants administrative access. This comes with the ability to \
+                                   approve new customers, change customer information, modify inventory and \
+                                   contact hours, and more.')
         print(admin)
         try:
             db.session.add(customer)

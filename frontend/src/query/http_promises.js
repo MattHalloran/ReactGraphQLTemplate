@@ -1,8 +1,8 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { storeItem, getItem, clearStorage, setTheme } from '../storage';
+import { storeItem, getItem, clearStorage, setTheme } from 'utils/storage';
 import StatusCodes from './consts/codes.json';
-import { LOCAL_STORAGE, LINKS, PUBS } from 'consts';
+import { LOCAL_STORAGE, LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import * as http from './http_functions';
 

@@ -1,34 +1,34 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import Navbar from 'components/shared/Navbar/Navbar';
-import Spinner from 'components/shared/Spinner/Spinner';
-import Footer from 'components/shared/Footer/Footer';
+import Navbar from 'components/Navbar/Navbar';
+import Spinner from 'components/Spinner/Spinner';
+import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import { PUBS, LINKS, USER_ROLES, LOCAL_STORAGE } from 'consts';
+import { PUBS, LINKS, USER_ROLES, LOCAL_STORAGE } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
-import FormPage from 'components/shared/wrappers/FormPage/FormPage';
+import FormPage from 'components/wrappers/FormPage/FormPage';
 //Routes
-import HomePage from 'components/HomePage/HomePage';
-import AboutPage from 'components/AboutPage/AboutPage';
-import GalleryPage from 'components/GalleryPage/GalleryPage';
-import ShoppingPage from 'components/shopping/ShoppingPage/ShoppingPage';
-import PrivacyPolicyPage from 'components/PrivacyPolicyPage/PrivacyPolicyPage';
-import AdminMainPage from 'components/admin/AdminMainPage/AdminMainPage';
-import AdminContactPage from 'components/admin/AdminContactPage/AdminContactPage';
-import AdminCustomerPage from 'components/admin/AdminCustomerPage/AdminCustomerPage';
-import AdminGalleryPage from 'components/admin/AdminGalleryPage/AdminGalleryPage';
-import AdminInventoryPage from 'components/admin/AdminInventoryPage/AdminInventoryPage';
-import AdminOrderPage from 'components/admin/AdminOrderPage/AdminOrderPage';
-import NotFoundPage from 'components/NotFoundPage/NotFoundPage/';
-import ProfileForm from 'components/forms/ProfileForm/ProfileForm';
-import SignUpForm from 'components/forms/SignUpForm/SignUpForm';
-import LogInForm from 'components/forms/LogInForm/LogInForm';
-import ForgotPasswordForm from 'components/forms/ForgotPasswordForm/ForgotPasswordForm';
+import HomePage from 'pages/HomePage/HomePage';
+import AboutPage from 'pages/AboutPage/AboutPage';
+import GalleryPage from 'pages/GalleryPage/GalleryPage';
+import ShoppingPage from 'pages/shopping/ShoppingPage/ShoppingPage';
+import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
+import AdminMainPage from 'pages/admin/AdminMainPage/AdminMainPage';
+import AdminContactPage from 'pages/admin/AdminContactPage/AdminContactPage';
+import AdminCustomerPage from 'pages/admin/AdminCustomerPage/AdminCustomerPage';
+import AdminGalleryPage from 'pages/admin/AdminGalleryPage/AdminGalleryPage';
+import AdminInventoryPage from 'pages/admin/AdminInventoryPage/AdminInventoryPage';
+import AdminOrderPage from 'pages/admin/AdminOrderPage/AdminOrderPage';
+import NotFoundPage from 'pages/NotFoundPage/NotFoundPage';
+import ProfileForm from 'forms/ProfileForm/ProfileForm';
+import SignUpForm from 'forms/SignUpForm/SignUpForm';
+import LogInForm from 'forms/LogInForm/LogInForm';
+import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getItem, getTheme } from './storage';
+import { getItem, getTheme } from './utils/storage';
 //Authentication
-import RequireAuthentication from 'components/shared/wrappers/RequireAuthentication/RequireAuthentication';
+import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
 import { checkCookies } from 'query/http_promises';
 
 const keyMap = {
@@ -117,17 +117,17 @@ function App() {
                 <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} />
                 <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} />
                 <Route exact path={LINKS.Register} render={() => (
-                  <FormPage header="Sign Up">
+                  <FormPage header="Sign Up" maxWidth="700px">
                     <SignUpForm />
                   </FormPage>
                 )} />
                 <Route exact path={LINKS.LogIn} render={() => (
-                  <FormPage header="Log In">
+                  <FormPage header="Log In" maxWidth="700px">
                     <LogInForm />
                   </FormPage>
                 )} />
                 <Route exact path={LINKS.ForgotPassword} render={() => (
-                  <FormPage header="Forgot Password">
+                  <FormPage header="Forgot Password" maxWidth="700px">
                     <ForgotPasswordForm />
                   </FormPage>
                 )} />

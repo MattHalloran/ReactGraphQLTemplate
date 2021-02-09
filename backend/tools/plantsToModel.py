@@ -25,6 +25,7 @@ def get_trait(trait: PlantTraitOptions, value: str):
     If none exists, a new object will be added to the database'''
     if value is None:
         return None
+    print(f'FROM VALUESSS, {trait.value}, {value}')
     trait_obj = PlantTraitHandler.from_values(trait, value)
     if trait_obj is None:
         trait_obj = PlantTraitHandler.create(trait.value, value)
@@ -223,11 +224,14 @@ def plants_to_model():
             print(f'Adding plant to db session: {plant_obj}')
             if is_new_plant:
                 db.session.add(plant_obj)
-            if AUTO_CREATE_SKU:
-                sku_obj = SkuHandler.create(5000, True, plant_obj)
-                db.session.add(sku_obj)
             try:
                 db.session.commit()
+                if AUTO_CREATE_SKU:
+                    sku_obj = SkuHandler.create()
+                    db.session.add(sku_obj)
+                    db.session.commit()
+                    SkuHandler.set_plant(sku_obj, plant_obj)
+                    db.session.commit()
             except Exception:
                 print(f'Failed to commit {plant_obj}')
                 print(traceback.format_exc())

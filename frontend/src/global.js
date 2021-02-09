@@ -58,6 +58,10 @@ export const GlobalStyles = createGlobalStyle`
         position: relative;
     }
 
+    .page {
+        padding-top: 12vh;
+    }
+
     .icon-container {
         display: flex;
         justify-content: space-between;
@@ -65,7 +69,7 @@ export const GlobalStyles = createGlobalStyle`
         > svg, img {
             display: inline-block;
             text-align: center;
-            color: black;
+            fill: ${({ theme }) => theme.textPrimary};
             cursor: pointer;
         }
     }

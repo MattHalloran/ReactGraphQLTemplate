@@ -2,9 +2,9 @@
 # Image rows in the database (happens if the database was dropped)
 import os
 from os import listdir
-from os.path import isfile, join, dirname, abspath
+from os.path import isfile, join, dirname
 import sys
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.api import db, create_app  # NOQA
 from src.config import Config  # NOQA
 from src.models import Image # NOQA

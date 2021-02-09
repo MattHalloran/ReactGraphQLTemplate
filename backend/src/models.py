@@ -26,7 +26,6 @@ class Tables(Enum):
     PLANT_TRAIT = 'plant_trait'
     PLANT_TRAIT_ASSOCIATION = 'plant_trait_association'
     ROLE = 'role'
-    SIZE = 'size'
     SKU = 'sku'
     SKU_DISCOUNT = 'sku_discount'
     USER = 'customer'  # 'user' is a reserved word in many databases
@@ -80,15 +79,6 @@ skuDiscounts = db.Table(Tables.SKU_DISCOUNTS.value,
                         )
 
 # A joining table for the two-way relationship between skus and sizes.
-skuSizes = db.Table(Tables.SKU_SIZES.value,
-                    Column('id', Integer, primary_key=True),
-                    Column('sku_id', Integer, ForeignKey(
-                        f'{Tables.SKU.value}.id')),
-                    Column('size_id', Integer, ForeignKey(
-                        f'{Tables.SIZE.value}.id'))
-                    )
-
-# A joining table for the two-way relationship between skus and sizes.
 plantTraits = db.Table(Tables.PLANT_TRAITS.value,
                        Column('id', Integer, primary_key=True),
                        Column('plant_id', Integer, ForeignKey(
@@ -100,7 +90,6 @@ plantTraits = db.Table(Tables.PLANT_TRAITS.value,
 
 # One of the delivery addresses associated with a business
 class Address(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'country': 'US'
     }
@@ -157,7 +146,6 @@ class Address(db.Model):
 
 
 class BusinessDiscount(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'discount': 0
     }
@@ -191,8 +179,7 @@ class ContactInfo(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
-    time_set = Column(Float, nullable=False,
-                      default=time.time())  # In UTC seconds
+    time_set = Column(Float, nullable=False, default=time.time())  # In UTC seconds
     monday = Column(String(200), nullable=False)
     tuesday = Column(String(200), nullable=False)
     wednesday = Column(String(200), nullable=False)
@@ -227,7 +214,6 @@ class ContactInfo(db.Model):
 
 # Stores information related to an email address
 class Email(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'receives_delivery_updates': True
     }
@@ -236,8 +222,7 @@ class Email(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     email_address = Column(String(100), nullable=False, unique=True)
-    receives_delivery_updates = Column(
-        Boolean, default=defaults['receives_delivery_updates'])
+    receives_delivery_updates = Column(Boolean, default=defaults['receives_delivery_updates'])
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
@@ -325,7 +310,6 @@ class Image(db.Model):
 
 # Stores information related to a phone number
 class Phone(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'country_code': '+1',
         'is_mobile': True,
@@ -383,19 +367,6 @@ class PlantTraitOptions(Enum):
     LIGHT_RANGE = 'Light Range'
 
 
-# class PlantTraitAssociation(db.Model):
-#     __tablename__ = Tables.PLANT_TRAIT_ASSOCIATION
-#     # ---------------Start columns-----------------
-#     plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'), primary_key=True)
-#     trait_id = Column(Integer, ForeignKey(f'{Tables.PLANT_TRAIT.value}.id'), primary_key=True)
-#     # ----------------End columns-------------------
-#     plant = db.relationship('Plant', uselist=False)
-#     trait = db.relationship('PlantTrait', back_populates='plants')
-
-#     def __repr__(self):
-#         return f"{self.__tablename__}({self.plant_id}, {self.trait_id})"
-
-
 class PlantTrait(db.Model):
     __tablename__ = Tables.PLANT_TRAIT.value
     # ---------------Start columns-----------------
@@ -403,7 +374,7 @@ class PlantTrait(db.Model):
     trait = Column(String(50), nullable=False)
     value = Column(String(250), nullable=False)
     # ----------------End columns-------------------
-    #plants = db.relationship('PlantTraitAssociation', back_populates='trait')
+    # plants = db.relationship('PlantTraitAssociation', back_populates='trait')
 
     def __init__(self, trait: str, value: str):
         self.trait = trait
@@ -456,6 +427,7 @@ class Plant(db.Model):
     salt_tolerance = db.relationship(
         'PlantTrait', uselist=False, foreign_keys=[salt_tolerance_id])
     # One-to-many relationships
+    skus = db.relationship('Sku', backref='plant', lazy=True)
     flower_images = db.relationship('Image', lazy=True,
                                     primaryjoin=f"and_(Plant.id==Image.plant_id, Image.used_for=='{ImageUses.PLANT_FLOWER.value}')")
     leaf_images = db.relationship('Image', lazy=True,
@@ -527,7 +499,6 @@ class Plant(db.Model):
 
 
 class SkuDiscount(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'discount': 0
     }
@@ -536,8 +507,7 @@ class SkuDiscount(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     # A number between 0 < 1, representing the discount percent in dollars (at least currently)
-    discount = Column(DECIMAL(4, 4), nullable=False,
-                      default=defaults['discount'])
+    discount = Column(DECIMAL(4, 4), nullable=False, default=defaults['discount'])
     # A short string explaining what the discount is for
     title = Column(String(100), nullable=False)
     comment = Column(String(1000))
@@ -555,27 +525,6 @@ class SkuDiscount(db.Model):
         return f"{self.__tablename__}('{self.id}', '{self.title}')"
 
 
-class Size(db.Model):
-    # Default values for fields in __init__
-    defaults = {
-        'availability': 0
-    }
-
-    __tablename__ = Tables.SIZE.value
-    # ---------------Start columns-----------------
-    id = Column(Integer, primary_key=True)
-    size = Column(String(25), nullable=False, unique=True)
-    availability = Column(Integer, nullable=False, default=0)
-    # ----------------End columns-------------------
-
-    def __init__(self, size: str, availability: int):
-        self.size = size
-        self.availability = availability
-
-    def __repr__(self):
-        return f"{self.__tablename__}('{self.id}', '{self.size}')"
-
-
 class SkuStatus(Enum):
     DELETED = -2
     INACTIVE = -1
@@ -584,44 +533,52 @@ class SkuStatus(Enum):
 
 # An item available for sale
 class Sku(db.Model):
-    # Default values for fields in __init__
     defaults = {
-        'is_discountable': True
+        'is_discountable': True,
+        'availability': 0,
+        'size': 'N/A',
+        'price': 'N/A',
+        'status': SkuStatus.ACTIVE.value,
     }
 
     __tablename__ = Tables.SKU.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
+    plant_id = db.Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
+    # Either provided by NLN, or generated as a random string
     sku = Column(String(32), nullable=False)
     # Date SKU was created in UTC seconds
     date_added = Column(Float, nullable=False, default=time.time())
-    is_discountable = Column(Boolean, nullable=False,
-                             default=defaults['is_discountable'])
-    # Price in cents, before discounts
-    price = Column(Integer)
-    status = Column(Integer, nullable=False, default=SkuStatus.ACTIVE.value)
-    plant_id = Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
+    is_discountable = Column(Boolean, nullable=False, default=defaults['is_discountable'])
+    size = Column(String(25), nullable=False, default=defaults['size'])
+    note = Column(String)
+    availability = Column(Integer, nullable=False, default=defaults['availability'])
+    # Price in cents, before discounts (ex: $10.67 => 1067)
+    price = Column(String(25), nullable=False, default=defaults['price'])
+    status = Column(Integer, nullable=False, default=defaults['status'])
     display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    # One-to-one relationships
-    plant = db.relationship('Plant', uselist=False, foreign_keys=[plant_id])
     display_img = db.relationship(
         'Image', uselist=False, foreign_keys=[display_img_id])
-    # Many-to-many relationships
-    sizes = db.relationship('Size', secondary=skuSizes, backref='users')
     discounts = db.relationship(
         'SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------
 
-    def __init__(self, price: int, is_discountable: bool, plant: Plant):
-        self.sku = salt(32)
+    def __init__(self,
+                 size: str = defaults['size'],
+                 sku: str = salt(32),
+                 price: str = defaults['price'],
+                 availability: int = defaults['availability'],
+                 is_discountable: bool = defaults['is_discountable']):
+        self.size = size
+        self.sku = sku
         self.price = price
+        self.availability = availability
         self.is_discountable = is_discountable
-        self.plant = plant
 
     def __repr__(self):
-        return f"{self.__tablename__}('{self.id}')"
+        return f"{self.__tablename__}('{self.id}', '{self.price}', '{self.availability}')"
 
 
 class OrderStatus(Enum):
@@ -649,7 +606,6 @@ class OrderStatus(Enum):
 
 
 class OrderItem(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'quantity': 1
     }
@@ -675,14 +631,17 @@ class OrderItem(db.Model):
 
 
 class Order(db.Model):
+    defaults = {
+        'status': OrderStatus.DRAFT.value
+    }
+
     __tablename__ = Tables.ORDER.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
-    status = Column(Integer, nullable=False, default=OrderStatus.DRAFT.value)
+    status = Column(Integer, nullable=False, default=defaults['status'])
     special_instructions = Column(String)
     desired_delivery_date = Column(Float)
-    delivery_address_id = db.Column(
-        Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
+    delivery_address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     # ----------------End columns-------------------
@@ -731,7 +690,6 @@ class AccountStatus(Enum):
 # All users of the system, such as customers and admins
 # Their "cart" is the last order in their orders list
 class User(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'pronouns': 'they/them/theirs',
         'theme': 'light',
@@ -745,8 +703,7 @@ class User(db.Model):
     last_name = Column(String(30), nullable=False)
     pronouns = Column(String(50), nullable=False, default=defaults['pronouns'])
     theme = Column(String(20), nullable=False, default=defaults['theme'])
-    image_file = Column(String(20), nullable=False,
-                        default=defaults['image_file'])
+    image_file = Column(String(20), nullable=False, default=defaults['image_file'])
     password = Column(String(255), nullable=False)
     login_attempts = Column(Integer, nullable=False, default=0)
     # UTC seconds since epoch
@@ -803,7 +760,6 @@ class User(db.Model):
 # Orders are submitted via businesses.
 # Each business has one or more users
 class Business(db.Model):
-    # Default values for fields in __init__
     defaults = {
         'subscribed_to_newsletters': True,
     }
@@ -812,8 +768,7 @@ class Business(db.Model):
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    subscribed_to_newsletters = Column(
-        Boolean, default=defaults['subscribed_to_newsletters'])
+    subscribed_to_newsletters = Column(Boolean, default=defaults['subscribed_to_newsletters'])
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-many relationships
@@ -823,8 +778,7 @@ class Business(db.Model):
     employees = db.relationship('User', backref='employer', lazy=True)
     # Many-to-many relationship
     # Discounts only apply to discountable items
-    discounts = db.relationship(
-        'BusinessDiscount', secondary=businessDiscounts, backref='businesses')
+    discounts = db.relationship('BusinessDiscount', secondary=businessDiscounts, backref='businesses')
     # -------------End relationships----------------
 
     def __init__(self, name: str, email: Email, phone: Phone, subscribed_to_newsletters: bool):

@@ -1,20 +1,18 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
-from src.models import AccountStatus, Plant, Sku, SkuStatus, Image, ImageUses, ContactInfo
+from src.models import AccountStatus, Sku, SkuStatus, ImageUses, Plant, PlantTrait, PlantTraitOptions
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler
-from src.handlers import PhoneHandler, PlantHandler, ImageHandler, ContactInfoHandler, OrderItemHandler
+from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, OrderItemHandler
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
 from src.utils import get_image_meta, find_available_file_names
 from sqlalchemy import exc
-import ast
 import traceback
 from base64 import b64encode, b64decode
 import json
 import os
-from os import path
 from functools import wraps
 
 app = create_app()
@@ -161,83 +159,21 @@ if __name__ == '__main__':
 @app.route(f'{PREFIX}/fetch_inventory_filters', methods=["POST"])
 @handle_exception
 def fetch_inventory_filters():
-    skus = Sku.query.with_entities(Sku).all()
-    plants = []
-    all_sizes = []
-    pollinators = []
-    lights = []
-    moistures = []
-    phs = []
-    soil_types = []
-    zones = []
-    optimal_lights = []
-    drought_tolerances = []
-    grown_heights = []
-    grown_spreads = []
-    growth_rates = []
-    salt_tolerances = []
-    # Grab SKU-related filters
-    for sku in skus:
-        sku_sizes = [size.size for size in sku.sizes]
-        new_skus = set(sku_sizes) - set(all_sizes)
-        all_sizes = all_sizes + list(new_skus)
-        plants.append(PlantHandler.from_id(sku.plant_id))
-    # Grab plant-related filters
-    for plant in plants:
-        # Single value fields
-        if (light := plant.optimal_light) and light.value not in optimal_lights:
-            optimal_lights.append(light.value)
-        if (drought := plant.drought_tolerance) and drought.value not in drought_tolerances:
-            drought_tolerances.append(drought.value)
-        if (height := plant.grown_height) and height.value not in grown_heights:
-            grown_heights.append(height.value)
-        if (spread := plant.grown_spread) and spread.value not in grown_spreads:
-            grown_spreads.append(spread.value)
-        if (rate := plant.growth_rate) and rate.value not in growth_rates:
-            growth_rates.append(rate.value)
-        if (salt := plant.salt_tolerance) and salt.value not in salt_tolerances:
-            salt_tolerances.append(salt.value)
-
-        # Multi value fields
-        if plant.attracts_pollinators_and_wildlifes:
-            for pollinator in plant.attracts_pollinators_and_wildlifes:
-                if pollinator.value not in pollinators:
-                    pollinators.append(pollinator.value)
-        if plant.light_ranges:
-            for light in plant.light_ranges:
-                if light.value not in lights:
-                    lights.append(light.value)
-        if plant.soil_moistures:
-            for moisture in plant.soil_moistures:
-                if moisture.value not in moistures:
-                    moistures.append(moisture.value)
-        if plant.soil_phs:
-            for ph in plant.soil_phs:
-                if ph.value not in phs:
-                    phs.append(ph.value)
-        if plant.soil_types:
-            for soil_type in plant.soil_types:
-                if soil_type.value not in soil_types:
-                    soil_types.append(soil_type.value)
-        if plant.zones:
-            for zone in plant.zones:
-                if zone.value not in zones:
-                    zones.append(zone.value)
-
-    # NOTE: keys must match the field names in user (besides sizes and status)
+    # NOTE: keys must match the field names in plant or sku (besides status)
     return {
-        "sizes": all_sizes,
-        "optimal_light": optimal_lights,
-        "drought_tolerance": drought_tolerances,
-        "grown_height": grown_heights,
-        "grown_spread": grown_spreads,
-        "growth_rate": growth_rates,
-        "salt_tolerance": salt_tolerances,
-        "attracts_pollinators_and_wildlifes": pollinators,
-        "soil_moistures": moistures,
-        "soil_phs": phs,
-        "soil_types": soil_types,
-        "zones": zones,
+        "size": SkuHandler.uniques(Sku.size),
+        "optimal_light": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.OPTIMAL_LIGHT),
+        "drought_tolerance": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.DROUGHT_TOLERANCE),
+        "grown_height": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.GROWN_HEIGHT),
+        "grown_spread": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.GROWN_SPREAD),
+        "growth_rate": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.GROWTH_RATE),
+        "salt_tolerance": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SALT_TOLERANCE),
+        "light_ranges": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.LIGHT_RANGE),
+        "attracts_pollinators_and_wildlifes": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE),
+        "soil_moistures": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_MOISTURE),
+        "soil_phs": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_PH),
+        "soil_types": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_TYPE),
+        "zones": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ZONE),
         "status": StatusCodes['SUCCESS']
     }
 
