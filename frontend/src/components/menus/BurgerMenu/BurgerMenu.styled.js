@@ -6,8 +6,10 @@ const overlay_style = `
     left: 0;
     top: 0;
     width: 100%;
+    width: -moz-fit-content;
     width: -webkit-fill-available;
     height: 100%;
+    height: -moz-fit-content;
     height: -webkit-fill-available;
     overflow: hidden;
     z-index: 10;
@@ -15,6 +17,9 @@ const overlay_style = `
 `
 
 export const StyledBurgerMenu = styled.div`
+    position: absolute;
+    display: block;
+    right: 0px;
 
   #overlay {
     transition: 0.3s ease-in-out;
@@ -22,16 +27,12 @@ export const StyledBurgerMenu = styled.div`
   }
 
   .burger {
+    position: relative;
+    display: block;
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 101;
-    position: fixed;
     right: 1em;
-    top: 4.5vh;
-    transition: all 0.3s ease-in-out;
-    transform-origin: 1px;
-    transform: ${({ visible }) => visible ? 'translateY(0%)' : 'translateY(-200%)'};
   }
 
   &:focus {
@@ -41,21 +42,9 @@ export const StyledBurgerMenu = styled.div`
   .burger > * {
     width: 35px;
     height: 5px;
-    background-color: ${({ theme, open }) => open ? theme.textPrimary : theme.textPrimary};
+    background-color: ${({ theme }) => theme.textPrimary};
     margin: 6px 0;
     transition: 0.4s;
     border-radius: 50px;
-  }
-
-  .burger > *:first-child {
-    transform: ${({ open }) => open ? 'rotate(45deg) translate(8px, 8px)' : 'rotate(0)'};
-  }
-
-  .burger > *:nth-child(2) {
-    opacity: ${({ open }) => open ? '0' : '1'};
-  }
-
-  .burger > *:nth-child(3) {
-    transform: ${({ open }) => open ? 'rotate(-45deg) translate(8px, -8px)' : 'rotate(0)'};
   }
 `;

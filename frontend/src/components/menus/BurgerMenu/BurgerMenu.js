@@ -14,7 +14,6 @@ import { getTheme } from 'utils/storage';
 function BurgerMenu({
     theme = getTheme(),
     children,
-    visible,
     ...props
 }) {
     const history = useHistory();
@@ -41,8 +40,8 @@ function BurgerMenu({
         }
     }, [history, closeMenu])
 
-    return ReactDOM.createPortal(
-        <StyledBurgerMenu theme={theme} open={open} visible={visible} {...props}>
+    return (
+        <StyledBurgerMenu theme={theme} open={open} {...props}>
             <div id="overlay" />
             <ClickOutside {...props} active={open} on_click_outside={closeMenu} >
                 <div className="burger" onClick={toggleOpen}>
@@ -52,28 +51,15 @@ function BurgerMenu({
                 </div>
                 <MenuContainer open={open} closeMenu={closeMenu}>
                     {children}
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
-                    <p>AAAAAAAAAAAAA</p>
                 </MenuContainer>
             </ClickOutside>
-        </StyledBurgerMenu>,
-        document.body
+        </StyledBurgerMenu>
     );
 }
 
 BurgerMenu.propTypes = {
     theme: PropTypes.object,
     children: PropTypes.any,
-    visible: PropTypes.bool,
 };
 
 export default BurgerMenu;

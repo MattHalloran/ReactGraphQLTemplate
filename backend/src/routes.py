@@ -44,13 +44,8 @@ def getJson(*names):
 # Helper method for grabbing data from the request
 def getData(*names):
     byte_data = request.data
-    print(f'AAAAAAAA {byte_data}')
     dict_str = byte_data.decode('UTF-8')
-    # if isinstance(dict_str, str)
-    print(f'BBBBBBBBBB {dict_str}')
-    print(f'CCCCCCCCCCC {type(dict_str)}')
     data = json.loads(dict_str)
-    print(f'DDDDDDDDD {type(data)}')
     if (len(names) == 1):
         return data[names[0]]
     return [data[name] for name in names]
@@ -302,6 +297,7 @@ def image_from_sku():
     print(f'trying to get image from sku {sku_code}')
     # Get image data from its hash
     sku = SkuHandler.from_sku(sku_code)
+    print(f'SKU IS {sku}')
     if not sku:
         print('FAILED TO FIND SKU ROW')
         return {"status": StatusCodes['ERROR_UNKNOWN']}

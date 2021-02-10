@@ -15,7 +15,8 @@ import { getTheme } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import InputText from 'components/inputs/InputText/InputText';
 // Icons
-import { TrashIcon, EditIcon, HideIcon } from 'assets/img';
+import { TrashIcon, EditIcon, HideIcon, NoImageIcon } from 'assets/img';
+import FileUpload from 'components/FileUpload/FileUpload';
 
 function AdminInventoryPage({
     theme = getTheme(),
@@ -79,8 +80,8 @@ function AdminInventoryPage({
             });
     }
 
-    const editSku = () => {
-
+    const editSku = (sku_data) => {
+        setCurrSku(sku_data);
     }
 
     const hideSku = (sku) => {
@@ -93,12 +94,6 @@ function AdminInventoryPage({
             .catch((error) => {
                 console.error("Failed to modify sku", error);
             });
-    }
-
-    const newEmptySku = () => setCurrSku({});
-
-    const newPlantSku = () => {
-
     }
 
     // const uploadFile = useCallback((file) => {
@@ -133,7 +128,6 @@ function AdminInventoryPage({
     // Processes a single file
     const fileSelectedHandler = (event) => {
         let files = event.target.files;
-        if (files.length <= 0) return;
         let extension = files[0].name.split('.')[0];
         if (extension !== 'xls') {
             alert('File must have the extension .xls');
@@ -144,7 +138,7 @@ function AdminInventoryPage({
 
     let popup = (currSku) ? (
         <Modal onClose={() => setCurrSku(null)}>
-            <SkuPopup theme={theme} data={currSku} trait_options={trait_options} />
+            <SkuPopup theme={theme} sku={currSku} trait_options={trait_options} />
         </Modal>
     ) : null;
 
@@ -154,13 +148,16 @@ function AdminInventoryPage({
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>
             <ul>
+                <li>Upload availability from a spreadsheet</li>
                 <li>Create a new SKU, either from scratch or with a plant template</li>
                 <li>Edit an existing SKU</li>
                 <li>Delete a SKU</li>
             </ul>
             <div>
-                <Button onClick={newEmptySku}>Create Empty SKU</Button>
-                Upload Spreadsheet<input className="primary" type="file" onChange={fileSelectedHandler}/>
+                <Button onClick={() => editSku({})}>Create Empty SKU</Button>
+            </div>
+            <div>
+                Upload Spreadsheet<FileUpload onUploadClick={() => {}} onUploadChange={fileSelectedHandler}/>
             </div>
 
             <div className="flexed">
@@ -173,7 +170,7 @@ function AdminInventoryPage({
                 <div className="flex-content">
                     <p>Select plant template to create a new SKU</p>
                     <div className="card-flex">
-                        {plantCards.map((data, index) => <PlantCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} plant={data} />)}
+                        {plantCards.map((data, index) => <PlantCard key={index} plant={data} onEdit={editSku} />)}
                     </div>
                 </div>
             </div>
@@ -197,7 +194,7 @@ function SkuCard({
     let plant = sku?.plant;
 
     return (
-        <StyledCard theme={theme} onClick={onEdit} status={sku?.status}>
+        <StyledCard theme={theme} onClick={() => onEdit(sku)} status={sku?.status}>
             <h2 className="title">{plant?.latin_name}</h2>
             <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
             <div className="icon-container">
@@ -218,27 +215,34 @@ SkuCard.propTypes = {
 
 function PlantCard({
     plant,
+    onEdit,
 }) {
 
     return (
-        <StyledCard>
+        <StyledCard onClick={() => onEdit({plant: plant})}>
             <h3>{plant?.latin_name}</h3>
         </StyledCard>
     );
 }
 
 SkuCard.propTypes = {
-    plant: PropTypes.object.isRequired
+    plant: PropTypes.object.isRequired,
+    onEdit: PropTypes.func.isRequired,
 }
 
 function SkuPopup({
-    data,
+    sku,
     theme = getTheme(),
     trait_options
 }) {
-    console.log('PROP UPPPPPPPP', data);
-    const [latin_name, setLatinName] = useHistoryState("ai_latin_name", "");
-    const [common_name, setCommonName] = useHistoryState("ai_common_name", "");
+    console.log('PROP UPPPPPPPP', sku);
+    let plant = sku.plant;
+    const [latin_name, setLatinName] = useHistoryState("ai_latin_name", plant?.latin_name ?? '');
+    const [common_name, setCommonName] = useHistoryState("ai_common_name", plant?.common_name ?? '');
+    const [code, setCode] = useHistoryState("ai_code", sku.sku ?? '');
+    const [size, setSize] = useHistoryState("ai_size", sku.size ?? '');
+    const [price, setPrice] = useHistoryState("ai_price", sku.price ?? '');
+    const [quantity, setQuantity] = useHistoryState("ai_quantity", sku.availability ?? '');
     const [drought_tolerance, setDroughtTolerance] = useHistoryState("ai_drought_tolerance", "");
     const [grown_height, setGrownHeight] = useHistoryState("ai_grown_height", "");
     const [grown_spread, setGrownSpread] = useHistoryState("ai_grown_spread", "");
@@ -246,8 +250,11 @@ function SkuPopup({
     const [optimal_light, setOptimalLight] = useHistoryState("ai_optimal_light", "");
     const [salt_tolerance, setSaltTolerance] = useHistoryState("ai_salt_tolerance", "");
 
+    //Used for display image upload
+    const [selectedImage, setSelectedImage] = useState(null);
+
     // Returns an input text or a dropdown, depending on if the field is in the trait options
-    const getInput = (field, label, value, valueFunc) => {
+    const getInput = (field, label, value, valueFunc, multi_select = true) => {
         if (!trait_options || !trait_options[field] || trait_options[field].length <= 0) return (
             <InputText
                 label={label}
@@ -261,13 +268,47 @@ function SkuPopup({
             <div>
                 <label>{label}</label>
                 <DropDown
-                    multi_select={true}
+                    multi_select={multi_select}
                     allow_custom_input={true}
                     className="sorter"
                     options={options}
                     onChange={(e) => valueFunc(e.value)} />
             </div>
         )
+    }
+
+    const fileSelectedHandler = (event) => {
+        let imageFile = event.target.files[0];
+        let fileSplit = imageFile.name.split('.');
+        processImage(event.target.files[0], fileSplit[0], fileSplit[1]);
+    }
+
+    const processImage = (file, name, extension) => {
+        let reader = new FileReader();
+        reader.onloadend = () => {
+            setSelectedImage({
+                name: name,
+                extension: extension,
+                data: reader.result
+            });
+        }
+        reader.readAsDataURL(file);
+    }
+
+    //Show display image from uploaded image.
+    //If no upload image, from model data.
+    //If not model data, show NoImageIcon
+    let image_data;
+    if (selectedImage?.data) {
+        image_data = selectedImage?.data
+    } else if (sku?.display_image) {
+        image_data = `data:image/jpeg;base64,${sku.display_image}`
+    }
+    let display_image;
+    if (image_data) {
+        display_image = <img src={image_data} className="display-image" alt="TODO" />
+    } else {
+        display_image = <NoImageIcon className="display-image" />
     }
 
     return (
@@ -285,24 +326,46 @@ function SkuPopup({
                     value={common_name}
                     valueFunc={setCommonName}
                 />
+                <InputText
+                    label="Plant Code"
+                    type="text"
+                    value={code}
+                    valueFunc={setCode}
+                />
                 <div className="half">
-                    {getInput('drought_tolerances', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
-                    {getInput('grown_heights', 'Grown Height', grown_height, setGrownHeight)}
-                    {getInput('grown_spreads', 'Grown Spread', grown_spread, setGrownSpread)}
-                    {getInput('growth_rates', 'Growth Rate', growth_rate, setGrowthRate)}
-                    {getInput('optimal_lights', 'Optimal Light', optimal_light, setOptimalLight)}
-                    {getInput('salt_tolerances', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
+                    {getInput('size', 'Size', size, setSize, false)}
+                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
+                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight)}
+                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread)}
+                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate)}
+                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight)}
+                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
                 </div>
                 <div className="half">
-
+                    <InputText
+                        label="Price"
+                        type="text"
+                        value={price}
+                        valueFunc={setPrice}
+                    />
+                    <InputText
+                        label="Quanity"
+                        type="text"
+                        value={quantity}
+                        valueFunc={setQuantity}
+                    />
+                    <p>Display Image</p>
+                    {display_image}
+                    <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
                 </div>
             </div>
+            <Button>Upload SKU</Button>
         </StyledSkuPopup>
     );
 }
 
 SkuPopup.propTypes = {
-    data: PropTypes.object.isRequired,
+    sku: PropTypes.object.isRequired,
     theme: PropTypes.object,
     trait_options: PropTypes.object,
 }

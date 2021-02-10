@@ -1,9 +1,7 @@
 import styled from 'styled-components';
 
-export const StyledContactInfo = styled.li`
+export const StyledContactInfo = styled.div`
     list-style-type: none;
-    border: 3px solid ${({ theme }) => theme.textPrimary};
-    border-radius: 5px;
 
     .contact-header {
         background-color: ${({ theme }) => theme.bodyPrimary};
@@ -12,21 +10,74 @@ export const StyledContactInfo = styled.li`
         text-align: center;
     }
 
+    .hours-header {
+        text-align: center;
+    }
+
     .hours-content-div {
+        display: block;
+        margin: auto;
         text-align: left;
-        display: inline-block;
+        border-top: 3px solid ${({ theme }) => theme.textPrimary};
+        border-bottom: 3px solid ${({ theme }) => theme.textPrimary};
     }
 
-    .phone {
-        font-size: inherit;
-        vertical-align: middle;
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        fill: ${({ theme }) => theme.textPrimary};
+    tbody {
+        display: grid;
     }
 
-    td {
-        border: 1px solid ${({ theme }) => theme.textPrimary};
+    tr {
+        box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, 0.4);
+    }
+
+    .external-links {
+        width: 100%;
+        width: -moz-fit-content;
+        width: -webkit-fill-available;
+        margin: 10px 0 10px 0;
+    }
+
+    .bottom-div {
+        padding-bottom: 5px;
+        border-bottom: 1px solid black;
+    }
+
+    @media (max-width: 400px) {
+        .external-link-text {
+            display: none;
+        }
+    }
+
+    .icon-group {
+        overflow-wrap: anywhere;
+        font-size: 0.8em;
+        cursor: pointer;
+        width: 33%;
+    }
+
+    .icon {
+        display: inline-block;
+        padding: 10px;
+        border: 1px solid black;
+        background-color: darkgreen;
+        border-radius: 200px;
+        transition-duration: 0.4s;
+
+        :hover {
+            box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+        }
+
+        > * {
+            fill: ${({ theme }) => theme.textPrimary};
+            stroke: none;
+        }
+    }
+
+    tr {
+        display: grid
+    }
+
+    td, th {
+        border-bottom: 1px solid black;
     }
 `;

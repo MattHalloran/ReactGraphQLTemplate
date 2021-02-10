@@ -474,7 +474,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['size', 'sku', 'price', 'availability', 'is_discountable']
+        return ['sku', 'size', 'price', 'availability', 'is_discountable']
 
     @staticmethod
     def required_fields():

@@ -42,6 +42,7 @@ export const StyledFormPage = styled.div`
 
     .submit {
         width: 100%;
+        width: -moz-fit-content;
         width: -webkit-fill-available;
     }
 

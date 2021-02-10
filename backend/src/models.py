@@ -566,19 +566,19 @@ class Sku(db.Model):
     # -------------End relationships----------------
 
     def __init__(self,
+                 sku: str = None,
                  size: str = defaults['size'],
-                 sku: str = salt(32),
                  price: str = defaults['price'],
                  availability: int = defaults['availability'],
                  is_discountable: bool = defaults['is_discountable']):
         self.size = size
-        self.sku = sku
+        self.sku = sku or salt(32)
         self.price = price
         self.availability = availability
         self.is_discountable = is_discountable
 
     def __repr__(self):
-        return f"{self.__tablename__}('{self.id}', '{self.price}', '{self.availability}')"
+        return f"{self.__tablename__}('{self.sku}', '{self.price}', '{self.availability}')"
 
 
 class OrderStatus(Enum):

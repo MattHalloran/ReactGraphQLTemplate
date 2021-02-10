@@ -30,7 +30,9 @@ function Modal({
                         <path d="M 10,10 L 30,30 M 30,10 L 10,30" />
                     </svg>
                 </Button>
-                {children}
+                <div className="body-children">
+                    {children}
+                </div>
             </ClickOutside>
         </StyledModal>);
 }

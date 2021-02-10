@@ -10,6 +10,7 @@ export const StyledModal = styled.aside`
     background-color: rgba(0,0,0,.8);
 
     .modal-body {
+        display: flex;
         background-color: ${({ theme }) => theme.bodySecondary};
         color: ${({ theme }) => theme.textSecondary};
         box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
@@ -22,6 +23,12 @@ export const StyledModal = styled.aside`
         width: auto;
         height: fit-content;
         border: 3px solid ${({ theme }) => theme.textPrimary};
+        border-radius: 10px;
+    }
+
+    .body-children {
+        overflow-y: scroll;
+        overflow-x: clip;
         border-radius: 10px;
     }
     
@@ -56,8 +63,10 @@ export const StyledModal = styled.aside`
         .modal-body {
             padding: 0px;
             width: 100%;
+            width: -moz-fit-content;
             width: -webkit-fill-available;
             height: 100%;
+            height: -moz-fit-content;
             height: -webkit-fill-available;
         }
     }

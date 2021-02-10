@@ -87,4 +87,9 @@ export const StyledNavbar = styled.nav`
         align-items: center;
         cursor: pointer;
     }
+
+    .iconic {
+        stroke: none;
+        fill: ${({ theme }) => theme.textPrimary};
+    }
 `;

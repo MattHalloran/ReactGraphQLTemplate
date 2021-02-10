@@ -69,6 +69,7 @@ export const GlobalStyles = createGlobalStyle`
         > svg, img {
             display: inline-block;
             text-align: center;
+            stroke: none;
             fill: ${({ theme }) => theme.textPrimary};
             cursor: pointer;
         }

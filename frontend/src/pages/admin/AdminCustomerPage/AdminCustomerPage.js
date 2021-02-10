@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { StyledAdminCustomerPage, StyledCustomerCard } from './AdminCustomerPage.styled';
 import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';
-import { LOCAL_STORAGE, ACCOUNT_STATUS } from 'utils/consts';
-import { getItem, getTheme } from 'utils/storage';
+import { ACCOUNT_STATUS } from 'utils/consts';
+import { getSession, getTheme } from 'utils/storage';
 import Button from 'components/Button/Button';
 
 function AdminCustomerPage({
-    session = getItem(LOCAL_STORAGE.Session),
+    session = getSession(),
     theme = getTheme(),
 }) {
     console.log('ADMIN CUTOMER PAGE RENDER')

@@ -116,9 +116,9 @@ function ShoppingList({
         //Find all applied filters
         let applied_filters = [];
         for (const key in filters) {
-            console.log('CURR KEY IS', key)
+            //console.log('CURR KEY IS', key)
             let filter_group = filters[key];
-            console.log('FILTER GROUP IS', filter_group)
+            //console.log('FILTER GROUP IS', filter_group)
             for (let i = 0; i < filter_group.length; i++) {
                 if (filter_group[i].checked) {
                     applied_filters.push([key, filter_group[i].label]);
@@ -160,7 +160,7 @@ function ShoppingList({
                 }
             }
         }
-        console.log('SETTING FILTERED CARDS TOOOOOO', filtered_cards);
+        //console.log('SETTING FILTERED CARDS TOOOOOO', filtered_cards);
         setVisibleCards(filtered_cards);
     }, [cards, filters])
 
@@ -295,7 +295,7 @@ function SkuCard({
     ));
 
     let display_image;
-    if (sku.display_image) {
+    if (sku?.display_image) {
         display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />
@@ -336,7 +336,7 @@ function ExpandedSku({
     const [quantity, setQuantity] = useState(1);
 
     let display_image;
-    if (sku.display_image) {
+    if (sku?.display_image) {
         display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />

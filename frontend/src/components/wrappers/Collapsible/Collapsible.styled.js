@@ -3,31 +3,20 @@ import styled from 'styled-components';
 export const StyledCollapsible = styled.header`
     .header{
     cursor: pointer;
-    border: solid 1px #f2f2f2;
+    border-style: solid;
+    border-top: solid 2px black;
+    border-bottom: solid 2px black;
+    border-left: 0;
+    border-right: 0;
     padding: 15px;
-    background-color: #0089CC;
+    background-color: ${({ theme }) => theme.bodySecondary};
+    box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, .6);
     color: #FFF;
     font-family: verdana;
     }
 
     .content{
-        cursor: pointer;
-        border-left: solid 1px #f2f2f2;
-        border-right: solid 1px #f2f2f2;
-        border-bottom: solid 1px #f2f2f2;
-        border-radius: 0 0 5px 5px;
-        padding: 15px;
-        font-family: verdana;
-        font-size: 14px;
-        display: flex;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space around;
-        justify-content: space-around;
-
-        > * {
-            display: inline-block;
-            text-align: center;
-        }
+        
     }
 
     .arrow-wrapper {

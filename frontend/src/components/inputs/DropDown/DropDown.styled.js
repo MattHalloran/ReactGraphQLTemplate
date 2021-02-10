@@ -42,6 +42,7 @@ export const StyledDropDown = styled.div`
 
     .DropDown-custom {
         width: 100%;
+        width: -moz-fit-content;
         width: -webkit-fill-available;
         background: transparent;
         text-align: center;

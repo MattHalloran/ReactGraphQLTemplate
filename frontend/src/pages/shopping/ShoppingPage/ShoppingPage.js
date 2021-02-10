@@ -27,6 +27,7 @@ function ShoppingPage({
             checkCookies().then(() => {
                 setAuthenticated(true);
             }).catch((err) => {
+                console.error(err);
                 history.push(LINKS.LogIn);
             })
         }

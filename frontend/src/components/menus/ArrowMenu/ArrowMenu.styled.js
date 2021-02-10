@@ -6,8 +6,10 @@ const overlay_style = `
     left: 0;
     top: 0;
     width: 100%;
+    width: -moz-fit-content;
     width: -webkit-fill-available; 
     height: 100%;
+    height: -moz-fit-content;
     height: -webkit-fill-available;
     overflow: hidden;
     z-index: 10;

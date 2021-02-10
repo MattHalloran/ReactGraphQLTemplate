@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import BurgerMenu from 'components/menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { clearStorage, getTheme, getItem } from 'utils/storage';
+import { clearStorage, getTheme, getSession, getRoles } from 'utils/storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
-import MapIcon from 'assets/img/MapIcon';
-import { BUSINESS_NAME, USER_ROLES, LINKS, LOCAL_STORAGE, GOOGLE_MAPS_ADDRESS } from 'utils/consts';
+import { BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
 import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
+import Collapsible from 'components/wrappers/Collapsible/Collapsible';
+import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
+import PubSub from 'utils/pubsub';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -34,7 +36,7 @@ function Navbar({
                 <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
                 <span className="nav-name">{BUSINESS_NAME}</span>
             </Link>
-            {show_hamburger ? <Hamburger visible={visible} theme={theme} {...props} /> : <NavList {...props} />}
+            {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
         </StyledNavbar>
     );
 }
@@ -47,47 +49,57 @@ Navbar.propTypes = {
 }
 
 function Hamburger({
-    session = getItem(LOCAL_STORAGE.Session),
-    user_roles = getItem(LOCAL_STORAGE.Roles),
-    visible,
+    session = getSession(),
+    user_roles = getRoles(),
     theme = getTheme(),
     ...props
 }) {
+    let history = useHistory();
     let nav_options = [];
+    let top_links = [];
 
     // If an admin is logged in, display admin links
     let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
+            console.log('HAMBURGER ROLEEE', r)
             if (r.title === USER_ROLES.Admin) {
-                nav_options.push([LINKS.Admin, 'Admin']);
+                console.log('ADMINNNNNNNNNNN')
+                top_links.push([LINKS.Admin, GearIcon]);
             }
         })
     }
 
     // If someone is not logged in, display sign up/log in links
     if (session === null) {
-        nav_options.push([LINKS.Register, 'Sign Up'],
-            [LINKS.LogIn, 'Log In']);
+        top_links.push([LINKS.LogIn, PersonPlusIcon]);
     } else {
-        nav_options.push([LINKS.Shopping, 'Shopping'])
-        nav_options.push([LINKS.Profile, 'Profile']);
+        top_links.push([LINKS.Shopping, BagPlusIcon],
+            [LINKS.Profile, PersonIcon],
+            [LINKS.Cart, ShoppingCartIcon],);
     }
 
     nav_options.push([LINKS.Gallery, 'Gallery'],
-        [LINKS.About, 'About Us'],
-        [LINKS.Contact, 'Contact Us']);
+        [LINKS.About, 'About Us']);
 
     if (session !== null) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
     }
 
     return (
-        <BurgerMenu theme={theme} {...props} visible={visible}>
+        <BurgerMenu theme={theme} {...props}>
+            <div className="icon-container" style={{margin: '10px 5px 10px 5px'}}>
+                {top_links.map(([link, Icon], index) => (
+                    <Icon key={index} width="40px" height="40px" onClick={() => history.push(link)} />
+                ))}
+                <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
+            </div>
+            <Collapsible title="Contact" initial_open={true}>
+                <ContactInfo />
+            </Collapsible>
             { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link to={link} onClick={onClick}>{text}</Link></p>
             ))}
-            <ContactInfo />
         </BurgerMenu>
     );
 }
@@ -100,8 +112,8 @@ Hamburger.propTypes = {
 }
 
 function NavList({
-    session = getItem(LOCAL_STORAGE.Session),
-    user_roles = getItem(LOCAL_STORAGE.Roles),
+    session = getSession(),
+    user_roles = getRoles(),
 }) {
     // Link, Link text, onClick function
     let nav_options = [];
@@ -123,12 +135,16 @@ function NavList({
         })
     }
 
+    let cart;
     // If someone is not logged in, display sign up/log in links
     if (session === null) {
         nav_options.push([LINKS.Register, 'Sign Up'],
             [LINKS.LogIn, 'Log In']);
     } else {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
+        cart = (
+            <Link to={LINKS.Cart}><ShoppingCartIcon className="iconic" width="30px" height="30px"/></Link>
+        );
     }
 
     about_options.push([LINKS.About, 'About Us'],
@@ -145,13 +161,11 @@ function NavList({
 
     return (
         <ul className="nav-list">
-            <PopupMenu obj={<p>Address</p>}
-                menu={<address className="address-container" onClick={() => window.open(GOOGLE_MAPS_ADDRESS, "_blank")}>
-                    <MapIcon className="trait-icon" width="25px" height="25px" title="Address" alt="Address" />
-                    106 South Woodruff Road<br/>Bridgeton, NJ 08302
-                </address>} />
+            <PopupMenu obj={<p>Contact</p>}
+                menu={<ContactInfo />} />
             <PopupMenu obj={<p>About</p>} menu={options_to_menu(about_options)} />
             {options_to_menu(nav_options)}
+            {cart}
         </ul>
     );
 }

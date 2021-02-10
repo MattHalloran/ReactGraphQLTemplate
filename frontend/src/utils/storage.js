@@ -1,8 +1,10 @@
 // Handles storing and retrieving data from local storage
+// TODO invalidate items after a while
 
 import PubSub from './pubsub';
 import { LOCAL_STORAGE, PUBS } from 'utils/consts';
 import { deepEqual } from 'utils/deepEqual';
+import { getProfileInfo } from 'query/http_promises';
 
 export const lightTheme = {
     bodyPrimary: '#253A18', //dark green
@@ -58,9 +60,37 @@ export function getTheme() {
   } catch(err) {
     console.error('Failed trying to get theme from local storage', err);
   } finally {
-    localStorage.setItem(LOCAL_STORAGE.Theme, JSON.stringify(lightTheme));
+    storeItem(LOCAL_STORAGE.Theme, lightTheme);
     return lightTheme;
   }
+}
+
+export const getCart = () => {
+    let data = getItem(LOCAL_STORAGE.Cart);
+    if (data) return data;
+    //If cart not found, attempt to query backend
+    let session = getSession();
+    if (!session) return null;
+    getProfileInfo(session).then(response => {
+        if (response.orders && response.orders.length > 0) {
+            let cart_index = response.orders.length - 1;
+            let cart = response.orders[cart_index];
+            storeItem(LOCAL_STORAGE.Cart, cart);
+            return cart;
+        }
+    }).catch(err => {
+        console.error(err);
+    }).finally(() => {
+        return null;
+    })
+}
+
+export const getRoles = () => {
+    return getItem(LOCAL_STORAGE.Roles);
+}
+
+export const getSession = () => {
+    return getItem(LOCAL_STORAGE.Session);
 }
 
 export const storeItem = (key, value) => {
@@ -77,7 +107,7 @@ export const storeItem = (key, value) => {
 }
 
 export const getItem = (key) => {
-  let data = localStorage.getItem(key)
+  let data = localStorage.getItem(key);
   return data ? JSON.parse(data) : null;
 }
 

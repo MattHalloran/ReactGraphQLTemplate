@@ -67,9 +67,20 @@ export const StyledSkuPopup = styled.div`
     display: block;
     padding: 1em;
     width: 500px;
+    max-width: 100%;
+    max-width: -moz-fit-content;
+    max-width: -webkit-fill-available;
 
     .half {
         display: inline-block;
         width: 50%;
+    }
+
+    .display-image {
+        border: 1px solid black;
+        max-width: 100%;
+        max-width: -webkit-fill-available;
+        max-height: 100%;
+        max-height: -webkit-fill-available;
     }
 `;

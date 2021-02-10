@@ -4,6 +4,7 @@ import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages } from 'query/http_promises';
 import { getTheme } from 'utils/storage';
 import Button from 'components/Button/Button';
+import FileUpload from 'components/FileUpload/FileUpload';
 
 function AdminGalleryPage({
     theme = getTheme(),
@@ -16,9 +17,6 @@ function AdminGalleryPage({
 
     const fileSelectedHandler = (event) => {
         let newImages = event.target.files;
-        if (newImages.length <= 0) {
-            return;
-        }
         setSelected([]);
         for(let i = 0; i < newImages.length; i++) {
             let fileSplit = newImages[i].name.split('.');
@@ -68,8 +66,7 @@ function AdminGalleryPage({
             <h1>Gallery Edit</h1>
             <div>
                 <h2>Select image(s) for upload</h2>
-                <input type="file" onChange={fileSelectedHandler} multiple/>
-                <Button onClick={uploadImages}>Upload</Button>
+                <FileUpload selectText="Select" uploadText="Upload" onUploadClick={uploadImages} onUploadChange={fileSelectedHandler} multiple/>
             </div>
             <h2>Reorder and delete images</h2>
             <div>

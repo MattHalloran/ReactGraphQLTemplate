@@ -1,6 +1,6 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { storeItem, getItem, clearStorage, setTheme } from 'utils/storage';
+import { storeItem, getRoles, getSession,clearStorage, setTheme } from 'utils/storage';
 import StatusCodes from './consts/codes.json';
 import { LOCAL_STORAGE, LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
@@ -41,12 +41,12 @@ export const modifyUser = (id, operation) => promiseWrapper(http.modify_user, id
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {
-        let roles = getItem(LOCAL_STORAGE.Roles);
+        let roles = getRoles();
         if (roles) PubSub.publish(PUBS.Roles, roles);
-        let session = getItem(LOCAL_STORAGE.Session);
+        let session = getSession();
         if (!session || !session.email || !session.token) {
-            console.log('SETTING SESSION TO NULL', session)
-            storeItem(LOCAL_STORAGE.Session, null)
+            console.log('SETTING SESSION TO NULL', session);
+            storeItem(LOCAL_STORAGE.Session, null);
             reject({ok: false, status: StatusCodes.FAILURE_NOT_VERIFIED});
         } else {
             http.validate_token(session.token).then(data => {

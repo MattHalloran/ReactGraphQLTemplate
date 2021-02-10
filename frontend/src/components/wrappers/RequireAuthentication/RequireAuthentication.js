@@ -2,8 +2,8 @@ import { useLayoutEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { checkCookies } from 'query/http_promises';
-import { LINKS, USER_ROLES, LOCAL_STORAGE } from 'utils/consts';
-import { getItem } from 'utils/storage';
+import { LINKS, USER_ROLES } from 'utils/consts';
+import { getRoles } from 'utils/storage';
 
 function RequireAuthentication({
     session,
@@ -12,7 +12,7 @@ function RequireAuthentication({
 }) {
 
     const history = useHistory();
-    const user_roles = getItem(LOCAL_STORAGE.Roles);
+    const user_roles = getRoles();
     console.log('USER ROLES IN REQUIRE AUTHHH', user_roles, session)
 
     let role_titles = user_roles?.map(r => r.title);
@@ -24,7 +24,7 @@ function RequireAuthentication({
         // As an extra check, make sure the user's cookies are vlid
         } else {
             checkCookies().then().catch((err) => {
-                console.log('FAILED COOKIE CHECK', err)
+                console.error('FAILED COOKIE CHECK', err)
                 history.push(LINKS.Home);
             })
         }

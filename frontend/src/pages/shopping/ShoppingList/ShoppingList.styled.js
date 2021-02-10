@@ -123,9 +123,9 @@ export const StyledExpandedSku = styled.div`
     }
 
     img {
-        max-height: 60vh;
+        max-height: 40vh;
         max-width: 100%;
-        display: block;
+        display: inline-block;
         border-radius: 10px 10px 0 0;
     }
 

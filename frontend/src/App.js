@@ -4,12 +4,13 @@ import Navbar from 'components/Navbar/Navbar';
 import Spinner from 'components/Spinner/Spinner';
 import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import { PUBS, LINKS, USER_ROLES, LOCAL_STORAGE } from 'utils/consts';
+import { PUBS, LINKS, USER_ROLES } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import FormPage from 'components/wrappers/FormPage/FormPage';
 //Routes
 import HomePage from 'pages/HomePage/HomePage';
 import AboutPage from 'pages/AboutPage/AboutPage';
+import CartPage from 'pages/CartPage/CartPage';
 import GalleryPage from 'pages/GalleryPage/GalleryPage';
 import ShoppingPage from 'pages/shopping/ShoppingPage/ShoppingPage';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
@@ -26,7 +27,7 @@ import LogInForm from 'forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getItem, getTheme } from './utils/storage';
+import { getSession, getTheme } from './utils/storage';
 //Authentication
 import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
 import { checkCookies } from 'query/http_promises';
@@ -41,7 +42,7 @@ const keyMap = {
 function App() {
   const [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
-  const [session, setSession] = useState(getItem(LOCAL_STORAGE.Session));
+  const [session, setSession] = useState(getSession());
   const session_attempts = useRef(0);
   const [user_roles, setUserRoles] = useState(null);
   const [theme, setTheme] = useState(getTheme());
@@ -98,7 +99,7 @@ function App() {
     if (session == null && session_attempts.current < 5) {
       session_attempts.current++;
       console.log('SESSION UPDATED IN APP', session)
-      checkCookies();
+      checkCookies().catch(err => console.error(err));
     }
   }, [session])
 
@@ -141,6 +142,9 @@ function App() {
                 )} />
                 <Route exact path={`${LINKS.Shopping}/:sku?`} render={() => (
                   <ShoppingPage user_roles={user_roles} session={session} />
+                )} />
+                <Route exact path={LINKS.Cart} render={() => (
+                  <CartPage user_roles={user_roles} session={session} />
                 )} />
                 {/* admin pages */}
                 <Route exact path={LINKS.Admin} render={() => (
