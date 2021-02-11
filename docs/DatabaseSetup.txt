@@ -1,0 +1,13 @@
+Last update: 2020/11/24
+
+The database code is located in models.py. The database is current in PostgreSQL.
+
+To delete the database:
+1) Open up a PostgreSQL terminal
+2) DROP DATABASE IF EXISTS nlnwebsite;
+3) CREATE DATABASE nlnwebsite;
+
+To populate database:
+1) Open a terminal in the backend directory
+2) cd tools
+2) python3 createDatabase.py

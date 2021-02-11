@@ -1,46 +1,67 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import Navbar from 'components/shared/Navbar/Navbar';
-import Spinner from 'components/shared/Spinner/Spinner';
-import Footer from 'components/shared/Footer/Footer';
+import Navbar from 'components/Navbar/Navbar';
+import Spinner from 'components/Spinner/Spinner';
+import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import FormPage from 'components/shared/wrappers/FormPage/FormPage';
+import { PUBS, LINKS, USER_ROLES } from 'utils/consts';
+import { GlobalHotKeys } from "react-hotkeys";
+import FormPage from 'components/wrappers/FormPage/FormPage';
 //Routes
-import HomePage from 'components/HomePage/HomePage';
-import AboutPage from 'components/AboutPage/AboutPage';
-import GalleryPage from 'components/GalleryPage/GalleryPage';
-import ShoppingPage from 'components/shopping/ShoppingPage/ShoppingPage';
-import PrivacyPolicyPage from 'components/PrivacyPolicyPage/PrivacyPolicyPage';
-import AdminMainPage from 'components/admin/AdminMainPage/AdminMainPage';
-import AdminContactPage from 'components/admin/AdminContactPage/AdminContactPage';
-import AdminCustomerPage from 'components/admin/AdminCustomerPage/AdminCustomerPage';
-import AdminGalleryPage from 'components/admin/AdminGalleryPage/AdminGalleryPage';
-import AdminInventoryPage from 'components/admin/AdminInventoryPage/AdminInventoryPage';
-import AdminOrderPage from 'components/admin/AdminOrderPage/AdminOrderPage';
-import AdminPlantPage from 'components/admin/AdminPlantPage/AdminPlantPage';
-import NotFoundPage from 'components/NotFoundPage/NotFoundPage/';
-import ProfileForm from 'components/forms/ProfileForm/ProfileForm';
-import SignUpForm from 'components/forms/SignUpForm/SignUpForm';
-import LogInForm from 'components/forms/LogInForm/LogInForm';
-import ForgotPasswordForm from 'components/forms/ForgotPasswordForm/ForgotPasswordForm';
+import HomePage from 'pages/HomePage/HomePage';
+import AboutPage from 'pages/AboutPage/AboutPage';
+import CartPage from 'pages/CartPage/CartPage';
+import GalleryPage from 'pages/GalleryPage/GalleryPage';
+import ShoppingPage from 'pages/shopping/ShoppingPage/ShoppingPage';
+import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
+import AdminMainPage from 'pages/admin/AdminMainPage/AdminMainPage';
+import AdminContactPage from 'pages/admin/AdminContactPage/AdminContactPage';
+import AdminCustomerPage from 'pages/admin/AdminCustomerPage/AdminCustomerPage';
+import AdminGalleryPage from 'pages/admin/AdminGalleryPage/AdminGalleryPage';
+import AdminInventoryPage from 'pages/admin/AdminInventoryPage/AdminInventoryPage';
+import AdminOrderPage from 'pages/admin/AdminOrderPage/AdminOrderPage';
+import NotFoundPage from 'pages/NotFoundPage/NotFoundPage';
+import ProfileForm from 'forms/ProfileForm/ProfileForm';
+import SignUpForm from 'forms/SignUpForm/SignUpForm';
+import LogInForm from 'forms/LogInForm/LogInForm';
+import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
-import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './global';
-import { getTheme } from './theme';
+import { getSession, getTheme } from './utils/storage';
 //Authentication
-import RequireAuthentication from 'components/shared/wrappers/RequireAuthentication/RequireAuthentication';
-import * as authQuery from 'query/auth';
+import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
+import { checkCookies } from 'query/http_promises';
+
+const keyMap = {
+  OPEN_MENU: "left",
+  TOGGLE_MENU: "m",
+  CLOSE_MENU: "right",
+  CLOSE_MENU_OR_POPUP: ["escape", "backspace"]
+};
 
 function App() {
-  console.log('RENDERING APPPPPP')
-  let [nav_visible, setNavVisible] = useState(true);
+  const [nav_visible, setNavVisible] = useState(true);
   const nav_visible_y = useRef(-1);
-  let [token, setToken] = useState(null);
-  let token_attempts = useRef(0);
-  let [user_roles, setUserRoles] = useState(null);
-  let [theme, setTheme] = useState(getTheme());
-  let [menu_open, setMenuOpen] = useState(false);
+  const [session, setSession] = useState(getSession());
+  const session_attempts = useRef(0);
+  const [user_roles, setUserRoles] = useState(null);
+  const [theme, setTheme] = useState(getTheme());
+  const [menu_open, setMenuOpen] = useState(false);
+  const [popup_open, setPopupOpen] = useState(false);
 
+  const handlers = {
+    OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
+    TOGGLE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle'),
+    CLOSE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, false),
+    CLOSE_POPUP: () => PubSub.publish(PUBS.PopupOpen, false),
+    CLOSE_MENU_OR_POPUP: () => {
+      if (popup_open) {
+        handlers.CLOSE_POPUP();
+      } else {
+        handlers.CLOSE_MENU();
+      }
+    },
+  };
 
   // Determines when the nav becomes visible/invisible
   const trackScrolling = useCallback(() => {
@@ -57,85 +78,112 @@ function App() {
     }
   }, [nav_visible]);
 
-  const menuClicked = (is_open) => setMenuOpen(is_open);
-
   useEffect(() => {
-    let tokenSub = PubSub.subscribe('token', (_, t) => setToken(t));
-    let themeSub = PubSub.subscribe('theme', (_, t) => setTheme(t));
-    let roleSub = PubSub.subscribe('roles', (_, r) => setUserRoles(r));
+    let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+    let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
+    let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+    let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
+    let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
     document.addEventListener('scroll', trackScrolling);
     return (() => {
-      PubSub.unsubscribe(tokenSub);
+      PubSub.unsubscribe(sessionSub);
       PubSub.unsubscribe(themeSub);
       PubSub.unsubscribe(roleSub);
+      PubSub.unsubscribe(popupSub);
+      PubSub.unsubscribe(menuSub);
       document.removeEventListener('scroll', trackScrolling);
     })
   }, [trackScrolling])
 
   useEffect(() => {
-    if (token == null && token_attempts.current < 5) {
-      token_attempts.current += 1;
-      console.log('TOKEN ATTEMPTS IS', token_attempts.current)
-      authQuery.checkCookies();
+    if (session == null && session_attempts.current < 5) {
+      session_attempts.current++;
+      console.log('SESSION UPDATED IN APP', session)
+      checkCookies().catch(err => console.error(err));
     }
-  }, [token])
+  }, [session])
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles menu_open={menu_open} />
-      <div id="App">
-        <div id="page-container">
-          <div id="content-wrap">
-            <Navbar menuClicked={menuClicked} visible={nav_visible} token={token} user_roles={user_roles} />
-            <Spinner spinning={false} />
-            <Switch>
-              {/* public pages */}
-              <Route exact path="/" component={HomePage} />
-              <Route exact path="/about" component={AboutPage} />
-              <Route exact path="/privacy-policy" component={PrivacyPolicyPage} />
-              <Route exact path="/gallery/:img?" component={GalleryPage} />
-              <Route exact path="/register" render={() => (
-                <FormPage header="Sign Up">
-                  <SignUpForm />
-                </FormPage>
-              )} />
-              <Route exact path="/login" render={() => (
-                <FormPage header="Log In">
-                  <LogInForm />
-                </FormPage>
-              )} />
-              <Route exact path="/forgot-password" render={() => (
-                <FormPage header="Forgot Password">
-                  <ForgotPasswordForm />
-                </FormPage>
-              )} />
-              {/* customer pages */}
-              <Route exact path="/profile/:edit?" render={() => (
-                <RequireAuthentication token={token}>
-                  <FormPage header="Profile">
-                    <ProfileForm />
+        <div id="App">
+        <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+        <GlobalStyles theme={theme} menu_or_popup_open={menu_open || popup_open} />
+          <div id="page-container">
+            <div id="content-wrap">
+              <Navbar visible={nav_visible} session={session} user_roles={user_roles} />
+              <Spinner spinning={false} />
+              <Switch>
+                {/* public pages */}
+                <Route exact path={LINKS.Home} component={HomePage} />
+                <Route exact path={LINKS.About} component={AboutPage} />
+                <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} />
+                <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} />
+                <Route exact path={LINKS.Register} render={() => (
+                  <FormPage header="Sign Up" maxWidth="700px">
+                    <SignUpForm />
                   </FormPage>
-                </RequireAuthentication>
-              )} />
-              <Route exact path="/shopping" render={() => (
-                <ShoppingPage user_roles={user_roles} />
-              )} />
-              {/* admin pages */}
-              <Route exact path="/admin" component={AdminMainPage} />
-              <Route exact path="/admin/contact-info" component={AdminContactPage} />
-              <Route exact path="/admin/customers" component={AdminCustomerPage} />
-              <Route exact path="/admin/gallery" component={AdminGalleryPage} />
-              <Route exact path="/admin/inventory" component={AdminInventoryPage} />
-              <Route exact path="/admin/orders" component={AdminOrderPage} />
-              <Route exact path="/admin/plant-info" component={AdminPlantPage} />
-              {/* 404 page */}
-              <Route component={NotFoundPage} />
-            </Switch>
+                )} />
+                <Route exact path={LINKS.LogIn} render={() => (
+                  <FormPage header="Log In" maxWidth="700px">
+                    <LogInForm />
+                  </FormPage>
+                )} />
+                <Route exact path={LINKS.ForgotPassword} render={() => (
+                  <FormPage header="Forgot Password" maxWidth="700px">
+                    <ForgotPasswordForm />
+                  </FormPage>
+                )} />
+                {/* customer pages */}
+                <Route exact path={LINKS.Profile} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Customer}>
+                    <FormPage header="Profile">
+                      <ProfileForm session={session} />
+                    </FormPage>
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={`${LINKS.Shopping}/:sku?`} render={() => (
+                  <ShoppingPage user_roles={user_roles} session={session} />
+                )} />
+                <Route exact path={LINKS.Cart} render={() => (
+                  <CartPage user_roles={user_roles} session={session} />
+                )} />
+                {/* admin pages */}
+                <Route exact path={LINKS.Admin} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminMainPage />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminContactInfo} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminContactPage />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminCustomers} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminCustomerPage />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminGallery} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminGalleryPage />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminInventory} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminInventoryPage />
+                  </RequireAuthentication>
+                )} />
+                <Route exact path={LINKS.AdminOrders} render={() => (
+                  <RequireAuthentication role={USER_ROLES.Admin}>
+                    <AdminOrderPage />
+                  </RequireAuthentication>
+                )} />
+                {/* 404 page */}
+                <Route component={NotFoundPage} />
+              </Switch>
+            </div>
+            <Footer />
           </div>
-          <Footer />
         </div>
-      </div>
-    </ThemeProvider>
   );
 }
 

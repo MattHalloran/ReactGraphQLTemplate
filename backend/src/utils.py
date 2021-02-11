@@ -2,6 +2,26 @@ from PIL import Image
 from PIL.Image import ANTIALIAS
 import numpy as np
 from io import BytesIO
+from os import path
+
+
+def find_available_file_names(directory: str, img_name: str, extension: str):
+    '''Using suggested image file name, returns image and thumbnail file names
+    that are not being used'''
+    suggested_img_name = img_name
+    thumb_name = f'{img_name}-thumb'
+    path_attempts = 0
+    while True and path_attempts < 100:
+        img_path = f'{directory}/{img_name}.{extension}'
+        thumb_path = f'{directory}/{thumb_name}.{extension}'
+        # If both paths are available
+        if not path.exists(img_path) and not path.exists(thumb_path):
+            return (img_name, thumb_name)
+        img_name = f'{suggested_img_name}({path_attempts})'
+        thumb_name = f'{img_name}-thumb'
+        path_attempts += 1
+    raise Exception('Could not find an available file name!')
+
 
 def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     """ Returns metadata about the image:
@@ -32,3 +52,13 @@ def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     thumb.thumbnail([256, 512], ANTIALIAS)
 
     return (diff_as_string, thumb, width, height)
+
+
+def salt(length: int):
+    '''Generates a random string of letters and numbers'''
+    import random
+    ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    chars=[]
+    for i in range(length):
+        chars.append(random.choice(ALPHABET))
+    return "".join(chars)

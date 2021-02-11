@@ -9,7 +9,7 @@ const menu_app_style = `position: fixed;
     top: 0;
     width: 100%; 
     overflow: hidden;
-    `
+`
 
 export const GlobalStyles = createGlobalStyle`
     body {
@@ -25,6 +25,7 @@ export const GlobalStyles = createGlobalStyle`
         font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
             monospace;
     }
+
     /* Primary (default) link settings */
     a {
         transition: color 0.3s linear;
@@ -43,41 +44,34 @@ export const GlobalStyles = createGlobalStyle`
 
     #App {
         text-align: center;
-        ${({ menu_open }) => menu_open ? menu_app_style : ''};
+        ${({ menu_or_popup_open }) => menu_or_popup_open ? menu_app_style : ''};
     }
     
     #page-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
     
     #content-wrap{
-    flex:1;
-    position: relative;
+        flex:1;
+        position: relative;
     }
-    
-    @keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+
+    .page {
+        padding-top: 12vh;
     }
-    to {
-        transform: rotate(360deg);
-    }
-    }
-    
-    button.primary {
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 16px 32px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        transition-duration: 0.4s;
-        cursor: pointer;
-        border-radius: 10px;
+
+    .icon-container {
+        display: flex;
+        justify-content: space-between;
+
+        > svg, img {
+            display: inline-block;
+            text-align: center;
+            stroke: none;
+            fill: ${({ theme }) => theme.textPrimary};
+            cursor: pointer;
+        }
     }
 `
