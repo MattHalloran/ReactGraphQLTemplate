@@ -1,12 +1,19 @@
-import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
+import { useLayoutEffect, useState } from 'react';
 import { StyledProfilePage } from './ProfilePage.styled';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getTheme } from 'utils/storage';
+import { PubSub } from 'utils/pubsub';
 
-function ProfilePage({
-    theme = getTheme(),
-}) {
+function ProfilePage() {
+    const [theme, setTheme] = useState(getTheme());
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
+
     useLayoutEffect(() => {
         document.title = `Profile Page | ${BUSINESS_NAME}`;
     })
@@ -18,7 +25,7 @@ function ProfilePage({
 }
 
 ProfilePage.propTypes = {
-    theme: PropTypes.object,
+    
 }
 
 export default ProfilePage;

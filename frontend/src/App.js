@@ -79,11 +79,11 @@ function App() {
   }, [nav_visible]);
 
   useEffect(() => {
-    let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
-    let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t ?? getTheme()));
-    let roleSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
-    let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, p) => setPopupOpen(open => p === 'toggle' ? !open : p));
-    let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => setMenuOpen(open => b === 'toggle' ? !open : b));
+    let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+    let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
+    let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+    let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
+    let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
     document.addEventListener('scroll', trackScrolling);
     return (() => {
       PubSub.unsubscribe(sessionSub);
@@ -134,7 +134,7 @@ function App() {
                 )} />
                 {/* customer pages */}
                 <Route exact path={LINKS.Profile} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Customer}>
+                  <RequireAuthentication role={USER_ROLES.Customer}>
                     <FormPage header="Profile">
                       <ProfileForm session={session} />
                     </FormPage>
@@ -148,32 +148,32 @@ function App() {
                 )} />
                 {/* admin pages */}
                 <Route exact path={LINKS.Admin} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminMainPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminContactInfo} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminContactPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminCustomers} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminCustomerPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminGallery} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminGalleryPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminInventory} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminInventoryPage />
                   </RequireAuthentication>
                 )} />
                 <Route exact path={LINKS.AdminOrders} render={() => (
-                  <RequireAuthentication session={session} role={USER_ROLES.Admin}>
+                  <RequireAuthentication role={USER_ROLES.Admin}>
                     <AdminOrderPage />
                   </RequireAuthentication>
                 )} />

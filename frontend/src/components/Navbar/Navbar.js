@@ -48,15 +48,24 @@ Navbar.propTypes = {
     user_roles: PropTypes.array,
 }
 
-function Hamburger({
-    session = getSession(),
-    user_roles = getRoles(),
-    theme = getTheme(),
-    ...props
-}) {
+function Hamburger(props) {
+    const [session, setSession] = useState(getSession());
+    const [user_roles, setUserRoles] = useState(getRoles());
+    const [theme, setTheme] = useState(getTheme());
     let history = useHistory();
     let nav_options = [];
     let top_links = [];
+
+    useEffect(() => {
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(sessionSub);
+            PubSub.unsubscribe(roleSub);
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
 
     // If an admin is logged in, display admin links
     let roles = user_roles;
@@ -105,16 +114,22 @@ function Hamburger({
 }
 
 Hamburger.propTypes = {
-    theme: PropTypes.object,
-    session: PropTypes.object,
-    user_roles: PropTypes.array,
-    visible: PropTypes.bool,
+    
 }
 
-function NavList({
-    session = getSession(),
-    user_roles = getRoles(),
-}) {
+function NavList() {
+    const [session, setSession] = useState(getSession());
+    const [user_roles, setUserRoles] = useState(getRoles());
+
+    useEffect(() => {
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+        return (() => {
+            PubSub.unsubscribe(sessionSub);
+            PubSub.unsubscribe(roleSub);
+        })
+    }, [])
+
     // Link, Link text, onClick function
     let nav_options = [];
     let about_options = [];
@@ -171,8 +186,7 @@ function NavList({
 }
 
 NavList.propTypes = {
-    session: PropTypes.object,
-    user_roles: PropTypes.array,
+    
 }
 
 export default Navbar;

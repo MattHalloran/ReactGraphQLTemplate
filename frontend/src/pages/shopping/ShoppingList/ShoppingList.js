@@ -6,23 +6,22 @@ import { getImageFromSku, getInventory, getInventoryPage, setLikeSku, setSkuInCa
 import PubSub from 'utils/pubsub';
 import { BUSINESS_NAME, LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
-import { HeartIcon, HeartFilledIcon, NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ChevronLeftIcon, ChevronRightIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
+import { HeartIcon, HeartFilledIcon, NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import Tooltip from 'components/Tooltip/Tooltip';
-import { getTheme } from "utils/storage";
-import makeid from "utils/makeID";
+import { getSession, getTheme, getCart, getLikes } from "utils/storage";
+import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
+import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 
 function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
-    session,
-    theme = getTheme(),
 }) {
-    console.log('SESSION IN SHOPPING LIST IS', session);
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
-    let history = useHistory();
-    const [likes, setLikes] = useState([]);
-    const [cart, setCart] = useState([]);
+    const [session, setSession] = useState(getSession());
+    const [theme, setTheme] = useState(getTheme());
+    const [likes, setLikes] = useState(getLikes());
+    const [cart, setCart] = useState(getCart());
     const [popup, setPopup] = useState(null);
     const [cards, setCards] = useState([]);
     const [visible_cards, setVisibleCards] = useState([]);
@@ -34,15 +33,18 @@ function ShoppingList({
     const urlParams = useParams();
     const curr_index = useMemo(() => cards.current?.findIndex(c => c.sku === urlParams.sku) ?? -1, [cards, urlParams]);
     const loading = useRef(false);
+    let history = useHistory();
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
-    // useHotkeys('arrowLeft', () => prevImage());
-    // useHotkeys('arrowRight', () => nextImage());
 
     useEffect(() => {
-        let likesSub = PubSub.subscribe(PUBS.Likes, (_, l) => setLikes(l));
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, c) => setCart(c));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        let likesSub = PubSub.subscribe(PUBS.Likes, (_, o) => setLikes(o));
+        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         return (() => {
+            PubSub.unsubscribe(sessionSub);
+            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(likesSub);
             PubSub.unsubscribe(cartSub);
         })
@@ -196,31 +198,6 @@ function ShoppingList({
         });
     }, [cards, page_size, readyToLoadPage, visible_cards]);
 
-    const prevImage = useCallback(() => {
-        if (cards.length <= 0) return;
-        // Default to last image if none open
-        if (curr_index < 0) {
-            history.push(LINKS.Shopping + '/' + visible_cards[cards.length - 1].sku);
-        } else {
-            // Find previous image index using modulus
-            let prev_index = (curr_index + cards.length - 1) % visible_cards.length;
-            history.replace(LINKS.Shopping + '/' + visible_cards[prev_index].sku);
-        }
-    }, [cards, visible_cards, curr_index, history]);
-
-    const nextImage = useCallback(() => {
-        if (cards.length <= 0) return;
-        // Default to first image if none open
-        if (curr_index < 0) {
-            history.push(LINKS.Shopping + '/' + visible_cards[0].sku);
-        } else {
-            // Find next image index using modulus
-            let next_index = (curr_index + 1) % visible_cards.length;
-            history.replace(LINKS.Shopping + '/' + visible_cards[next_index].sku);
-        }
-    }, [cards, visible_cards, curr_index, history]);
-
-
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);
     };
@@ -231,8 +208,16 @@ function ShoppingList({
     }
 
     const setInCart = (sku, quantity, in_cart) => {
+        console.log('SET IN CART PART 1')
         if (!session?.email || !session?.token) return;
-        setSkuInCart(session.email, session.token, sku, quantity, in_cart);
+        console.log('SET IN CART PART 2')
+        setSkuInCart(session.email, session.token, sku, quantity, in_cart)
+            .then(() => {
+                alert(`${quantity} ${sku?.plant?.latin_name}(s) ${in_cart ? 'added to' : 'removed from'} cart!`)
+            })
+            .catch(() => {
+                alert('Operation failed. Please try again');
+            })
     }
 
     useEffect(() => {
@@ -246,9 +231,8 @@ function ShoppingList({
         setPopup(
             <Modal onClose={() => history.goBack()}>
                 <ExpandedSku sku={popup_data}
+                    cart={cart}
                     is_liked={likes?.some(l => l.sku === popup_data.sku)}
-                    goLeft={prevImage}
-                    goRight={nextImage}
                     onLike={setLike}
                     onCart={setInCart}
                     theme={theme} />
@@ -276,8 +260,6 @@ ShoppingList.propTypes = {
     page_size: PropTypes.number,
     sort: PropTypes.string,
     filters: PropTypes.object,
-    session: PropTypes.object,
-    theme: PropTypes.object,
 };
 
 export default ShoppingList;
@@ -285,8 +267,9 @@ export default ShoppingList;
 function SkuCard({
     sku,
     onClick,
-    theme = getTheme(),
 }) {
+    console.log("SKU CARDDDD", sku)
+    const [theme, setTheme] = useState(getTheme());
     const plant = sku?.plant;
 
     let temp_sizes = [['1', 2234], ['2', 1], ['3', 23]];//sku.sizes
@@ -324,15 +307,14 @@ export { SkuCard };
 
 function ExpandedSku({
     sku,
+    cart,
     is_liked = false,
-    goLeft,
-    goRight,
     onLike,
     onCart,
-    theme = getTheme(),
 }) {
-    console.log('EEEEEE', sku)
+    console.log('EEEEEE', cart)
     const plant = sku?.plant;
+    const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
 
     let display_image;
@@ -348,14 +330,14 @@ function ExpandedSku({
             <HeartIcon
                 width="40px"
                 height="40px"
-                onClick={onLike(sku.sku, true)} />
+                onClick={onLike(sku?.sku, true)} />
         )
     } else {
         heartIcon = (
             <HeartFilledIcon
                 width="40px"
                 height="40px"
-                onClick={onLike(sku.sku, false)} />
+                onClick={onLike(sku?.sku, false)} />
         )
     }
 
@@ -376,56 +358,56 @@ function ExpandedSku({
 
     return (
         <StyledExpandedSku theme={theme}>
-            <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={goLeft} />
-            <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={goRight} />
-            <div className="main-content">
-                <h1 className="title">{plant?.latin_name}</h1>
-                {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
-                {display_image}
-                {plant?.description ?
-                    <div className="description-container">
-                        <p className="center">Description</p>
-                        <p>{plant.description}</p>
-                    </div>
-                    : null}
-                <div className="trait-list">
-                    <div className="sku">
-                        {/* TODO availability, sizes */}
-                    </div>
-                    <div className="general">
-                        <p>General Information</p>
-                        {traitIconList("zones", MapIcon, "Zones")}
-                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                    </div>
-                    <div className="bloom">
-                        <p>Bloom</p>
-                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                    </div>
-                    <div className="light">
-                        <p>Light</p>
-                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                    </div>
-                    <div className="soil">
-                        <p>Soil</p>
-                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                    </div>
+            <h1 className="title">{plant?.latin_name}</h1>
+            {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
+            {display_image}
+            {plant?.description ?
+                <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
+                    <p>{plant.description}</p>
+                </Collapsible>
+                : null}
+            <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
+                <div className="sku">
+                    {/* TODO availability, sizes */}
                 </div>
-                <div className="order-div">
-
+                <div className="general">
+                    <p>General</p>
+                    {traitIconList("zones", MapIcon, "Zones")}
+                    {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+                    {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                    {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
+                    {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
                 </div>
-                <div className="icon-container">
-                    {heartIcon}
+                <div className="bloom">
+                    <p>Bloom</p>
+                    {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
+                    {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+                </div>
+                <div className="light">
+                    <p>Light</p>
+                    {traitIconList("light_ranges", RangeIcon, "Light Range")}
+                    {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+                </div>
+                <div className="soil">
+                    <p>Soil</p>
+                    {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
+                    {traitIconList("soil_phs", PHIcon, "Soil PH")}
+                    {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
+                </div>
+            </Collapsible>
+            <div className="icon-container bottom-div">
+                {heartIcon}
+                <div className="quantity-div">
+                    <QuantityBox
+                        min_value={0}
+                        max_value={sku?.quantity ?? 100}
+                        initial_value={1}
+                        value={quantity}
+                        valueFunc={setQuantity} />
                     <BagPlusIcon
                         width="30px"
                         height="30px"
-                        onClick={onCart(sku.sku, quantity, true)} />
+                        onClick={() => onCart(sku.sku, quantity, true)} />
                 </div>
             </div>
         </StyledExpandedSku>
@@ -434,9 +416,8 @@ function ExpandedSku({
 
 ExpandedSku.propTypes = {
     sku: PropTypes.object.isRequired,
+    cart: PropTypes.object.isRequired,
     is_liked: PropTypes.bool.isRequired,
-    goLeft: PropTypes.func.isRequired,
-    goRight: PropTypes.func.isRequired,
     onLike: PropTypes.func.isRequired,
     onCart: PropTypes.func.isRequired,
     theme: PropTypes.object,

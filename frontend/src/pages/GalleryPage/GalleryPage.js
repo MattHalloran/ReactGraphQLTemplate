@@ -20,9 +20,8 @@ const SortableGallery = SortableContainer(({ items, handleClick }) => (
     <Gallery photos={items} renderImage={props => <SortableGalleryPhoto handleClick={handleClick} {...props} />} />
 ));
 
-function GalleryPage({
-    theme = getTheme(),
-}) {
+function GalleryPage() {
+    const [theme, setTheme] = useState(getTheme());
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
@@ -40,6 +39,13 @@ function GalleryPage({
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => prevImage());
     // useHotkeys('arrowRight', () => nextImage());
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
 
     const loading_full_image = useRef(false);
     const loadImage = useCallback((index, hash) => {

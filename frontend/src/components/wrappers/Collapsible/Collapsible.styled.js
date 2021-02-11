@@ -19,11 +19,11 @@ export const StyledCollapsible = styled.header`
         
     }
 
-    .arrow-wrapper {
+    .collapse-arrow-wrapper {
         position: relative;
     }
 
-    .arrow {
+    .collapse-arrow {
         border-color: black transparent transparent;
         border-style: solid;
         border-width: 5px 5px 0;

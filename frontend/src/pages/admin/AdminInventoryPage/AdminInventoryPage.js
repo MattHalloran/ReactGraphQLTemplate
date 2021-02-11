@@ -3,24 +3,27 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { StyledAdminInventoryPage, StyledSkuPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import { useHistoryState } from 'utils/useHistoryState';
 import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getPlants, getInventoryFilters, modifySku } from 'query/http_promises';
+import { getInventory, getPlants, getInventoryFilters, modifySku, uploadAvailability} from 'query/http_promises';
 import Button from 'components/Button/Button';
-import { SORT_OPTIONS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
+import { SORT_OPTIONS, PUBS } from 'utils/consts';
+import { PubSub } from 'utils/pubsub';
+import { getTheme, getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import InputText from 'components/inputs/InputText/InputText';
 // Icons
 import { TrashIcon, EditIcon, HideIcon, NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 
-function AdminInventoryPage({
-    theme = getTheme(),
-}) {
+function AdminInventoryPage() {
+    const [theme, setTheme] = useState(getTheme());
+    const [session, setSession] = useState(getSession());
+    // Holds the selected availability file, if uploading one
+    const [selected, setSelected] = useState(null);
     // Holds the existing SKUs list
     const [skuCards, setSkuCards] = useState([]);
     // Holds the existing plants list
@@ -29,6 +32,15 @@ function AdminInventoryPage({
     const [currSku, setCurrSku] = useState(null);
     const [trait_options, setTraitOptions] = useState(null);
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+            PubSub.unsubscribe(sessionSub);
+        })
+    }, [])
 
     useLayoutEffect(() => {
         let mounted = true;
@@ -69,7 +81,7 @@ function AdminInventoryPage({
 
     const deleteSku = (sku) => {
         if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        modifySku(sku.sku, 'DELETE')
+        modifySku(session?.email, session?.token, sku.sku, 'DELETE')
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -86,7 +98,7 @@ function AdminInventoryPage({
 
     const hideSku = (sku) => {
         let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-        modifySku(sku.sku, operation)
+        modifySku(session?.email, session?.token, sku.sku, operation)
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -120,7 +132,7 @@ function AdminInventoryPage({
         reader.onloadend = () => {
             let fileData = reader.result;
             console.log('GOT FILE DATAAAA', fileData);
-            //setSelected(images => [...images, imageData])
+            setSelected(fileData);
         }
         reader.readAsDataURL(file);
     }
@@ -134,6 +146,18 @@ function AdminInventoryPage({
             return;
         }
         processFile(files[0]);
+    }
+
+    const sendAvailability = () => {
+        if (!selected) return;
+        let form = new FormData();
+        form.append('data', selected)
+        uploadAvailability(form).then(() => {
+            alert('Successfully uploaded availability! Refresh page to see results');
+        }).catch(error => {
+            console.error(error);
+            alert('Error uploading availability!');
+        });
     }
 
     let popup = (currSku) ? (
@@ -157,7 +181,7 @@ function AdminInventoryPage({
                 <Button onClick={() => editSku({})}>Create Empty SKU</Button>
             </div>
             <div>
-                Upload Spreadsheet<FileUpload onUploadClick={() => {}} onUploadChange={fileSelectedHandler}/>
+                Upload Spreadsheet<FileUpload onUploadClick={sendAvailability} onUploadChange={fileSelectedHandler}/>
             </div>
 
             <div className="flexed">
@@ -179,7 +203,7 @@ function AdminInventoryPage({
 }
 
 AdminInventoryPage.propTypes = {
-    theme: PropTypes.object,
+    
 }
 
 export default AdminInventoryPage;
@@ -252,6 +276,10 @@ function SkuPopup({
 
     //Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const saveSku = () => {
+        //TODO
+    }
 
     // Returns an input text or a dropdown, depending on if the field is in the trait options
     const getInput = (field, label, value, valueFunc, multi_select = true) => {
@@ -359,7 +387,7 @@ function SkuPopup({
                     <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
                 </div>
             </div>
-            <Button>Upload SKU</Button>
+            <Button onClick={saveSku}>Save SKU</Button>
         </StyledSkuPopup>
     );
 }

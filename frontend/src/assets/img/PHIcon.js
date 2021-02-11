@@ -11,8 +11,8 @@ function PHIcon(props) {
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
             <title id="title">{props.iconTitle ?? 'Soil PH'}</title>
             <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="175.422" x2="336.578" y1="256.497" y2="95.341">
-                <stop offset="0" stop-color="#b3e152" />
-                <stop offset="1" stop-color="#f6e46f" />
+                <stop offset="0" stopColor="#b3e152" />
+                <stop offset="1" stopColor="#f6e46f" />
             </linearGradient>
             <path d="M490.668 256c0 129.602-105.066 234.668-234.668 234.668S21.332 385.602 21.332 256 126.398 21.332 256 21.332 490.668 126.398 490.668 256zm0 0" fill="#f5fbe9" />
             <path d="M320 469.332c-129.602 0-234.668-105.062-234.668-234.664 0-91.68 52.578-171.066 129.223-209.684C104.719 44.554 21.332 140.54 21.332 256c0 129.602 105.066 234.668 234.668 234.668 37.926 0 73.742-9.008 105.445-24.984A236.38 236.38 0 01320 469.332zm0 0" fill="#ecf7d4" />

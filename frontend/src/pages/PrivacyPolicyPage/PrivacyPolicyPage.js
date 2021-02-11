@@ -1,12 +1,19 @@
-import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
+import { useLayoutEffect, useState, useEffect } from 'react';
 import { getTheme } from 'utils/storage';
 import { StyledPrivacyPolicyPage } from './PrivacyPolicyPage.styled';
-import { BUSINESS_NAME, FULL_BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, FULL_BUSINESS_NAME, PUBS } from 'utils/consts';
+import { PubSub } from 'utils/pubsub';
 
-function PrivacyPolicyPage({
-    theme=getTheme(),
-}) {
+function PrivacyPolicyPage() {
+    const [theme, setTheme] = useState(getTheme());
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
+
     useLayoutEffect(() => {
         document.title = `Privacy Policy | ${BUSINESS_NAME}`;
     })
@@ -322,7 +329,7 @@ function PrivacyPolicyPage({
 }
 
 PrivacyPolicyPage.propTypes = {
-    theme: PropTypes.object,
+    
 }
 
 export default PrivacyPolicyPage;

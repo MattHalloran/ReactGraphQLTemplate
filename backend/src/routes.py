@@ -312,8 +312,16 @@ def image_from_sku():
     }
 
 
+@app.route(f'{PREFIX}/upload_availability', methods=["POST"])
+@handle_exception
+def upload_availability():
+    # Check to make sure requestor is an admin TODO
+    (data) = getJson('data')
+    # TODO
+
+
 # TODO - check image size and extension to make sure it is valid
-@app.route(f'{PREFIX}/upload_gallery_image/', methods=["POST"])
+@app.route(f'{PREFIX}/upload_gallery_image', methods=["POST"])
 @handle_exception
 def upload_gallery_image():
     (names, extensions, images) = getForm('name', 'extension', 'image')
@@ -403,10 +411,15 @@ def fetch_profile_info():
 @app.route(f'{PREFIX}/fetch_customers', methods=["POST"])
 @handle_exception
 def fetch_customers():
-    # Check to make sure requestor is an admin TODO
+    # Grab data
     (email, token) = getJson('email', 'token')
-    user = UserHandler.from_email(email)
-    customers = [UserHandler.to_dict(UserHandler.from_id(id)) for id in UserHandler.all_ids()]
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    # Grab all users that have a customer role
+    users = [UserHandler.to_dict(UserHandler.from_id(id)) for id in UserHandler.all_ids()]
+    customers = [u for u in users if UserHandler.is_customer(u)]
     return {
         "customers": customers,
         "status": StatusCodes['SUCCESS']
@@ -417,16 +430,24 @@ def fetch_customers():
 @handle_exception
 def set_like_sku():
     '''Like or unlike an inventory item'''
+    # Grab data
     (email, token, sku_str, liked) = getData('email', 'token', 'sku', 'liked')
-    user = UserHandler.from_email(email)
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    user = session_check['user']
     sku = SkuHandler.from_sku(sku_str)
+    # Like SKU
     if liked:
         if sku not in user.likes:
             user.likes.append(sku)
+    # Unlike SKU
     else:
         if sku in user.likes:
             user.likes.remove(sku)
     db.session.commit()
+    # Return updated user data
     user_data = UserHandler.to_dict(user)
     user_data['status'] = StatusCodes['SUCCESS']
     return user_data
@@ -437,9 +458,13 @@ def set_like_sku():
 def set_sku_in_cart():
     '''Adds or removes an item from the user's cart
     Returns an updated json of the user'''
+    # Grab data
     (email, token, sku_str, quantity, in_cart) = getData('email', 'token', 'sku', 'quantity', 'in_cart')
-    print('TODOOOOO')
-    user = UserHandler.from_email(email)
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    user = session_check['user']
     sku = SkuHandler.from_sku(sku_str)
     # Find or create cart
     cart = None
@@ -460,7 +485,7 @@ def set_sku_in_cart():
             matching_order_item = item
             break
     # Remove order item, if quantity dropped to 0
-    if matching_order_item.quantity == 0:
+    if matching_order_item and matching_order_item.quantity == 0:
         cart.items.remove(matching_order_item)
         matching_order_item.delete()
     # Create a new order item, if adding and no matching SKU found
@@ -479,43 +504,48 @@ def set_sku_in_cart():
 @handle_exception
 def modify_sku():
     '''Like or unlike an inventory item'''
-    (sku, operation) = getData('sku', 'operation')
+    (email, token, sku, operation) = getData('sku', 'operation')
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
     sku_obj = SkuHandler.from_sku(sku)
     if sku_obj is None:
         return {"status": StatusCodes['ERROR_UNKNOWN']}
-    if operation == 'HIDE':
-        sku_obj.status = SkuStatus.INACTIVE.value
+    operation_to_status = {
+        'HIDE': SkuStatus.INACTIVE.value,
+        'UNHIDE': SkuStatus.ACTIVE.value,
+        'DELETE': SkuStatus.DELETED.value
+    }
+    if operation in operation_to_status:
+        sku_obj.status = operation_to_status[operation]
         db.session.commit()
-    if operation == 'UNHIDE':
-        sku_obj.status = SkuStatus.ACTIVE.value
-        db.session.commit()
-    if operation == 'DELETE':
-        sku_obj.status = SkuStatus.DELETED.value
-        db.session.commit()
-    return {"status": StatusCodes['SUCCESS']}
+        return {"status": StatusCodes['SUCCESS']}
+    return {"status": StatusCodes['ERROR_UNKNOWN']}
 
 
-# Change the account status of a use
+# Change the account status of a user
 @app.route(f'{PREFIX}/modify_user', methods=["POST"])
 @handle_exception
 def modify_user():
     '''Like or unlike an inventory item'''
-    (id, operation) = getData('id', 'operation')
+    (email, token, id, operation) = getData('id', 'operation')
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
     user = UserHandler.from_id(id)
     if user is None:
         print('USER NOT FOUND')
         return {"status": StatusCodes['ERROR_UNKNOWN']}
-    if operation == 'LOCK':
-        print('LOCKING USER')
-        user.account_status = AccountStatus.HARD_LOCK.value
+    operation_to_status = {
+        'LOCK': AccountStatus.HARD_LOCK.value,
+        'UNLOCK': AccountStatus.UNLOCKED.value,
+        'APPROVE': AccountStatus.UNLOCKED.value,
+        'DELETE': AccountStatus.DELETED.value
+    }
+    if operation in operation_to_status:
+        user.account_status = operation_to_status[operation]
         db.session.commit()
-    if operation == 'UNLOCK':
-        user.account_status = AccountStatus.UNLOCKED.value
-        db.session.commit()
-    if operation == 'APPROVE':
-        user.account_status = AccountStatus.UNLOCKED.value
-        db.session.commit()
-    if operation == 'DELETE':
-        user.account_status = AccountStatus.DELETED.value
-        db.session.commit()
-    return {"status": StatusCodes['SUCCESS']}
+        return {"status": StatusCodes['SUCCESS']}
+    return {"status": StatusCodes['ERROR_UNKNOWN']}

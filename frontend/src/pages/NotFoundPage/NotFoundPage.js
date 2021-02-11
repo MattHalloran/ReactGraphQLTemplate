@@ -1,14 +1,21 @@
-import React, { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useLayoutEffect, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { getTheme } from 'utils/storage';
 
-function NotFoundPage({
-    theme = getTheme(),
-}) {
+function NotFoundPage() {
+    const [theme, setTheme] = useState(getTheme());
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
+
     useLayoutEffect(() => {
         document.title = `404 | ${BUSINESS_NAME}`;
     })
@@ -28,7 +35,7 @@ function NotFoundPage({
 }
 
 NotFoundPage.propTypes = {
-    theme: PropTypes.object,
+    
 }
 
 export default NotFoundPage;

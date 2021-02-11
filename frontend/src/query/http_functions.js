@@ -206,7 +206,15 @@ export async function upload_gallery_images(formData) {
         body: formData,
         method: 'post',
     }
-    return await fetchWrapper(`${PREFIX}/upload_gallery_image/`, options);
+    return await fetchWrapper(`${PREFIX}/upload_gallery_image`, options);
+}
+
+export async function upload_availability(formData) {
+    let options = {
+        body: formData,
+        method: 'post',
+    }
+    return await fetchWrapper(`${PREFIX}/upload_availavility`, options);
 }
 
 export async function fetch_contact_info() {
@@ -273,8 +281,10 @@ export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
     return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
 }
 
-export async function modify_sku(sku, operation) {
+export async function modify_sku(email, token, sku, operation) {
     let json = JSON.stringify({
+        "email": email,
+        "token": token,
         "sku": sku,
         "operation": operation
     });
@@ -286,8 +296,10 @@ export async function modify_sku(sku, operation) {
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }
 
-export async function modify_user(id, operation) {
+export async function modify_user(email, token, id, operation) {
     let json = JSON.stringify({
+        "email": email,
+        "token": token,
         "id": id,
         "operation": operation
     });

@@ -20,15 +20,15 @@ export const StyledModal = styled.aside`
         transform: translate(-50%, -50%);
         max-width: calc(100% - 100px);
         max-height: calc(100% - 50px);
-        width: auto;
+        width: fit-content;
         height: fit-content;
         border: 3px solid ${({ theme }) => theme.textPrimary};
         border-radius: 10px;
     }
 
     .body-children {
-        overflow-y: scroll;
-        overflow-x: clip;
+        overflow-y: auto;
+        overflow-x: hidden;
         border-radius: 10px;
     }
     

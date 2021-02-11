@@ -1,18 +1,26 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { StyledAdminCustomerPage, StyledCustomerCard } from './AdminCustomerPage.styled';
 import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';
-import { ACCOUNT_STATUS } from 'utils/consts';
+import { ACCOUNT_STATUS, PUBS } from 'utils/consts';
 import { getSession, getTheme } from 'utils/storage';
 import Button from 'components/Button/Button';
+import { PubSub } from 'utils/pubsub';
 
-function AdminCustomerPage({
-    session = getSession(),
-    theme = getTheme(),
-}) {
-    console.log('ADMIN CUTOMER PAGE RENDER')
+function AdminCustomerPage() {
+    const [theme, setTheme] = useState(getTheme());
+    const [session, setSession] = useState(getSession());
     const [customers, setCustomers] = useState([]);
     const [selected, setSelected] = useState(null);
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(0));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+            PubSub.unsubscribe(sessionSub);
+        })
+    }, [])
 
     useEffect(() => {
         console.log("CUSTOMERS UPDATED", customers);
@@ -43,20 +51,20 @@ function AdminCustomerPage({
     }, [customers])
 
     const approve_user = useCallback(() => {
-        modifyUser(selected?.id, 'APPROVE');
+        modifyUser(session?.email, session?.token, selected?.id, 'APPROVE');
     }, [selected])
 
     const unlock_user = useCallback(() => {
-        modifyUser(selected?.id, 'UNLOCK');
+        modifyUser(session?.email, session?.token, selected?.id, 'UNLOCK');
     }, [selected])
 
     const lock_user = useCallback(() => {
-        modifyUser(selected?.id, 'LOCK');
+        modifyUser(session?.email, session?.token, selected?.id, 'LOCK');
     }, [selected])
 
     const delete_user = useCallback(() => {
         if (!window.confirm(`Are you sure you want to delete the account for ${selected?.first_name} ${selected?.last_name}?`)) return;
-        modifyUser(selected?.id, 'DELETE');
+        modifyUser(session?.email, session?.token, selected?.id, 'DELETE');
     }, [selected]);
 
 
@@ -126,5 +134,4 @@ CustomerCard.propTypes = {
     last_name: PropTypes.string,
     account_status: PropTypes.number,
     onClick: PropTypes.func,
-    theme: PropTypes.object,
 }

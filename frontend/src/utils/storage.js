@@ -65,6 +65,22 @@ export function getTheme() {
   }
 }
 
+export const getLikes = () => {
+    let data = getItem(LOCAL_STORAGE.Likes);
+    if (data) return data;
+    //If cart not found, attempt to query backend
+    let session = getSession();
+    if (!session) return null;
+    getProfileInfo(session).then(response => {
+        storeItem(LOCAL_STORAGE.Likes, response.likes);
+        return response.likes;
+    }).catch(err => {
+        console.error(err);
+    }).finally(() => {
+        return null;
+    })
+}
+
 export const getCart = () => {
     let data = getItem(LOCAL_STORAGE.Cart);
     if (data) return data;
@@ -76,6 +92,7 @@ export const getCart = () => {
             let cart_index = response.orders.length - 1;
             let cart = response.orders[cart_index];
             storeItem(LOCAL_STORAGE.Cart, cart);
+            storeItem(LOCAL_STORAGE.Likes, response.likes);
             return cart;
         }
     }).catch(err => {

@@ -52,6 +52,13 @@ export const StyledSkuCard = styled.div`
         }
     }
 
+    .display-image {
+        display: block;
+        position: absolute;
+        width: 100%;
+        top: 0%;
+    }
+
     .display-image-container {
         border: 1px solid black;
         width: 100%;
@@ -59,24 +66,24 @@ export const StyledSkuCard = styled.div`
         height: 0; /* Ensures 1:1 Aspect Ratio */
         padding-top: 100%; /* Ensures 1:1 Aspect Ratio */
     }
-
-    .display-image {
-        display: block;
-        position: absolute;
-        width: 100%;
-        top: 0%;
-    }
 `;
 
 export const StyledExpandedSku = styled.div`
-    display: flex;
+    background-color: ${({ theme }) => theme.bodySecondary};
+    color: ${({ theme }) => theme.textPrimary};
+    display: block;
     width: 100%;
     height: 100%;
+    min-width: 50vw;
+
+    .display-image {
+        display: inline-block;
+        top: 0%;
+    }
 
     .trait-list {
-        overflow-y: auto;
         display: block;
-        max-height: 15%;
+        overflow-y: auto;
     }
 
     .trait-container {
@@ -106,7 +113,6 @@ export const StyledExpandedSku = styled.div`
     }
 
     .description-container {
-        max-height: 15%;
         overflow-y: auto;
         border-top: 2px solid ${({ theme }) => theme.textPrimary};
         border-bottom: 2px solid ${({ theme }) => theme.textPrimary};
@@ -147,5 +153,28 @@ export const StyledExpandedSku = styled.div`
 
     .right {
         right: -20px;
+    }
+
+    .bottom-div {
+        height: 10%;
+        align-items: center;
+        padding: 0 10px;
+        border-top: 2px solid ${({ theme }) => theme.textPrimary};
+    }
+
+    .quantity-div {
+        display: flex;
+        width: 25%;
+
+        > * {
+            width: 75%;
+        }
+
+        > svg {
+            stroke: none;
+            fill: ${({ theme }) => theme.textPrimary};
+            padding: 0 10px;
+            width: 25%;
+        }
     }
 `;

@@ -1,15 +1,22 @@
-import React, { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import Hero from 'components/Hero/Hero';
 import { StyledHomePage } from './HomePage.styled';
 import { SocialIcon } from 'react-social-icons';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getTheme } from 'utils/storage';
+import { PubSub } from 'utils/pubsub';
 
-function HomePage({
-    theme = getTheme(),
-}) {
+function HomePage() {
+    const [theme, setTheme] = useState(getTheme());
+
+    useEffect(() => {
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        return (() => {
+            PubSub.unsubscribe(themeSub);
+        })
+    }, [])
+
     useLayoutEffect(() => {
         document.title = `Home | ${BUSINESS_NAME}`;
     }, [])
@@ -26,7 +33,7 @@ function HomePage({
 }
 
 HomePage.propTypes = {
-    theme: PropTypes.object,
+    
 }
 
 export default HomePage;

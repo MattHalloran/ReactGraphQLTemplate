@@ -20,8 +20,8 @@ function Collapsible({
     return (<StyledCollapsible theme={theme}>
         <div onClick={() => togglePanel()} className={headerClassName}>
             {title}
-            <div className="arrow-wrapper">
-                <span className='arrow' />
+            <div className="collapse-arrow-wrapper">
+                <span className='collapse-arrow' />
             </div>
         </div>
         {open ? (

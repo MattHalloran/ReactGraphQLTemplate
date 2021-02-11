@@ -16,6 +16,7 @@ function promiseWrapper(http_func, ...args) {
             if (data.ok) {
                 resolve(data);
             } else {
+                console.warn(`HTTP call ${http_func} failed with status ${data.status}`);
                 reject(data);
             }
         })
@@ -27,6 +28,7 @@ export const updateContactInfo = (data) => promiseWrapper(http.update_contact_in
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
 export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_image_thumbnails, hashes)
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
+export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
 export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
@@ -36,8 +38,8 @@ export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
-export const modifySku = (sku, operation) => promiseWrapper(http.modify_sku, sku, operation);
-export const modifyUser = (id, operation) => promiseWrapper(http.modify_user, id, operation);
+export const modifySku = (email, token, sku, operation) => promiseWrapper(http.modify_sku, email, token, sku, operation);
+export const modifyUser = (email, token, id, operation) => promiseWrapper(http.modify_user, email, token, id, operation);
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {
@@ -151,6 +153,7 @@ export function setSkuInCart(email, token, sku, quantity, in_cart) {
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {
+                console.log('SKU IN CART FAIL', response)
                 reject(response);
             }
         })

@@ -10,6 +10,7 @@
     "chai": "^4.2.0",
     "hero-slider": "github:MattHalloran/hero-slider",
     "mocha": "^8.2.1",
+    "nodemon": "^2.0.7",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",

@@ -37,11 +37,10 @@ class Handler(ABC):
 
     @staticmethod
     def simple_fields_to_dict(model, simple_fields: list):
-        '''Used to simplify field representations in to_dict that are just self.whatever
-        NOTE: This only works for db columns. If you are trying to access a relationship, this will not work'''
+        '''Used to simplify field representations in to_dict that are just self.whatever'''
         simple_dict = {}
         for field in simple_fields:
-            simple_dict[field] = model.__dict__.get(field, 'ERROR: Could not retrieve field')
+            simple_dict[field] = getattr(model, field, 'ERROR: Could not retrieve field')
         return simple_dict
 
     @staticmethod
@@ -98,13 +97,9 @@ class Handler(ABC):
     @classmethod
     def update_from_dict(cls, obj, data: dict):
         '''Used to create a new model, if data has passed preprocess checks'''
-        print(f'update_from_dict start {obj}')
-        print(obj.__dict__)
         filtered_data = cls.filter_data(data, cls.all_fields(), cls.protected_fields())
         for key in filtered_data.keys():
             setattr(obj, key, filtered_data[key])
-            print(f'SET! {obj.__dict__[key]}')
-        print(f'update_from_dict end {obj}')
 
     @classmethod
     def update(cls, obj, *args):
@@ -572,7 +567,7 @@ class UserHandler(Handler):
         as_dict['account_status'] = model.account_status
         as_dict['roles'] = [RoleHandler.to_dict(r) for r in model.roles]
         if len(model.orders) > 0:
-            as_dict['cart'] = [OrderItemHandler.to_dict(o) for o in model.orders[-1].items]
+            as_dict['cart'] = OrderHandler.to_dict(model.orders[-1])
         else:
             as_dict['cart'] = []
         if len(model.likes) > 0:
@@ -584,6 +579,14 @@ class UserHandler(Handler):
     @staticmethod
     def from_email(email: str):
         return User.query.filter(User.personal_email.any(email_address=email)).first()
+
+    @staticmethod
+    def is_customer(user: User):
+        return any(r.title == 'Customer' for r in user.roles)
+
+    @staticmethod
+    def is_admin(user: User):
+        return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod
     def get_user_from_credentials(email: str, password: str):
@@ -620,20 +623,40 @@ class UserHandler(Handler):
         model.session_token = token
 
     @staticmethod
-    def get_profile_data(email, token, app):
-        '''Returns user profile data, after
-        verifying the session token'''
-        # Check if user esists
+    def is_valid_session(email, token, app):
+        '''Determines if the provided email and token combination
+        makes a valid user session
+        Returns a dict containing:
+            1) a boolean indicating if the user is a customer
+            2) the error message, if boolean is false
+            3) the user object, if boolean is true'''
+        # First, try to find the user associated with the email
         user = UserHandler.from_email(email)
         if not user:
-            return 'No user with that email'
+            return {
+                'valid': False,
+                'error': 'No user with that email'
+            }
         # Check if supplied token is equal to the user's token
-        if not token == user.session_token:
-            return 'Tokens do not match'
-        # Check if user token is still valid
-        if not verify_token(app, user.session_token):
-            return 'Token could not be verified'
-        # If all checks pass, return profile data
+        if not token == user.session_token or not verify_token(app, user.session_token):
+            return {
+                'valid': False,
+                'error': 'Invalid token'
+            }
+        # Check if the user 
+        return {
+            'valid': True,
+            'user': user
+        }
+
+    @staticmethod
+    def get_profile_data(email, token, app):
+        '''Returns user profile data'''
+        session_check = UserHandler.is_valid_session(email, token, app)
+        # Check if user esists
+        user = UserHandler.from_email(email)
+        if not session_check['valid'] or not user:
+            return None
         return {
             "first_name": user.first_name,
             "last_name": user.last_name,
