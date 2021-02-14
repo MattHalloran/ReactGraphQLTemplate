@@ -19,6 +19,9 @@ function promiseWrapper(http_func, ...args) {
                 console.warn(`HTTP call ${http_func} failed with status ${data.status}`);
                 reject(data);
             }
+        }).catch(err => {
+            console.error(err);
+            PubSub.publish(PUBS.Loading, false);
         })
     });
 }
