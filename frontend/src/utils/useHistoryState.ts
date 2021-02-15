@@ -5,9 +5,6 @@ import React from "react";
  * making the state reusable across refreshes, navigation
  * and even closing and reopening the window!
  *
- * Codesandbox's preview pane does not preserve history state,
- * so make sure to open the preview in a new page
- *
  * @param key The key to store it in history
  * @param defaultTo A default value if nothing exists in history
  */

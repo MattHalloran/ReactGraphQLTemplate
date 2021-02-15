@@ -17,6 +17,7 @@ function ShoppingPage() {
     const [theme, setTheme] = useState(getTheme());
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
+    const [searchString, setSearchString] = useState('');
     let history = useHistory();
 
     useEffect(() => {
@@ -109,7 +110,7 @@ function ShoppingPage() {
                 <h2>Sort</h2>
                 <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
                 <h2>Search</h2>
-                <SearchBar />
+                <SearchBar onChange={(s) => setSearchString(s)}/>
                 <h2>Filters</h2>
                 {filters_to_checkbox('sizes', 'Sizes')}
                 {filters_to_checkbox('optimal_lights', 'Optimal Light')}
@@ -127,7 +128,7 @@ function ShoppingPage() {
                 {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
             </ArrowMenu>
-            <ShoppingList sort={sortBy} filters={filters} />
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString}/>
         </StyledShoppingPage>
     );
 }

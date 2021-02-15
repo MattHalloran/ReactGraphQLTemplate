@@ -79,34 +79,28 @@ function GalleryPage() {
         }
     }, [urlParams, curr_index, loadImage])
 
+    //Load next page if scrolling near the bottom of the page
+    const checkScroll = useCallback(() => {
+        const divElement = document.getElementById(track_scrolling_id);
+        if (divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight) {
+            loadNextPage();
+        }
+    }, [track_scrolling_id, loadNextPage])
+
     useLayoutEffect(() => {
         document.title = `Gallery | ${BUSINESS_NAME}`;
-        document.addEventListener('scroll', loadNextPage);
-        return (() => document.removeEventListener('scroll', loadNextPage));
+        document.addEventListener('scroll', checkScroll);
+        return (() => document.removeEventListener('scroll', checkScroll));
     })
 
     useEffect(() => {
         loading.current = false;
     }, [thumbnails])
 
-    const readyToLoadPage = useCallback(() => {
-        //If the image metadata hasn't been received, or
-        //the next page is still loading
-        if (loading.current) return false;
-        //If all image thumbnails have already been loaded
-        if (images_meta.current === null ||
-            images_meta.current.length === thumbnails.length) {
-            return false;
-        }
-        //If the first page hasn't loaded
-        if (thumbnails.length < page_size) return true;
-        //If the scrollbar is near the bottom
-        const divElement = document.getElementById(track_scrolling_id);
-        return divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight;
-    }, [thumbnails, page_size]);
+    let readyToLoadPage = !loading.current && images_meta.current.length < thumbnails.length;
 
     const loadNextPage = useCallback(() => {
-        if (!readyToLoadPage()) return;
+        if (!readyToLoadPage) return;
         loading.current = true;
         //Grab all thumbnail images
         let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
@@ -134,10 +128,12 @@ function GalleryPage() {
                 }
             }
             setThumbnails(thumbs => thumbs.concat(combined_data));
+            loading.current = false;
         }).catch(error => {
             console.error("Failed to load thumbnails!", error);
             loading.current = false;
         });
+        return () => loading.current = false;
     }, [thumbnails, page_size, readyToLoadPage]);
 
     const prevImage = useCallback(() => {

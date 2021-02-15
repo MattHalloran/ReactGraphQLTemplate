@@ -25,7 +25,6 @@ async function fetchWrapper(url, httpParams) {
         let response = await fetch(url, httpParams);
         let json = await response.json();
         if (json.status === StatusCodes.SUCCESS) {
-            console.log('HTTP SUCCESSSSSS', json)
             json.ok = true;
             return json;
         }
@@ -265,13 +264,13 @@ export async function set_like_sku(email, token, sku, liked) {
     return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
 }
 
-export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
+export async function set_sku_in_cart(email, token, sku, operation, quantity) {
     let json = JSON.stringify({
         "email": email,
         "token": token,
         "sku": sku,
-        "quantity": quantity,
-        "in_cart": in_cart
+        "operation": operation,
+        "quantity": quantity
     });
     let options = {
         body: json,

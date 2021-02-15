@@ -124,9 +124,9 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
                 console.log('REGISTER FAIL LOGGING OUT')
                 clearStorage();
                 if (data.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
-                    data.error = "User with that email already exists. If you would like to reset your password, TODO";
+                    data.error = "User with that email already exists";
                 } else {
-                    data.error = "Unknown error occurred. Please try again";
+                    data.error = "Unknown error occurred";
                 }
                 reject(data);
             }
@@ -148,15 +148,13 @@ export function setLikeSku(email, token, sku, liked) {
     });
 }
 
-export function setSkuInCart(email, token, sku, quantity, in_cart) {
+export function setSkuInCart(email, token, sku, operation, quantity) {
     return new Promise(function (resolve, reject) {
-        http.set_sku_in_cart(email, token, sku, quantity, in_cart).then(response => {
+        http.set_sku_in_cart(email, token, sku, operation, quantity).then(response => {
             if (response.ok) {
-                console.log('SKU IN CART SUCCESS', response.cart);
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {
-                console.log('SKU IN CART FAIL', response)
                 reject(response);
             }
         })

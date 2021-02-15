@@ -1,29 +1,51 @@
 import { useState, useLayoutEffect, useEffect } from 'react';
 import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { getTheme, getCart } from 'utils/storage';
+import { getTheme, getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
+import { setSkuInCart } from 'query/http_promises';
 
 function CartPage() {
     const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
+    const [session, setSession] = useState(getSession());
     console.log('ON CART PAGEEE', cart);
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
+            PubSub.unsubscribe(sessionSub);
         })
     }, [])
 
     useLayoutEffect(() => {
         document.title = `Cart | ${BUSINESS_NAME}`;
     })
+
+    const updateCartItem = (sku, operation, quantity) => {
+        if (!session?.email || !session?.token) return;
+        let display_name = sku?.plant?.latin_name ?? sku?.plant?.common_name ?? 'plant';
+        setSkuInCart(session.email, session.token, sku.sku, operation, quantity)
+            .then(() => {
+                if (operation === 'ADD')
+                    alert(`${quantity} ${display_name}(s) added to cart!`)
+                else if (operation === 'SET')
+                    alert(`${display_name} quantity updated to ${quantity}!`)
+                else if (operation === 'DELETE')
+                    alert(`${display_name} 'removed from' cart!`)
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Operation failed. Please try again');
+            })
+    }
 
     let all_total = 0;
     const cart_item_to_row = (data) => {
@@ -43,7 +65,7 @@ function CartPage() {
         return (
             <tr>
                 <td><div className="product-row">
-                    <XIcon width="30px" height="30px" /> 
+                    <XIcon width="30px" height="30px" onClick={() => updateCartItem(data.sku, 'DELETE', 0)}/> 
                     <img className="cart-image" src={`data:image/jpeg;base64,${data.sku.display_image}`} />
                     <p>{data.sku?.plant?.latin_name}</p>
                     </div></td>

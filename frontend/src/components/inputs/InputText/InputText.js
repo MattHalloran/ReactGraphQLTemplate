@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { getTheme } from 'utils/storage';
 import { StyledInputText } from  './InputText.styled';
@@ -7,30 +7,30 @@ import makeID from 'utils/makeID';
 function InputText(props) {
     const theme = props.theme ?? getTheme();
     const [value, setValue] = useState(props.value ?? '');
-    let error = null;
+    const [error, setError] = useState(props.validate ? (props.error ?? '') : null);
     const id = useRef(props.id ?? makeID(10));
 
-    if (props.validate) {
+    useEffect(() => {
         // Only show an error if form submit was clicked, or if a value was entered
         if (props.validate && (props.showErrors || value)) {
-            error = props.validate(value);
+            setError(props.validate(value));
+        }
+    }, [value])
+
+
+    const sendValueUpdate = () => {
+        console.log('UPDATINGGGGG', id.current)
+        if (props.valueFunc) {
+            if (props.index)
+                props.valueFunc(value, props.index);
+            else
+                props.valueFunc(value)
         }
         if (props.errorFunc) {
             if (props.index)
                 props.errorFunc(error, props.index);
             else
                 props.errorFunc(error);
-        }
-    }
-
-    const updateValue = (event) => {
-        let e_value = event.target.value;
-        setValue(e_value);
-        if (props.valueFunc) {
-            if (props.index)
-                props.valueFunc(e_value, props.index);
-            else
-                props.valueFunc(e_value)
         }
     }
 
@@ -46,7 +46,8 @@ function InputText(props) {
             type={props.type ?? "text"}
             value={value}
             placeholder={props.label}
-            onChange={(e) => props.index ? updateValue(e, props.index) : updateValue(e)}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={sendValueUpdate}
           />
           <label type={props.type ?? "text"} htmlFor={id.current}>
             {displayed_label}

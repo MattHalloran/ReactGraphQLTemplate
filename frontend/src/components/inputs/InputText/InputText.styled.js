@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 
 export const StyledInputText = styled.div`
-    width: 100%;
+    width: -moz-fit-content;
+    width: -webkit-fill-available;
     height: 40px;
     border: 1px solid black;
     border-radius: 10px;
@@ -10,17 +11,19 @@ export const StyledInputText = styled.div`
     background-color: rgba(255, 255, 255, 0.3);
     transition: 0.3s background-color ease-in-out, 0.3s box-shadow ease-in-out;
     ${({ locked }) => locked ? 'pointer-events: none;' : ''};
+
+    //Diables Chrome auto-complete styling
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
+        -webkit-transition-delay: 9999s;
+    }
   
   :hover {
     background-color: rgba(255, 255, 255, 0.45);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
-  }
-  
-  
-  input + label {
-    top: 4px;
-    opacity: 1;
-    color: #512da8;
   }
   
   .field.locked {
@@ -28,7 +31,8 @@ export const StyledInputText = styled.div`
   }
   
   input {
-    width: 100%;
+    width: -moz-fit-content;
+    width: -webkit-fill-available;
     height: 40px;
     position: relative;
     padding: 0px 16px;
@@ -69,9 +73,17 @@ export const StyledInputText = styled.div`
     font-weight: 600;
     line-height: 24px;
     opacity: ${({ show_label }) => show_label ? '1' : '0'};
-    color: ${({ has_error, theme }) => has_error ? '#ec392f' : theme.textPrimary};
+    color: ${({ has_error, theme }) => has_error ? '#fc5c53' : theme.textPrimary};
     pointer-events: none;
     transition: 0.1s all ease-in-out;
+  }
+
+  label {
+    text-shadow:
+    -1px -1px 0 #000,  
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
   }
   
 `;

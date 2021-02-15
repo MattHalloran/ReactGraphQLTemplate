@@ -6,7 +6,7 @@ import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
 import { PUBS, LINKS, USER_ROLES } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
-import FormPage from 'components/wrappers/FormPage/FormPage';
+import FormPage from 'pages/FormPage/FormPage';
 //Routes
 import HomePage from 'pages/HomePage/HomePage';
 import AboutPage from 'pages/AboutPage/AboutPage';

@@ -478,16 +478,16 @@ def set_like_sku():
 @app.route(f'{PREFIX}/set_sku_in_cart', methods=["POST"])
 @handle_exception
 def set_sku_in_cart():
-    '''Adds or removes an item from the user's cart
+    '''Adds, updates, or deletes an item from the user's cart
     Returns an updated json of the user'''
     # Grab data
-    (email, token, sku_str, quantity, in_cart) = getData('email', 'token', 'sku', 'quantity', 'in_cart')
+    (email, token, sku_code, operation, quantity) = getData('email', 'token', 'sku', 'operation', 'quantity')
     # Verify authorization
     session_check = UserHandler.is_valid_session(email, token, app)
     if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     user = session_check['user']
-    sku = SkuHandler.from_sku(sku_str)
+    sku = SkuHandler.from_sku(sku_code)
     # Find or create cart
     cart = None
     if len(user.orders) == 0:
@@ -495,26 +495,33 @@ def set_sku_in_cart():
         db.session.add(cart)
     else:
         cart = user.orders[-1]
-    print(f'CART HERE IS {cart.items}')
-    # Add/Remove quantity from existing order item, if any have a matching SKU
+    # Find cart item that matches sku
     matching_order_item = None
     for item in cart.items:
         if item.sku == sku:
-            if in_cart:
-                item.quantity += quantity
-            else:
-                item.quantity = max(0, item.quantity - quantity)
             matching_order_item = item
             break
-    # Remove order item, if quantity dropped to 0
-    if matching_order_item and matching_order_item.quantity == 0:
+    # If operation is to add
+    if operation == 'ADD':
+        # Create a new order item, if no matching SKU found
+        if not matching_order_item:
+            order_item = OrderItemHandler.create(quantity, sku)
+            db.session.add(order_item)
+            cart.items.append(order_item)
+        else:
+            matching_order_item.quantity += quantity
+    # If operation is to set the quantity
+    if operation == 'SET':
+        if matching_order_item:
+            matching_order_item.quantity = max(0, quantity)
+        # If quantity is now 0, remove item
+        if matching_order_item.quantity == 0:
+            cart.items.remove(matching_order_item)
+            db.session.delete(matching_order_item)
+    # If operation is to delete the cart item
+    if operation == 'DELETE' and matching_order_item:
         cart.items.remove(matching_order_item)
-        matching_order_item.delete()
-    # Create a new order item, if adding and no matching SKU found
-    if not matching_order_item and in_cart:
-        order_item = OrderItemHandler.create(quantity, sku)
-        db.session.add(order_item)
-        cart.items.append(order_item)
+        db.session.delete(matching_order_item)
     db.session.commit()
     user_data = UserHandler.to_dict(user)
     user_data['status'] = StatusCodes['SUCCESS']

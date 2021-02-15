@@ -35,7 +35,7 @@ export const StyledFormPage = styled.div`
     }
 
     .form-body {
-        color: ${({ theme }) => theme.textSecondary};
+        color: ${({ theme }) => theme.textPrimary};
         padding: 1em;
         border-radius: 0 0 5px 5px;
     }
