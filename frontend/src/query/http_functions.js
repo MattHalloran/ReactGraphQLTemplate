@@ -280,12 +280,13 @@ export async function set_sku_in_cart(email, token, sku, operation, quantity) {
     return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
 }
 
-export async function modify_sku(email, token, sku, operation) {
+export async function modify_sku(email, token, sku, operation, data) {
     let json = JSON.stringify({
         "email": email,
         "token": token,
         "sku": sku,
-        "operation": operation
+        "operation": operation,
+        "data": data
     });
     let options = {
         body: json,
@@ -308,4 +309,17 @@ export async function modify_user(email, token, id, operation) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
+}
+
+export async function submit_order(email, token) {
+    let json = JSON.stringify({
+        "email": email,
+        "token": token
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/submit_order`, options);
 }

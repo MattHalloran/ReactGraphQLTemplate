@@ -193,7 +193,6 @@ function ShoppingList({
     }
 
     useEffect(() => {
-        console.log('INDEX CHANGEDDDD', curr_index)
         if (curr_index < 0) {
             setPopup(null);
             return;
@@ -243,7 +242,8 @@ function SkuCard({
     const [theme, setTheme] = useState(getTheme());
     const plant = sku?.plant;
 
-    let temp_sizes = [['1', 2234], ['2', 1], ['3', 23]];//sku.sizes
+    //TODO SKUS need to be grouped by size, if they share the same plant
+    let temp_sizes = [['1', 2234], ['2', 1], ['3', 23]];//sku.size
     let sizes = temp_sizes?.map(data => (
         <div>#{data[0]}: {data[1]}</div>
     ));

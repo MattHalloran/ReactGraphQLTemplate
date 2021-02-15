@@ -418,7 +418,10 @@ def update_contact_info():
 @handle_exception
 def fetch_profile_info():
     (email, token) = getJson('email', 'token')
-    print(f'boopies {email} {token}')
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid']:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
     user_data = UserHandler.get_profile_data(email, token, app)
     if user_data is str:
         print('FAILEDDDD')
@@ -489,12 +492,7 @@ def set_sku_in_cart():
     user = session_check['user']
     sku = SkuHandler.from_sku(sku_code)
     # Find or create cart
-    cart = None
-    if len(user.orders) == 0:
-        cart = OrderHandler.create(user.id)
-        db.session.add(cart)
-    else:
-        cart = user.orders[-1]
+    cart = UserHandler.get_cart(user)
     # Find cart item that matches sku
     matching_order_item = None
     for item in cart.items:
@@ -528,12 +526,12 @@ def set_sku_in_cart():
     return user_data
 
 
-# Hide/Unhide or delete a SKU
+# Hide, unhide, delete, or update SKU
 @app.route(f'{PREFIX}/modify_sku', methods=["POST"])
 @handle_exception
 def modify_sku():
     '''Like or unlike an inventory item'''
-    (email, token, sku, operation) = getData('sku', 'operation')
+    (email, token, sku, operation, sku_data) = getData('email', 'token', 'sku', 'operation', 'data')
     # Verify authorization
     session_check = UserHandler.is_valid_session(email, token, app)
     if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
@@ -550,6 +548,10 @@ def modify_sku():
         sku_obj.status = operation_to_status[operation]
         db.session.commit()
         return {"status": StatusCodes['SUCCESS']}
+    if operation == 'UPDATE':
+        SkuHandler.update(sku_obj, sku_data)
+        db.session.commit()
+        return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}
 
 
@@ -558,7 +560,7 @@ def modify_sku():
 @handle_exception
 def modify_user():
     '''Like or unlike an inventory item'''
-    (email, token, id, operation) = getData('id', 'operation')
+    (email, token, id, operation) = getData('email', 'token', 'id', 'operation')
     # Verify authorization
     session_check = UserHandler.is_valid_session(email, token, app)
     if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
@@ -576,5 +578,19 @@ def modify_user():
     if operation in operation_to_status:
         user.account_status = operation_to_status[operation]
         db.session.commit()
+        return {"status": StatusCodes['SUCCESS']}
+    return {"status": StatusCodes['ERROR_UNKNOWN']}
+
+
+@app.route(f'{PREFIX}/submit_order', methods=["POST"])
+@handle_exception
+def submit_order():
+    (email, token) = getData('email', 'token')
+    # Verify authorization
+    session_check = UserHandler.is_valid_session(email, token, app)
+    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    user = session_check['user']
+    if UserHandler.submit_order(user):
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}

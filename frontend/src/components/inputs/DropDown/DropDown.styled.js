@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const getMaxMenuHeight = (data) => {
     let window_height = data[0];
     let control_y = data[1];
-    console.log('MAX MENU HEIGHTTT', data);
     return `${window_height - control_y - 50}px`;
 }
 

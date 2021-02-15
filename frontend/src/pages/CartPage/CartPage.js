@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useEffect } from 'react';
+import { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
 import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getTheme, getCart, getSession } from 'utils/storage';
@@ -6,13 +6,25 @@ import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
-import { setSkuInCart } from 'query/http_promises';
+import { setSkuInCart, submitOrder } from 'query/http_promises';
 
 function CartPage() {
     const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
+    //Stores quantities before cart update
+    const quantities = useRef([]);
     const [session, setSession] = useState(getSession());
     console.log('ON CART PAGEEE', cart);
+
+    useEffect(() => {
+        if (!cart?.items) {
+            quantities.current = [];
+            return;
+        }
+        let starting_quantities = [];
+        cart.items.forEach(i => starting_quantities.push(i.quantity));
+        quantities.current = starting_quantities;
+    }, [cart])
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
@@ -29,23 +41,62 @@ function CartPage() {
         document.title = `Cart | ${BUSINESS_NAME}`;
     })
 
-    const updateCartItem = (sku, operation, quantity) => {
+    const updateItemQuantity = (sku, quantity) => {
+        let index = cart?.items?.findIndex(i => i.sku.sku === sku) ?? -1;
+        if (index < 0 || index >= quantities.current.length) {
+            alert('Error: Could not update item quantity!');
+            console.log(index);
+            return;
+        }
+        quantities.current[index] = quantity;
+    }
+
+    const updateOrder = () => {
+        if (!session?.email || !session?.token) {
+            alert('Error: Could not update order!');
+            return;
+        }
+        for (let i = 0; i < cart.items.length; i++) {
+            if (cart.items[i].quantity === quantities.current[i]) continue;
+            setSkuInCart(session.email, session.token, cart.items[i].sku.sku, 'SET', quantities.current[i])
+                .then(() => {})
+                .catch(err => {
+                    console.error(err);
+                    alert('Error: Could not update order!');
+                    return;
+                })
+        }
+        alert('Order updated')
+    }
+
+    const deleteCartItem = (sku) => {
         if (!session?.email || !session?.token) return;
         let display_name = sku?.plant?.latin_name ?? sku?.plant?.common_name ?? 'plant';
-        setSkuInCart(session.email, session.token, sku.sku, operation, quantity)
+        setSkuInCart(session.email, session.token, sku.sku, 'DELETE', 0)
             .then(() => {
-                if (operation === 'ADD')
-                    alert(`${quantity} ${display_name}(s) added to cart!`)
-                else if (operation === 'SET')
-                    alert(`${display_name} quantity updated to ${quantity}!`)
-                else if (operation === 'DELETE')
-                    alert(`${display_name} 'removed from' cart!`)
+                alert(`${display_name} 'removed from' cart!`)
             })
             .catch(err => {
                 console.error(err);
                 alert('Operation failed. Please try again');
             })
     }
+
+    const finalizeOrder = useCallback(() => {
+        if (cart.items.length <= 0) {
+            alert('Cannot finalize order: cart is empty');
+            return;
+        }
+        if (!window.confirm('This will submit the order to New Life Nursery. We will contact you for further information. Are you sure you want to continue?')) return;
+        submitOrder(session?.email, session?.token)
+            .then(() => {
+                alert('Order submitted! We will be in touch with you soon :)')
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to submit order. Please contact New Life Nursery');
+            })
+    }, [cart]);
 
     let all_total = 0;
     const cart_item_to_row = (data) => {
@@ -65,7 +116,7 @@ function CartPage() {
         return (
             <tr>
                 <td><div className="product-row">
-                    <XIcon width="30px" height="30px" onClick={() => updateCartItem(data.sku, 'DELETE', 0)}/> 
+                    <XIcon width="30px" height="30px" onClick={() => deleteCartItem(data.sku)}/> 
                     <img className="cart-image" src={`data:image/jpeg;base64,${data.sku.display_image}`} />
                     <p>{data.sku?.plant?.latin_name}</p>
                     </div></td>
@@ -74,9 +125,8 @@ function CartPage() {
                             className="quant"
                             min_value={0}
                             max_value={data.sku?.quantity ?? 100}
-                            initial_value={1}
-                            value={quantity}
-                            valueFunc={() => console.log('TODOOOOOOOO')} /></td>
+                            initial_value={quantity}
+                            valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} /></td>
                 <td>{display_total}</td>
             </tr>
         );
@@ -99,8 +149,8 @@ function CartPage() {
                 </tbody>
             </table>
             <p>Total: {all_total}</p>
-            <Button>Update Cart</Button>
-            <Button>Finalize Order</Button>
+            <Button onClick={updateOrder}>Update Order</Button>
+            <Button onClick={finalizeOrder}>Finalize Order</Button>
         </StyledCartPage>
     );
 }

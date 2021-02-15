@@ -41,8 +41,21 @@ export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
-export const modifySku = (email, token, sku, operation) => promiseWrapper(http.modify_sku, email, token, sku, operation);
+export const modifySku = (email, token, sku, operation, data) => promiseWrapper(http.modify_sku, email, token, sku, operation, data);
 export const modifyUser = (email, token, id, operation) => promiseWrapper(http.modify_user, email, token, id, operation);
+
+export function submitOrder(email, token) {
+    return new Promise(function (resolve, reject) {
+        http.submit_order(email, token).then(data => {
+            if (data.ok) {
+                storeItem(LOCAL_STORAGE.Cart, null);
+                resolve(data);
+            } else {
+                reject(data);
+            }
+        })
+    });
+}
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {

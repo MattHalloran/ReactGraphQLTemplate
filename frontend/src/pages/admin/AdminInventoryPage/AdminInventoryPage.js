@@ -81,7 +81,7 @@ function AdminInventoryPage() {
 
     const deleteSku = (sku) => {
         if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        modifySku(session?.email, session?.token, sku.sku, 'DELETE')
+        modifySku(session?.email, session?.token, sku.sku, 'DELETE', {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -98,7 +98,7 @@ function AdminInventoryPage() {
 
     const hideSku = (sku) => {
         let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-        modifySku(session?.email, session?.token, sku.sku, operation)
+        modifySku(session?.email, session?.token, sku.sku, operation, {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -162,7 +162,7 @@ function AdminInventoryPage() {
 
     let popup = (currSku) ? (
         <Modal onClose={() => setCurrSku(null)}>
-            <SkuPopup theme={theme} sku={currSku} trait_options={trait_options} />
+            <SkuPopup session={session} theme={theme} sku={currSku} trait_options={trait_options} />
         </Modal>
     ) : null;
 
@@ -255,6 +255,7 @@ SkuCard.propTypes = {
 }
 
 function SkuPopup({
+    session = getSession(),
     sku,
     theme = getTheme(),
     trait_options
@@ -278,7 +279,31 @@ function SkuPopup({
     const [selectedImage, setSelectedImage] = useState(null);
 
     const saveSku = () => {
-        //TODO
+        let plant_data = {
+            "latin_name": latin_name,
+            "common_name": common_name,
+            "drought_tolerance": drought_tolerance,
+            "grown_height": grown_height,
+            "grown_spread": grown_spread,
+            "growth_rate": growth_rate,
+            "optimal_light": optimal_light,
+            "salt_tolerance": salt_tolerance
+        }
+        let sku_data = {
+            "code": code,
+            "size": size,
+            "price": price,
+            "quantity": quantity,
+            "plant": plant_data,
+        }
+        modifySku(session?.email, session?.token, sku.sku, 'UPDATE', sku_data)
+            .then(() => {
+                alert('SKU Updated!')
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('Failed to update SKU!')
+            });
     }
 
     // Returns an input text or a dropdown, depending on if the field is in the trait options
@@ -393,6 +418,7 @@ function SkuPopup({
 }
 
 SkuPopup.propTypes = {
+    session: PropTypes.object,
     sku: PropTypes.object.isRequired,
     theme: PropTypes.object,
     trait_options: PropTypes.object,

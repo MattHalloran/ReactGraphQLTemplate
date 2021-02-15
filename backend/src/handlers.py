@@ -681,3 +681,34 @@ class UserHandler(Handler):
         except Exception:
             print(f'Could not find account status for {email}')
             return -1
+
+    @staticmethod
+    def get_cart(user: User):
+        '''Returns the user's cart, or None'''
+        if user is None or not UserHandler.is_customer(user):
+            return None
+        cart = None
+        if len(user.orders) == 0:
+            cart = OrderHandler.create(user.id)
+            db.session.add(cart)
+            user.orders.append(cart)
+            db.session.commit()
+        else:
+            cart = user.orders[-1]
+        return cart
+
+    @staticmethod
+    def submit_order(user: User):
+        '''Submits the user's cart. Returns true if successful'''
+        # Get cart
+        cart = UserHandler.get_cart(user)
+        # If cart is empty, don't submit
+        if len(cart.items) <= 0:
+            return False
+        print('TODOOOOO')
+        # Add a new, empty order to serve as the user's next cart
+        cart = OrderHandler.create(user.id)
+        db.session.add(cart)
+        user.orders.append(cart)
+        db.session.commit()
+        return True
