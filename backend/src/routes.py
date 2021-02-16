@@ -462,11 +462,8 @@ def fetch_customers():
     (email, token) = getJson('email', 'token')
     if not verify_admin(email, token):
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
-    # Grab all users that have a customer role
-    users = [UserHandler.to_dict(UserHandler.from_id(id)) for id in UserHandler.all_ids()]
-    customers = [u for u in users if UserHandler.is_customer(u)]
     return {
-        "customers": customers,
+        "customers": UserHandler.all_customers(),
         "status": StatusCodes['SUCCESS']
     }
 
@@ -588,6 +585,9 @@ def modify_user():
     if user is None:
         print('USER NOT FOUND')
         return {"status": StatusCodes['ERROR_UNKNOWN']}
+    # Don't allow modification of admins
+    if UserHandler.is_admin(user):
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
     operation_to_status = {
         'LOCK': AccountStatus.HARD_LOCK.value,
         'UNLOCK': AccountStatus.UNLOCKED.value,
@@ -597,7 +597,10 @@ def modify_user():
     if operation in operation_to_status:
         user.account_status = operation_to_status[operation]
         db.session.commit()
-        return {"status": StatusCodes['SUCCESS']}
+        return {
+            "customers": UserHandler.all_customers(),
+            "status": StatusCodes['SUCCESS']
+        }
     return {"status": StatusCodes['ERROR_UNKNOWN']}
 
 

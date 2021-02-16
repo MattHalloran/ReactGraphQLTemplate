@@ -578,6 +578,11 @@ class UserHandler(Handler):
         return as_dict
 
     @staticmethod
+    def all_customers():
+        users = [UserHandler.from_id(id) for id in UserHandler.all_ids()]
+        return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
+
+    @staticmethod
     def from_email(email: str):
         return User.query.filter(User.personal_email.any(email_address=email)).first()
 

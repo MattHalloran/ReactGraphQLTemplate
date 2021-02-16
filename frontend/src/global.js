@@ -12,6 +12,7 @@ const menu_app_style = `position: fixed;
 `
 
 export const GlobalStyles = createGlobalStyle`
+
     body {
         background: ${({ theme }) => theme.bodyPrimary};
         color: ${({ theme }) => theme.textPrimary};
@@ -40,6 +41,10 @@ export const GlobalStyles = createGlobalStyle`
     a:hover {
         color: ${({ theme }) => theme.hoverPrimary};
         text-decoration: none;
+    }
+
+    p {
+        color: ${({ theme }) => theme.textPrimary};
     }
 
     #App {
