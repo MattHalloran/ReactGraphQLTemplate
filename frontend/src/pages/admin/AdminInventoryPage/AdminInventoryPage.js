@@ -140,7 +140,7 @@ function AdminInventoryPage() {
     // Processes a single file
     const fileSelectedHandler = (event) => {
         let files = event.target.files;
-        let extension = files[0].name.split('.')[0];
+        let extension = files[0].name.split('.')[1];
         if (extension !== 'xls') {
             alert('File must have the extension .xls');
             return;
@@ -217,10 +217,17 @@ function SkuCard({
 }) {
     let plant = sku?.plant;
 
+    let display_image;
+    if (sku?.display_image) {
+        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+    } else {
+        display_image = <NoImageIcon />
+    }
+
     return (
         <StyledCard theme={theme} onClick={() => onEdit(sku)} status={sku?.status}>
             <h2 className="title">{plant?.latin_name}</h2>
-            <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+            { display_image }
             <div className="icon-container">
                 <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
                 <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />

@@ -6,10 +6,11 @@
 # 3) Set up git
 # 4) Download backend repository
 # 5) Download python dependencies
-# 6) Set up PostgreSQL
-# 7) Set environment variables
-# 8) Create assets directories
-# 9) Execute database setup script
+# 6) Set up Redis task queue system
+# 7) Set up PostgreSQL
+# 8) Set environment variables
+# 9) Create assets directories
+# 10) Execute database setup script
 # ---------- Frontend setup ---------------
 # 10) Install npm
 # 11) Download frontend repository
@@ -35,7 +36,24 @@ git clone <repo-url>
 cd <project-name>
 pip3 install -r requirements.txt
 
-# 6) Set up PostgreSQL
+# 6 Set up Redis task queue system
+# Create a directory to store the Redis files in
+cd
+mkdir redis
+cd redis
+# Install Redis
+wget https://download.redis.io/releases/redis-6.0.10.tar.gz
+tar xzf redis-6.0.10.tar.gz
+cd redis-6.0.10
+make
+# Allow redis-server and redis-cli to be called from anywhere
+sudo make install
+# Start server (defaults to port 6379)
+src/redis-server
+# Download redis libraries for Python
+pip3 install redis rq
+
+# 7) Set up PostgreSQL
 # Download (on Mac use "brew install postgres" instead )
 sudo apt-get install postgresql postgresql-contrib
 # Make sure postgres server is running
@@ -51,7 +69,7 @@ ALTER USER <USER_IN_CONFIG> WITH SUPERUSER;
 \q
 exit
 
-# 7) Set environment variables
+# 8) Set environment variables
 # In a Mac terminal, you can enter  'env | grep SOME_STRING' to search for environment variables
 # Currently, there are 7 environment variables which need to be set
 # Open environment file
@@ -67,29 +85,29 @@ AFA_EMAIL_PASSWORD="EMAIL_API_KEY"
 # To save and exit vim,
 <press escape> :wq
 
-# 8) Create assets directories
+# 9) Create assets directories
 mkdir assets
 mkdir assets/gallery
 mkdir assets/messaging
 mkdir assets/plant
 
-# 9) Setup database and populate with default data
+# 10) Setup database and populate with default data
 cd tools
 python3 dbTools.py
 
-# 10) Install npm
+# 11) Install npm
 sudo apt install nodejs
 sudo apt install npm
 
-# 11) Download frontend repository (ex: https://github.com/MattHalloran/NLN-frontend.git)
+# 12) Download frontend repository (ex: https://github.com/MattHalloran/NLN-frontend.git)
 cd
 git clone <repo-url>
 
-# 12) Install npm packages
+# 13) Install npm packages
 cd <repo-directory>
 npm install
 
-# 13) Update max listeners
+# 14) Update max listeners
 # npm uses a lot of listeners. Not sure exactly what they do, but the default max amount is not enough
 echo fs.inotify.max_user_watches=20000 | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p

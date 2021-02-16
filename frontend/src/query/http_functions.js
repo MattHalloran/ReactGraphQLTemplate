@@ -213,7 +213,7 @@ export async function upload_availability(formData) {
         body: formData,
         method: 'post',
     }
-    return await fetchWrapper(`${PREFIX}/upload_availavility`, options);
+    return await fetchWrapper(`${PREFIX}/upload_availability`, options);
 }
 
 export async function fetch_contact_info() {

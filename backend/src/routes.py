@@ -13,7 +13,9 @@ import traceback
 from base64 import b64encode, b64decode
 import json
 import os
+import io
 from functools import wraps
+from src.uploadAvailability import upload_availability
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -362,10 +364,18 @@ def image_from_sku():
 
 @app.route(f'{PREFIX}/upload_availability', methods=["POST"])
 @handle_exception
-def upload_availability():
+def upload_availability_file():
     # Check to make sure requestor is an admin TODO
-    (data) = getJson('data')
-    # TODO
+    (data) = getForm('data')
+    b64 = data[0].split('base64,')[1]
+    decoded = b64decode(b64)
+    toread = io.BytesIO()
+    toread.write(decoded)
+    toread.seek(0) # resets pointer
+    success = upload_availability(app, toread)
+    if success:
+        return {"status": StatusCodes['SUCCESS']}
+    return {"status": StatusCodes['ERROR_UNKNOWN']}
 
 
 # TODO - check image size and extension to make sure it is valid

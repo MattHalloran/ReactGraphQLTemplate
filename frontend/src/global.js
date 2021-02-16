@@ -27,23 +27,19 @@ export const GlobalStyles = createGlobalStyle`
             monospace;
     }
 
-    /* Primary (default) link settings */
     a {
         transition: color 0.3s linear;
         text-decoration: none;
-    }
-    a:link {
-        color: ${({ theme }) => theme.textPrimary};
-    }
-    a:visited {
-        color: ${({ theme }) => theme.textPrimary};
     }
     a:hover {
         color: ${({ theme }) => theme.hoverPrimary};
         text-decoration: none;
     }
 
-    p {
+    p, h1, h2,
+    h3, h4, h5,
+    h6, a:link,
+    a:visited {
         color: ${({ theme }) => theme.textPrimary};
     }
 
