@@ -105,7 +105,7 @@ export function loginUser(email, password) {
                 login({email: email, token: data.token}, data.user);
                 resolve(data);
             } else {
-                console.log('DATA NOT OKAY, logging out')
+                console.log('DATA NOT OKAY, logging out', data)
                 clearStorage();
                 switch (data.status) {
                     case StatusCodes.FAILURE_NO_USER:

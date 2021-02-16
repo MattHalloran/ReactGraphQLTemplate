@@ -1,5 +1,13 @@
 import styled from 'styled-components';
 
+const getDisabledStyle = (disabled) => {
+    if (!disabled) return '';
+    return `
+        background-color: rgba(164, 164, 164, 0.8);
+        pointer-events: none;
+    `
+}
+
 export const StyledInputText = styled.div`
     width: -moz-fit-content;
     width: -webkit-fill-available;
@@ -10,7 +18,7 @@ export const StyledInputText = styled.div`
     margin-bottom: 20px;
     background-color: rgba(255, 255, 255, 0.3);
     transition: 0.3s background-color ease-in-out, 0.3s box-shadow ease-in-out;
-    ${({ locked }) => locked ? 'pointer-events: none;' : ''};
+    ${({ disabled }) => getDisabledStyle(disabled)};
 
     //Diables Chrome auto-complete styling
     input:-webkit-autofill,

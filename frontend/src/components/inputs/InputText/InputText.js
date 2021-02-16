@@ -19,7 +19,6 @@ function InputText(props) {
 
 
     const sendValueUpdate = () => {
-        console.log('UPDATINGGGGG', id.current)
         if (props.valueFunc) {
             if (props.index)
                 props.valueFunc(value, props.index);
@@ -40,7 +39,7 @@ function InputText(props) {
     }
 
     return (
-        <StyledInputText icon={props.icon} theme={theme} has_error={error?.length > 0} show_label={value?.length > 0}>
+        <StyledInputText icon={props.icon} theme={theme} has_error={error?.length > 0} show_label={value?.length > 0} disabled={props.disabled ?? false}>
           <input
             id={id.current}
             type={props.type ?? "text"}
@@ -70,7 +69,6 @@ InputText.propTypes = {
     validate: PropTypes.func,
     icon: PropTypes.func, // TODO!!!
     showErrors: PropTypes.bool,
-    locked: PropTypes.bool,
 }
 
 export default InputText;

@@ -51,8 +51,8 @@ def getData(*names):
     return [data[name] for name in names]
 
 
-# Wraps functions in try/except
 def handle_exception(func):
+    '''Wraps routes in try/except'''
     @wraps(func)
     def decorated(*args, **kwargs):
         try:
@@ -62,6 +62,34 @@ def handle_exception(func):
             return {"status": StatusCodes['ERROR_UNKNOWN']}
 
     return decorated
+
+
+def verify_session(email, token):
+    '''Verifies that the user supplied a valid session token
+    Returns User object if valid, otherwise None'''
+    return UserHandler.is_valid_session(email, token, app).get('user', None)
+
+
+def verify_customer(email, token):
+    '''Verifies that the user:
+    1) Supplied a valid session token
+    2) Is a customer
+    Returns User object if both checks pass, otherwise None'''
+    user = verify_session(email, token)
+    if user and UserHandler.is_customer(user):
+        return user
+    return None
+
+
+def verify_admin(email, token):
+    '''Verifies that the user:
+    1) Supplied a valid session token
+    2) Is an admin
+    Returns User object if both checks pass, otherwise None'''
+    user = verify_session(email, token)
+    if user and UserHandler.is_admin(user):
+        return user
+    return None
 
 # =========== End Helper Methods ========================
 
@@ -124,7 +152,7 @@ def get_token():
     user = UserHandler.get_user_from_credentials(email, password)
     if user:
         token = generate_token(app, user)
-        print(f'RECEIVED TOKEN!!!!!! {token}')
+        print('RECEIVED TOKEN!!!!!!')
         UserHandler.set_token(user, token)
         db.session.commit()
         return {
@@ -216,7 +244,6 @@ def fetch_inventory():
         'new': (lambda s: s.date_added, True),
         'old': (lambda s: s.date_added, True),
     }
-    print(f'SORTER ISSSSS {sorter}')
     # Sort the SKUs
     sort_data = sort_map.get(sorter, None)
     if sort_data is None:
@@ -263,7 +290,6 @@ def fetch_inventory_page():
 def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
     print('boop le snoot')
-    print(images_data)
     return {
         "images_meta": json.dumps(images_data),
         "status": StatusCodes['SUCCESS']
@@ -418,17 +444,13 @@ def update_contact_info():
 @handle_exception
 def fetch_profile_info():
     (email, token) = getJson('email', 'token')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid']:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if not verify_customer(email, token):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     user_data = UserHandler.get_profile_data(email, token, app)
     if user_data is str:
         print('FAILEDDDD')
-        print(user_data)
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     print('SUCESS BABYYYYY')
-    print(user_data)
     user_data['status'] = StatusCodes['SUCCESS']
     return user_data
 
@@ -438,10 +460,8 @@ def fetch_profile_info():
 def fetch_customers():
     # Grab data
     (email, token) = getJson('email', 'token')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if not verify_admin(email, token):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     # Grab all users that have a customer role
     users = [UserHandler.to_dict(UserHandler.from_id(id)) for id in UserHandler.all_ids()]
     customers = [u for u in users if UserHandler.is_customer(u)]
@@ -457,11 +477,9 @@ def set_like_sku():
     '''Like or unlike an inventory item'''
     # Grab data
     (email, token, sku_str, liked) = getData('email', 'token', 'sku', 'liked')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    user = session_check['user']
+    user = verify_customer(email, token)
+    if not user:
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     sku = SkuHandler.from_sku(sku_str)
     # Like SKU
     if liked:
@@ -485,11 +503,9 @@ def set_sku_in_cart():
     Returns an updated json of the user'''
     # Grab data
     (email, token, sku_code, operation, quantity) = getData('email', 'token', 'sku', 'operation', 'quantity')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    user = session_check['user']
+    user = verify_customer(email, token)
+    if not user:
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     sku = SkuHandler.from_sku(sku_code)
     # Find or create cart
     cart = UserHandler.get_cart(user)
@@ -526,16 +542,14 @@ def set_sku_in_cart():
     return user_data
 
 
-# Hide, unhide, delete, or update SKU
+# Hide, unhide, add, delete, or update SKU
 @app.route(f'{PREFIX}/modify_sku', methods=["POST"])
 @handle_exception
 def modify_sku():
     '''Like or unlike an inventory item'''
     (email, token, sku, operation, sku_data) = getData('email', 'token', 'sku', 'operation', 'data')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if not verify_admin(email, token):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     sku_obj = SkuHandler.from_sku(sku)
     if sku_obj is None:
         return {"status": StatusCodes['ERROR_UNKNOWN']}
@@ -548,8 +562,15 @@ def modify_sku():
         sku_obj.status = operation_to_status[operation]
         db.session.commit()
         return {"status": StatusCodes['SUCCESS']}
+    if operation == 'ADD':
+        plant = PlantHandler.create(sku_data['plant'])
+        db.session.add(plant)
+        sku = SkuHandler.create(sku_obj)
+        db.session.add(sku)
+        db.session.commit()
     if operation == 'UPDATE':
         SkuHandler.update(sku_obj, sku_data)
+        PlantHandler.update(sku_obj.plant, sku_data['plant'])
         db.session.commit()
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}
@@ -561,10 +582,8 @@ def modify_sku():
 def modify_user():
     '''Like or unlike an inventory item'''
     (email, token, id, operation) = getData('email', 'token', 'id', 'operation')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_admin(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if not verify_admin(email, token):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     user = UserHandler.from_id(id)
     if user is None:
         print('USER NOT FOUND')
@@ -586,11 +605,9 @@ def modify_user():
 @handle_exception
 def submit_order():
     (email, token) = getData('email', 'token')
-    # Verify authorization
-    session_check = UserHandler.is_valid_session(email, token, app)
-    if not session_check['valid'] or not UserHandler.is_customer(session_check['user']):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    user = session_check['user']
+    user = verify_customer(email, token)
+    if not user:
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     if UserHandler.submit_order(user):
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}

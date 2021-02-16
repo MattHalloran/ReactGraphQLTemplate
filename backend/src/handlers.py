@@ -601,6 +601,7 @@ class UserHandler(Handler):
             user.login_attempts += 1
             db.session.commit()
             print(f'User login attempts: {user.login_attempts}')
+            print(bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')))
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
                bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):

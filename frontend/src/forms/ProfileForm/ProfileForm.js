@@ -5,6 +5,11 @@ import * as validation from 'utils/validations';
 import { getProfileInfo } from 'query/http_promises';
 import { BUSINESS_NAME } from 'utils/consts';
 import Button from 'components/Button/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 // Profile fields:
 // first_name: str
@@ -34,6 +39,8 @@ function ProfileForm(props) {
     const [emailErrors, setEmailErrors] = useState(null);
     const [phones, setPhones] = useState([""])
     const [phoneErrors, setPhoneErrors] = useState(null);
+    const [existingCustomer, setExistingCustomer] = useState(null);
+    const [existingCustomerError, setExistingCustomerError] = useState(null);
 
     useEffect(() => {
         console.log('PRONOUNS ARE', pronouns)
@@ -86,6 +93,10 @@ function ProfileForm(props) {
     // Helper method for updating InputText objects created through a map
     const updateFieldArray = (stateFunc, value, index) => {
         console.log('TODO')
+    }
+
+    const handleRadioSelect = (event) => {
+        setExistingCustomer(event.target.value);
     }
 
     return (
@@ -167,13 +178,20 @@ function ProfileForm(props) {
                 valueFunc={setConfirmPassword}
                 disabled={!editing}
             />
+            <FormControl component="fieldset">
+                <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
+                    <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                    <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                </RadioGroup>
+                <FormHelperText>{existingCustomerError}</FormHelperText>
+            </FormControl>
             <div className="buttons-div">
                 <Button className="primary" onClick={toggleEdit}>
                     { editing ? "Cancel" : "Edit" }
             </Button>
-                <Button className="primary" type="submit" onClick={submit}>
-                    Submit
-            </Button>
+                <Button className="primary" type="submit" onClick={submit} disabled={!editing}>
+                    Update
+                </Button>
             </div>
         </React.Fragment>
     );

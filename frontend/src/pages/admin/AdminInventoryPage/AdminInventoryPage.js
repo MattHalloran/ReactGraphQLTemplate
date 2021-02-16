@@ -262,18 +262,18 @@ function SkuPopup({
 }) {
     console.log('PROP UPPPPPPPP', sku);
     let plant = sku.plant;
-    const [latin_name, setLatinName] = useHistoryState("ai_latin_name", plant?.latin_name ?? '');
-    const [common_name, setCommonName] = useHistoryState("ai_common_name", plant?.common_name ?? '');
-    const [code, setCode] = useHistoryState("ai_code", sku.sku ?? '');
-    const [size, setSize] = useHistoryState("ai_size", sku.size ?? '');
-    const [price, setPrice] = useHistoryState("ai_price", sku.price ?? '');
-    const [quantity, setQuantity] = useHistoryState("ai_quantity", sku.availability ?? '');
-    const [drought_tolerance, setDroughtTolerance] = useHistoryState("ai_drought_tolerance", "");
-    const [grown_height, setGrownHeight] = useHistoryState("ai_grown_height", "");
-    const [grown_spread, setGrownSpread] = useHistoryState("ai_grown_spread", "");
-    const [growth_rate, setGrowthRate] = useHistoryState("ai_growth_rate", "");
-    const [optimal_light, setOptimalLight] = useHistoryState("ai_optimal_light", "");
-    const [salt_tolerance, setSaltTolerance] = useHistoryState("ai_salt_tolerance", "");
+    const [latin_name, setLatinName] = useState(plant?.latin_name ?? '');
+    const [common_name, setCommonName] = useState(plant?.common_name ?? '');
+    const [code, setCode] = useState(sku.sku ?? '');
+    const [size, setSize] = useState(sku.size ?? '');
+    const [price, setPrice] = useState(sku.price ?? '');
+    const [quantity, setQuantity] = useState(sku.availability ?? '');
+    const [drought_tolerance, setDroughtTolerance] = useState("");
+    const [grown_height, setGrownHeight] = useState("");
+    const [grown_spread, setGrownSpread] = useState("");
+    const [growth_rate, setGrowthRate] = useState("");
+    const [optimal_light, setOptimalLight] = useState("");
+    const [salt_tolerance, setSaltTolerance] = useState("");
 
     //Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
@@ -296,7 +296,8 @@ function SkuPopup({
             "quantity": quantity,
             "plant": plant_data,
         }
-        modifySku(session?.email, session?.token, sku.sku, 'UPDATE', sku_data)
+        let operation = sku === null ? 'ADD': 'UPDATE';
+        modifySku(session?.email, session?.token, sku?.sku ?? code, operation, sku_data)
             .then(() => {
                 alert('SKU Updated!')
             })
