@@ -75,7 +75,7 @@ def numberToEmail(number: str):
     if len(closest_carriers) < 1:
         raise Exception('Could not find the carrier for this number!')
     carrier_extension = carrier_dict[closest_carriers[0]]
-    #Return {number without country code}@{carrier email extension}
+    # Return {number without country code}@{carrier email extension}
     return f'{number[-10:]}@{carrier_extension}'
 
 

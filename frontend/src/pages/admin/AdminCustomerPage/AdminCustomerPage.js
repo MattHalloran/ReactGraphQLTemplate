@@ -11,7 +11,7 @@ function AdminCustomerPage() {
     const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     const [customers, setCustomers] = useState([]);
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelected] = useState(-1);
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
@@ -41,7 +41,7 @@ function AdminCustomerPage() {
     }, [customers])
 
     const approve_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected].id, 'APPROVE')
+        modifyUser(session?.email, session?.token, customers[selected]?.id, 'APPROVE')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -52,7 +52,7 @@ function AdminCustomerPage() {
     }, [selected])
 
     const unlock_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected].id, 'UNLOCK')
+        modifyUser(session?.email, session?.token, customers[selected]?.id, 'UNLOCK')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -63,7 +63,7 @@ function AdminCustomerPage() {
     }, [selected])
 
     const lock_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected].id, 'LOCK')
+        modifyUser(session?.email, session?.token, customers[selected]?.id, 'LOCK')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -75,7 +75,7 @@ function AdminCustomerPage() {
 
     const delete_user = useCallback(() => {
         if (!window.confirm(`Are you sure you want to delete the account for ${selected?.first_name} ${selected?.last_name}?`)) return;
-        modifyUser(session?.email, session?.token, customers[selected].id, 'DELETE')
+        modifyUser(session?.email, session?.token, customers[selected]?.id, 'DELETE')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -94,8 +94,8 @@ function AdminCustomerPage() {
     let account_options = [];
     let selected_display = '';
     if (selected >= 0) {
-        selected_display = `${customers[selected].first_name} ${customers[selected].last_name}`
-        switch (customers[selected].account_status) {
+        selected_display = `${customers[selected]?.first_name} ${customers[selected]?.last_name}`
+        switch (customers[selected]?.account_status) {
             case ACCOUNT_STATUS.Unlocked:
                 account_options = [lock_button, delete_button]
                 break;

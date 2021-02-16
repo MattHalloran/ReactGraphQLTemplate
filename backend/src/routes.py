@@ -233,7 +233,7 @@ def fetch_inventory():
     # Find all SKUs available to the customer
     skus = None
     if (admin):
-        skus = [SkuHandler.from_id(id) for id in SkuHandler.all_ids()]
+        skus = SkuHandler.all_objs()
     else:
         skus = SkuHandler.all_available_skus()
     sort_map = {
@@ -251,7 +251,7 @@ def fetch_inventory():
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     skus.sort(key=sort_data[0], reverse=sort_data[1])
     sku_page = skus[0: min(len(skus), page_size)]
-    page_results = [SkuHandler.to_dict(sku) for sku in sku_page]
+    page_results = SkuHandler.all_dicts(sku_page)
     return {
         "all_skus": [sku.sku for sku in skus],
         "page_results": page_results,
@@ -279,7 +279,7 @@ def fetch_plants():
 def fetch_inventory_page():
     skus = getData('skus')
     return {
-        "data": [SkuHandler.to_dict(SkuHandler.from_sku(sku)) for sku in skus],
+        "data": [SkuHandler.to_dict(sku) for sku in skus],
         "status": StatusCodes['SUCCESS']
     }
 
@@ -419,6 +419,15 @@ def upload_gallery_image():
             "status": status}
 
 
+@app.route(f'{PREFIX}/fetch_all_contact_infos', methods=["POST"])
+@handle_exception
+def fetch_all_contact_infos():
+    return {
+        "contact_infos": ContactInfoHandler.all_dicts(),
+        "status": StatusCodes['SUCCESS']
+    }
+
+
 @app.route(f'{PREFIX}/fetch_contact_info', methods=["POST"])
 @handle_exception
 def fetch_contact_info():
@@ -446,8 +455,8 @@ def fetch_profile_info():
     (email, token) = getJson('email', 'token')
     if not verify_customer(email, token):
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
-    user_data = UserHandler.get_profile_data(email, token, app)
-    if user_data is str:
+    user_data = UserHandler.get_profile_data(email)
+    if user_data is None:
         print('FAILEDDDD')
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     print('SUCESS BABYYYYY')
