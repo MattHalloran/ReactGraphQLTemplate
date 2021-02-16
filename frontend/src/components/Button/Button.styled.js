@@ -15,6 +15,14 @@ export const StyledButton = styled.button`
     border-radius: 10px;
     pointer-events: ${({ disabled }) => disabled ? 'none' : ''};
 
+    //disable text selection
+    -ms-user-select:none;
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout: none;
+    -khtml-user-select: none;
+        user-select:none;
+
     :hover {
         box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
     }

@@ -21,19 +21,27 @@ export const StyledSkuCard = styled.div`
     min-height: 50px;
     border: 1px solid black;
     border-radius: 10px;
+    transition: 0.3s;
+
+    :hover {
+        box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+        border: 1px solid ${({ theme }) => theme.textPrimary};
+    }
 
     .title {
-        color: ${({ theme }) => theme.textPrimary};
         position: absolute;
         width: 100%;
         text-align: center;
         background-color: rgba(0,0,0,.4);
-        margin: 0;
-        border-radius: 10px 10px 0 0;
         padding: 0.5em 0 0.5em 0;
+        border-radius: 10px 10px 0 0;
         left: 0;
         top: 0;
         z-index: 2;
+
+        > * {
+            margin: 0 !important;
+        }
     }
 
     .size-container {
@@ -70,11 +78,17 @@ export const StyledSkuCard = styled.div`
 
 export const StyledExpandedSku = styled.div`
     background-color: ${({ theme }) => theme.bodySecondary};
-    color: ${({ theme }) => theme.textPrimary};
     display: block;
-    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
     height: 100%;
     min-width: 50vw;
+
+    .main-div {
+        padding-bottom: 14%;
+        width: -webkit-fill-available;
+        width: -moz-available;
+    }
 
     .display-image {
         display: inline-block;
@@ -123,9 +137,12 @@ export const StyledExpandedSku = styled.div`
         width: 100%;
         text-align: center;
         background-color: rgba(0,0,0,.4);
-        margin: 0;
         border-radius: 10px 10px 0 0;
         padding: 0.5em 0 0.5em 0;
+
+        > * {
+            margin: 0 !important;
+        }
     }
 
     img {
@@ -157,6 +174,15 @@ export const StyledExpandedSku = styled.div`
 
     .bottom-div {
         height: 10%;
+        bottom: 0;
+        width: -webkit-fill-available;
+        width: -moz-available;
+        background: ${({ theme }) => theme.bodyPrimary};
+        position: absolute;
+        border-radius: 0 0 5px 5px;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
         align-items: center;
         padding: 0 10px;
         border-top: 2px solid ${({ theme }) => theme.textPrimary};
@@ -164,7 +190,7 @@ export const StyledExpandedSku = styled.div`
 
     .quantity-div {
         display: flex;
-        width: 25%;
+        width: max(150px, 25%);
 
         > * {
             width: 75%;
@@ -173,8 +199,7 @@ export const StyledExpandedSku = styled.div`
         > svg {
             stroke: none;
             fill: ${({ theme }) => theme.textPrimary};
-            padding: 0 10px;
-            width: 25%;
+            width: max(40px, 25%);
         }
     }
 `;

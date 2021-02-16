@@ -53,7 +53,6 @@ export const StyledNavbar = styled.nav`
     }
 
     .nav-link {
-        color: ${({ theme }) => theme.textPrimary};
         text-decoration: none;
     }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import PropTypes from 'prop-types';
 import { getTheme } from 'utils/storage';
 import { StyledQuantityBox } from './QuantityBox.styled';
@@ -6,8 +6,8 @@ import Button from 'components/Button/Button';
 
 function QuantityBox({
     initial_value = 0,
-    min_value,
-    max_value,
+    min_value = -2097151,
+    max_value = 2097151,
     step = 1,
     valueFunc,
     errorFunc,
@@ -16,6 +16,12 @@ function QuantityBox({
 }) {
     const [theme, setTheme] = useState(getTheme());
     const [value, setValue] = useState(initial_value ?? '');
+    // Time for a button press to become a hold
+    const HOLD_DELAY = 250;
+    // Time between hold increments
+    const HOLD_INTERVAL = 50;
+    let holdTimeout = useRef(null);
+    let holdInterval = useRef(null);
     let error = null;
 
     if (validateFunc) {
@@ -30,20 +36,55 @@ function QuantityBox({
         if (valueFunc) valueFunc(quantity);
     }
 
+    const incTick = () => {
+        updateValue(v => Math.min(v + step, max_value));
+    }
+    
+    const decTick = () => {
+        updateValue(v => v - step);
+    }
+
+    const startTouch = (adding) => {
+        console.log('START TOUCH')
+        holdTimeout.current = setTimeout(() => {
+            if (adding)
+                holdInterval.current = setInterval(incTick, HOLD_INTERVAL);
+            else
+                holdInterval.current = setInterval(decTick, HOLD_INTERVAL);
+        }, HOLD_DELAY)
+    }
+
+    const stopTouch = () => {
+        console.log('STOP TOUCH')
+        clearTimeout(holdTimeout.current);
+        clearInterval(holdInterval.current);
+    }
+
     return (
         <StyledQuantityBox theme={theme} has_error={error?.length > 0} {...props}>
-            <Button className="minus" data-field="quantity" onClick={() => updateValue(value - step)}>-</Button>
+            <Button className="minus" 
+                data-field="quantity" 
+                onClick={() => updateValue(value - step)}
+                onTouchStart={() => startTouch(false)}
+                onTouchEnd={stopTouch}
+                onContextMenu={(e) => e.preventDefault()}>-</Button>
             <input
-                type="number" 
-                step={step} 
-                min={min_value} 
-                max={max_value} 
+                type="number"
+                pattern="[0-9]*"
+                step={step}
+                min={min_value}
+                max={max_value}
                 value={value}
-                className="quantity-field" 
+                className="quantity-field"
                 onChange={(e) => updateValue(e.target.value)}/>
-            <Button className="plus" data-field="quantity" onClick={() => updateValue(value + step)}>+</Button>
+            <Button className="plus" 
+                data-field="quantity" 
+                onClick={() => updateValue(value + step)}
+                onTouchStart={() => startTouch(true)}
+                onTouchEnd={stopTouch}
+                onContextMenu={(e) => e.preventDefault()}>+</Button>
         </StyledQuantityBox>
-      );
+    );
 }
 
 QuantityBox.propTypes = {

@@ -29,7 +29,7 @@ export const StyledArrowMenu = styled.div`
         transition: all 0.3s linear;
         position: fixed;
         transform: ${({ open }) => open ? 'translateX(400px) scaleX(-1)' : 'transformX(0px) scaleX(1)'};
-        fill: ${({ theme }) => theme.textPrimary};;
+        fill: ${({ theme }) => theme.textPrimary};
         stroke: black;
         stroke-width: 0.5px;
         padding: 5px;

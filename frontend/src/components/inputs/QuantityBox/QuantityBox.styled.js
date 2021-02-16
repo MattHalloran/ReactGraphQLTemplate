@@ -30,6 +30,7 @@ export const StyledQuantityBox = styled.div`
         width: 60%;
         text-align: center;
         border-style: unset;
+        border-radius: 0;
     }
 
     input::-webkit-outer-spin-button,

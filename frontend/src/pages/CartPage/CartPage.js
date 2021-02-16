@@ -7,6 +7,8 @@ import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import { setSkuInCart, submitOrder } from 'query/http_promises';
+import { displayPrice } from 'utils/displayPrice';
+import { NoImageIcon } from 'assets/img';
 
 function CartPage() {
     const [theme, setTheme] = useState(getTheme());
@@ -104,20 +106,27 @@ function CartPage() {
         let price = parseInt(data.sku.price);
         let display_price;
         let display_total;
+        let display_image;
         if (isNaN(price)) {
             display_price = 'TBD';
             display_total = 'TBD';
             all_total = 'TBD';
         } else {
-            display_price = `$${price}`;
-            display_total = `$${quantity * price}`;
+            display_price = displayPrice(price);
+            display_total = displayPrice(quantity * price);
             if (typeof(all_total) === 'number') all_total += (quantity * price);
         }
+        if (data.sku.display_image) {
+            display_image = <img src={`data:image/jpeg;base64,${data.sku.display_image}`} className="cart-image" alt="TODO" />
+        } else {
+            display_image = <NoImageIcon className="cart-image" />
+        }
+
         return (
             <tr>
                 <td><div className="product-row">
                     <XIcon width="30px" height="30px" onClick={() => deleteCartItem(data.sku)}/> 
-                    <img className="cart-image" src={`data:image/jpeg;base64,${data.sku.display_image}`} />
+                    { display_image }
                     <p>{data.sku?.plant?.latin_name}</p>
                     </div></td>
                 <td>{display_price}</td>
@@ -148,7 +157,7 @@ function CartPage() {
                     {cart?.items?.map(c => cart_item_to_row(c))}
                 </tbody>
             </table>
-            <p>Total: {all_total}</p>
+            <p>Total: {displayPrice(all_total)}</p>
             <Button onClick={updateOrder}>Update Order</Button>
             <Button onClick={finalizeOrder}>Finalize Order</Button>
         </StyledCartPage>

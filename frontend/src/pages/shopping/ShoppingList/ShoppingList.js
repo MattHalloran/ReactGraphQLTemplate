@@ -11,6 +11,7 @@ import Tooltip from 'components/Tooltip/Tooltip';
 import { getSession, getTheme, getCart, getLikes } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
+import { displayPrice } from 'utils/displayPrice';
 
 function ShoppingList({
     page_size,
@@ -171,7 +172,10 @@ function ShoppingList({
 
     const setLike = (sku, liked) => {
         if (!session?.email || !session?.token) return;
-        setLikeSku(session.email, session.token, sku, liked);
+        setLikeSku(session.email, session.token, sku, liked).catch(err => {
+            console.error(err);
+            alert('Error: Failed to like SKU');
+        })
     }
 
     const setInCart = (sku, operation, quantity) => {
@@ -257,13 +261,18 @@ function SkuCard({
 
     return (
         <StyledSkuCard theme={theme} onClick={() => onClick(sku.sku)}>
-            <h2 className="title">{plant.latin_name}</h2>
+            <div className="title">
+                <h2>{plant?.latin_name}</h2>
+                {plant?.common_name ? <br/> : null}
+                <h3>{plant?.common_name ? plant.common_name : null}</h3>
+            </div>
             <div className="display-image-container">
                 {display_image}
             </div>
             <div className="size-container">
                 {sizes}
             </div>
+            <p>Price: {displayPrice(sku?.price)}</p>
         </StyledSkuCard>
     );
 }
@@ -283,7 +292,7 @@ function ExpandedSku({
     onLike,
     onCart,
 }) {
-    console.log('EEEEEE', cart)
+    //console.log('EEEEEE', cart)
     const plant = sku?.plant;
     const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
@@ -301,14 +310,14 @@ function ExpandedSku({
             <HeartIcon
                 width="40px"
                 height="40px"
-                onClick={onLike(sku?.sku, true)} />
+                onClick={() => onLike(sku?.sku, true)} />
         )
     } else {
         heartIcon = (
             <HeartFilledIcon
                 width="40px"
                 height="40px"
-                onClick={onLike(sku?.sku, false)} />
+                onClick={() => onLike(sku?.sku, false)} />
         )
     }
 
@@ -329,43 +338,48 @@ function ExpandedSku({
 
     return (
         <StyledExpandedSku theme={theme}>
-            <h1 className="title">{plant?.latin_name}</h1>
-            {plant?.common_name ? <h3 className="subtitle">{plant.common_name}</h3> : null}
-            {display_image}
-            {plant?.description ?
-                <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
-                    <p>{plant.description}</p>
+            <div className="title">
+                <h1>{plant?.latin_name}</h1>
+                {plant?.common_name ? <br/> : null}
+                <h3>{plant?.common_name ? plant.common_name : null}</h3>
+            </div>
+            <div className="main-div">
+                {display_image}
+                {plant?.description ?
+                    <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
+                        <p>{plant.description}</p>
+                    </Collapsible>
+                    : null}
+                <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
+                    <div className="sku">
+                        {/* TODO availability, sizes */}
+                    </div>
+                    <div className="general">
+                        <p>General</p>
+                        {traitIconList("zones", MapIcon, "Zones")}
+                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
+                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+                    </div>
+                    <div className="bloom">
+                        <p>Bloom</p>
+                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
+                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+                    </div>
+                    <div className="light">
+                        <p>Light</p>
+                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
+                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+                    </div>
+                    <div className="soil">
+                        <p>Soil</p>
+                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
+                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
+                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
+                    </div>
                 </Collapsible>
-                : null}
-            <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
-                <div className="sku">
-                    {/* TODO availability, sizes */}
-                </div>
-                <div className="general">
-                    <p>General</p>
-                    {traitIconList("zones", MapIcon, "Zones")}
-                    {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                    {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                    {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                    {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                </div>
-                <div className="bloom">
-                    <p>Bloom</p>
-                    {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                    {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                </div>
-                <div className="light">
-                    <p>Light</p>
-                    {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                    {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                </div>
-                <div className="soil">
-                    <p>Soil</p>
-                    {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                    {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                    {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                </div>
-            </Collapsible>
+            </div>
             <div className="icon-container bottom-div">
                 {heartIcon}
                 <div className="quantity-div">

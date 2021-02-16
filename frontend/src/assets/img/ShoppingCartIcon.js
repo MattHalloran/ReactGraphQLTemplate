@@ -19,8 +19,10 @@ function ShoppingCartIcon(props) {
     let cart_bubble;
     if (cart?.items?.length > 0) {
         cart_bubble = <div style={{position: 'absolute',
+                        border:'1px solid darkred',
                         borderRadius:'50px', 
                         backgroundColor:'red',
+                        fontWeight:'bold',
                         width: '20px',
                         height: '20px',
                         textAlign: 'center',

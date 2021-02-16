@@ -42,7 +42,6 @@ export const StyledCard = styled.div`
     cursor: pointer;
 
     .title {
-        color: ${({ theme }) => theme.textPrimary};
         position: absolute;
         width: 100%;
         text-align: center;
