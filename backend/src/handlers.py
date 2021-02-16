@@ -323,8 +323,18 @@ class OrderHandler(Handler):
         as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'desired_delivery_date'])
         as_dict['items'] = [OrderItemHandler.to_dict(item) for item in model.items]
         as_dict['delivery_address'] = AddressHandler.to_dict(model.delivery_address)
-        as_dict['customer'] = {"id": model.customer.id}
+        customer = UserHandler.from_id(model.user_id)
+        as_dict['customer'] = {
+            "id": customer.id,
+            "first_name": customer.first_name,
+            "last_name": customer.last_name,
+        }
         return as_dict
+
+    @staticmethod
+    def from_status(status: OrderStatus):
+        '''Return all orders that match the provided status'''
+        return db.session.query(Order).filter_by(status=status.value).all()
 
     @staticmethod
     def set_status(model: Order, status: OrderStatus):
@@ -711,7 +721,7 @@ class UserHandler(Handler):
         # If cart is empty, don't submit
         if len(cart.items) <= 0:
             return False
-        print('TODOOOOO')
+        cart.status = OrderStatus.PENDING.value
         # Add a new, empty order to serve as the user's next cart
         cart = OrderHandler.create(user.id)
         db.session.add(cart)

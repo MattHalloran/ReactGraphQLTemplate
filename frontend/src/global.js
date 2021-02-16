@@ -64,7 +64,7 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     .page {
-        padding-top: 12vh;
+        padding-top: 13.5vh;
     }
 
     .icon-container {

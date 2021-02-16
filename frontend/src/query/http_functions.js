@@ -323,3 +323,17 @@ export async function submit_order(email, token) {
     }
     return await fetchWrapper(`${PREFIX}/submit_order`, options);
 }
+
+export async function fetch_orders(email, token, status) {
+    let json = JSON.stringify({
+        "email": email,
+        "token": token,
+        "status": status
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_orders`, options);
+}

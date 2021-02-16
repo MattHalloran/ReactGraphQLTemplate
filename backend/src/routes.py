@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
-from src.models import AccountStatus, Sku, SkuStatus, ImageUses, Plant, PlantTrait, PlantTraitOptions
+from src.models import AccountStatus, Sku, SkuStatus, ImageUses, Plant, PlantTrait, PlantTraitOptions, OrderStatus
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, OrderItemHandler
 from src.messenger import welcome, reset_password
@@ -614,3 +614,16 @@ def submit_order():
     if UserHandler.submit_order(user):
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}
+
+
+@app.route(f'{PREFIX}/fetch_orders', methods=["POST"])
+@handle_exception
+def fetch_orders():
+    '''Fetch orders that match the provided state'''
+    (email, token, status) = getData('email', 'token', 'status')
+    if not verify_admin(email, token):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+    return {
+        "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(OrderStatus(status))],
+        "status": StatusCodes['SUCCESS']
+    }

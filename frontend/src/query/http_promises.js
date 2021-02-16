@@ -43,6 +43,7 @@ export const resetPasswordRequest = (email) => promiseWrapper(http.send_password
 export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
 export const modifySku = (email, token, sku, operation, data) => promiseWrapper(http.modify_sku, email, token, sku, operation, data);
 export const modifyUser = (email, token, id, operation) => promiseWrapper(http.modify_user, email, token, id, operation);
+export const getOrders = (email, token, status) => promiseWrapper(http.fetch_orders, email, token, status)
 
 export function submitOrder(email, token) {
     return new Promise(function (resolve, reject) {
