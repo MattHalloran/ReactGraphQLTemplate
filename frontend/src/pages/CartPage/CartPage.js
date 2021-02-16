@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
+import { useHistory } from 'react-router';
 import { StyledCartPage } from './CartPage.styled';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
 import { getTheme, getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
@@ -16,6 +17,7 @@ function CartPage() {
     //Stores quantities before cart update
     const quantities = useRef([]);
     const [session, setSession] = useState(getSession());
+    let history = useHistory();
     console.log('ON CART PAGEEE', cart);
 
     useEffect(() => {
@@ -60,7 +62,7 @@ function CartPage() {
         }
         for (let i = 0; i < cart.items.length; i++) {
             if (cart.items[i].quantity === quantities.current[i]) continue;
-            setSkuInCart(session.email, session.token, cart.items[i].sku.sku, 'SET', quantities.current[i])
+            setSkuInCart(session, cart.items[i].sku.sku, 'SET', quantities.current[i])
                 .then(() => {})
                 .catch(err => {
                     console.error(err);
@@ -74,7 +76,7 @@ function CartPage() {
     const deleteCartItem = (sku) => {
         if (!session?.email || !session?.token) return;
         let display_name = sku?.plant?.latin_name ?? sku?.plant?.common_name ?? 'plant';
-        setSkuInCart(session.email, session.token, sku.sku, 'DELETE', 0)
+        setSkuInCart(session, sku.sku, 'DELETE', 0)
             .then(() => {
                 alert(`${display_name} 'removed from' cart!`)
             })
@@ -90,7 +92,7 @@ function CartPage() {
             return;
         }
         if (!window.confirm('This will submit the order to New Life Nursery. We will contact you for further information. Are you sure you want to continue?')) return;
-        submitOrder(session?.email, session?.token)
+        submitOrder(session)
             .then(() => {
                 alert('Order submitted! We will be in touch with you soon :)')
             })
@@ -158,6 +160,7 @@ function CartPage() {
                 </tbody>
             </table>
             <p>Total: {displayPrice(all_total)}</p>
+            <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
             <Button onClick={updateOrder}>Update Order</Button>
             <Button onClick={finalizeOrder}>Finalize Order</Button>
         </StyledCartPage>

@@ -97,10 +97,9 @@ export async function send_password_reset_request(email) {
     return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
 }
 
-export async function fetch_customers(email, token) {
+export async function fetch_customers(session) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session
     });
     let options = {
         body: json,
@@ -237,8 +236,9 @@ export async function update_contact_info(data) {
 }
 
 export async function fetch_profile_info(session) {
-    console.log('FETCHING PROFILE INFO', session)
-    let json = JSON.stringify(session);
+    let json = JSON.stringify({
+        "session": session,
+    });
     let options = {
         body: json,
         method: 'post',
@@ -248,11 +248,36 @@ export async function fetch_profile_info(session) {
     return await fetchWrapper(`${PREFIX}/fetch_profile_info`, options);
 }
 
-export async function set_like_sku(email, token, sku, liked) {
+export async function fetch_likes(session) {
+    let json = JSON.stringify({
+        "session": session,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicatonJsonAccept,
+        credentials: 'include',
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_likes`, options);
+}
+
+export async function fetch_cart(session) {
+    let json = JSON.stringify({
+        "session": session,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicatonJsonAccept,
+        credentials: 'include',
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_cart`, options);
+}
+
+export async function set_like_sku(session, sku, liked) {
     console.log('SET LIKE SKU', liked)
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
         "liked": liked
     });
@@ -264,10 +289,9 @@ export async function set_like_sku(email, token, sku, liked) {
     return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
 }
 
-export async function set_sku_in_cart(email, token, sku, operation, quantity) {
+export async function set_sku_in_cart(session, sku, operation, quantity) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
         "operation": operation,
         "quantity": quantity
@@ -280,10 +304,9 @@ export async function set_sku_in_cart(email, token, sku, operation, quantity) {
     return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
 }
 
-export async function modify_sku(email, token, sku, operation, data) {
+export async function modify_sku(session, sku, operation, data) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
         "operation": operation,
         "data": data
@@ -296,10 +319,9 @@ export async function modify_sku(email, token, sku, operation, data) {
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }
 
-export async function modify_user(email, token, id, operation) {
+export async function modify_user(session, id, operation) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "id": id,
         "operation": operation
     });
@@ -311,10 +333,9 @@ export async function modify_user(email, token, id, operation) {
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
 }
 
-export async function submit_order(email, token) {
+export async function submit_order(session) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token
+        "session": session,
     });
     let options = {
         body: json,
@@ -324,10 +345,9 @@ export async function submit_order(email, token) {
     return await fetchWrapper(`${PREFIX}/submit_order`, options);
 }
 
-export async function fetch_orders(email, token, status) {
+export async function fetch_orders(session, status) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "status": status
     });
     let options = {

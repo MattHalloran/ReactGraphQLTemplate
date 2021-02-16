@@ -9,6 +9,11 @@ function InputText(props) {
     const [value, setValue] = useState(props.value ?? '');
     const [error, setError] = useState(props.validate ? (props.error ?? '') : null);
     const id = useRef(props.id ?? makeID(10));
+    const focused = useRef(false);
+
+    if (!focused.current && props.value !== value) {
+        setValue(props.value);
+    }
 
     useEffect(() => {
         // Only show an error if form submit was clicked, or if a value was entered
@@ -33,6 +38,10 @@ function InputText(props) {
         }
     }
 
+    const checkKey = (e) => {
+        if (e.key === 'Enter') sendValueUpdate();
+    }
+
     let displayed_label = props.label ?? '';
     if (error?.length > 0) {
         displayed_label += ' - ' + error;
@@ -46,6 +55,9 @@ function InputText(props) {
             value={value}
             placeholder={props.label}
             onChange={(e) => setValue(e.target.value)}
+            onKeyPress={checkKey}
+            onFocus={() => focused.current = true}
+            onBlurCapture={() => focused.current = false}
             onBlur={sendValueUpdate}
           />
           <label type={props.type ?? "text"} htmlFor={id.current}>

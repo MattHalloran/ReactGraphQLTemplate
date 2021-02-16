@@ -81,7 +81,7 @@ function AdminInventoryPage() {
 
     const deleteSku = (sku) => {
         if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        modifySku(session?.email, session?.token, sku.sku, 'DELETE', {})
+        modifySku(session, sku.sku, 'DELETE', {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -98,7 +98,7 @@ function AdminInventoryPage() {
 
     const hideSku = (sku) => {
         let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-        modifySku(session?.email, session?.token, sku.sku, operation, {})
+        modifySku(session, sku.sku, operation, {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -304,7 +304,7 @@ function SkuPopup({
             "plant": plant_data,
         }
         let operation = sku === null ? 'ADD': 'UPDATE';
-        modifySku(session?.email, session?.token, sku?.sku ?? code, operation, sku_data)
+        modifySku(session, sku?.sku ?? code, operation, sku_data)
             .then(() => {
                 alert('SKU Updated!')
             })

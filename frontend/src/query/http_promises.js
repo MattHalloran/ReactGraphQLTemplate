@@ -33,6 +33,8 @@ export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_image_
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
+export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
+export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
 export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (skus) => promiseWrapper(http.fetch_inventory_page, skus);
@@ -40,14 +42,14 @@ export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_h
 export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
-export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
-export const modifySku = (email, token, sku, operation, data) => promiseWrapper(http.modify_sku, email, token, sku, operation, data);
-export const modifyUser = (email, token, id, operation) => promiseWrapper(http.modify_user, email, token, id, operation);
-export const getOrders = (email, token, status) => promiseWrapper(http.fetch_orders, email, token, status)
+export const getCustomers = (session) => promiseWrapper(http.fetch_customers, session);
+export const modifySku = (session, sku, operation, data) => promiseWrapper(http.modify_sku, session, sku, operation, data);
+export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);
+export const getOrders = (session, status) => promiseWrapper(http.fetch_orders, session, status)
 
-export function submitOrder(email, token) {
+export function submitOrder(session) {
     return new Promise(function (resolve, reject) {
-        http.submit_order(email, token).then(data => {
+        http.submit_order(session).then(data => {
             if (data.ok) {
                 storeItem(LOCAL_STORAGE.Cart, null);
                 resolve(data);
@@ -148,9 +150,9 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
     });
 }
 
-export function setLikeSku(email, token, sku, liked) {
+export function setLikeSku(session, sku, liked) {
     return new Promise(function (resolve, reject) {
-        http.set_like_sku(email, token, sku, liked).then(response => {
+        http.set_like_sku(session, sku, liked).then(response => {
             if (response.ok) {
                 console.log('BUNNYYYY', response)
                 storeItem(LOCAL_STORAGE.Likes, response.likes);
@@ -162,9 +164,9 @@ export function setLikeSku(email, token, sku, liked) {
     });
 }
 
-export function setSkuInCart(email, token, sku, operation, quantity) {
+export function setSkuInCart(session, sku, operation, quantity) {
     return new Promise(function (resolve, reject) {
-        http.set_sku_in_cart(email, token, sku, operation, quantity).then(response => {
+        http.set_sku_in_cart(session, sku, operation, quantity).then(response => {
             if (response.ok) {
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);

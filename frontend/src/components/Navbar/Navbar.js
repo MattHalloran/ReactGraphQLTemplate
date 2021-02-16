@@ -11,6 +11,7 @@ import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
 import PubSub from 'utils/pubsub';
+import { SocialIcon } from 'react-social-icons';
 
 const SHOW_HAMBURGER_AT = 800;
 
@@ -109,6 +110,10 @@ function Hamburger(props) {
             { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link to={link} onClick={onClick}>{text}</Link></p>
             ))}
+            <div className="bottom">
+                <SocialIcon fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+                <SocialIcon fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+            </div>
         </BurgerMenu>
     );
 }

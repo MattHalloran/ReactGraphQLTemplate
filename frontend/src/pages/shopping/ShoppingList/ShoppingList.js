@@ -172,7 +172,7 @@ function ShoppingList({
 
     const setLike = (sku, liked) => {
         if (!session?.email || !session?.token) return;
-        setLikeSku(session.email, session.token, sku, liked).catch(err => {
+        setLikeSku(session, sku, liked).catch(err => {
             console.error(err);
             alert('Error: Failed to like SKU');
         })
@@ -181,7 +181,7 @@ function ShoppingList({
     const setInCart = (sku, operation, quantity) => {
         if (!session?.email || !session?.token) return;
         let display_name = sku?.plant?.latin_name ?? sku?.plant?.common_name ?? 'plant';
-        setSkuInCart(session.email, session.token, sku.sku, operation, quantity)
+        setSkuInCart(session, sku.sku, operation, quantity)
             .then(() => {
                 if (operation === 'ADD')
                     alert(`${quantity} ${display_name}(s) added to cart!`)

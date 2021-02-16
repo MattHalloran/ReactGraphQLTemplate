@@ -4,7 +4,7 @@
 import PubSub from './pubsub';
 import { LOCAL_STORAGE, PUBS } from 'utils/consts';
 import { deepEqual } from 'utils/deepEqual';
-import { getProfileInfo } from 'query/http_promises';
+import * as http from 'query/http_promises';
 
 export const lightTheme = {
     bodyPrimary: '#253A18', //dark green
@@ -73,7 +73,7 @@ export const getLikes = () => {
     //If cart not found, attempt to query backend
     let session = getSession();
     if (!session) return null;
-    getProfileInfo(session).then(response => {
+    http.getLikes(session).then(response => {
         storeItem(LOCAL_STORAGE.Likes, response.likes);
         return response.likes;
     }).catch(err => {
@@ -89,14 +89,9 @@ export const getCart = () => {
     //If cart not found, attempt to query backend
     let session = getSession();
     if (!session) return null;
-    getProfileInfo(session).then(response => {
-        if (response.orders && response.orders.length > 0) {
-            let cart_index = response.orders.length - 1;
-            let cart = response.orders[cart_index];
-            storeItem(LOCAL_STORAGE.Cart, cart);
-            storeItem(LOCAL_STORAGE.Likes, response.likes);
-            return cart;
-        }
+    http.getCart(session).then(response => {
+        storeItem(LOCAL_STORAGE.Cart, response.cart);
+        return response.cart;
     }).catch(err => {
         console.error(err);
     }).finally(() => {

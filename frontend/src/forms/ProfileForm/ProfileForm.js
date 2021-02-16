@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import InputText from 'components/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { getProfileInfo } from 'query/http_promises';
-import { BUSINESS_NAME } from 'utils/consts';
+import { getSession } from 'utils/storage';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -21,6 +23,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 // personal_phone: array
 // orders: array (last order is cart)
 function ProfileForm(props) {
+    const [session, setSession] = useState(getSession());
     const [editing, setEditing] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
     // String profile fields
@@ -46,29 +49,33 @@ function ProfileForm(props) {
         console.log('PRONOUNS ARE', pronouns)
     }, [pronouns])
 
+    useEffect(() => {
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        return () => PubSub.unsubscribe(sessionSub);
+    }, [])
+
     useLayoutEffect(() => {
         let mounted = true;
         document.title = `Profile | ${BUSINESS_NAME}`;
-        if (props.session) {
-            getProfileInfo(props.session).then(response => {
-                console.log('GOT PROFILE INFOO!!!!!!', response);
-                if (!mounted || editing) return;
-                if (response.first_name) setFirstName(response.first_name);
-                if (response.last_name) setLastName(response.last_name)
-                // TODO convert emails and phones to strings first
-                if (response.personal_email) {
-                    setEmails(response.personal_email.map(o => o.email_address));
-                }
-                if (response.personal_phone) {
-                    setPhones(response.personal_phone.map(o => o.unformatted_number));
-                }
-                if (response.pronouns) {
-                    setPronouns(response.pronouns);
-                }
-            }).catch(err => {
-                console.error(err);
-            })
-        }
+        if (!session) return;
+        getProfileInfo(session).then(response => {
+            console.log('GOT PROFILE INFOO!!!!!!', response);
+            if (!mounted || editing) return;
+            if (response.first_name) setFirstName(response.first_name);
+            if (response.last_name) setLastName(response.last_name)
+            // TODO convert emails and phones to strings first
+            if (response.personal_email) {
+                setEmails(response.personal_email.map(o => o.email_address));
+            }
+            if (response.personal_phone) {
+                setPhones(response.personal_phone.map(o => o.unformatted_number));
+            }
+            if (response.pronouns) {
+                setPronouns(response.pronouns);
+            }
+        }).catch(err => {
+            console.error(err);
+        })
         return () => mounted = false;
     }, [])
 

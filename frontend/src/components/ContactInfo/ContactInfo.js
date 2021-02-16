@@ -9,6 +9,22 @@ import Button from 'components/Button/Button';
 function ContactInfo({
     theme = getTheme(),
 }) {
+
+    const openMaps = (e) => {
+        window.location = GOOGLE_MAPS_ADDRESS;
+        e.preventDefault();
+    }
+
+    const openMail = (e) => {
+        window.location = "mailto:info@newlifenurseryinc.com";
+        e.preventDefault();
+    }
+
+    const openPhone = (e) => {
+        window.location = "tel:+18564553601";
+        e.preventDefault();
+    }
+
     return (
         <StyledContactInfo theme={theme}>
                 <table className="hours-content-div">
@@ -22,19 +38,19 @@ function ContactInfo({
                     </tbody>
                 </table>
                 <div className="icon-container external-links">
-                    <div className="icon-group" onClick={() => window.open(GOOGLE_MAPS_ADDRESS, "_blank")}>
+                    <div className="icon-group" onClick={openMaps}>
                         <div className="icon">
                             <GeoIcon width="30px" height="30px"/>
                         </div>
                         <p className="external-link-text">106 South Woodruff Road<br />Bridgeton, NJ 08302</p>
                     </div>
-                    <div className="icon-group" onClick={() => window.open("mailto:info@newlifenurseryinc.com", "_blank")}>
+                    <div className="icon-group" onClick={openMail}>
                         <div className="icon">
                             <EmailIcon width="30px" height="30px" />
                         </div>
                         <p className="external-link-text">info@newlifenurseryinc.com</p>
                     </div>
-                    <div className="icon-group" onClick={() => window.open("tel:+18564553601", "_blank")}>
+                    <div className="icon-group" onClick={openPhone}>
                         <div className="icon">
                             <PhoneIcon width="30px" height="30px"/>
                         </div>

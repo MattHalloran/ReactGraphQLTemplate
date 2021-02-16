@@ -52,7 +52,7 @@ function AdminOrderPage({
     })
 
     useEffect(() => {
-        getOrders(session?.email, session?.token, filter)
+        getOrders(session, filter)
         .then((response) => {
             setOrders(response.orders);
         })

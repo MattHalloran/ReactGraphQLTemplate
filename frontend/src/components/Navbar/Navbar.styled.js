@@ -91,4 +91,17 @@ export const StyledNavbar = styled.nav`
         stroke: none;
         fill: ${({ theme }) => theme.textPrimary};
     }
+
+    .bottom {
+        display: flex;
+        bottom: 0;
+        justify-content: space-around;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        background: ${({ theme }) => theme.bodyPrimary};
+
+        > * {
+            margin: 10px 0;
+        }
+    }
 `;

@@ -25,7 +25,7 @@ function AdminCustomerPage() {
     useLayoutEffect(() => {
         let mounted = true;
         document.title = "Customer Page";
-        getCustomers(session?.email, session?.token)
+        getCustomers(session)
             .then((response) => {
                 if (!mounted) return;
                 setCustomers(response.customers);
@@ -41,7 +41,7 @@ function AdminCustomerPage() {
     }, [customers])
 
     const approve_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected]?.id, 'APPROVE')
+        modifyUser(session, customers[selected]?.id, 'APPROVE')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -52,7 +52,7 @@ function AdminCustomerPage() {
     }, [selected])
 
     const unlock_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected]?.id, 'UNLOCK')
+        modifyUser(session, customers[selected]?.id, 'UNLOCK')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -63,7 +63,7 @@ function AdminCustomerPage() {
     }, [selected])
 
     const lock_user = useCallback(() => {
-        modifyUser(session?.email, session?.token, customers[selected]?.id, 'LOCK')
+        modifyUser(session, customers[selected]?.id, 'LOCK')
             .then(response => {
                 setCustomers(response.customers);
             })
@@ -75,7 +75,7 @@ function AdminCustomerPage() {
 
     const delete_user = useCallback(() => {
         if (!window.confirm(`Are you sure you want to delete the account for ${selected?.first_name} ${selected?.last_name}?`)) return;
-        modifyUser(session?.email, session?.token, customers[selected]?.id, 'DELETE')
+        modifyUser(session, customers[selected]?.id, 'DELETE')
             .then(response => {
                 setCustomers(response.customers);
             })
