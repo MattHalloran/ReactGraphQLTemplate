@@ -5,7 +5,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import ArrowMenu from 'components/menus/ArrowMenu/ArrowMenu';
 import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
-import { getInventoryFilters } from "query/http_promises";
+import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession, getTheme } from 'utils/storage';
@@ -33,28 +33,31 @@ function ShoppingPage() {
     }, [])
 
     useEffect(() => {
-        if (session === null) history.push(LINKS.LogIn);
         let mounted = true;
-        getInventoryFilters()
-            .then((response) => {
-                console.log("GOT INVENTORY FILTERS!!!!!!!!! BOOP", response)
-                if (!mounted) return;
-                // Add checked boolean to each filter
-                for (const [_, value] of Object.entries(response)) {
-                    for (let i = 0; i < value.length; i++) {
-                        value[i] = {
-                            label: value[i],
-                            value: i,
-                            checked: false,
+        checkCookies().then(() => {
+            getInventoryFilters()
+                .then((response) => {
+                    console.log("GOT INVENTORY FILTERS!!!!!!!!! BOOP", response)
+                    if (!mounted) return;
+                    // Add checked boolean to each filter
+                    for (const [_, value] of Object.entries(response)) {
+                        for (let i = 0; i < value.length; i++) {
+                            value[i] = {
+                                label: value[i],
+                                value: i,
+                                checked: false,
+                            }
                         }
                     }
-                }
-                setFilters(response);
-                console.log('SETING FILTERSSSSSSSSSS', response);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
+                    setFilters(response);
+                    console.log('SETING FILTERSSSSSSSSSS', response);
+                })
+                .catch((error) => {
+                    console.error("Failed to load filters", error);
+                });
+        }).catch(() => {
+            history.push(LINKS.LogIn);
+        })
 
         return () => mounted = false;
     }, []);

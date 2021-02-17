@@ -141,7 +141,7 @@ function NavList() {
     console.log('IN NAVLIST', session, user_roles)
 
     if (session !== null) {
-        nav_options.push([LINKS.Shopping, 'Shopping']);
+        nav_options.push([LINKS.Shopping, 'Availability']);
         nav_options.push([LINKS.Profile, 'Profile']);
     }
 

@@ -30,10 +30,8 @@ function ContactInfo({
                 <table className="hours-content-div">
                     <tbody>
                         <tr><th className="hours-header">Hours</th></tr>
-                        <tr><td>MON-THUR: 7:30 am to 12:00 PM 1:00 to 5:00 pm</td></tr>
-                        <tr><td>FRI: 7:30 am to 12:00 PM 1:00 to 3:00 pm</td></tr>
-                        <tr><td>SAT 7:30 am to 12:00 PM</td></tr>
-                        <tr><td>SUN: Closed</td></tr>
+                        <tr><td>MON-FRI: 8:00 am to 3:00 pm</td></tr>
+                        <tr><td>SAT-SUN: Closed</td></tr>
                         <tr><td>Note: Closed daily from 12:00 pm to 1:00 pm</td></tr>
                     </tbody>
                 </table>

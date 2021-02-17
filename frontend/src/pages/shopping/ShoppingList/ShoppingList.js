@@ -277,7 +277,7 @@ function SkuCard({
     const plant = group[0].plant;
 
     let sizes = group?.map(s => (
-        <div>#{s.size}: {displayPrice(s.price)}</div>
+        <div>#{s.size}: {displayPrice(s.price)} | {s.availability}</div>
     ));
 
     let display_image;

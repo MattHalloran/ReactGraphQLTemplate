@@ -673,6 +673,7 @@ class UserHandler(Handler):
 
     @staticmethod
     def is_customer(user: User):
+        print(RoleHandler.all_dicts(user.roles))
         return any(r.title == 'Customer' for r in user.roles)
 
     @staticmethod

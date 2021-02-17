@@ -3,11 +3,16 @@ import PropTypes from 'prop-types';
 import ProvenWinners from 'assets/img/proven-winners.png';
 import { StyledFooter } from './Footer.styled';
 import { getTheme } from 'utils/storage';
-import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
+import { GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
 
 function Footer({
     theme=getTheme(),
 }) {
+
+    const printAvailability = () => {
+        alert('TODO')
+    }
+
     return (
         <StyledFooter theme={theme}>
             <div className="flexed">
@@ -15,13 +20,13 @@ function Footer({
                     <ul className="footer-ul">
                         <li><Link to="/about">About Us</Link></li>
                         <li><Link to="/contact">Contact Us</Link></li>
-                        <li><Link to="/terms-and-conditions">Terms & Conditions</Link></li>
+                        <li><Link to={LINKS.Terms}>Terms & Conditions</Link></li>
                     </ul>
                 </div>
                 <div className="footer-group">
                     <ul className="footer-ul">
-                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} download="Confidential_Commercial_Credit_Application">Credit App</a></li>
-                        <li><Link to="/sales">Sales</Link></li>
+                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
+                        <li style={{cursor:'pointer'}} onClick={printAvailability}>Print Availability</li>
                         <li><Link to="/gallery">Gallery</Link></li>
                         <li><Link to="/featured">Featured Plants</Link></li>
                     </ul>

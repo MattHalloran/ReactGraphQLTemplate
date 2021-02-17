@@ -69,6 +69,10 @@ def handle_exception(func):
 def verify_session(session):
     '''Verifies that the user supplied a valid session token
     Returns User object if valid, otherwise None'''
+    print('in veify session')
+    print(session)
+    temp = UserHandler.is_valid_session(session['email'], session['token'], app)
+    print(temp)
     return UserHandler.is_valid_session(session['email'], session['token'], app).get('user', None)
 
 
@@ -150,6 +154,7 @@ def register():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def get_token():
+    '''Generate a session token from a user's credentials'''
     (email, password) = getData('email', 'password')
     user = UserHandler.get_user_from_credentials(email, password)
     if user:
@@ -187,7 +192,6 @@ def send_password_reset_request():
 @handle_exception
 def is_token_valid():
     token = getJson('token')
-    print(f'GOT INCOMINGGGGGGGGGGGGGGGGGGG {token}')
     is_valid = verify_token(app, token) if (token is not None) else False
 
     if is_valid:
@@ -296,6 +300,7 @@ def fetch_sku_thumbnails():
         "status": StatusCodes['SUCCESS']
     }
 
+
 # Returns inventory data for the given inventory SKUs
 @app.route(f'{PREFIX}/fetch_inventory_page', methods=["POST"])
 @handle_exception
@@ -350,7 +355,7 @@ def upload_availability_file():
     decoded = b64decode(b64)
     toread = io.BytesIO()
     toread.write(decoded)
-    toread.seek(0) # resets pointer
+    toread.seek(0)  # resets pointer
     success = upload_availability(app, toread)
     if success:
         return {"status": StatusCodes['SUCCESS']}
@@ -464,7 +469,6 @@ def fetch_likes():
         "likes": SkuHandler.all_dicts(user.likes),
         "status": StatusCodes['SUCCESS']
     }
-    
 
 
 @app.route(f'{PREFIX}/fetch_cart', methods=["POST"])
@@ -484,7 +488,7 @@ def fetch_cart():
 @handle_exception
 def fetch_customers():
     # Grab data
-    (verify_session) = getJson('session')
+    (session) = getJson('session')
     if not verify_admin(session):
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     return {

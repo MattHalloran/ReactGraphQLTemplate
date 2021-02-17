@@ -14,6 +14,7 @@ import CartPage from 'pages/CartPage/CartPage';
 import GalleryPage from 'pages/GalleryPage/GalleryPage';
 import ShoppingPage from 'pages/shopping/ShoppingPage/ShoppingPage';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
+import TermsPage from 'pages/TermsPage/TermsPage';
 import AdminMainPage from 'pages/admin/AdminMainPage/AdminMainPage';
 import AdminContactPage from 'pages/admin/AdminContactPage/AdminContactPage';
 import AdminCustomerPage from 'pages/admin/AdminCustomerPage/AdminCustomerPage';
@@ -116,6 +117,7 @@ function App() {
                 <Route exact path={LINKS.Home} component={HomePage} />
                 <Route exact path={LINKS.About} component={AboutPage} />
                 <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} />
+                <Route exact path={LINKS.Terms} component={TermsPage} />
                 <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} />
                 <Route exact path={LINKS.Register} render={() => (
                   <FormPage header="Sign Up" maxWidth="700px">

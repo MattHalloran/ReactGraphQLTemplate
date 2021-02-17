@@ -82,7 +82,7 @@ function CartPage() {
             })
             .catch(err => {
                 console.error(err);
-                alert('Operation failed. Please try again');
+                alert(`Error: Failed to delete item! ${err.status}`);
             })
     }
 
@@ -162,7 +162,7 @@ function CartPage() {
             <p>Total: {displayPrice(all_total)}</p>
             <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
             <Button onClick={updateOrder}>Update Order</Button>
-            <Button onClick={finalizeOrder}>Finalize Order</Button>
+            <Button onClick={finalizeOrder}>Request Quote</Button>
         </StyledCartPage>
     );
 }
