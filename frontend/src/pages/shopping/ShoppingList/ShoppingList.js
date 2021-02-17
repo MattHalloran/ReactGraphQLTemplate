@@ -2,16 +2,17 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMe
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
-import { getImageFromSku, getInventory, getInventoryPage, setLikeSku, setSkuInCart } from "query/http_promises";
+import { getImageFromSku, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
-import { HeartIcon, HeartFilledIcon, NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
+import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import Tooltip from 'components/Tooltip/Tooltip';
-import { getSession, getTheme, getCart, getLikes } from "utils/storage";
+import { getSession, getTheme, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
+import DropDown from 'components/inputs/DropDown/DropDown';
 
 function ShoppingList({
     page_size,
@@ -22,29 +23,61 @@ function ShoppingList({
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
     const [session, setSession] = useState(getSession());
     const [theme, setTheme] = useState(getTheme());
-    const [likes, setLikes] = useState(getLikes());
     const [cart, setCart] = useState(getCart());
     const [popup, setPopup] = useState(null);
-    const [cards, setCards] = useState([]);
-    const [visible_cards, setVisibleCards] = useState([]);
-    const [all_skus, setAllSkus] = useState([]);
+    // SKU data for every loaded SKU
+    const [loaded_skus, setLoadedSkus] = useState([]);
+    // SKU codes for all SKUs, not just displayed ones
+    const all_skus = useRef([]);
+    // List of data passed to SKU cards. Each card represents 1 or more SKUs,
+    // that share the same plant info
+    const [sku_groups, setSkuGroups] = useState([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams();
-    let curr_index = visible_cards?.findIndex(c => c.sku === urlParams.sku) ?? -1
+    // Find the current SKU group index, by any of the group's SKUs
+    let curr_index = sku_groups?.findIndex(c => c.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
     const loading = useRef(false);
+
+    // Compares two sku dictionaries for equality
+    const skus_equal = (a, b) => {
+        // Check defined latin names
+        let a_latin = a.plant?.latin_name;
+        let b_latin = b.plant?.latin_name;
+        if (a_latin && b_latin && a_latin === b_latin) return true;
+        // Check defined common names
+        let a_common = a.plant?.common_name;
+        let b_common = b.plant?.common_name;
+        if (a_common && b_common && a_common === b_common) return true;
+        return false;
+
+    }
+
+    // Combine SKUs that share the same plant
+    const combine_skus = (skus) => {
+        let combined = [];
+        for (let i = 0; i < skus.length; i++) {
+            let sku = skus[i]
+            let combined_index = combined.findIndex(s => skus_equal(s[0], sku));
+            if (combined_index < 0) {
+                combined.push([sku])
+            } else {
+                combined[combined_index].push(sku);
+            }
+        }
+        console.log('SETTING SKU GROUP', combined)
+        setSkuGroups(combined);
+    }
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        let likesSub = PubSub.subscribe(PUBS.Likes, (_, o) => setLikes(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
-            PubSub.unsubscribe(likesSub);
             PubSub.unsubscribe(cartSub);
         })
     }, [])
@@ -62,8 +95,8 @@ function ShoppingList({
         getInventory(sort, page_size, false)
             .then((response) => {
                 if (!mounted) return;
-                setCards(response.page_results);
-                setAllSkus(skus => skus.concat(response.all_skus));
+                setLoadedSkus(response.page_results);
+                all_skus.current = response.all_skus;
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);
@@ -76,8 +109,7 @@ function ShoppingList({
     // Determine which skus will be visible to the user (i.e. not filtered out)
     useEffect(() => {
         if (!filters) {
-            console.log('SETTING VISIBLE CARDS', cards);
-            setVisibleCards(cards);
+            combine_skus(loaded_skus);
             return;
         }
 
@@ -95,16 +127,13 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length == 0) {
-            console.log('SETTING VISIBLE CARDS', cards);
-            setVisibleCards(cards);
+            combine_skus(loaded_skus);
             return;
         }
         //Select all skus that contain the filters
-        let filtered_cards = [];
-        for (let i = 0; i < cards.length; i++) {
-            let curr_plant = cards[i].plant;
-            //console.log('ALL CARDS IS', cards);
-            //console.log('CURR PLANT ISSS', curr_plant, i)
+        let filtered_skus = [];
+        for (let i = 0; i < loaded_skus.length; i++) {
+            let curr_plant = loaded_skus[i].plant;
             filterloop:
             for (let j = 0; j < applied_filters.length; j++) {
                 let trait = applied_filters[j][0];
@@ -113,45 +142,45 @@ function ShoppingList({
                 // Grab data depending on if the field is for the sku or its associated plant
                 let data;
                 if (trait === 'sizes') {
-                    data = cards[i][trait];
+                    data = loaded_skus[i][trait];
                 } else {
                     data = curr_plant[trait];
                 }
 
                 if (Array.isArray(data) && data.length > 0) {
                     if (data.some(o => o.value === value)) {
-                        filtered_cards.push(cards[i]);
+                        filtered_skus.push(loaded_skus[i]);
                         break filterloop;
                     }
                 } else if (data?.value === value) {
-                    filtered_cards.push(cards[i]);
+                    filtered_skus.push(loaded_skus[i]);
                     break filterloop;
                 }
             }
         }
-        console.log('SETTING VISIBLE CARDS', filtered_cards);
-        setVisibleCards(filtered_cards);
-    }, [cards, filters])
+        combine_skus(filtered_skus);
+    }, [loaded_skus, filters])
 
     const loadNextPage = useCallback(() => {
-        if (loading.current || cards.length >= all_skus.length) return;
+        if (loading.current || loaded_skus.length >= all_skus.current.length) return;
         loading.current = true;
         //Grab all card thumbnail images
-        let load_to = Math.min(visible_cards.length, cards.length + page_size - 1);
-        let page_skus = all_skus.splice(visible_cards.length, load_to);
+        let load_to = Math.min(all_skus.current.length, loaded_skus.length + page_size - 1);
+        let clone = all_skus.current.slice();
+        let page_skus = clone.splice(loaded_skus.length, load_to);
         if (page_skus.length == 0) {
             loading.current = false;
             return;
         }
         getInventoryPage(page_skus).then(response => {
-            setCards(c => c.concat(...response.data));
+            setLoadedSkus(c => c.concat(...response.data));
         }).catch(error => {
-            console.error("Failed to load cards!", error);
+            console.error("Failed to load SKUs!", error);
         }).finally(() => {
             loading.current = false;
         })
         return () => loading.current = false;
-    }, [cards, page_size, visible_cards]);
+    }, [loaded_skus, all_skus, page_size]);
 
     //Load next page if scrolling near the bottom of the page
     const checkScroll = useCallback(() => {
@@ -169,14 +198,6 @@ function ShoppingList({
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);
     };
-
-    const setLike = (sku, liked) => {
-        if (!session?.email || !session?.token) return;
-        setLikeSku(session, sku, liked).catch(err => {
-            console.error(err);
-            alert('Error: Failed to like SKU');
-        })
-    }
 
     const setInCart = (sku, operation, quantity) => {
         if (!session?.email || !session?.token) return;
@@ -201,30 +222,25 @@ function ShoppingList({
             setPopup(null);
             return;
         }
-        let popup_data = visible_cards[curr_index];
+        let popup_data = sku_groups[curr_index];
         setPopup(
             <Modal onClose={() => history.goBack()}>
-                <ExpandedSku sku={popup_data}
-                    cart={cart}
-                    is_liked={likes?.some(l => l.sku === popup_data.sku)}
-                    onLike={setLike}
+                <ExpandedSku group={popup_data}
                     onCart={setInCart}
                     theme={theme} />
             </Modal>
         );
-    }, [visible_cards, curr_index])
+    }, [sku_groups, curr_index])
 
     return (
         <StyledShoppingList id={track_scrolling_id}>
             {popup}
-            {visible_cards.map((item, index) =>
+            {sku_groups.map((item, index) =>
                 <SkuCard key={index}
                     theme={theme}
-                    likes={likes}
                     cart={cart}
                     onClick={expandSku}
-                    sku={item}
-                    onSetLike={setLike}
+                    group={item}
                     onSetInCart={setInCart} />)}
         </StyledShoppingList>
     );
@@ -240,30 +256,28 @@ ShoppingList.propTypes = {
 export default ShoppingList;
 
 function SkuCard({
-    sku,
+    group,
     onClick,
 }) {
     const [theme, setTheme] = useState(getTheme());
-    const plant = sku?.plant;
+    const plant = group[0].plant;
 
-    //TODO SKUS need to be grouped by size, if they share the same plant
-    let temp_sizes = [['1', 2234], ['2', 1], ['3', 23]];//sku.size
-    let sizes = temp_sizes?.map(data => (
-        <div>#{data[0]}: {data[1]}</div>
+    let sizes = group?.map(s => (
+        <div>#{s.size}: {displayPrice(s.price)}</div>
     ));
 
     let display_image;
-    if (sku?.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
+    if (group[0]?.display_image) {
+        display_image = <img src={`data:image/jpeg;base64,${group[0]?.display_image}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />
     }
 
     return (
-        <StyledSkuCard theme={theme} onClick={() => onClick(sku.sku)}>
+        <StyledSkuCard theme={theme} onClick={() => onClick(group[0].sku)}>
             <div className="title">
                 <h2>{plant?.latin_name}</h2>
-                {plant?.common_name ? <br/> : null}
+                {plant?.common_name ? <br /> : null}
                 <h3>{plant?.common_name ? plant.common_name : null}</h3>
             </div>
             <div className="display-image-container">
@@ -272,13 +286,12 @@ function SkuCard({
             <div className="size-container">
                 {sizes}
             </div>
-            <p>Price: {displayPrice(sku?.price)}</p>
         </StyledSkuCard>
     );
 }
 
 SkuCard.propTypes = {
-    sku: PropTypes.object.isRequired,
+    group: PropTypes.object.isRequired,
     onClick: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };
@@ -286,39 +299,30 @@ SkuCard.propTypes = {
 export { SkuCard };
 
 function ExpandedSku({
-    sku,
-    cart,
-    is_liked = false,
-    onLike,
+    group,
     onCart,
 }) {
-    //console.log('EEEEEE', cart)
-    const plant = sku?.plant;
+    const plant = group[0].plant;
     const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
 
+    let order_options = group?.map(s => {
+        return {
+            label: `#${s.size} : ${displayPrice(s.price)}`,
+            value: s
+        }
+    });
+    const [selected, setSelected] = useState(order_options[0].value);
+
     let display_image;
-    if (sku?.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} className="display-image" alt="TODO" />
+    if (group[0]?.display_image) {
+        display_image = <img src={`data:image/jpeg;base64,${group[0].display_image}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />
     }
 
-    let heartIcon;
-    if (is_liked) {
-        heartIcon = (
-            <HeartIcon
-                width="40px"
-                height="40px"
-                onClick={() => onLike(sku?.sku, true)} />
-        )
-    } else {
-        heartIcon = (
-            <HeartFilledIcon
-                width="40px"
-                height="40px"
-                onClick={() => onLike(sku?.sku, false)} />
-        )
+    const handleSortChange = (item, _) => {
+        setSelected(item.value);
     }
 
     const traitIconList = (field, Icon, title, alt) => {
@@ -340,7 +344,7 @@ function ExpandedSku({
         <StyledExpandedSku theme={theme}>
             <div className="title">
                 <h1>{plant?.latin_name}</h1>
-                {plant?.common_name ? <br/> : null}
+                {plant?.common_name ? <br /> : null}
                 <h3>{plant?.common_name ? plant.common_name : null}</h3>
             </div>
             <div className="main-div">
@@ -381,29 +385,26 @@ function ExpandedSku({
                 </Collapsible>
             </div>
             <div className="icon-container bottom-div">
-                {heartIcon}
-                <div className="quantity-div">
-                    <QuantityBox
-                        min_value={0}
-                        max_value={sku?.quantity ?? 100}
-                        initial_value={1}
-                        value={quantity}
-                        valueFunc={setQuantity} />
-                    <BagPlusIcon
-                        width="30px"
-                        height="30px"
-                        onClick={() => onCart(sku, 'ADD', quantity)} />
-                </div>
+                <DropDown className="selecter" options={order_options} onChange={handleSortChange} initial_value={order_options[0]} />
+                <QuantityBox
+                    className="quanter"
+                    min_value={0}
+                    max_value={group[0]?.quantity ?? 100}
+                    initial_value={1}
+                    value={quantity}
+                    valueFunc={setQuantity} />
+                <BagPlusIcon
+                    className="bag"
+                    width="30px"
+                    height="30px"
+                    onClick={() => onCart(selected, 'ADD', quantity)} />
             </div>
         </StyledExpandedSku>
     );
 }
 
 ExpandedSku.propTypes = {
-    sku: PropTypes.object.isRequired,
-    cart: PropTypes.object.isRequired,
-    is_liked: PropTypes.bool.isRequired,
-    onLike: PropTypes.func.isRequired,
+    group: PropTypes.object.isRequired,
     onCart: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };

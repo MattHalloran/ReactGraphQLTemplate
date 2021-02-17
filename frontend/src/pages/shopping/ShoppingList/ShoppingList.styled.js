@@ -54,7 +54,7 @@ export const StyledSkuCard = styled.div`
             background-color: cornflowerblue;
             border: 1px solid black;
             border-radius: 10px;
-            max-width: 70px;
+            max-width: 100px;
             padding: 0 10px 0 10px;
             margin: 5px 0 0 5px;
         }
@@ -186,20 +186,25 @@ export const StyledExpandedSku = styled.div`
         align-items: center;
         padding: 0 10px;
         border-top: 2px solid ${({ theme }) => theme.textPrimary};
-    }
-
-    .quantity-div {
-        display: flex;
-        width: max(150px, 25%);
-
-        > * {
-            width: 75%;
-        }
 
         > svg {
             stroke: none;
             fill: ${({ theme }) => theme.textPrimary};
             width: max(40px, 25%);
         }
+
+        > *:first-child {
+            width: 40%;
+            margin-bottom: 0;
+        }
+    }
+
+    .selecter,
+    .quanter {
+        width: 40%;
+    }
+
+    .bag {
+        width: 20%;
     }
 `;

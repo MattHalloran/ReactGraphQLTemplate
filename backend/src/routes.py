@@ -279,9 +279,9 @@ def fetch_plants():
 @app.route(f'{PREFIX}/fetch_inventory_page', methods=["POST"])
 @handle_exception
 def fetch_inventory_page():
-    skus = getData('skus')
+    sku_codes = getData('skus')
     return {
-        "data": [SkuHandler.to_dict(sku) for sku in skus],
+        "data": [SkuHandler.to_dict(SkuHandler.from_sku(s)) for s in sku_codes],
         "status": StatusCodes['SUCCESS']
     }
 
