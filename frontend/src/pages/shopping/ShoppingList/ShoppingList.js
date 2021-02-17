@@ -2,7 +2,7 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMe
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
-import { getImageFromSku, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
+import { getSkuThumbnails, getImageFromSku, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
@@ -32,6 +32,10 @@ function ShoppingList({
     // List of data passed to SKU cards. Each card represents 1 or more SKUs,
     // that share the same plant info
     const [sku_groups, setSkuGroups] = useState([]);
+    // Thumbnail data for every sku group
+    const [thumbnails, setThumbnails] = useState([]);
+    // Full image data for every sku group
+    const [full_images, setFullImages] = useState([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams();
@@ -67,6 +71,13 @@ function ShoppingList({
         }
         console.log('SETTING SKU GROUP', combined)
         setSkuGroups(combined);
+        // Using a SKU code from each group, request thumbnail images
+        let codes = skus.map(s => s.sku);
+        getSkuThumbnails(codes).then(response => {
+            setThumbnails(response.thumbnails);
+        }).catch(err => {
+            console.error(err);
+        });
     }
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
@@ -226,6 +237,7 @@ function ShoppingList({
         setPopup(
             <Modal onClose={() => history.goBack()}>
                 <ExpandedSku group={popup_data}
+                    thumbnail={thumbnails.length >= curr_index ? thumbnails[curr_index] : null}
                     onCart={setInCart}
                     theme={theme} />
             </Modal>
@@ -241,6 +253,7 @@ function ShoppingList({
                     cart={cart}
                     onClick={expandSku}
                     group={item}
+                    thumbnail={thumbnails.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
         </StyledShoppingList>
     );
@@ -257,6 +270,7 @@ export default ShoppingList;
 
 function SkuCard({
     group,
+    thumbnail,
     onClick,
 }) {
     const [theme, setTheme] = useState(getTheme());
@@ -267,8 +281,8 @@ function SkuCard({
     ));
 
     let display_image;
-    if (group[0]?.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${group[0]?.display_image}`} className="display-image" alt="TODO" />
+    if (thumbnail) {
+        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />
     }
@@ -292,6 +306,7 @@ function SkuCard({
 
 SkuCard.propTypes = {
     group: PropTypes.object.isRequired,
+    thumbnail: PropTypes.string,
     onClick: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };
@@ -300,11 +315,21 @@ export { SkuCard };
 
 function ExpandedSku({
     group,
+    thumbnail,
     onCart,
 }) {
     const plant = group[0].plant;
     const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
+    const [image, setImage] = useState(null);
+
+    useEffect(() => {
+        getImageFromSku(group[0].sku).then(response => {
+            setImage(response.image);
+        }).catch(error => {
+            console.error(error);
+        })
+    },[])
 
     let order_options = group?.map(s => {
         return {
@@ -315,8 +340,8 @@ function ExpandedSku({
     const [selected, setSelected] = useState(order_options[0].value);
 
     let display_image;
-    if (group[0]?.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${group[0].display_image}`} className="display-image" alt="TODO" />
+    if (image) {
+        display_image = <img src={`data:image/jpeg;base64,${image}`} className="display-image" alt="TODO" />
     } else {
         display_image = <NoImageIcon className="display-image" />
     }
@@ -405,6 +430,7 @@ function ExpandedSku({
 
 ExpandedSku.propTypes = {
     group: PropTypes.object.isRequired,
+    thumbnail: PropTypes.string,
     onCart: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };

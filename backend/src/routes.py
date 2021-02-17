@@ -275,7 +275,28 @@ def fetch_plants():
     }
 
 
-# Returns inventory data for the given inventory IDs
+# Returns thumbnail images for the given gallery image hashes
+@app.route(f'{PREFIX}/fetch_gallery_thumbnails', methods=["POST"])
+@handle_exception
+def fetch_gallery_thumbnails():
+    hashes = getData('hashes')
+    return {
+        "thumbnails": [ImageHandler.get_thumb_b64(ImageHandler.from_hash(hash)) for hash in hashes],
+        "status": StatusCodes['SUCCESS']
+    }
+
+
+# Returns thumbnail images for the given inventory SKUs
+@app.route(f'{PREFIX}/fetch_sku_thumbnails', methods=["POST"])
+@handle_exception
+def fetch_sku_thumbnails():
+    sku_codes = getData('skus')
+    return {
+        "thumbnails": [SkuHandler.get_thumb_display_b64(SkuHandler.from_sku(s)) for s in sku_codes],
+        "status": StatusCodes['SUCCESS']
+    }
+
+# Returns inventory data for the given inventory SKUs
 @app.route(f'{PREFIX}/fetch_inventory_page', methods=["POST"])
 @handle_exception
 def fetch_inventory_page():
@@ -298,66 +319,24 @@ def fetch_gallery():
     }
 
 
-# Returns thumbnails for a list of images
-@app.route(f'{PREFIX}/image_thumbnails', methods=["POST"])
+# Returns an image from its hash
+@app.route(f'{PREFIX}/fetch_image_from_hash', methods=["POST"])
 @handle_exception
-def image_thumbnails():
-    hashes = getJson('hashes')
-    print(f'here boopy boop {hashes}')
-    thumbnail_data = []
-    for hash in hashes:
-        img = ImageHandler.from_hash(hash)
-        if not img:
-            thumbnail_data.append([])
-            continue
-        with open(f'{Config.BASE_IMAGE_DIR}/{img.folder}/{img.thumbnail_file_name}.{img.extension}', 'rb') as open_file:
-            byte_content = open_file.read()
-        base64_bytes = b64encode(byte_content)
-        base64_string = base64_bytes.decode('utf-8')
-        thumbnail_data.append(base64_string)
+def fetch_image_from_hash():
+    hash = getData('hash')
     return {
-        "thumbnails": thumbnail_data,
+        "image": ImageHandler.get_full_b64(ImageHandler.from_hash(hash)),
         "status": StatusCodes['SUCCESS']
     }
 
 
 # Returns an image from its hash
-@app.route(f'{PREFIX}/image_hash', methods=["POST"])
+@app.route(f'{PREFIX}/fetch_image_from_sku', methods=["POST"])
 @handle_exception
-def image_from_hash():
-    img_hash = getJson('hash')
-    print(f'trying to get image from hash {img_hash}')
-    # Get image data from its hash
-    img = ImageHandler.from_hash(img_hash)
-    if not img:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    b64 = ImageHandler.get_b64(img)
+def fetch_image_from_sku():
+    code = getData('sku')
     return {
-        "image": b64,
-        "alt": img.alt,
-        "status": StatusCodes['SUCCESS']
-    }
-
-
-# Returns an image from its hash
-@app.route(f'{PREFIX}/image_sku', methods=["POST"])
-@handle_exception
-def image_from_sku():
-    sku_code = getJson('sku')
-    print(f'trying to get image from sku {sku_code}')
-    # Get image data from its hash
-    sku = SkuHandler.from_sku(sku_code)
-    print(f'SKU IS {sku}')
-    if not sku:
-        print('FAILED TO FIND SKU ROW')
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    b64 = SkuHandler.get_display_image(sku)
-    if not b64:
-        print(' NO B64444444 ')
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    return {
-        "image": b64,
-        "alt": 'TODO',
+        "image": SkuHandler.get_full_display_b64(SkuHandler.from_sku(code)),
         "status": StatusCodes['SUCCESS']
     }
 

@@ -172,7 +172,7 @@ export async function fetch_image_from_hash(hash) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_hash`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_image_from_hash`, options);
 }
 
 export async function fetch_image_from_sku(sku) {
@@ -184,19 +184,31 @@ export async function fetch_image_from_sku(sku) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_sku`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_image_from_sku`, options);
 }
 
-export async function fetch_image_thumbnails(hashes) {
+export async function fetch_gallery_thumbnails(skus) {
     let json = JSON.stringify({
-        "hashes": hashes,
+        "hashes": skus,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_thumbnails`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_gallery_thumbnails`, options);
+}
+
+export async function fetch_sku_thumbnails(skus) {
+    let json = JSON.stringify({
+        "skus": skus,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicationJson,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_sku_thumbnails`, options);
 }
 
 export async function upload_gallery_images(formData) {

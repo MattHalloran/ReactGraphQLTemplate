@@ -29,7 +29,8 @@ function promiseWrapper(http_func, ...args) {
 export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
-export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_image_thumbnails, hashes)
+export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_gallery_thumbnails, hashes)
+export const getSkuThumbnails = (skus) => promiseWrapper(http.fetch_sku_thumbnails, skus)
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);

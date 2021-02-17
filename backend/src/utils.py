@@ -50,7 +50,7 @@ def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
 
     # Create thumbnail
     thumb = Image.open(BytesIO(image_str))
-    thumb.thumbnail([256, 512], ANTIALIAS)
+    thumb.thumbnail([256, 256], ANTIALIAS)
 
     return (diff_as_string, thumb, width, height)
 

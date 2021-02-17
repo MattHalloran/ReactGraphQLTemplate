@@ -301,7 +301,18 @@ class ImageHandler(Handler):
         return ImageHandler.simple_fields_to_dict(model, ['hash', 'alt', 'used_for', 'width', 'height'])
 
     @staticmethod
-    def get_b64(model: Image):
+    def get_thumb_b64(model: Image):
+        '''Returns the base64 string representation of an image file's thumbnail'''
+        # Read image file
+        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
+            byte_content = open_file.read()
+        # Convert image to a base64 string
+        base64_bytes = b64encode(byte_content)
+        base64_string = base64_bytes.decode('utf-8')
+        return base64_string
+
+    @staticmethod
+    def get_full_b64(model: Image):
         '''Returns the base64 string representation of an image file'''
         # Read image file
         with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
@@ -541,7 +552,6 @@ class SkuHandler(Handler):
     def to_dict(cls, model: Sku):
         model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
-        as_dict['display_image'] = SkuHandler.get_display_image(model)
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
         as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
@@ -554,26 +564,38 @@ class SkuHandler(Handler):
 
     @staticmethod
     def get_display_image(model: Sku):
-        '''Returns a base64 string of the Sku's display image. If none is set,
-        one is decided'''
-        # If the sku has a display image
+        '''Returns an Image model for the SKUs display image, or None
+        if not found'''
+        # If the sku has a display image TODO doesn't account for full or thumb
         if model.display_img:
             return model.display_img
-        # If an associated plant can't be found, return a default image TODO!!!!!1
         if not model.plant:
             return None
         if len(model.plant.flower_images) > 0:
-            return ImageHandler.get_b64(model.plant.flower_images[0])
+            return model.plant.flower_images[0]
         if len(model.plant.leaf_images) > 0:
-            return ImageHandler.get_b64(model.plant.leaf_images[0])
+            return model.plant.leaf_images[0]
         if len(model.plant.fruit_images) > 0:
-            return ImageHandler.get_b64(model.plant.fruit_images[0])
+            return model.plant.fruit_images[0]
         if len(model.plant.bark_images) > 0:
-            return ImageHandler.get_b64(model.plant.bark_images[0])
+            return model.plant.bark_images[0]
         if len(model.plant.habit_images) > 0:
-            return ImageHandler.get_b64(model.plant.habit_images[0])
-        # TODO default image
+            return model.plant.habit_images[0]
         return None
+
+    @classmethod
+    def get_thumb_display_b64(cls, model: Sku):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_thumb_b64(img)
+
+    @classmethod
+    def get_full_display_b64(cls, model: Sku):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_full_b64(img)
 
     @staticmethod
     def add_discount(model: Sku, discount):
