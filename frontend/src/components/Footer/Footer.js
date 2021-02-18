@@ -4,14 +4,11 @@ import ProvenWinners from 'assets/img/proven-winners.png';
 import { StyledFooter } from './Footer.styled';
 import { getTheme } from 'utils/storage';
 import { GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
+import { printAvailability } from 'utils/printAvailability';
 
 function Footer({
     theme=getTheme(),
 }) {
-
-    const printAvailability = () => {
-        alert('TODO')
-    }
 
     return (
         <StyledFooter theme={theme}>

@@ -231,6 +231,7 @@ def fetch_inventory_filters():
 
 # Returns IDs of all inventory items available to the customer.
 # Also returns required info to display the first page of results
+# If page_size is 0, returns all
 @app.route(f'{PREFIX}/fetch_inventory', methods=["POST"])
 @handle_exception
 def fetch_inventory():
@@ -256,7 +257,10 @@ def fetch_inventory():
         print('Could not find the correct sorter')
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     skus.sort(key=sort_data[0], reverse=sort_data[1])
-    sku_page = skus[0: min(len(skus), page_size)]
+    if page_size > 0:
+        sku_page = skus[0: min(len(skus), page_size)]
+    else:
+        sku_page = skus
     page_results = SkuHandler.all_dicts(sku_page)
     return {
         "all_skus": [sku.sku for sku in skus],
