@@ -680,8 +680,6 @@ class UserHandler(Handler):
         except Exception:
             print(f'Could not find account status for {email}')
             return -1
-<<<<<<< Updated upstream
-=======
 
     @staticmethod
     def get_cart(user: User):
@@ -724,4 +722,3 @@ class UserHandler(Handler):
         user.orders.append(cart)
         db.session.commit()
         return True
->>>>>>> Stashed changes

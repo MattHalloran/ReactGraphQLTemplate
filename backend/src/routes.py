@@ -547,8 +547,6 @@ def modify_user():
     if operation in operation_to_status:
         user.account_status = operation_to_status[operation]
         db.session.commit()
-<<<<<<< Updated upstream
-=======
         return {
             "customers": UserHandler.all_customers(),
             "status": StatusCodes['SUCCESS']
@@ -565,6 +563,5 @@ def submit_order():
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     update_success = UserHandler.update_order(user, is_delivery, requested_date, notes)
     if update_success and UserHandler.submit_order(user):
->>>>>>> Stashed changes
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}

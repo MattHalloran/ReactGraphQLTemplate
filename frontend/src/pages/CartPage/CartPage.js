@@ -6,8 +6,6 @@ import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
-<<<<<<< Updated upstream
-=======
 import { setSkuInCart, submitOrder } from 'query/http_promises';
 import { displayPrice } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
@@ -26,13 +24,10 @@ const DELIVERY_OPTIONS = [
         value: 1,
     },
 ]
->>>>>>> Stashed changes
 
 function CartPage() {
     const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
-<<<<<<< Updated upstream
-=======
     //Stores quantities before cart update
     const quantities = useRef([]);
     const [session, setSession] = useState(getSession());
@@ -40,7 +35,6 @@ function CartPage() {
     const [deliveryDate, setDeliveryDate] = useState(new Date());
     const [notes, setNotes] = useHistoryState('cart_note_area','');
     let history = useHistory();
->>>>>>> Stashed changes
     console.log('ON CART PAGEEE', cart);
 
     useEffect(() => {
@@ -56,8 +50,6 @@ function CartPage() {
         document.title = `Cart | ${BUSINESS_NAME}`;
     })
 
-<<<<<<< Updated upstream
-=======
     const handleDeliveryChange = (sort_item, _) => {
         setDelivery(sort_item.value);
     }
@@ -119,7 +111,6 @@ function CartPage() {
             })
     }, [cart]);
 
->>>>>>> Stashed changes
     let all_total = 0;
     const cart_item_to_row = (data) => {
         let quantity = data.quantity;
@@ -171,11 +162,6 @@ function CartPage() {
                     {cart?.items?.map(c => cart_item_to_row(c))}
                 </tbody>
             </table>
-<<<<<<< Updated upstream
-            <p>Total: {all_total}</p>
-            <Button>Update Cart</Button>
-            <Button>Finalize Order</Button>
-=======
             <p>Total: {displayPrice(all_total)}</p>
             <div>
                 <DropDown options={DELIVERY_OPTIONS} onChange={handleDeliveryChange} initial_value={DELIVERY_OPTIONS[0]} />
@@ -192,7 +178,6 @@ function CartPage() {
             <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
             <Button onClick={updateOrder}>Update Order</Button>
             <Button onClick={finalizeOrder}>Request Quote</Button>
->>>>>>> Stashed changes
         </StyledCartPage>
     );
 }

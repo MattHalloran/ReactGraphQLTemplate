@@ -22,13 +22,8 @@ function Footer({
                 </div>
                 <div className="footer-group">
                     <ul className="footer-ul">
-<<<<<<< Updated upstream
-                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} download="Confidential_Commercial_Credit_Application">Credit App</a></li>
-                        <li><Link to="/sales">Sales</Link></li>
-=======
                         <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
                         <li style={{ cursor: 'pointer' }} onClick={printAvailability}>Print Availability</li>
->>>>>>> Stashed changes
                         <li><Link to="/gallery">Gallery</Link></li>
                         <li><Link to="/featured">Featured Plants</Link></li>
                     </ul>

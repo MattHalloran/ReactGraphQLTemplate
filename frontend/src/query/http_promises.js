@@ -37,11 +37,6 @@ export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_h
 export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
-<<<<<<< Updated upstream
-export const getCustomers = (email, token) => promiseWrapper(http.fetch_customers, email, token);
-export const modifySku = (email, token, sku, operation) => promiseWrapper(http.modify_sku, email, token, sku, operation);
-export const modifyUser = (email, token, id, operation) => promiseWrapper(http.modify_user, email, token, id, operation);
-=======
 export const getCustomers = (session) => promiseWrapper(http.fetch_customers, session);
 export const modifySku = (session, sku, operation, data) => promiseWrapper(http.modify_sku, session, sku, operation, data);
 export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);
@@ -59,7 +54,6 @@ export function submitOrder(session, is_delivery, requested_date, notes) {
         })
     });
 }
->>>>>>> Stashed changes
 
 export const checkCookies = () => {
     return new Promise(function (resolve, reject) {
