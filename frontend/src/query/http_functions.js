@@ -309,4 +309,35 @@ export async function modify_user(email, token, id, operation) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
+<<<<<<< Updated upstream
+=======
+}
+
+export async function submit_order(session, is_delivery, requested_date, notes) {
+    let json = JSON.stringify({
+        "session": session,
+        "is_delivery": is_delivery,
+        "requested_date": requested_date,
+        "notes": notes
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/submit_order`, options);
+}
+
+export async function fetch_orders(session, status) {
+    let json = JSON.stringify({
+        "session": session,
+        "status": status
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_orders`, options);
+>>>>>>> Stashed changes
 }

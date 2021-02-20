@@ -632,7 +632,8 @@ class OrderItem(db.Model):
 
 class Order(db.Model):
     defaults = {
-        'status': OrderStatus.DRAFT.value
+        'status': OrderStatus.DRAFT.value,
+        'is_delivery': True,
     }
 
     __tablename__ = Tables.ORDER.value
@@ -641,6 +642,7 @@ class Order(db.Model):
     status = Column(Integer, nullable=False, default=defaults['status'])
     special_instructions = Column(String)
     desired_delivery_date = Column(Float)
+    is_delivery = Column(Boolean, nullable=False, default=defaults['is_delivery'])
     delivery_address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))
     user_id = db.Column(Integer, ForeignKey(f'{Tables.USER.value}.id'))
     address_id = db.Column(Integer, ForeignKey(f'{Tables.ADDRESS.value}.id'))

@@ -35,6 +35,12 @@ export const StyledArrowMenu = styled.div`
         padding: 5px;
     }
 
+    @media (max-width: ${({ theme }) => theme.mobile}) {
+        .arrow {
+            transform: ${({ open, theme }) => open ? `translateX(${theme.mobile}) scaleX(-1)` : 'transformX(0px) scaleX(1)'};
+        }
+    }
+
     .arrow > * {
         margin: 0;
         transition: 0.4s;

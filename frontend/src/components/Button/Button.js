@@ -4,17 +4,19 @@ import { StyledButton } from './Button.styled';
 
 function Button({
     theme = getTheme(),
+    value,
     children,
     ...props
 }) {
 
     return (
-        <StyledButton theme={theme} {...props}>{children}</StyledButton>
+        <StyledButton theme={theme} {...props}>{value ?? children}</StyledButton>
     );
 }
 
 Button.propTypes = {
     theme: PropTypes.object,
+    value: PropTypes.string,
     children: PropTypes.any,
 }
 

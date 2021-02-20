@@ -680,3 +680,48 @@ class UserHandler(Handler):
         except Exception:
             print(f'Could not find account status for {email}')
             return -1
+<<<<<<< Updated upstream
+=======
+
+    @staticmethod
+    def get_cart(user: User):
+        '''Returns the user's cart, or None'''
+        if user is None or not UserHandler.is_customer(user):
+            return None
+        cart = None
+        if len(user.orders) == 0:
+            cart = OrderHandler.create(user.id)
+            db.session.add(cart)
+            user.orders.append(cart)
+            db.session.commit()
+        else:
+            cart = user.orders[-1]
+        return cart
+
+    @staticmethod
+    def update_order(user: User, is_delivery: bool, requested_date: float, notes: str):
+        cart = UserHandler.get_cart(user)
+        if cart:
+            cart.is_delivery = True
+            cart.desired_delivery_date = requested_date
+            cart.special_instructions = notes
+            db.session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def submit_order(user: User):
+        '''Submits the user's cart. Returns true if successful'''
+        # Get cart
+        cart = UserHandler.get_cart(user)
+        # If cart is empty, don't submit
+        if len(cart.items) <= 0:
+            return False
+        cart.status = OrderStatus.PENDING.value
+        # Add a new, empty order to serve as the user's next cart
+        cart = OrderHandler.create(user.id)
+        db.session.add(cart)
+        user.orders.append(cart)
+        db.session.commit()
+        return True
+>>>>>>> Stashed changes
