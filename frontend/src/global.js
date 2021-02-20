@@ -12,6 +12,7 @@ const menu_app_style = `position: fixed;
 `
 
 export const GlobalStyles = createGlobalStyle`
+
     body {
         background: ${({ theme }) => theme.bodyPrimary};
         color: ${({ theme }) => theme.textPrimary};
@@ -22,24 +23,23 @@ export const GlobalStyles = createGlobalStyle`
     }
   
     code {
-        font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-            monospace;
+        font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     }
 
-    /* Primary (default) link settings */
     a {
         transition: color 0.3s linear;
         text-decoration: none;
     }
-    a:link {
-        color: ${({ theme }) => theme.textPrimary};
-    }
-    a:visited {
-        color: ${({ theme }) => theme.textPrimary};
-    }
     a:hover {
         color: ${({ theme }) => theme.hoverPrimary};
         text-decoration: none;
+    }
+
+    p, h1, h2,
+    h3, h4, h5,
+    h6, a:link,
+    a:visited {
+        color: ${({ theme }) => theme.textPrimary};
     }
 
     #App {
@@ -59,7 +59,7 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     .page {
-        padding-top: 12vh;
+        padding-top: 13.5vh;
     }
 
     .icon-container {

@@ -5,7 +5,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import ArrowMenu from 'components/menus/ArrowMenu/ArrowMenu';
 import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
-import { getInventoryFilters } from "query/http_promises";
+import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession, getTheme } from 'utils/storage';
@@ -17,6 +17,7 @@ function ShoppingPage() {
     const [theme, setTheme] = useState(getTheme());
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
+    const [searchString, setSearchString] = useState('');
     let history = useHistory();
 
     useEffect(() => {
@@ -32,28 +33,31 @@ function ShoppingPage() {
     }, [])
 
     useEffect(() => {
-        if (session === null) history.push(LINKS.LogIn);
         let mounted = true;
-        getInventoryFilters()
-            .then((response) => {
-                console.log("GOT INVENTORY FILTERS!!!!!!!!! BOOP", response)
-                if (!mounted) return;
-                // Add checked boolean to each filter
-                for (const [_, value] of Object.entries(response)) {
-                    for (let i = 0; i < value.length; i++) {
-                        value[i] = {
-                            label: value[i],
-                            value: i,
-                            checked: false,
+        checkCookies().then(() => {
+            getInventoryFilters()
+                .then((response) => {
+                    console.log("GOT INVENTORY FILTERS!!!!!!!!! BOOP", response)
+                    if (!mounted) return;
+                    // Add checked boolean to each filter
+                    for (const [_, value] of Object.entries(response)) {
+                        for (let i = 0; i < value.length; i++) {
+                            value[i] = {
+                                label: value[i],
+                                value: i,
+                                checked: false,
+                            }
                         }
                     }
-                }
-                setFilters(response);
-                console.log('SETING FILTERSSSSSSSSSS', response);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
+                    setFilters(response);
+                    console.log('SETING FILTERSSSSSSSSSS', response);
+                })
+                .catch((error) => {
+                    console.error("Failed to load filters", error);
+                });
+        }).catch(() => {
+            history.push(LINKS.LogIn);
+        })
 
         return () => mounted = false;
     }, []);
@@ -109,7 +113,7 @@ function ShoppingPage() {
                 <h2>Sort</h2>
                 <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
                 <h2>Search</h2>
-                <SearchBar />
+                <SearchBar onChange={(s) => setSearchString(s)}/>
                 <h2>Filters</h2>
                 {filters_to_checkbox('sizes', 'Sizes')}
                 {filters_to_checkbox('optimal_lights', 'Optimal Light')}
@@ -127,7 +131,7 @@ function ShoppingPage() {
                 {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
             </ArrowMenu>
-            <ShoppingList sort={sortBy} filters={filters} />
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString}/>
         </StyledShoppingPage>
     );
 }

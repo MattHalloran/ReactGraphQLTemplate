@@ -15,7 +15,7 @@ from src.utils import get_image_meta, find_available_file_names  # NOQA
 
 # Will create a SKU for every plant added
 AUTO_CREATE_SKU = True
-IN_FILE = '/Users/matthewhalloran/Documents/NLNWebsite/backend/plant_info/combined-output.json'
+IN_FILE = '../plant_info/combined-output.json'
 
 app = create_app()
 
@@ -59,7 +59,7 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
         file_name = url[url.rindex('/')+1:]
         thumb_file_name = f'{file_name}-thumb'
         # If image has already been downloaded
-        if len(glob_results := glob.glob(f'{Config.PLANT_DIR}/{file_name}.*')) > 0:
+        if len(glob_results := glob.glob(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}.*')) > 0:
             print(f'Image already downloaded: {file_name}')
             # Try to get existing image object from database
             img_row = ImageHandler.from_file_name(file_name)
@@ -76,7 +76,7 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
                     print(f'Hash collision! For image {url}')
                     continue
                 extension = glob_results[0][glob_results[0].rindex('.')+1:]
-                img_row = ImageHandler.create(Config.PLANT_DIR,
+                img_row = ImageHandler.create(Config.PLANT_FOLDER,
                                               file_name,
                                               thumb_file_name,
                                               extension,
@@ -101,11 +101,11 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
                 print(f'Hash collision! For image {url}')
                 continue
             # Save image and thumbnail to files
-            with open(f'{Config.PLANT_DIR}/{file_name}.{extension}', 'wb') as f:
+            with open(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}.{extension}', 'wb') as f:
                 f.write(image)
-            thumbnail.save(f'{Config.PLANT_DIR}/{thumb_file_name}.{extension}')
+            thumbnail.save(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{thumb_file_name}.{extension}')
             # Now create a model object to associate with the image
-            img_row = ImageHandler.create(Config.PLANT_DIR,
+            img_row = ImageHandler.create(Config.PLANT_FOLDER,
                                           file_name,
                                           thumb_file_name,
                                           extension,

@@ -51,7 +51,7 @@ function LogInForm() {
                 type="password"
                 valueFunc={setPassword}
                 errorFunc={setPasswordError}
-                validate={validation.passwordValidation}
+                validate={validation.defaultStringValidation}
                 showErrors={showErrors}
             />
             <Button className="primary submit" type="submit" onClick={submit}>

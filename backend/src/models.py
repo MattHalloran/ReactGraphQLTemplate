@@ -266,7 +266,7 @@ class Image(db.Model):
     __tablename__ = Tables.IMAGE.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
-    directory = Column(String(250), nullable=False)
+    folder = Column(String(250), nullable=False)
     file_name = Column(String(100), nullable=False)
     thumbnail_file_name = Column(String(100), nullable=False)
     extension = Column(String(10), nullable=False)
@@ -281,7 +281,7 @@ class Image(db.Model):
     SUPPORTED_IMAGE_TYPES = ['bmp', 'gif', 'png', 'jpg', 'jpeg', 'ico']
 
     def __init__(self,
-                 directory: str,
+                 folder: str,
                  file_name: str,
                  thumbnail_file_name: str,
                  extension: str,
@@ -294,7 +294,7 @@ class Image(db.Model):
             raise Exception('File extension not supported for images')
         if used_for not in ImageUses:
             raise Exception('Must pass a valid used_for value')
-        self.directory = directory
+        self.folder = folder
         self.file_name = file_name
         self.thumbnail_file_name = thumbnail_file_name
         self.extension = extension

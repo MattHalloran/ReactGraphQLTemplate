@@ -33,7 +33,11 @@ EMAIL_PASSWORD = os.environ.get("AFA_EMAIL_PASSWORD")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+try:
+    twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+except Exception:
+    print(traceback.format_exc())
+    print(f'Could not establish twilio client connection for sid {TWILIO_ACCOUNT_SID}')
 
 carrier_remove_characters = ['-', '.', '&']
 carrier_dict = {
@@ -57,6 +61,8 @@ def numberToEmail(number: str):
     # Already an email
     if '@' in number:
         return number
+    if twilio_client is None:
+        raise Exception('Twilio client not set up. Cannot convert number to email')
     carrier_info = twilio_client.lookups.phone_numbers(number).fetch(type=['carrier'])
     if carrier_info.carrier['type'] != 'mobile':
         raise Exception('Cannot send a text message to a landline!')
@@ -69,7 +75,7 @@ def numberToEmail(number: str):
     if len(closest_carriers) < 1:
         raise Exception('Could not find the carrier for this number!')
     carrier_extension = carrier_dict[closest_carriers[0]]
-    #Return {number without country code}@{carrier email extension}
+    # Return {number without country code}@{carrier email extension}
     return f'{number[-10:]}@{carrier_extension}'
 
 

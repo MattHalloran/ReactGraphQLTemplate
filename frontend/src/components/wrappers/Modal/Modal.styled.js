@@ -30,6 +30,8 @@ export const StyledModal = styled.aside`
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 10px;
+        width: -moz-available;
+        width: -webkit-fill-available;
     }
     
     .x-button {
@@ -63,10 +65,10 @@ export const StyledModal = styled.aside`
         .modal-body {
             padding: 0px;
             width: 100%;
-            width: -moz-fit-content;
+            width: -moz-available;
             width: -webkit-fill-available;
             height: 100%;
-            height: -moz-fit-content;
+            height: -moz-available;
             height: -webkit-fill-available;
         }
     }

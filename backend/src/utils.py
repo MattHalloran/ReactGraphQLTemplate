@@ -3,17 +3,18 @@ from PIL.Image import ANTIALIAS
 import numpy as np
 from io import BytesIO
 from os import path
+from src.config import Config
 
 
-def find_available_file_names(directory: str, img_name: str, extension: str):
+def find_available_file_names(folder: str, img_name: str, extension: str):
     '''Using suggested image file name, returns image and thumbnail file names
     that are not being used'''
     suggested_img_name = img_name
     thumb_name = f'{img_name}-thumb'
     path_attempts = 0
     while True and path_attempts < 100:
-        img_path = f'{directory}/{img_name}.{extension}'
-        thumb_path = f'{directory}/{thumb_name}.{extension}'
+        img_path = f'{Config.BASE_IMAGE_DIR}/{folder}/{img_name}.{extension}'
+        thumb_path = f'{Config.BASE_IMAGE_DIR}/{folder}/{thumb_name}.{extension}'
         # If both paths are available
         if not path.exists(img_path) and not path.exists(thumb_path):
             return (img_name, thumb_name)
@@ -49,7 +50,7 @@ def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
 
     # Create thumbnail
     thumb = Image.open(BytesIO(image_str))
-    thumb.thumbnail([256, 512], ANTIALIAS)
+    thumb.thumbnail([256, 256], ANTIALIAS)
 
     return (diff_as_string, thumb, width, height)
 

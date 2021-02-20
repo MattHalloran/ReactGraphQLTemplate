@@ -15,16 +15,17 @@ app = create_app()
 
 def find_unused_images():
     '''Returns a list of all image file names not assocated with model objects'''
-    img_files = [join(Config.PLANT_DIR, f) for f in listdir(Config.PLANT_DIR) if isfile(join(Config.PLANT_DIR, f))] + \
-                [join(Config.GALLERY_DIR, f) for f in listdir(Config.GALLERY_DIR) if isfile(join(Config.GALLERY_DIR, f))]
+    # TODO these joins were written before the image storing was changed from absolute to relative paths. Probably will break
+    img_files = [join(Config.PLANT_FOLDER, f) for f in listdir(Config.PLANT_FOLDER) if isfile(join(Config.PLANT_FOLDER, f))] + \
+                [join(Config.GALLERY_FOLDER, f) for f in listdir(Config.GALLERY_FOLDER) if isfile(join(Config.GALLERY_FOLDER, f))]
     with app.app_context():
         image_ids = ImageHandler.all_ids()
         for id in image_ids:
             image_obj = ImageHandler.from_id(id)
-            file_path = f'{image_obj.directory}/{image_obj.file_name}.{image_obj.extension}'
+            file_path = f'../{Config.BASE_IMAGE_DIR}/{image_obj.folder}/{image_obj.file_name}.{image_obj.extension}'
             if file_path in img_files:
                 img_files.remove(file_path)
-            thumbnail_path = f'{image_obj.directory}/{image_obj.thumbnail_file_name}.{image_obj.extension}'
+            thumbnail_path = f'../{Config.BASE_IMAGE_DIR}/{image_obj.folder}/{image_obj.thumbnail_file_name}.{image_obj.extension}'
             if thumbnail_path in img_files:
                 img_files.remove(thumbnail_path)
     return img_files

@@ -5,11 +5,13 @@ import AmericanHort from 'assets/img/american_hort_logo.jpg';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import { StyledFooter } from './Footer.styled';
 import { getTheme } from 'utils/storage';
-import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
+import { GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
+import { printAvailability } from 'utils/printAvailability';
 
 function Footer({
     theme = getTheme(),
 }) {
+
     return (
         <StyledFooter theme={theme}>
             <div className="flexed">
@@ -17,7 +19,7 @@ function Footer({
                     <ul className="footer-ul">
                         <li><Link to="/about">About Us</Link></li>
                         <li><Link to="/contact">Contact Us</Link></li>
-                        <li><Link to="/terms-and-conditions">Terms & Conditions</Link></li>
+                        <li><Link to={LINKS.Terms}>Terms & Conditions</Link></li>
                     </ul>
                 </div>
                 <div className="footer-group">

@@ -32,7 +32,6 @@ export const Title = styled.h1`
     width: 90%;
     text-align: center;
     font-size: 3.5rem;
-    color: ${({ theme }) => theme.textPrimary};
     text-shadow:
         -1px -1px 0 #000,  
         1px -1px 0 #000,
@@ -46,7 +45,6 @@ export const Subtitle = styled.h2`
     width: 80%;
     text-align: center;
     font-size: 1.75rem;
-    color: ${({ theme }) => theme.textPrimary};
     text-shadow:
         -1px -1px 0 #000,  
         1px -1px 0 #000,

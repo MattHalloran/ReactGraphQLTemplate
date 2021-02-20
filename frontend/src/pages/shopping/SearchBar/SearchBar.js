@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import PropTypes from "prop-types";
 import { StyledSearchBar } from './SearchBar.styled';
 import InputText from 'components/inputs/InputText/InputText';
 import SearchIcon from 'assets/img/SearchIcon';
@@ -7,7 +8,9 @@ import { getTheme } from 'utils/storage';
 import { PUBS } from 'utils/consts'
 
 
-function SearchBar() {
+function SearchBar({
+    onChange
+}) {
     const [theme, setTheme] = useState(getTheme());
     const [input, setInput] = useState("");
 
@@ -17,6 +20,10 @@ function SearchBar() {
             PubSub.unsubscribe(themeSub);
         })
     }, [])
+
+    useEffect(() => {
+        onChange(input);
+    }, [input])
 
     return (
         <StyledSearchBar theme={theme}>
@@ -32,7 +39,7 @@ function SearchBar() {
 }
 
 SearchBar.propTypes = {
-
+    onChange: PropTypes.func.isRequired,
 }
 
 export default SearchBar;

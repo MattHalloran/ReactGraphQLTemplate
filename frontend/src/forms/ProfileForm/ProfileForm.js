@@ -3,8 +3,15 @@ import PropTypes from 'prop-types';
 import InputText from 'components/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { getProfileInfo } from 'query/http_promises';
-import { BUSINESS_NAME } from 'utils/consts';
+import { getSession } from 'utils/storage';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 // Profile fields:
 // first_name: str
@@ -16,6 +23,7 @@ import Button from 'components/Button/Button';
 // personal_phone: array
 // orders: array (last order is cart)
 function ProfileForm(props) {
+    const [session, setSession] = useState(getSession());
     const [editing, setEditing] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
     // String profile fields
@@ -34,34 +42,40 @@ function ProfileForm(props) {
     const [emailErrors, setEmailErrors] = useState(null);
     const [phones, setPhones] = useState([""])
     const [phoneErrors, setPhoneErrors] = useState(null);
+    const [existingCustomer, setExistingCustomer] = useState(null);
+    const [existingCustomerError, setExistingCustomerError] = useState(null);
 
     useEffect(() => {
         console.log('PRONOUNS ARE', pronouns)
     }, [pronouns])
 
+    useEffect(() => {
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
+        return () => PubSub.unsubscribe(sessionSub);
+    }, [])
+
     useLayoutEffect(() => {
         let mounted = true;
         document.title = `Profile | ${BUSINESS_NAME}`;
-        if (props.session) {
-            getProfileInfo(props.session).then(response => {
-                console.log('GOT PROFILE INFOO!!!!!!', response);
-                if (!mounted || editing) return;
-                if (response.first_name) setFirstName(response.first_name);
-                if (response.last_name) setLastName(response.last_name)
-                // TODO convert emails and phones to strings first
-                if (response.personal_email) {
-                    setEmails(response.personal_email.map(o => o.email_address));
-                }
-                if (response.personal_phone) {
-                    setPhones(response.personal_phone.map(o => o.unformatted_number));
-                }
-                if (response.pronouns) {
-                    setPronouns(response.pronouns);
-                }
-            }).catch(err => {
-                console.error(err);
-            })
-        }
+        if (!session) return;
+        getProfileInfo(session).then(response => {
+            console.log('GOT PROFILE INFOO!!!!!!', response);
+            if (!mounted || editing) return;
+            if (response.first_name) setFirstName(response.first_name);
+            if (response.last_name) setLastName(response.last_name)
+            // TODO convert emails and phones to strings first
+            if (response.personal_email) {
+                setEmails(response.personal_email.map(o => o.email_address));
+            }
+            if (response.personal_phone) {
+                setPhones(response.personal_phone.map(o => o.unformatted_number));
+            }
+            if (response.pronouns) {
+                setPronouns(response.pronouns);
+            }
+        }).catch(err => {
+            console.error(err);
+        })
         return () => mounted = false;
     }, [])
 
@@ -86,6 +100,10 @@ function ProfileForm(props) {
     // Helper method for updating InputText objects created through a map
     const updateFieldArray = (stateFunc, value, index) => {
         console.log('TODO')
+    }
+
+    const handleRadioSelect = (event) => {
+        setExistingCustomer(event.target.value);
     }
 
     return (
@@ -167,13 +185,20 @@ function ProfileForm(props) {
                 valueFunc={setConfirmPassword}
                 disabled={!editing}
             />
+            <FormControl component="fieldset">
+                <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
+                    <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                    <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                </RadioGroup>
+                <FormHelperText>{existingCustomerError}</FormHelperText>
+            </FormControl>
             <div className="buttons-div">
                 <Button className="primary" onClick={toggleEdit}>
                     { editing ? "Cancel" : "Edit" }
             </Button>
-                <Button className="primary" type="submit" onClick={submit}>
-                    Submit
-            </Button>
+                <Button className="primary" type="submit" onClick={submit} disabled={!editing}>
+                    Update
+                </Button>
             </div>
         </React.Fragment>
     );

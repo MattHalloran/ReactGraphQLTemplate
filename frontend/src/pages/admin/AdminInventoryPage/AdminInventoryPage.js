@@ -81,7 +81,7 @@ function AdminInventoryPage() {
 
     const deleteSku = (sku) => {
         if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        modifySku(session?.email, session?.token, sku.sku, 'DELETE')
+        modifySku(session, sku.sku, 'DELETE', {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -98,7 +98,7 @@ function AdminInventoryPage() {
 
     const hideSku = (sku) => {
         let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-        modifySku(session?.email, session?.token, sku.sku, operation)
+        modifySku(session, sku.sku, operation, {})
             .then((response) => {
                 //TODO update list to reflect status chagne
                 console.log('TODOOO')
@@ -140,7 +140,7 @@ function AdminInventoryPage() {
     // Processes a single file
     const fileSelectedHandler = (event) => {
         let files = event.target.files;
-        let extension = files[0].name.split('.')[0];
+        let extension = files[0].name.split('.')[1];
         if (extension !== 'xls') {
             alert('File must have the extension .xls');
             return;
@@ -162,7 +162,7 @@ function AdminInventoryPage() {
 
     let popup = (currSku) ? (
         <Modal onClose={() => setCurrSku(null)}>
-            <SkuPopup theme={theme} sku={currSku} trait_options={trait_options} />
+            <SkuPopup session={session} theme={theme} sku={currSku} trait_options={trait_options} />
         </Modal>
     ) : null;
 
@@ -217,10 +217,17 @@ function SkuCard({
 }) {
     let plant = sku?.plant;
 
+    let display_image;
+    if (sku?.display_image) {
+        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+    } else {
+        display_image = <NoImageIcon />
+    }
+
     return (
         <StyledCard theme={theme} onClick={() => onEdit(sku)} status={sku?.status}>
             <h2 className="title">{plant?.latin_name}</h2>
-            <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+            { display_image }
             <div className="icon-container">
                 <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
                 <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />
@@ -255,30 +262,56 @@ SkuCard.propTypes = {
 }
 
 function SkuPopup({
+    session = getSession(),
     sku,
     theme = getTheme(),
     trait_options
 }) {
     console.log('PROP UPPPPPPPP', sku);
     let plant = sku.plant;
-    const [latin_name, setLatinName] = useHistoryState("ai_latin_name", plant?.latin_name ?? '');
-    const [common_name, setCommonName] = useHistoryState("ai_common_name", plant?.common_name ?? '');
-    const [code, setCode] = useHistoryState("ai_code", sku.sku ?? '');
-    const [size, setSize] = useHistoryState("ai_size", sku.size ?? '');
-    const [price, setPrice] = useHistoryState("ai_price", sku.price ?? '');
-    const [quantity, setQuantity] = useHistoryState("ai_quantity", sku.availability ?? '');
-    const [drought_tolerance, setDroughtTolerance] = useHistoryState("ai_drought_tolerance", "");
-    const [grown_height, setGrownHeight] = useHistoryState("ai_grown_height", "");
-    const [grown_spread, setGrownSpread] = useHistoryState("ai_grown_spread", "");
-    const [growth_rate, setGrowthRate] = useHistoryState("ai_growth_rate", "");
-    const [optimal_light, setOptimalLight] = useHistoryState("ai_optimal_light", "");
-    const [salt_tolerance, setSaltTolerance] = useHistoryState("ai_salt_tolerance", "");
+    const [latin_name, setLatinName] = useState(plant?.latin_name ?? '');
+    const [common_name, setCommonName] = useState(plant?.common_name ?? '');
+    const [code, setCode] = useState(sku.sku ?? '');
+    const [size, setSize] = useState(sku.size ?? '');
+    const [price, setPrice] = useState(sku.price ?? '');
+    const [quantity, setQuantity] = useState(sku.availability ?? '');
+    const [drought_tolerance, setDroughtTolerance] = useState("");
+    const [grown_height, setGrownHeight] = useState("");
+    const [grown_spread, setGrownSpread] = useState("");
+    const [growth_rate, setGrowthRate] = useState("");
+    const [optimal_light, setOptimalLight] = useState("");
+    const [salt_tolerance, setSaltTolerance] = useState("");
 
     //Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
 
     const saveSku = () => {
-        //TODO
+        let plant_data = {
+            "latin_name": latin_name,
+            "common_name": common_name,
+            "drought_tolerance": drought_tolerance,
+            "grown_height": grown_height,
+            "grown_spread": grown_spread,
+            "growth_rate": growth_rate,
+            "optimal_light": optimal_light,
+            "salt_tolerance": salt_tolerance
+        }
+        let sku_data = {
+            "code": code,
+            "size": size,
+            "price": price,
+            "quantity": quantity,
+            "plant": plant_data,
+        }
+        let operation = sku === null ? 'ADD': 'UPDATE';
+        modifySku(session, sku?.sku ?? code, operation, sku_data)
+            .then(() => {
+                alert('SKU Updated!')
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('Failed to update SKU!')
+            });
     }
 
     // Returns an input text or a dropdown, depending on if the field is in the trait options
@@ -393,6 +426,7 @@ function SkuPopup({
 }
 
 SkuPopup.propTypes = {
+    session: PropTypes.object,
     sku: PropTypes.object.isRequired,
     theme: PropTypes.object,
     trait_options: PropTypes.object,

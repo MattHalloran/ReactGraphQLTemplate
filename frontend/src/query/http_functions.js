@@ -8,10 +8,10 @@ const HEADERS = {
         'Accept': 'application/json', // eslint-disable-line quote-props
         'Content-Type': 'application/json',
     },
-    ApplicationJson: { 
-        'Content-Type': 'application/json' 
+    ApplicationJson: {
+        'Content-Type': 'application/json'
     },
-    Text: { 
+    Text: {
         'Content-Type': 'text/html; charset=UTF-8',
     },
 }
@@ -25,7 +25,6 @@ async function fetchWrapper(url, httpParams) {
         let response = await fetch(url, httpParams);
         let json = await response.json();
         if (json.status === StatusCodes.SUCCESS) {
-            console.log('HTTP SUCCESSSSSS', json)
             json.ok = true;
             return json;
         }
@@ -98,10 +97,9 @@ export async function send_password_reset_request(email) {
     return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
 }
 
-export async function fetch_customers(email, token) {
+export async function fetch_customers(session) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session
     });
     let options = {
         body: json,
@@ -174,7 +172,7 @@ export async function fetch_image_from_hash(hash) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_hash`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_image_from_hash`, options);
 }
 
 export async function fetch_image_from_sku(sku) {
@@ -186,19 +184,31 @@ export async function fetch_image_from_sku(sku) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_sku`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_image_from_sku`, options);
 }
 
-export async function fetch_image_thumbnails(hashes) {
+export async function fetch_gallery_thumbnails(skus) {
     let json = JSON.stringify({
-        "hashes": hashes,
+        "hashes": skus,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/image_thumbnails`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_gallery_thumbnails`, options);
+}
+
+export async function fetch_sku_thumbnails(skus) {
+    let json = JSON.stringify({
+        "skus": skus,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicationJson,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_sku_thumbnails`, options);
 }
 
 export async function upload_gallery_images(formData) {
@@ -214,7 +224,7 @@ export async function upload_availability(formData) {
         body: formData,
         method: 'post',
     }
-    return await fetchWrapper(`${PREFIX}/upload_availavility`, options);
+    return await fetchWrapper(`${PREFIX}/upload_availability`, options);
 }
 
 export async function fetch_contact_info() {
@@ -238,8 +248,9 @@ export async function update_contact_info(data) {
 }
 
 export async function fetch_profile_info(session) {
-    console.log('FETCHING PROFILE INFO', session)
-    let json = JSON.stringify(session);
+    let json = JSON.stringify({
+        "session": session,
+    });
     let options = {
         body: json,
         method: 'post',
@@ -249,11 +260,36 @@ export async function fetch_profile_info(session) {
     return await fetchWrapper(`${PREFIX}/fetch_profile_info`, options);
 }
 
-export async function set_like_sku(email, token, sku, liked) {
+export async function fetch_likes(session) {
+    let json = JSON.stringify({
+        "session": session,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicatonJsonAccept,
+        credentials: 'include',
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_likes`, options);
+}
+
+export async function fetch_cart(session) {
+    let json = JSON.stringify({
+        "session": session,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.ApplicatonJsonAccept,
+        credentials: 'include',
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_cart`, options);
+}
+
+export async function set_like_sku(session, sku, liked) {
     console.log('SET LIKE SKU', liked)
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
         "liked": liked
     });
@@ -265,13 +301,12 @@ export async function set_like_sku(email, token, sku, liked) {
     return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
 }
 
-export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
+export async function set_sku_in_cart(session, sku, operation, quantity) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
-        "quantity": quantity,
-        "in_cart": in_cart
+        "operation": operation,
+        "quantity": quantity
     });
     let options = {
         body: json,
@@ -281,12 +316,12 @@ export async function set_sku_in_cart(email, token, sku, quantity, in_cart) {
     return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
 }
 
-export async function modify_sku(email, token, sku, operation) {
+export async function modify_sku(session, sku, operation, data) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "sku": sku,
-        "operation": operation
+        "operation": operation,
+        "data": data
     });
     let options = {
         body: json,
@@ -296,10 +331,9 @@ export async function modify_sku(email, token, sku, operation) {
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }
 
-export async function modify_user(email, token, id, operation) {
+export async function modify_user(session, id, operation) {
     let json = JSON.stringify({
-        "email": email,
-        "token": token,
+        "session": session,
         "id": id,
         "operation": operation
     });

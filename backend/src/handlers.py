@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 from src.models import AccountStatus, Address, ContactInfo, Business, BusinessDiscount, Email, Feedback
 from src.models import Image, ImageUses, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
 from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, User
+from sqlalchemy.orm.collections import InstrumentedList
 from src.api import db
+from src.config import Config
 from base64 import b64encode
 from src.auth import verify_token
 import time
@@ -28,6 +30,13 @@ class Handler(ABC):
     @staticmethod
     def protected_fields():
         '''Specifies which fields should be filtered out from the update method (ex: password)'''
+
+    @classmethod
+    def convert_to_model(cls, obj):
+        '''Returns the input as a model type'''
+        if type(obj) is int:
+            return cls.from_id(obj)
+        return obj
 
     @staticmethod
     @abstractmethod
@@ -120,6 +129,31 @@ class Handler(ABC):
         return [o[0] for o in cls.ModelType.query.with_entities(cls.ModelType.id).all()]
 
     @classmethod
+    def all_objs(cls, *args):
+        '''Converts passed ids to objects.
+        If no ids passed in, defaults to all ids'''
+        id_list = args
+        if len(args) == 0:
+            id_list = cls.all_ids()
+        elif len(args) == 1 and type(args[0]) is list:
+            id_list = args[0]
+        print('YEEEEEET')
+        print(args)
+        print(id_list)
+        return [cls.from_id(id) for id in id_list]
+
+    @classmethod
+    def all_dicts(cls, *args):
+        '''Converts passed ids to objects.
+        If no ids passed in, defaults to all ids'''
+        id_list = args
+        if len(args) == 0:
+            id_list = cls.all_ids()
+        elif len(args) == 1 and (type(args[0]) is list or type(args[0]) is InstrumentedList):
+            id_list = args[0]
+        return [cls.to_dict(id) for id in id_list]
+
+    @classmethod
     def uniques(cls, column):
         '''Return all unique values for a column'''
         return [o[0] for o in cls.ModelType.query.with_entities(column).distinct(column).all()]
@@ -138,8 +172,9 @@ class AddressHandler(Handler):
     def required_fields():
         return ['country', 'locality', 'postal_code', 'throughfare']
 
-    @staticmethod
-    def to_dict(model: Address):
+    @classmethod
+    def to_dict(cls, model: Address):
+        model = cls.convert_to_model(model)
         return AddressHandler.simple_fields_to_dict(model, AddressHandler.all_fields())
 
 
@@ -154,8 +189,9 @@ class BusinessDiscountHandler(Handler):
     def required_fields():
         return ['discount', 'title']
 
-    @staticmethod
-    def to_dict(model: BusinessDiscount):
+    @classmethod
+    def to_dict(cls, model: BusinessDiscount):
+        model = cls.convert_to_model(model)
         return BusinessDiscountHandler.simple_fields_to_dict(model, BusinessDiscountHandler.all_fields())
 
 
@@ -170,13 +206,14 @@ class BusinessHandler(Handler):
     def required_fields():
         return ['name']
 
-    @staticmethod
-    def to_dict(model: Business):
+    @classmethod
+    def to_dict(cls, model: Business):
+        model = cls.convert_to_model(model)
         as_dict = BusinessHandler.simple_fields_to_dict(model, ['name', 'subscribed_to_newsletters'])
-        as_dict['delivery_addresses'] = [AddressHandler.to_dict(addy) for addy in model.delivery_addresses]
-        as_dict['employees'] = [UserHandler.to_dict(emp) for emp in model.employees]
-        as_dict['phones'] = [PhoneHandler.to_dict(phone) for phone in model.phones]
-        as_dict['emails'] = [EmailHandler.to_dict(email) for email in model.emails]
+        as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
+        as_dict['employees'] = UserHandler.all_dicts(model.employees)
+        as_dict['phones'] = PhoneHandler.all_dicts(model.phones)
+        as_dict['emails'] = EmailHandler.all_dicts(model.emails)
         return as_dict
 
     @staticmethod
@@ -205,8 +242,9 @@ class ContactInfoHandler(Handler):
     def required_fields():
         return []
 
-    @staticmethod
-    def to_dict(model: ContactInfo):
+    @classmethod
+    def to_dict(cls, model: ContactInfo):
+        model = cls.convert_to_model(model)
         return ContactInfoHandler.simple_fields_to_dict(model, ContactInfoHandler.all_fields())
 
 
@@ -221,8 +259,9 @@ class EmailHandler(Handler):
     def required_fields():
         return ['email_address']
 
-    @staticmethod
-    def to_dict(model: Email):
+    @classmethod
+    def to_dict(cls, model: Email):
+        model = cls.convert_to_model(model)
         return EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
 
 
@@ -237,8 +276,9 @@ class FeedbackHandler(Handler):
     def required_fields():
         return ['text']
 
-    @staticmethod
-    def to_dict(model: Feedback):
+    @classmethod
+    def to_dict(cls, model: Feedback):
+        model = cls.convert_to_model(model)
         return FeedbackHandler.simple_fields_to_dict(model, FeedbackHandler.all_fields())
 
 
@@ -247,23 +287,35 @@ class ImageHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['directory', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @staticmethod
     def required_fields():
-        return ['directory', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
-    @staticmethod
-    def to_dict(model: Image):
+    @classmethod
+    def to_dict(cls, model: Image):
+        model = cls.convert_to_model(model)
         return ImageHandler.simple_fields_to_dict(model, ['hash', 'alt', 'used_for', 'width', 'height'])
 
     @staticmethod
-    def get_b64(model: Image):
+    def get_thumb_b64(model: Image):
+        '''Returns the base64 string representation of an image file's thumbnail'''
+        # Read image file
+        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
+            byte_content = open_file.read()
+        # Convert image to a base64 string
+        base64_bytes = b64encode(byte_content)
+        base64_string = base64_bytes.decode('utf-8')
+        return base64_string
+
+    @staticmethod
+    def get_full_b64(model: Image):
         '''Returns the base64 string representation of an image file'''
         # Read image file
-        with open(f'{model.directory}/{model.file_name}.{model.extension}', 'rb') as open_file:
+        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
             byte_content = open_file.read()
         # Convert image to a base64 string
         base64_bytes = b64encode(byte_content)
@@ -296,10 +348,13 @@ class OrderItemHandler(Handler):
 
     @staticmethod
     def required_fields():
-        return ['quantity', 'sku']
+        return []
 
-    @staticmethod
-    def to_dict(model: OrderItem):
+    @classmethod
+    def to_dict(cls, model: OrderItem):
+        model = cls.convert_to_model(model)
+        print('ORDER ITEM HANDLER TO DICT')
+        print(type(model))
         return {
             'quantity': model.quantity,
             'sku': SkuHandler.to_dict(model.sku)
@@ -317,13 +372,26 @@ class OrderHandler(Handler):
     def required_fields():
         return ['user_id']
 
-    @staticmethod
-    def to_dict(model: Order):
+    @classmethod
+    def to_dict(cls, model: Order):
+        model = cls.convert_to_model(model)
+        print('ORDER HANDLER TO DICT')
+        print(type(model))
         as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'desired_delivery_date'])
-        as_dict['items'] = [OrderItemHandler.to_dict(item) for item in model.items]
+        as_dict['items'] = OrderItemHandler.all_dicts(model.items)
         as_dict['delivery_address'] = AddressHandler.to_dict(model.delivery_address)
-        as_dict['customer'] = {"id": model.customer.id}
+        customer = UserHandler.from_id(model.user_id)
+        as_dict['customer'] = {
+            "id": customer.id,
+            "first_name": customer.first_name,
+            "last_name": customer.last_name,
+        }
         return as_dict
+
+    @staticmethod
+    def from_status(status: OrderStatus):
+        '''Return all orders that match the provided status'''
+        return db.session.query(Order).filter_by(status=status.value).all()
 
     @staticmethod
     def set_status(model: Order, status: OrderStatus):
@@ -341,8 +409,9 @@ class PhoneHandler(Handler):
     def required_fields():
         return ['unformatted_number']
 
-    @staticmethod
-    def to_dict(model: Phone):
+    @classmethod
+    def to_dict(cls, model: Phone):
+        model = cls.convert_to_model(model)
         return PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
 
 
@@ -357,8 +426,9 @@ class PlantTraitHandler(Handler):
     def required_fields():
         return ['trait', 'value']
 
-    @staticmethod
-    def to_dict(model: PlantTrait):
+    @classmethod
+    def to_dict(cls, model: PlantTrait):
+        model = cls.convert_to_model(model)
         return PlantTraitHandler.simple_fields_to_dict(model, PlantTraitHandler.all_fields())
 
     @staticmethod
@@ -385,8 +455,9 @@ class PlantHandler(Handler):
     def required_fields():
         return ['latin_name']
 
-    @staticmethod
-    def to_dict(model: Plant):
+    @classmethod
+    def to_dict(cls, model: Plant):
+        model = cls.convert_to_model(model)
 
         def array_to_dict(model_dict: dict, to_dict, field: str, key=None):
             '''Helper method for creating json data from an array'''
@@ -418,7 +489,7 @@ class PlantHandler(Handler):
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
 
         return as_dict
-    
+
     @staticmethod
     def from_latin(latin: str):
         return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
@@ -435,8 +506,9 @@ class RoleHandler(Handler):
     def required_fields():
         return ['title']
 
-    @staticmethod
-    def to_dict(model):
+    @classmethod
+    def to_dict(cls, model):
+        model = cls.convert_to_model(model)
         return RoleHandler.simple_fields_to_dict(model, RoleHandler.all_fields())
 
     @staticmethod
@@ -459,8 +531,9 @@ class SkuDiscountHandler(Handler):
     def required_fields():
         return ['discount', 'title']
 
-    @staticmethod
-    def to_dict(model: SkuDiscount):
+    @classmethod
+    def to_dict(cls, model: SkuDiscount):
+        model = cls.convert_to_model(model)
         return SkuDiscountHandler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields())
 
 
@@ -475,12 +548,12 @@ class SkuHandler(Handler):
     def required_fields():
         return []
 
-    @staticmethod
-    def to_dict(model: Sku):
+    @classmethod
+    def to_dict(cls, model: Sku):
+        model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
-        as_dict['display_image'] = SkuHandler.get_display_image(model)
         as_dict['plant'] = PlantHandler.to_dict(model.plant)
-        as_dict['discounts'] = [SkuDiscountHandler.to_dict(discount) for discount in model.discounts]
+        as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
         return as_dict
 
@@ -491,26 +564,38 @@ class SkuHandler(Handler):
 
     @staticmethod
     def get_display_image(model: Sku):
-        '''Returns a base64 string of the Sku's display image. If none is set,
-        one is decided'''
-        # If the sku has a display image
+        '''Returns an Image model for the SKUs display image, or None
+        if not found'''
+        # If the sku has a display image TODO doesn't account for full or thumb
         if model.display_img:
             return model.display_img
-        # If an associated plant can't be found, return a default image TODO!!!!!1
         if not model.plant:
             return None
         if len(model.plant.flower_images) > 0:
-            return ImageHandler.get_b64(model.plant.flower_images[0])
+            return model.plant.flower_images[0]
         if len(model.plant.leaf_images) > 0:
-            return ImageHandler.get_b64(model.plant.leaf_images[0])
+            return model.plant.leaf_images[0]
         if len(model.plant.fruit_images) > 0:
-            return ImageHandler.get_b64(model.plant.fruit_images[0])
+            return model.plant.fruit_images[0]
         if len(model.plant.bark_images) > 0:
-            return ImageHandler.get_b64(model.plant.bark_images[0])
+            return model.plant.bark_images[0]
         if len(model.plant.habit_images) > 0:
-            return ImageHandler.get_b64(model.plant.habit_images[0])
-        # TODO default image
+            return model.plant.habit_images[0]
         return None
+
+    @classmethod
+    def get_thumb_display_b64(cls, model: Sku):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_thumb_b64(img)
+
+    @classmethod
+    def get_full_display_b64(cls, model: Sku):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_full_b64(img)
 
     @staticmethod
     def add_discount(model: Sku, discount):
@@ -560,21 +645,27 @@ class UserHandler(Handler):
         user.roles.append(RoleHandler.get_customer_role())
         return user
 
-    @staticmethod
-    def to_dict(model: User):
+    @classmethod
+    def to_dict(cls, model: User):
+        model = cls.convert_to_model(model)
         as_dict = UserHandler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
         as_dict['id'] = model.id
         as_dict['account_status'] = model.account_status
-        as_dict['roles'] = [RoleHandler.to_dict(r) for r in model.roles]
+        as_dict['roles'] = RoleHandler.all_dicts(model.roles)
         if len(model.orders) > 0:
-            as_dict['cart'] = OrderHandler.to_dict(model.orders[-1])
+            as_dict['cart'] = OrderHandler.to_dict(UserHandler.get_cart(model))
         else:
             as_dict['cart'] = []
         if len(model.likes) > 0:
-            as_dict['likes'] = [SkuHandler.to_dict(s) for s in model.likes]
+            as_dict['likes'] = SkuHandler.all_dicts(model.likes)
         else:
             as_dict['likes'] = []
         return as_dict
+
+    @staticmethod
+    def all_customers():
+        users = UserHandler.all_objs()
+        return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
 
     @staticmethod
     def from_email(email: str):
@@ -582,6 +673,7 @@ class UserHandler(Handler):
 
     @staticmethod
     def is_customer(user: User):
+        print(RoleHandler.all_dicts(user.roles))
         return any(r.title == 'Customer' for r in user.roles)
 
     @staticmethod
@@ -600,6 +692,7 @@ class UserHandler(Handler):
             user.login_attempts += 1
             db.session.commit()
             print(f'User login attempts: {user.login_attempts}')
+            print(bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')))
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
                bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
@@ -643,31 +736,30 @@ class UserHandler(Handler):
                 'valid': False,
                 'error': 'Invalid token'
             }
-        # Check if the user 
+        # Check if the user
         return {
             'valid': True,
             'user': user
         }
 
     @staticmethod
-    def get_profile_data(email, token, app):
+    def get_profile_data(email):
         '''Returns user profile data'''
-        session_check = UserHandler.is_valid_session(email, token, app)
         # Check if user esists
         user = UserHandler.from_email(email)
-        if not session_check['valid'] or not user:
+        if not user:
             return None
         return {
             "first_name": user.first_name,
             "last_name": user.last_name,
             "pronouns": user.pronouns,
             "theme": user.theme,
-            "personal_email": [EmailHandler.to_dict(email) for email in user.personal_email],
-            "personal_phone": [PhoneHandler.to_dict(number) for number in user.personal_phone],
+            "personal_email": EmailHandler.all_dicts(user.personal_email),
+            "personal_phone": PhoneHandler.all_dicts(user.personal_phone),
             "image_file": user.image_file,
-            "orders": [OrderHandler.to_dict(order) for order in user.orders],
-            "roles": [RoleHandler.to_dict(role) for role in user.roles],
-            "likes": [SkuHandler.to_dict(sku) for sku in user.likes]
+            "orders": OrderHandler.all_dicts(user.orders),
+            "roles": RoleHandler.all_dicts(user.roles),
+            "likes": SkuHandler.all_dicts(user.likes)
         }
 
     @staticmethod

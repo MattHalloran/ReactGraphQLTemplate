@@ -1,7 +1,8 @@
-import { useState, useLayoutEffect, useEffect } from 'react';
+import { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
+import { useHistory } from 'react-router';
 import { StyledCartPage } from './CartPage.styled';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { getTheme, getCart } from 'utils/storage';
+import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
+import { getTheme, getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
@@ -38,11 +39,23 @@ function CartPage() {
     console.log('ON CART PAGEEE', cart);
 
     useEffect(() => {
+        if (!cart?.items) {
+            quantities.current = [];
+            return;
+        }
+        let starting_quantities = [];
+        cart.items.forEach(i => starting_quantities.push(i.quantity));
+        quantities.current = starting_quantities;
+    }, [cart])
+
+    useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
+            PubSub.unsubscribe(sessionSub);
         })
     }, [])
 
@@ -117,20 +130,27 @@ function CartPage() {
         let price = parseInt(data.sku.price);
         let display_price;
         let display_total;
+        let display_image;
         if (isNaN(price)) {
             display_price = 'TBD';
             display_total = 'TBD';
             all_total = 'TBD';
         } else {
-            display_price = `$${price}`;
-            display_total = `$${quantity * price}`;
+            display_price = displayPrice(price);
+            display_total = displayPrice(quantity * price);
             if (typeof(all_total) === 'number') all_total += (quantity * price);
         }
+        if (data.sku.display_image) {
+            display_image = <img src={`data:image/jpeg;base64,${data.sku.display_image}`} className="cart-image" alt="TODO" />
+        } else {
+            display_image = <NoImageIcon className="cart-image" />
+        }
+
         return (
             <tr>
                 <td><div className="product-row">
-                    <XIcon width="30px" height="30px" /> 
-                    <img className="cart-image" src={`data:image/jpeg;base64,${data.sku.display_image}`} />
+                    <XIcon width="30px" height="30px" onClick={() => deleteCartItem(data.sku)}/>
+                    { display_image }
                     <p>{data.sku?.plant?.latin_name}</p>
                     </div></td>
                 <td>{display_price}</td>
@@ -138,9 +158,8 @@ function CartPage() {
                             className="quant"
                             min_value={0}
                             max_value={data.sku?.quantity ?? 100}
-                            initial_value={1}
-                            value={quantity}
-                            valueFunc={() => console.log('TODOOOOOOOO')} /></td>
+                            initial_value={quantity}
+                            valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} /></td>
                 <td>{display_total}</td>
             </tr>
         );
@@ -183,7 +202,7 @@ function CartPage() {
 }
 
 CartPage.propTypes = {
-    
+
 }
 
 export default CartPage;

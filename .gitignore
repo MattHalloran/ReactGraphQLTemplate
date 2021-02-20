@@ -159,7 +159,8 @@ sketch
 *.db
 
 #Postgres
-postgres/
+Backend/postgres/
 
 #Assets
-Backend/assets/
+backend/assets/
+backend/plant_info/yards/yards*.json

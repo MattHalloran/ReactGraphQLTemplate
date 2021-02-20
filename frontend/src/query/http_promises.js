@@ -19,6 +19,9 @@ function promiseWrapper(http_func, ...args) {
                 console.warn(`HTTP call ${http_func} failed with status ${data.status}`);
                 reject(data);
             }
+        }).catch(err => {
+            console.error(err);
+            PubSub.publish(PUBS.Loading, false);
         })
     });
 }
@@ -26,10 +29,13 @@ function promiseWrapper(http_func, ...args) {
 export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
-export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_image_thumbnails, hashes)
+export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_gallery_thumbnails, hashes)
+export const getSkuThumbnails = (skus) => promiseWrapper(http.fetch_sku_thumbnails, skus)
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
+export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
+export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
 export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (skus) => promiseWrapper(http.fetch_inventory_page, skus);
@@ -103,7 +109,7 @@ export function loginUser(email, password) {
                 login({email: email, token: data.token}, data.user);
                 resolve(data);
             } else {
-                console.log('DATA NOT OKAY, logging out')
+                console.log('DATA NOT OKAY, logging out', data)
                 clearStorage();
                 switch (data.status) {
                     case StatusCodes.FAILURE_NO_USER:
@@ -135,9 +141,9 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
                 console.log('REGISTER FAIL LOGGING OUT')
                 clearStorage();
                 if (data.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
-                    data.error = "User with that email already exists. If you would like to reset your password, TODO";
+                    data.error = "User with that email already exists";
                 } else {
-                    data.error = "Unknown error occurred. Please try again";
+                    data.error = "Unknown error occurred";
                 }
                 reject(data);
             }
@@ -145,9 +151,9 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
     });
 }
 
-export function setLikeSku(email, token, sku, liked) {
+export function setLikeSku(session, sku, liked) {
     return new Promise(function (resolve, reject) {
-        http.set_like_sku(email, token, sku, liked).then(response => {
+        http.set_like_sku(session, sku, liked).then(response => {
             if (response.ok) {
                 console.log('BUNNYYYY', response)
                 storeItem(LOCAL_STORAGE.Likes, response.likes);
@@ -159,15 +165,13 @@ export function setLikeSku(email, token, sku, liked) {
     });
 }
 
-export function setSkuInCart(email, token, sku, quantity, in_cart) {
+export function setSkuInCart(session, sku, operation, quantity) {
     return new Promise(function (resolve, reject) {
-        http.set_sku_in_cart(email, token, sku, quantity, in_cart).then(response => {
+        http.set_sku_in_cart(session, sku, operation, quantity).then(response => {
             if (response.ok) {
-                console.log('SKU IN CART SUCCESS', response.cart);
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {
-                console.log('SKU IN CART FAIL', response)
                 reject(response);
             }
         })
