@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { BUSINESS_NAME, SORT_OPTIONS } from 'utils/consts';
+import { displayPrice } from 'utils/displayPrice';
 import { getInventory } from "query/http_promises";
 
 const TITLE_FONT_SIZE = 30;
@@ -19,7 +20,7 @@ const data_to_table = (data) => {
         let name = curr.plant?.latin_name ?? curr.plant.common_name ?? curr.sku;
         let size = isNaN(curr.size) ? curr.size : `#${curr.size}`;
         let availability = curr.availability ?? 'N/A';
-        let price = curr.price ?? 'N/A';
+        let price = curr.price ? displayPrice(curr.price) : 'N/A';
         result.push([name, size, availability, price]);
     }
     return result;

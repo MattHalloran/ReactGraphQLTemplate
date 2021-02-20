@@ -640,11 +640,12 @@ def modify_user():
 @app.route(f'{PREFIX}/submit_order', methods=["POST"])
 @handle_exception
 def submit_order():
-    (session) = getData('session')
+    (session, is_delivery, requested_date, notes) = getData('session', 'is_delivery', 'requested_date', 'notes')
     user = verify_customer(session)
     if not user:
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
-    if UserHandler.submit_order(user):
+    update_success = UserHandler.update_order(user, is_delivery, requested_date, notes)
+    if update_success and UserHandler.submit_order(user):
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}
 

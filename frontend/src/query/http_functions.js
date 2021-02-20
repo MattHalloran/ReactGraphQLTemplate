@@ -8,10 +8,10 @@ const HEADERS = {
         'Accept': 'application/json', // eslint-disable-line quote-props
         'Content-Type': 'application/json',
     },
-    ApplicationJson: { 
-        'Content-Type': 'application/json' 
+    ApplicationJson: {
+        'Content-Type': 'application/json'
     },
-    Text: { 
+    Text: {
         'Content-Type': 'text/html; charset=UTF-8',
     },
 }
@@ -345,9 +345,12 @@ export async function modify_user(session, id, operation) {
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
 }
 
-export async function submit_order(session) {
+export async function submit_order(session, is_delivery, requested_date, notes) {
     let json = JSON.stringify({
         "session": session,
+        "is_delivery": is_delivery,
+        "requested_date": requested_date,
+        "notes": notes
     });
     let options = {
         body: json,

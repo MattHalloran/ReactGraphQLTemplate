@@ -489,7 +489,7 @@ class PlantHandler(Handler):
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
 
         return as_dict
-    
+
     @staticmethod
     def from_latin(latin: str):
         return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
@@ -736,7 +736,7 @@ class UserHandler(Handler):
                 'valid': False,
                 'error': 'Invalid token'
             }
-        # Check if the user 
+        # Check if the user
         return {
             'valid': True,
             'user': user
@@ -787,6 +787,17 @@ class UserHandler(Handler):
         else:
             cart = user.orders[-1]
         return cart
+
+    @staticmethod
+    def update_order(user: User, is_delivery: bool, requested_date: float, notes: str):
+        cart = UserHandler.get_cart(user)
+        if cart:
+            cart.is_delivery = True
+            cart.desired_delivery_date = requested_date
+            cart.special_instructions = notes
+            db.session.commit()
+            return True
+        return False
 
     @staticmethod
     def submit_order(user: User):

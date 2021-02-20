@@ -11,3 +11,11 @@ To populate database:
 1) Open a terminal in the backend directory
 2) cd tools
 2) python3 createDatabase.py
+
+To perform a databse migration:
+**Note: If you are adding a new Column to an existing table, and it has a default value, note that the "default"
+argument is only interpreted by the python class instance. Please also add a "server_default" argument with a SQL expression
+1) Open a terminal in the backend directory
+1.5) If migrations folder doesn't exist (i.e. first migration), run 'flask db init'
+2) flask db migrate
+3) flask db upgrade

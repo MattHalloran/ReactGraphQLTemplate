@@ -48,9 +48,9 @@ export const modifySku = (session, sku, operation, data) => promiseWrapper(http.
 export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);
 export const getOrders = (session, status) => promiseWrapper(http.fetch_orders, session, status)
 
-export function submitOrder(session) {
+export function submitOrder(session, is_delivery, requested_date, notes) {
     return new Promise(function (resolve, reject) {
-        http.submit_order(session).then(data => {
+        http.submit_order(session, is_delivery, requested_date, notes).then(data => {
             if (data.ok) {
                 storeItem(LOCAL_STORAGE.Cart, null);
                 resolve(data);

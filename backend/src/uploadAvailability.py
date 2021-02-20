@@ -56,7 +56,7 @@ def upload_availability(app, data):
             if not is_cell_blank(sizes[i]):
                 sku_dict['size'] = str(sizes[i]).replace('#', '')
             if not is_cell_blank(prices[i]):
-                sku_dict['price'] = str(prices[i]).replace('.', '')
+                sku_dict['price'] = str(prices[i]).replace('.', '0')  # Add 0 because price only has one decimal place
             if not is_cell_blank(codes[i]):
                 sku_dict['sku'] = codes[i]
             if not is_cell_blank(quantities[i]):
