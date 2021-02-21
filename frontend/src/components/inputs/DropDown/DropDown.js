@@ -9,8 +9,6 @@ function DropDown({ allow_custom_input = false,
     multi_select = false,
     options,
     disabled = false,
-    arrowClosed,
-    arrowOpen,
     onChange,
     onFocus,
     initial_value,
@@ -146,14 +144,10 @@ function DropDown({ allow_custom_input = false,
     </div>) : null
 
     return (
-        <StyledDropDown id={dropID.current} theme={theme} className={(is_open ? `${className} is-open` : {className})} ref={clickRef} size_data={[window.innerHeight, y]}>
+        <StyledDropDown id={dropID.current} theme={theme} is_open={is_open} className={className} ref={clickRef} size_data={[window.innerHeight, y]}>
             <div className={'DropDown-control' + (disabled ? 'DropDown-disabled' : '')} onClick={() => setIsOpen(is => !is)} aria-haspopup='listbox'>
                 {control}
-                <div className='DropDown-arrow-wrapper'>
-                    {arrowOpen && arrowClosed
-                        ? is_open ? arrowOpen : arrowClosed
-                        : <span className='DropDown-arrow' />}
-                </div>
+                <span className='DropDown-arrow' />
             </div>
             {menu}
         </StyledDropDown>

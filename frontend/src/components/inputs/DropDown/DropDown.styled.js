@@ -1,9 +1,23 @@
 import styled from 'styled-components';
 
-const getMaxMenuHeight = (data) => {
+//Determines if the menu opens above the dropdown or below.
+//Defaults to below
+const getMenuStyle = (data) => {
     let window_height = data[0];
     let control_y = data[1];
-    return `${window_height - control_y - 50}px`;
+    let space_below = window_height - control_y;
+    if (space_below < 150) {
+        return `
+            max-height: ${control_y - 40 - 50}px;
+            bottom: 100%;
+            border-radius: 10px 10px 0 0;
+        `
+    }
+    return `
+        max-height: ${window_height - control_y - 50}px;
+        top: 100%;
+        border-radius: 0 0 10px 10px;
+    `
 }
 
 export const StyledDropDown = styled.div`
@@ -49,37 +63,28 @@ export const StyledDropDown = styled.div`
     }
     
     .DropDown-arrow {
-        border-color: black transparent transparent;
-        border-style: solid;
-        border-width: 5px 5px 0;
+        width: 0;
+        height: 0;
+        border: 5px solid transparent;
+        ${({ is_open }) => is_open? 'border-bottom: 5px solid black' : 'border-top: 5px solid black'};
         content: ' ';
         display: block;
-        height: 0;
-        margin-top: -ceil(2.5);
         position: absolute;
         right: 10px;
-        top: 14px;
-        width: 0
-    }
-    
-    .is-open .DropDown-arrow {
-        border-color: transparent transparent black;
-        border-width: 0 5px 5px;
+        top: ${({ is_open }) => is_open? '14px' : '19px'};
     }
     
     .DropDown-menu {
         border: 1px solid black;
-        border-radius: 0 0 10px 10px;
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
         box-sizing: border-box;
-        margin-top: -1px;
-        max-height: ${({ size_data }) => getMaxMenuHeight(size_data)};
         overflow-y: auto;
         position: absolute;
-        top: 100%;
         width: 100%;
         z-index: 1000;
         -webkit-overflow-scrolling: touch;
+        margin-top: -1px;
+        ${({ size_data }) => getMenuStyle(size_data)};
     }
     
     .DropDown-option {
