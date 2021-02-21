@@ -38,7 +38,7 @@ export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
 export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
 export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
-export const getInventoryPage = (skus) => promiseWrapper(http.fetch_inventory_page, skus);
+export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
 export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);
 export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);

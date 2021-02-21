@@ -487,12 +487,70 @@ class PlantHandler(Handler):
                         'zones', 'plant_types', 'physiographic_regions', 'soil_moistures',
                         'soil_phs', 'soil_types', 'light_ranges']
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
+        as_dict['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model)]
 
         return as_dict
 
     @staticmethod
     def from_latin(latin: str):
         return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
+
+    @classmethod
+    def has_sku(cls, model):
+        '''Returns True if there are any SKUs associated with this plant'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id).count() > 0
+
+    @classmethod
+    def has_available_sku(cls, model):
+        '''Returns True if there are any SKUs VISIBLE TO THE CUSTOMER
+        that are associated with this plant'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id, status=SkuStatus.ACTIVE.value).count() > 0
+
+    @classmethod
+    def skus(cls, model):
+        '''Returns all SKU objects associated with the plant model'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id).all()
+
+    @classmethod
+    def available_skus(cls, model):
+        '''Returns all available SKU objects associated with the plant model'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id, status=SkuStatus.ACTIVE.value).all()
+
+    @staticmethod
+    def cheapest(model):
+        '''Returns the lowest SKU price associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.cheapest(skus)
+
+    @staticmethod
+    def priciest(model):
+        '''Returns the highest SKU price associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.priciest(skus)
+
+    @staticmethod
+    def newest(model):
+        '''Returns the newest SKU associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.newest(skus)
+
+    @staticmethod
+    def oldest(model):
+        '''Returns the oldest SKU associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.oldest(skus)
 
 
 class RoleHandler(Handler):
@@ -552,7 +610,6 @@ class SkuHandler(Handler):
     def to_dict(cls, model: Sku):
         model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
-        as_dict['plant'] = PlantHandler.to_dict(model.plant)
         as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
         return as_dict
@@ -619,8 +676,38 @@ class SkuHandler(Handler):
         return db.session.query(Sku).filter_by(sku=sku).one_or_none()
 
     @staticmethod
+    def from_plant_id(id: int):
+        '''Returns all SKUs associated with a plant id'''
+        return db.session.query(Sku).filter_by(plant_id=id).all()
+
+    @staticmethod
     def from_plant(plant: Plant):
-        return db.session.query(Sku).filter_by(plant_id=plant.id).one_or_none()
+        '''Returns all SKUs associated with a plant object'''
+        return SkuHandler.from_plant_id(plant.id)
+
+    @staticmethod
+    def cheapest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.price, reverse=False)
+
+    @staticmethod
+    def priciest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.price, reverse=True)
+
+    @staticmethod
+    def newest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.date_added, reverse=False)
+
+    @staticmethod
+    def oldest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.date_added, reverse=True)
 
 
 class UserHandler(Handler):

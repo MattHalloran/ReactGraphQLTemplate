@@ -143,9 +143,9 @@ export async function fetch_inventory_filters() {
     return await fetchWrapper(`${PREFIX}/fetch_inventory_filters`, options);
 }
 
-export async function fetch_inventory_page(skus) {
+export async function fetch_inventory_page(ids) {
     let json = JSON.stringify({
-        "skus": skus,
+        "ids": ids,
     });
     let options = {
         body: json,

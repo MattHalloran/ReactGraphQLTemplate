@@ -11,7 +11,7 @@ export const StyledShoppingList = styled.div`
     }
 `;
 
-export const StyledSkuCard = styled.div`
+export const StyledPlantCard = styled.div`
     position: relative;
     background-color: ${({ theme }) => theme.bodySecondary};
     color: black;
@@ -76,7 +76,7 @@ export const StyledSkuCard = styled.div`
     }
 `;
 
-export const StyledExpandedSku = styled.div`
+export const StyledExpandedPlant = styled.div`
     background-color: ${({ theme }) => theme.bodySecondary};
     display: block;
     width: -webkit-fill-available;

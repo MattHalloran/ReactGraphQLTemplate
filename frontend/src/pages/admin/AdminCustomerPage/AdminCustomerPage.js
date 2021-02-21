@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { StyledAdminCustomerPage, StyledCustomerCard } from './AdminCustomerPage.styled';
 import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';

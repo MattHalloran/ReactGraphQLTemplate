@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { StyledShoppingList, StyledSkuCard, StyledExpandedSku } from "./ShoppingList.styled";
+import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
 import { getSkuThumbnails, getImageFromSku, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
@@ -25,10 +25,10 @@ function ShoppingList({
     const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
     const [popup, setPopup] = useState(null);
-    // SKU data for every loaded SKU
-    const [loaded_skus, setLoadedSkus] = useState([]);
+    // Plant data for every loaded plant
+    const [loaded_plants, setLoadedPlants] = useState([]);
     // SKU codes for all SKUs, not just displayed ones
-    const all_skus = useRef([]);
+    const all_plant_ids = useRef([]);
     // List of data passed to SKU cards. Each card represents 1 or more SKUs,
     // that share the same plant info
     const [sku_groups, setSkuGroups] = useState([]);
@@ -40,45 +40,17 @@ function ShoppingList({
     let history = useHistory();
     const urlParams = useParams();
     // Find the current SKU group index, by any of the group's SKUs
-    let curr_index = sku_groups?.findIndex(c => c.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
+    let curr_index = sku_groups?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
     const loading = useRef(false);
 
-    // Compares two sku dictionaries for equality
-    const skus_equal = (a, b) => {
-        // Check defined latin names
-        let a_latin = a.plant?.latin_name;
-        let b_latin = b.plant?.latin_name;
-        if (a_latin && b_latin && a_latin === b_latin) return true;
-        // Check defined common names
-        let a_common = a.plant?.common_name;
-        let b_common = b.plant?.common_name;
-        if (a_common && b_common && a_common === b_common) return true;
-        return false;
-
-    }
-
-    // Combine SKUs that share the same plant
-    const combine_skus = (skus) => {
-        let combined = [];
-        for (let i = 0; i < skus.length; i++) {
-            let sku = skus[i]
-            let combined_index = combined.findIndex(s => skus_equal(s[0], sku));
-            if (combined_index < 0) {
-                combined.push([sku])
-            } else {
-                combined[combined_index].push(sku);
-            }
-        }
-        console.log('SETTING SKU GROUP', combined)
-        setSkuGroups(combined);
-        // Using a SKU code from each group, request thumbnail images
-        let codes = skus.map(s => s.sku);
+    useEffect(() => {
+        let codes = sku_groups.map(p => p.skus[0].sku);
         getSkuThumbnails(codes).then(response => {
             setThumbnails(response.thumbnails);
         }).catch(err => {
             console.error(err);
         });
-    }
+    }, [sku_groups])
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -106,8 +78,8 @@ function ShoppingList({
         getInventory(sort, page_size, false)
             .then((response) => {
                 if (!mounted) return;
-                setLoadedSkus(response.page_results);
-                all_skus.current = response.all_skus;
+                setLoadedPlants(response.page_results);
+                all_plant_ids.current = response.all_plant_ids;
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);
@@ -119,11 +91,6 @@ function ShoppingList({
 
     // Determine which skus will be visible to the user (i.e. not filtered out)
     useEffect(() => {
-        if (!filters) {
-            combine_skus(loaded_skus);
-            return;
-        }
-
         //Find all applied filters
         let applied_filters = [];
         for (const key in filters) {
@@ -138,13 +105,13 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length == 0) {
-            combine_skus(loaded_skus);
+            setSkuGroups(loaded_plants);
             return;
         }
-        //Select all skus that contain the filters
-        let filtered_skus = [];
-        for (let i = 0; i < loaded_skus.length; i++) {
-            let curr_plant = loaded_skus[i].plant;
+        //Select all plants that contain the filters
+        let filtered_plants = [];
+        for (let i = 0; i < loaded_plants.length; i++) {
+            let curr_plant = loaded_plants[i];
             filterloop:
             for (let j = 0; j < applied_filters.length; j++) {
                 let trait = applied_filters[j][0];
@@ -153,45 +120,45 @@ function ShoppingList({
                 // Grab data depending on if the field is for the sku or its associated plant
                 let data;
                 if (trait === 'sizes') {
-                    data = loaded_skus[i][trait];
+                    data = curr_plant.skus.map(s => s[trait]);
                 } else {
                     data = curr_plant[trait];
                 }
 
                 if (Array.isArray(data) && data.length > 0) {
                     if (data.some(o => o.value === value)) {
-                        filtered_skus.push(loaded_skus[i]);
+                        filtered_plants.push(curr_plant);
                         break filterloop;
                     }
                 } else if (data?.value === value) {
-                    filtered_skus.push(loaded_skus[i]);
+                    filtered_plants.push(curr_plant);
                     break filterloop;
                 }
             }
         }
-        combine_skus(filtered_skus);
-    }, [loaded_skus, filters])
+        setSkuGroups(filtered_plants);
+    }, [loaded_plants, filters])
 
     const loadNextPage = useCallback(() => {
-        if (loading.current || loaded_skus.length >= all_skus.current.length) return;
+        if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
         loading.current = true;
         //Grab all card thumbnail images
-        let load_to = Math.min(all_skus.current.length, loaded_skus.length + page_size - 1);
-        let clone = all_skus.current.slice();
-        let page_skus = clone.splice(loaded_skus.length, load_to);
-        if (page_skus.length == 0) {
+        let load_to = Math.min(all_plant_ids.current.length, loaded_plants.length + page_size - 1);
+        let clone = all_plant_ids.current.slice();
+        let page_ids = clone.splice(loaded_plants.length, load_to);
+        if (page_ids.length == 0) {
             loading.current = false;
             return;
         }
-        getInventoryPage(page_skus).then(response => {
-            setLoadedSkus(c => c.concat(...response.data));
+        getInventoryPage(page_ids).then(response => {
+            setLoadedPlants(c => c.concat(...response.data));
         }).catch(error => {
             console.error("Failed to load SKUs!", error);
         }).finally(() => {
             loading.current = false;
         })
         return () => loading.current = false;
-    }, [loaded_skus, all_skus, page_size]);
+    }, [loaded_plants, all_plant_ids, page_size]);
 
     //Load next page if scrolling near the bottom of the page
     const checkScroll = useCallback(() => {
@@ -236,7 +203,7 @@ function ShoppingList({
         let popup_data = sku_groups[curr_index];
         setPopup(
             <Modal onClose={() => history.goBack()}>
-                <ExpandedSku group={popup_data}
+                <ExpandedPlant plant={popup_data}
                     thumbnail={thumbnails.length >= curr_index ? thumbnails[curr_index] : null}
                     onCart={setInCart}
                     theme={theme} />
@@ -248,11 +215,11 @@ function ShoppingList({
         <StyledShoppingList id={track_scrolling_id}>
             {popup}
             {sku_groups.map((item, index) =>
-                <SkuCard key={index}
+                <PlantCard key={index}
                     theme={theme}
                     cart={cart}
                     onClick={expandSku}
-                    group={item}
+                    plant={item}
                     thumbnail={thumbnails.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
         </StyledShoppingList>
@@ -268,15 +235,14 @@ ShoppingList.propTypes = {
 
 export default ShoppingList;
 
-function SkuCard({
-    group,
+function PlantCard({
+    plant,
     thumbnail,
     onClick,
 }) {
-    const [theme, setTheme] = useState(getTheme());
-    const plant = group[0].plant;
+    const [theme] = useState(getTheme());
 
-    let sizes = group?.map(s => (
+    let sizes = plant.skus.map(s => (
         <div>#{s.size}: {displayPrice(s.price)} | {s.availability}</div>
     ));
 
@@ -288,11 +254,11 @@ function SkuCard({
     }
 
     return (
-        <StyledSkuCard theme={theme} onClick={() => onClick(group[0].sku)}>
+        <StyledPlantCard theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
             <div className="title">
-                <h2>{plant?.latin_name}</h2>
-                {plant?.common_name ? <br /> : null}
-                <h3>{plant?.common_name ? plant.common_name : null}</h3>
+                <h2>{plant.latin_name}</h2>
+                {plant.common_name ? <br /> : null}
+                <h3>{plant.common_name}</h3>
             </div>
             <div className="display-image-container">
                 {display_image}
@@ -300,38 +266,37 @@ function SkuCard({
             <div className="size-container">
                 {sizes}
             </div>
-        </StyledSkuCard>
+        </StyledPlantCard>
     );
 }
 
-SkuCard.propTypes = {
-    group: PropTypes.object.isRequired,
+PlantCard.propTypes = {
+    plant: PropTypes.object.isRequired,
     thumbnail: PropTypes.string,
     onClick: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };
 
-export { SkuCard };
+export { PlantCard };
 
-function ExpandedSku({
-    group,
+function ExpandedPlant({
+    plant,
     thumbnail,
     onCart,
 }) {
-    const plant = group[0].plant;
     const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        getImageFromSku(group[0].sku).then(response => {
+        getImageFromSku(plant.skus[0].sku).then(response => {
             setImage(response.image);
         }).catch(error => {
             console.error(error);
         })
     },[])
 
-    let order_options = group?.map(s => {
+    let order_options = plant.skus?.map(s => {
         return {
             label: `#${s.size} : ${displayPrice(s.price)}`,
             value: s
@@ -366,15 +331,15 @@ function ExpandedSku({
     }
 
     return (
-        <StyledExpandedSku theme={theme}>
+        <StyledExpandedPlant theme={theme}>
             <div className="title">
-                <h1>{plant?.latin_name}</h1>
-                {plant?.common_name ? <br /> : null}
-                <h3>{plant?.common_name ? plant.common_name : null}</h3>
+                <h1>{plant.latin_name}</h1>
+                {plant.common_name ? <br /> : null}
+                <h3>{plant.common_name}</h3>
             </div>
             <div className="main-div">
                 {display_image}
-                {plant?.description ?
+                {plant.description ?
                     <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
                         <p>{plant.description}</p>
                     </Collapsible>
@@ -414,7 +379,7 @@ function ExpandedSku({
                 <QuantityBox
                     className="quanter"
                     min_value={0}
-                    max_value={group[0]?.quantity ?? 100}
+                    max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
                     initial_value={1}
                     value={quantity}
                     valueFunc={setQuantity} />
@@ -424,15 +389,15 @@ function ExpandedSku({
                     height="30px"
                     onClick={() => onCart(selected, 'ADD', quantity)} />
             </div>
-        </StyledExpandedSku>
+        </StyledExpandedPlant>
     );
 }
 
-ExpandedSku.propTypes = {
+ExpandedPlant.propTypes = {
     group: PropTypes.object.isRequired,
     thumbnail: PropTypes.string,
     onCart: PropTypes.func.isRequired,
     theme: PropTypes.object,
 };
 
-export { ExpandedSku };
+export { ExpandedPlant };

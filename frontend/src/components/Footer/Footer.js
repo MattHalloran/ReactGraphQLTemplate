@@ -24,7 +24,7 @@ function Footer({
                 </div>
                 <div className="footer-group">
                     <ul className="footer-ul">
-                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
+                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" rel="noopener noreferrer" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
                         <li style={{ cursor: 'pointer' }} onClick={printAvailability}>Print Availability</li>
                         <li><Link to="/gallery">Gallery</Link></li>
                         <li><Link to="/featured">Featured Plants</Link></li>
@@ -42,13 +42,13 @@ function Footer({
                     </address>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.provenwinners.com/" target="_blank"><img src={ProvenWinners} alt="We Sell Proven Winners - The #1 Plant Brand" className="proven-winner" /></a>
+                    <a style={{display:'contents'}} href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img src={ProvenWinners} alt="We Sell Proven Winners - The #1 Plant Brand" className="proven-winner" /></a>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.americanhort.org/" target="_blank"><img src={AmericanHort} alt="Proud member of the AmericanHort" className="proven-winner" /></a>
+                    <a style={{display:'contents'}} href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img src={AmericanHort} alt="Proud member of the AmericanHort" className="proven-winner" /></a>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.njnla.org/" target="_blank"><img src={NJNLA} alt="Proud member of the New Jersey Nursery and Landscape Association" className="proven-winner" /></a>
+                    <a style={{display:'contents'}} href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img src={NJNLA} alt="Proud member of the New Jersey Nursery and Landscape Association" className="proven-winner" /></a>
                 </div>
             </div>
         </StyledFooter >

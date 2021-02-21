@@ -122,7 +122,7 @@ function CartPage() {
                 console.error(err);
                 alert('Failed to submit order. Please contact New Life Nursery');
             })
-    }, [cart]);
+    }, [cart, delivery, deliveryDate, notes, session]);
 
     let all_total = 0;
     const cart_item_to_row = (data) => {

@@ -50,8 +50,6 @@ function AdminInventoryPage() {
                 if (!mounted) return;
                 setSkuCards(response.page_results);
                 console.log('SETTING SKUS', response.page_results)
-                //setSkuCards(skus => skus.concat(response.all_skus));
-                //console.log('SET ALL SKUS', response.all_skus)
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);

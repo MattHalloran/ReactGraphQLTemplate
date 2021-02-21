@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { registerUser } from 'query/http_promises';
 import StatusCodes from 'query/consts/codes.json';

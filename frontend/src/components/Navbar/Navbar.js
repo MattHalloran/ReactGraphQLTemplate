@@ -72,9 +72,7 @@ function Hamburger(props) {
     let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            console.log('HAMBURGER ROLEEE', r)
             if (r.title === USER_ROLES.Admin) {
-                console.log('ADMINNNNNNNNNNN')
                 top_links.push([LINKS.Admin, GearIcon]);
             }
         })
@@ -148,7 +146,6 @@ function NavList() {
     // If an admin is logged in, display admin links
     if (user_roles instanceof Array) {
         user_roles?.forEach(r => {
-            console.log('USER ROLEEE', r)
             if (r.title === USER_ROLES.Admin) {
                 nav_options.push([LINKS.Admin, 'Admin']);
             }

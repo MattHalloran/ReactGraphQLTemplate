@@ -20,9 +20,9 @@ from src.uploadAvailability import upload_availability
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 PREFIX = '/api'
-with open(os.path.join(os.path.dirname(__file__),"consts/codes.json"), 'r') as f:
+with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as f:
     StatusCodes = json.load(f)
-with open(os.path.join(os.path.dirname(__file__),"consts/codes.json"), 'r') as f:
+with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as f:
     RoutePaths = json.load(f)
 
 # ============= Helper Methods ========================
@@ -235,35 +235,41 @@ def fetch_inventory_filters():
 @app.route(f'{PREFIX}/fetch_inventory', methods=["POST"])
 @handle_exception
 def fetch_inventory():
-    # Grab sort option
     (sorter, page_size, admin) = getData('sorter', 'page_size', 'admin')
-    # Find all SKUs available to the customer
-    skus = None
-    if (admin):
-        skus = SkuHandler.all_objs()
-    else:
-        skus = SkuHandler.all_available_skus()
+    # Grab plant ids
+    all_plant_ids = PlantHandler.all_ids()
+    # Find all plants that have available SKUs associated with them
+    plants_with_skus = []
+    for id in all_plant_ids:
+        # Admins can view plants that are hidden to customers
+        if admin and PlantHandler.has_sku(id):
+            plants_with_skus.append(PlantHandler.from_id(id))
+        elif not admin and PlantHandler.has_available_sku(id):
+            plants_with_skus.append(PlantHandler.from_id(id))
+    if len(plants_with_skus) == 0:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    # Define map for handling sort options
     sort_map = {
-        'az': (lambda s: s.plant.latin_name if s.plant else '', False),
-        'za': (lambda s: s.plant.latin_name if s.plant else '', True),
-        'lth': (lambda s: s.price, False),
-        'htl': (lambda s: s.price, True),
-        'new': (lambda s: s.date_added, True),
-        'old': (lambda s: s.date_added, True),
+        'az': (lambda p: p.latin_name, False),
+        'za': (lambda p: p.latin_name, True),
+        'lth': (lambda p: PlantHandler.cheapest(p), False),
+        'htl': (lambda p: PlantHandler.priciest(p), True),
+        'new': (lambda p: PlantHandler.newest(p), True),
+        'old': (lambda p: PlantHandler.oldest(p), True),
     }
     # Sort the SKUs
     sort_data = sort_map.get(sorter, None)
     if sort_data is None:
         print('Could not find the correct sorter')
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
-    skus.sort(key=sort_data[0], reverse=sort_data[1])
+        return {"status": StatusCodes['ERROR_INVALID_ARGS']}
+    plants_with_skus.sort(key=sort_data[0], reverse=sort_data[1])
     if page_size > 0:
-        sku_page = skus[0: min(len(skus), page_size)]
+        page = plants_with_skus[0: min(len(plants_with_skus), page_size)]
     else:
-        sku_page = skus
-    page_results = SkuHandler.all_dicts(sku_page)
+        page = plants_with_skus
+    page_results = PlantHandler.all_dicts(page)
     return {
-        "all_skus": [sku.sku for sku in skus],
+        "all_plant_ids": [plant.id for plant in plants_with_skus],
         "page_results": page_results,
         "status": StatusCodes['SUCCESS']
     }
@@ -309,9 +315,9 @@ def fetch_sku_thumbnails():
 @app.route(f'{PREFIX}/fetch_inventory_page', methods=["POST"])
 @handle_exception
 def fetch_inventory_page():
-    sku_codes = getData('skus')
+    plant_ids = getData('ids')
     return {
-        "data": [SkuHandler.to_dict(SkuHandler.from_sku(s)) for s in sku_codes],
+        "data": PlantHandler.all_dicts(plant_ids),
         "status": StatusCodes['SUCCESS']
     }
 
