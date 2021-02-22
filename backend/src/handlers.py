@@ -297,27 +297,75 @@ class ImageHandler(Handler):
         model = cls.convert_to_model(model)
         return ImageHandler.simple_fields_to_dict(model, ['hash', 'alt', 'used_for', 'width', 'height'])
 
+    @classmethod
+    def create_from_scratch(cls, data: str, alt: str, dest_folder: str, used_for: ImageUses):
+        '''Creates a new image model without having to worry about file names, thumbnail, etc'''
+        from src.utils import salt, find_available_file_names, get_image_meta
+        from mimetypes import guess_extension
+        from base64 import b64decode
+        img_name = salt(30)
+        # ex: guess_extension(image/jpeg)
+        img_ext = guess_extension(data[data.index(':')+1:data.index(';')])
+        # Data is stored in base64, and the beginning of the
+        # string is not needed
+        just_data = data[data.index('base64,')+7:]
+        decoded = b64decode(just_data)
+        (hash, thumbnail, width, height) = get_image_meta(decoded)
+        # If image already exists, return it
+        if (existing := ImageHandler.from_hash(hash)):
+            print('Image already in backend!')
+            return existing
+        (img_name, thumb_name) = find_available_file_names(dest_folder, img_name, img_ext)
+        img_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{img_name}{img_ext}'
+        thumb_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{thumb_name}{img_ext}'
+        # Save image
+        with open(img_path, 'wb') as f:
+            f.write(decoded)
+        # Save image thumbnail
+        thumbnail.save(thumb_path)
+        # Add image data to database
+        img_row = cls.create(dest_folder,
+                             img_name,
+                             thumb_name,
+                             img_ext,
+                             alt,
+                             hash,
+                             used_for,
+                             width,
+                             height)
+        db.session.add(img_row)
+        db.session.commit()
+        return img_row
+
     @staticmethod
     def get_thumb_b64(model: Image):
         '''Returns the base64 string representation of an image file's thumbnail'''
-        # Read image file
-        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
-            byte_content = open_file.read()
-        # Convert image to a base64 string
-        base64_bytes = b64encode(byte_content)
-        base64_string = base64_bytes.decode('utf-8')
-        return base64_string
+        try:
+            # Read image file
+            with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
+                byte_content = open_file.read()
+            # Convert image to a base64 string
+            base64_bytes = b64encode(byte_content)
+            base64_string = base64_bytes.decode('utf-8')
+            return base64_string
+        except Exception:
+            print('Error: could not find thumbnail')
+            return None
 
     @staticmethod
     def get_full_b64(model: Image):
         '''Returns the base64 string representation of an image file'''
-        # Read image file
-        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
-            byte_content = open_file.read()
-        # Convert image to a base64 string
-        base64_bytes = b64encode(byte_content)
-        base64_string = base64_bytes.decode('utf-8')
-        return base64_string
+        try:
+            # Read image file
+            with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
+                byte_content = open_file.read()
+            # Convert image to a base64 string
+            base64_bytes = b64encode(byte_content)
+            base64_string = base64_bytes.decode('utf-8')
+            return base64_string
+        except Exception:
+            print('Error: could not find image')
+            return None
 
     @staticmethod
     def from_used_for(used_for: ImageUses):
@@ -484,7 +532,8 @@ class PlantHandler(Handler):
                         'zones', 'plant_types', 'physiographic_regions', 'soil_moistures',
                         'soil_phs', 'soil_types', 'light_ranges']
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
-        as_dict['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model)]
+        as_dict['id'] = model.id
+        as_dict['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
 
         return as_dict
 
@@ -549,6 +598,48 @@ class PlantHandler(Handler):
             return -1
         return SkuHandler.oldest(skus)
 
+    @staticmethod
+    def set_display_image(model: Plant, image: Image):
+        print(f'PRE SET: {model.display_img}')
+        model.display_img = image
+        model.display_img_id = image.id
+        db.session.commit()
+        print(f'POST SET: {model.display_img}')
+
+    @staticmethod
+    def get_display_image(model: Plant):
+        '''Returns an Image model for the SKUs display image, or None
+        if not found'''
+        # If the sku has a display image TODO doesn't account for full or thumb
+        if model.display_img:
+            print(f'DISPLAY HERE: {model.display_img}')
+            return model.display_img
+        if len(model.flower_images) > 0:
+            return model.flower_images[0]
+        if len(model.leaf_images) > 0:
+            return model.leaf_images[0]
+        if len(model.fruit_images) > 0:
+            return model.fruit_images[0]
+        if len(model.bark_images) > 0:
+            return model.bark_images[0]
+        if len(model.habit_images) > 0:
+            return model.habit_images[0]
+        return None
+
+    @classmethod
+    def get_thumb_display_b64(cls, model: Plant):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_thumb_b64(img)
+
+    @classmethod
+    def get_full_display_b64(cls, model: Plant):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_full_b64(img)
+
 
 class RoleHandler(Handler):
     ModelType = Role
@@ -607,49 +698,10 @@ class SkuHandler(Handler):
     def to_dict(cls, model: Sku):
         model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
+        as_dict['id'] = model.id
         as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
         return as_dict
-
-    @staticmethod
-    def set_display_image(model: Sku, image: Image):
-        model.display_image = image
-        model.display_img_id = image.id
-
-    @staticmethod
-    def get_display_image(model: Sku):
-        '''Returns an Image model for the SKUs display image, or None
-        if not found'''
-        # If the sku has a display image TODO doesn't account for full or thumb
-        if model.display_img:
-            return model.display_img
-        if not model.plant:
-            return None
-        if len(model.plant.flower_images) > 0:
-            return model.plant.flower_images[0]
-        if len(model.plant.leaf_images) > 0:
-            return model.plant.leaf_images[0]
-        if len(model.plant.fruit_images) > 0:
-            return model.plant.fruit_images[0]
-        if len(model.plant.bark_images) > 0:
-            return model.plant.bark_images[0]
-        if len(model.plant.habit_images) > 0:
-            return model.plant.habit_images[0]
-        return None
-
-    @classmethod
-    def get_thumb_display_b64(cls, model: Sku):
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_thumb_b64(img)
-
-    @classmethod
-    def get_full_display_b64(cls, model: Sku):
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_full_b64(img)
 
     @staticmethod
     def add_discount(model: Sku, discount):

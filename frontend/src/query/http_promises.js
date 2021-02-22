@@ -30,7 +30,7 @@ export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
 export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_gallery_thumbnails, hashes)
-export const getSkuThumbnails = (skus) => promiseWrapper(http.fetch_sku_thumbnails, skus)
+export const getPlantThumbnails = (ids) => promiseWrapper(http.fetch_plant_thumbnails, ids)
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
@@ -40,11 +40,12 @@ export const getUnusedPlants = (sorter) => promiseWrapper(http.fetch_unused_plan
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
 export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);
-export const getImageFromSku = (sku) => promiseWrapper(http.fetch_image_from_sku, sku);
+export const getFullPlantImage = (id) => promiseWrapper(http.fetch_full_plant_image, id);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const getCustomers = (session) => promiseWrapper(http.fetch_customers, session);
 export const modifySku = (session, sku, operation, data) => promiseWrapper(http.modify_sku, session, sku, operation, data);
+export const modifyPlant = (session, operation, data) => promiseWrapper(http.modify_plant, session, operation, data);
 export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);
 export const getOrders = (session, status) => promiseWrapper(http.fetch_orders, session, status)
 

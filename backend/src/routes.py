@@ -1,16 +1,15 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db
-from src.models import AccountStatus, Sku, SkuStatus, ImageUses, Plant, PlantTrait, PlantTraitOptions, OrderStatus
-from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler
-from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, OrderItemHandler
+from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
+from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
+from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
-from src.utils import get_image_meta, find_available_file_names
 from sqlalchemy import exc
 import traceback
-from base64 import b64encode, b64decode
+from base64 import b64decode
 import json
 import os
 import io
@@ -314,13 +313,13 @@ def fetch_gallery_thumbnails():
     }
 
 
-# Returns thumbnail images for the given inventory SKUs
-@app.route(f'{PREFIX}/fetch_sku_thumbnails', methods=["POST"])
+# Returns thumbnail images for the given plants
+@app.route(f'{PREFIX}/fetch_plant_thumbnails', methods=["POST"])
 @handle_exception
-def fetch_sku_thumbnails():
-    sku_codes = getData('skus')
+def fetch_plant_thumbnails():
+    plant_ids = getData('ids')
     return {
-        "thumbnails": [SkuHandler.get_thumb_display_b64(SkuHandler.from_sku(s)) for s in sku_codes],
+        "thumbnails": [PlantHandler.get_thumb_display_b64(PlantHandler.from_id(i)) for i in plant_ids],
         "status": StatusCodes['SUCCESS']
     }
 
@@ -360,12 +359,12 @@ def fetch_image_from_hash():
 
 
 # Returns an image from its hash
-@app.route(f'{PREFIX}/fetch_image_from_sku', methods=["POST"])
+@app.route(f'{PREFIX}/fetch_full_plant_image', methods=["POST"])
 @handle_exception
-def fetch_image_from_sku():
-    code = getData('sku')
+def fetch_full_plant_image():
+    id = getData('id')
     return {
-        "image": SkuHandler.get_full_display_b64(SkuHandler.from_sku(code)),
+        "image": PlantHandler.get_full_display_b64(PlantHandler.from_id(id)),
         "status": StatusCodes['SUCCESS']
     }
 
@@ -397,41 +396,13 @@ def upload_gallery_image():
     failed_indexes = []
     # Iterate through images
     for i in range(len(images)):
-        img_name = names[i]
-        thumbnail_name = f'{img_name}-thumb'
-        img_extension = extensions[i]
-        # Data is stored in base64, and the beginning of the
-        # string is not needed
-        img_data = images[i][len('data:image/jpeg;base64,'):]
-        (img_hash, thumbnail, img_width, img_height) = get_image_meta(b64decode(img_data))
-        # If image hash matches a row in the database, then the
-        # image was uploaded already
-        if ImageHandler.is_hash_used(img_hash):
-            print('Image already in backend!')
-            status = StatusCodes['ERROR_SOME_IMAGES_ALREADY_UPLOADED']
+        img_data = images[i]
+        image = ImageHandler.create_from_scratch(img_data, 'TODO', Config.GALLERY_FOLDER, ImageUses.GALLERY)
+        if image is None:
+            status = StatusCodes['ERROR_UNKNOWN']
             failed_indexes.append(i)
-            continue
-        (img_name, thumb_name) = find_available_file_names(Config.GALLERY_FOLDER, img_name, img_extension)
-        img_path = f'{Config.BASE_IMAGE_DIR}/{Config.GALLERY_FOLDER}/{img_name}.{img_extension}'
-        thumbnail_path = f'{Config.BASE_IMAGE_DIR}/{Config.GALLERY_FOLDER}/{thumb_name}.{img_extension}'
-        # Save image
-        with open(img_path, 'wb') as f:
-            f.write(b64decode(img_data))
-        # Save image thumbnail
-        thumbnail.save(thumbnail_path)
-        # Add image data to database
-        img_row = ImageHandler.create(Config.GALLERY_FOLDER,
-                                      img_name,
-                                      thumbnail_name,
-                                      img_extension,
-                                      'TODO',
-                                      img_hash,
-                                      ImageUses.GALLERY,
-                                      img_width,
-                                      img_height)
-        db.session.add(img_row)
-        db.session.commit()
-        passed_indexes.append(i)
+        else:
+            passed_indexes.append(i)
     return {"passed_indexes": passed_indexes,
             "failed_indexes": failed_indexes,
             "status": status}
@@ -621,6 +592,58 @@ def modify_sku():
     if operation == 'UPDATE':
         SkuHandler.update(sku_obj, sku_data)
         PlantHandler.update(sku_obj.plant, sku_data['plant'])
+        db.session.commit()
+        return {"status": StatusCodes['SUCCESS']}
+    return {"status": StatusCodes['ERROR_UNKNOWN']}
+
+
+# Hide, unhide, add, delete, or update SKU
+@app.route(f'{PREFIX}/modify_plant', methods=["POST"])
+@handle_exception
+def modify_plant():
+    '''Like or unlike an inventory item'''
+    (session, operation, plant_data) = getData('session', 'operation', 'data')
+    if not verify_admin(session):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+    plant_obj = PlantHandler.from_id(plant_data['id'])
+    if plant_obj is None and operation != 'ADD':
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    operation_to_status = {
+        'HIDE': SkuStatus.INACTIVE.value,
+        'UNHIDE': SkuStatus.ACTIVE.value,
+        'DELETE': SkuStatus.DELETED.value
+    }
+    if operation in operation_to_status:
+        plant_obj.status = operation_to_status[operation]
+        db.session.commit()
+        return {"status": StatusCodes['SUCCESS']}
+    if operation == 'ADD' or operation == 'UPDATE':
+        # Create plant if doesn't exist
+        if plant_obj is None:
+            plant_obj = PlantHandler.create(plant_data)
+            db.session.add(plant_obj)
+        # Set display image
+        if plant_data['display_image'] is not None:
+            image = ImageHandler.create_from_scratch(plant_data['display_image']['data'], 'TODO', Config.PLANT_FOLDER, ImageUses.DISPLAY)
+            if image is not None:
+                PlantHandler.set_display_image(plant_obj, image)
+                db.session.commit()
+        # Hide existing SKUs (if they are still active, this will be updated later)
+        else:
+            for sku in plant_obj.skus:
+                sku.status = SkuStatus.INACTIVE.value
+        sku_data = plant_data.get('skus', None)
+        if sku_data:
+            for data in sku_data:
+                id = data.get('id', None)
+                # If id was in data, then this is not a new SKU
+                if id:
+                    sku = SkuHandler.from_id(id)
+                else:
+                    sku = SkuHandler.create()
+                SkuHandler.update(sku, data)
+                db.session.add(sku)
+                plant_obj.skus.append(sku)
         db.session.commit()
         return {"status": StatusCodes['SUCCESS']}
     return {"status": StatusCodes['ERROR_UNKNOWN']}

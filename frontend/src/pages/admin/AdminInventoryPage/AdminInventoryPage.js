@@ -3,11 +3,11 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, uploadAvailability } from 'query/http_promises';
+import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, modifyPlant, uploadAvailability, getPlantThumbnails } from 'query/http_promises';
 import Button from 'components/Button/Button';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
@@ -15,7 +15,7 @@ import { getTheme, getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import InputText from 'components/inputs/InputText/InputText';
-import { displayPrice } from 'utils/displayPrice';
+import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { TrashIcon, EditIcon, HideIcon, NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
@@ -30,8 +30,10 @@ function AdminInventoryPage() {
     const [selected, setSelected] = useState(null);
     // Holds the list of plants with existing SKUs
     const [existing, setExisting] = useState([]);
+    const [existingThumbnails, setExistingThumbnails] = useState([]);
     // Holds list of all plants
     const [all, setAll] = useState([]);
+    const [allThumbnails, setAllThumbnails] = useState([]);
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
     const [trait_options, setTraitOptions] = useState(null);
@@ -47,6 +49,24 @@ function AdminInventoryPage() {
             PubSub.unsubscribe(sessionSub);
         })
     }, [])
+
+    useEffect(() => {
+        let ids = existing.map(p => p.id);
+        getPlantThumbnails(ids).then(response => {
+            setExistingThumbnails(response.thumbnails);
+        }).catch(err => {
+            console.error(err);
+        });
+    }, [existing])
+
+    useEffect(() => {
+        let ids = existing.map(p => p.id);
+        getPlantThumbnails(ids).then(response => {
+            setAllThumbnails(response.thumbnails);
+        }).catch(err => {
+            console.error(err);
+        });
+    }, [all])
 
     useEffect(() => {
         getInventory(existing_sort_by, 0, true)
@@ -182,14 +202,20 @@ function AdminInventoryPage() {
                 <h2>Sort</h2>
                 <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
                 <div className="card-flex">
-                    {existing.map((plant, index) => <PlantCard key={index} plant={plant} onEdit={() => setCurrPlant(plant)} />)}
+                    {existing.map((plant, index) => <PlantCard key={index}
+                        plant={plant}
+                        onEdit={() => setCurrPlant(plant)}
+                        thumbnail={existingThumbnails.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
             <Collapsible title="Plants without active SKUs">
                 <h2>Sort</h2>
                 <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
                 <div className="card-flex">
-                    {all.map((plant, index) => <PlantCard key={index} plant={plant} onEdit={() => setCurrPlant(plant)} />)}
+                    {all.map((plant, index) => <PlantCard key={index}
+                        plant={plant}
+                        onEdit={() => setCurrPlant(plant)}
+                        thumbnail={allThumbnails.length >= index ? allThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
         </StyledAdminInventoryPage >
@@ -207,6 +233,7 @@ function PlantCard({
     onHide,
     onDelete,
     plant,
+    thumbnail,
     theme = getTheme(),
 }) {
     let has_skus = plant.skus?.length > 0;
@@ -226,10 +253,10 @@ function PlantCard({
     ));
 
     let display_image;
-    if (plant.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${plant.display_image}`} alt="TODO" />
+    if (thumbnail) {
+        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
-        display_image = <NoImageIcon />
+        display_image = <NoImageIcon className="display-image" />
     }
 
     return (
@@ -261,7 +288,7 @@ function PlantPopup({
     theme = getTheme(),
     trait_options
 }) {
-    console.log('PROP UPPPPPPPP', plant);
+    console.log('PLANT POPUP', plant)
     const [latin_name, setLatinName] = useState(plant.latin_name ?? '');
     const [common_name, setCommonName] = useState(plant.common_name ?? '');
     const [drought_tolerance, setDroughtTolerance] = useState("");
@@ -273,7 +300,7 @@ function PlantPopup({
 
     // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
-    // Used to display SKU info
+    // Used to display selected SKU info
     const [selectedSku, setSelectedSku] = useState(null);
     const [skus, setSkus] = useState(plant.skus ?? []);
     const [code, setCode] = useState(selectedSku?.sku ?? '');
@@ -281,33 +308,57 @@ function PlantPopup({
     const [price, setPrice] = useState(selectedSku?.price ?? '');
     const [quantity, setQuantity] = useState(selectedSku?.availability ?? '');
 
-    const saveSku = () => {
-        // let plant_data = {
-        //     "latin_name": latin_name,
-        //     "common_name": common_name,
-        //     "drought_tolerance": drought_tolerance,
-        //     "grown_height": grown_height,
-        //     "grown_spread": grown_spread,
-        //     "growth_rate": growth_rate,
-        //     "optimal_light": optimal_light,
-        //     "salt_tolerance": salt_tolerance
-        // }
-        // let sku_data = {
-        //     "code": code,
-        //     "size": size,
-        //     "price": price,
-        //     "quantity": quantity,
-        //     "plant": plant_data,
-        // }
-        // let operation = sku === null ? 'ADD' : 'UPDATE';
-        // modifySku(session, sku?.sku ?? code, operation, sku_data)
-        //     .then(() => {
-        //         alert('SKU Updated!')
-        //     })
-        //     .catch((error) => {
-        //         console.error(error);
-        //         alert('Failed to update SKU!')
-        //     });
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['sku'] = code;
+    }, [code])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['size'] = size;
+    }, [size])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['price'] = displayPriceToDatabase(price);
+    }, [price])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['availability'] = quantity;
+    }, [quantity])
+
+    useEffect(() => {
+        console.log(selectedSku);
+        if (!selectedSku) return;
+        setCode(selectedSku['sku'] ?? '');
+        setSize(selectedSku['size'] ?? '');
+        setPrice(selectedSku['price'] ? displayPrice(selectedSku['price']) : '');
+        setQuantity(selectedSku['availability'] ?? '');
+    }, [selectedSku])
+
+    const savePlant = () => {
+        let plant_data = {
+            "id": plant['id'],
+            "latin_name": latin_name,
+            "common_name": common_name,
+            "drought_tolerance": drought_tolerance,
+            "grown_height": grown_height,
+            "grown_spread": grown_spread,
+            "growth_rate": growth_rate,
+            "optimal_light": optimal_light,
+            "salt_tolerance": salt_tolerance,
+            "skus": skus,
+            "display_image": selectedImage,
+        }
+        modifyPlant(session, 'UPDATE', plant_data)
+            .then(() => {
+                alert('SKU Updated!')
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('Failed to update SKU!')
+            });
     }
 
     // Returns an input text or a dropdown, depending on if the field is in the trait options
@@ -356,6 +407,17 @@ function PlantPopup({
         setSkus(l => l.concat({ sku: makeID(10) }))
     }
 
+    const removeSku = useCallback(() => {
+        //let index = skus.findIndex(s => s.sku === selectedSku.sku)
+        let index = skus.indexOf(selectedSku);
+        console.log('SLECTED', selectedSku)
+        console.log("INDEX IS", index)
+        if (index < 0) return;
+        let spliced = skus.splice(index, 1);
+        console.log('SPLICED', spliced)
+        setSkus(l => l.filter(s => s.sku !== selectedSku.sku))
+    }, [skus, selectedSku])
+
     //Show display image from uploaded image.
     //If no upload image, from model data.
     //If not model data, show NoImageIcon
@@ -378,10 +440,12 @@ function PlantPopup({
                 <h3>SKUs</h3>
                 <div className="sku-list">
                     {skus.map(s => (
-                        <div className="sku-option">{s.sku}</div>
+                        <div className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
+                            onClick={() => setSelectedSku(s)}>{s.sku}</div>
                     ))}
                 </div>
-                <Button className="add-sku" onClick={newSku}>Add SKU</Button>
+                {selectedSku ? <Button className="delete-sku" onClick={removeSku}>Delete</Button> : null}
+                <Button className="add-sku" onClick={newSku}>New SKU</Button>
             </div>
             <div className="plant-info-div">
                 <InputText
@@ -420,7 +484,7 @@ function PlantPopup({
                         value={code}
                         valueFunc={setCode}
                     />
-                    {getInput('size', 'Size', size, setSize)}
+                    {getInput('size', 'Size', size, setSize, false)}
                 </div>
                 <div className="half">
                     <InputText
@@ -437,7 +501,7 @@ function PlantPopup({
                     />
                 </div>
             </div>
-            <Button onClick={saveSku}>Save SKU</Button>
+            <Button onClick={savePlant}>Apply Changes</Button>
         </StyledPlantPopup>
     );
 }

@@ -175,16 +175,16 @@ export async function fetch_image_from_hash(hash) {
     return await fetchWrapper(`${PREFIX}/fetch_image_from_hash`, options);
 }
 
-export async function fetch_image_from_sku(sku) {
+export async function fetch_full_plant_image(id) {
     let json = JSON.stringify({
-        "sku": sku,
+        "id": id,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_image_from_sku`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_full_plant_image`, options);
 }
 
 export async function fetch_gallery_thumbnails(skus) {
@@ -199,16 +199,16 @@ export async function fetch_gallery_thumbnails(skus) {
     return await fetchWrapper(`${PREFIX}/fetch_gallery_thumbnails`, options);
 }
 
-export async function fetch_sku_thumbnails(skus) {
+export async function fetch_plant_thumbnails(ids) {
     let json = JSON.stringify({
-        "skus": skus,
+        "ids": ids,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_sku_thumbnails`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_plant_thumbnails`, options);
 }
 
 export async function upload_gallery_images(formData) {
@@ -329,6 +329,20 @@ export async function modify_sku(session, sku, operation, data) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
+}
+
+export async function modify_plant(session, operation, data) {
+    let json = JSON.stringify({
+        "session": session,
+        "operation": operation,
+        "data": data
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/modify_plant`, options);
 }
 
 export async function modify_user(session, id, operation) {

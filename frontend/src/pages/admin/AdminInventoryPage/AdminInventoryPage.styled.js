@@ -98,6 +98,17 @@ export const StyledPlantPopup = styled.div`
                 padding-bottom: 3px;
                 border-bottom: 1px solid ${({ theme }) => theme.textPrimary};
             }
+
+            .selected {
+                background-color: rgba(255, 255, 255, 0.45);
+                box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        .delete-sku {
+            position: fixed;
+            left: 10px;
+            bottom: 55px;
         }
 
         .add-sku {
@@ -132,5 +143,6 @@ export const StyledPlantPopup = styled.div`
         max-width: -webkit-fill-available;
         max-height: 100%;
         max-height: -webkit-fill-available;
+        bottom: 0;
     }
 `;

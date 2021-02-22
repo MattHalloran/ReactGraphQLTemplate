@@ -2,7 +2,7 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMe
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
-import { getSkuThumbnails, getImageFromSku, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
+import { getPlantThumbnails, getFullPlantImage, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
@@ -43,8 +43,8 @@ function ShoppingList({
     const loading = useRef(false);
 
     useEffect(() => {
-        let codes = plants.map(p => p.skus[0].sku);
-        getSkuThumbnails(codes).then(response => {
+        let ids = plants.map(p => p.id);
+        getPlantThumbnails(ids).then(response => {
             setThumbnails(response.thumbnails);
         }).catch(err => {
             console.error(err);
@@ -292,7 +292,7 @@ function ExpandedPlant({
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        getImageFromSku(plant.skus[0].sku).then(response => {
+        getFullPlantImage(plant.id).then(response => {
             setImage(response.image);
         }).catch(error => {
             console.error(error);

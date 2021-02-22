@@ -259,6 +259,7 @@ class ImageUses(Enum):
     PLANT_FRUIT = 5
     PLANT_BARK = 6
     PLANT_HABIT = 7
+    DISPLAY = 8
 
 
 # Stores metadata for images used on website (gallery, plants, etc), but NOT profile pictures
@@ -290,14 +291,14 @@ class Image(db.Model):
                  used_for: ImageUses,
                  width: int,
                  height: int):
-        if extension not in self.SUPPORTED_IMAGE_TYPES:
+        if extension.replace('.', '') not in self.SUPPORTED_IMAGE_TYPES:
             raise Exception('File extension not supported for images')
         if used_for not in ImageUses:
             raise Exception('Must pass a valid used_for value')
         self.folder = folder
         self.file_name = file_name
         self.thumbnail_file_name = thumbnail_file_name
-        self.extension = extension
+        self.extension = extension.replace('.', '')
         self.alt = alt
         self.hash = hash
         self.used_for = used_for.value
@@ -409,9 +410,14 @@ class Plant(db.Model):
         f'{Tables.PLANT_TRAIT.value}.id'))
     salt_tolerance_id = Column(Integer, ForeignKey(
         f'{Tables.PLANT_TRAIT.value}.id'))
+    # User-specified display image. If none set, uses one of the other images
+    # associated with this plant
+    display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-one relationships
+    display_img = db.relationship(
+        'Image', uselist=False, foreign_keys=[display_img_id])
     deer_resistance = db.relationship(
         'PlantTrait', uselist=False, foreign_keys=[deer_resistance_id])
     drought_tolerance = db.relationship(
@@ -556,11 +562,8 @@ class Sku(db.Model):
     # Price in cents, before discounts (ex: $10.67 => 1067)
     price = Column(String(25), nullable=False, default=defaults['price'])
     status = Column(Integer, nullable=False, default=defaults['status'])
-    display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    display_img = db.relationship(
-        'Image', uselist=False, foreign_keys=[display_img_id])
     discounts = db.relationship(
         'SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------

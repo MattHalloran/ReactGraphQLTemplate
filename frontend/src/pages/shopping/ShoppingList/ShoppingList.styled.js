@@ -64,7 +64,8 @@ export const StyledPlantCard = styled.div`
         display: block;
         position: absolute;
         width: 100%;
-        top: 0%;
+        max-height: 100%;
+        bottom: 0%;
     }
 
     .display-image-container {
@@ -82,10 +83,10 @@ export const StyledExpandedPlant = styled.div`
     width: -webkit-fill-available;
     width: -moz-available;
     height: 100%;
-    min-width: 50vw;
+    min-width: 60vw;
 
     .main-div {
-        padding-bottom: 19%;
+        padding-bottom: 30%;
         width: -webkit-fill-available;
         width: -moz-available;
     }
@@ -190,7 +191,6 @@ export const StyledExpandedPlant = styled.div`
         > svg {
             stroke: none;
             fill: ${({ theme }) => theme.textPrimary};
-            width: max(40px, 25%);
         }
 
         > *:first-child {
@@ -202,7 +202,7 @@ export const StyledExpandedPlant = styled.div`
     .selecter,
     .quanter {
         display: inline-block;
-        width: 40%;
+        width: 45%;
 
         > * {
             margin-bottom: 0;
@@ -210,6 +210,6 @@ export const StyledExpandedPlant = styled.div`
     }
 
     .bag {
-        width: 20%;
+        width: 10%;
     }
 `;
