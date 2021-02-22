@@ -30,10 +30,12 @@ function DropDown({ allow_custom_input = false,
         return multi_select ? [value] : value;
     })
 
-    console.log('DROPDOWN OPTIONS AREEEE', options, selected);
+    const trackScrolling = () => setY(document.getElementById(dropID.current)?.getBoundingClientRect()?.y ?? 0);
 
     useEffect(() => {
-        setY(document.getElementById(dropID.current)?.getBoundingClientRect()?.y ?? 0);
+        trackScrolling();
+        document.addEventListener('scroll', trackScrolling);
+        return () => document.removeEventListener('scroll', trackScrolling);
     },[])
 
     useEffect(() => {
@@ -100,7 +102,7 @@ function DropDown({ allow_custom_input = false,
         } else {
             setSelected(option);
         }
-    }, [selected])
+    }, [selected, findIndex, multi_select, was_drag])
 
     const renderOption = useCallback((option) => {
         let is_selected = false;
@@ -121,7 +123,7 @@ function DropDown({ allow_custom_input = false,
                 {option.label}
             </div>
         )
-    }, [selected]);
+    }, [selected, findIndex, multi_select, setValue]);
 
     let control_text;
     if (multi_select) {
@@ -144,7 +146,7 @@ function DropDown({ allow_custom_input = false,
     </div>) : null
 
     return (
-        <StyledDropDown id={dropID.current} theme={theme} is_open={is_open} className={className} ref={clickRef} size_data={[window.innerHeight, y]}>
+        <StyledDropDown id={dropID.current} theme={theme} is_open={is_open} num_options={options?.length ?? 0} className={className} ref={clickRef} size_data={[window.innerHeight, y]}>
             <div className={'DropDown-control' + (disabled ? 'DropDown-disabled' : '')} onClick={() => setIsOpen(is => !is)} aria-haspopup='listbox'>
                 {control}
                 <span className='DropDown-arrow' />

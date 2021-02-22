@@ -4,6 +4,7 @@ import pandas as pd
 import math
 import numpy
 from src.api import db
+from src.models import SkuStatus
 from src.handlers import SkuHandler, PlantHandler
 
 
@@ -23,8 +24,11 @@ def upload_availability(app, data):
     prices = df['Price 10+']
     codes = df['Plant Code']
     quantities = df['Quantity']
-    # TODO remove plants not found in availability list
+    # TODO figure out rollback
     with app.app_context():
+        # First, hide all old SKUs. These can't be deleted, since they
+        # can still be in orders
+        SkuHandler.hide_all()
         for i in range(len(latin_names)):
             curr_latin = latin_names[i]
             curr_sku = codes[i]
@@ -34,9 +38,9 @@ def upload_availability(app, data):
             if sku is None:
                 plant = PlantHandler.from_latin(curr_latin)
                 # If found by plant, update sku with code
-                if plant:
+                if plant and (skus := SkuHandler.from_plant(plant)):
                     print(f'Found SKU {curr_sku} by plant instead of code')
-                    sku = SkuHandler.from_plant(plant)
+                    sku = skus[0]
             # If SKU not found by code or plant, create from scratch
             if sku is None:
                 print(f'Could not find SKU associated with {curr_sku}. Attempting to create new one')
@@ -49,11 +53,14 @@ def upload_availability(app, data):
                 db.session.commit()
             # Now that we have a SKU, update it and its plant with the spreadsheet data
             plant_dict = {}
-            sku_dict = {}
+            sku_dict = {
+                'status': SkuStatus.ACTIVE.value
+            }
             if not is_cell_blank(common_names[i]):
                 print('IN COMMON NAME')
                 plant_dict['common_name'] = common_names[i]
             if not is_cell_blank(sizes[i]):
+                print(f"SIZE IS: unformatted: {str(sizes[i])} formatted: {str(sizes[i]).replace('#', '')}")
                 sku_dict['size'] = str(sizes[i]).replace('#', '')
             if not is_cell_blank(prices[i]):
                 sku_dict['price'] = str(prices[i]).replace('.', '0')  # Add 0 because price only has one decimal place

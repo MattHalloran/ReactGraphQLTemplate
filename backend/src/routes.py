@@ -241,13 +241,10 @@ def fetch_inventory():
     # Find all plants that have available SKUs associated with them
     plants_with_skus = []
     for id in all_plant_ids:
-        # Admins can view plants that are hidden to customers
-        if admin and PlantHandler.has_sku(id):
-            plants_with_skus.append(PlantHandler.from_id(id))
-        elif not admin and PlantHandler.has_available_sku(id):
+        if PlantHandler.has_available_sku(id):
             plants_with_skus.append(PlantHandler.from_id(id))
     if len(plants_with_skus) == 0:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return {"status": StatusCodes['WARNING_NO_RESULTS']}
     # Define map for handling sort options
     sort_map = {
         'az': (lambda p: p.latin_name, False),
@@ -257,7 +254,7 @@ def fetch_inventory():
         'new': (lambda p: PlantHandler.newest(p), True),
         'old': (lambda p: PlantHandler.oldest(p), True),
     }
-    # Sort the SKUs
+    # Sort the plants
     sort_data = sort_map.get(sorter, None)
     if sort_data is None:
         print('Could not find the correct sorter')
@@ -275,16 +272,33 @@ def fetch_inventory():
     }
 
 
-# Returns IDs of plant templates in the database,
-# as well as info to display the first page
-@app.route(f'{PREFIX}/fetch_plants', methods=["POST"])
+# Returns plants that do not have any assigned SKUs
+@app.route(f'{PREFIX}/fetch_unused_plants', methods=["POST"])
 @handle_exception
-def fetch_plants():
-    ids = PlantHandler.all_ids()
-    page_results = [PlantHandler.to_dict(PlantHandler.from_id(id)) for id in ids]
+def fetch_unused_plants():
+    (sorter) = getData('sorter')
+    # Grab plant ids
+    all_plant_ids = PlantHandler.all_ids()
+    # Find all plants that do not have associated SKUs
+    lone_plants = []
+    for id in all_plant_ids:
+        # Admins can view plants that are hidden to customers
+        if not PlantHandler.has_available_sku(id):
+            lone_plants.append(PlantHandler.from_id(id))
+    if len(lone_plants) == 0:
+        return {"status": StatusCodes['WARNING_NO_RESULTS']}
+    sort_map = {
+        'az': (lambda p: p.latin_name, False),
+        'za': (lambda p: p.latin_name, True)
+    }
+    # Sort the plants
+    sort_data = sort_map.get(sorter, None)
+    if sort_data is None:
+        print('Could not find the correct sorter')
+        return {"status": StatusCodes['ERROR_INVALID_ARGS']}
+    lone_plants.sort(key=sort_data[0], reverse=sort_data[1])
     return {
-        "all_plants": ids,
-        "page_results": page_results,
+        "plants": PlantHandler.all_dicts(lone_plants),
         "status": StatusCodes['SUCCESS']
     }
 

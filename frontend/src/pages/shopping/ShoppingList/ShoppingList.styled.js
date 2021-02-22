@@ -85,7 +85,7 @@ export const StyledExpandedPlant = styled.div`
     min-width: 50vw;
 
     .main-div {
-        padding-bottom: 14%;
+        padding-bottom: 19%;
         width: -webkit-fill-available;
         width: -moz-available;
     }
@@ -173,7 +173,7 @@ export const StyledExpandedPlant = styled.div`
     }
 
     .bottom-div {
-        height: 10%;
+        height: 15%;
         bottom: 0;
         width: -webkit-fill-available;
         width: -moz-available;
@@ -184,7 +184,7 @@ export const StyledExpandedPlant = styled.div`
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        padding: 0 10px;
+        padding: 5px 10px;
         border-top: 2px solid ${({ theme }) => theme.textPrimary};
 
         > svg {
@@ -201,7 +201,12 @@ export const StyledExpandedPlant = styled.div`
 
     .selecter,
     .quanter {
+        display: inline-block;
         width: 40%;
+
+        > * {
+            margin-bottom: 0;
+        }
     }
 
     .bag {

@@ -2,11 +2,11 @@ import styled from 'styled-components';
 
 //Determines if the menu opens above the dropdown or below.
 //Defaults to below
-const getMenuStyle = (data) => {
+const getMenuStyle = (data, num_options) => {
     let window_height = data[0];
     let control_y = data[1];
     let space_below = window_height - control_y;
-    if (space_below < 150) {
+    if (space_below < ((num_options+1) * 35)) {
         return `
             max-height: ${control_y - 40 - 50}px;
             bottom: 100%;
@@ -84,7 +84,7 @@ export const StyledDropDown = styled.div`
         z-index: 1000;
         -webkit-overflow-scrolling: touch;
         margin-top: -1px;
-        ${({ size_data }) => getMenuStyle(size_data)};
+        ${({ size_data, num_options }) => getMenuStyle(size_data, num_options)};
     }
     
     .DropDown-option {

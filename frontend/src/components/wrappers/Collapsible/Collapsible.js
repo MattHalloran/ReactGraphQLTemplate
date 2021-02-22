@@ -17,12 +17,10 @@ function Collapsible({
     const togglePanel = () => {
         setOpen(open => !open);
     }
-    return (<StyledCollapsible theme={theme}>
+    return (<StyledCollapsible theme={theme} is_open={open}>
         <div onClick={() => togglePanel()} className={headerClassName}>
             {title}
-            <div className="collapse-arrow-wrapper">
                 <span className='collapse-arrow' />
-            </div>
         </div>
         {open ? (
             <div className={contentClassName}>

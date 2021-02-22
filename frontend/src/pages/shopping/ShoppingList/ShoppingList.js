@@ -29,9 +29,8 @@ function ShoppingList({
     const [loaded_plants, setLoadedPlants] = useState([]);
     // SKU codes for all SKUs, not just displayed ones
     const all_plant_ids = useRef([]);
-    // List of data passed to SKU cards. Each card represents 1 or more SKUs,
-    // that share the same plant info
-    const [sku_groups, setSkuGroups] = useState([]);
+    // Plant data for all visible plants (i.e. not filtered)
+    const [plants, setPlants] = useState([]);
     // Thumbnail data for every sku group
     const [thumbnails, setThumbnails] = useState([]);
     // Full image data for every sku group
@@ -40,17 +39,17 @@ function ShoppingList({
     let history = useHistory();
     const urlParams = useParams();
     // Find the current SKU group index, by any of the group's SKUs
-    let curr_index = sku_groups?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
+    let curr_index = plants?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
     const loading = useRef(false);
 
     useEffect(() => {
-        let codes = sku_groups.map(p => p.skus[0].sku);
+        let codes = plants.map(p => p.skus[0].sku);
         getSkuThumbnails(codes).then(response => {
             setThumbnails(response.thumbnails);
         }).catch(err => {
             console.error(err);
         });
-    }, [sku_groups])
+    }, [plants])
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -105,7 +104,7 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length == 0) {
-            setSkuGroups(loaded_plants);
+            setPlants(loaded_plants);
             return;
         }
         //Select all plants that contain the filters
@@ -136,7 +135,7 @@ function ShoppingList({
                 }
             }
         }
-        setSkuGroups(filtered_plants);
+        setPlants(filtered_plants);
     }, [loaded_plants, filters])
 
     const loadNextPage = useCallback(() => {
@@ -177,17 +176,21 @@ function ShoppingList({
         history.push(LINKS.Shopping + "/" + sku);
     };
 
-    const setInCart = (sku, operation, quantity) => {
+    const setInCart = (name, sku, operation, quantity) => {
         if (!session?.email || !session?.token) return;
-        let display_name = sku?.plant?.latin_name ?? sku?.plant?.common_name ?? 'plant';
+        let max_quantity = parseInt(sku.availability);
+        if (Number.isInteger(max_quantity) && quantity > max_quantity) {
+            alert(`Error: Cannot add more than ${max_quantity}!`);
+            return;
+        }
         setSkuInCart(session, sku.sku, operation, quantity)
             .then(() => {
                 if (operation === 'ADD')
-                    alert(`${quantity} ${display_name}(s) added to cart!`)
+                    alert(`${quantity} ${name}(s) added to cart!`)
                 else if (operation === 'SET')
-                    alert(`${display_name} quantity updated to ${quantity}!`)
+                    alert(`${name} quantity updated to ${quantity}!`)
                 else if (operation === 'DELETE')
-                    alert(`${display_name} 'removed from' cart!`)
+                    alert(`${name} 'removed from' cart!`)
             })
             .catch(err => {
                 console.error(err);
@@ -200,7 +203,7 @@ function ShoppingList({
             setPopup(null);
             return;
         }
-        let popup_data = sku_groups[curr_index];
+        let popup_data = plants[curr_index];
         setPopup(
             <Modal onClose={() => history.goBack()}>
                 <ExpandedPlant plant={popup_data}
@@ -209,12 +212,12 @@ function ShoppingList({
                     theme={theme} />
             </Modal>
         );
-    }, [sku_groups, curr_index])
+    }, [plants, curr_index])
 
     return (
         <StyledShoppingList id={track_scrolling_id}>
             {popup}
-            {sku_groups.map((item, index) =>
+            {plants.map((item, index) =>
                 <PlantCard key={index}
                     theme={theme}
                     cart={cart}
@@ -243,7 +246,7 @@ function PlantCard({
     const [theme] = useState(getTheme());
 
     let sizes = plant.skus.map(s => (
-        <div>#{s.size}: {displayPrice(s.price)} | {s.availability}</div>
+        <div>Size: #{s.size}<br/>Price: {displayPrice(s.price)}<br/>Avail: {s.availability}</div>
     ));
 
     let display_image;
@@ -375,19 +378,24 @@ function ExpandedPlant({
                 </Collapsible>
             </div>
             <div className="icon-container bottom-div">
-                <DropDown className="selecter" options={order_options} onChange={handleSortChange} initial_value={order_options[0]} />
-                <QuantityBox
-                    className="quanter"
-                    min_value={0}
-                    max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
-                    initial_value={1}
-                    value={quantity}
-                    valueFunc={setQuantity} />
+                <div className="selecter">
+                    <label>Option</label>
+                    <DropDown options={order_options} onChange={handleSortChange} initial_value={order_options[0]} />
+                </div>
+                <div className="quanter">
+                    <label>Quantity</label>
+                    <QuantityBox
+                        min_value={0}
+                        max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
+                        initial_value={1}
+                        value={quantity}
+                        valueFunc={setQuantity} />
+                </div>
                 <BagPlusIcon
                     className="bag"
                     width="30px"
                     height="30px"
-                    onClick={() => onCart(selected, 'ADD', quantity)} />
+                    onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected, 'ADD', quantity)} />
             </div>
         </StyledExpandedPlant>
     );

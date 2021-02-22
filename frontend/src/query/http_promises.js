@@ -36,7 +36,7 @@ export const uploadAvailability = (formData) => promiseWrapper(http.upload_avail
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
 export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
 export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
-export const getPlants = (sort) => promiseWrapper(http.fetch_plants, sort);
+export const getUnusedPlants = (sorter) => promiseWrapper(http.fetch_unused_plants, sorter);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
 export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);

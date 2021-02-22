@@ -109,16 +109,16 @@ export async function fetch_customers(session) {
     return await fetchWrapper(`${PREFIX}/fetch_customers`, options);
 }
 
-export async function fetch_plants(sort) {
+export async function fetch_unused_plants(sorter) {
     let json = JSON.stringify({
-        "sort": sort,
+        "sorter": sorter,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_plants`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_unused_plants`, options);
 }
 
 export async function fetch_inventory(sorter, page_size, admin) {

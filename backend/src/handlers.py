@@ -137,9 +137,6 @@ class Handler(ABC):
             id_list = cls.all_ids()
         elif len(args) == 1 and type(args[0]) is list:
             id_list = args[0]
-        print('YEEEEEET')
-        print(args)
-        print(id_list)
         return [cls.from_id(id) for id in id_list]
 
     @classmethod
@@ -600,7 +597,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['sku', 'size', 'price', 'availability', 'is_discountable']
+        return ['sku', 'size', 'price', 'availability', 'is_discountable', 'status']
 
     @staticmethod
     def required_fields():
@@ -708,6 +705,14 @@ class SkuHandler(Handler):
         if skus is None:
             return -1
         return sorted(skus, key=lambda s: s.date_added, reverse=True)
+
+    @classmethod
+    def hide_all(cls):
+        '''Hides all SKUs from the customer'''
+        skus = cls.all_objs()
+        for sku in skus:
+            sku.status = SkuStatus.INACTIVE.value
+        db.session.commit()
 
 
 class UserHandler(Handler):

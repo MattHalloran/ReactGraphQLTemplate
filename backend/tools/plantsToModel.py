@@ -14,7 +14,7 @@ from src.handlers import Handler, ImageHandler, PlantHandler, PlantTraitHandler,
 from src.utils import get_image_meta, find_available_file_names  # NOQA
 
 # Will create a SKU for every plant added
-AUTO_CREATE_SKU = True
+AUTO_CREATE_SKU = False
 IN_FILE = '../plant_info/combined-output.json'
 
 app = create_app()
