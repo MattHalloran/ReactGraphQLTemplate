@@ -301,19 +301,32 @@ export async function set_like_sku(session, sku, liked) {
     return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
 }
 
-export async function set_sku_in_cart(session, sku, operation, quantity) {
+export async function set_order_status(session, id, status) {
     let json = JSON.stringify({
         "session": session,
-        "sku": sku,
-        "operation": operation,
-        "quantity": quantity
+        "id": id,
+        "status": status,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
+    return await fetchWrapper(`${PREFIX}/set_order_status`, options);
+}
+
+export async function update_cart(session, who, cart) {
+    let json = JSON.stringify({
+        "session": session,
+        "who": who,
+        "cart": cart,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/update_cart`, options);
 }
 
 export async function modify_sku(session, sku, operation, data) {
@@ -359,12 +372,10 @@ export async function modify_user(session, id, operation) {
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
 }
 
-export async function submit_order(session, is_delivery, requested_date, notes) {
+export async function submit_order(session, cart) {
     let json = JSON.stringify({
         "session": session,
-        "is_delivery": is_delivery,
-        "requested_date": requested_date,
-        "notes": notes
+        "cart": cart,
     });
     let options = {
         body: json,

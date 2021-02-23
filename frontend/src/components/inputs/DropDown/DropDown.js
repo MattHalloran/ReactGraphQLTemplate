@@ -131,6 +131,7 @@ function DropDown({ allow_custom_input = false,
     } else {
         control_text = typeof selected === 'string' ? selected : selected.label;
     }
+    console.log('CONTROL TEXTTTT', control_text, selected);
 
     let any_selected = (multi_select && selected.length > 0) || (!multi_select && selected.value?.length > 0);
     let control = allow_custom_input ? (

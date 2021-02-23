@@ -37,6 +37,17 @@ function LogInForm() {
 
     return (
         <React.Fragment>
+            {/* I kid you not, the autofill will not work correctly if this isn't here */}
+            <InputText
+                style={{visibility:'hidden',display:'none'}}
+                label="Email"
+                type="email"
+                value={email}
+                valueFunc={setEmail}
+                errorFunc={setEmailError}
+                validate={validation.emailValidation}
+                showErrors={showErrors}
+            />
             <InputText
                 label="Email"
                 type="email"

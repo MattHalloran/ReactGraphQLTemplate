@@ -48,10 +48,11 @@ export const modifySku = (session, sku, operation, data) => promiseWrapper(http.
 export const modifyPlant = (session, operation, data) => promiseWrapper(http.modify_plant, session, operation, data);
 export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);
 export const getOrders = (session, status) => promiseWrapper(http.fetch_orders, session, status)
+export const setOrderStatus = (session, id, status) => promiseWrapper(http.set_order_status, session, id, status);
 
-export function submitOrder(session, is_delivery, requested_date, notes) {
+export function submitOrder(session, cart) {
     return new Promise(function (resolve, reject) {
-        http.submit_order(session, is_delivery, requested_date, notes).then(data => {
+        http.submit_order(session, cart).then(data => {
             if (data.ok) {
                 storeItem(LOCAL_STORAGE.Cart, null);
                 resolve(data);
@@ -166,9 +167,9 @@ export function setLikeSku(session, sku, liked) {
     });
 }
 
-export function setSkuInCart(session, sku, operation, quantity) {
+export function updateCart(session, who, cart) {
     return new Promise(function (resolve, reject) {
-        http.set_sku_in_cart(session, sku, operation, quantity).then(response => {
+        http.update_cart(session, who, cart).then(response => {
             if (response.ok) {
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);

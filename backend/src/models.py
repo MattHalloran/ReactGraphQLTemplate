@@ -4,6 +4,8 @@ from enum import Enum
 from sqlalchemy import Column, Integer, String, DECIMAL, Float, Boolean, ForeignKey
 import time
 from src.utils import salt
+import os
+import json
 
 
 # Used to help prevent typos. You may be wondering if you could
@@ -584,30 +586,6 @@ class Sku(db.Model):
         return f"{self.__tablename__}('{self.sku}', '{self.price}', '{self.availability}')"
 
 
-class OrderStatus(Enum):
-    # Admin canceled the order at any point before delivery
-    CANCELED_BY_ADMIN = -4
-    # 1) User canceled the order before it was approved (i.e. no admin approval needed), OR
-    # 2) PENDING_CANCEL was approved by admin
-    CANCELED_BY_USER = -3
-    # User canceled the order after it was approved (i.e. admin approval needed)
-    PENDING_CANCEL = -2
-    # Order was pending, but admin denied it
-    REJECTED = -1
-    # Order that hasn't been submitted yet (i.e. cart)
-    DRAFT = 0
-    # Order that has been submitted, but not approved by admin yet
-    PENDING = 1
-    # Order that has been approved by admin
-    APPROVED = 2
-    # Order has been scheduled for delivery
-    SCHEDULED = 3
-    # Order is currently being delivered
-    IN_TRANSIT = 4
-    # Order has been delivered
-    DELIVERED = 5
-
-
 class OrderItem(db.Model):
     defaults = {
         'quantity': 1
@@ -633,9 +611,25 @@ class OrderItem(db.Model):
         return f"{self.__tablename__}({self.sku})"
 
 
+# -4 | CANCELED_BY_ADMIN | Admin canceled the order at any point before delivery
+# -3 | CANCELED_BY_USER |
+#       1) User canceled order before approval (i.e. no admin approval needed), OR
+#       2) PENDING_CANCEL was approved by admin
+# -2 | PENDING_CANCEL | User canceled order after approval (i.e. admin approval needed)
+# -1 | REJECTED | Order was pending, but admin denied it
+#  0 | DRAFT | Order that hasn't been submitted yet (i.e. cart)
+#  1 | PENDING | Order that has been submitted, but not approved by admin yet
+#  2 | APPROVED | Order that has been approved by admin
+#  3 | SCHEDULED | Order has been scheduled for delivery
+#  4 | IN_TRANSIT | Order is currently being delivered
+#  5 | DELIVERED | Order has been delivered
+with open(os.path.join(os.path.dirname(__file__), "consts/orderStatus.json"), 'r') as f:
+    OrderStatus = json.load(f)
+
+
 class Order(db.Model):
     defaults = {
-        'status': OrderStatus.DRAFT.value,
+        'status': OrderStatus['DRAFT'],
         'is_delivery': True,
     }
 

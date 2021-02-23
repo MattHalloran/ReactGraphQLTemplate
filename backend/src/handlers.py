@@ -398,11 +398,10 @@ class OrderItemHandler(Handler):
     @classmethod
     def to_dict(cls, model: OrderItem):
         model = cls.convert_to_model(model)
-        print('ORDER ITEM HANDLER TO DICT')
-        print(type(model))
         return {
+            'id': model.id,
             'quantity': model.quantity,
-            'sku': SkuHandler.to_dict(model.sku)
+            'sku': SkuHandler.to_dict(model.sku),
         }
 
 
@@ -411,18 +410,18 @@ class OrderHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['delivery_address', 'special_instructions', 'desired_delivery_date', 'items', 'user_id']
+        return ['is_delivery', 'delivery_address', 'special_instructions', 'desired_delivery_date', 'items', 'user_id']
 
     @staticmethod
     def required_fields():
-        return ['user_id']
+        return ['quantity', 'sku']
 
     @classmethod
     def to_dict(cls, model: Order):
         model = cls.convert_to_model(model)
-        print('ORDER HANDLER TO DICT')
-        print(type(model))
-        as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'desired_delivery_date'])
+        print(f'ORDER IS_DELIVERY: {model.is_delivery}')
+        as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'is_delivery', 'desired_delivery_date'])
+        as_dict['id'] = model.id
         as_dict['items'] = OrderItemHandler.all_dicts(model.items)
         as_dict['delivery_address'] = AddressHandler.to_dict(model.delivery_address)
         customer = UserHandler.from_id(model.user_id)
@@ -431,16 +430,67 @@ class OrderHandler(Handler):
             "first_name": customer.first_name,
             "last_name": customer.last_name,
         }
+        print(as_dict)
         return as_dict
 
     @staticmethod
-    def from_status(status: OrderStatus):
+    def from_status(status: int):
         '''Return all orders that match the provided status'''
-        return db.session.query(Order).filter_by(status=status.value).all()
+        return db.session.query(Order).filter_by(status=status).all()
 
     @staticmethod
-    def set_status(model: Order, status: OrderStatus):
-        model.status = status.value
+    def set_status(model: Order, status: int):
+        model.status = status
+
+    @classmethod
+    def update_from_dict(cls, obj, data: dict):
+        items_data = data['items']
+        if len(items_data) == 0:
+            OrderHandler.empty_order()
+        else:
+            # Any item without an id is new, so we can track all ids in the dict
+            # to determine which items have been deleted
+            data_ids = []
+            for item in items_data:
+                if (item_id := item.get('id', None)):
+                    data_ids.append(item_id)
+                    item_obj = OrderItemHandler.from_id(item_id)
+                    OrderItemHandler.update(item_obj, {'quantity': item['quantity']})
+                else:
+                    new_item = OrderItemHandler.create(item)
+                    db.session.add(new_item)
+                    obj.items.append(new_item)
+            old_ids = [it.id for it in obj.items]
+            for old in old_ids:
+                # If id is not in the data list, then delete it
+                if old not in data_ids:
+                    old_item = OrderItemHandler.from_id(old)
+                    db.session.delete(old_item)
+
+        if (notes := data.get('special_instructions', None)):
+            obj.special_instructions = notes
+        if (date := data.get('desired_delivery_date', None)):
+            obj.desired_delivery_date = date
+        if (addy_id := data.get('address_id', None)):
+            obj.address_id = addy_id
+        is_delivery = data.get('is_delivery', None)
+        if is_delivery is not None:
+            obj.is_delivery = is_delivery
+
+    @classmethod
+    def empty_order(cls, model: Order):
+        '''Remove all items in the order.
+        Returns True if successful'''
+        try:
+            model = cls.convert_to_model(model)
+            for item in model.items:
+                db.session.delete(item)
+            model.items = []
+            db.session.commit()
+            return True
+        except Exception:
+            print('Failed to empty order!')
+            return False
 
 
 class PhoneHandler(Handler):
@@ -501,7 +551,8 @@ class PlantHandler(Handler):
         return ['latin_name']
 
     @classmethod
-    def to_dict(cls, model: Plant):
+    def basic_dict(cls, model: Plant):
+        '''Similar to the normal to_dict method, but without SKU data'''
         model = cls.convert_to_model(model)
 
         def array_to_dict(model_dict: dict, to_dict, field: str, key=None):
@@ -533,9 +584,14 @@ class PlantHandler(Handler):
                         'soil_phs', 'soil_types', 'light_ranges']
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
         as_dict['id'] = model.id
-        as_dict['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
-
         return as_dict
+
+    @classmethod
+    def to_dict(cls, model: Plant):
+        model = cls.convert_to_model(model)
+        data = cls.basic_dict(model)
+        data['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
+        return data
 
     @staticmethod
     def from_latin(latin: str):
@@ -701,6 +757,7 @@ class SkuHandler(Handler):
         as_dict['id'] = model.id
         as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
+        as_dict['plant'] = PlantHandler.basic_dict(model.plant)
         return as_dict
 
     @staticmethod
@@ -951,7 +1008,7 @@ class UserHandler(Handler):
         # If cart is empty, don't submit
         if len(cart.items) <= 0:
             return False
-        cart.status = OrderStatus.PENDING.value
+        cart.status = OrderStatus['PENDING']
         # Add a new, empty order to serve as the user's next cart
         cart = OrderHandler.create(user.id)
         db.session.add(cart)

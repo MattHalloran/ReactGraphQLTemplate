@@ -1,8 +1,8 @@
-import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
-import { getPlantThumbnails, getFullPlantImage, getInventory, getInventoryPage, setSkuInCart } from "query/http_promises";
+import { getPlantThumbnails, getFullPlantImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
@@ -31,7 +31,7 @@ function ShoppingList({
     const all_plant_ids = useRef([]);
     // Plant data for all visible plants (i.e. not filtered)
     const [plants, setPlants] = useState([]);
-    // Thumbnail data for every sku group
+    // Thumbnail data for every plant
     const [thumbnails, setThumbnails] = useState([]);
     // Full image data for every sku group
     const [full_images, setFullImages] = useState([]);
@@ -183,7 +183,9 @@ function ShoppingList({
             alert(`Error: Cannot add more than ${max_quantity}!`);
             return;
         }
-        setSkuInCart(session, sku.sku, operation, quantity)
+        let cart_copy = JSON.parse(JSON.stringify(cart));
+        cart_copy.items.push({'sku': sku.sku, 'quantity':quantity});
+        updateCart(session, session.email, cart_copy)
             .then(() => {
                 if (operation === 'ADD')
                     alert(`${quantity} ${name}(s) added to cart!`)

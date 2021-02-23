@@ -517,50 +517,47 @@ def set_like_sku():
     return user_data
 
 
-@app.route(f'{PREFIX}/set_sku_in_cart', methods=["POST"])
+@app.route(f'{PREFIX}/set_order_status', methods=["POST"])
 @handle_exception
-def set_sku_in_cart():
-    '''Adds, updates, or deletes an item from the user's cart
-    Returns an updated json of the user'''
-    # Grab data
-    (session, sku_code, operation, quantity) = getData('session', 'sku', 'operation', 'quantity')
-    user = verify_customer(session)
+def set_order_status():
+    '''Sets the order status for an order'''
+    (session, id, status) = getData('session', 'id', 'status')
+    if not verify_admin(session):
+        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+    order_obj = OrderHandler.from_id(id)
+    if order_obj is None:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    order_obj.status = status
+    db.session.commit()
+    return {
+        'order': OrderHandler.to_dict(order_obj),
+        'status': StatusCodes['SUCCESS']
+    }
+
+
+@app.route(f'{PREFIX}/update_cart', methods=["POST"])
+@handle_exception
+def update_cart():
+    '''Updates the cart for the specified user.
+    Only admins can update other carts.
+    Returns the updated cart data, so the frontend can verify update'''
+    (session, who, cart) = getData('session', 'who', 'cart')
+    # If changing a cart that doesn't belong to them, verify admin
+    if session['email'] is not who:
+        user = verify_admin(session)
+    else:
+        user = verify_customer(session)
     if not user:
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
-    sku = SkuHandler.from_sku(sku_code)
-    # Find or create cart
-    cart = UserHandler.get_cart(user)
-    # Find cart item that matches sku
-    matching_order_item = None
-    for item in cart.items:
-        if item.sku == sku:
-            matching_order_item = item
-            break
-    # If operation is to add
-    if operation == 'ADD':
-        # Create a new order item, if no matching SKU found
-        if not matching_order_item:
-            order_item = OrderItemHandler.create(quantity, sku)
-            db.session.add(order_item)
-            cart.items.append(order_item)
-        else:
-            matching_order_item.quantity += quantity
-    # If operation is to set the quantity
-    if operation == 'SET':
-        if matching_order_item:
-            matching_order_item.quantity = max(0, quantity)
-        # If quantity is now 0, remove item
-        if matching_order_item.quantity == 0:
-            cart.items.remove(matching_order_item)
-            db.session.delete(matching_order_item)
-    # If operation is to delete the cart item
-    if operation == 'DELETE' and matching_order_item:
-        cart.items.remove(matching_order_item)
-        db.session.delete(matching_order_item)
+    cart_obj = OrderHandler.from_id(cart['id'])
+    if cart_obj is None:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
-    user_data = UserHandler.to_dict(user)
-    user_data['status'] = StatusCodes['SUCCESS']
-    return user_data
+    return {
+        "cart": OrderHandler.to_dict(cart_obj),
+        "status": StatusCodes['SUCCESS']
+    }
 
 
 # Hide, unhide, add, delete, or update SKU
@@ -683,14 +680,24 @@ def modify_user():
 @app.route(f'{PREFIX}/submit_order', methods=["POST"])
 @handle_exception
 def submit_order():
-    (session, is_delivery, requested_date, notes) = getData('session', 'is_delivery', 'requested_date', 'notes')
+    (session, cart) = getData('session', 'cart')
+    # If changing a cart that doesn't belong to them, verify admin
     user = verify_customer(session)
     if not user:
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
-    update_success = UserHandler.update_order(user, is_delivery, requested_date, notes)
-    if update_success and UserHandler.submit_order(user):
-        return {"status": StatusCodes['SUCCESS']}
-    return {"status": StatusCodes['ERROR_UNKNOWN']}
+    cart_obj = OrderHandler.from_id(cart['id'])
+    if cart_obj is None:
+        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    OrderHandler.update_from_dict(cart_obj, cart)
+    OrderHandler.set_status(cart_obj, OrderStatus['PENDING'])
+    new_cart = OrderHandler.create(user.id)
+    db.session.add(new_cart)
+    user.orders.append(new_cart)
+    db.session.commit()
+    return {
+        "cart": OrderHandler.to_dict(cart_obj),
+        "status": StatusCodes['SUCCESS']
+    }
 
 
 @app.route(f'{PREFIX}/fetch_orders', methods=["POST"])
@@ -701,6 +708,6 @@ def fetch_orders():
     if not verify_admin(session):
         return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
     return {
-        "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(OrderStatus(status))],
+        "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(status)],
         "status": StatusCodes['SUCCESS']
     }

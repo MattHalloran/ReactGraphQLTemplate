@@ -4,37 +4,49 @@ import { getTheme } from 'utils/storage';
 import { StyledInputText } from  './InputText.styled';
 import makeID from 'utils/makeID';
 
-function InputText(props) {
-    const theme = props.theme ?? getTheme();
-    const [value, setValue] = useState(props.value ?? '');
-    const [error, setError] = useState(props.validate ? (props.error ?? '') : null);
-    const id = useRef(props.id ?? makeID(10));
+function InputText({
+    id = makeID(10),
+    theme = getTheme(),
+    index,
+    label,
+    value = '',
+    valueFunc,
+    error = '',
+    errorFunc,
+    validate,
+    icon,
+    showErrors,
+    ...props
+}) {
+    const [valueState, setValueState] = useState(value);
+    const [errorString, setErrorString] = useState(validate ? (error) : null);
+    const idRef = useRef(id);
     const focused = useRef(false);
 
-    if (!focused.current && props.value !== value) {
-        setValue(props.value);
+    if (!focused.current && value !== valueState) {
+        setValueState(value);
     }
 
     useEffect(() => {
         // Only show an error if form submit was clicked, or if a value was entered
-        if (props.validate && (props.showErrors || value)) {
-            setError(props.validate(value));
+        if (validate && (showErrors || valueState)) {
+            setErrorString(validate(valueState));
         }
-    }, [value])
+    }, [valueState])
 
 
     const sendValueUpdate = () => {
-        if (props.valueFunc) {
-            if (props.index)
-                props.valueFunc(value, props.index);
+        if (valueFunc) {
+            if (index)
+                valueFunc(valueState, index);
             else
-                props.valueFunc(value)
+                valueFunc(valueState);
         }
-        if (props.errorFunc) {
-            if (props.index)
-                props.errorFunc(error, props.index);
+        if (errorFunc) {
+            if (index)
+                errorFunc(error, index);
             else
-                props.errorFunc(error);
+                errorFunc(error);
         }
     }
 
@@ -43,24 +55,28 @@ function InputText(props) {
     }
 
     let displayed_label = props.label ?? '';
-    if (error?.length > 0) {
+    if (errorString?.length > 0) {
         displayed_label += ' - ' + error;
     }
 
     return (
-        <StyledInputText icon={props.icon} theme={theme} has_error={error?.length > 0} show_label={value?.length > 0} disabled={props.disabled ?? false}>
+        <StyledInputText icon={props.icon} theme={theme}
+            has_error={errorString?.length > 0}
+            show_label={value?.length > 0}
+            disabled={props.disabled ?? false}
+            {...props}>
           <input
-            id={id.current}
+            id={idRef.current}
             type={props.type ?? "text"}
-            value={value}
-            placeholder={props.label}
-            onChange={(e) => setValue(e.target.value)}
+            value={valueState}
+            placeholder={label}
+            onChange={(e) => setValueState(e.target.value)}
             onKeyPress={checkKey}
             onFocus={() => focused.current = true}
             onBlurCapture={() => focused.current = false}
             onBlur={sendValueUpdate}
           />
-          <label type={props.type ?? "text"} htmlFor={id.current}>
+          <label type={props.type ?? "text"} htmlFor={idRef.current}>
             {displayed_label}
           </label>
         </StyledInputText>
