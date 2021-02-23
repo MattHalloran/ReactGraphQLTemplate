@@ -178,9 +178,9 @@ function NavList() {
 
     return (
         <ul className="nav-list">
-            <PopupMenu obj={<p>Contact</p>}
+            <PopupMenu obj={<p style={{marginRight:'10px'}}>Contact</p>}
                 menu={<ContactInfo />} />
-            <PopupMenu obj={<p>About</p>} menu={options_to_menu(about_options)} />
+            <PopupMenu obj={<p style={{marginRight:'8px'}}>About</p>} menu={options_to_menu(about_options)} />
             {options_to_menu(nav_options)}
             {cart}
         </ul>

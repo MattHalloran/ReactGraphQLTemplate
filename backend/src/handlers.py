@@ -642,6 +642,9 @@ class PlantHandler(Handler):
                         'soil_phs', 'soil_types', 'light_ranges']
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
         as_dict['id'] = model.id
+        display_image = cls.get_display_image(model)
+        if display_image:
+            as_dict['display_id'] = display_image.id
         return as_dict
 
     @classmethod

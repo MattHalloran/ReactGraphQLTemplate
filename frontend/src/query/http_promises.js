@@ -184,8 +184,8 @@ export function getConsts() {
         http.fetch_consts().then(response => {
             if (response.ok) {
                 console.log('FOUND CODES', response.status_codes);
-                storeItem(LOCAL_STORAGE.StatusCodes, response.status_codes);
-                storeItem(LOCAL_STORAGE.OrderStatus, response.status_codes);
+                storeItem(LOCAL_STORAGE.StatusCodes, response.status_codes, true);
+                storeItem(LOCAL_STORAGE.OrderStatus, response.order_status, true);
                 resolve(response);
             } else {
                 console.log('COULD NOT FETCH CODES', response)

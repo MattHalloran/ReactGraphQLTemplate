@@ -89,6 +89,7 @@ export const StyledNavbar = styled.nav`
 
     .iconic {
         stroke: none;
+        margin-top: 5px;
         fill: ${({ theme }) => theme.textPrimary};
     }
 

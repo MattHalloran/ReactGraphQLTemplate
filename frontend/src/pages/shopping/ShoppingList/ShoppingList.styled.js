@@ -39,8 +39,15 @@ export const StyledPlantCard = styled.div`
         top: 0;
         z-index: 2;
 
-        > * {
-            margin: 0 !important;
+        h2 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        h3 {
+            margin: 0;
+            margin-bottom: 5px;
+            font-size: 1em;
         }
     }
 
@@ -141,8 +148,15 @@ export const StyledExpandedPlant = styled.div`
         border-radius: 10px 10px 0 0;
         padding: 0.5em 0 0.5em 0;
 
-        > * {
-            margin: 0 !important;
+        h2 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        h3 {
+            margin: 0;
+            margin-bottom: 5px;
+            font-size: 1em;
         }
     }
 

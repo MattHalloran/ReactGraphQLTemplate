@@ -13,6 +13,7 @@ import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import DropDown from 'components/inputs/DropDown/DropDown';
+import { updateArray } from "utils/arrayTools";
 
 function ShoppingList({
     page_size,
@@ -27,7 +28,6 @@ function ShoppingList({
     const [popup, setPopup] = useState(null);
     // Plant data for every loaded plant
     const [loaded_plants, setLoadedPlants] = useState([]);
-    // SKU codes for all SKUs, not just displayed ones
     const all_plant_ids = useRef([]);
     // Plant data for all visible plants (i.e. not filtered)
     const [plants, setPlants] = useState([]);
@@ -43,7 +43,7 @@ function ShoppingList({
     const loading = useRef(false);
 
     useEffect(() => {
-        let ids = plants.map(p => p.id);
+        let ids = plants.map(p => p.display_id);
         console.log('IDS ARE', ids, plants);
         getImages(ids, 'm').then(response => {
             setThumbnails(response.images);
@@ -79,7 +79,8 @@ function ShoppingList({
             .then((response) => {
                 if (!mounted) return;
                 setLoadedPlants(response.page_results);
-                all_plant_ids.current = response.all_plant_ids;
+                all_plant_ids.current = response.plant_ids;
+                console.log('ALL PLANT IDS IS', all_plant_ids.current)
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);
@@ -140,6 +141,7 @@ function ShoppingList({
     }, [loaded_plants, filters])
 
     const loadNextPage = useCallback(() => {
+        console.log('AAAAAAAA', loaded_plants, all_plant_ids)
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
         loading.current = true;
         //Grab all card thumbnail images
@@ -163,7 +165,9 @@ function ShoppingList({
     //Load next page if scrolling near the bottom of the page
     const checkScroll = useCallback(() => {
         const divElement = document.getElementById(track_scrolling_id);
+        console.log('SCROLL CHeCK')
         if (divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight) {
+            console.log('BOTTOM REACHED')
             loadNextPage();
         }
     }, [track_scrolling_id, loadNextPage])
@@ -263,7 +267,6 @@ function PlantCard({
         <StyledPlantCard theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
             <div className="title">
                 <h2>{plant.latin_name}</h2>
-                {plant.common_name ? <br /> : null}
                 <h3>{plant.common_name}</h3>
             </div>
             <div className="display-image-container">
@@ -340,7 +343,6 @@ function ExpandedPlant({
         <StyledExpandedPlant theme={theme}>
             <div className="title">
                 <h1>{plant.latin_name}</h1>
-                {plant.common_name ? <br /> : null}
                 <h3>{plant.common_name}</h3>
             </div>
             <div className="main-div">

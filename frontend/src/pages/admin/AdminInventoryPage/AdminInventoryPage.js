@@ -51,7 +51,7 @@ function AdminInventoryPage() {
     }, [])
 
     useEffect(() => {
-        let ids = existing.map(p => p.id);
+        let ids = existing.map(p => p.display_id);
         getImages(ids, 'm').then(response => {
             setExistingThumbnails(response.images);
         }).catch(err => {
@@ -60,7 +60,7 @@ function AdminInventoryPage() {
     }, [existing])
 
     useEffect(() => {
-        let ids = existing.map(p => p.id);
+        let ids = existing.map(p => p.display_id);
         getImages(ids, 'm').then(response => {
             setAllThumbnails(response.images);
         }).catch(err => {

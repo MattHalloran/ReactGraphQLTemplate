@@ -55,7 +55,7 @@ function AdminOrderPage({
     theme = getTheme(),
 }) {
     const [session, setSession] = useState(getSession());
-    const [filter, setFilter] = useState(ORDER_STATES[3].value);
+    const [filter, setFilter] = useState(ORDER_STATES[4].value);
     const [orders, setOrders] = useState([]);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
@@ -87,7 +87,7 @@ function AdminOrderPage({
     return (
         <StyledAdminOrderPage className="page" theme={theme}>
             {popup}
-            <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[3]} />
+            <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
             <div className="card-flex">
                 {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
             </div>

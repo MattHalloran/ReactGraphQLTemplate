@@ -264,7 +264,7 @@ def fetch_inventory():
         page = plants_with_skus
     page_results = PlantHandler.all_dicts(page)
     return {
-        "all_plant_ids": [plant.id for plant in plants_with_skus],
+        "plant_ids": PlantHandler.all_ids(),
         "page_results": page_results,
         "status": StatusCodes['SUCCESS']
     }
@@ -318,7 +318,7 @@ def fetch_images():
     '''Fetches info for a list of images'''
     (ids, size) = getData('ids', 'size')
     return {
-        "images": [ImageHandler.get_b64(int(id), size) for id in ids],
+        "images": [ImageHandler.get_b64(int(id), size) if id is not None else None for id in ids],
         "status": StatusCodes['SUCCESS']
     }
 
@@ -584,6 +584,7 @@ def modify_plant():
     plant_obj = PlantHandler.from_id(plant_data['id'])
     if plant_obj is None and operation != 'ADD':
         return {"status": StatusCodes['ERROR_UNKNOWN']}
+    print(f'PLANT IS {plant_obj.latin_name}')
     operation_to_status = {
         'HIDE': SkuStatus.INACTIVE.value,
         'UNHIDE': SkuStatus.ACTIVE.value,
@@ -602,6 +603,7 @@ def modify_plant():
         if plant_data['display_image'] is not None:
             image = ImageHandler.create_from_scratch(plant_data['display_image']['data'], 'TODO', Config.PLANT_FOLDER, ImageUses.DISPLAY)
             if image is not None:
+                print('SETTING PLANTS DISPLAY IMAGE')
                 PlantHandler.set_display_image(plant_obj, image)
                 db.session.commit()
         # Hide existing SKUs (if they are still active, this will be updated later)
