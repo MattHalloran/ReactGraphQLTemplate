@@ -368,6 +368,8 @@ class ImageHandler(Handler):
         '''Returns the base64 string representation of an image in the requested size,
         or the next best size available'''
         model = cls.convert_to_model(model)
+        if model is None:
+            return None
         print('got model')
         print(type(model))
         # First, check if the image exists in the exact requested size
@@ -505,16 +507,18 @@ class OrderHandler(Handler):
             # Any item without an id is new, so we can track all ids in the dict
             # to determine which items have been deleted
             data_ids = []
+            old_ids = [it.id for it in obj.items]
             for item in items_data:
                 if (item_id := item.get('id', None)):
                     data_ids.append(item_id)
                     item_obj = OrderItemHandler.from_id(item_id)
                     OrderItemHandler.update(item_obj, {'quantity': item['quantity']})
                 else:
-                    new_item = OrderItemHandler.create(item)
+                    quantity = item['quantity']
+                    sku = SkuHandler.from_sku(item['sku'])
+                    new_item = OrderItemHandler.create(quantity, sku)
                     db.session.add(new_item)
                     obj.items.append(new_item)
-            old_ids = [it.id for it in obj.items]
             for old in old_ids:
                 # If id is not in the data list, then delete it
                 if old not in data_ids:

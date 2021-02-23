@@ -169,6 +169,7 @@ export function updateCart(session, who, cart) {
     return new Promise(function (resolve, reject) {
         http.update_cart(session, who, cart).then(response => {
             if (response.ok) {
+                console.log('SUCCESS! UPDATING CART', response.cart)
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {

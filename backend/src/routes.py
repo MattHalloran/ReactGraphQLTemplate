@@ -531,6 +531,8 @@ def update_cart():
         return {"status": StatusCodes['ERROR_UNKNOWN']}
     OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
+    print('yeet')
+    print(cart_obj.items)
     return {
         "cart": OrderHandler.to_dict(cart_obj),
         "status": StatusCodes['SUCCESS']

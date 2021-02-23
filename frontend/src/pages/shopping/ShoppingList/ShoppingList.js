@@ -196,7 +196,7 @@ function ShoppingList({
                     alert(`${name} 'removed from' cart!`)
             })
             .catch(err => {
-                console.error(err);
+                console.error(err, cart_copy);
                 alert('Operation failed. Please try again');
             })
     }
