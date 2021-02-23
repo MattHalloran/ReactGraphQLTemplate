@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { registerUser } from 'query/http_promises';
-import StatusCodes from 'query/consts/codes.json';
 import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -12,6 +11,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import { useHistoryState } from 'utils/useHistoryState';
 import { LINKS } from 'utils/consts';
 import Button from 'components/Button/Button';
+import { getStatusCodes } from 'utils/storage';
 
 function SignUpForm() {
     let history = useHistory();
@@ -46,7 +46,7 @@ function SignUpForm() {
             history.push(LINKS.Shopping);
         }).catch(error => {
             console.error(error);
-            if (error.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
+            if (error.status === getStatusCodes().FAILURE_EMAIL_EXISTS) {
                 if (window.confirm('Email already taken. Press OK if you would like to be redirected to the Forgot Password form')) {
                     history.push(LINKS.ForgotPassword);
                 }

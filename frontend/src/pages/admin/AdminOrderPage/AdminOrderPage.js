@@ -1,16 +1,16 @@
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminOrderPage, StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
-import { getTheme, getSession } from 'utils/storage';
+import { getTheme, getSession, getItem } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import Button from 'components/Button/Button';
 import Cart from 'components/Cart/Cart';
 import { updateCart, setOrderStatus } from 'query/http_promises';
-import OrderStatus from 'query/consts/orderStatus.json';
 import { updateObject } from 'utils/objectTools';
 import { findWithAttr } from 'utils/arrayTools';
+import { LOCAL_STORAGE } from 'utils/consts';
 
 const ORDER_STATES = [
     {
@@ -158,7 +158,7 @@ function OrderPopup({
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, OrderStatus.APPROVED)
+        setOrderStatus(session, changedOrder.id, getItem(LOCAL_STORAGE.OrderStatus).APPROVED)
             .then(() => {
                 alert('Order status set to \'Approved\'')
             }).catch(err => {
@@ -168,7 +168,7 @@ function OrderPopup({
     }, [changedOrder])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, OrderStatus.REJECTED)
+        setOrderStatus(session, changedOrder.id, getItem(LOCAL_STORAGE.OrderStatus).REJECTED)
             .then(() => {
                 alert('Order status set to \'Denied\'')
             }).catch(err => {

@@ -2,7 +2,7 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
-import { getPlantThumbnails, getFullPlantImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
+import { getImages, getImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
@@ -44,8 +44,9 @@ function ShoppingList({
 
     useEffect(() => {
         let ids = plants.map(p => p.id);
-        getPlantThumbnails(ids).then(response => {
-            setThumbnails(response.thumbnails);
+        console.log('IDS ARE', ids, plants);
+        getImages(ids, 'm').then(response => {
+            setThumbnails(response.images);
         }).catch(err => {
             console.error(err);
         });
@@ -209,7 +210,7 @@ function ShoppingList({
         setPopup(
             <Modal onClose={() => history.goBack()}>
                 <ExpandedPlant plant={popup_data}
-                    thumbnail={thumbnails.length >= curr_index ? thumbnails[curr_index] : null}
+                    thumbnail={thumbnails?.length >= curr_index ? thumbnails[curr_index] : null}
                     onCart={setInCart}
                     theme={theme} />
             </Modal>
@@ -225,7 +226,7 @@ function ShoppingList({
                     cart={cart}
                     onClick={expandSku}
                     plant={item}
-                    thumbnail={thumbnails.length >= index ? thumbnails[index] : null}
+                    thumbnail={thumbnails?.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
         </StyledShoppingList>
     );
@@ -294,7 +295,7 @@ function ExpandedPlant({
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        getFullPlantImage(plant.id).then(response => {
+        getImage(plant.id, 'l').then(response => {
             setImage(response.image);
         }).catch(error => {
             console.error(error);

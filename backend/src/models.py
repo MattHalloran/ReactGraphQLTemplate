@@ -264,6 +264,15 @@ class ImageUses(Enum):
     DISPLAY = 8
 
 
+# Possible image sizes stored, and their max size
+class ImageSizes(Enum):
+    XS = (64, 64)
+    S = (128, 128)
+    M = (256, 256)
+    ML = (512, 512)
+    L = (1024, 1024)
+
+
 # Stores metadata for images used on website (gallery, plants, etc), but NOT profile pictures
 class Image(db.Model):
     __tablename__ = Tables.IMAGE.value
@@ -271,11 +280,11 @@ class Image(db.Model):
     id = Column(Integer, primary_key=True)
     folder = Column(String(250), nullable=False)
     file_name = Column(String(100), nullable=False)
-    thumbnail_file_name = Column(String(100), nullable=False)
     extension = Column(String(10), nullable=False)
     alt = Column(String(100))
     hash = Column(String(100), unique=True, nullable=False)
     used_for = Column(Integer, nullable=False)
+    # Largest width and height stored for this image
     width = Column(Integer, nullable=False)
     height = Column(Integer, nullable=False)
     plant_id = db.Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
@@ -286,7 +295,6 @@ class Image(db.Model):
     def __init__(self,
                  folder: str,
                  file_name: str,
-                 thumbnail_file_name: str,
                  extension: str,
                  alt: str,
                  hash: str,
@@ -299,7 +307,6 @@ class Image(db.Model):
             raise Exception('Must pass a valid used_for value')
         self.folder = folder
         self.file_name = file_name
-        self.thumbnail_file_name = thumbnail_file_name
         self.extension = extension.replace('.', '')
         self.alt = alt
         self.hash = hash

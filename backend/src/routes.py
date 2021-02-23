@@ -20,9 +20,9 @@ app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 PREFIX = '/api'
 with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as f:
+    print('READING CODES')
     StatusCodes = json.load(f)
-with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as f:
-    RoutePaths = json.load(f)
+    print(type(StatusCodes))
 
 # ============= Helper Methods ========================
 
@@ -98,25 +98,24 @@ def verify_admin(session):
 
 # =========== End Helper Methods ========================
 
-@app.route(f'{PREFIX}/test', methods=['POST'])
+
+@app.route(f'{PREFIX}/ping', methods=['POST'])
 @handle_exception
-def test():
+def ping():
     '''Used for testing client/server connection'''
-    print('IN TEST METHOD')
     return {
-        "test_value": 1234,
+        "result": 'pong',
         "status": StatusCodes['SUCCESS']
     }
 
 
-@app.route(f'{PREFIX}/test_cross_origin', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@app.route(f'{PREFIX}/consts', methods=['GET'])
 @handle_exception
-def test_cross_origin():
-    '''Used for testing client/server connection'''
-    print('IN CROSS ORIGIN TEST METHOD')
+def consts():
+    '''Returns codes shared between frontend and backend'''
     return {
-        "test_value": 4321,
+        "status_codes": StatusCodes,
+        "order_status": OrderStatus,
         "status": StatusCodes['SUCCESS']
     }
 
@@ -187,9 +186,9 @@ def send_password_reset_request():
     return {"status": StatusCodes['SUCCESS']}
 
 
-@app.route(f'{PREFIX}/is_token_valid', methods=["POST"])
+@app.route(f'{PREFIX}/validate_token', methods=["POST"])
 @handle_exception
-def is_token_valid():
+def validate_token():
     token = getJson('token')
     is_valid = verify_token(app, token) if (token is not None) else False
 
@@ -302,24 +301,24 @@ def fetch_unused_plants():
     }
 
 
-# Returns thumbnail images for the given gallery image hashes
-@app.route(f'{PREFIX}/fetch_gallery_thumbnails', methods=["POST"])
+@app.route(f'{PREFIX}/fetch_image', methods=["POST"])
 @handle_exception
-def fetch_gallery_thumbnails():
-    hashes = getData('hashes')
+def fetch_image():
+    '''Fetches info for an image'''
+    (id, size) = getData('id', 'size')
     return {
-        "thumbnails": [ImageHandler.get_thumb_b64(ImageHandler.from_hash(hash)) for hash in hashes],
+        "images": ImageHandler.get_b64(int(id), size),
         "status": StatusCodes['SUCCESS']
     }
 
 
-# Returns thumbnail images for the given plants
-@app.route(f'{PREFIX}/fetch_plant_thumbnails', methods=["POST"])
+@app.route(f'{PREFIX}/fetch_images', methods=["POST"])
 @handle_exception
-def fetch_plant_thumbnails():
-    plant_ids = getData('ids')
+def fetch_images():
+    '''Fetches info for a list of images'''
+    (ids, size) = getData('ids', 'size')
     return {
-        "thumbnails": [PlantHandler.get_thumb_display_b64(PlantHandler.from_id(i)) for i in plant_ids],
+        "images": [ImageHandler.get_b64(int(id), size) for id in ids],
         "status": StatusCodes['SUCCESS']
     }
 
@@ -342,29 +341,7 @@ def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
     print('boop le snoot')
     return {
-        "images_meta": json.dumps(images_data),
-        "status": StatusCodes['SUCCESS']
-    }
-
-
-# Returns an image from its hash
-@app.route(f'{PREFIX}/fetch_image_from_hash', methods=["POST"])
-@handle_exception
-def fetch_image_from_hash():
-    hash = getData('hash')
-    return {
-        "image": ImageHandler.get_full_b64(ImageHandler.from_hash(hash)),
-        "status": StatusCodes['SUCCESS']
-    }
-
-
-# Returns an image from its hash
-@app.route(f'{PREFIX}/fetch_full_plant_image', methods=["POST"])
-@handle_exception
-def fetch_full_plant_image():
-    id = getData('id')
-    return {
-        "image": PlantHandler.get_full_display_b64(PlantHandler.from_id(id)),
+        "images_meta": images_data,
         "status": StatusCodes['SUCCESS']
     }
 

@@ -53,6 +53,8 @@ export const LOCAL_STORAGE = {
     Theme: "theme",
     Session: "session",
     Roles: "roles",
+    StatusCodes: "status_codes",
+    OrderStatus: "order_status",
 }
 
 export const PUBS = {

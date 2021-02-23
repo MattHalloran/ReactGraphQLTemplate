@@ -1,7 +1,6 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { storeItem, getRoles, getSession,clearStorage, setTheme } from 'utils/storage';
-import StatusCodes from './consts/codes.json';
+import { storeItem, getRoles, getSession,clearStorage, setTheme, getItem, getStatusCodes } from 'utils/storage';
 import { LOCAL_STORAGE, LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import * as http from './http_functions';
@@ -29,8 +28,8 @@ function promiseWrapper(http_func, ...args) {
 export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
-export const getGalleryThumbnails = (hashes) => promiseWrapper(http.fetch_gallery_thumbnails, hashes)
-export const getPlantThumbnails = (ids) => promiseWrapper(http.fetch_plant_thumbnails, ids)
+export const getImage = (id, size) => promiseWrapper(http.fetch_image, id, size);
+export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, size);
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
@@ -39,8 +38,6 @@ export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
 export const getUnusedPlants = (sorter) => promiseWrapper(http.fetch_unused_plants, sorter);
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
-export const getImageFromHash = (hash) => promiseWrapper(http.fetch_image_from_hash, hash);
-export const getFullPlantImage = (id) => promiseWrapper(http.fetch_full_plant_image, id);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const getCustomers = (session) => promiseWrapper(http.fetch_customers, session);
@@ -71,7 +68,7 @@ export const checkCookies = () => {
         if (!session || !session.email || !session.token) {
             console.log('SETTING SESSION TO NULL', session);
             storeItem(LOCAL_STORAGE.Session, null);
-            reject({ok: false, status: StatusCodes.FAILURE_NOT_VERIFIED});
+            reject({ok: false, status: getStatusCodes().FAILURE_NOT_VERIFIED});
         } else {
             http.validate_token(session.token).then(data => {
                 if (data.ok) {
@@ -106,6 +103,7 @@ export const login = (session, user) => {
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         http.get_token(email, password).then(data => {
+            let codes = getStatusCodes();
             if (data.ok) {
                 console.log('LOGIN OKAY')
                 login({email: email, token: data.token}, data.user);
@@ -114,13 +112,13 @@ export function loginUser(email, password) {
                 console.log('DATA NOT OKAY, logging out', data)
                 clearStorage();
                 switch (data.status) {
-                    case StatusCodes.FAILURE_NO_USER:
+                    case codes.FAILURE_NO_USER:
                         data.error = "Email or password incorrect. Please try again.";
                         break;
-                    case StatusCodes.FAILURE_SOFT_LOCKOUT:
+                    case codes.FAILURE_SOFT_LOCKOUT:
                         data.error = "Incorrect password entered too many times. Please try again in 15 minutes";
                         break;
-                    case StatusCodes.FAILURE_HARD_LOCKOUT:
+                    case codes.FAILURE_HARD_LOCKOUT:
                         data.error = "Account locked. Please contact us";
                         break;
                     default:
@@ -142,7 +140,7 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')
                 clearStorage();
-                if (data.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
+                if (data.status === getStatusCodes().FAILURE_EMAIL_EXISTS) {
                     data.error = "User with that email already exists";
                 } else {
                     data.error = "Unknown error occurred";
@@ -174,6 +172,22 @@ export function updateCart(session, who, cart) {
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {
+                reject(response);
+            }
+        })
+    });
+}
+
+export function getConsts() {
+    return new Promise(function (resolve, reject) {
+        http.fetch_consts().then(response => {
+            if (response.ok) {
+                console.log('FOUND CODES', response.status_codes);
+                storeItem(LOCAL_STORAGE.StatusCodes, response.status_codes);
+                storeItem(LOCAL_STORAGE.OrderStatus, response.status_codes);
+                resolve(response);
+            } else {
+                console.log('COULD NOT FETCH CODES', response)
                 reject(response);
             }
         })

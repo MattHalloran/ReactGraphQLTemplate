@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { StyledCart } from './Cart.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getTheme } from 'utils/storage';
-import { getPlantThumbnails } from 'query/http_promises';
+import { getImages } from 'query/http_promises';
 import { PubSub } from 'utils/pubsub';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
@@ -50,8 +50,8 @@ function Cart({
 
     useEffect(() => {
         let ids = cart.items.map(it => it.sku.plant.id);
-        getPlantThumbnails(ids).then(response => {
-            setThumbnails(response.thumbnails);
+        getImages(ids, 'm').then(response => {
+            setThumbnails(response.images);
         }).catch(err => {
             console.error(err);
         });

@@ -7,29 +7,34 @@ from src.config import Config
 
 
 def find_available_file_names(folder: str, img_name: str, extension: str):
-    '''Using suggested image file name, returns image and thumbnail file names
-    that are not being used'''
+    '''Using suggested image file name, returns file name
+    that is not being used'''
     suggested_img_name = img_name
-    thumb_name = f'{img_name}-thumb'
     path_attempts = 0
     while True and path_attempts < 100:
         img_path = f'{Config.BASE_IMAGE_DIR}/{folder}/{img_name}.{extension}'
-        thumb_path = f'{Config.BASE_IMAGE_DIR}/{folder}/{thumb_name}.{extension}'
         # If both paths are available
-        if not path.exists(img_path) and not path.exists(thumb_path):
-            return (img_name, thumb_name)
+        if not path.exists(img_path):
+            return img_name
         img_name = f'{suggested_img_name}({path_attempts})'
-        thumb_name = f'{img_name}-thumb'
         path_attempts += 1
     raise Exception('Could not find an available file name!')
+
+
+def resize_image(image_str: str, dim: tuple):
+    img = Image.open(BytesIO(image_str))
+    (curr_width, curr_height) = img.size
+    width = min(curr_width, dim[0])
+    height = min(curr_height, dim[1])
+    img.thumbnail([width, height], ANTIALIAS)
+    return img
 
 
 def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     """ Returns metadata about the image:
     1) Image hash, using the average hash algorithm
-    2) Thumbnail
-    3) Image width
-    4) Image height """
+    2) Image width
+    3) Image height """
     if hash_size < 2:
         raise ValueError("Hash size must be greater than or equal to 2")
 
@@ -48,11 +53,7 @@ def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     diff = pixels > avg
     diff_as_string = ''.join(['1' if x else '0' for x in diff.flatten().tolist()])
 
-    # Create thumbnail
-    thumb = Image.open(BytesIO(image_str))
-    thumb.thumbnail([256, 256], ANTIALIAS)
-
-    return (diff_as_string, thumb, width, height)
+    return (diff_as_string, width, height)
 
 
 def salt(length: int):

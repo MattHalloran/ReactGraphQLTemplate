@@ -99,6 +99,10 @@ export const getCart = () => {
     })
 }
 
+export const getStatusCodes = () => {
+    return getItem(LOCAL_STORAGE.StatusCodes);
+}
+
 export const getRoles = () => {
     return getItem(LOCAL_STORAGE.Roles);
 }

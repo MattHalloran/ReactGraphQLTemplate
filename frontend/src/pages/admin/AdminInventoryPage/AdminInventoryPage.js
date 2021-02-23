@@ -7,7 +7,7 @@ import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react'
 import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, modifyPlant, uploadAvailability, getPlantThumbnails } from 'query/http_promises';
+import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
 import Button from 'components/Button/Button';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
@@ -52,8 +52,8 @@ function AdminInventoryPage() {
 
     useEffect(() => {
         let ids = existing.map(p => p.id);
-        getPlantThumbnails(ids).then(response => {
-            setExistingThumbnails(response.thumbnails);
+        getImages(ids, 'm').then(response => {
+            setExistingThumbnails(response.images);
         }).catch(err => {
             console.error(err);
         });
@@ -61,8 +61,8 @@ function AdminInventoryPage() {
 
     useEffect(() => {
         let ids = existing.map(p => p.id);
-        getPlantThumbnails(ids).then(response => {
-            setAllThumbnails(response.thumbnails);
+        getImages(ids, 'm').then(response => {
+            setAllThumbnails(response.images);
         }).catch(err => {
             console.error(err);
         });
@@ -205,7 +205,7 @@ function AdminInventoryPage() {
                     {existing.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onEdit={() => setCurrPlant(plant)}
-                        thumbnail={existingThumbnails.length >= index ? existingThumbnails[index] : null} />)}
+                        thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
             <Collapsible title="Plants without active SKUs">
@@ -215,7 +215,7 @@ function AdminInventoryPage() {
                     {all.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onEdit={() => setCurrPlant(plant)}
-                        thumbnail={allThumbnails.length >= index ? allThumbnails[index] : null} />)}
+                        thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
         </StyledAdminInventoryPage >

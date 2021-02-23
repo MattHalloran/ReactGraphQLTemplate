@@ -1,5 +1,8 @@
-import StatusCodes from './consts/codes.json';
+import { LOCAL_STORAGE } from 'utils/consts';
+import { getStatusCodes } from 'utils/storage';
 
+const SUCCESS_CODE = 200;
+const DEFAULT_ERROR_CODE = 6969;
 // URL prefix used to signify calls to backend
 const PREFIX = '/api';
 // Headers used by fetch calls
@@ -22,20 +25,29 @@ const HEADERS = {
 // httpParams - object containing fetch options
 async function fetchWrapper(url, httpParams) {
     try {
+        let codes = getStatusCodes();
         let response = await fetch(url, httpParams);
         let json = await response.json();
-        if (json.status === StatusCodes.SUCCESS) {
+        if (json.status === SUCCESS_CODE) {
             json.ok = true;
             return json;
         }
-        console.log('HTTP FAILUREEEEEE', json.status, StatusCodes.SUCCESS)
         json.ok = false;
-        if (!json.status) json.status = StatusCodes.ERROR_UNKNOWN;
+        if (!json.status) json.status = DEFAULT_ERROR_CODE;
         return json;
     } catch (err) {
         console.error(err);
         return err;
     }
+}
+
+export async function fetch_consts() {
+    let options = {
+        method: 'get',
+        headers: HEADERS.Text,
+        credentials: 'include',
+    }
+    return await fetchWrapper(`${PREFIX}/consts`, options);
 }
 
 
@@ -49,7 +61,7 @@ export async function validate_token(token) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/is_token_valid`, options);
+    return await fetchWrapper(`${PREFIX}/validate_token`, options);
 }
 
 export async function create_user(firstName, lastName, business, email, phone, password, existing_customer) {
@@ -161,54 +173,6 @@ export async function fetch_gallery() {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/fetch_gallery`, options);
-}
-
-export async function fetch_image_from_hash(hash) {
-    let json = JSON.stringify({
-        "hash": hash,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_image_from_hash`, options);
-}
-
-export async function fetch_full_plant_image(id) {
-    let json = JSON.stringify({
-        "id": id,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_full_plant_image`, options);
-}
-
-export async function fetch_gallery_thumbnails(skus) {
-    let json = JSON.stringify({
-        "hashes": skus,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_gallery_thumbnails`, options);
-}
-
-export async function fetch_plant_thumbnails(ids) {
-    let json = JSON.stringify({
-        "ids": ids,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_plant_thumbnails`, options);
 }
 
 export async function upload_gallery_images(formData) {
@@ -396,4 +360,30 @@ export async function fetch_orders(session, status) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/fetch_orders`, options);
+}
+
+export async function fetch_image(id, size) {
+    let json = JSON.stringify({
+        "id": id,
+        "size": size
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_image`, options);
+}
+
+export async function fetch_images(ids, size) {
+    let json = JSON.stringify({
+        "ids": ids,
+        "size": size
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_images`, options);
 }

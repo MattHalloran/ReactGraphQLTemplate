@@ -5,9 +5,7 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
-import { SortableGalleryPhoto } from "components/GalleryPhoto/GalleryPhoto";
-import { getGallery, getGalleryThumbnails, getImageFromHash } from 'query/http_promises';
-import { SortableContainer } from 'react-sortable-hoc';
+import { getGallery, getImages, getImage } from 'query/http_promises';
 import arrayMove from "array-move";
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
@@ -16,21 +14,17 @@ import { getTheme } from 'utils/storage';
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
-const SortableGallery = SortableContainer(({ items, handleClick }) => (
-    <Gallery photos={items} renderImage={props => <SortableGalleryPhoto handleClick={handleClick} {...props} />} />
-));
-
 function GalleryPage() {
     const [theme, setTheme] = useState(getTheme());
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
-    const images_meta = useRef(null);
+    const images_meta = useRef([]);
     let history = useHistory();
     const urlParams = useParams();
     // [base64 data, alt]
     const [curr_img, setCurrImg] = useState(null);
-    const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.hash === urlParams.img) ?? -1, [images_meta, urlParams]);
+    const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id === urlParams.img) ?? -1, [images_meta, urlParams]);
     const loading = useRef(false);
     const track_scrolling_id = 'scroll-tracked';
     //Estimates how many images will fill the screen
@@ -48,18 +42,18 @@ function GalleryPage() {
     }, [])
 
     const loading_full_image = useRef(false);
-    const loadImage = useCallback((index, hash) => {
+    const loadImage = useCallback((index, id) => {
         // If this function hasn't finished yet
         if (loading_full_image.current) return;
         // If there is an image to load
-        if (!hash) return;
+        if (!id) return;
         // First check if the image data has already been retrieved
         if (index in full_images.current) {
             setCurrImg(full_images.current[index]);
         } else {
             loading_full_image.current = true;
             // Request the image from the backend
-            getImageFromHash(hash).then(response => {
+            getImage(id, 'l').then(response => {
                 let image_data = [`data:image/jpeg;base64,${response.image}`, response.alt];
                 setCurrImg(image_data);
                 full_images.current[index] = image_data;
@@ -79,6 +73,48 @@ function GalleryPage() {
         }
     }, [urlParams, curr_index, loadImage])
 
+    useEffect(() => {
+        loading.current = false;
+    }, [thumbnails])
+
+    const loadNextPage = useCallback(() => {
+        if (loading.current || images_meta.current.length <= thumbnails.length) return;
+        loading.current = true;
+        //Grab all thumbnail images
+        let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
+        let ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
+        getImages(ids, 'm').then(response => {
+            let combined_data = [];
+            //Combine metadata with thumbnail images
+            for (let i = 0; i < ids.length; i++) {
+                let meta = images_meta.current[thumbnails.length + i];
+                if (!meta) {
+                    console.log('META IS EMPTY', images_meta.current, i);
+                    continue;
+                }
+                let img = response.images[i];
+                let new_data = {
+                    "key": meta.id,
+                    "src": `data:image/jpeg;base64,${img}`,
+                    "width": meta.width,
+                    "height": meta.height,
+                };
+                // Prevent identical images from being added multiple times, if checks
+                // up to this point have failed
+                if (!images_meta.current.some(d => d.key === new_data.key)) {
+                    combined_data.push(new_data);
+                }
+            }
+            console.log('COMBINED DATA:',combined_data)
+            setThumbnails(thumbs => thumbs.concat(combined_data));
+            loading.current = false;
+        }).catch(error => {
+            console.error("Failed to load thumbnails!", error);
+            loading.current = false;
+        });
+        return () => loading.current = false;
+    }, [thumbnails, page_size]);
+
     //Load next page if scrolling near the bottom of the page
     const checkScroll = useCallback(() => {
         const divElement = document.getElementById(track_scrolling_id);
@@ -93,59 +129,16 @@ function GalleryPage() {
         return (() => document.removeEventListener('scroll', checkScroll));
     })
 
-    useEffect(() => {
-        loading.current = false;
-    }, [thumbnails])
-
-    let readyToLoadPage = !loading.current && images_meta.current.length < thumbnails.length;
-
-    const loadNextPage = useCallback(() => {
-        if (!readyToLoadPage) return;
-        loading.current = true;
-        //Grab all thumbnail images
-        let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
-        let hashes = images_meta.current.map(meta => meta.hash).slice(thumbnails.length, load_to);
-        getGalleryThumbnails(hashes).then(response => {
-            let combined_data = [];
-            //Combine metadata with thumbnail images
-            for (let i = 0; i < hashes.length; i++) {
-                let meta = images_meta.current[thumbnails.length + i];
-                if (!meta) {
-                    console.log('META IS EMPTY', images_meta.current, i);
-                    continue;
-                }
-                let img = response.thumbnails[i];
-                let new_data = {
-                    "key": meta.hash,
-                    "src": `data:image/jpeg;base64,${img}`,
-                    "width": meta.width,
-                    "height": meta.height,
-                };
-                // Prevent identical images from being added multiple times, if checks
-                // up to this point have failed
-                if (!images_meta.current.some(d => d.key === new_data.key)) {
-                    combined_data.push(new_data);
-                }
-            }
-            setThumbnails(thumbs => thumbs.concat(combined_data));
-            loading.current = false;
-        }).catch(error => {
-            console.error("Failed to load thumbnails!", error);
-            loading.current = false;
-        });
-        return () => loading.current = false;
-    }, [thumbnails, page_size, readyToLoadPage]);
-
     const prevImage = useCallback(() => {
         if (thumbnails.length <= 0) return;
         // Default to last image if none open
         if (curr_index < 0) {
-            history.push(LINKS.Gallery + '/' + images_meta.current[thumbnails.length - 1].hash);
+            history.push(LINKS.Gallery + '/' + images_meta.current[thumbnails.length - 1].id);
         } else {
             // Find previous image index using modulus
             let prev_index = (curr_index + images_meta.current.length - 1) % images_meta.current.length;
-            let hash = images_meta.current[prev_index].hash
-            history.replace(LINKS.Gallery + '/' + hash);
+            let id = images_meta.current[prev_index].id
+            history.replace(LINKS.Gallery + '/' + id);
         }
     }, [thumbnails, images_meta, curr_index, history]);
 
@@ -153,18 +146,17 @@ function GalleryPage() {
         if (thumbnails.length <= 0) return;
         // Default to first image if none open
         if (curr_index < 0) {
-            history.push(LINKS.Gallery + '/' + images_meta.current[0].hash);
+            history.push(LINKS.Gallery + '/' + images_meta.current[0].id);
         } else {
             // Find next image index using modulus
             let next_index = (curr_index + 1) % images_meta.current.length;
-            let hash = images_meta.current[next_index].hash;
-            history.replace(LINKS.Gallery + '/' + hash);
+            let id = images_meta.current[next_index].id;
+            history.replace(LINKS.Gallery + '/' + id);
         }
     }, [thumbnails, images_meta, curr_index, history]);
 
     const openImage = (_event, photo, index) => {
-        let hash = photo.key;
-        history.push(LINKS.Gallery + '/' + hash);
+        history.push(LINKS.Gallery + '/' + photo.photo.key);
     }
 
     const onSortEnd = useCallback(({ oldIndex, newIndex }) => {
@@ -175,8 +167,9 @@ function GalleryPage() {
         let mounted = true;
         getGallery().then(response => {
             if (!mounted) return;
-            images_meta.current = JSON.parse(response.images_meta);
-            if (images_meta.current === null) {
+            images_meta.current = response.images_meta ?? [];
+            console.log('IMAGES META SET', images_meta.current);
+            if (images_meta.current.length === 0) {
                 setThumbnails([]);
             } else {
                 loadNextPage();
@@ -201,7 +194,7 @@ function GalleryPage() {
     return (
         <StyledGalleryPage className="page" theme={theme} id={track_scrolling_id}>
             {popup}
-            <SortableGallery distance={5} items={thumbnails} handleClick={openImage} onSortEnd={onSortEnd} axis={"xy"} />
+            <Gallery photos={thumbnails} onClick={openImage}/>
         </StyledGalleryPage>
     );
 }

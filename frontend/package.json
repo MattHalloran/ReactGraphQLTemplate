@@ -8,6 +8,7 @@
     "@material-ui/lab": "^4.0.0-alpha.57",
     "array-move": "^3.0.1",
     "chai": "^4.2.0",
+    "consts": "file:../shared/consts",
     "hero-slider": "github:MattHalloran/hero-slider",
     "jspdf": "^2.3.0",
     "jspdf-autotable": "^3.5.14",
@@ -28,7 +29,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start-api": "cd ../backend/api && flask run --no-debugger",
+    "start-api": "cd ../backend && flask run --no-debugger",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -54,10 +55,10 @@
   "devDependencies": {
     "@storybook/addon-actions": "^6.1.15",
     "@storybook/addon-controls": "^6.1.15",
-    "@storybook/addon-essentials": "^6.1.15",
+    "@storybook/addon-essentials": "^5.3.21",
     "@storybook/addon-links": "^6.1.15",
     "@storybook/node-logger": "^6.1.15",
     "@storybook/preset-create-react-app": "^3.1.5",
-    "@storybook/react": "^6.1.15"
+    "@storybook/react": "^4.0.2"
   }
 }

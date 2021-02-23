@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from src.models import AccountStatus, Address, ContactInfo, Business, BusinessDiscount, Email, Feedback
-from src.models import Image, ImageUses, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
+from src.models import Image, ImageUses, ImageSizes, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
 from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, User
 from sqlalchemy.orm.collections import InstrumentedList
 from src.api import db
 from src.config import Config
+from src.utils import resize_image
 from base64 import b64encode
 from src.auth import verify_token
 import time
 import bcrypt
+import os
 
 
 # Abstract method for model handling classes
@@ -284,18 +286,44 @@ class ImageHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @staticmethod
     def required_fields():
-        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @classmethod
     def to_dict(cls, model: Image):
         model = cls.convert_to_model(model)
-        return ImageHandler.simple_fields_to_dict(model, ['hash', 'alt', 'used_for', 'width', 'height'])
+        return ImageHandler.simple_fields_to_dict(model, ['id', 'hash', 'alt', 'used_for', 'width', 'height'])
+
+    @staticmethod
+    def label_from_dimensions(width: int, height: int):
+        '''Returns closest size label, based on provided width and height'''
+        if width > ImageSizes.L.value[0] or height > ImageSizes.L.value[1]:
+            return 'l'
+        if width > ImageSizes.ML.value[0] or height > ImageSizes.ML.value[1]:
+            return 'ml'
+        if width > ImageSizes.M.value[0] or height > ImageSizes.M.value[1]:
+            return 'm'
+        if width > ImageSizes.S.value[0] or height > ImageSizes.S.value[1]:
+            return 's'
+        return 'xs'
+
+    @staticmethod
+    def dimensions_from_label(label: str):
+        '''Returns dimensions of size label'''
+        if label == 'l':
+            return ImageSizes.L.value
+        if label == 'ml':
+            return ImageSizes.ML.value
+        if label == 'm':
+            return ImageSizes.M.value
+        if label == 's':
+            return ImageSizes.S.value
+        return ImageSizes.XS.value
 
     @classmethod
     def create_from_scratch(cls, data: str, alt: str, dest_folder: str, used_for: ImageUses):
@@ -310,23 +338,21 @@ class ImageHandler(Handler):
         # string is not needed
         just_data = data[data.index('base64,')+7:]
         decoded = b64decode(just_data)
-        (hash, thumbnail, width, height) = get_image_meta(decoded)
+        (hash, width, height) = get_image_meta(decoded)
         # If image already exists, return it
         if (existing := ImageHandler.from_hash(hash)):
             print('Image already in backend!')
             return existing
-        (img_name, thumb_name) = find_available_file_names(dest_folder, img_name, img_ext)
-        img_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{img_name}{img_ext}'
-        thumb_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{thumb_name}{img_ext}'
+        # Find the size label for the image
+        label = ImageHandler.label_from_dimensions(width, height)
+        img_name = find_available_file_names(dest_folder, img_name, img_ext)
+        img_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{img_name}-{label}{img_ext}'
         # Save image
         with open(img_path, 'wb') as f:
             f.write(decoded)
-        # Save image thumbnail
-        thumbnail.save(thumb_path)
         # Add image data to database
         img_row = cls.create(dest_folder,
                              img_name,
-                             thumb_name,
                              img_ext,
                              alt,
                              hash,
@@ -337,35 +363,62 @@ class ImageHandler(Handler):
         db.session.commit()
         return img_row
 
-    @staticmethod
-    def get_thumb_b64(model: Image):
-        '''Returns the base64 string representation of an image file's thumbnail'''
-        try:
+    @classmethod
+    def get_b64(cls, model, size: str):
+        '''Returns the base64 string representation of an image in the requested size,
+        or the next best size available'''
+        model = cls.convert_to_model(model)
+        print('got model')
+        print(type(model))
+        # First, check if the image exists in the exact requested size
+        file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
+        if os.path.exists(file_path):
             # Read image file
-            with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
+            with open(file_path, 'rb') as open_file:
                 byte_content = open_file.read()
             # Convert image to a base64 string
             base64_bytes = b64encode(byte_content)
             base64_string = base64_bytes.decode('utf-8')
             return base64_string
-        except Exception:
-            print('Error: could not find thumbnail')
-            return None
+        # If it didn't exist, try to find a larger version and scale it down
+        larger_labels = ['l', 'ml', 'm', 's', 'xs']
+        requested_index = larger_labels.index(size)
+        if requested_index >= 0:
+            larger_labels = larger_labels[:requested_index+1]
+        for size_label in larger_labels:
+            file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size_label}.{model.extension}'
+            if os.path.exists(file_path):
+                # Load file
+                with open(file_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                # Resize file
+                resized = resize_image(byte_content, ImageHandler.dimensions_from_label(size))
+                # Store and return file
+                store_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
+                resized.save(store_path)
+                with open(store_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                # Convert image to a base64 string
+                base64_bytes = b64encode(byte_content)
+                base64_string = base64_bytes.decode('utf-8')
+                return base64_string
+        # If a larger size didn't exist, try to return a smaller size
+        smaller_labels = ['l', 'ml', 'm', 's', 'xs']
+        requested_index = smaller_labels.index(size)
+        if requested_index >= 0:
+            smaller_labels = smaller_labels[requested_index:]
+        for size_label in smaller_labels:
+            file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size_label}.{model.extension}'
+            if os.path.exists(file_path):
+                # Load file
+                with open(file_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                base64_bytes = b64encode(byte_content)
+                base64_string = base64_bytes.decode('utf-8')
+                return base64_string
+        # Finally, if no image found, return None
+        return None
 
-    @staticmethod
-    def get_full_b64(model: Image):
-        '''Returns the base64 string representation of an image file'''
-        try:
-            # Read image file
-            with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
-                byte_content = open_file.read()
-            # Convert image to a base64 string
-            base64_bytes = b64encode(byte_content)
-            base64_string = base64_bytes.decode('utf-8')
-            return base64_string
-        except Exception:
-            print('Error: could not find image')
-            return None
 
     @staticmethod
     def from_used_for(used_for: ImageUses):
@@ -381,6 +434,7 @@ class ImageHandler(Handler):
 
     @staticmethod
     def is_hash_used(hash: str):
+        print(f'CHECKING IF HASH USED {hash}')
         return db.session.query(Image.id).filter_by(hash=hash).scalar() is not None
 
 
@@ -687,14 +741,14 @@ class PlantHandler(Handler):
         img = cls.get_display_image(model)
         if img is None:
             return None
-        return ImageHandler.get_thumb_b64(img)
+        return ImageHandler.get_b64(img, 'm')
 
     @classmethod
     def get_full_display_b64(cls, model: Plant):
         img = cls.get_display_image(model)
         if img is None:
             return None
-        return ImageHandler.get_full_b64(img)
+        return ImageHandler.get_b64(img, 'l')
 
 
 class RoleHandler(Handler):
