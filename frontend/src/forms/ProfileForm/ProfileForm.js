@@ -61,17 +61,18 @@ function ProfileForm(props) {
         getProfileInfo(session).then(response => {
             console.log('GOT PROFILE INFOO!!!!!!', response);
             if (!mounted || editing) return;
-            if (response.first_name) setFirstName(response.first_name);
-            if (response.last_name) setLastName(response.last_name)
+            let user = response.user;
+            if (user.first_name) setFirstName(user.first_name);
+            if (user.last_name) setLastName(user.last_name)
             // TODO convert emails and phones to strings first
-            if (response.personal_email) {
-                setEmails(response.personal_email.map(o => o.email_address));
+            if (user.personal_email) {
+                setEmails(user.personal_email.map(o => o.email_address));
             }
-            if (response.personal_phone) {
-                setPhones(response.personal_phone.map(o => o.unformatted_number));
+            if (user.personal_phone) {
+                setPhones(user.personal_phone.map(o => o.unformatted_number));
             }
-            if (response.pronouns) {
-                setPronouns(response.pronouns);
+            if (user.pronouns) {
+                setPronouns(user.pronouns);
             }
         }).catch(err => {
             console.error(err);

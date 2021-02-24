@@ -60,7 +60,7 @@ def handle_exception(func):
             return func(*args, **kwargs)
         except Exception:
             print(traceback.format_exc())
-            return {"status": StatusCodes['ERROR_UNKNOWN']}
+            return StatusCodes['ERROR_UNKNOWN']
 
     return decorated
 
@@ -104,8 +104,8 @@ def verify_admin(session):
 def ping():
     '''Used for testing client/server connection'''
     return {
-        "result": 'pong',
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "result": 'pong'
     }
 
 
@@ -114,9 +114,9 @@ def ping():
 def consts():
     '''Returns codes shared between frontend and backend'''
     return {
+        **StatusCodes['SUCCESS'],
         "status_codes": StatusCodes,
         "order_status": OrderStatus,
-        "status": StatusCodes['SUCCESS']
     }
 
 
@@ -143,9 +143,11 @@ def register():
         status = StatusCodes['FAILURE_EMAIL_EXISTS']
         return {"status": status}
     status = StatusCodes['SUCCESS']
-    return {"token": generate_token(app, user),
-            "user": UserHandler.to_dict(user),
-            "status": status}
+    return {
+        **status,
+        "token": generate_token(app, user),
+        "user": UserHandler.to_dict(user)
+    }
 
 
 @app.route(f'{PREFIX}/get_token', methods=['POST'])
@@ -161,9 +163,9 @@ def get_token():
         UserHandler.set_token(user, token)
         db.session.commit()
         return {
+            **StatusCodes['SUCCESS'],
             "user": UserHandler.to_dict(user),
-            "token": token,
-            "status": StatusCodes['SUCCESS'],
+            "token": token
         }
     else:
         account_status = UserHandler.get_user_lock_status(email)
@@ -175,7 +177,7 @@ def get_token():
             status = StatusCodes['FAILURE_SOFT_LOCKOUT']
         elif account_status == AccountStatus.HARD_LOCK.value:
             status = StatusCodes['FAILURE_HARD_LOCKOUT']
-        return jsonify(status=status)
+        return status
 
 
 @app.route(f'{PREFIX}/reset_password_request', methods=['POST'])
@@ -183,7 +185,7 @@ def get_token():
 def send_password_reset_request():
     email = getData('email')
     reset_password(email)
-    return {"status": StatusCodes['SUCCESS']}
+    return StatusCodes['SUCCESS']
 
 
 @app.route(f'{PREFIX}/validate_token', methods=["POST"])
@@ -191,13 +193,11 @@ def send_password_reset_request():
 def validate_token():
     token = getJson('token')
     is_valid = verify_token(app, token) if (token is not None) else False
-
-    if is_valid:
-        status = StatusCodes['SUCCESS']
-        return jsonify(token_is_valid=True, status=status)
-    else:
-        status = StatusCodes['FAILURE_NOT_VERIFIED']
-        return jsonify(token_is_valid=False, status=status)
+    status = StatusCodes['SUCCESS'] if is_valid else StatusCodes['FAILURE_NOT_VERIFIED']
+    return {
+        **status,
+        "token_is_valid": is_valid
+    }
 
 
 if __name__ == '__main__':
@@ -210,6 +210,7 @@ if __name__ == '__main__':
 def fetch_inventory_filters():
     # NOTE: keys must match the field names in plant or sku (besides status)
     return {
+        **StatusCodes['SUCCESS'],
         "size": SkuHandler.uniques(Sku.size),
         "optimal_light": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.OPTIMAL_LIGHT),
         "drought_tolerance": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.DROUGHT_TOLERANCE),
@@ -222,8 +223,7 @@ def fetch_inventory_filters():
         "soil_moistures": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_MOISTURE),
         "soil_phs": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_PH),
         "soil_types": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_TYPE),
-        "zones": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ZONE),
-        "status": StatusCodes['SUCCESS']
+        "zones": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ZONE)
     }
 
 
@@ -242,7 +242,7 @@ def fetch_inventory():
         if PlantHandler.has_available_sku(id):
             plants_with_skus.append(PlantHandler.from_id(id))
     if len(plants_with_skus) == 0:
-        return {"status": StatusCodes['WARNING_NO_RESULTS']}
+        return StatusCodes['WARNING_NO_RESULTS']
     # Define map for handling sort options
     sort_map = {
         'az': (lambda p: p.latin_name, False),
@@ -256,7 +256,7 @@ def fetch_inventory():
     sort_data = sort_map.get(sorter, None)
     if sort_data is None:
         print('Could not find the correct sorter')
-        return {"status": StatusCodes['ERROR_INVALID_ARGS']}
+        return StatusCodes['ERROR_INVALID_ARGS']
     plants_with_skus.sort(key=sort_data[0], reverse=sort_data[1])
     if page_size > 0:
         page = plants_with_skus[0: min(len(plants_with_skus), page_size)]
@@ -264,9 +264,9 @@ def fetch_inventory():
         page = plants_with_skus
     page_results = PlantHandler.all_dicts(page)
     return {
+        **StatusCodes['SUCCESS'],
         "plant_ids": PlantHandler.all_ids(),
-        "page_results": page_results,
-        "status": StatusCodes['SUCCESS']
+        "page_results": page_results
     }
 
 
@@ -284,7 +284,7 @@ def fetch_unused_plants():
         if not PlantHandler.has_available_sku(id):
             lone_plants.append(PlantHandler.from_id(id))
     if len(lone_plants) == 0:
-        return {"status": StatusCodes['WARNING_NO_RESULTS']}
+        return StatusCodes['WARNING_NO_RESULTS']
     sort_map = {
         'az': (lambda p: p.latin_name, False),
         'za': (lambda p: p.latin_name, True)
@@ -293,11 +293,11 @@ def fetch_unused_plants():
     sort_data = sort_map.get(sorter, None)
     if sort_data is None:
         print('Could not find the correct sorter')
-        return {"status": StatusCodes['ERROR_INVALID_ARGS']}
+        return StatusCodes['ERROR_INVALID_ARGS']
     lone_plants.sort(key=sort_data[0], reverse=sort_data[1])
     return {
-        "plants": PlantHandler.all_dicts(lone_plants),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "plants": PlantHandler.all_dicts(lone_plants)
     }
 
 
@@ -307,8 +307,8 @@ def fetch_image():
     '''Fetches info for an image'''
     (id, size) = getData('id', 'size')
     return {
-        "images": ImageHandler.get_b64(int(id), size),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "images": ImageHandler.get_b64(int(id), size)
     }
 
 
@@ -318,8 +318,8 @@ def fetch_images():
     '''Fetches info for a list of images'''
     (ids, size) = getData('ids', 'size')
     return {
-        "images": [ImageHandler.get_b64(int(id), size) if id is not None else None for id in ids],
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "images": [ImageHandler.get_b64(int(id), size) if id is not None else None for id in ids]
     }
 
 
@@ -329,8 +329,8 @@ def fetch_images():
 def fetch_inventory_page():
     plant_ids = getData('ids')
     return {
-        "data": PlantHandler.all_dicts(plant_ids),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "data": PlantHandler.all_dicts(plant_ids)
     }
 
 
@@ -341,8 +341,8 @@ def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
     print('boop le snoot')
     return {
-        "images_meta": images_data,
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "images_meta": images_data
     }
 
 
@@ -358,8 +358,8 @@ def upload_availability_file():
     toread.seek(0)  # resets pointer
     success = upload_availability(app, toread)
     if success:
-        return {"status": StatusCodes['SUCCESS']}
-    return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['SUCCESS']
+    return StatusCodes['ERROR_UNKNOWN']
 
 
 # TODO - check image size and extension to make sure it is valid
@@ -380,17 +380,19 @@ def upload_gallery_image():
             failed_indexes.append(i)
         else:
             passed_indexes.append(i)
-    return {"passed_indexes": passed_indexes,
-            "failed_indexes": failed_indexes,
-            "status": status}
+    return {
+        **status,
+        "passed_indexes": passed_indexes,
+        "failed_indexes": failed_indexes,
+    }
 
 
 @app.route(f'{PREFIX}/fetch_all_contact_infos', methods=["POST"])
 @handle_exception
 def fetch_all_contact_infos():
     return {
-        "contact_infos": ContactInfoHandler.all_dicts(),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "contact_infos": ContactInfoHandler.all_dicts()
     }
 
 
@@ -409,10 +411,10 @@ def update_contact_info():
     id = json['id']
     contact = ContactInfoHandler.from_id(id)
     if contact is None:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     ContactInfoHandler.update(json)
     db.session.commit()
-    return {"status": StatusCodes['SUCCESS']}
+    return StatusCodes['SUCCESS']
 
 
 @app.route(f'{PREFIX}/fetch_profile_info', methods=["POST"])
@@ -420,14 +422,16 @@ def update_contact_info():
 def fetch_profile_info():
     (session) = getJson('session')
     if not verify_customer(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     user_data = UserHandler.get_profile_data(session['email'])
     if user_data is None:
         print('FAILEDDDD')
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     print('SUCESS BABYYYYY')
-    user_data['status'] = StatusCodes['SUCCESS']
-    return user_data
+    return {
+        **StatusCodes['SUCCESS'],
+        "user": user_data
+    }
 
 
 @app.route(f'{PREFIX}/fetch_likes', methods=["POST"])
@@ -436,10 +440,10 @@ def fetch_likes():
     (session) = getJson('session')
     user = verify_customer(session)
     if not user:
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
-        "likes": SkuHandler.all_dicts(user.likes),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "likes": SkuHandler.all_dicts(user.likes)
     }
 
 
@@ -449,10 +453,10 @@ def fetch_cart():
     (session) = getJson('session')
     user = verify_customer(session)
     if not user:
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
-        "cart": OrderHandler.to_dict(UserHandler.get_cart(user)),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "cart": OrderHandler.to_dict(UserHandler.get_cart(user))
     }
 
 
@@ -462,10 +466,10 @@ def fetch_customers():
     # Grab data
     (session) = getJson('session')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
-        "customers": UserHandler.all_customers(),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "customers": UserHandler.all_customers()
     }
 
 
@@ -477,7 +481,7 @@ def set_like_sku():
     (session, sku_str, liked) = getData('session', 'sku', 'liked')
     user = verify_customer(session)
     if not user:
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     sku = SkuHandler.from_sku(sku_str)
     # Like SKU
     if liked:
@@ -489,9 +493,10 @@ def set_like_sku():
             user.likes.remove(sku)
     db.session.commit()
     # Return updated user data
-    user_data = UserHandler.to_dict(user)
-    user_data['status'] = StatusCodes['SUCCESS']
-    return user_data
+    return {
+        **StatusCodes['SUCCESS'],
+        "user": user_data
+    }
 
 
 @app.route(f'{PREFIX}/set_order_status', methods=["POST"])
@@ -500,15 +505,15 @@ def set_order_status():
     '''Sets the order status for an order'''
     (session, id, status) = getData('session', 'id', 'status')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     order_obj = OrderHandler.from_id(id)
     if order_obj is None:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     order_obj.status = status
     db.session.commit()
     return {
-        'order': OrderHandler.to_dict(order_obj),
-        'status': StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        'order': OrderHandler.to_dict(order_obj)
     }
 
 
@@ -525,17 +530,17 @@ def update_cart():
     else:
         user = verify_customer(session)
     if not user:
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     cart_obj = OrderHandler.from_id(cart['id'])
     if cart_obj is None:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
     print('yeet')
     print(cart_obj.items)
     return {
-        "cart": OrderHandler.to_dict(cart_obj),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "cart": OrderHandler.to_dict(cart_obj)
     }
 
 
@@ -546,10 +551,10 @@ def modify_sku():
     '''Like or unlike an inventory item'''
     (session, sku, operation, sku_data) = getData('session', 'sku', 'operation', 'data')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     sku_obj = SkuHandler.from_sku(sku)
     if sku_obj is None:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     operation_to_status = {
         'HIDE': SkuStatus.INACTIVE.value,
         'UNHIDE': SkuStatus.ACTIVE.value,
@@ -558,7 +563,7 @@ def modify_sku():
     if operation in operation_to_status:
         sku_obj.status = operation_to_status[operation]
         db.session.commit()
-        return {"status": StatusCodes['SUCCESS']}
+        return StatusCodes['SUCCESS']
     if operation == 'ADD':
         plant = PlantHandler.create(sku_data['plant'])
         db.session.add(plant)
@@ -569,8 +574,8 @@ def modify_sku():
         SkuHandler.update(sku_obj, sku_data)
         PlantHandler.update(sku_obj.plant, sku_data['plant'])
         db.session.commit()
-        return {"status": StatusCodes['SUCCESS']}
-    return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['SUCCESS']
+    return StatusCodes['ERROR_UNKNOWN']
 
 
 # Hide, unhide, add, delete, or update SKU
@@ -580,10 +585,10 @@ def modify_plant():
     '''Like or unlike an inventory item'''
     (session, operation, plant_data) = getData('session', 'operation', 'data')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     plant_obj = PlantHandler.from_id(plant_data['id'])
     if plant_obj is None and operation != 'ADD':
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     print(f'PLANT IS {plant_obj.latin_name}')
     operation_to_status = {
         'HIDE': SkuStatus.INACTIVE.value,
@@ -593,7 +598,7 @@ def modify_plant():
     if operation in operation_to_status:
         plant_obj.status = operation_to_status[operation]
         db.session.commit()
-        return {"status": StatusCodes['SUCCESS']}
+        return StatusCodes['SUCCESS']
     if operation == 'ADD' or operation == 'UPDATE':
         # Create plant if doesn't exist
         if plant_obj is None:
@@ -623,8 +628,8 @@ def modify_plant():
                 db.session.add(sku)
                 plant_obj.skus.append(sku)
         db.session.commit()
-        return {"status": StatusCodes['SUCCESS']}
-    return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['SUCCESS']
+    return StatusCodes['ERROR_UNKNOWN']
 
 
 # Change the account status of a user
@@ -634,14 +639,15 @@ def modify_user():
     '''Like or unlike an inventory item'''
     (session, id, operation) = getData('session', 'id', 'operation')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     user = UserHandler.from_id(id)
     if user is None:
         print('USER NOT FOUND')
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     # Don't allow modification of admins
-    if UserHandler.is_admin(user):
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+    if not UserHandler.is_admin(user):
+        print('CANNOT DELETE A USER')
+        return StatusCodes['ERROR_UNKNOWN']
     operation_to_status = {
         'LOCK': AccountStatus.HARD_LOCK.value,
         'UNLOCK': AccountStatus.UNLOCKED.value,
@@ -652,10 +658,11 @@ def modify_user():
         user.account_status = operation_to_status[operation]
         db.session.commit()
         return {
-            "customers": UserHandler.all_customers(),
-            "status": StatusCodes['SUCCESS']
+            **StatusCodes['SUCCESS'],
+            "customers": UserHandler.all_customers()
         }
-    return {"status": StatusCodes['ERROR_UNKNOWN']}
+    print(f'OPERATION NOT IN OPERATIONS: {operation}')
+    return StatusCodes['ERROR_UNKNOWN']
 
 
 @app.route(f'{PREFIX}/submit_order', methods=["POST"])
@@ -665,10 +672,10 @@ def submit_order():
     # If changing a cart that doesn't belong to them, verify admin
     user = verify_customer(session)
     if not user:
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     cart_obj = OrderHandler.from_id(cart['id'])
     if cart_obj is None:
-        return {"status": StatusCodes['ERROR_UNKNOWN']}
+        return StatusCodes['ERROR_UNKNOWN']
     OrderHandler.update_from_dict(cart_obj, cart)
     OrderHandler.set_status(cart_obj, OrderStatus['PENDING'])
     new_cart = OrderHandler.create(user.id)
@@ -676,8 +683,8 @@ def submit_order():
     user.orders.append(new_cart)
     db.session.commit()
     return {
-        "cart": OrderHandler.to_dict(cart_obj),
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "cart": OrderHandler.to_dict(cart_obj)
     }
 
 
@@ -687,8 +694,8 @@ def fetch_orders():
     '''Fetch orders that match the provided state'''
     (session, status) = getData('session', 'status')
     if not verify_admin(session):
-        return {"status": StatusCodes['ERROR_NOT_AUTHORIZED']}
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
-        "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(status)],
-        "status": StatusCodes['SUCCESS']
+        **StatusCodes['SUCCESS'],
+        "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(status)]
     }

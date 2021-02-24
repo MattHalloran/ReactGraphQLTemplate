@@ -68,7 +68,7 @@ export const checkCookies = () => {
         if (!session || !session.email || !session.token) {
             console.log('SETTING SESSION TO NULL', session);
             storeItem(LOCAL_STORAGE.Session, null);
-            reject({ok: false, status: getStatusCodes().FAILURE_NOT_VERIFIED});
+            reject(getStatusCodes().FAILURE_NOT_VERIFIED);
         } else {
             http.validate_token(session.token).then(data => {
                 if (data.ok) {
@@ -103,7 +103,6 @@ export const login = (session, user) => {
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         http.get_token(email, password).then(data => {
-            let codes = getStatusCodes();
             if (data.ok) {
                 console.log('LOGIN OKAY')
                 login({email: email, token: data.token}, data.user);
@@ -111,20 +110,6 @@ export function loginUser(email, password) {
             } else {
                 console.log('DATA NOT OKAY, logging out', data)
                 clearStorage();
-                switch (data.status) {
-                    case codes.FAILURE_NO_USER:
-                        data.error = "Email or password incorrect. Please try again.";
-                        break;
-                    case codes.FAILURE_SOFT_LOCKOUT:
-                        data.error = "Incorrect password entered too many times. Please try again in 15 minutes";
-                        break;
-                    case codes.FAILURE_HARD_LOCKOUT:
-                        data.error = "Account locked. Please contact us";
-                        break;
-                    default:
-                        data.error = "Unknown error occurred. Please try again";
-                        break;
-                }
                 reject(data);
             }
         })
@@ -140,11 +125,6 @@ export function registerUser(firstName, lastName, business, email, phone, passwo
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')
                 clearStorage();
-                if (data.status === getStatusCodes().FAILURE_EMAIL_EXISTS) {
-                    data.error = "User with that email already exists";
-                } else {
-                    data.error = "Unknown error occurred";
-                }
                 reject(data);
             }
         })
@@ -155,8 +135,7 @@ export function setLikeSku(session, sku, liked) {
     return new Promise(function (resolve, reject) {
         http.set_like_sku(session, sku, liked).then(response => {
             if (response.ok) {
-                console.log('BUNNYYYY', response)
-                storeItem(LOCAL_STORAGE.Likes, response.likes);
+                storeItem(LOCAL_STORAGE.Likes, response.user.likes);
                 resolve(response);
             } else {
                 reject(response);

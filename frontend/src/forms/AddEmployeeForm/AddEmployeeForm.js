@@ -33,9 +33,9 @@ function AddEmployeeForm() {
   const register = () => {
     registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
       history.push(LINKS.Shopping);
-    }).catch(error => {
-      console.error(error);
-      alert(error.error);
+    }).catch(err => {
+      console.error(err);
+      alert(err.msg);
     })
   }
 

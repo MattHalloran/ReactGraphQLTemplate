@@ -1,8 +1,3 @@
-import { LOCAL_STORAGE } from 'utils/consts';
-import { getStatusCodes } from 'utils/storage';
-
-const SUCCESS_CODE = 200;
-const DEFAULT_ERROR_CODE = 6969;
 // URL prefix used to signify calls to backend
 const PREFIX = '/api';
 // Headers used by fetch calls
@@ -25,15 +20,8 @@ const HEADERS = {
 // httpParams - object containing fetch options
 async function fetchWrapper(url, httpParams) {
     try {
-        let codes = getStatusCodes();
         let response = await fetch(url, httpParams);
         let json = await response.json();
-        if (json.status === SUCCESS_CODE) {
-            json.ok = true;
-            return json;
-        }
-        json.ok = false;
-        if (!json.status) json.status = DEFAULT_ERROR_CODE;
         return json;
     } catch (err) {
         console.error(err);

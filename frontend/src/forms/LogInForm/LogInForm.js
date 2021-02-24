@@ -22,10 +22,9 @@ function LogInForm() {
     const login = () => {
         loginUser(email, password).then(() => {
             history.push(LINKS.Shopping);
-        }).catch(error => {
-            console.log("Failed to log in");
-            console.error(error);
-            alert(error.error);
+        }).catch(err => {
+            console.error(err);
+            alert(error.msg);
         })
     }
 

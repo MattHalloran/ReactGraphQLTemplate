@@ -35,4 +35,5 @@ export const StyledCustomerCard = styled.div`
     border: 2px solid ${({ account_status }) => status_to_color(account_status)};
     border-radius: 1em;
     cursor: pointer;
+    box-shadow: ${({ is_selected }) => is_selected ? 'inset 0 0 100px 100px rgba(255, 255, 255, 0.45)' : ''};
 `;

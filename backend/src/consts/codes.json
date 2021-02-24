@@ -1,13 +1,57 @@
 {
-    "SUCCESS": 200,
-    "ERROR_UNKNOWN": 6969,
-    "ERROR_INVALID_ARGS": 369,
-    "WARNING_NO_RESULTS": 420,
-    "FAILURE_EMAIL_EXISTS": 469,
-    "FAILURE_NO_USER": 969,
-    "FAILURE_SOFT_LOCKOUT": 910,
-    "FAILURE_HARD_LOCKOUT": 920,
-    "FAILURE_NOT_VERIFIED": 1400,
-    "ERROR_SOME_IMAGES_ALREADY_UPLOADED": 2500,
-    "ERROR_NOT_AUTHORIZED": 3000
+    "SUCCESS": {
+        "code": 200,
+        "ok": true,
+        "msg": ""
+    },
+    "WARNING_NO_RESULTS": {
+        "code": 201,
+        "ok": true,
+        "msg": "Warning: Called successfully, but got no results"
+    },
+    "ERROR_SOME_IMAGES_ALREADY_UPLOADED": {
+        "code": 202,
+        "ok": true,
+        "msg": "Warning: Some images were already uploaded"
+    },
+    "ERROR_UNKNOWN": {
+        "code": 6969,
+        "ok": false,
+        "msg": "Unknown error occurred"
+    },
+    "ERROR_INVALID_ARGS": {
+        "code": 369,
+        "ok": false,
+        "msg": "Error: Invalid arguments supplied"
+    },
+    "FAILURE_EMAIL_EXISTS": {
+        "code": 469,
+        "ok": false,
+        "msg": "Error: Account with that email already exists"
+    },
+    "FAILURE_NO_USER": {
+        "code": 969,
+        "ok": false,
+        "msg": "Error: No user with that email"
+    },
+    "FAILURE_SOFT_LOCKOUT": {
+        "code": 910,
+        "ok": false,
+        "msg": "Error: Too many login attempts. Try again in 15 minutes"
+    },
+    "FAILURE_HARD_LOCKOUT": {
+        "code": 912,
+        "ok": false,
+        "msg": "Error: Account locked. Contact us for assistance"
+    },
+    "FAILURE_NOT_VERIFIED": {
+        "code": 1400,
+        "ok": false,
+        "msg": "Error: Session token could not be verified. Please log back in"
+    },
+    "ERROR_NOT_AUTHORIZED": {
+        "code": 300,
+        "ok": false,
+        "msg": "Error: Not authorized to perform this action"
+    }
 }
