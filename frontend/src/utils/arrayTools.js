@@ -24,3 +24,24 @@ export const findWithAttr = (array, attr, value) => {
     }
     return -1;
 }
+
+export const moveArrayIndex = (array, from, to) => {
+    let copy = [...array];
+    copy.splice(to, 0, copy.splice(from, 1)[0]);
+    return copy;
+}
+
+// Shifts everything to the right, and puts the last element in the beginning
+export const rotateArray = (array, to_right = true) => {
+    if (array.length === 0) return array;
+    let copy = [...array];
+    if (to_right) {
+        let last_elem = copy.pop();
+        copy.unshift(last_elem);
+        return copy;
+    } else {
+        let first_elem = copy.shift();
+        copy.push(first_elem);
+        return copy;
+    }
+}
