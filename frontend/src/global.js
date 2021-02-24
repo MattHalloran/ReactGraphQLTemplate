@@ -56,6 +56,7 @@ export const GlobalStyles = createGlobalStyle`
     #content-wrap{
         flex:1;
         position: relative;
+        min-height: 100vh;
     }
 
     .page {

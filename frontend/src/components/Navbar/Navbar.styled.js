@@ -77,8 +77,7 @@ export const StyledNavbar = styled.nav`
         font-size: 1.5em;
         vertical-align: middle;
         margin-left: -10px;
-        font-family: fantasy;
-        font-style: normal;
+        font-family: 'Kite One', sans-serif;
     }
 
     .address-container {
