@@ -5,7 +5,7 @@ import AmericanHort from 'assets/img/american_hort_logo.jpg';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import { StyledFooter } from './Footer.styled';
 import { getTheme } from 'utils/storage';
-import { GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
+import { FULL_BUSINESS_NAME, GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
 import { printAvailability } from 'utils/printAvailability';
 
 function Footer({
@@ -19,11 +19,6 @@ function Footer({
                     <ul className="footer-ul">
                         <li><Link to="/about">About Us</Link></li>
                         <li><Link to="/contact">Contact Us</Link></li>
-                        <li><Link to={LINKS.Terms}>Terms & Conditions</Link></li>
-                    </ul>
-                </div>
-                <div className="footer-group">
-                    <ul className="footer-ul">
                         <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" rel="noopener noreferrer" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
                         <li style={{ cursor: 'pointer' }} onClick={printAvailability}>Print Availability</li>
                         <li><Link to="/gallery">Gallery</Link></li>
@@ -42,15 +37,18 @@ function Footer({
                     </address>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img src={ProvenWinners} alt="We Sell Proven Winners - The #1 Plant Brand" className="proven-winner" /></a>
+                    <a style={{ display: 'contents' }} href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img src={ProvenWinners} alt="We Sell Proven Winners - The #1 Plant Brand" className="proven-winner" /></a>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img src={AmericanHort} alt="Proud member of the AmericanHort" className="proven-winner" /></a>
+                    <a style={{ display: 'contents' }} href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img src={AmericanHort} alt="Proud member of the AmericanHort" className="proven-winner" /></a>
                 </div>
                 <div className="footer-group winner-div">
-                    <a style={{display:'contents'}} href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img src={NJNLA} alt="Proud member of the New Jersey Nursery and Landscape Association" className="proven-winner" /></a>
+                    <a style={{ display: 'contents' }} href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img src={NJNLA} alt="Proud member of the New Jersey Nursery and Landscape Association" className="proven-winner" /></a>
                 </div>
             </div>
+            <p>
+                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link to={LINKS.Terms}>Terms & Conditions</Link>
+            </p>
         </StyledFooter >
     );
 }

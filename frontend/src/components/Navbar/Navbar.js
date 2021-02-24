@@ -6,7 +6,7 @@ import Logo from 'assets/img/nln-logo-colorized.png';
 import { clearStorage, getTheme, getSession, getRoles } from 'utils/storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
+import { FULL_BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
 import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
@@ -34,8 +34,8 @@ function Navbar({
     return (
         <StyledNavbar theme={theme} visible={visible}>
             <Link to={LINKS.Home} className="nav-brand">
-                <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
-                <span className="nav-name">{BUSINESS_NAME}</span>
+                <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
+                <span className="nav-name">{FULL_BUSINESS_NAME}</span>
             </Link>
             {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
         </StyledNavbar>
@@ -87,8 +87,11 @@ function Hamburger(props) {
             [LINKS.Cart, ShoppingCartIcon],);
     }
 
-    nav_options.push([LINKS.Gallery, 'Gallery'],
-        [LINKS.About, 'About Us']);
+    nav_options.push(
+        [LINKS.Home, 'Home'],
+        [LINKS.Gallery, 'Gallery'],
+        [LINKS.About, 'About Us']
+    );
 
     if (session !== null) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
@@ -112,6 +115,9 @@ function Hamburger(props) {
                 <SocialIcon fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>
+            <p>
+                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link to={LINKS.Terms}>Terms & Conditions</Link>
+            </p>
         </BurgerMenu>
     );
 }
