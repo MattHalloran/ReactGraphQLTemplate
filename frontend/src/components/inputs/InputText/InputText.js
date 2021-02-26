@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { getTheme } from 'utils/storage';
 import { StyledInputText } from  './InputText.styled';
@@ -7,6 +7,7 @@ import makeID from 'utils/makeID';
 function InputText({
     id = makeID(10),
     theme = getTheme(),
+    type = 'text',
     index,
     label,
     value = '',
@@ -16,33 +17,24 @@ function InputText({
     validate,
     icon,
     showErrors,
+    disabled = false,
     ...props
 }) {
-    const [valueState, setValueState] = useState(value);
-    const [errorString, setErrorString] = useState(validate ? (error) : null);
     const idRef = useRef(id);
-    const focused = useRef(false);
-
-    if (!focused.current && value !== valueState) {
-        setValueState(value);
-    }
 
     useEffect(() => {
-        // Only show an error if form submit was clicked, or if a value was entered
-        if (validate && (showErrors || valueState)) {
-            setErrorString(validate(valueState));
-        }
-    }, [valueState])
+        sendValueUpdate(value);
+    }, [])
 
-
-    const sendValueUpdate = () => {
+    const sendValueUpdate = (value) => {
         if (valueFunc) {
             if (index)
-                valueFunc(valueState, index);
+                valueFunc(value, index);
             else
-                valueFunc(valueState);
+                valueFunc(value);
         }
-        if (errorFunc) {
+        if (validate && errorFunc) {
+            let error = validate(value);
             if (index)
                 errorFunc(error, index);
             else
@@ -50,33 +42,25 @@ function InputText({
         }
     }
 
-    const checkKey = (e) => {
-        if (e.key === 'Enter') sendValueUpdate();
-    }
-
-    let displayed_label = props.label ?? '';
-    if (errorString?.length > 0) {
+    let displayed_label = label ?? '';
+    if (error?.length > 0) {
         displayed_label += ' - ' + error;
     }
 
     return (
-        <StyledInputText icon={props.icon} theme={theme}
-            has_error={errorString?.length > 0}
-            show_label={value?.length > 0}
-            disabled={props.disabled ?? false}
+        <StyledInputText icon={icon} theme={theme}
+            has_error={error?.length > 0}
+            show_label={showErrors || value?.length > 0}
+            disabled={disabled}
             {...props}>
           <input
             id={idRef.current}
-            type={props.type ?? "text"}
-            value={valueState}
+            type={type}
+            value={value}
             placeholder={label}
-            onChange={(e) => setValueState(e.target.value)}
-            onKeyPress={checkKey}
-            onFocus={() => focused.current = true}
-            onBlurCapture={() => focused.current = false}
-            onBlur={sendValueUpdate}
+            onChange={(e) => sendValueUpdate(e.target.value)}
           />
-          <label type={props.type ?? "text"} htmlFor={idRef.current}>
+          <label type={type} htmlFor={idRef.current}>
             {displayed_label}
           </label>
         </StyledInputText>
@@ -97,6 +81,7 @@ InputText.propTypes = {
     validate: PropTypes.func,
     icon: PropTypes.func, // TODO!!!
     showErrors: PropTypes.bool,
+    disabled: PropTypes.bool,
 }
 
 export default InputText;

@@ -157,6 +157,40 @@ class Handler(ABC):
         '''Return all unique values for a column'''
         return [o[0] for o in cls.ModelType.query.with_entities(column).distinct(column).all()]
 
+    @classmethod
+    def update_relationship_list(cls, model, relationship_field: str, data):
+        '''Uses a list of dictionaries to update a model's relationship list
+        Arguments:
+        1) model - the model being updated
+        1) relationship_field - the name of the field being updated with data
+        2) data - the data to update the field with'''
+        items = getattr(model, relationship_field, None)
+        if not items:
+            print('Error: Could not find field to update in update_relationship_list')
+            return False
+        # Any item without an id is new, so we can track all ids in the dict
+        # to determine which items have been added/deleted
+        i_ids = [it.id for it in items]  # IDs in the items list
+        d_ids = []  # IDs in the data list
+        for d_obj in data:
+            # Object is not new - update
+            if (d_id := d_obj.get('id', None)):
+                d_ids.append(d_id)
+                d_model = cls.from_id(d_id)
+                cls.update(d_model, d_obj)
+            # Object is new - create
+            else:
+                new_model = cls.create(data)
+                cls.update(new_model, data)
+                db.session.add(new_model)
+                items.append(new_model)
+        for old in i_ids:
+            # Object not found in data - delete
+            if old not in d_ids:
+                old_model = cls.from_id(old)
+                db.session.delete(old_model)
+                items.remove(old_model)
+
 
 class AddressHandler(Handler):
     ModelType = Address
@@ -261,7 +295,9 @@ class EmailHandler(Handler):
     @classmethod
     def to_dict(cls, model: Email):
         model = cls.convert_to_model(model)
-        return EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
+        as_dict = EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
+        as_dict['id'] = model.id
+        return as_dict
 
 
 class FeedbackHandler(Handler):
@@ -565,7 +601,9 @@ class PhoneHandler(Handler):
     @classmethod
     def to_dict(cls, model: Phone):
         model = cls.convert_to_model(model)
-        return PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
+        as_dict = PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
+        as_dict['id'] = model.id
+        return as_dict
 
 
 class PlantTraitHandler(Handler):
@@ -1023,6 +1061,28 @@ class UserHandler(Handler):
             "roles": RoleHandler.all_dicts(user.roles),
             "likes": SkuHandler.all_dicts(user.likes)
         }
+
+    @classmethod
+    def set_profile_data(cls, user, data: dict):
+        '''Sets user profile data'''
+        success = True
+        user.first_name = data.get('firstName', user.first_name)
+        user.last_name = data.get('lastName', user.last_name)
+        user.pronouns = data.get('pronouns', user.pronouns)
+        emails = data.get('emails', None)
+        if emails:
+            success = success and cls.update_relationship_list(user, 'emails', emails)
+        phones = data.get('phones', None)
+        if phones:
+            success = success and cls.update_relationship_list(user, 'phones', phones)
+        existing_customer = data.get('existingCustomer', None)
+        if existing_customer:
+            if not user.account_approved and existing_customer:
+                user.account_approved = True
+        if (password := data.get('password', None)):
+            user.password = User.hashed_password(password)
+        db.session.commit()
+        return True
 
     @staticmethod
     def get_user_lock_status(email: str):

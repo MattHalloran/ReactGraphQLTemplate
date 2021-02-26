@@ -14,6 +14,7 @@ export const StyledDots = styled.div`
         margin-right: 5px;
         cursor: pointer;
         border-radius: 50%;
+        opacity: 80%;
     }
 
     .active {
@@ -22,7 +23,7 @@ export const StyledDots = styled.div`
     }
 
     .inactive {
-        background: lightgray;
+        background: white;
         border: 1px solid black;
     }
 `;

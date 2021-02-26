@@ -688,9 +688,8 @@ class Role(db.Model):
 class AccountStatus(Enum):
     DELETED = -1
     UNLOCKED = 1
-    WAITING_APPROVAL = 2
-    SOFT_LOCK = 3
-    HARD_LOCK = 4
+    SOFT_LOCK = 2
+    HARD_LOCK = 3
 
 
 # All users of the system, such as customers and admins
@@ -700,6 +699,8 @@ class User(db.Model):
         'pronouns': 'they/them/theirs',
         'theme': 'light',
         'image_file': 'default.jpg',
+        'account_approved': False,
+        'account_status': AccountStatus.UNLOCKED.value,
     }
 
     __tablename__ = Tables.USER.value
@@ -715,7 +716,8 @@ class User(db.Model):
     # UTC seconds since epoch
     last_login_attempt = Column(Float, nullable=False, default=time.time())
     session_token = Column(String(250))
-    account_status = Column(Integer, nullable=False, default=AccountStatus.WAITING_APPROVAL.value)
+    account_approved = Column(Boolean, nullable=False, default=defaults['account_approved'])
+    account_status = Column(Integer, nullable=False, default=defaults['account_status'])
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------

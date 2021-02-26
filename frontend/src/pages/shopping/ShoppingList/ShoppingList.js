@@ -298,7 +298,7 @@ function ExpandedPlant({
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        getImage(plant.id, 'l').then(response => {
+        getImage(plant.display_id, 'l').then(response => {
             setImage(response.image);
         }).catch(error => {
             console.error(error);
@@ -407,7 +407,7 @@ function ExpandedPlant({
 }
 
 ExpandedPlant.propTypes = {
-    group: PropTypes.object.isRequired,
+    plant: PropTypes.object.isRequired,
     thumbnail: PropTypes.string,
     onCart: PropTypes.func.isRequired,
     theme: PropTypes.object,

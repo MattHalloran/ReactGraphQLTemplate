@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import { loginUser } from 'query/http_promises';
@@ -14,6 +14,10 @@ function LogInForm() {
     const [password, setPassword] = useState("")
     const [passwordError, setPasswordError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
+    
+    useEffect(() => {
+        console.log('EMAIL ERROR:', emailError)
+    }, [emailError])
 
     const toRegister = () => history.replace('/register');
 
@@ -24,7 +28,7 @@ function LogInForm() {
             history.push(LINKS.Shopping);
         }).catch(err => {
             console.error(err);
-            alert(error.msg);
+            alert(err.msg);
         })
     }
 
@@ -43,6 +47,7 @@ function LogInForm() {
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}
@@ -52,6 +57,7 @@ function LogInForm() {
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}
@@ -59,7 +65,9 @@ function LogInForm() {
             <InputText
                 label="Password"
                 type="password"
+                value={password}
                 valueFunc={setPassword}
+                error={passwordError}
                 errorFunc={setPasswordError}
                 validate={validation.defaultStringValidation}
                 showErrors={showErrors}

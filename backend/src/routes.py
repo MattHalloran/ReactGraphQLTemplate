@@ -308,7 +308,7 @@ def fetch_image():
     (id, size) = getData('id', 'size')
     return {
         **StatusCodes['SUCCESS'],
-        "images": ImageHandler.get_b64(int(id), size)
+        "image": ImageHandler.get_b64(int(id), size)
     }
 
 
@@ -434,6 +434,22 @@ def fetch_profile_info():
     }
 
 
+@app.route(f'{PREFIX}/update_profile', methods=["POST"])
+@handle_exception
+def update_profile():
+    (session, data) = getData('session', 'data')
+    user = verify_session(session)
+    # If session invalid, or existing password invalid
+    if not user or not UserHandler.get_user_from_credentials(session['email'], data['currentPassword']):
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
+    if UserHandler.set_profile_data(user, data):
+        return {
+            **StatusCodes['SUCCESS'],
+            "profile": UserHandler.get_profile_data(session['email'])
+        }
+    return StatusCodes['ERROR_UNKNOWN']
+
+
 @app.route(f'{PREFIX}/fetch_likes', methods=["POST"])
 @handle_exception
 def fetch_likes():
@@ -495,7 +511,7 @@ def set_like_sku():
     # Return updated user data
     return {
         **StatusCodes['SUCCESS'],
-        "user": user_data
+        "user": UserHandler.to_dict(user)
     }
 
 

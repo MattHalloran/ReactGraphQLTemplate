@@ -35,6 +35,7 @@ function ForgotPasswordForm() {
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}

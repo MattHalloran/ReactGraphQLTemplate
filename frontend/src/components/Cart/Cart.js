@@ -31,7 +31,8 @@ function Cart({
     cart,
     onUpdate,
 }) {
-    const [changedCart, setChangedCart] = useState(cart);
+    console.log('CART IS: ', cart)
+    const [changedCart, setChangedCart] = useState(cart ?? {});
     const [theme, setTheme] = useState(getTheme());
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);

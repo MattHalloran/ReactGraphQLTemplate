@@ -375,3 +375,16 @@ export async function fetch_images(ids, size) {
     }
     return await fetchWrapper(`${PREFIX}/fetch_images`, options);
 }
+
+export async function update_profile(session, data) {
+    let json = JSON.stringify({
+        "session": session,
+        "data": data
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/update_profile`, options);
+}

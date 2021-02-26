@@ -77,6 +77,7 @@ function SignUpForm() {
                     type="text"
                     value={firstName}
                     valueFunc={setFirstName}
+                    error={firstNameError}
                     errorFunc={setFirstNameError}
                     validate={validation.firstNameValidation}
                     showErrors={showErrors}
@@ -86,6 +87,7 @@ function SignUpForm() {
                     type="text"
                     value={lastName}
                     valueFunc={setLastName}
+                    error={lastNameError}
                     errorFunc={setLastNameError}
                     validate={validation.lastNameValidation}
                     showErrors={showErrors}
@@ -96,6 +98,7 @@ function SignUpForm() {
                 type="text"
                 value={business}
                 valueFunc={setBusiness}
+                error={businessError}
                 errorFunc={setBusinessError}
                 validate={validation.businessValidation}
                 showErrors={showErrors}
@@ -105,6 +108,7 @@ function SignUpForm() {
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}
@@ -114,6 +118,7 @@ function SignUpForm() {
                 type="text"
                 value={phone}
                 valueFunc={setPhone}
+                error={phoneError}
                 errorFunc={setPhoneError}
                 validate={validation.phoneNumberValidation}
                 showErrors={showErrors}
@@ -121,7 +126,9 @@ function SignUpForm() {
             <InputText
                 label="Password"
                 type="password"
+                value={password}
                 valueFunc={setPassword}
+                error={passwordError}
                 errorFunc={setPasswordError}
                 validate={validation.passwordValidation}
                 showErrors={showErrors}
@@ -129,6 +136,7 @@ function SignUpForm() {
             <InputText
                 label="Confirm Password"
                 type="password"
+                value={confirmPassword}
                 valueFunc={setConfirmPassword}
             />
             <FormControl component="fieldset">

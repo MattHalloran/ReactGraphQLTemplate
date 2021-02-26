@@ -101,6 +101,8 @@ export const StyledExpandedPlant = styled.div`
     .display-image {
         display: inline-block;
         top: 0%;
+        width: fit-content;
+        object-fit: cover;
     }
 
     .trait-list {

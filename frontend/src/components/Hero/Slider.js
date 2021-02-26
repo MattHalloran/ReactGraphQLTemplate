@@ -39,7 +39,6 @@ const Slider = ({
     })
 
     const play = useCallback((index) => {
-        console.log('PLAY', index, slidingDuration)
         timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
         setState({
             transition: slidingDuration,
@@ -48,7 +47,6 @@ const Slider = ({
     }, [timeoutRef])
 
     const wait = useCallback((index) => {
-        console.log('WAIT', index)
         setSlideIndex(index);
         timeoutRef.current = setTimeout(play, slidingDelay, index);
         //setSlides(s => rotateArray(s, false));

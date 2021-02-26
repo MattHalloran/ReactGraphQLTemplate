@@ -33,6 +33,7 @@ export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, s
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
 export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
+export const updateProfile = (session, data) => promiseWrapper(http.update_profile, session, data);
 export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
 export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
 export const getUnusedPlants = (sorter) => promiseWrapper(http.fetch_unused_plants, sorter);
