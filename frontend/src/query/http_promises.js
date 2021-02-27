@@ -1,7 +1,7 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { storeItem, getRoles, getSession,clearStorage, setTheme, getItem, getStatusCodes } from 'utils/storage';
-import { LOCAL_STORAGE, LINKS, PUBS } from 'utils/consts';
+import { storeItem, getRoles, getSession,clearStorage, setTheme } from 'utils/storage';
+import { LOCAL_STORAGE, LINKS, PUBS, STATUS_CODES } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import * as http from './http_functions';
 
@@ -69,7 +69,7 @@ export const checkCookies = () => {
         if (!session || !session.email || !session.token) {
             console.log('SETTING SESSION TO NULL', session);
             storeItem(LOCAL_STORAGE.Session, null);
-            reject(getStatusCodes().FAILURE_NOT_VERIFIED);
+            reject(STATUS_CODES.FAILURE_NOT_VERIFIED);
         } else {
             http.validate_token(session.token).then(data => {
                 if (data.ok) {
@@ -117,16 +117,16 @@ export function loginUser(email, password) {
     });
 }
 
-export function registerUser(firstName, lastName, business, email, phone, password, existing_customer) {
+export function registerUser(email, data) {
     return new Promise(function (resolve, reject) {
-        http.create_user(firstName, lastName, business, email, phone, password, existing_customer).then(data => {
-            if (data.ok) {
+        http.create_user(data).then(response => {
+            if (response.ok) {
                 login({email: email, token: data.token }, data.user);
                 resolve(data);
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')
                 clearStorage();
-                reject(data);
+                reject(response);
             }
         })
     });
@@ -153,22 +153,6 @@ export function updateCart(session, who, cart) {
                 storeItem(LOCAL_STORAGE.Cart, response.cart);
                 resolve(response);
             } else {
-                reject(response);
-            }
-        })
-    });
-}
-
-export function getConsts() {
-    return new Promise(function (resolve, reject) {
-        http.fetch_consts().then(response => {
-            if (response.ok) {
-                console.log('FOUND CODES', response.status_codes);
-                storeItem(LOCAL_STORAGE.StatusCodes, response.status_codes, true);
-                storeItem(LOCAL_STORAGE.OrderStatus, response.order_status, true);
-                resolve(response);
-            } else {
-                console.log('COULD NOT FETCH CODES', response)
                 reject(response);
             }
         })

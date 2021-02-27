@@ -68,11 +68,11 @@ function ProfileForm(props) {
             if (user.first_name) setFirstName(user.first_name);
             if (user.last_name) setLastName(user.last_name)
             // TODO convert emails and phones to strings first
-            if (user.personal_email) {
-                setEmails(user.personal_email.map(o => o.email_address));
+            if (user.emails) {
+                setEmails(user.emails.map(o => o.email_address));
             }
-            if (user.personal_phone) {
-                setPhones(user.personal_phone.map(o => o.unformatted_number));
+            if (user.phones) {
+                setPhones(user.phones.map(o => o.unformatted_number));
             }
             if (user.pronouns) {
                 setPronouns(user.pronouns);
@@ -114,12 +114,12 @@ function ProfileForm(props) {
         // Now that all checks have passed, we can send post a profile update
         let data = {
             "currentPassword": currentPassword,
-            "firstName": firstName,
-            "lastName": lastName,
+            "first_name": firstName,
+            "last_name": lastName,
             "pronouns": pronouns,
             "emails": emails,
             "phones": phones,
-            "existingCustomer": existingCustomer
+            "existing_customer": existingCustomer
         }
         if (password !== '')
             data.password = password;

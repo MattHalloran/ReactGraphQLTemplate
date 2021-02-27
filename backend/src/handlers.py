@@ -76,17 +76,17 @@ class Handler(ABC):
     @classmethod
     def create_from_dict(cls, data: dict):
         '''Used to create a new model, if data has passed preprocess checks'''
-        # If any required fields are missing
-        if not cls.data_has_required(cls.required_fields(), data):
-            raise Exception('Cannot create object: one or more required fields missing')
-        # Filter data
-        filtered_data = cls.filter_data(data, cls.all_fields())
         # Before creating the model object, first try to set default values
         # of fields that have not been provided
         if hasattr(cls.ModelType, 'defaults'):
             for key in cls.ModelType.defaults.keys():
-                if not filtered_data.get(key):
-                    filtered_data[key] = cls.ModelType.defaults[key]
+                if not data.get(key):
+                    data[key] = cls.ModelType.defaults[key]
+        # If any required fields are missing
+        if not cls.data_has_required(cls.required_fields(), data):
+            raise Exception('Cannot create object: one or more required fields missing')
+        # Filter data
+        filtered_data = cls.filter_data(data, cls.required_fields())
         return cls.ModelType(*filtered_data)
 
     @classmethod
@@ -103,6 +103,8 @@ class Handler(ABC):
         # If arguments are passed in to match the model's __init___
         else:
             print('CREATING OBJECT FROM ARGS...')
+            print(type(args[0]))
+            print(args[0])
             return cls.create_from_args(*args)
 
     @classmethod
@@ -158,38 +160,39 @@ class Handler(ABC):
         return [o[0] for o in cls.ModelType.query.with_entities(column).distinct(column).all()]
 
     @classmethod
-    def update_relationship_list(cls, model, relationship_field: str, data):
+    def update_relationship_list(cls, relationship, relationship_handler, data):
         '''Uses a list of dictionaries to update a model's relationship list
         Arguments:
-        1) model - the model being updated
-        1) relationship_field - the name of the field being updated with data
+        1) relationship - the model's relationship array
+        1) relationship type - the handler type of the relationship objects
         2) data - the data to update the field with'''
-        items = getattr(model, relationship_field, None)
-        if not items:
-            print('Error: Could not find field to update in update_relationship_list')
+        if not isinstance(relationship, list):
+            print('Error: relationship must be an array')
             return False
         # Any item without an id is new, so we can track all ids in the dict
         # to determine which items have been added/deleted
-        i_ids = [it.id for it in items]  # IDs in the items list
+        i_ids = [it.id for it in relationship]  # IDs in the items list
         d_ids = []  # IDs in the data list
         for d_obj in data:
+            print(f'd_obj is {d_obj}')
+            print(type(d_obj))
             # Object is not new - update
             if (d_id := d_obj.get('id', None)):
                 d_ids.append(d_id)
-                d_model = cls.from_id(d_id)
-                cls.update(d_model, d_obj)
+                d_model = relationship_handler.from_id(d_id)
+                relationship_handler.update(d_model, d_obj)
             # Object is new - create
             else:
-                new_model = cls.create(data)
-                cls.update(new_model, data)
+                new_model = relationship_handler.create(d_obj)
+                relationship_handler.update(new_model, d_obj)
                 db.session.add(new_model)
-                items.append(new_model)
+                relationship.append(new_model)
         for old in i_ids:
             # Object not found in data - delete
             if old not in d_ids:
-                old_model = cls.from_id(old)
+                old_model = relationship_handler.from_id(old)
                 db.session.delete(old_model)
-                items.remove(old_model)
+                relationship.remove(old_model)
 
 
 class AddressHandler(Handler):
@@ -290,7 +293,7 @@ class EmailHandler(Handler):
 
     @staticmethod
     def required_fields():
-        return ['email_address']
+        return ['email_address', 'receives_delivery_updates']
 
     @classmethod
     def to_dict(cls, model: Email):
@@ -596,7 +599,7 @@ class PhoneHandler(Handler):
 
     @staticmethod
     def required_fields():
-        return ['unformatted_number']
+        return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
 
     @classmethod
     def to_dict(cls, model: Phone):
@@ -1054,8 +1057,8 @@ class UserHandler(Handler):
             "last_name": user.last_name,
             "pronouns": user.pronouns,
             "theme": user.theme,
-            "personal_email": EmailHandler.all_dicts(user.personal_email),
-            "personal_phone": PhoneHandler.all_dicts(user.personal_phone),
+            "emails": EmailHandler.all_dicts(user.personal_email),
+            "phones": PhoneHandler.all_dicts(user.personal_phone),
             "image_file": user.image_file,
             "orders": OrderHandler.all_dicts(user.orders),
             "roles": RoleHandler.all_dicts(user.roles),
@@ -1066,17 +1069,14 @@ class UserHandler(Handler):
     def set_profile_data(cls, user, data: dict):
         '''Sets user profile data'''
         success = True
-        user.first_name = data.get('firstName', user.first_name)
-        user.last_name = data.get('lastName', user.last_name)
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
         user.pronouns = data.get('pronouns', user.pronouns)
-        emails = data.get('emails', None)
-        if emails:
-            success = success and cls.update_relationship_list(user, 'emails', emails)
-        phones = data.get('phones', None)
-        if phones:
-            success = success and cls.update_relationship_list(user, 'phones', phones)
-        existing_customer = data.get('existingCustomer', None)
-        if existing_customer:
+        if emails := data.get('emails', None):
+            success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
+        if phones := data.get('phones', None):
+            success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
+        if existing_customer := data.get('existing_customer', None):
             if not user.account_approved and existing_customer:
                 user.account_approved = True
         if (password := data.get('password', None)):

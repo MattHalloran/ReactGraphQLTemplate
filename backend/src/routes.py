@@ -124,27 +124,15 @@ def consts():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def register():
-    data = getData('first_name', 'last_name', 'business', 'email', 'phone', 'password', 'existing_customer')
-    email = EmailHandler.create(data[3], True)
-    phone = PhoneHandler.create(data[4], '+1', '', True, True)
-    business = BusinessHandler.create(data[2], email, phone, True)
-    user = UserHandler.create(data[0], data[1], '', data[5], data[6])
-    user.personal_email.append(email)
-    db.session.add(email)
-    db.session.add(phone)
-    db.session.add(business)
-    db.session.add(user)
-    try:
-        db.session.commit()
-        welcome(data[3])
-    # Most likely means that a user with that email already exists
-    except exc.IntegrityError:
-        print(traceback.format_exc())
-        status = StatusCodes['FAILURE_EMAIL_EXISTS']
-        return {"status": status}
-    status = StatusCodes['SUCCESS']
+    (data) = getData('data')
+    # If email is already registered
+    if any(UserHandler.from_email(e['email_address']) for e in data['emails']):
+        print('ERROR: Email exists')
+        return StatusCodes['FAILURE_EMAIL_EXISTS']
+    user = UserHandler.create(data)
+    UserHandler.set_profile_data(user, data)
     return {
-        **status,
+        **StatusCodes['SUCCESS'],
         "token": generate_token(app, user),
         "user": UserHandler.to_dict(user)
     }
@@ -662,7 +650,7 @@ def modify_user():
         return StatusCodes['ERROR_UNKNOWN']
     # Don't allow modification of admins
     if not UserHandler.is_admin(user):
-        print('CANNOT DELETE A USER')
+        print('CANNOT DELETE AN ADMIN')
         return StatusCodes['ERROR_UNKNOWN']
     operation_to_status = {
         'LOCK': AccountStatus.HARD_LOCK.value,

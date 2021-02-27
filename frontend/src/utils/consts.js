@@ -1,6 +1,10 @@
+import codes from 'query/codes.json';
+
 export const BUSINESS_NAME = "New Life Nursery Inc.";
 export const FULL_BUSINESS_NAME = "New Life Nursery Inc.";
 export const GOOGLE_MAPS_ADDRESS = "https://www.google.com/maps/place/106+S+Woodruff+Rd,+Bridgeton,+NJ+08302/@39.4559443,-75.1793432,17z/";
+
+export const STATUS_CODES = codes;
 
 export const DEFAULT_PRONOUNS = [
     "Custom",
@@ -53,7 +57,6 @@ export const LOCAL_STORAGE = {
     Theme: "theme",
     Session: "session",
     Roles: "roles",
-    StatusCodes: "status_codes",
     OrderStatus: "order_status",
 }
 

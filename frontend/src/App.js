@@ -28,10 +28,10 @@ import LogInForm from 'forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getSession, getStatusCodes, getTheme } from './utils/storage';
+import { getSession, getTheme } from './utils/storage';
 //Authentication
 import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
-import { checkCookies, getConsts } from 'query/http_promises';
+import { checkCookies } from 'query/http_promises';
 
 const keyMap = {
     OPEN_MENU: "left",
@@ -45,8 +45,6 @@ function App() {
     const nav_visible_y = useRef(-1);
     const [session, setSession] = useState(getSession());
     const session_attempts = useRef(0);
-    const [statusCodes, setStatusCodes] = useState(null);
-    const status_code_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
     const [theme, setTheme] = useState(getTheme());
     const [menu_open, setMenuOpen] = useState(false);
@@ -83,7 +81,6 @@ function App() {
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let statusSub = PubSub.subscribe(PUBS.StatusCodes, (_, o) => setStatusCodes(o));
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
@@ -91,7 +88,6 @@ function App() {
         document.addEventListener('scroll', trackScrolling);
         return (() => {
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(statusSub);
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(popupSub);
@@ -107,20 +103,6 @@ function App() {
             checkCookies().catch(err => console.error(err));
         }
     }, [session])
-
-    useEffect(() => {
-        console.log('STATUS CODE UPDATE',statusCodes)
-        if (statusCodes == null && status_code_attempts.current < 5) {
-            status_code_attempts.current++;
-            getConsts().catch(err => console.log(err));
-        }
-    }, [statusCodes])
-
-    if (!statusCodes) {
-        return (
-            <p>WAITING</p>
-        );
-    }
 
     return (
         <div id="App">

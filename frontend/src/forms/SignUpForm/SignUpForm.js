@@ -9,9 +9,8 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { useHistoryState } from 'utils/useHistoryState';
-import { LINKS } from 'utils/consts';
+import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES } from 'utils/consts';
 import Button from 'components/Button/Button';
-import { getStatusCodes } from 'utils/storage';
 
 function SignUpForm() {
     let history = useHistory();
@@ -19,6 +18,8 @@ function SignUpForm() {
     const [firstNameError, setFirstNameError] = useHistoryState("su_first_name_error", null);
     const [lastName, setLastName] = useHistoryState("su_last_name", "");
     const [lastNameError, setLastNameError] = useHistoryState("su_last_name_error", null);
+    const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
+    const [pronounsError, setPronounsError] = useHistoryState("su_pronoun_error", null);
     const [business, setBusiness] = useHistoryState("su_bizz", null);
     const [businessError, setBusinessError] = useHistoryState("su_bizz_error", null);
     const [email, setEmail] = useHistoryState("su_email", "");
@@ -37,7 +38,23 @@ function SignUpForm() {
     }
 
     const register = () => {
-        registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
+        let data = {
+            "first_name": firstName,
+            "last_name": lastName,
+            "pronouns": pronouns,
+            "business": business,
+            "emails": [{"email_address": email, "receives_delivery_updates": true}],
+            "phones": [{
+                "unformatted_number": phone,
+                 "country_code": '+1',
+                 "extension": '',
+                 "is_mobile": true,
+                 "receives_delivery_updates": false
+            }],
+            "password": password,
+            "existing_customer": existingCustomer
+        }
+        registerUser(email, data).then(() => {
             if (existingCustomer) {
                 alert('Welcome to New Life Nursery! You may now begin shopping');
             } else {
@@ -46,7 +63,7 @@ function SignUpForm() {
             history.push(LINKS.Shopping);
         }).catch(err => {
             console.error(err);
-            if (err.code === getStatusCodes().FAILURE_EMAIL_EXISTS.code) {
+            if (err.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
                 if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
                     history.push(LINKS.ForgotPassword);
                 }
@@ -59,10 +76,17 @@ function SignUpForm() {
     const submit = (event) => {
         event.preventDefault();
         setShowErrors(true);
-        if (!firstNameError && !lastNameError && !businessError && !emailError &&
-            !passwordError && password === confirmPassword && !existingCustomerError) {
-            register();
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
         }
+        if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError, emailError,
+            passwordError, existingCustomerError)) {
+            alert('Please fill in required fields');
+            return;
+
+        }
+        register();
     }
 
     const handleRadioSelect = (event) => {
@@ -93,6 +117,14 @@ function SignUpForm() {
                     showErrors={showErrors}
                 />
             </div>
+            <InputText
+                label="Pronouns"
+                value={pronouns}
+                valueFunc={setPronouns}
+                error={pronounsError}
+                errorFunc={setPronounsError}
+                validate={validation.pronounValidation}>
+            </InputText>
             <InputText
                 label="Business"
                 type="text"
