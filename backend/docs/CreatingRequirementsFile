@@ -10,5 +10,8 @@ add the python-dotenv environment variable. To add this to the requirements.txt 
 Another missing file is psycopg2. Enter:
     4) pip3 freeze | grep psycopg2 >> requirements.txt
 
+Also make sure to install gunicorn, for serving the backend. Enter:
+    5) pip3 freeze | grep gunicorn >> requirements.txt
+
 Also, make sure to check that the correct bcrypt was added to the requirements file.
 It should be bcrypt, not python-bcrypt!
