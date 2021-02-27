@@ -10,7 +10,7 @@ import Cart from 'components/Cart/Cart';
 import { updateCart, setOrderStatus } from 'query/http_promises';
 import { updateObject } from 'utils/objectTools';
 import { findWithAttr } from 'utils/arrayTools';
-import { LOCAL_STORAGE } from 'utils/consts';
+import { ORDER_STATUS } from 'utils/consts';
 
 const ORDER_STATES = [
     {
@@ -158,7 +158,7 @@ function OrderPopup({
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, getItem(LOCAL_STORAGE.OrderStatus).APPROVED)
+        setOrderStatus(session, changedOrder.id, ORDER_STATUS.APPROVED)
             .then(() => {
                 alert('Order status set to \'Approved\'')
             }).catch(err => {
@@ -168,7 +168,7 @@ function OrderPopup({
     }, [changedOrder])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, getItem(LOCAL_STORAGE.OrderStatus).REJECTED)
+        setOrderStatus(session, changedOrder.id, ORDER_STATUS.REJECTED)
             .then(() => {
                 alert('Order status set to \'Denied\'')
             }).catch(err => {

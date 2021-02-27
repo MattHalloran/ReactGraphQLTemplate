@@ -55,7 +55,7 @@ export async function create_user(data) {
     return await fetchWrapper(`${PREFIX}/register`, options);
 }
 
-export async function get_token(email, password) {
+export async function login(email, password) {
     let json = JSON.stringify({
         "email": email,
         "password": password
@@ -66,7 +66,7 @@ export async function get_token(email, password) {
         headers: HEADERS.Text,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/get_token`, options);
+    return await fetchWrapper(`${PREFIX}/login`, options);
 }
 
 export async function send_password_reset_request(email) {

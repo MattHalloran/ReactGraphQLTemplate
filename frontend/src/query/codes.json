@@ -35,6 +35,11 @@
         "ok": false,
         "msg": "Error: No user with that email"
     },
+    "FAILURE_INCORRECT_CREDENTIALS": {
+        "code": 975,
+        "ok": false,
+        "msg": "Error: Email or password incorrect"
+    },
     "FAILURE_SOFT_LOCKOUT": {
         "code": 910,
         "ok": false,

@@ -103,7 +103,7 @@ export const login = (session, user) => {
 
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
-        http.get_token(email, password).then(data => {
+        http.login(email, password).then(data => {
             if (data.ok) {
                 console.log('LOGIN OKAY')
                 login({email: email, token: data.token}, data.user);

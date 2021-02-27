@@ -138,10 +138,10 @@ def register():
     }
 
 
-@app.route(f'{PREFIX}/get_token', methods=['POST'])
+@app.route(f'{PREFIX}/login', methods=['POST'])
 @cross_origin(supports_credentials=True)
 @handle_exception
-def get_token():
+def login():
     '''Generate a session token from a user's credentials'''
     (email, password) = getData('email', 'password')
     user = UserHandler.get_user_from_credentials(email, password)
@@ -158,7 +158,7 @@ def get_token():
     else:
         account_status = UserHandler.get_user_lock_status(email)
         print(f'User account status is {account_status}')
-        status = StatusCodes['ERROR_UNKNOWN']
+        status = StatusCodes['FAILURE_INCORRECT_CREDENTIALS']
         if account_status == -1:
             status = StatusCodes['FAILURE_NO_USER']
         elif account_status == AccountStatus.SOFT_LOCK.value:
