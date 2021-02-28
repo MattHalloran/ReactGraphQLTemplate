@@ -37,7 +37,7 @@ function Cart({
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
 
-    if(changedCart.desired_delivery_date === null) {
+    if(!changedCart.desired_delivery_date) {
         changedCart.desired_delivery_date = +(new Date());
     }
     if(changedCart.special_instructions === null) {

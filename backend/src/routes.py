@@ -588,6 +588,7 @@ def modify_sku():
 def modify_plant():
     '''Like or unlike an inventory item'''
     (session, operation, plant_data) = getData('session', 'operation', 'data')
+    print(f'PLANT DATA HERE IS {plant_data}')
     if not verify_admin(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     plant_obj = PlantHandler.from_id(plant_data['id'])
@@ -615,10 +616,32 @@ def modify_plant():
                 print('SETTING PLANTS DISPLAY IMAGE')
                 PlantHandler.set_display_image(plant_obj, image)
                 db.session.commit()
+
+        # Update plant fields
+        def update_trait(option: PlantTraitOptions, value: str):
+            if isinstance(value, list):
+                return [update_trait(option, v) for v in value]
+            if value is None:
+                return None
+            if (trait := PlantTraitHandler.from_values(option, value)):
+                return trait
+            print(f'UPDATEE TRAIT A... {value}')
+            new_trait = PlantTraitHandler.create(option, value)
+            print(f'UPDATE TRAIT B... {new_trait}')
+            db.session.add(new_trait)
+            return new_trait
+        print(f"TODOOOOOOOO {plant_data}")
+        plant_obj.latin_name = plant_data['latin_name']
+        plant_obj.common_name = plant_data['common_name']
+        plant_obj.drought_tolerance = update_trait(PlantTraitOptions.DROUGHT_TOLERANCE, plant_data['drought_tolerance'])
+        plant_obj.grown_height = update_trait(PlantTraitOptions.GROWN_HEIGHT, plant_data['grown_height'])
+        plant_obj.grown_spread = update_trait(PlantTraitOptions.GROWN_SPREAD, plant_data['grown_spread'])
+        plant_obj.growth_rate = update_trait(PlantTraitOptions.GROWTH_RATE, plant_data['growth_rate'])
+        plant_obj.optimal_light = update_trait(PlantTraitOptions.OPTIMAL_LIGHT, plant_data['optimal_light'])
+        plant_obj.salt_tolerance = update_trait(PlantTraitOptions.SALT_TOLERANCE, plant_data['salt_tolerance'])
         # Hide existing SKUs (if they are still active, this will be updated later)
-        else:
-            for sku in plant_obj.skus:
-                sku.status = SkuStatus.INACTIVE.value
+        for sku in plant_obj.skus:
+            sku.status = SkuStatus.INACTIVE.value
         sku_data = plant_data.get('skus', None)
         if sku_data:
             for data in sku_data:
@@ -626,6 +649,7 @@ def modify_plant():
                 # If id was in data, then this is not a new SKU
                 if id:
                     sku = SkuHandler.from_id(id)
+                    sku.status = SkuStatus.ACTIVE.value
                 else:
                     sku = SkuHandler.create()
                 SkuHandler.update(sku, data)
@@ -642,16 +666,16 @@ def modify_plant():
 def modify_user():
     '''Like or unlike an inventory item'''
     (session, id, operation) = getData('session', 'id', 'operation')
-    if not verify_admin(session):
+    admin = verify_admin(session)
+    if not admin:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     user = UserHandler.from_id(id)
     if user is None:
         print('USER NOT FOUND')
         return StatusCodes['ERROR_UNKNOWN']
-    # Don't allow modification of admins
-    if not UserHandler.is_admin(user):
-        print('CANNOT DELETE AN ADMIN')
-        return StatusCodes['ERROR_UNKNOWN']
+    # Cannot delete yourself
+    if user.id == admin.id:
+        return StatusCodes['ERROR_CANNOT_DELETE_YOURSELF']
     operation_to_status = {
         'LOCK': AccountStatus.HARD_LOCK.value,
         'UNLOCK': AccountStatus.UNLOCKED.value,

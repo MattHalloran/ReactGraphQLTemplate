@@ -293,6 +293,7 @@ function ExpandedPlant({
     thumbnail,
     onCart,
 }) {
+    console.log('EXPANDED PLANT', plant)
     const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
     const [image, setImage] = useState(null);
@@ -325,15 +326,20 @@ function ExpandedPlant({
     }
 
     const traitIconList = (field, Icon, title, alt) => {
-        if (!plant || !plant[field] || !Array.isArray(plant[field]) ||
-            plant[field].length === 0) return null;
+        if (!plant || !plant[field]) return null;
         if (!alt) alt = title;
-        let field_map = plant[field].map((f) => f.value)
+        console.log('TRAIT ICON LIST', field)
+        let field_string;
+        if (Array.isArray(plant[field])) {
+            field_string = plant[field].map((f) => f.value).join(', ')
+        } else {
+            field_string = plant[field].value;
+        }
         return (
             <div className="trait-container">
                 <Tooltip content={title}>
                     <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
-                    <p>: {field_map.join(', ')}</p>
+                    <p>: {field_string}</p>
                 </Tooltip>
             </div>
         )

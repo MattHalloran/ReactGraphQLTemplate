@@ -79,7 +79,7 @@ function Hamburger(props) {
     }
 
     // If someone is not logged in, display sign up/log in links
-    if (session === null) {
+    if (!session) {
         top_links.push([LINKS.LogIn, PersonPlusIcon]);
     } else {
         top_links.push([LINKS.Shopping, BagPlusIcon],
@@ -160,7 +160,7 @@ function NavList() {
 
     let cart;
     // If someone is not logged in, display sign up/log in links
-    if (session === null) {
+    if (!session) {
         nav_options.push([LINKS.Register, 'Sign Up'],
             [LINKS.LogIn, 'Log In']);
     } else {

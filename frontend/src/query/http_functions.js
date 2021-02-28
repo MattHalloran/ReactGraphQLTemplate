@@ -286,6 +286,7 @@ export async function modify_plant(session, operation, data) {
         "operation": operation,
         "data": data
     });
+    console.log('PLANT DATA', json)
     let options = {
         body: json,
         method: 'post',

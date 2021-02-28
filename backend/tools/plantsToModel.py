@@ -28,7 +28,7 @@ def get_trait(trait: PlantTraitOptions, value: str):
     print(f'FROM VALUESSS, {trait.value}, {value}')
     trait_obj = PlantTraitHandler.from_values(trait, value)
     if trait_obj is None:
-        trait_obj = PlantTraitHandler.create(trait.value, value)
+        trait_obj = PlantTraitHandler.create(trait, value)
         db.session.add(trait_obj)
         # ID is not created until the object is committed
         db.session.commit()

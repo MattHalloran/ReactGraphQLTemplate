@@ -20,6 +20,8 @@ function InputText({
     disabled = false,
     ...props
 }) {
+    value = value ?? '';
+    error = error ?? '';
     const idRef = useRef(id);
 
     useEffect(() => {

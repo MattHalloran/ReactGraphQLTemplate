@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { StyledDropDown } from './DropDown.styled';
 import useOutsideClick from 'utils/useOutsideClick';
 import { getTheme } from 'utils/storage';
+import { isString } from 'utils/typeChecking';
 import makeID from 'utils/makeID';
 
 function DropDown({ allow_custom_input = false,
@@ -26,8 +27,8 @@ function DropDown({ allow_custom_input = false,
 
     const [custom, setCustom] = useState('');
     const [selected, setSelected] = useState(() => {
-        let value = initial_value ?? options[0];
-        return multi_select ? [value] : value;
+        if (multi_select) return initial_value ? [initial_value] : [];
+        return initial_value ?? options[0];
     })
 
     const trackScrolling = () => setY(document.getElementById(dropID.current)?.getBoundingClientRect()?.y ?? 0);
@@ -40,20 +41,23 @@ function DropDown({ allow_custom_input = false,
 
     useEffect(() => {
         if (multi_select) {
-            if (custom.length > 0) 
+            if (allow_custom_input && custom.length > 0) 
                 onChange([...selected, custom]);
             else
                 onChange(selected);
         } else {
-            onChange(selected);
+            if (allow_custom_input && custom.length > 0) {
+                onChange(custom);
+                setSelected('');
+            }
+            else
+                onChange(selected);
             setIsOpen(false);
         }
 
-
-        onChange(selected);
         if (multi_select || selected?.length <= 0) return;
         setIsOpen(false);
-    }, [selected, custom, multi_select, onChange])
+    }, [selected, custom, multi_select, allow_custom_input, onChange])
 
     // Start tracking drag variables for dropdown menu
     const handleMouseDown = (event) => {
@@ -79,9 +83,11 @@ function DropDown({ allow_custom_input = false,
     const findIndex = (arr, opt) => {
         if (!multi_select) return -1;
         for (let i = 0; i < arr.length; i++) {
-            if (arr[i].label === opt.label && arr[i].value === opt.value) {
-                console.log('GOT INDEX', i)
-                return i;
+            //Options are either a {label, value} object, or a string
+            if (isString(arr[i])) {
+                if (arr[i] === opt) return i;
+            } else {
+                if (arr[i].label === opt.label && arr[i].value === opt.value) return i;
             }
         }
         return -1;
@@ -92,11 +98,10 @@ function DropDown({ allow_custom_input = false,
         if (multi_select) {
             let index = findIndex(selected, option);
             if (index >= 0) {
-                let new_selection = selected.splice(index, 1);
-                console.log('A NEW SELECTION IS', index, new_selection);
+                console.log('REMOVING SELECTED', index)
                 setSelected(s => s.splice(index, 1));
             } else {
-                console.log('B NEW SELECTINO IS', index, [...selected, option])
+                console.log('SETTING SELECTED', option)
                 setSelected(s => [...s, option]);
             }
         } else {
@@ -108,30 +113,35 @@ function DropDown({ allow_custom_input = false,
         let is_selected = false;
         if (multi_select) {
             is_selected = findIndex(selected, option) >= 0;
-            console.log('RENDERRERRR', option, findIndex(selected,option))
-        } else if (selected.value === option.value) {
-            is_selected = true;
+        } else {
+            if (isString(option)) {
+                is_selected = selected === option;
+            } else {
+                is_selected = selected.value === option.value;
+            }
         }
+
+        console.log('RENDER OPTION', option, is_selected, findIndex(selected, option));
+        
         return (
             <div
-                key={option.value}
+                key={isString(option) ? option : option.value}
                 className={'DropDown-option ' + (is_selected ? 'is-selected' : '')}
                 role='option'
                 onClick={() => setValue(option)}
                 onTouchEnd={() => setValue(option)}
                 aria-selected={is_selected}>
-                {option.label}
+                {isString(option) ? option : option.label}
             </div>
         )
     }, [selected, findIndex, multi_select, setValue]);
 
     let control_text;
-    if (multi_select) {
+    if (allow_custom_input) {
         control_text = custom;
     } else {
-        control_text = typeof selected === 'string' ? selected : selected.label;
+        control_text = isString(selected) ? selected : selected.label;
     }
-    console.log('CONTROL TEXTTTT', control_text, selected);
 
     let any_selected = (multi_select && selected.length > 0) || (!multi_select && selected.value?.length > 0);
     let control = allow_custom_input ? (
@@ -161,14 +171,14 @@ DropDown.propTypes = {
     allow_custom_input: PropTypes.bool,
     // Allow multiple options to be selected at the same time
     multi_select: PropTypes.bool,
-    // Options is an array of {label, value} pairs
+    // Options is an array of strings, or and array of {label, value} pairs
     options: PropTypes.array.isRequired,
     disabled: PropTypes.bool,
     arrowClosed: PropTypes.object,
     arrowOpen: PropTypes.object,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
-    // initial selected {label, value} pair.
+    // initial selected string or {label, value} pair.
     // If not set, defaults to first object
     initial_value: PropTypes.object,
     placeholder: PropTypes.string,

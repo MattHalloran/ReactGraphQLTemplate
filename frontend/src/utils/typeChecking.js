@@ -8,3 +8,7 @@ export const deepEqual = (a, b) => {
     if (keys.length !== Object.keys(b).length) return false;
     return keys.every(k => deepEqual(a[k], b[k]));
   };
+
+export const isString = (obj) => {
+    return (Object.prototype.toString.call(obj) === '[object String]');
+}

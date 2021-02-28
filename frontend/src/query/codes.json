@@ -59,5 +59,10 @@
         "code": 300,
         "ok": false,
         "msg": "Error: Not authorized to perform this action"
+    },
+    "ERROR_CANNOT_DELETE_YOURSELF": {
+        "code": 1500,
+        "ok": false,
+        "msg": "Error: What are you doing trying to delete your own account? I am disappointed :("
     }
 }

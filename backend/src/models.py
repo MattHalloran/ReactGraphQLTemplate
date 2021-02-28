@@ -386,8 +386,8 @@ class PlantTrait(db.Model):
     # ----------------End columns-------------------
     # plants = db.relationship('PlantTraitAssociation', back_populates='trait')
 
-    def __init__(self, trait: str, value: str):
-        self.trait = trait
+    def __init__(self, trait: PlantTraitOptions, value: str):
+        self.trait = trait.value
         self.value = value
 
     def __repr__(self):

@@ -95,6 +95,7 @@ function AdminInventoryPage() {
         getInventoryFilters()
             .then((response) => {
                 if (!mounted) return;
+                console.log('GOT TRAIT OPTIONS', response);
                 setTraitOptions(response);
             })
             .catch((error) => {
@@ -289,24 +290,24 @@ function PlantPopup({
     trait_options
 }) {
     console.log('PLANT POPUP', plant)
-    const [latin_name, setLatinName] = useState(plant.latin_name ?? '');
-    const [common_name, setCommonName] = useState(plant.common_name ?? '');
-    const [drought_tolerance, setDroughtTolerance] = useState("");
-    const [grown_height, setGrownHeight] = useState("");
-    const [grown_spread, setGrownSpread] = useState("");
-    const [growth_rate, setGrowthRate] = useState("");
-    const [optimal_light, setOptimalLight] = useState("");
-    const [salt_tolerance, setSaltTolerance] = useState("");
+    const [latin_name, setLatinName] = useState(plant.latin_name);
+    const [common_name, setCommonName] = useState(plant.common_name);
+    const [drought_tolerance, setDroughtTolerance] = useState(plant.drought_tolerance?.value);
+    const [grown_height, setGrownHeight] = useState(plant.grown_height?.value);
+    const [grown_spread, setGrownSpread] = useState(plant.grown_spread?.value);
+    const [growth_rate, setGrowthRate] = useState(plant.growth_rate?.value);
+    const [optimal_light, setOptimalLight] = useState(plant.optimal_light?.value);
+    const [salt_tolerance, setSaltTolerance] = useState(plant.salt_tolerance?.value);
 
     // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
     // Used to display selected SKU info
     const [selectedSku, setSelectedSku] = useState(null);
     const [skus, setSkus] = useState(plant.skus ?? []);
-    const [code, setCode] = useState(selectedSku?.sku ?? '');
-    const [size, setSize] = useState(selectedSku?.size ?? '');
-    const [price, setPrice] = useState(selectedSku?.price ?? '');
-    const [quantity, setQuantity] = useState(selectedSku?.availability ?? '');
+    const [code, setCode] = useState(selectedSku?.sku);
+    const [size, setSize] = useState(selectedSku?.size);
+    const [price, setPrice] = useState(selectedSku?.price);
+    const [quantity, setQuantity] = useState(selectedSku?.availability);
 
     useEffect(() => {
         if (!selectedSku) return;
@@ -329,12 +330,19 @@ function PlantPopup({
     }, [quantity])
 
     useEffect(() => {
-        console.log(selectedSku);
+        console.log('NEW SKU', selectedSku);
         if (!selectedSku) return;
-        setCode(selectedSku['sku'] ?? '');
-        setSize(selectedSku['size'] ?? '');
-        setPrice(selectedSku['price'] ? displayPrice(selectedSku['price']) : '');
-        setQuantity(selectedSku['availability'] ?? '');
+        setCode(selectedSku['sku']);
+        setSize(selectedSku['size']);
+        setPrice(displayPrice(selectedSku['price']));
+        setQuantity(selectedSku['availability']);
+        setLatinName(selectedSku['latin_name']);
+        setCommonName(selectedSku['common_name']);
+        setDroughtTolerance(selectedSku['drought_tolerance']);
+        setGrownHeight(selectedSku['grown_height']);
+        setGrownSpread(selectedSku['grown_spread'])
+        setOptimalLight(selectedSku['optimal_light']);
+        setSaltTolerance(selectedSku['salt_tolerance']);
     }, [selectedSku])
 
     const savePlant = () => {
@@ -351,6 +359,7 @@ function PlantPopup({
             "skus": skus,
             "display_image": selectedImage,
         }
+        console.log('GOING TO MODIFY PLANT', plant_data)
         modifyPlant(session, 'UPDATE', plant_data)
             .then(() => {
                 alert('SKU Updated!')
@@ -371,7 +380,6 @@ function PlantPopup({
                 valueFunc={valueFunc}
             />
         )
-        let options = trait_options[field].map((o, index) => { return { label: o, value: index } })
         return (
             <div>
                 <label>{label}</label>
@@ -379,8 +387,8 @@ function PlantPopup({
                     multi_select={multi_select}
                     allow_custom_input={true}
                     className="sorter"
-                    options={options}
-                    onChange={(e) => valueFunc(e.value)} />
+                    options={trait_options[field]}
+                    onChange={valueFunc} />
             </div>
         )
     }
@@ -461,14 +469,14 @@ function PlantPopup({
                     valueFunc={setCommonName}
                 />
                 <div className="third">
-                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
-                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight)}
-                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread)}
+                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance, false)}
+                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight, false)}
+                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread, false)}
                 </div>
                 <div className="third">
-                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate)}
-                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight)}
-                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
+                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate, false)}
+                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight, false)}
+                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance, false)}
                 </div>
                 <div className="third">
                     <p>Display Image</p>
