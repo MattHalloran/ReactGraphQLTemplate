@@ -1,5 +1,4 @@
-// Currently, backend is hosted on same machine
-const IP = 'localhost';
+const IP = 'localhost'; //'192.81.213.223';
 const PORT = '5000';
 // URL prefix used to signify calls to backend
 const PREFIX = 'api';

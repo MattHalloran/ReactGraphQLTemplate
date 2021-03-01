@@ -1,17 +1,4 @@
 requirements.txt is important for deployment of the backend (and anyone picking up your project later).
 It lists all python requirements needed to run the application. To create/update this file, go to the backend directory in a terminal and enter:
-    1) "pip3 install pipreqs"       (if not already installed)
-    2) "pipreqs . --force"
-
-This will add most of the files, but some will still be missing. Since we are using .flaskenv to set flask's environment variables, we also need to
-add the python-dotenv environment variable. To add this to the requirements.txt file, enter:
-    3) pip3 freeze | grep python-dotenv >> requirements.txt
-
-Another missing file is psycopg2. Enter:
-    4) pip3 freeze | grep psycopg2 >> requirements.txt
-
-Also make sure to install gunicorn, for serving the backend. Enter:
-    5) pip3 freeze | grep gunicorn >> requirements.txt
-
-Also, make sure to check that the correct bcrypt was added to the requirements file.
-It should be bcrypt, not python-bcrypt!
+    1) source site_env/bin/activate     (if not already in the python virtual environment)
+    2) pip freeze > requirements.txt
