@@ -1,5 +1,0 @@
-To run the backend, open a terminal in the backend directory and enter:
-    gunicorn -b :5000 src.routes:application
-
-To run the frontend, open a terminal in the frontend directory and enter:
-    flask run
