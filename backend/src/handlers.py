@@ -298,6 +298,10 @@ class EmailHandler(Handler):
         as_dict['id'] = model.id
         return as_dict
 
+    @staticmethod
+    def from_email_address(email: str):
+        return db.session.query(Email).filter_by(email_address=email).one_or_none()
+
 
 class FeedbackHandler(Handler):
     ModelType = Feedback
@@ -1006,6 +1010,7 @@ class UserHandler(Handler):
                bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
                 user.login_attempts = 0  # Reset login attemps
                 db.session.commit()
+                print('Found user')
                 return user
             if user.login_attempts > User.LOGIN_ATTEMPS_TO_HARD_LOCKOUT:
                 print(f'Hard-locking user {email}')
@@ -1077,10 +1082,11 @@ class UserHandler(Handler):
         user.first_name = data.get('first_name', user.first_name)
         user.last_name = data.get('last_name', user.last_name)
         user.pronouns = data.get('pronouns', user.pronouns)
-        if emails := data.get('emails', None):
-            success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
-        if phones := data.get('phones', None):
-            success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
+        # TODO fix for multiple emails and phones
+        # if emails := data.get('emails', None):
+        #     success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
+        # if phones := data.get('phones', None):
+        #     success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
         if existing_customer := data.get('existing_customer', None):
             if not user.account_approved and existing_customer:
                 user.account_approved = True
