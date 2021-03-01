@@ -4,6 +4,8 @@ from enum import Enum
 from sqlalchemy import Column, Integer, String, DECIMAL, Float, Boolean, ForeignKey
 import time
 from src.utils import salt
+import os
+import json
 
 
 # Used to help prevent typos. You may be wondering if you could
@@ -259,6 +261,16 @@ class ImageUses(Enum):
     PLANT_FRUIT = 5
     PLANT_BARK = 6
     PLANT_HABIT = 7
+    DISPLAY = 8
+
+
+# Possible image sizes stored, and their max size
+class ImageSizes(Enum):
+    XS = (64, 64)
+    S = (128, 128)
+    M = (256, 256)
+    ML = (512, 512)
+    L = (1024, 1024)
 
 
 # Stores metadata for images used on website (gallery, plants, etc), but NOT profile pictures
@@ -268,11 +280,11 @@ class Image(db.Model):
     id = Column(Integer, primary_key=True)
     folder = Column(String(250), nullable=False)
     file_name = Column(String(100), nullable=False)
-    thumbnail_file_name = Column(String(100), nullable=False)
     extension = Column(String(10), nullable=False)
     alt = Column(String(100))
     hash = Column(String(100), unique=True, nullable=False)
     used_for = Column(Integer, nullable=False)
+    # Largest width and height stored for this image
     width = Column(Integer, nullable=False)
     height = Column(Integer, nullable=False)
     plant_id = db.Column(Integer, ForeignKey(f'{Tables.PLANT.value}.id'))
@@ -283,21 +295,19 @@ class Image(db.Model):
     def __init__(self,
                  folder: str,
                  file_name: str,
-                 thumbnail_file_name: str,
                  extension: str,
                  alt: str,
                  hash: str,
                  used_for: ImageUses,
                  width: int,
                  height: int):
-        if extension not in self.SUPPORTED_IMAGE_TYPES:
+        if extension.replace('.', '') not in self.SUPPORTED_IMAGE_TYPES:
             raise Exception('File extension not supported for images')
         if used_for not in ImageUses:
             raise Exception('Must pass a valid used_for value')
         self.folder = folder
         self.file_name = file_name
-        self.thumbnail_file_name = thumbnail_file_name
-        self.extension = extension
+        self.extension = extension.replace('.', '')
         self.alt = alt
         self.hash = hash
         self.used_for = used_for.value
@@ -376,8 +386,8 @@ class PlantTrait(db.Model):
     # ----------------End columns-------------------
     # plants = db.relationship('PlantTraitAssociation', back_populates='trait')
 
-    def __init__(self, trait: str, value: str):
-        self.trait = trait
+    def __init__(self, trait: PlantTraitOptions, value: str):
+        self.trait = trait.value
         self.value = value
 
     def __repr__(self):
@@ -409,9 +419,14 @@ class Plant(db.Model):
         f'{Tables.PLANT_TRAIT.value}.id'))
     salt_tolerance_id = Column(Integer, ForeignKey(
         f'{Tables.PLANT_TRAIT.value}.id'))
+    # User-specified display image. If none set, uses one of the other images
+    # associated with this plant
+    display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
     # One-to-one relationships
+    display_img = db.relationship(
+        'Image', uselist=False, foreign_keys=[display_img_id])
     deer_resistance = db.relationship(
         'PlantTrait', uselist=False, foreign_keys=[deer_resistance_id])
     drought_tolerance = db.relationship(
@@ -556,11 +571,8 @@ class Sku(db.Model):
     # Price in cents, before discounts (ex: $10.67 => 1067)
     price = Column(String(25), nullable=False, default=defaults['price'])
     status = Column(Integer, nullable=False, default=defaults['status'])
-    display_img_id = Column(Integer, ForeignKey(f'{Tables.IMAGE.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------
-    display_img = db.relationship(
-        'Image', uselist=False, foreign_keys=[display_img_id])
     discounts = db.relationship(
         'SkuDiscount', secondary=skuDiscounts, backref='plants')
     # -------------End relationships----------------
@@ -579,30 +591,6 @@ class Sku(db.Model):
 
     def __repr__(self):
         return f"{self.__tablename__}('{self.sku}', '{self.price}', '{self.availability}')"
-
-
-class OrderStatus(Enum):
-    # Admin canceled the order at any point before delivery
-    CANCELED_BY_ADMIN = -4
-    # 1) User canceled the order before it was approved (i.e. no admin approval needed), OR
-    # 2) PENDING_CANCEL was approved by admin
-    CANCELED_BY_USER = -3
-    # User canceled the order after it was approved (i.e. admin approval needed)
-    PENDING_CANCEL = -2
-    # Order was pending, but admin denied it
-    REJECTED = -1
-    # Order that hasn't been submitted yet (i.e. cart)
-    DRAFT = 0
-    # Order that has been submitted, but not approved by admin yet
-    PENDING = 1
-    # Order that has been approved by admin
-    APPROVED = 2
-    # Order has been scheduled for delivery
-    SCHEDULED = 3
-    # Order is currently being delivered
-    IN_TRANSIT = 4
-    # Order has been delivered
-    DELIVERED = 5
 
 
 class OrderItem(db.Model):
@@ -630,9 +618,25 @@ class OrderItem(db.Model):
         return f"{self.__tablename__}({self.sku})"
 
 
+# -4 | CANCELED_BY_ADMIN | Admin canceled the order at any point before delivery
+# -3 | CANCELED_BY_USER |
+#       1) User canceled order before approval (i.e. no admin approval needed), OR
+#       2) PENDING_CANCEL was approved by admin
+# -2 | PENDING_CANCEL | User canceled order after approval (i.e. admin approval needed)
+# -1 | REJECTED | Order was pending, but admin denied it
+#  0 | DRAFT | Order that hasn't been submitted yet (i.e. cart)
+#  1 | PENDING | Order that has been submitted, but not approved by admin yet
+#  2 | APPROVED | Order that has been approved by admin
+#  3 | SCHEDULED | Order has been scheduled for delivery
+#  4 | IN_TRANSIT | Order is currently being delivered
+#  5 | DELIVERED | Order has been delivered
+with open(os.path.join(os.path.dirname(__file__), "consts/orderStatus.json"), 'r') as f:
+    OrderStatus = json.load(f)
+
+
 class Order(db.Model):
     defaults = {
-        'status': OrderStatus.DRAFT.value,
+        'status': OrderStatus['DRAFT'],
         'is_delivery': True,
     }
 
@@ -684,9 +688,8 @@ class Role(db.Model):
 class AccountStatus(Enum):
     DELETED = -1
     UNLOCKED = 1
-    WAITING_APPROVAL = 2
-    SOFT_LOCK = 3
-    HARD_LOCK = 4
+    SOFT_LOCK = 2
+    HARD_LOCK = 3
 
 
 # All users of the system, such as customers and admins
@@ -696,6 +699,8 @@ class User(db.Model):
         'pronouns': 'they/them/theirs',
         'theme': 'light',
         'image_file': 'default.jpg',
+        'account_approved': False,
+        'account_status': AccountStatus.UNLOCKED.value,
     }
 
     __tablename__ = Tables.USER.value
@@ -711,7 +716,8 @@ class User(db.Model):
     # UTC seconds since epoch
     last_login_attempt = Column(Float, nullable=False, default=time.time())
     session_token = Column(String(250))
-    account_status = Column(Integer, nullable=False, default=AccountStatus.WAITING_APPROVAL.value)
+    account_approved = Column(Boolean, nullable=False, default=defaults['account_approved'])
+    account_status = Column(Integer, nullable=False, default=defaults['account_status'])
     business_id = db.Column(Integer, ForeignKey(f'{Tables.BUSINESS.value}.id'))
     # ----------------End columns-------------------
     # ------------Start relationships---------------

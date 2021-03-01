@@ -3,35 +3,43 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { StyledAdminInventoryPage, StyledSkuPopup, StyledCard } from './AdminInventoryPage.styled';
+import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
+import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
-import { useHistoryState } from 'utils/useHistoryState';
 import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getPlants, getInventoryFilters, modifySku, uploadAvailability} from 'query/http_promises';
+import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
 import Button from 'components/Button/Button';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { getTheme, getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
+import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import InputText from 'components/inputs/InputText/InputText';
-// Icons
+import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { TrashIcon, EditIcon, HideIcon, NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
+import makeID from 'utils/makeID';
+
+let copy = SORT_OPTIONS.slice();
+const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
     const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     // Holds the selected availability file, if uploading one
     const [selected, setSelected] = useState(null);
-    // Holds the existing SKUs list
-    const [skuCards, setSkuCards] = useState([]);
-    // Holds the existing plants list
-    const [plantCards, setPlantCards] = useState([]);
-    // Dictionary of sku and plant data, or an empty dictionary
-    const [currSku, setCurrSku] = useState(null);
+    // Holds the list of plants with existing SKUs
+    const [existing, setExisting] = useState([]);
+    const [existingThumbnails, setExistingThumbnails] = useState([]);
+    // Holds list of all plants
+    const [all, setAll] = useState([]);
+    const [allThumbnails, setAllThumbnails] = useState([]);
+    // Selected plant data. Used for popup
+    const [currPlant, setCurrPlant] = useState(null);
     const [trait_options, setTraitOptions] = useState(null);
-    const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
+    const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
+    const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
@@ -42,34 +50,54 @@ function AdminInventoryPage() {
         })
     }, [])
 
-    useLayoutEffect(() => {
-        let mounted = true;
-        document.title = "Edit Inventory Info";
-        getInventory(SORT_OPTIONS[0].value, page_size, true)
+    useEffect(() => {
+        let ids = existing?.map(p => p.display_id);
+        if (!ids) return;
+        getImages(ids, 'm').then(response => {
+            setExistingThumbnails(response.images);
+        }).catch(err => {
+            console.error(err);
+        });
+    }, [existing])
+
+    useEffect(() => {
+        let ids = existing?.map(p => p.display_id);
+        if (!ids) return;
+        getImages(ids, 'm').then(response => {
+            setAllThumbnails(response.images);
+        }).catch(err => {
+            console.error(err);
+        });
+    }, [all])
+
+    useEffect(() => {
+        getInventory(existing_sort_by, 0, true)
             .then((response) => {
-                if (!mounted) return;
-                setSkuCards(response.page_results);
-                console.log('SETTING SKUS', response.page_results)
-                //setSkuCards(skus => skus.concat(response.all_skus));
-                //console.log('SET ALL SKUS', response.all_skus)
+                setExisting(response.page_results);
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);
                 alert(error.error);
             });
-        getPlants('A-Z')
+    }, [existing_sort_by])
+
+    useEffect(() => {
+        getUnusedPlants(all_sort_by)
             .then((response) => {
-                if (!mounted) return;
-                setPlantCards(response.page_results);
-                console.log('SETTING PLANTSSSS', response.page_results)
+                setAll(response.plants);
             })
             .catch((error) => {
                 console.error("Failed to load plants", error);
-                alert(error.error);
             });
+    }, [all_sort_by])
+
+    useLayoutEffect(() => {
+        let mounted = true;
+        document.title = "Edit Inventory Info";
         getInventoryFilters()
             .then((response) => {
                 if (!mounted) return;
+                console.log('GOT TRAIT OPTIONS', response);
                 setTraitOptions(response);
             })
             .catch((error) => {
@@ -79,53 +107,34 @@ function AdminInventoryPage() {
         return () => mounted = false;
     }, [])
 
-    const deleteSku = (sku) => {
-        if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-        modifySku(session, sku.sku, 'DELETE', {})
-            .then((response) => {
-                //TODO update list to reflect status chagne
-                console.log('TODOOO')
-            })
-            .catch((error) => {
-                console.error(error);
-                alert("Failed to delte sku");
-            });
-    }
+    // const deleteSku = (sku) => {
+    //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
+    //     modifySku(session, sku.sku, 'DELETE', {})
+    //         .then((response) => {
+    //             //TODO update list to reflect status chagne
+    //             console.log('TODOOO')
+    //         })
+    //         .catch((error) => {
+    //             console.error(error);
+    //             alert("Failed to delte sku");
+    //         });
+    // }
 
-    const editSku = (sku_data) => {
-        setCurrSku(sku_data);
-    }
+    // const editSku = (sku_data) => {
+    //     setCurrPlant(sku_data);
+    // }
 
-    const hideSku = (sku) => {
-        let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-        modifySku(session, sku.sku, operation, {})
-            .then((response) => {
-                //TODO update list to reflect status chagne
-                console.log('TODOOO')
-            })
-            .catch((error) => {
-                console.error("Failed to modify sku", error);
-            });
-    }
-
-    // const uploadFile = useCallback((file) => {
-    //     if(!file) {
-    //         alert('No file selected!');
-    //         return;
-    //     }
-    //     let form = new FormData();
-    //     selected.forEach(img => {
-    //         form.append('name', img.name);
-    //         form.append('extension', img.extension);
-    //         form.append('image', img.data);
-    //     });
-    //     uploadGalleryImages(form).then(response => {
-    //         alert('Successfully uploaded ' + response.passed_indexes?.length + ' images!');
-    //     }).catch(error => {
-    //         console.error(error);
-    //         alert('Error uploading images!');
-    //     });
-    // }, [selected])
+    // const hideSku = (sku) => {
+    //     let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
+    //     modifySku(session, sku.sku, operation, {})
+    //         .then((response) => {
+    //             //TODO update list to reflect status chagne
+    //             console.log('TODOOO')
+    //         })
+    //         .catch((error) => {
+    //             console.error("Failed to modify sku", error);
+    //         });
+    // }
 
     const processFile = (file) => {
         let reader = new FileReader();
@@ -160,9 +169,17 @@ function AdminInventoryPage() {
         });
     }
 
-    let popup = (currSku) ? (
-        <Modal onClose={() => setCurrSku(null)}>
-            <SkuPopup session={session} theme={theme} sku={currSku} trait_options={trait_options} />
+    const handleExistingSort = (sort_item, _) => {
+        setExistingSortBy(sort_item.value);
+    }
+
+    const handleAllSort = (sort_item, _) => {
+        setAllSortBy(sort_item.value);
+    }
+
+    let popup = (currPlant) ? (
+        <Modal onClose={() => setCurrPlant(null)}>
+            <PlantPopup session={session} theme={theme} plant={currPlant} trait_options={trait_options} />
         </Modal>
     ) : null;
 
@@ -178,115 +195,161 @@ function AdminInventoryPage() {
                 <li>Delete a SKU</li>
             </ul>
             <div>
-                <Button onClick={() => editSku({})}>Create Empty SKU</Button>
+                {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
             <div>
-                Upload Spreadsheet<FileUpload onUploadClick={sendAvailability} onUploadChange={fileSelectedHandler}/>
+                Upload Spreadsheet<FileUpload onUploadClick={sendAvailability} onUploadChange={fileSelectedHandler} />
             </div>
 
-            <div className="flexed">
-                <div className="flex-content">
-                    <p>Select existing SKU to open editor</p>
-                    <div className="card-flex">
-                        {skuCards.map((data, index) => <SkuCard key={index} onEdit={editSku} onHide={hideSku} onDelete={deleteSku} sku={data} />)}
-                    </div>
+            <Collapsible title="Plants with active SKUs">
+                <h2>Sort</h2>
+                <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
+                <div className="card-flex">
+                    {existing?.map((plant, index) => <PlantCard key={index}
+                        plant={plant}
+                        onEdit={() => setCurrPlant(plant)}
+                        thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
-                <div className="flex-content">
-                    <p>Select plant template to create a new SKU</p>
-                    <div className="card-flex">
-                        {plantCards.map((data, index) => <PlantCard key={index} plant={data} onEdit={editSku} />)}
-                    </div>
+            </Collapsible>
+            <Collapsible title="Plants without active SKUs">
+                <h2>Sort</h2>
+                <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
+                <div className="card-flex">
+                    {all?.map((plant, index) => <PlantCard key={index}
+                        plant={plant}
+                        onEdit={() => setCurrPlant(plant)}
+                        thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
-            </div>
+            </Collapsible>
         </StyledAdminInventoryPage >
     );
 }
 
 AdminInventoryPage.propTypes = {
-    
+
 }
 
 export default AdminInventoryPage;
 
-function SkuCard({
+function PlantCard({
     onEdit,
     onHide,
     onDelete,
-    sku,
+    plant,
+    thumbnail,
     theme = getTheme(),
 }) {
-    let plant = sku?.plant;
+    let has_skus = plant.skus?.length > 0;
+
+    const SkuStatus = {
+        '-2': 'deleted',
+        '-1': 'inactive',
+        '1': 'active',
+    }
+
+    const getStatus = (status) => {
+        return SkuStatus[status + ''] ?? 'deleted';
+    }
+
+    let sizes = plant.skus?.map(s => (
+        <div className={getStatus(s.status)}>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
+    ));
 
     let display_image;
-    if (sku?.display_image) {
-        display_image = <img src={`data:image/jpeg;base64,${sku.display_image}`} alt="TODO" />
+    if (thumbnail) {
+        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
-        display_image = <NoImageIcon />
+        display_image = <NoImageIcon className="display-image" />
     }
 
     return (
-        <StyledCard theme={theme} onClick={() => onEdit(sku)} status={sku?.status}>
-            <h2 className="title">{plant?.latin_name}</h2>
-            { display_image }
-            <div className="icon-container">
+        <StyledCard theme={theme} onClick={onEdit}>
+            <h2 className="title">{plant.latin_name}</h2>
+            { display_image}
+            <div className="size-container">
+                {sizes}
+            </div>
+            {/* <div className="icon-container">
                 <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
                 <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />
                 <TrashIcon width="30px" height="30px" onClick={() => onDelete(sku)} />
-            </div>
+            </div> */}
         </StyledCard>
     );
 }
 
-SkuCard.propTypes = {
+PlantCard.propTypes = {
     data: PropTypes.object.isRequired,
-    onEdit: PropTypes.func.isRequired,
-    onHide: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired,
+    // onEdit: PropTypes.func.isRequired,
+    // onHide: PropTypes.func.isRequired,
+    // onDelete: PropTypes.func.isRequired,
 }
 
-function PlantCard({
-    plant,
-    onEdit,
-}) {
-
-    return (
-        <StyledCard onClick={() => onEdit({plant: plant})}>
-            <h3>{plant?.latin_name}</h3>
-        </StyledCard>
-    );
-}
-
-SkuCard.propTypes = {
-    plant: PropTypes.object.isRequired,
-    onEdit: PropTypes.func.isRequired,
-}
-
-function SkuPopup({
+function PlantPopup({
     session = getSession(),
-    sku,
+    plant,
     theme = getTheme(),
     trait_options
 }) {
-    console.log('PROP UPPPPPPPP', sku);
-    let plant = sku.plant;
-    const [latin_name, setLatinName] = useState(plant?.latin_name ?? '');
-    const [common_name, setCommonName] = useState(plant?.common_name ?? '');
-    const [code, setCode] = useState(sku.sku ?? '');
-    const [size, setSize] = useState(sku.size ?? '');
-    const [price, setPrice] = useState(sku.price ?? '');
-    const [quantity, setQuantity] = useState(sku.availability ?? '');
-    const [drought_tolerance, setDroughtTolerance] = useState("");
-    const [grown_height, setGrownHeight] = useState("");
-    const [grown_spread, setGrownSpread] = useState("");
-    const [growth_rate, setGrowthRate] = useState("");
-    const [optimal_light, setOptimalLight] = useState("");
-    const [salt_tolerance, setSaltTolerance] = useState("");
+    console.log('PLANT POPUP', plant)
+    const [latin_name, setLatinName] = useState(plant.latin_name);
+    const [common_name, setCommonName] = useState(plant.common_name);
+    const [drought_tolerance, setDroughtTolerance] = useState(plant.drought_tolerance?.value);
+    const [grown_height, setGrownHeight] = useState(plant.grown_height?.value);
+    const [grown_spread, setGrownSpread] = useState(plant.grown_spread?.value);
+    const [growth_rate, setGrowthRate] = useState(plant.growth_rate?.value);
+    const [optimal_light, setOptimalLight] = useState(plant.optimal_light?.value);
+    const [salt_tolerance, setSaltTolerance] = useState(plant.salt_tolerance?.value);
 
-    //Used for display image upload
+    // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
+    // Used to display selected SKU info
+    const [selectedSku, setSelectedSku] = useState(null);
+    const [skus, setSkus] = useState(plant.skus ?? []);
+    const [code, setCode] = useState(selectedSku?.sku);
+    const [size, setSize] = useState(selectedSku?.size);
+    const [price, setPrice] = useState(selectedSku?.price);
+    const [quantity, setQuantity] = useState(selectedSku?.availability);
 
-    const saveSku = () => {
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['sku'] = code;
+    }, [code])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['size'] = size;
+    }, [size])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['price'] = displayPriceToDatabase(price);
+    }, [price])
+
+    useEffect(() => {
+        if (!selectedSku) return;
+        selectedSku['availability'] = quantity;
+    }, [quantity])
+
+    useEffect(() => {
+        console.log('NEW SKU', selectedSku);
+        if (!selectedSku) return;
+        setCode(selectedSku['sku']);
+        setSize(selectedSku['size']);
+        setPrice(displayPrice(selectedSku['price']));
+        setQuantity(selectedSku['availability']);
+        setLatinName(selectedSku['plant']['latin_name']);
+        setCommonName(selectedSku['plant']['common_name']);
+        setDroughtTolerance(selectedSku['plant']['drought_tolerance']?.value);
+        setGrownHeight(selectedSku['plant']['grown_height']?.value);
+        setGrownSpread(selectedSku['plant']['grown_spread']?.value)
+        setOptimalLight(selectedSku['plant']['optimal_light']?.value);
+        setSaltTolerance(selectedSku['plant']['salt_tolerance']?.value);
+    }, [selectedSku])
+
+    const savePlant = () => {
         let plant_data = {
+            "id": plant['id'],
             "latin_name": latin_name,
             "common_name": common_name,
             "drought_tolerance": drought_tolerance,
@@ -294,17 +357,12 @@ function SkuPopup({
             "grown_spread": grown_spread,
             "growth_rate": growth_rate,
             "optimal_light": optimal_light,
-            "salt_tolerance": salt_tolerance
+            "salt_tolerance": salt_tolerance,
+            "skus": skus,
+            "display_image": selectedImage,
         }
-        let sku_data = {
-            "code": code,
-            "size": size,
-            "price": price,
-            "quantity": quantity,
-            "plant": plant_data,
-        }
-        let operation = sku === null ? 'ADD': 'UPDATE';
-        modifySku(session, sku?.sku ?? code, operation, sku_data)
+        console.log('GOING TO MODIFY PLANT', plant_data)
+        modifyPlant(session, 'UPDATE', plant_data)
             .then(() => {
                 alert('SKU Updated!')
             })
@@ -324,7 +382,6 @@ function SkuPopup({
                 valueFunc={valueFunc}
             />
         )
-        let options = trait_options[field].map((o, index) => { return { label: o, value: index } })
         return (
             <div>
                 <label>{label}</label>
@@ -332,8 +389,8 @@ function SkuPopup({
                     multi_select={multi_select}
                     allow_custom_input={true}
                     className="sorter"
-                    options={options}
-                    onChange={(e) => valueFunc(e.value)} />
+                    options={trait_options[field]}
+                    onChange={valueFunc} />
             </div>
         )
     }
@@ -356,14 +413,29 @@ function SkuPopup({
         reader.readAsDataURL(file);
     }
 
+    const newSku = () => {
+        setSkus(l => l.concat({ sku: makeID(10) }))
+    }
+
+    const removeSku = useCallback(() => {
+        //let index = skus.findIndex(s => s.sku === selectedSku.sku)
+        let index = skus.indexOf(selectedSku);
+        console.log('SLECTED', selectedSku)
+        console.log("INDEX IS", index)
+        if (index < 0) return;
+        let spliced = skus.splice(index, 1);
+        console.log('SPLICED', spliced)
+        setSkus(l => l.filter(s => s.sku !== selectedSku.sku))
+    }, [skus, selectedSku])
+
     //Show display image from uploaded image.
     //If no upload image, from model data.
     //If not model data, show NoImageIcon
     let image_data;
     if (selectedImage?.data) {
         image_data = selectedImage?.data
-    } else if (sku?.display_image) {
-        image_data = `data:image/jpeg;base64,${sku.display_image}`
+    } else if (plant.display_image) {
+        image_data = `data:image/jpeg;base64,${plant.display_image}`
     }
     let display_image;
     if (image_data) {
@@ -373,8 +445,19 @@ function SkuPopup({
     }
 
     return (
-        <StyledSkuPopup theme={theme}>
-            <div>
+        <StyledPlantPopup theme={theme}>
+            <div className="sidenav">
+                <h3>SKUs</h3>
+                <div className="sku-list">
+                    {skus?.map(s => (
+                        <div className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
+                            onClick={() => setSelectedSku(s)}>{s.sku}</div>
+                    ))}
+                </div>
+                {selectedSku ? <Button className="delete-sku" onClick={removeSku}>Delete</Button> : null}
+                <Button className="add-sku" onClick={newSku}>New SKU</Button>
+            </div>
+            <div className="plant-info-div">
                 <InputText
                     label="Latin Name"
                     type="text"
@@ -387,20 +470,31 @@ function SkuPopup({
                     value={common_name}
                     valueFunc={setCommonName}
                 />
-                <InputText
-                    label="Plant Code"
-                    type="text"
-                    value={code}
-                    valueFunc={setCode}
-                />
+                <div className="third">
+                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance, false)}
+                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight, false)}
+                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread, false)}
+                </div>
+                <div className="third">
+                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate, false)}
+                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight, false)}
+                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance, false)}
+                </div>
+                <div className="third">
+                    <p>Display Image</p>
+                    {display_image}
+                    <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
+                </div>
+            </div>
+            <div className="sku-info-div">
                 <div className="half">
+                    <InputText
+                        label="Plant Code"
+                        type="text"
+                        value={code}
+                        valueFunc={setCode}
+                    />
                     {getInput('size', 'Size', size, setSize, false)}
-                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance)}
-                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight)}
-                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread)}
-                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate)}
-                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight)}
-                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance)}
                 </div>
                 <div className="half">
                     <InputText
@@ -415,21 +509,18 @@ function SkuPopup({
                         value={quantity}
                         valueFunc={setQuantity}
                     />
-                    <p>Display Image</p>
-                    {display_image}
-                    <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
                 </div>
             </div>
-            <Button onClick={saveSku}>Save SKU</Button>
-        </StyledSkuPopup>
+            <Button onClick={savePlant}>Apply Changes</Button>
+        </StyledPlantPopup>
     );
 }
 
-SkuPopup.propTypes = {
+PlantPopup.propTypes = {
     session: PropTypes.object,
     sku: PropTypes.object.isRequired,
     theme: PropTypes.object,
     trait_options: PropTypes.object,
 }
 
-export { SkuPopup };
+export { PlantPopup };

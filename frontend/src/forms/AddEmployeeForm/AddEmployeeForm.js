@@ -33,9 +33,9 @@ function AddEmployeeForm() {
   const register = () => {
     registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
       history.push(LINKS.Shopping);
-    }).catch(error => {
-      console.error(error);
-      alert(error.error);
+    }).catch(err => {
+      console.error(err);
+      alert(err.msg);
     })
   }
 
@@ -45,7 +45,7 @@ function AddEmployeeForm() {
     console.log('PRONOUNSSSS', pronouns, pronounsError);
     return;
     if (validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError,
-    passwordError) && password === confirmPassword && !existingCustomerError) {
+    passwordError, existingCustomerError) && password === confirmPassword) {
       register();
     }
   }
@@ -62,6 +62,7 @@ function AddEmployeeForm() {
           type="text"
           value={firstName}
           valueFunc={setFirstName}
+          error={firstNameError}
           errorFunc={setFirstNameError}
           validate={validation.firstNameValidation}
           showErrors={showErrors}
@@ -71,6 +72,7 @@ function AddEmployeeForm() {
           type="text"
           value={lastName}
           valueFunc={setLastName}
+          error={lastNameError}
           errorFunc={setLastNameError}
           validate={validation.lastNameValidation}
           showErrors={showErrors}
@@ -97,6 +99,7 @@ function AddEmployeeForm() {
             type="text"
             value={customPronouns}
             valueFunc={setCustomPronouns}
+            error={customPronounsError}
             errorFunc={setCustomPronounsError}
             validate={validation.pronounValidation}
             showErrors={showErrors}
@@ -108,6 +111,7 @@ function AddEmployeeForm() {
         type="email"
         value={email}
         valueFunc={setEmail}
+        error={emailError}
         errorFunc={setEmailError}
         validate={validation.emailValidation}
         showErrors={showErrors}
@@ -115,7 +119,9 @@ function AddEmployeeForm() {
       <InputText
         label="Password"
         type="password"
+        value={password}
         valueFunc={setPassword}
+        error={passwordError}
         errorFunc={setPasswordError}
         validate={validation.passwordValidation}
         showErrors={showErrors}
@@ -123,6 +129,7 @@ function AddEmployeeForm() {
       <InputText
         label="Confirm Password"
         type="password"
+        value={confirmPassword}
         valueFunc={setConfirmPassword}
       />
       <div className="form-group">

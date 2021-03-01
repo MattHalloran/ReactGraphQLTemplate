@@ -1,0 +1,12 @@
+{
+    "CANCELED_BY_ADMIN": -4,
+    "CANCELED_BY_USER": -3,
+    "PENDING_CANCEL": -2,
+    "REJECTED": -1,
+    "DRAFT": 0,
+    "PENDING": 1,
+    "APPROVED": 2,
+    "SCHEDULED": 3,
+    "IN_TRANSIT": 4,
+    "DELIVERED": 5
+}

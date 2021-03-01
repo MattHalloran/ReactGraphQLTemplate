@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import { loginUser } from 'query/http_promises';
@@ -14,6 +14,10 @@ function LogInForm() {
     const [password, setPassword] = useState("")
     const [passwordError, setPasswordError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
+    
+    useEffect(() => {
+        console.log('EMAIL ERROR:', emailError)
+    }, [emailError])
 
     const toRegister = () => history.replace('/register');
 
@@ -22,10 +26,9 @@ function LogInForm() {
     const login = () => {
         loginUser(email, password).then(() => {
             history.push(LINKS.Shopping);
-        }).catch(error => {
-            console.log("Failed to log in");
-            console.error(error);
-            alert(error.error);
+        }).catch(err => {
+            console.error(err);
+            alert(err.msg);
         })
     }
 
@@ -37,11 +40,24 @@ function LogInForm() {
 
     return (
         <React.Fragment>
+            {/* I kid you not, the autofill will not work correctly if this isn't here */}
+            <InputText
+                style={{visibility:'hidden',display:'none'}}
+                label="Email"
+                type="email"
+                value={email}
+                valueFunc={setEmail}
+                error={emailError}
+                errorFunc={setEmailError}
+                validate={validation.emailValidation}
+                showErrors={showErrors}
+            />
             <InputText
                 label="Email"
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}
@@ -49,7 +65,9 @@ function LogInForm() {
             <InputText
                 label="Password"
                 type="password"
+                value={password}
                 valueFunc={setPassword}
+                error={passwordError}
                 errorFunc={setPasswordError}
                 validate={validation.defaultStringValidation}
                 showErrors={showErrors}

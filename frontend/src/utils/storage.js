@@ -3,7 +3,7 @@
 
 import PubSub from './pubsub';
 import { LOCAL_STORAGE, PUBS } from 'utils/consts';
-import { deepEqual } from 'utils/deepEqual';
+import { deepEqual, isString } from 'utils/typeChecking';
 import * as http from 'query/http_promises';
 
 export const lightTheme = {
@@ -107,14 +107,14 @@ export const getSession = () => {
     return getItem(LOCAL_STORAGE.Session);
 }
 
-export const storeItem = (key, value) => {
+export const storeItem = (key, value, forceUpdate=false) => {
     // If JSON was passed in instead of an object
-    if (value instanceof String && value.length > 0 && value[0] === '{') {
+    if (isString(value) && value.length > 0 && value[0] === '{') {
         try {
             value = JSON.parse(value)
         } catch (e) { }
     }
-    if (deepEqual(getItem(key), value)) return;
+    if (!forceUpdate && deepEqual(getItem(key), value)) return;
     console.log("STORING ITEMMMM", key, value);
     localStorage.setItem(key, JSON.stringify(value));
     PubSub.publish(key, value);

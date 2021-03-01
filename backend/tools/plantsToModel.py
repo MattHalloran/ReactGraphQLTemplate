@@ -14,7 +14,7 @@ from src.handlers import Handler, ImageHandler, PlantHandler, PlantTraitHandler,
 from src.utils import get_image_meta, find_available_file_names  # NOQA
 
 # Will create a SKU for every plant added
-AUTO_CREATE_SKU = True
+AUTO_CREATE_SKU = False
 IN_FILE = '../plant_info/combined-output.json'
 
 app = create_app()
@@ -28,7 +28,7 @@ def get_trait(trait: PlantTraitOptions, value: str):
     print(f'FROM VALUESSS, {trait.value}, {value}')
     trait_obj = PlantTraitHandler.from_values(trait, value)
     if trait_obj is None:
-        trait_obj = PlantTraitHandler.create(trait.value, value)
+        trait_obj = PlantTraitHandler.create(trait, value)
         db.session.add(trait_obj)
         # ID is not created until the object is committed
         db.session.commit()
@@ -57,9 +57,8 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
         # File name created from url. This allows for a check to see
         # if the image has already been downloaded
         file_name = url[url.rindex('/')+1:]
-        thumb_file_name = f'{file_name}-thumb'
         # If image has already been downloaded
-        if len(glob_results := glob.glob(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}.*')) > 0:
+        if len(glob_results := glob.glob(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}-[A-z]*.*')) > 0:
             print(f'Image already downloaded: {file_name}')
             # Try to get existing image object from database
             img_row = ImageHandler.from_file_name(file_name)
@@ -71,14 +70,13 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
                 print(f'Could not find image in database. Attempting to create row from {file_name}')
                 with open(glob_results[0], 'rb') as f:
                     image = f.read()
-                (img_hash, thumbnail, img_width, img_height) = get_image_meta(image)
+                (img_hash, img_width, img_height) = get_image_meta(image)
                 if ImageHandler.is_hash_used(img_hash):
                     print(f'Hash collision! For image {url}')
                     continue
                 extension = glob_results[0][glob_results[0].rindex('.')+1:]
                 img_row = ImageHandler.create(Config.PLANT_FOLDER,
                                               file_name,
-                                              thumb_file_name,
                                               extension,
                                               alt,
                                               img_hash,
@@ -96,18 +94,17 @@ def download_and_store_imgs(urls: list, alt: str, use: ImageUses):
             image = response.content
             content_type = response.headers['Content-Type']
             extension = content_type[content_type.rindex('/')+1:]
-            (img_hash, thumbnail, img_width, img_height) = get_image_meta(image)
+            (img_hash, img_width, img_height) = get_image_meta(image)
+            label = ImageHandler.label_from_dimensions(img_width, img_height)
             if ImageHandler.is_hash_used(img_hash):
                 print(f'Hash collision! For image {url}')
                 continue
-            # Save image and thumbnail to files
-            with open(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}.{extension}', 'wb') as f:
+            # Store image file
+            with open(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{file_name}-{label}.{extension}', 'wb') as f:
                 f.write(image)
-            thumbnail.save(f'../{Config.BASE_IMAGE_DIR}/{Config.PLANT_FOLDER}/{thumb_file_name}.{extension}')
             # Now create a model object to associate with the image
             img_row = ImageHandler.create(Config.PLANT_FOLDER,
                                           file_name,
-                                          thumb_file_name,
                                           extension,
                                           alt,
                                           img_hash,

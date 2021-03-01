@@ -1,5 +1,3 @@
-import StatusCodes from './consts/codes.json';
-
 // URL prefix used to signify calls to backend
 const PREFIX = '/api';
 // Headers used by fetch calls
@@ -24,20 +22,12 @@ async function fetchWrapper(url, httpParams) {
     try {
         let response = await fetch(url, httpParams);
         let json = await response.json();
-        if (json.status === StatusCodes.SUCCESS) {
-            json.ok = true;
-            return json;
-        }
-        console.log('HTTP FAILUREEEEEE', json.status, StatusCodes.SUCCESS)
-        json.ok = false;
-        if (!json.status) json.status = StatusCodes.ERROR_UNKNOWN;
         return json;
     } catch (err) {
         console.error(err);
         return err;
     }
 }
-
 
 export async function validate_token(token) {
     let json = JSON.stringify({
@@ -49,18 +39,12 @@ export async function validate_token(token) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/is_token_valid`, options);
+    return await fetchWrapper(`${PREFIX}/validate_token`, options);
 }
 
-export async function create_user(firstName, lastName, business, email, phone, password, existing_customer) {
+export async function create_user(data) {
     let json = JSON.stringify({
-        "first_name": firstName,
-        "last_name": lastName,
-        "business": business,
-        "email": email,
-        "phone": phone,
-        "password": password,
-        "existing_customer": existing_customer
+        "data": data
     });
     let options = {
         body: json,
@@ -71,7 +55,7 @@ export async function create_user(firstName, lastName, business, email, phone, p
     return await fetchWrapper(`${PREFIX}/register`, options);
 }
 
-export async function get_token(email, password) {
+export async function login(email, password) {
     let json = JSON.stringify({
         "email": email,
         "password": password
@@ -82,7 +66,7 @@ export async function get_token(email, password) {
         headers: HEADERS.Text,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/get_token`, options);
+    return await fetchWrapper(`${PREFIX}/login`, options);
 }
 
 export async function send_password_reset_request(email) {
@@ -109,16 +93,16 @@ export async function fetch_customers(session) {
     return await fetchWrapper(`${PREFIX}/fetch_customers`, options);
 }
 
-export async function fetch_plants(sort) {
+export async function fetch_unused_plants(sorter) {
     let json = JSON.stringify({
-        "sort": sort,
+        "sorter": sorter,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_plants`, options);
+    return await fetchWrapper(`${PREFIX}/fetch_unused_plants`, options);
 }
 
 export async function fetch_inventory(sorter, page_size, admin) {
@@ -143,9 +127,9 @@ export async function fetch_inventory_filters() {
     return await fetchWrapper(`${PREFIX}/fetch_inventory_filters`, options);
 }
 
-export async function fetch_inventory_page(skus) {
+export async function fetch_inventory_page(ids) {
     let json = JSON.stringify({
-        "skus": skus,
+        "ids": ids,
     });
     let options = {
         body: json,
@@ -161,54 +145,6 @@ export async function fetch_gallery() {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/fetch_gallery`, options);
-}
-
-export async function fetch_image_from_hash(hash) {
-    let json = JSON.stringify({
-        "hash": hash,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_image_from_hash`, options);
-}
-
-export async function fetch_image_from_sku(sku) {
-    let json = JSON.stringify({
-        "sku": sku,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_image_from_sku`, options);
-}
-
-export async function fetch_gallery_thumbnails(skus) {
-    let json = JSON.stringify({
-        "hashes": skus,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_gallery_thumbnails`, options);
-}
-
-export async function fetch_sku_thumbnails(skus) {
-    let json = JSON.stringify({
-        "skus": skus,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper(`${PREFIX}/fetch_sku_thumbnails`, options);
 }
 
 export async function upload_gallery_images(formData) {
@@ -301,19 +237,32 @@ export async function set_like_sku(session, sku, liked) {
     return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
 }
 
-export async function set_sku_in_cart(session, sku, operation, quantity) {
+export async function set_order_status(session, id, status) {
     let json = JSON.stringify({
         "session": session,
-        "sku": sku,
-        "operation": operation,
-        "quantity": quantity
+        "id": id,
+        "status": status,
     });
     let options = {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/set_sku_in_cart`, options);
+    return await fetchWrapper(`${PREFIX}/set_order_status`, options);
+}
+
+export async function update_cart(session, who, cart) {
+    let json = JSON.stringify({
+        "session": session,
+        "who": who,
+        "cart": cart,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/update_cart`, options);
 }
 
 export async function modify_sku(session, sku, operation, data) {
@@ -331,6 +280,21 @@ export async function modify_sku(session, sku, operation, data) {
     return await fetchWrapper(`${PREFIX}/modify_sku`, options);
 }
 
+export async function modify_plant(session, operation, data) {
+    let json = JSON.stringify({
+        "session": session,
+        "operation": operation,
+        "data": data
+    });
+    console.log('PLANT DATA', json)
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/modify_plant`, options);
+}
+
 export async function modify_user(session, id, operation) {
     let json = JSON.stringify({
         "session": session,
@@ -345,12 +309,10 @@ export async function modify_user(session, id, operation) {
     return await fetchWrapper(`${PREFIX}/modify_user`, options);
 }
 
-export async function submit_order(session, is_delivery, requested_date, notes) {
+export async function submit_order(session, cart) {
     let json = JSON.stringify({
         "session": session,
-        "is_delivery": is_delivery,
-        "requested_date": requested_date,
-        "notes": notes
+        "cart": cart,
     });
     let options = {
         body: json,
@@ -371,4 +333,43 @@ export async function fetch_orders(session, status) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper(`${PREFIX}/fetch_orders`, options);
+}
+
+export async function fetch_image(id, size) {
+    let json = JSON.stringify({
+        "id": id,
+        "size": size
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_image`, options);
+}
+
+export async function fetch_images(ids, size) {
+    let json = JSON.stringify({
+        "ids": ids,
+        "size": size
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/fetch_images`, options);
+}
+
+export async function update_profile(session, data) {
+    let json = JSON.stringify({
+        "session": session,
+        "data": data
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper(`${PREFIX}/update_profile`, options);
 }

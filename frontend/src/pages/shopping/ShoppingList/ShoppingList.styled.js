@@ -11,7 +11,7 @@ export const StyledShoppingList = styled.div`
     }
 `;
 
-export const StyledSkuCard = styled.div`
+export const StyledPlantCard = styled.div`
     position: relative;
     background-color: ${({ theme }) => theme.bodySecondary};
     color: black;
@@ -39,8 +39,15 @@ export const StyledSkuCard = styled.div`
         top: 0;
         z-index: 2;
 
-        > * {
-            margin: 0 !important;
+        h2 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        h3 {
+            margin: 0;
+            margin-bottom: 5px;
+            font-size: 1em;
         }
     }
 
@@ -64,7 +71,8 @@ export const StyledSkuCard = styled.div`
         display: block;
         position: absolute;
         width: 100%;
-        top: 0%;
+        max-height: 100%;
+        bottom: 0%;
     }
 
     .display-image-container {
@@ -76,16 +84,16 @@ export const StyledSkuCard = styled.div`
     }
 `;
 
-export const StyledExpandedSku = styled.div`
+export const StyledExpandedPlant = styled.div`
     background-color: ${({ theme }) => theme.bodySecondary};
     display: block;
     width: -webkit-fill-available;
     width: -moz-available;
     height: 100%;
-    min-width: 50vw;
+    min-width: 60vw;
 
     .main-div {
-        padding-bottom: 14%;
+        padding-bottom: 30%;
         width: -webkit-fill-available;
         width: -moz-available;
     }
@@ -93,6 +101,8 @@ export const StyledExpandedSku = styled.div`
     .display-image {
         display: inline-block;
         top: 0%;
+        width: fit-content;
+        object-fit: cover;
     }
 
     .trait-list {
@@ -140,8 +150,15 @@ export const StyledExpandedSku = styled.div`
         border-radius: 10px 10px 0 0;
         padding: 0.5em 0 0.5em 0;
 
-        > * {
-            margin: 0 !important;
+        h2 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        h3 {
+            margin: 0;
+            margin-bottom: 5px;
+            font-size: 1em;
         }
     }
 
@@ -173,7 +190,7 @@ export const StyledExpandedSku = styled.div`
     }
 
     .bottom-div {
-        height: 10%;
+        height: 15%;
         bottom: 0;
         width: -webkit-fill-available;
         width: -moz-available;
@@ -184,13 +201,12 @@ export const StyledExpandedSku = styled.div`
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        padding: 0 10px;
+        padding: 5px 10px;
         border-top: 2px solid ${({ theme }) => theme.textPrimary};
 
         > svg {
             stroke: none;
             fill: ${({ theme }) => theme.textPrimary};
-            width: max(40px, 25%);
         }
 
         > *:first-child {
@@ -201,10 +217,15 @@ export const StyledExpandedSku = styled.div`
 
     .selecter,
     .quanter {
-        width: 40%;
+        display: inline-block;
+        width: 45%;
+
+        > * {
+            margin-bottom: 0;
+        }
     }
 
     .bag {
-        width: 20%;
+        width: 10%;
     }
 `;

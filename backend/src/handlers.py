@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from src.models import AccountStatus, Address, ContactInfo, Business, BusinessDiscount, Email, Feedback
-from src.models import Image, ImageUses, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
+from src.models import Image, ImageUses, ImageSizes, Order, OrderItem, OrderStatus, Phone, Plant, PlantTrait
 from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, User
 from sqlalchemy.orm.collections import InstrumentedList
 from src.api import db
 from src.config import Config
+from src.utils import resize_image
 from base64 import b64encode
 from src.auth import verify_token
 import time
 import bcrypt
+import os
 
 
 # Abstract method for model handling classes
@@ -74,17 +76,17 @@ class Handler(ABC):
     @classmethod
     def create_from_dict(cls, data: dict):
         '''Used to create a new model, if data has passed preprocess checks'''
-        # If any required fields are missing
-        if not cls.data_has_required(cls.required_fields(), data):
-            raise Exception('Cannot create object: one or more required fields missing')
-        # Filter data
-        filtered_data = cls.filter_data(data, cls.all_fields())
         # Before creating the model object, first try to set default values
         # of fields that have not been provided
         if hasattr(cls.ModelType, 'defaults'):
             for key in cls.ModelType.defaults.keys():
-                if not filtered_data.get(key):
-                    filtered_data[key] = cls.ModelType.defaults[key]
+                if not data.get(key):
+                    data[key] = cls.ModelType.defaults[key]
+        # If any required fields are missing
+        if not cls.data_has_required(cls.required_fields(), data):
+            raise Exception('Cannot create object: one or more required fields missing')
+        # Filter data
+        filtered_data = cls.filter_data(data, cls.required_fields())
         return cls.ModelType(*filtered_data)
 
     @classmethod
@@ -96,11 +98,9 @@ class Handler(ABC):
         '''Create a new model object'''
         # If a dict of values is passed in
         if len(args) == 1 and type(args[0]) is dict:
-            print(f'CREATING OBJECT FROM DICT... {args[0]}')
             return cls.create_from_dict(args[0])
         # If arguments are passed in to match the model's __init___
         else:
-            print('CREATING OBJECT FROM ARGS...')
             return cls.create_from_args(*args)
 
     @classmethod
@@ -137,9 +137,6 @@ class Handler(ABC):
             id_list = cls.all_ids()
         elif len(args) == 1 and type(args[0]) is list:
             id_list = args[0]
-        print('YEEEEEET')
-        print(args)
-        print(id_list)
         return [cls.from_id(id) for id in id_list]
 
     @classmethod
@@ -157,6 +154,41 @@ class Handler(ABC):
     def uniques(cls, column):
         '''Return all unique values for a column'''
         return [o[0] for o in cls.ModelType.query.with_entities(column).distinct(column).all()]
+
+    @classmethod
+    def update_relationship_list(cls, relationship, relationship_handler, data):
+        '''Uses a list of dictionaries to update a model's relationship list
+        Arguments:
+        1) relationship - the model's relationship array
+        1) relationship type - the handler type of the relationship objects
+        2) data - the data to update the field with'''
+        if not isinstance(relationship, list):
+            print('Error: relationship must be an array')
+            return False
+        # Any item without an id is new, so we can track all ids in the dict
+        # to determine which items have been added/deleted
+        i_ids = [it.id for it in relationship]  # IDs in the items list
+        d_ids = []  # IDs in the data list
+        for d_obj in data:
+            print(f'd_obj is {d_obj}')
+            print(type(d_obj))
+            # Object is not new - update
+            if (d_id := d_obj.get('id', None)):
+                d_ids.append(d_id)
+                d_model = relationship_handler.from_id(d_id)
+                relationship_handler.update(d_model, d_obj)
+            # Object is new - create
+            else:
+                new_model = relationship_handler.create(d_obj)
+                relationship_handler.update(new_model, d_obj)
+                db.session.add(new_model)
+                relationship.append(new_model)
+        for old in i_ids:
+            # Object not found in data - delete
+            if old not in d_ids:
+                old_model = relationship_handler.from_id(old)
+                db.session.delete(old_model)
+                relationship.remove(old_model)
 
 
 class AddressHandler(Handler):
@@ -257,12 +289,14 @@ class EmailHandler(Handler):
 
     @staticmethod
     def required_fields():
-        return ['email_address']
+        return ['email_address', 'receives_delivery_updates']
 
     @classmethod
     def to_dict(cls, model: Email):
         model = cls.convert_to_model(model)
-        return EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
+        as_dict = EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
+        as_dict['id'] = model.id
+        return as_dict
 
 
 class FeedbackHandler(Handler):
@@ -287,40 +321,140 @@ class ImageHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @staticmethod
     def required_fields():
-        return ['folder', 'file_name', 'thumbnail_file_name', 'extension',
+        return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @classmethod
     def to_dict(cls, model: Image):
         model = cls.convert_to_model(model)
-        return ImageHandler.simple_fields_to_dict(model, ['hash', 'alt', 'used_for', 'width', 'height'])
+        return ImageHandler.simple_fields_to_dict(model, ['id', 'hash', 'alt', 'used_for', 'width', 'height'])
 
     @staticmethod
-    def get_thumb_b64(model: Image):
-        '''Returns the base64 string representation of an image file's thumbnail'''
-        # Read image file
-        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.thumbnail_file_name}.{model.extension}', 'rb') as open_file:
-            byte_content = open_file.read()
-        # Convert image to a base64 string
-        base64_bytes = b64encode(byte_content)
-        base64_string = base64_bytes.decode('utf-8')
-        return base64_string
+    def label_from_dimensions(width: int, height: int):
+        '''Returns closest size label, based on provided width and height'''
+        if width > ImageSizes.L.value[0] or height > ImageSizes.L.value[1]:
+            return 'l'
+        if width > ImageSizes.ML.value[0] or height > ImageSizes.ML.value[1]:
+            return 'ml'
+        if width > ImageSizes.M.value[0] or height > ImageSizes.M.value[1]:
+            return 'm'
+        if width > ImageSizes.S.value[0] or height > ImageSizes.S.value[1]:
+            return 's'
+        return 'xs'
 
     @staticmethod
-    def get_full_b64(model: Image):
-        '''Returns the base64 string representation of an image file'''
-        # Read image file
-        with open(f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}.{model.extension}', 'rb') as open_file:
-            byte_content = open_file.read()
-        # Convert image to a base64 string
-        base64_bytes = b64encode(byte_content)
-        base64_string = base64_bytes.decode('utf-8')
-        return base64_string
+    def dimensions_from_label(label: str):
+        '''Returns dimensions of size label'''
+        if label == 'l':
+            return ImageSizes.L.value
+        if label == 'ml':
+            return ImageSizes.ML.value
+        if label == 'm':
+            return ImageSizes.M.value
+        if label == 's':
+            return ImageSizes.S.value
+        return ImageSizes.XS.value
+
+    @classmethod
+    def create_from_scratch(cls, data: str, alt: str, dest_folder: str, used_for: ImageUses):
+        '''Creates a new image model without having to worry about file names, thumbnail, etc'''
+        from src.utils import salt, find_available_file_names, get_image_meta
+        from mimetypes import guess_extension
+        from base64 import b64decode
+        img_name = salt(30)
+        # ex: guess_extension(image/jpeg)
+        img_ext = guess_extension(data[data.index(':')+1:data.index(';')])
+        # Data is stored in base64, and the beginning of the
+        # string is not needed
+        just_data = data[data.index('base64,')+7:]
+        decoded = b64decode(just_data)
+        (hash, width, height) = get_image_meta(decoded)
+        # If image already exists, return it
+        if (existing := ImageHandler.from_hash(hash)):
+            print('Image already in backend!')
+            return existing
+        # Find the size label for the image
+        label = ImageHandler.label_from_dimensions(width, height)
+        img_name = find_available_file_names(dest_folder, img_name, img_ext)
+        img_path = f'{Config.BASE_IMAGE_DIR}/{dest_folder}/{img_name}-{label}{img_ext}'
+        # Save image
+        with open(img_path, 'wb') as f:
+            f.write(decoded)
+        # Add image data to database
+        img_row = cls.create(dest_folder,
+                             img_name,
+                             img_ext,
+                             alt,
+                             hash,
+                             used_for,
+                             width,
+                             height)
+        db.session.add(img_row)
+        db.session.commit()
+        return img_row
+
+    @classmethod
+    def get_b64(cls, model, size: str):
+        '''Returns the base64 string representation of an image in the requested size,
+        or the next best size available'''
+        model = cls.convert_to_model(model)
+        if model is None:
+            return None
+        print('got model')
+        print(type(model))
+        # First, check if the image exists in the exact requested size
+        file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
+        if os.path.exists(file_path):
+            # Read image file
+            with open(file_path, 'rb') as open_file:
+                byte_content = open_file.read()
+            # Convert image to a base64 string
+            base64_bytes = b64encode(byte_content)
+            base64_string = base64_bytes.decode('utf-8')
+            return base64_string
+        # If it didn't exist, try to find a larger version and scale it down
+        larger_labels = ['l', 'ml', 'm', 's', 'xs']
+        requested_index = larger_labels.index(size)
+        if requested_index >= 0:
+            larger_labels = larger_labels[:requested_index+1]
+        for size_label in larger_labels:
+            file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size_label}.{model.extension}'
+            if os.path.exists(file_path):
+                # Load file
+                with open(file_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                # Resize file
+                resized = resize_image(byte_content, ImageHandler.dimensions_from_label(size))
+                # Store and return file
+                store_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
+                resized.save(store_path)
+                with open(store_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                # Convert image to a base64 string
+                base64_bytes = b64encode(byte_content)
+                base64_string = base64_bytes.decode('utf-8')
+                return base64_string
+        # If a larger size didn't exist, try to return a smaller size
+        smaller_labels = ['l', 'ml', 'm', 's', 'xs']
+        requested_index = smaller_labels.index(size)
+        if requested_index >= 0:
+            smaller_labels = smaller_labels[requested_index:]
+        for size_label in smaller_labels:
+            file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size_label}.{model.extension}'
+            if os.path.exists(file_path):
+                # Load file
+                with open(file_path, 'rb') as open_file:
+                    byte_content = open_file.read()
+                base64_bytes = b64encode(byte_content)
+                base64_string = base64_bytes.decode('utf-8')
+                return base64_string
+        # Finally, if no image found, return None
+        return None
 
     @staticmethod
     def from_used_for(used_for: ImageUses):
@@ -336,6 +470,7 @@ class ImageHandler(Handler):
 
     @staticmethod
     def is_hash_used(hash: str):
+        print(f'CHECKING IF HASH USED {hash}')
         return db.session.query(Image.id).filter_by(hash=hash).scalar() is not None
 
 
@@ -353,11 +488,10 @@ class OrderItemHandler(Handler):
     @classmethod
     def to_dict(cls, model: OrderItem):
         model = cls.convert_to_model(model)
-        print('ORDER ITEM HANDLER TO DICT')
-        print(type(model))
         return {
+            'id': model.id,
             'quantity': model.quantity,
-            'sku': SkuHandler.to_dict(model.sku)
+            'sku': SkuHandler.to_dict(model.sku),
         }
 
 
@@ -366,18 +500,18 @@ class OrderHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['delivery_address', 'special_instructions', 'desired_delivery_date', 'items', 'user_id']
+        return ['is_delivery', 'delivery_address', 'special_instructions', 'desired_delivery_date', 'items', 'user_id']
 
     @staticmethod
     def required_fields():
-        return ['user_id']
+        return ['quantity', 'sku']
 
     @classmethod
     def to_dict(cls, model: Order):
         model = cls.convert_to_model(model)
-        print('ORDER HANDLER TO DICT')
-        print(type(model))
-        as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'desired_delivery_date'])
+        print(f'ORDER IS_DELIVERY: {model.is_delivery}')
+        as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'is_delivery', 'desired_delivery_date'])
+        as_dict['id'] = model.id
         as_dict['items'] = OrderItemHandler.all_dicts(model.items)
         as_dict['delivery_address'] = AddressHandler.to_dict(model.delivery_address)
         customer = UserHandler.from_id(model.user_id)
@@ -386,16 +520,69 @@ class OrderHandler(Handler):
             "first_name": customer.first_name,
             "last_name": customer.last_name,
         }
+        print(as_dict)
         return as_dict
 
     @staticmethod
-    def from_status(status: OrderStatus):
+    def from_status(status: int):
         '''Return all orders that match the provided status'''
-        return db.session.query(Order).filter_by(status=status.value).all()
+        return db.session.query(Order).filter_by(status=status).all()
 
     @staticmethod
-    def set_status(model: Order, status: OrderStatus):
-        model.status = status.value
+    def set_status(model: Order, status: int):
+        model.status = status
+
+    @classmethod
+    def update_from_dict(cls, obj, data: dict):
+        items_data = data['items']
+        if len(items_data) == 0:
+            OrderHandler.empty_order()
+        else:
+            # Any item without an id is new, so we can track all ids in the dict
+            # to determine which items have been deleted
+            data_ids = []
+            old_ids = [it.id for it in obj.items]
+            for item in items_data:
+                if (item_id := item.get('id', None)):
+                    data_ids.append(item_id)
+                    item_obj = OrderItemHandler.from_id(item_id)
+                    OrderItemHandler.update(item_obj, {'quantity': item['quantity']})
+                else:
+                    quantity = item['quantity']
+                    sku = SkuHandler.from_sku(item['sku'])
+                    new_item = OrderItemHandler.create(quantity, sku)
+                    db.session.add(new_item)
+                    obj.items.append(new_item)
+            for old in old_ids:
+                # If id is not in the data list, then delete it
+                if old not in data_ids:
+                    old_item = OrderItemHandler.from_id(old)
+                    db.session.delete(old_item)
+
+        if (notes := data.get('special_instructions', None)):
+            obj.special_instructions = notes
+        if (date := data.get('desired_delivery_date', None)):
+            obj.desired_delivery_date = date
+        if (addy_id := data.get('address_id', None)):
+            obj.address_id = addy_id
+        is_delivery = data.get('is_delivery', None)
+        if is_delivery is not None:
+            obj.is_delivery = is_delivery
+
+    @classmethod
+    def empty_order(cls, model: Order):
+        '''Remove all items in the order.
+        Returns True if successful'''
+        try:
+            model = cls.convert_to_model(model)
+            for item in model.items:
+                db.session.delete(item)
+            model.items = []
+            db.session.commit()
+            return True
+        except Exception:
+            print('Failed to empty order!')
+            return False
 
 
 class PhoneHandler(Handler):
@@ -407,12 +594,14 @@ class PhoneHandler(Handler):
 
     @staticmethod
     def required_fields():
-        return ['unformatted_number']
+        return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
 
     @classmethod
     def to_dict(cls, model: Phone):
         model = cls.convert_to_model(model)
-        return PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
+        as_dict = PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
+        as_dict['id'] = model.id
+        return as_dict
 
 
 class PlantTraitHandler(Handler):
@@ -456,7 +645,8 @@ class PlantHandler(Handler):
         return ['latin_name']
 
     @classmethod
-    def to_dict(cls, model: Plant):
+    def basic_dict(cls, model: Plant):
+        '''Similar to the normal to_dict method, but without SKU data'''
         model = cls.convert_to_model(model)
 
         def array_to_dict(model_dict: dict, to_dict, field: str, key=None):
@@ -487,12 +677,121 @@ class PlantHandler(Handler):
                         'zones', 'plant_types', 'physiographic_regions', 'soil_moistures',
                         'soil_phs', 'soil_types', 'light_ranges']
         [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
-
+        as_dict['id'] = model.id
+        display_image = cls.get_display_image(model)
+        if display_image:
+            as_dict['display_id'] = display_image.id
         return as_dict
+
+    @classmethod
+    def to_dict(cls, model: Plant):
+        model = cls.convert_to_model(model)
+        data = cls.basic_dict(model)
+        data['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
+        return data
 
     @staticmethod
     def from_latin(latin: str):
         return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
+
+    @classmethod
+    def has_sku(cls, model):
+        '''Returns True if there are any SKUs associated with this plant'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id).count() > 0
+
+    @classmethod
+    def has_available_sku(cls, model):
+        '''Returns True if there are any SKUs VISIBLE TO THE CUSTOMER
+        that are associated with this plant'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id, status=SkuStatus.ACTIVE.value).count() > 0
+
+    @classmethod
+    def skus(cls, model):
+        '''Returns all SKU objects associated with the plant model'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id).all()
+
+    @classmethod
+    def available_skus(cls, model):
+        '''Returns all available SKU objects associated with the plant model'''
+        model = cls.convert_to_model(model)
+        return db.session.query(Sku).filter_by(plant_id=model.id, status=SkuStatus.ACTIVE.value).all()
+
+    @staticmethod
+    def cheapest(model):
+        '''Returns the lowest SKU price associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.cheapest(skus)
+
+    @staticmethod
+    def priciest(model):
+        '''Returns the highest SKU price associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.priciest(skus)
+
+    @staticmethod
+    def newest(model):
+        '''Returns the newest SKU associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.newest(skus)
+
+    @staticmethod
+    def oldest(model):
+        '''Returns the oldest SKU associated with this plant, or -1'''
+        skus = PlantHandler.available_skus(model)
+        if skus is None:
+            return -1
+        return SkuHandler.oldest(skus)
+
+    @staticmethod
+    def set_display_image(model: Plant, image: Image):
+        print(f'PRE SET: {model.display_img}')
+        model.display_img = image
+        model.display_img_id = image.id
+        db.session.commit()
+        print(f'POST SET: {model.display_img}')
+
+    @staticmethod
+    def get_display_image(model: Plant):
+        '''Returns an Image model for the SKUs display image, or None
+        if not found'''
+        # If the sku has a display image TODO doesn't account for full or thumb
+        if model.display_img:
+            print(f'DISPLAY HERE: {model.display_img}')
+            return model.display_img
+        if len(model.flower_images) > 0:
+            return model.flower_images[0]
+        if len(model.leaf_images) > 0:
+            return model.leaf_images[0]
+        if len(model.fruit_images) > 0:
+            return model.fruit_images[0]
+        if len(model.bark_images) > 0:
+            return model.bark_images[0]
+        if len(model.habit_images) > 0:
+            return model.habit_images[0]
+        return None
+
+    @classmethod
+    def get_thumb_display_b64(cls, model: Plant):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_b64(img, 'm')
+
+    @classmethod
+    def get_full_display_b64(cls, model: Plant):
+        img = cls.get_display_image(model)
+        if img is None:
+            return None
+        return ImageHandler.get_b64(img, 'l')
 
 
 class RoleHandler(Handler):
@@ -542,7 +841,7 @@ class SkuHandler(Handler):
 
     @staticmethod
     def all_fields():
-        return ['sku', 'size', 'price', 'availability', 'is_discountable']
+        return ['sku', 'size', 'price', 'availability', 'is_discountable', 'status']
 
     @staticmethod
     def required_fields():
@@ -552,50 +851,11 @@ class SkuHandler(Handler):
     def to_dict(cls, model: Sku):
         model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
-        as_dict['plant'] = PlantHandler.to_dict(model.plant)
+        as_dict['id'] = model.id
         as_dict['discounts'] = SkuDiscountHandler.all_dicts(model.discounts)
         as_dict['status'] = model.status
+        as_dict['plant'] = PlantHandler.basic_dict(model.plant)
         return as_dict
-
-    @staticmethod
-    def set_display_image(model: Sku, image: Image):
-        model.display_image = image
-        model.display_img_id = image.id
-
-    @staticmethod
-    def get_display_image(model: Sku):
-        '''Returns an Image model for the SKUs display image, or None
-        if not found'''
-        # If the sku has a display image TODO doesn't account for full or thumb
-        if model.display_img:
-            return model.display_img
-        if not model.plant:
-            return None
-        if len(model.plant.flower_images) > 0:
-            return model.plant.flower_images[0]
-        if len(model.plant.leaf_images) > 0:
-            return model.plant.leaf_images[0]
-        if len(model.plant.fruit_images) > 0:
-            return model.plant.fruit_images[0]
-        if len(model.plant.bark_images) > 0:
-            return model.plant.bark_images[0]
-        if len(model.plant.habit_images) > 0:
-            return model.plant.habit_images[0]
-        return None
-
-    @classmethod
-    def get_thumb_display_b64(cls, model: Sku):
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_thumb_b64(img)
-
-    @classmethod
-    def get_full_display_b64(cls, model: Sku):
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_full_b64(img)
 
     @staticmethod
     def add_discount(model: Sku, discount):
@@ -619,8 +879,46 @@ class SkuHandler(Handler):
         return db.session.query(Sku).filter_by(sku=sku).one_or_none()
 
     @staticmethod
+    def from_plant_id(id: int):
+        '''Returns all SKUs associated with a plant id'''
+        return db.session.query(Sku).filter_by(plant_id=id).all()
+
+    @staticmethod
     def from_plant(plant: Plant):
-        return db.session.query(Sku).filter_by(plant_id=plant.id).one_or_none()
+        '''Returns all SKUs associated with a plant object'''
+        return SkuHandler.from_plant_id(plant.id)
+
+    @staticmethod
+    def cheapest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.price, reverse=False)
+
+    @staticmethod
+    def priciest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.price, reverse=True)
+
+    @staticmethod
+    def newest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.date_added, reverse=False)
+
+    @staticmethod
+    def oldest(skus):
+        if skus is None:
+            return -1
+        return sorted(skus, key=lambda s: s.date_added, reverse=True)
+
+    @classmethod
+    def hide_all(cls):
+        '''Hides all SKUs from the customer'''
+        skus = cls.all_objs()
+        for sku in skus:
+            sku.status = SkuStatus.INACTIVE.value
+        db.session.commit()
 
 
 class UserHandler(Handler):
@@ -670,6 +968,16 @@ class UserHandler(Handler):
     @staticmethod
     def from_email(email: str):
         return User.query.filter(User.personal_email.any(email_address=email)).first()
+
+    @staticmethod
+    def email_in_use(email: str):
+        '''Returns True if the email is being used by an active account'''
+        users = User.query.filter(User.personal_email.any(email_address=email)).all()
+        print('IN EMAIL IN USE')
+        print(users)
+        if users is None:
+            return True
+        return any(user.account_status != AccountStatus.DELETED.value for user in users)
 
     @staticmethod
     def is_customer(user: User):
@@ -754,13 +1062,32 @@ class UserHandler(Handler):
             "last_name": user.last_name,
             "pronouns": user.pronouns,
             "theme": user.theme,
-            "personal_email": EmailHandler.all_dicts(user.personal_email),
-            "personal_phone": PhoneHandler.all_dicts(user.personal_phone),
+            "emails": EmailHandler.all_dicts(user.personal_email),
+            "phones": PhoneHandler.all_dicts(user.personal_phone),
             "image_file": user.image_file,
             "orders": OrderHandler.all_dicts(user.orders),
             "roles": RoleHandler.all_dicts(user.roles),
             "likes": SkuHandler.all_dicts(user.likes)
         }
+
+    @classmethod
+    def set_profile_data(cls, user, data: dict):
+        '''Sets user profile data'''
+        success = True
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.pronouns = data.get('pronouns', user.pronouns)
+        if emails := data.get('emails', None):
+            success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
+        if phones := data.get('phones', None):
+            success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
+        if existing_customer := data.get('existing_customer', None):
+            if not user.account_approved and existing_customer:
+                user.account_approved = True
+        if (password := data.get('password', None)):
+            user.password = User.hashed_password(password)
+        db.session.commit()
+        return True
 
     @staticmethod
     def get_user_lock_status(email: str):
@@ -807,7 +1134,7 @@ class UserHandler(Handler):
         # If cart is empty, don't submit
         if len(cart.items) <= 0:
             return False
-        cart.status = OrderStatus.PENDING.value
+        cart.status = OrderStatus['PENDING']
         # Add a new, empty order to serve as the user's next cart
         cart = OrderHandler.create(user.id)
         db.session.add(cart)

@@ -23,6 +23,16 @@ export const StyledFormPage = styled.div`
         margin-bottom: 20px;
     }
 
+    .half {
+        display: inline-table;
+        width: 50%;
+
+        > div {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+    }
+
     .form-header {
         background-color: rgba(0, 0, 0, .6);
         padding: 1em 0.5em 0.5em 1em;
@@ -37,6 +47,11 @@ export const StyledFormPage = styled.div`
     .form-body {
         padding: 1em;
         border-radius: 0 0 5px 5px;
+    }
+
+    .buttons-div {
+        display: flex;
+        align-items: baseline;
     }
 
     .submit {

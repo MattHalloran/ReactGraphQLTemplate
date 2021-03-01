@@ -6,7 +6,7 @@ import Logo from 'assets/img/nln-logo-colorized.png';
 import { clearStorage, getTheme, getSession, getRoles } from 'utils/storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
+import { FULL_BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
 import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
@@ -34,8 +34,8 @@ function Navbar({
     return (
         <StyledNavbar theme={theme} visible={visible}>
             <Link to={LINKS.Home} className="nav-brand">
-                <img src={Logo} alt={`${BUSINESS_NAME} Logo`} className="nav-logo" />
-                <span className="nav-name">{BUSINESS_NAME}</span>
+                <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
+                <span className="nav-name">{FULL_BUSINESS_NAME}</span>
             </Link>
             {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
         </StyledNavbar>
@@ -72,16 +72,14 @@ function Hamburger(props) {
     let roles = user_roles;
     if (roles instanceof Array) {
         roles?.forEach(r => {
-            console.log('HAMBURGER ROLEEE', r)
             if (r.title === USER_ROLES.Admin) {
-                console.log('ADMINNNNNNNNNNN')
                 top_links.push([LINKS.Admin, GearIcon]);
             }
         })
     }
 
     // If someone is not logged in, display sign up/log in links
-    if (session === null) {
+    if (!session) {
         top_links.push([LINKS.LogIn, PersonPlusIcon]);
     } else {
         top_links.push([LINKS.Shopping, BagPlusIcon],
@@ -89,8 +87,11 @@ function Hamburger(props) {
             [LINKS.Cart, ShoppingCartIcon],);
     }
 
-    nav_options.push([LINKS.Gallery, 'Gallery'],
-        [LINKS.About, 'About Us']);
+    nav_options.push(
+        [LINKS.Home, 'Home'],
+        [LINKS.Gallery, 'Gallery'],
+        [LINKS.About, 'About Us']
+    );
 
     if (session !== null) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
@@ -114,6 +115,9 @@ function Hamburger(props) {
                 <SocialIcon fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>
+            <p>
+                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link to={LINKS.Terms}>Terms & Conditions</Link>
+            </p>
         </BurgerMenu>
     );
 }
@@ -148,7 +152,6 @@ function NavList() {
     // If an admin is logged in, display admin links
     if (user_roles instanceof Array) {
         user_roles?.forEach(r => {
-            console.log('USER ROLEEE', r)
             if (r.title === USER_ROLES.Admin) {
                 nav_options.push([LINKS.Admin, 'Admin']);
             }
@@ -157,7 +160,7 @@ function NavList() {
 
     let cart;
     // If someone is not logged in, display sign up/log in links
-    if (session === null) {
+    if (!session) {
         nav_options.push([LINKS.Register, 'Sign Up'],
             [LINKS.LogIn, 'Log In']);
     } else {
@@ -181,9 +184,9 @@ function NavList() {
 
     return (
         <ul className="nav-list">
-            <PopupMenu obj={<p>Contact</p>}
+            <PopupMenu obj={<p style={{marginRight:'10px'}}>Contact</p>}
                 menu={<ContactInfo />} />
-            <PopupMenu obj={<p>About</p>} menu={options_to_menu(about_options)} />
+            <PopupMenu obj={<p style={{marginRight:'8px'}}>About</p>} menu={options_to_menu(about_options)} />
             {options_to_menu(nav_options)}
             {cart}
         </ul>

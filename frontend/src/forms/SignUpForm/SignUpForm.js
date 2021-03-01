@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { registerUser } from 'query/http_promises';
-import StatusCodes from 'query/consts/codes.json';
 import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -10,7 +9,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { useHistoryState } from 'utils/useHistoryState';
-import { LINKS } from 'utils/consts';
+import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES } from 'utils/consts';
 import Button from 'components/Button/Button';
 
 function SignUpForm() {
@@ -19,6 +18,8 @@ function SignUpForm() {
     const [firstNameError, setFirstNameError] = useHistoryState("su_first_name_error", null);
     const [lastName, setLastName] = useHistoryState("su_last_name", "");
     const [lastNameError, setLastNameError] = useHistoryState("su_last_name_error", null);
+    const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
+    const [pronounsError, setPronounsError] = useHistoryState("su_pronoun_error", null);
     const [business, setBusiness] = useHistoryState("su_bizz", null);
     const [businessError, setBusinessError] = useHistoryState("su_bizz_error", null);
     const [email, setEmail] = useHistoryState("su_email", "");
@@ -37,21 +38,37 @@ function SignUpForm() {
     }
 
     const register = () => {
-        registerUser(firstName, lastName, business, email, phone, password, existingCustomer).then(() => {
+        let data = {
+            "first_name": firstName,
+            "last_name": lastName,
+            "pronouns": pronouns,
+            "business": business,
+            "emails": [{"email_address": email, "receives_delivery_updates": true}],
+            "phones": [{
+                "unformatted_number": phone,
+                 "country_code": '+1',
+                 "extension": '',
+                 "is_mobile": true,
+                 "receives_delivery_updates": false
+            }],
+            "password": password,
+            "existing_customer": existingCustomer
+        }
+        registerUser(email, data).then(() => {
             if (existingCustomer) {
                 alert('Welcome to New Life Nursery! You may now begin shopping');
             } else {
                 alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
             }
             history.push(LINKS.Shopping);
-        }).catch(error => {
-            console.error(error);
-            if (error.status === StatusCodes.FAILURE_EMAIL_EXISTS) {
-                if (window.confirm('Email already taken. Press OK if you would like to be redirected to the Forgot Password form')) {
+        }).catch(err => {
+            console.error(err);
+            if (err.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
+                if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
                     history.push(LINKS.ForgotPassword);
                 }
             } else {
-                alert(error.error);
+                alert(err.msg);
             }
         })
     }
@@ -59,10 +76,17 @@ function SignUpForm() {
     const submit = (event) => {
         event.preventDefault();
         setShowErrors(true);
-        if (!firstNameError && !lastNameError && !businessError && !emailError &&
-            !passwordError && password === confirmPassword && !existingCustomerError) {
-            register();
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
         }
+        if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError, emailError,
+            passwordError, existingCustomerError)) {
+            alert('Please fill in required fields');
+            return;
+
+        }
+        register();
     }
 
     const handleRadioSelect = (event) => {
@@ -77,6 +101,7 @@ function SignUpForm() {
                     type="text"
                     value={firstName}
                     valueFunc={setFirstName}
+                    error={firstNameError}
                     errorFunc={setFirstNameError}
                     validate={validation.firstNameValidation}
                     showErrors={showErrors}
@@ -86,16 +111,26 @@ function SignUpForm() {
                     type="text"
                     value={lastName}
                     valueFunc={setLastName}
+                    error={lastNameError}
                     errorFunc={setLastNameError}
                     validate={validation.lastNameValidation}
                     showErrors={showErrors}
                 />
             </div>
             <InputText
+                label="Pronouns"
+                value={pronouns}
+                valueFunc={setPronouns}
+                error={pronounsError}
+                errorFunc={setPronounsError}
+                validate={validation.pronounValidation}>
+            </InputText>
+            <InputText
                 label="Business"
                 type="text"
                 value={business}
                 valueFunc={setBusiness}
+                error={businessError}
                 errorFunc={setBusinessError}
                 validate={validation.businessValidation}
                 showErrors={showErrors}
@@ -105,6 +140,7 @@ function SignUpForm() {
                 type="email"
                 value={email}
                 valueFunc={setEmail}
+                error={emailError}
                 errorFunc={setEmailError}
                 validate={validation.emailValidation}
                 showErrors={showErrors}
@@ -114,6 +150,7 @@ function SignUpForm() {
                 type="text"
                 value={phone}
                 valueFunc={setPhone}
+                error={phoneError}
                 errorFunc={setPhoneError}
                 validate={validation.phoneNumberValidation}
                 showErrors={showErrors}
@@ -121,7 +158,9 @@ function SignUpForm() {
             <InputText
                 label="Password"
                 type="password"
+                value={password}
                 valueFunc={setPassword}
+                error={passwordError}
                 errorFunc={setPasswordError}
                 validate={validation.passwordValidation}
                 showErrors={showErrors}
@@ -129,6 +168,7 @@ function SignUpForm() {
             <InputText
                 label="Confirm Password"
                 type="password"
+                value={confirmPassword}
                 valueFunc={setConfirmPassword}
             />
             <FormControl component="fieldset">

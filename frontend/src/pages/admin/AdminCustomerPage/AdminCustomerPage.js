@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { StyledAdminCustomerPage, StyledCustomerCard } from './AdminCustomerPage.styled';
 import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';
@@ -116,7 +116,7 @@ function AdminCustomerPage() {
                 {account_options?.map((o, index) => <Button key={index} onClick={o[0]}>{o[1]}</Button>)}
             </div>
             <div className="card-flex">
-                {customers.map((c, index) => <CustomerCard key={index} onClick={select_user} {...c} />)}
+                {customers.map((c, index) => <CustomerCard key={index} is_selected={selected === index} onClick={select_user} {...c} />)}
             </div>
         </StyledAdminCustomerPage >
     );
@@ -134,11 +134,12 @@ function CustomerCard({
     first_name,
     last_name,
     account_status,
+    is_selected = false,
     onClick,
     theme = getTheme(),
 }) {
     return (
-        <StyledCustomerCard theme={theme} account_status={account_status} onClick={() => onClick(id)}>
+        <StyledCustomerCard theme={theme} is_selected={is_selected} account_status={account_status} onClick={() => onClick(id)}>
             <p>Name: {first_name} {last_name}</p>
         </StyledCustomerCard>
     );

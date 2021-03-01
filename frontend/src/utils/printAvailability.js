@@ -16,12 +16,17 @@ const centeredText = (text, doc, y) => {
 const data_to_table = (data) => {
     let result = [];
     for (let i = 0; i < data.length; i++) {
-        let curr = data[i];
-        let name = curr.plant?.latin_name ?? curr.plant.common_name ?? curr.sku;
-        let size = isNaN(curr.size) ? curr.size : `#${curr.size}`;
-        let availability = curr.availability ?? 'N/A';
-        let price = curr.price ? displayPrice(curr.price) : 'N/A';
-        result.push([name, size, availability, price]);
+        let plant = data[i];
+        let plant_name = plant.latin_name ?? plant.common_name;
+        if (!plant.skus || plant.skus.length === 0) continue;
+        for (let j = 0; j < plant.skus.length; j++) {
+            let sku = plant.skus[j];
+            let display_name = plant_name ?? sku.sku;
+            let size = isNaN(sku.size) ? sku.size : `#${sku.size}`;
+            let availability = sku.availability ?? 'N/A';
+            let price = displayPrice(sku.price);
+            result.push([display_name, size, availability, price]);
+        }
     }
     return result;
 }
@@ -29,6 +34,7 @@ const data_to_table = (data) => {
 export const printAvailability = () => {
     getInventory(SORT_OPTIONS[0].value, 0, false)
         .then(response => {
+            console.log('GOT AVAILABILITY', response.page_results);
             let table_data = data_to_table(response.page_results);
             // Default export is a4 paper, portrait, using millimeters for units
             const doc = new jsPDF();

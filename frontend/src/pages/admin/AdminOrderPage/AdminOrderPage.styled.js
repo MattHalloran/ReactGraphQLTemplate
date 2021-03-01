@@ -19,3 +19,7 @@ export const StyledOrderCard = styled.div`
     border-radius: 1em;
     cursor: pointer;
 `;
+
+export const StyledOrderPopup = styled.div`
+    
+`;

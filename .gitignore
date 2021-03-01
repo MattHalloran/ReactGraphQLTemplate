@@ -164,3 +164,6 @@ Backend/postgres/
 #Assets
 backend/assets/
 backend/plant_info/yards/yards*.json
+
+.eslintcache
+package-lock.json

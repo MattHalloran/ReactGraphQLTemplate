@@ -37,7 +37,7 @@ export const GlobalStyles = createGlobalStyle`
 
     p, h1, h2,
     h3, h4, h5,
-    h6, a:link,
+    h6, label, a:link,
     a:visited {
         color: ${({ theme }) => theme.textPrimary};
     }
@@ -56,6 +56,7 @@ export const GlobalStyles = createGlobalStyle`
     #content-wrap{
         flex:1;
         position: relative;
+        min-height: 100vh;
     }
 
     .page {
