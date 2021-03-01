@@ -3,7 +3,7 @@ from flask_cors import CORS, cross_origin
 from src.api import create_app, db
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
-from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler
+from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
 from src.messenger import welcome, reset_password
 from src.auth import generate_token, verify_token
 from src.config import Config
@@ -126,14 +126,22 @@ def consts():
 def register():
     (data) = getData('data')
     # If email is already registered
-    if any(UserHandler.from_email(e['email_address']) for e in data['emails']):
+    if any(UserHandler.email_in_use(e['email_address']) for e in data['emails']):
         print('ERROR: Email exists')
         return StatusCodes['FAILURE_EMAIL_EXISTS']
+    # Create user
     user = UserHandler.create(data)
+    # Give the user a customer role
+    user.roles.append(RoleHandler.get_customer_role())
+    # Update the user's profile data
     UserHandler.set_profile_data(user, data)
+    # Create a session token
+    token = generate_token(app, user)
+    UserHandler.set_token(user, token)
+    db.session.commit()
     return {
         **StatusCodes['SUCCESS'],
-        "token": generate_token(app, user),
+        "token": token,
         "user": UserHandler.to_dict(user)
     }
 
@@ -631,8 +639,10 @@ def modify_plant():
             db.session.add(new_trait)
             return new_trait
         print(f"TODOOOOOOOO {plant_data}")
-        plant_obj.latin_name = plant_data['latin_name']
-        plant_obj.common_name = plant_data['common_name']
+        if (latin := plant_data.get('latin_name', None)):
+            plant_obj.latin_name = latin
+        if (common := plant_data.get('common_name', None)):
+            plant_obj.common_name = common
         plant_obj.drought_tolerance = update_trait(PlantTraitOptions.DROUGHT_TOLERANCE, plant_data['drought_tolerance'])
         plant_obj.grown_height = update_trait(PlantTraitOptions.GROWN_HEIGHT, plant_data['grown_height'])
         plant_obj.grown_spread = update_trait(PlantTraitOptions.GROWN_SPREAD, plant_data['grown_spread'])
@@ -684,6 +694,13 @@ def modify_user():
     }
     if operation in operation_to_status:
         user.account_status = operation_to_status[operation]
+        if operation == 'DELETE':
+            for email in user.personal_email:
+                user.personal_email.remove(email)
+                db.session.delete(email)
+            for phone in user.personal_phone:
+                user.personal_phone.remove(phone)
+                db.session.delete(phone)
         db.session.commit()
         return {
             **StatusCodes['SUCCESS'],

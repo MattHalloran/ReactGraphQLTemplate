@@ -121,7 +121,7 @@ export function registerUser(email, data) {
     return new Promise(function (resolve, reject) {
         http.create_user(data).then(response => {
             if (response.ok) {
-                login({email: email, token: data.token }, data.user);
+                login({email: email, token: response.token }, response.user);
                 resolve(data);
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')

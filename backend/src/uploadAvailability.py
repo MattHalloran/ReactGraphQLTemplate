@@ -44,7 +44,9 @@ def upload_availability(app, data):
             # If SKU not found by code or plant, create from scratch
             if sku is None:
                 print(f'Could not find SKU associated with {curr_sku}. Attempting to create new one')
-                plant = PlantHandler.create(curr_latin)
+                plant = PlantHandler.from_latin(curr_latin)
+                if not plant:
+                    plant = PlantHandler.create(curr_latin)
                 db.session.add(plant)
                 db.session.commit()
                 sku = SkuHandler.create()

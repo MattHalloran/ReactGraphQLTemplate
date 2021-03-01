@@ -43,8 +43,8 @@ function ShoppingList({
     const loading = useRef(false);
 
     useEffect(() => {
-        let ids = plants.map(p => p.display_id);
-        console.log('IDS ARE', ids, plants);
+        let ids = plants?.map(p => p.display_id);
+        if (!ids) return;
         getImages(ids, 'm').then(response => {
             setThumbnails(response.images);
         }).catch(err => {
@@ -224,7 +224,7 @@ function ShoppingList({
     return (
         <StyledShoppingList id={track_scrolling_id}>
             {popup}
-            {plants.map((item, index) =>
+            {plants?.map((item, index) =>
                 <PlantCard key={index}
                     theme={theme}
                     cart={cart}

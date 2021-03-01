@@ -51,7 +51,8 @@ function AdminInventoryPage() {
     }, [])
 
     useEffect(() => {
-        let ids = existing.map(p => p.display_id);
+        let ids = existing?.map(p => p.display_id);
+        if (!ids) return;
         getImages(ids, 'm').then(response => {
             setExistingThumbnails(response.images);
         }).catch(err => {
@@ -60,7 +61,8 @@ function AdminInventoryPage() {
     }, [existing])
 
     useEffect(() => {
-        let ids = existing.map(p => p.display_id);
+        let ids = existing?.map(p => p.display_id);
+        if (!ids) return;
         getImages(ids, 'm').then(response => {
             setAllThumbnails(response.images);
         }).catch(err => {
@@ -203,7 +205,7 @@ function AdminInventoryPage() {
                 <h2>Sort</h2>
                 <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
                 <div className="card-flex">
-                    {existing.map((plant, index) => <PlantCard key={index}
+                    {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onEdit={() => setCurrPlant(plant)}
                         thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
@@ -213,7 +215,7 @@ function AdminInventoryPage() {
                 <h2>Sort</h2>
                 <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
                 <div className="card-flex">
-                    {all.map((plant, index) => <PlantCard key={index}
+                    {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onEdit={() => setCurrPlant(plant)}
                         thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
@@ -336,13 +338,13 @@ function PlantPopup({
         setSize(selectedSku['size']);
         setPrice(displayPrice(selectedSku['price']));
         setQuantity(selectedSku['availability']);
-        setLatinName(selectedSku['latin_name']);
-        setCommonName(selectedSku['common_name']);
-        setDroughtTolerance(selectedSku['drought_tolerance']);
-        setGrownHeight(selectedSku['grown_height']);
-        setGrownSpread(selectedSku['grown_spread'])
-        setOptimalLight(selectedSku['optimal_light']);
-        setSaltTolerance(selectedSku['salt_tolerance']);
+        setLatinName(selectedSku['plant']['latin_name']);
+        setCommonName(selectedSku['plant']['common_name']);
+        setDroughtTolerance(selectedSku['plant']['drought_tolerance']?.value);
+        setGrownHeight(selectedSku['plant']['grown_height']?.value);
+        setGrownSpread(selectedSku['plant']['grown_spread']?.value)
+        setOptimalLight(selectedSku['plant']['optimal_light']?.value);
+        setSaltTolerance(selectedSku['plant']['salt_tolerance']?.value);
     }, [selectedSku])
 
     const savePlant = () => {
@@ -447,7 +449,7 @@ function PlantPopup({
             <div className="sidenav">
                 <h3>SKUs</h3>
                 <div className="sku-list">
-                    {skus.map(s => (
+                    {skus?.map(s => (
                         <div className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
                             onClick={() => setSelectedSku(s)}>{s.sku}</div>
                     ))}

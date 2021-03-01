@@ -98,13 +98,9 @@ class Handler(ABC):
         '''Create a new model object'''
         # If a dict of values is passed in
         if len(args) == 1 and type(args[0]) is dict:
-            print(f'CREATING OBJECT FROM DICT... {args[0]}')
             return cls.create_from_dict(args[0])
         # If arguments are passed in to match the model's __init___
         else:
-            print('CREATING OBJECT FROM ARGS...')
-            print(type(args[0]))
-            print(args[0])
             return cls.create_from_args(*args)
 
     @classmethod
@@ -459,7 +455,6 @@ class ImageHandler(Handler):
                 return base64_string
         # Finally, if no image found, return None
         return None
-
 
     @staticmethod
     def from_used_for(used_for: ImageUses):
@@ -973,6 +968,16 @@ class UserHandler(Handler):
     @staticmethod
     def from_email(email: str):
         return User.query.filter(User.personal_email.any(email_address=email)).first()
+
+    @staticmethod
+    def email_in_use(email: str):
+        '''Returns True if the email is being used by an active account'''
+        users = User.query.filter(User.personal_email.any(email_address=email)).all()
+        print('IN EMAIL IN USE')
+        print(users)
+        if users is None:
+            return True
+        return any(user.account_status != AccountStatus.DELETED.value for user in users)
 
     @staticmethod
     def is_customer(user: User):
