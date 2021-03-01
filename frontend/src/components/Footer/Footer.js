@@ -19,7 +19,7 @@ function Footer({
                     <ul className="footer-ul">
                         <li><Link to="/about">About Us</Link></li>
                         <li><Link to="/contact">Contact Us</Link></li>
-                        <li><a href={require('assets/downloads/Confidential_Commercial_Credit_Application-2010.doc')} target="_blank" rel="noopener noreferrer" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
+                        <li><a href='/docs/Confidential_Commercial_Credit_Application-2010.doc' target="_blank" rel="noopener noreferrer" download="Confidential_Commercial_Credit_Application">Credit App</a></li>
                         <li style={{ cursor: 'pointer' }} onClick={printAvailability}>Print Availability</li>
                         <li><Link to="/gallery">Gallery</Link></li>
                         <li><Link to="/featured">Featured Plants</Link></li>

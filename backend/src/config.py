@@ -1,9 +1,11 @@
+import os
+
 
 class Config:
     DB_NAME = 'nlndb'
     DB_LANGUAGE = 'postgresql'
     DB_USERNAME = 'siteadmin'
-    DB_PASSWORD = 'test' # Actual password will be stored in environment variable
+    DB_PASSWORD = os.environ.get("DB_PASSWORD")
     DB_HOST = 'localhost'
     # URI format: dialect+driver://username:password@host:port/database
     # BASE_DB used for connecting to database if site's db has been deleted
