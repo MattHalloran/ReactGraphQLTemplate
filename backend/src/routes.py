@@ -185,6 +185,7 @@ def send_password_reset_request():
 
 
 @app.route(f'{PREFIX}/validate_token', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def validate_token():
     token = getJson('token')
@@ -414,6 +415,7 @@ def update_contact_info():
 
 
 @app.route(f'{PREFIX}/fetch_profile_info', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_profile_info():
     (session) = getJson('session')
@@ -431,6 +433,7 @@ def fetch_profile_info():
 
 
 @app.route(f'{PREFIX}/update_profile', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def update_profile():
     (session, data) = getData('session', 'data')
@@ -447,6 +450,7 @@ def update_profile():
 
 
 @app.route(f'{PREFIX}/fetch_likes', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_likes():
     (session) = getJson('session')
@@ -460,6 +464,7 @@ def fetch_likes():
 
 
 @app.route(f'{PREFIX}/fetch_cart', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_cart():
     (session) = getJson('session')
@@ -473,6 +478,7 @@ def fetch_cart():
 
 
 @app.route(f'{PREFIX}/fetch_customers', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_customers():
     # Grab data
@@ -486,6 +492,7 @@ def fetch_customers():
 
 
 @app.route(f'{PREFIX}/set_like_sku', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def set_like_sku():
     '''Like or unlike an inventory item'''
@@ -512,6 +519,7 @@ def set_like_sku():
 
 
 @app.route(f'{PREFIX}/set_order_status', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def set_order_status():
     '''Sets the order status for an order'''
@@ -530,6 +538,7 @@ def set_order_status():
 
 
 @app.route(f'{PREFIX}/update_cart', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def update_cart():
     '''Updates the cart for the specified user.
@@ -558,6 +567,7 @@ def update_cart():
 
 # Hide, unhide, add, delete, or update SKU
 @app.route(f'{PREFIX}/modify_sku', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def modify_sku():
     '''Like or unlike an inventory item'''
@@ -592,6 +602,7 @@ def modify_sku():
 
 # Hide, unhide, add, delete, or update SKU
 @app.route(f'{PREFIX}/modify_plant', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def modify_plant():
     '''Like or unlike an inventory item'''
@@ -672,6 +683,7 @@ def modify_plant():
 
 # Change the account status of a user
 @app.route(f'{PREFIX}/modify_user', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def modify_user():
     '''Like or unlike an inventory item'''
@@ -711,6 +723,7 @@ def modify_user():
 
 
 @app.route(f'{PREFIX}/submit_order', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def submit_order():
     (session, cart) = getData('session', 'cart')
@@ -734,6 +747,7 @@ def submit_order():
 
 
 @app.route(f'{PREFIX}/fetch_orders', methods=["POST"])
+@cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_orders():
     '''Fetch orders that match the provided state'''
