@@ -25,7 +25,7 @@ import difflib
 import traceback
 
 PORT_NUM = 465
-ASSET_LOCATION = f'../assets/messaging'
+ASSET_LOCATION = '../assets/messaging'
 # Stored in environment variables so it's not uploaded to GitHub.
 EMAIL_USERNAME = os.environ.get("AFA_EMAIL_USERNAME")  # What you login as
 EMAIL_FROM = os.environ.get("AFA_EMAIL_FROM")  # Who the recipient thinks the email is from
