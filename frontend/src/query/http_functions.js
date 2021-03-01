@@ -1,5 +1,8 @@
+// Currently, backend is hosted on same machine
+const IP = 'localhost';
+const PORT = '5000';
 // URL prefix used to signify calls to backend
-const PREFIX = '/api';
+const PREFIX = 'api';
 // Headers used by fetch calls
 const HEADERS = {
     ApplicatonJsonAccept: {
@@ -18,9 +21,9 @@ const HEADERS = {
 // Parameters:
 // url - string
 // httpParams - object containing fetch options
-async function fetchWrapper(url, httpParams) {
+async function fetchWrapper(route, httpParams) {
     try {
-        let response = await fetch(url, httpParams);
+        let response = await fetch(`http://${IP}:${PORT}/${PREFIX}/${route}`, httpParams);
         let json = await response.json();
         return json;
     } catch (err) {
@@ -39,7 +42,7 @@ export async function validate_token(token) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/validate_token`, options);
+    return await fetchWrapper('validate_token', options);
 }
 
 export async function create_user(data) {
@@ -52,7 +55,7 @@ export async function create_user(data) {
         headers: HEADERS.Text,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/register`, options);
+    return await fetchWrapper('register', options);
 }
 
 export async function login(email, password) {
@@ -66,7 +69,7 @@ export async function login(email, password) {
         headers: HEADERS.Text,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/login`, options);
+    return await fetchWrapper('login', options);
 }
 
 export async function send_password_reset_request(email) {
@@ -78,7 +81,7 @@ export async function send_password_reset_request(email) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/reset_password_request`, options);
+    return await fetchWrapper('reset_password_request', options);
 }
 
 export async function fetch_customers(session) {
@@ -89,8 +92,9 @@ export async function fetch_customers(session) {
         body: json,
         method: 'post',
         headers: HEADERS.ApplicationJson,
+        credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/fetch_customers`, options);
+    return await fetchWrapper('fetch_customers', options);
 }
 
 export async function fetch_unused_plants(sorter) {
@@ -102,7 +106,7 @@ export async function fetch_unused_plants(sorter) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_unused_plants`, options);
+    return await fetchWrapper('fetch_unused_plants', options);
 }
 
 export async function fetch_inventory(sorter, page_size, admin) {
@@ -116,7 +120,7 @@ export async function fetch_inventory(sorter, page_size, admin) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_inventory`, options);
+    return await fetchWrapper('fetch_inventory', options);
 }
 
 export async function fetch_inventory_filters() {
@@ -124,7 +128,7 @@ export async function fetch_inventory_filters() {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_inventory_filters`, options);
+    return await fetchWrapper('fetch_inventory_filters', options);
 }
 
 export async function fetch_inventory_page(ids) {
@@ -136,7 +140,7 @@ export async function fetch_inventory_page(ids) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_inventory_page`, options);
+    return await fetchWrapper('fetch_inventory_page', options);
 }
 
 export async function fetch_gallery() {
@@ -144,7 +148,7 @@ export async function fetch_gallery() {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_gallery`, options);
+    return await fetchWrapper('fetch_gallery', options);
 }
 
 export async function upload_gallery_images(formData) {
@@ -152,7 +156,7 @@ export async function upload_gallery_images(formData) {
         body: formData,
         method: 'post',
     }
-    return await fetchWrapper(`${PREFIX}/upload_gallery_image`, options);
+    return await fetchWrapper('upload_gallery_image', options);
 }
 
 export async function upload_availability(formData) {
@@ -160,7 +164,7 @@ export async function upload_availability(formData) {
         body: formData,
         method: 'post',
     }
-    return await fetchWrapper(`${PREFIX}/upload_availability`, options);
+    return await fetchWrapper('upload_availability', options);
 }
 
 export async function fetch_contact_info() {
@@ -168,7 +172,7 @@ export async function fetch_contact_info() {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_contact_info`, options);
+    return await fetchWrapper('fetch_contact_info', options);
 }
 
 export async function update_contact_info(data) {
@@ -180,7 +184,7 @@ export async function update_contact_info(data) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/update_contact_info`, options);
+    return await fetchWrapper('update_contact_info', options);
 }
 
 export async function fetch_profile_info(session) {
@@ -193,7 +197,7 @@ export async function fetch_profile_info(session) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/fetch_profile_info`, options);
+    return await fetchWrapper('fetch_profile_info', options);
 }
 
 export async function fetch_likes(session) {
@@ -206,7 +210,7 @@ export async function fetch_likes(session) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/fetch_likes`, options);
+    return await fetchWrapper('fetch_likes', options);
 }
 
 export async function fetch_cart(session) {
@@ -219,7 +223,7 @@ export async function fetch_cart(session) {
         headers: HEADERS.ApplicatonJsonAccept,
         credentials: 'include',
     }
-    return await fetchWrapper(`${PREFIX}/fetch_cart`, options);
+    return await fetchWrapper('fetch_cart', options);
 }
 
 export async function set_like_sku(session, sku, liked) {
@@ -233,8 +237,9 @@ export async function set_like_sku(session, sku, liked) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/set_like_sku`, options);
+    return await fetchWrapper('set_like_sku', options);
 }
 
 export async function set_order_status(session, id, status) {
@@ -247,8 +252,9 @@ export async function set_order_status(session, id, status) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/set_order_status`, options);
+    return await fetchWrapper('set_order_status', options);
 }
 
 export async function update_cart(session, who, cart) {
@@ -261,8 +267,9 @@ export async function update_cart(session, who, cart) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/update_cart`, options);
+    return await fetchWrapper('update_cart', options);
 }
 
 export async function modify_sku(session, sku, operation, data) {
@@ -276,8 +283,9 @@ export async function modify_sku(session, sku, operation, data) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'indlude'
     }
-    return await fetchWrapper(`${PREFIX}/modify_sku`, options);
+    return await fetchWrapper('modify_sku', options);
 }
 
 export async function modify_plant(session, operation, data) {
@@ -291,8 +299,9 @@ export async function modify_plant(session, operation, data) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/modify_plant`, options);
+    return await fetchWrapper('modify_plant', options);
 }
 
 export async function modify_user(session, id, operation) {
@@ -305,8 +314,9 @@ export async function modify_user(session, id, operation) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/modify_user`, options);
+    return await fetchWrapper('modify_user', options);
 }
 
 export async function submit_order(session, cart) {
@@ -318,8 +328,9 @@ export async function submit_order(session, cart) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/submit_order`, options);
+    return await fetchWrapper('submit_order', options);
 }
 
 export async function fetch_orders(session, status) {
@@ -331,8 +342,9 @@ export async function fetch_orders(session, status) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/fetch_orders`, options);
+    return await fetchWrapper('fetch_orders', options);
 }
 
 export async function fetch_image(id, size) {
@@ -345,7 +357,7 @@ export async function fetch_image(id, size) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_image`, options);
+    return await fetchWrapper('fetch_image', options);
 }
 
 export async function fetch_images(ids, size) {
@@ -358,7 +370,7 @@ export async function fetch_images(ids, size) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper(`${PREFIX}/fetch_images`, options);
+    return await fetchWrapper('fetch_images', options);
 }
 
 export async function update_profile(session, data) {
@@ -370,6 +382,7 @@ export async function update_profile(session, data) {
         body: json,
         method: 'post',
         headers: HEADERS.Text,
+        credentials: 'include'
     }
-    return await fetchWrapper(`${PREFIX}/update_profile`, options);
+    return await fetchWrapper('update_profile', options);
 }
