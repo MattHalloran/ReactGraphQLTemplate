@@ -736,7 +736,7 @@ class User(db.Model):
 
     LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3
     SOFT_LOCKOUT_DURATION_SECONDS = 15*60
-    LOGIN_ATTEMPS_TO_HARD_LOCKOUT = 10
+    LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10
 
     def __init__(self,
                  first_name: str,

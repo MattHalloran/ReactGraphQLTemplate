@@ -513,7 +513,6 @@ class OrderHandler(Handler):
     @classmethod
     def to_dict(cls, model: Order):
         model = cls.convert_to_model(model)
-        print(f'ORDER IS_DELIVERY: {model.is_delivery}')
         as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'is_delivery', 'desired_delivery_date'])
         as_dict['id'] = model.id
         as_dict['items'] = OrderItemHandler.all_dicts(model.items)
@@ -540,7 +539,7 @@ class OrderHandler(Handler):
     def update_from_dict(cls, obj, data: dict):
         items_data = data['items']
         if len(items_data) == 0:
-            OrderHandler.empty_order()
+            OrderHandler.empty_order(obj)
         else:
             # Any item without an id is new, so we can track all ids in the dict
             # to determine which items have been deleted
@@ -1008,11 +1007,12 @@ class UserHandler(Handler):
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
                bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
+                user.account_status = AccountStatus.UNLOCKED.value
                 user.login_attempts = 0  # Reset login attemps
                 db.session.commit()
                 print('Found user')
                 return user
-            if user.login_attempts > User.LOGIN_ATTEMPS_TO_HARD_LOCKOUT:
+            if user.login_attempts > User.LOGIN_ATTEMPTS_TO_HARD_LOCKOUT:
                 print(f'Hard-locking user {email}')
                 user.account_status = AccountStatus.HARD_LOCK.value
                 db.session.commit()
@@ -1112,7 +1112,7 @@ class UserHandler(Handler):
         if user is None or not UserHandler.is_customer(user):
             return None
         cart = None
-        if len(user.orders) == 0:
+        if len(user.orders) == 0 or user.orders[-1].status != OrderStatus['DRAFT']:
             cart = OrderHandler.create(user.id)
             db.session.add(cart)
             user.orders.append(cart)
@@ -1146,4 +1146,6 @@ class UserHandler(Handler):
         db.session.add(cart)
         user.orders.append(cart)
         db.session.commit()
+        print('Order submitted')
+        print(user.orders)
         return True
