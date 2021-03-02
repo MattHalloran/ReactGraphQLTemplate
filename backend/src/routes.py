@@ -554,6 +554,7 @@ def update_cart():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     cart_obj = OrderHandler.from_id(cart['id'])
     if cart_obj is None:
+        print('Error: Could not find cart')
         return StatusCodes['ERROR_UNKNOWN']
     OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
