@@ -11,7 +11,7 @@ function FormPage({
     return (
         <StyledFormPage theme={theme} maxWidth={maxWidth}>
             <form className="form">
-                <div className="form-header">
+                <div className="header">
                     <h1>{header}</h1>
                 </div>
                 <div className="form-body">

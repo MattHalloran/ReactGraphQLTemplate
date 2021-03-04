@@ -1,15 +1,14 @@
 // Global menu that is accessible from all pages
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
-import ClickOutside from 'components/wrappers/ClickOutside/ClickOutside';
 import { getTheme } from 'utils/storage';
+import { Portal } from 'components/Portal/Portal';
 
 function BurgerMenu({
     theme = getTheme(),
@@ -21,7 +20,6 @@ function BurgerMenu({
 
     useEffect(() => {
         let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
-            console.log('I GOTTA PEEE', b)
             setOpen(open => b === 'toggle' ? !open : b);
         });
         return (() => {
@@ -43,16 +41,16 @@ function BurgerMenu({
     return (
         <StyledBurgerMenu theme={theme} open={open} {...props}>
             <div id="overlay" />
-            <ClickOutside {...props} active={open} on_click_outside={closeMenu} >
-                <div className="burger" onClick={toggleOpen}>
-                    <div />
-                    <div />
-                    <div />
-                </div>
+            <div className="burger" onClick={toggleOpen}>
+                <div />
+                <div />
+                <div />
+            </div>
+            <Portal>
                 <MenuContainer open={open} closeMenu={closeMenu}>
                     {children}
                 </MenuContainer>
-            </ClickOutside>
+            </Portal>
         </StyledBurgerMenu>
     );
 }

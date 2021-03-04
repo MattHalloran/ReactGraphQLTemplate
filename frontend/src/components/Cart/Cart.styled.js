@@ -9,8 +9,8 @@ export const StyledCart = styled.div`
         margin-left: 20px;
         margin-right: 20px;
         border-collapse: collapse;
-        border: 2px solid ${({ theme }) => theme.textPrimary};
-        background-color: ${({ theme }) => theme.bodySecondary};
+        border: 2px solid ${({ theme }) => theme.primaryText};
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
     }
 
     .cart-image {
@@ -23,7 +23,7 @@ export const StyledCart = styled.div`
     }
 
     tr {
-        border-bottom: 1px solid ${({ theme }) => theme.textPrimary};
+        border-bottom: 1px solid ${({ theme }) => theme.primaryText};
     }
 
     .product-row {
@@ -32,7 +32,7 @@ export const StyledCart = styled.div`
 
         > svg {
             stroke: none;
-            fill: ${({ theme }) => theme.textPrimary};
+            fill: ${({ theme }) => theme.primaryText};
             margin: 0 5px 0 5px
         }
     }

@@ -13,11 +13,12 @@ export const StyledFormPage = styled.div`
     .form {
         display: grid;
         position: relative;
-        background-color: ${({ theme }) => theme.bodySecondary};
+        background-color: ${({ theme }) => theme.lightPrimaryColor};
+        box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
         min-width: 300px;
         max-width: ${({ maxWidth }) => maxWidth};
-        border: 4px solid black;
         border-radius: 10px;
+        overflow: hidden;
         left: 50%;
         transform: translateX(-50%);
         margin-bottom: 20px;
@@ -31,13 +32,6 @@ export const StyledFormPage = styled.div`
             margin-left: 5px;
             margin-right: 5px;
         }
-    }
-
-    .form-header {
-        background-color: rgba(0, 0, 0, .6);
-        padding: 1em 0.5em 0.5em 1em;
-        text-align: center;
-        border-radius: 5px 5px 0 0;
     }
 
     .form-header-text {

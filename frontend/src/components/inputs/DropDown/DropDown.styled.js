@@ -88,7 +88,7 @@ export const StyledDropDown = styled.div`
     }
     
     .DropDown-option {
-        background-color: ${({ theme }) => theme.bodySecondary};
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
         border-bottom: 1px solid darkgreen;
         box-sizing: border-box;
         cursor: pointer;
@@ -102,7 +102,7 @@ export const StyledDropDown = styled.div`
     }
     
     .DropDown-option:hover {
-        background-color: ${({ theme }) => theme.hoverPrimary};
+        background-color: ${({ theme }) => theme.secondaryText};
         color: #333;
     }
     

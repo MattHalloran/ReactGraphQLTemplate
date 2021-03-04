@@ -260,11 +260,11 @@ function PlantCard({
     if (thumbnail) {
         display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
-        display_image = <NoImageIcon className="display-image" />
+        display_image = <NoImageIcon className="display-image image-not-found" />
     }
 
     return (
-        <StyledPlantCard theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
+        <StyledPlantCard className="card" theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
             <div className="title">
                 <h2>{plant.latin_name}</h2>
                 <h3>{plant.common_name}</h3>

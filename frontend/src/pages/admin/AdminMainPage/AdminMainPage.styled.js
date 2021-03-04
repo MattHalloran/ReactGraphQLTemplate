@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 export const StyledAdminMainPage = styled.div`
+    color: ${({ theme }) => theme.headerText};
+
     .flexed {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -15,6 +17,7 @@ export const StyledAdminMainPage = styled.div`
         min-height: 50px;
         border: 1px solid #ccc;
         border-radius: 1em;
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
     }
 
     .admin-card:hover {

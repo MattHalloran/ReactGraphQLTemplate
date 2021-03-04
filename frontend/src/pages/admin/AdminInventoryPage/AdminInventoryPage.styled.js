@@ -3,19 +3,16 @@ import styled from 'styled-components';
 export const StyledAdminInventoryPage = styled.div`
     .card-flex {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        align-items: stretch;
     }
 `;
 
 export const StyledCard = styled.div`
     position: relative;
-    background-color: ${({ theme }) => theme.bodySecondary};
-    color: black;
     margin: 20px;
-    padding: 10px;
     min-width: 150px;
     min-height: 50px;
-    border-radius: 1em;
     cursor: pointer;
 
     .deleted {
@@ -43,10 +40,23 @@ export const StyledCard = styled.div`
         z-index: 2;
     }
 
-    img {
+    .display-image {
         display: block;
-        max-width: 100%;
+        position: absolute;
+        width: 100%;
         max-height: 100%;
+        bottom: 0%;
+    }
+
+    .image-not-found {
+        bottom: -30%;
+    }
+
+    .display-image-container {
+        width: 100%;
+        position: relative; /* Ensures 1:1 Aspect Ratio */
+        height: 0; /* Ensures 1:1 Aspect Ratio */
+        padding-top: 100%; /* Ensures 1:1 Aspect Ratio */
     }
 
     .size-container {
@@ -56,7 +66,7 @@ export const StyledCard = styled.div`
 
         > * {
             display: inline-block;
-            background-color: cornflowerblue;
+            background-color: ${({ theme }) => theme.accentColor};
             border: 1px solid black;
             border-radius: 10px;
             max-width: 100px;
@@ -67,7 +77,7 @@ export const StyledCard = styled.div`
 `;
 
 export const StyledPlantPopup = styled.div`
-    background: ${({ theme }) => theme.bodyPrimary};
+    background: ${({ theme }) => theme.primaryColor};
     display: block;
     padding: 1em;
     padding-left: calc(150px + 1em);
@@ -83,20 +93,20 @@ export const StyledPlantPopup = styled.div`
         z-index: 1;
         top: 0;
         left: 0;
-        border-right: 2px solid ${({ theme }) => theme.textPrimary};
+        border-right: 2px solid ${({ theme }) => theme.primaryText};
         overflow-x: hidden;
 
         .sku-list {
             max-height: 80%;
             overflow-y: scroll;
-            border-top: 2px solid ${({ theme }) => theme.textPrimary};
-            border-bottom: 2px solid ${({ theme }) => theme.textPrimary};
+            border-top: 2px solid ${({ theme }) => theme.primaryText};
+            border-bottom: 2px solid ${({ theme }) => theme.primaryText};
 
             .sku-option {
                 cursor: pointer;
                 overflow-wrap: anywhere;
                 padding-bottom: 3px;
-                border-bottom: 1px solid ${({ theme }) => theme.textPrimary};
+                border-bottom: 1px solid ${({ theme }) => theme.primaryText};
             }
 
             .selected {
@@ -120,7 +130,7 @@ export const StyledPlantPopup = styled.div`
 
     .plant-info-div {
         max-height: 60%;
-        border-bottom: 3px solid ${({ theme }) => theme.textPrimary};
+        border-bottom: 3px solid ${({ theme }) => theme.primaryText};
     }
 
     .sku-info-div {

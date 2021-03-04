@@ -29,7 +29,8 @@ export const StyledMenuContainer = styled.nav`
   display: block;
   flex-direction: column;
   justify-content: center;
-  background: ${({ theme }) => theme.bodySecondary};
+  background: ${({ theme }) => theme.darkPrimaryColor};
+  color: ${({ theme }) => theme.headerText};
   height: 100vh;
   text-align: center;
   overflow: scroll;
@@ -58,7 +59,7 @@ export const StyledMenuContainer = styled.nav`
     }
 
     &:hover {
-      color: ${({ theme }) => theme.hoverPrimary};
+      color: ${({ theme }) => theme.secondaryText};
     }
   }
 `;

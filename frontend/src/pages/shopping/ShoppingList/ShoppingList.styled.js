@@ -13,20 +13,9 @@ export const StyledShoppingList = styled.div`
 
 export const StyledPlantCard = styled.div`
     position: relative;
-    background-color: ${({ theme }) => theme.bodySecondary};
-    color: black;
     margin: 10px;
-    padding: 10px;
     min-width: 150px;
     min-height: 50px;
-    border: 1px solid black;
-    border-radius: 10px;
-    transition: 0.3s;
-
-    :hover {
-        box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
-        border: 1px solid ${({ theme }) => theme.textPrimary};
-    }
 
     .title {
         position: absolute;
@@ -34,7 +23,6 @@ export const StyledPlantCard = styled.div`
         text-align: center;
         background-color: rgba(0,0,0,.4);
         padding: 0.5em 0 0.5em 0;
-        border-radius: 10px 10px 0 0;
         left: 0;
         top: 0;
         z-index: 2;
@@ -58,7 +46,7 @@ export const StyledPlantCard = styled.div`
 
         > * {
             display: inline-block;
-            background-color: cornflowerblue;
+            background-color: ${({ theme }) => theme.accentColor};
             border: 1px solid black;
             border-radius: 10px;
             max-width: 100px;
@@ -75,8 +63,11 @@ export const StyledPlantCard = styled.div`
         bottom: 0%;
     }
 
+    .image-not-found {
+        bottom: -30%;
+    }
+
     .display-image-container {
-        border: 1px solid black;
         width: 100%;
         position: relative; /* Ensures 1:1 Aspect Ratio */
         height: 0; /* Ensures 1:1 Aspect Ratio */
@@ -85,7 +76,8 @@ export const StyledPlantCard = styled.div`
 `;
 
 export const StyledExpandedPlant = styled.div`
-    background-color: ${({ theme }) => theme.bodySecondary};
+    background-color: ${({ theme }) => theme.darkPrimaryColor};
+    color: ${({ theme }) => theme.headerText};
     display: block;
     width: -webkit-fill-available;
     width: -moz-available;
@@ -138,16 +130,15 @@ export const StyledExpandedPlant = styled.div`
 
     .description-container {
         overflow-y: auto;
-        border-top: 2px solid ${({ theme }) => theme.textPrimary};
-        border-bottom: 2px solid ${({ theme }) => theme.textPrimary};
+        border-top: 2px solid ${({ theme }) => theme.primaryText};
+        border-bottom: 2px solid ${({ theme }) => theme.primaryText};
     }
 
     .title {
-        position: absolute;
+        position: relative;
         width: 100%;
         text-align: center;
         background-color: rgba(0,0,0,.4);
-        border-radius: 10px 10px 0 0;
         padding: 0.5em 0 0.5em 0;
 
         h2 {
@@ -191,10 +182,10 @@ export const StyledExpandedPlant = styled.div`
 
     .bottom-div {
         height: 15%;
-        bottom: 0;
+        bottom: 5px;
         width: -webkit-fill-available;
         width: -moz-available;
-        background: ${({ theme }) => theme.bodyPrimary};
+        background: ${({ theme }) => theme.primaryColor};
         position: absolute;
         border-radius: 0 0 5px 5px;
         -webkit-align-items: center;
@@ -202,11 +193,11 @@ export const StyledExpandedPlant = styled.div`
         -ms-flex-align: center;
         align-items: center;
         padding: 5px 10px;
-        border-top: 2px solid ${({ theme }) => theme.textPrimary};
+        border-top: 2px solid ${({ theme }) => theme.primaryText};
 
         > svg {
             stroke: none;
-            fill: ${({ theme }) => theme.textPrimary};
+            fill: ${({ theme }) => theme.headerText};
         }
 
         > *:first-child {

@@ -18,8 +18,9 @@ export const StyledDots = styled.div`
     }
 
     .active {
-        background: lightgreen;
-        border: 1px solid white;
+        background-color: ${({ theme }) => theme.primaryColor};
+        opacity: 0.9;
+        border: 1px solid ${({ theme }) => theme.textPrimary};
     }
 
     .inactive {

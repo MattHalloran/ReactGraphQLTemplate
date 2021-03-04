@@ -24,7 +24,9 @@ function AdminMainPage({
 
     return (
         <StyledAdminMainPage className="page" theme={theme}>
-            <h1>Admin Portal</h1>
+            <div className="header">
+                <h1>Admin Portal</h1>
+            </div>
             <div className="flexed">
                 {card_data.map(([link, title, description]) => (
                     <div className="admin-card"

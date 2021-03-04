@@ -4,8 +4,8 @@ export const StyledPopupMenu = styled.div`
    .popup-menu-container {
         position: absolute;
         display: grid;
-        border: 2px solid ${({ theme }) => theme.textPrimary};
-        background-color: ${({ theme }) => theme.bodySecondary};
+        border: 2px solid ${({ theme }) => theme.primaryText};
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
         border-radius: 0 0 5px 5px;
         padding: 2px;
    }

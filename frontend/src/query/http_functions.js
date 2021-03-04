@@ -1,5 +1,4 @@
-const IP = 'localhost'; //'192.81.213.223';
-const PORT = '5000';
+const IP = 'newlifenurseryinc.com';
 // URL prefix used to signify calls to backend
 const PREFIX = 'api';
 // Headers used by fetch calls
@@ -22,7 +21,7 @@ const HEADERS = {
 // httpParams - object containing fetch options
 async function fetchWrapper(route, httpParams) {
     try {
-        let response = await fetch(`http://${IP}:${PORT}/${PREFIX}/${route}`, httpParams);
+        let response = await fetch(`https://${IP}/${PREFIX}/${route}`, httpParams);
         let json = await response.json();
         return json;
     } catch (err) {
@@ -377,6 +376,7 @@ export async function update_profile(session, data) {
         "session": session,
         "data": data
     });
+    console.log('UPDATING PROFILE WITH', data)
     let options = {
         body: json,
         method: 'post',

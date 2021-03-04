@@ -11,8 +11,8 @@ export const StyledModal = styled.aside`
 
     .modal-body {
         display: flex;
-        background-color: ${({ theme }) => theme.bodySecondary};
-        color: ${({ theme }) => theme.textSecondary};
+        background-color: transparent;
+        color: ${({ theme }) => theme.secondaryText};
         box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
         position: fixed;
         left: 50%;
@@ -22,14 +22,16 @@ export const StyledModal = styled.aside`
         max-height: calc(100% - 50px);
         width: fit-content;
         height: fit-content;
-        border: 3px solid ${({ theme }) => theme.textPrimary};
-        border-radius: 10px;
     }
 
     .body-children {
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 10px;
+        overflow: hidden;
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
+        color: ${({ theme }) => theme.backgroundColor};
+        border: 3px solid ${({ theme }) => theme.primaryText};
         width: -moz-available;
         width: -webkit-fill-available;
     }
@@ -56,7 +58,7 @@ export const StyledModal = styled.aside`
     width: 25px;
     height: 25px;
     fill: transparent;
-    stroke: ${({ theme }) => theme.textPrimary};
+    stroke: ${({ theme }) => theme.headerText};
     stroke-linecap: round;
     stroke-width: 3;
     }

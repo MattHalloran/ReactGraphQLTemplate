@@ -259,13 +259,15 @@ function PlantCard({
     if (thumbnail) {
         display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
-        display_image = <NoImageIcon className="display-image" />
+        display_image = <NoImageIcon className="display-image image-not-found" />
     }
 
     return (
-        <StyledCard theme={theme} onClick={onEdit}>
+        <StyledCard className="card" theme={theme} onClick={onEdit}>
             <h2 className="title">{plant.latin_name}</h2>
-            { display_image}
+            <div className="display-image-container">
+                {display_image}
+            </div>
             <div className="size-container">
                 {sizes}
             </div>

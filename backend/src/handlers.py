@@ -1082,6 +1082,7 @@ class UserHandler(Handler):
         user.first_name = data.get('first_name', user.first_name)
         user.last_name = data.get('last_name', user.last_name)
         user.pronouns = data.get('pronouns', user.pronouns)
+        user.theme = data.get('theme', user.theme)
         # TODO fix for multiple emails and phones
         # if emails := data.get('emails', None):
         #     success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success

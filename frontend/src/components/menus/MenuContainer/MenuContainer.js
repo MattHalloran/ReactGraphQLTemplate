@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import { StyledMenuContainer } from './MenuContainer.styled';
 import { getTheme } from 'utils/storage';
+import ClickOutside from 'components/wrappers/ClickOutside/ClickOutside';
 
 function MenuContainer({
-    theme=getTheme(),
+    theme = getTheme(),
     side = 'right',
     open = false,
     closeMenu,
@@ -29,16 +30,18 @@ function MenuContainer({
     }
 
     return (
-        <StyledMenuContainer
-            theme={theme}
-            side={side}
-            open={open}
-            {...props}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}>
+        <ClickOutside active={open} on_click_outside={closeMenu} >
+            <StyledMenuContainer
+                theme={theme}
+                side={side}
+                open={open}
+                {...props}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchMove}>
                 {children}
-        </StyledMenuContainer>
+            </StyledMenuContainer>
+        </ClickOutside>
     );
 }
 

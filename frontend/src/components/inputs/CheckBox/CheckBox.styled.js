@@ -33,6 +33,6 @@ export const StyledCheckBox = styled.div`
     .label {
         position: relative;
         top: 2px;
-        color: ${({ theme }) => theme.textPrimary};
+        color: ${({ theme }) => theme.primaryText};
     }
 `;

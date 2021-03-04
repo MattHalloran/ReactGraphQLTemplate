@@ -105,7 +105,7 @@ export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
         http.login(email, password).then(data => {
             if (data.ok) {
-                console.log('LOGIN OKAY')
+                console.log('LOGIN OKAY', data.user)
                 login({email: email, token: data.token}, data.user);
                 resolve(data);
             } else {

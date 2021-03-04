@@ -105,15 +105,15 @@ function Hamburger(props) {
                 ))}
                 <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
             </div>
-            <Collapsible title="Contact" initial_open={true}>
+            <Collapsible contentClassName='' title="Contact" initial_open={true}>
                 <ContactInfo />
             </Collapsible>
             { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link to={link} onClick={onClick}>{text}</Link></p>
             ))}
             <div className="bottom">
-                <SocialIcon fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-                <SocialIcon fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+                <SocialIcon fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+                <SocialIcon fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>
             <p>
                 &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link to={LINKS.Terms}>Terms & Conditions</Link>
@@ -142,7 +142,6 @@ function NavList() {
     // Link, Link text, onClick function
     let nav_options = [];
     let about_options = [];
-    console.log('IN NAVLIST', session, user_roles)
 
     if (session !== null) {
         nav_options.push([LINKS.Shopping, 'Availability']);

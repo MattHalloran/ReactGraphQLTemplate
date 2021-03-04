@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import InputText from 'components/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { getProfileInfo, updateProfile } from 'query/http_promises';
-import { getSession } from 'utils/storage';
+import { getSession, setTheme } from 'utils/storage';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
@@ -44,12 +44,13 @@ function ProfileForm(props) {
     const [emailErrors, setEmailErrors] = useState(null);
     const [phones, setPhones] = useState([""])
     const [phoneErrors, setPhoneErrors] = useState(null);
+    const [isLightTheme, setIsLightTheme] = useState(null);
     const [existingCustomer, setExistingCustomer] = useState(null);
     const [existingCustomerError, setExistingCustomerError] = useState(null);
 
     useEffect(() => {
-        console.log('PRONOUNS ARE', pronouns)
-    }, [pronouns])
+        console.log('THEME IS', isLightTheme ? 'light': 'dark')
+    }, [isLightTheme])
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
@@ -119,7 +120,8 @@ function ProfileForm(props) {
             "pronouns": pronouns,
             "emails": emails,
             "phones": phones,
-            "existing_customer": existingCustomer
+            "existing_customer": existingCustomer,
+            "theme": isLightTheme ? 'light' : 'dark',
         }
         if (password !== '')
             data.password = password;
@@ -138,8 +140,13 @@ function ProfileForm(props) {
         console.log('TODO')
     }
 
-    const handleRadioSelect = (event) => {
-        setExistingCustomer(event.target.value);
+    const handleThemeSelect = (event) => {
+        setIsLightTheme(event.target.value == 'true');
+        setTheme(event.target.value === 'true' ? 'light' : 'dark');
+    }
+
+    const handleCustomerSelect = (event) => {
+        setExistingCustomer(event.target.value == 'true');
     }
 
     return (
@@ -211,9 +218,16 @@ function ProfileForm(props) {
                     />
                 ))}
                 <FormControl component="fieldset">
-                    <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
-                        <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                        <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                    <RadioGroup aria-label="theme-check" name="theme-check" value={isLightTheme} onChange={handleThemeSelect}>
+                        <FormControlLabel value={true} control={<Radio />} label="Light Theme" />
+                        <FormControlLabel value={false} control={<Radio />} label="Dark Theme" />
+                    </RadioGroup>
+                    <FormHelperText>{existingCustomerError}</FormHelperText>
+                </FormControl>
+                <FormControl component="fieldset">
+                    <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleCustomerSelect}>
+                        <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
+                        <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
                     </RadioGroup>
                     <FormHelperText>{existingCustomerError}</FormHelperText>
                 </FormControl>
