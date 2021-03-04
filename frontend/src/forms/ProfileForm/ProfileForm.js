@@ -61,7 +61,7 @@ function ProfileForm(props) {
         let mounted = true;
         document.title = `Profile | ${BUSINESS_NAME}`;
         if (!session) return;
-        getProfileInfo(session).then(response => {
+        getProfileInfo(session, session.email).then(response => {
             console.log('GOT PROFILE INFOO!!!!!!', response);
             if (!mounted || editing) return;
             let user = response.user;

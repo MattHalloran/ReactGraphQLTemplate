@@ -418,10 +418,14 @@ def update_contact_info():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_profile_info():
-    (session) = getJson('session')
+    '''Fetches profile info for a customer'''
+    (session, email) = getJson('session', 'email')
+    # Only admins can view information for other profiles
+    if email != session['email'] and not verify_admin(session):
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     if not verify_customer(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
-    user_data = UserHandler.get_profile_data(session['email'])
+    user_data = UserHandler.get_profile_data(email)
     if user_data is None:
         print('FAILEDDDD')
         return StatusCodes['ERROR_UNKNOWN']

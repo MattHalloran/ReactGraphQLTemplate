@@ -31,7 +31,7 @@ function Hero({
                     {subtext}
                 </h2>
                 <Link to="/shopping">
-                    <Button className="primary">Order now</Button>
+                    <Button className="primary">Request Quote</Button>
                 </Link>
             </div>
         </StyledHero>

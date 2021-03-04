@@ -32,7 +32,7 @@ export const getImage = (id, size) => promiseWrapper(http.fetch_image, id, size)
 export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, size);
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
-export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
+export const getProfileInfo = (session, email) => promiseWrapper(http.fetch_profile_info, session, email);
 export const updateProfile = (session, data) => promiseWrapper(http.update_profile, session, data);
 export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
 export const getCart = (session) => promiseWrapper(http.fetch_cart, session);

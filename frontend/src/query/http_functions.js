@@ -185,9 +185,10 @@ export async function update_contact_info(data) {
     return await fetchWrapper('update_contact_info', options);
 }
 
-export async function fetch_profile_info(session) {
+export async function fetch_profile_info(session, email) {
     let json = JSON.stringify({
         "session": session,
+        "email": email,
     });
     let options = {
         body: json,

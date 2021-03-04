@@ -522,6 +522,9 @@ class OrderHandler(Handler):
             "id": customer.id,
             "first_name": customer.first_name,
             "last_name": customer.last_name,
+            "pronouns": customer.pronouns,
+            "emails": EmailHandler.all_dicts(customer.personal_email),
+            "phones": PhoneHandler.all_dicts(customer.personal_phone),
         }
         print(as_dict)
         return as_dict
@@ -953,6 +956,8 @@ class UserHandler(Handler):
         as_dict['id'] = model.id
         as_dict['account_status'] = model.account_status
         as_dict['roles'] = RoleHandler.all_dicts(model.roles)
+        as_dict['emails'] = EmailHandler.all_dicts(model.personal_email)
+        as_dict['phones'] = PhoneHandler.all_dicts(model.personal_phone)
         if len(model.orders) > 0:
             as_dict['cart'] = OrderHandler.to_dict(UserHandler.get_cart(model))
         else:
