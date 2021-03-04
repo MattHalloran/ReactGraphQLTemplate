@@ -1,4 +1,4 @@
-const IP = 'newlifenurseryinc.com';
+const IP = 'http://localhost:5000';//https://newlifenurseryinc.com';
 // URL prefix used to signify calls to backend
 const PREFIX = 'api';
 // Headers used by fetch calls
@@ -21,7 +21,7 @@ const HEADERS = {
 // httpParams - object containing fetch options
 async function fetchWrapper(route, httpParams) {
     try {
-        let response = await fetch(`https://${IP}/${PREFIX}/${route}`, httpParams);
+        let response = await fetch(`${IP}/${PREFIX}/${route}`, httpParams);
         let json = await response.json();
         return json;
     } catch (err) {
