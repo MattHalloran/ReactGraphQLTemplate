@@ -19,6 +19,7 @@ function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
+    showUnavailable,
     searchString = '',
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
@@ -92,6 +93,19 @@ function ShoppingList({
 
     // Determine which skus will be visible to the user (i.e. not filtered out)
     useEffect(() => {
+        //First, determine if plants without availability shall be shown
+        let visible_plants = loaded_plants;
+        if (!showUnavailable) {
+            visible_plants = loaded_plants.filter(plant => {
+                if (plant.skus.length === 0) return true;
+                return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
+            })
+        }
+        //Now, filter out everything that doesn't match the search string
+        if (searchString.length > 0) {
+            let search = searchString.trim().toLowerCase();
+            visible_plants = visible_plants.filter(plant => plant.latin_name?.toLowerCase().includes(search) || plant.common_name?.toLowerCase().includes(search));
+        }
         //Find all applied filters
         let applied_filters = [];
         for (const key in filters) {
@@ -106,13 +120,14 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length == 0) {
-            setPlants(loaded_plants);
+            console.log('SETTING PLANTS', visible_plants);
+            setPlants(visible_plants);
             return;
         }
         //Select all plants that contain the filters
         let filtered_plants = [];
-        for (let i = 0; i < loaded_plants.length; i++) {
-            let curr_plant = loaded_plants[i];
+        for (let i = 0; i < visible_plants.length; i++) {
+            let curr_plant = visible_plants[i];
             filterloop:
             for (let j = 0; j < applied_filters.length; j++) {
                 let trait = applied_filters[j][0];
@@ -138,7 +153,7 @@ function ShoppingList({
             }
         }
         setPlants(filtered_plants);
-    }, [loaded_plants, filters])
+    }, [loaded_plants, filters, searchString, showUnavailable])
 
     const loadNextPage = useCallback(() => {
         console.log('AAAAAAAA', loaded_plants, all_plant_ids)
@@ -189,7 +204,7 @@ function ShoppingList({
             return;
         }
         let cart_copy = JSON.parse(JSON.stringify(cart));
-        cart_copy.items.push({'sku': sku.sku, 'quantity':quantity});
+        cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
         updateCart(session, session.email, cart_copy)
             .then(() => {
                 if (operation === 'ADD')
@@ -253,7 +268,7 @@ function PlantCard({
     const [theme] = useState(getTheme());
 
     let sizes = plant.skus.map(s => (
-        <div>Size: #{s.size}<br/>Price: {displayPrice(s.price)}<br/>Avail: {s.availability}</div>
+        <div>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
     ));
 
     let display_image;
@@ -304,7 +319,7 @@ function ExpandedPlant({
         }).catch(error => {
             console.error(error);
         })
-    },[])
+    }, [])
 
     let order_options = plant.skus?.map(s => {
         return {
@@ -352,41 +367,45 @@ function ExpandedPlant({
                 <h3>{plant.common_name}</h3>
             </div>
             <div className="main-div">
-                {display_image}
-                {plant.description ?
-                    <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
-                        <p>{plant.description}</p>
+                <div className="floating-half">
+                    {display_image}
+                </div>
+                <div className="floating-half">
+                    {plant.description ?
+                        <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
+                            <p>{plant.description}</p>
+                        </Collapsible>
+                        : null}
+                    <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
+                        <div className="sku">
+                            {/* TODO availability, sizes */}
+                        </div>
+                        <div className="general">
+                            <p>General</p>
+                            {traitIconList("zones", MapIcon, "Zones")}
+                            {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+                            {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                            {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
+                            {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+                        </div>
+                        <div className="bloom">
+                            <p>Bloom</p>
+                            {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
+                            {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+                        </div>
+                        <div className="light">
+                            <p>Light</p>
+                            {traitIconList("light_ranges", RangeIcon, "Light Range")}
+                            {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+                        </div>
+                        <div className="soil">
+                            <p>Soil</p>
+                            {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
+                            {traitIconList("soil_phs", PHIcon, "Soil PH")}
+                            {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
+                        </div>
                     </Collapsible>
-                    : null}
-                <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
-                    <div className="sku">
-                        {/* TODO availability, sizes */}
-                    </div>
-                    <div className="general">
-                        <p>General</p>
-                        {traitIconList("zones", MapIcon, "Zones")}
-                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                    </div>
-                    <div className="bloom">
-                        <p>Bloom</p>
-                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                    </div>
-                    <div className="light">
-                        <p>Light</p>
-                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                    </div>
-                    <div className="soil">
-                        <p>Soil</p>
-                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                    </div>
-                </Collapsible>
+                </div>
             </div>
             <div className="icon-container bottom-div">
                 <div className="selecter">

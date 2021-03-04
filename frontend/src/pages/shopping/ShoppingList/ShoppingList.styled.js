@@ -59,7 +59,8 @@ export const StyledPlantCard = styled.div`
         display: block;
         position: absolute;
         width: 100%;
-        max-height: 100%;
+        height: 100%;
+        object-fit: cover;
         bottom: 0%;
     }
 
@@ -83,18 +84,12 @@ export const StyledExpandedPlant = styled.div`
     width: -moz-available;
     height: 100%;
     min-width: 60vw;
+    overflow-y: scroll;
 
     .main-div {
         padding-bottom: 30%;
         width: -webkit-fill-available;
         width: -moz-available;
-    }
-
-    .display-image {
-        display: inline-block;
-        top: 0%;
-        width: fit-content;
-        object-fit: cover;
     }
 
     .trait-list {
@@ -141,7 +136,7 @@ export const StyledExpandedPlant = styled.div`
         background-color: rgba(0,0,0,.4);
         padding: 0.5em 0 0.5em 0;
 
-        h2 {
+        h1 {
             margin: 0;
             font-size: 1.3em;
         }
@@ -154,10 +149,9 @@ export const StyledExpandedPlant = styled.div`
     }
 
     img {
-        max-height: 40vh;
+        max-height: 100%;
         max-width: 100%;
         display: inline-block;
-        border-radius: 10px 10px 0 0;
     }
 
     .arrow {
@@ -180,9 +174,23 @@ export const StyledExpandedPlant = styled.div`
         right: -20px;
     }
 
+    .floating-half {
+        width: 50%;
+        float: left;
+        min-height: 60vh;
+    }
+
+    @media (max-width: ${({ theme }) => theme.mobile}) {
+        .floating-half {
+            width: 100%;
+            min-height: 60vh;
+        }
+    }
+
+
     .bottom-div {
         height: 15%;
-        bottom: 5px;
+        bottom: 0px;
         width: -webkit-fill-available;
         width: -moz-available;
         background: ${({ theme }) => theme.primaryColor};

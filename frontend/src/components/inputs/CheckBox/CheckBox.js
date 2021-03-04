@@ -4,15 +4,16 @@ import { getTheme } from 'utils/storage';
 
 function CheckBox({
     theme=getTheme(),
-    group,
-    label,
-    value,
-    checked,
+    group = '',
+    label = '',
+    value = '',
+    checked = false,
     onChange,
+    ...props
 }) {
 
     return (
-        <StyledCheckBox theme={theme}>
+        <StyledCheckBox theme={theme} {...props}>
             <div className="border" onClick={() => onChange(group, value ?? label, !checked)}>
                 <div className={`indicator ${checked ? "checked" : ""}`}/>
             </div>

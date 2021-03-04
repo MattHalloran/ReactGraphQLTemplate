@@ -18,6 +18,7 @@ function ShoppingPage() {
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
+    const [showCurrentlyUnavailable, setShowCurrentlyUnavailable] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
@@ -66,10 +67,14 @@ function ShoppingPage() {
         console.log("NEW FILTERSSS", filters);
     }, [filters])
 
-    const handleCheckBoxChange = useCallback((group, value, checked) => {
+    const handleFiltersChange = useCallback((group, value, checked) => {
         let modified_filters = { ...filters };
         modified_filters[group][value].checked = checked;
         setFilters(modified_filters)
+    }, [filters])
+
+    const handleCurrentlyUnavailableChange = useCallback((_group, _value, checked) => {
+        setShowCurrentlyUnavailable(checked);
     }, [filters])
 
     const handleSortChange = (sort_item, _) => {
@@ -86,7 +91,7 @@ function ShoppingPage() {
                 label={item.label} 
                 value={item.value} 
                 checked={filters[field][index].checked ?? false} 
-                onChange={handleCheckBoxChange} />
+                onChange={handleFiltersChange} />
         ))
         return <React.Fragment>
             <fieldset className="checkbox-group" onChange={onChange}>
@@ -134,7 +139,11 @@ function ShoppingPage() {
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>
             </ArrowMenu>
-            <ShoppingList sort={sortBy} filters={filters} searchString={searchString}/>
+            <CheckBox className="unavailable-checkbox"
+                label='Show Currently Unavailable' 
+                checked={showCurrentlyUnavailable} 
+                onChange={handleCurrentlyUnavailableChange} />
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable}/>
         </StyledShoppingPage>
     );
 }
