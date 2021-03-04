@@ -29,6 +29,8 @@ export const StyledModal = styled.aside`
         overflow-x: hidden;
         border-radius: 10px;
         overflow: hidden;
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
+        color: ${({ theme }) => theme.backgroundColor};
         border: 3px solid ${({ theme }) => theme.primaryText};
         width: -moz-available;
         width: -webkit-fill-available;

@@ -9,7 +9,7 @@ export const StyledNavbar = styled.nav`
     top: 0;
     right: 0;
     left: 0;
-    z-index: 5;
+    z-index: 15;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

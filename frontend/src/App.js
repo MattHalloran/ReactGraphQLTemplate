@@ -48,6 +48,7 @@ function App() {
     const [user_roles, setUserRoles] = useState(null);
     const [theme, setTheme] = useState(getTheme());
     const [menu_open, setMenuOpen] = useState(false);
+    const [arrow_open, setArrowOpen] = useState(false);
     const [popup_open, setPopupOpen] = useState(false);
 
     const handlers = {
@@ -84,6 +85,7 @@ function App() {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
+        let arrowSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, o) => setArrowOpen(open => o === 'toggle' ? !open : o));
         let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
         document.addEventListener('scroll', trackScrolling);
         return (() => {
@@ -91,6 +93,7 @@ function App() {
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(popupSub);
+            PubSub.unsubscribe(arrowSub);
             PubSub.unsubscribe(menuSub);
             document.removeEventListener('scroll', trackScrolling);
         })
@@ -107,7 +110,7 @@ function App() {
     return (
         <div id="App">
             <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-            <GlobalStyles theme={theme} menu_or_popup_open={menu_open || popup_open} />
+            <GlobalStyles theme={theme} menu_or_popup_open={menu_open || arrow_open || popup_open} />
             <div id="page-container">
                 <div id="content-wrap">
                     <Navbar visible={nav_visible} session={session} user_roles={user_roles} />

@@ -41,7 +41,7 @@ export const lightTheme = {
     isLight: true,
     backgroundColor: '#d3d8d7',
     primaryColor: '#3d921a',
-    lightPrimaryColor: '#48bf2a',
+    lightPrimaryColor: '#8fc581',
     darkPrimaryColor: '#1E7E26',
     accentColor: '#3549d8',
     cardColor: '#1E7E26',

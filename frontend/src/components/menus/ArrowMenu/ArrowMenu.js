@@ -1,12 +1,14 @@
 // Menu for a specific page
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledArrowMenu } from './ArrowMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
 import { getTheme } from 'utils/storage';
 import Draggable from 'components/Draggable/Draggable';
 import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
+import PubSub from 'utils/pubsub';
+import { PUBS } from 'utils/consts';
 
 function ArrowMenu({
     theme=getTheme(),
@@ -15,13 +17,17 @@ function ArrowMenu({
 }) {
     const [open, setOpen] = useState(false);
 
-    const closeMenu = () => {
-        setOpen(false);
-    }
+    useEffect(() => {
+        let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
+            setOpen(open => b === 'toggle' ? !open : b);
+        });
+        return (() => {
+            PubSub.unsubscribe(openSub);
+        })
+    }, [])
 
-    const toggleOpen = () => {
-        setOpen(o => !o);
-    }
+    const toggleOpen = () => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle');
+    const closeMenu = () => PubSub.publish(PUBS.ArrowMenuOpen, false);
 
     return (
         <StyledArrowMenu theme={theme} open={open} {...props}>

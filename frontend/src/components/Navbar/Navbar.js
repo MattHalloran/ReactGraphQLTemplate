@@ -105,7 +105,7 @@ function Hamburger(props) {
                 ))}
                 <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
             </div>
-            <Collapsible title="Contact" initial_open={true}>
+            <Collapsible contentClassName='' title="Contact" initial_open={true}>
                 <ContactInfo />
             </Collapsible>
             { nav_options.map(([link, text, onClick], index) => (

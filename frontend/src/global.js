@@ -58,10 +58,31 @@ export const GlobalStyles = createGlobalStyle`
         min-height: 100vh;
     }
 
+    #overlay {
+        transition: 0.3s ease-in-out;
+        background-color: ${({ menu_or_popup_open }) => menu_or_popup_open ? 'rgba(0,0,0,0.5)' : 'transparent'};
+        width: 150vw;
+        height: 150vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+    }
+
     .card {
         background: ${({ theme }) => theme.cardColor};
         color: ${({ theme }) => theme.headerText};
         overflow: hidden;
+        box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+        border-radius: 10px;
+        transition: 0.3s;
+
+        :hover {
+            border: 1px solid ${({ theme }) => theme.headerText};
+            box-shadow: none;
+        }
     }
 
     .header {

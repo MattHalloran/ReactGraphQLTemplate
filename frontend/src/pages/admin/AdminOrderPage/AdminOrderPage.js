@@ -66,12 +66,12 @@ function AdminOrderPage({
 
     useEffect(() => {
         getOrders(session, filter)
-        .then((response) => {
-            setOrders(response.orders);
-        })
-        .catch((error) => {
-            console.error("Failed to load orders", error);
-        });
+            .then((response) => {
+                setOrders(response.orders);
+            })
+            .catch((error) => {
+                console.error("Failed to load orders", error);
+            });
     }, [filter])
 
     const handleFilterChange = (sort_item, _) => {
@@ -87,9 +87,13 @@ function AdminOrderPage({
     return (
         <StyledAdminOrderPage className="page" theme={theme}>
             {popup}
-            <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
-            <div className="card-flex">
-                {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
+            <div className="content">
+                <h2>Sort By</h2>
+                <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
+                <h3>Count: {orders?.length ?? 0}</h3>
+                <div className="card-flex">
+                    {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
+                </div>
             </div>
         </StyledAdminOrderPage >
     );
@@ -110,7 +114,7 @@ function OrderCard({
 }) {
     items.map(i => console.log(i))
     return (
-        <StyledOrderCard theme={theme} onClick={onEdit} >
+        <StyledOrderCard className="card" theme={theme} onClick={onEdit} >
             <p>{customer.first_name} {customer.last_name}</p>
             <p>Requested Date: {new Date(desired_delivery_date).getDate()}</p>
             <p>Items: {items.length}</p>

@@ -3,19 +3,16 @@ import styled from 'styled-components';
 export const StyledAdminInventoryPage = styled.div`
     .card-flex {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        align-items: stretch;
     }
 `;
 
 export const StyledCard = styled.div`
     position: relative;
-    background-color: ${({ theme }) => theme.darkPrimaryColor};
-    color: black;
     margin: 20px;
-    padding: 10px;
     min-width: 150px;
     min-height: 50px;
-    border-radius: 1em;
     cursor: pointer;
 
     .deleted {
@@ -43,10 +40,23 @@ export const StyledCard = styled.div`
         z-index: 2;
     }
 
-    img {
+    .display-image {
         display: block;
-        max-width: 100%;
+        position: absolute;
+        width: 100%;
         max-height: 100%;
+        bottom: 0%;
+    }
+
+    .image-not-found {
+        bottom: -30%;
+    }
+
+    .display-image-container {
+        width: 100%;
+        position: relative; /* Ensures 1:1 Aspect Ratio */
+        height: 0; /* Ensures 1:1 Aspect Ratio */
+        padding-top: 100%; /* Ensures 1:1 Aspect Ratio */
     }
 
     .size-container {

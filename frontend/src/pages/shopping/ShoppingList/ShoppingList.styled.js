@@ -16,14 +16,6 @@ export const StyledPlantCard = styled.div`
     margin: 10px;
     min-width: 150px;
     min-height: 50px;
-    box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
-    border-radius: 10px;
-    transition: 0.3s;
-
-    :hover {
-        border: 1px solid ${({ theme }) => theme.headerText};
-        box-shadow: none;
-    }
 
     .title {
         position: absolute;
@@ -69,6 +61,10 @@ export const StyledPlantCard = styled.div`
         width: 100%;
         max-height: 100%;
         bottom: 0%;
+    }
+
+    .image-not-found {
+        bottom: -30%;
     }
 
     .display-image-container {
@@ -186,7 +182,7 @@ export const StyledExpandedPlant = styled.div`
 
     .bottom-div {
         height: 15%;
-        bottom: 0;
+        bottom: 5px;
         width: -webkit-fill-available;
         width: -moz-available;
         background: ${({ theme }) => theme.primaryColor};

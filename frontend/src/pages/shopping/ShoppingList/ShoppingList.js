@@ -260,7 +260,7 @@ function PlantCard({
     if (thumbnail) {
         display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
     } else {
-        display_image = <NoImageIcon className="display-image" />
+        display_image = <NoImageIcon className="display-image image-not-found" />
     }
 
     return (
