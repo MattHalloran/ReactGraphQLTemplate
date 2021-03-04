@@ -34,7 +34,9 @@ function Navbar({
     return (
         <StyledNavbar theme={theme} visible={visible}>
             <Link to={LINKS.Home} className="nav-brand">
-                <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
+                <div className="nav-logo-container">
+                    <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
+                </div>
                 <span className="nav-name">{FULL_BUSINESS_NAME}</span>
             </Link>
             {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
@@ -84,7 +86,7 @@ function Hamburger(props) {
     } else {
         top_links.push([LINKS.Shopping, BagPlusIcon],
             [LINKS.Profile, PersonIcon],
-            [LINKS.Cart, ShoppingCartIcon],);
+            [LINKS.Cart, ShoppingCartIcon]);
     }
 
     nav_options.push(
@@ -99,7 +101,7 @@ function Hamburger(props) {
 
     return (
         <BurgerMenu theme={theme} {...props}>
-            <div className="icon-container" style={{margin: '10px 5px 10px 5px'}}>
+            <div className="icon-container" style={{ margin: '10px 5px 10px 5px' }}>
                 {top_links.map(([link, Icon], index) => (
                     <Icon key={index} width="40px" height="40px" onClick={() => history.push(link)} />
                 ))}
@@ -123,7 +125,7 @@ function Hamburger(props) {
 }
 
 Hamburger.propTypes = {
-    
+
 }
 
 function NavList() {
@@ -165,7 +167,7 @@ function NavList() {
     } else {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
         cart = (
-            <Link to={LINKS.Cart}><ShoppingCartIcon className="iconic" width="30px" height="30px"/></Link>
+            <Link to={LINKS.Cart}><ShoppingCartIcon className="iconic" width="30px" height="30px" /></Link>
         );
     }
 
@@ -183,9 +185,9 @@ function NavList() {
 
     return (
         <ul className="nav-list">
-            <PopupMenu obj={<p style={{marginRight:'10px'}}>Contact</p>}
+            <PopupMenu obj={<p style={{ marginRight: '10px' }}>Contact</p>}
                 menu={<ContactInfo />} />
-            <PopupMenu obj={<p style={{marginRight:'8px'}}>About</p>} menu={options_to_menu(about_options)} />
+            <PopupMenu obj={<p style={{ marginRight: '8px' }}>About</p>} menu={options_to_menu(about_options)} />
             {options_to_menu(nav_options)}
             {cart}
         </ul>
@@ -193,7 +195,7 @@ function NavList() {
 }
 
 NavList.propTypes = {
-    
+
 }
 
 export default Navbar;

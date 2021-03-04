@@ -9,6 +9,12 @@ export const StyledShoppingPage = styled.div`
         margin-bottom: 20px;
     }
 
+    .unavailable-checkbox {
+        left: 0;
+        right: 0;
+        display: inline-flex;
+    }
+
     .shopping-menu {
         padding: 0 10px;
     }

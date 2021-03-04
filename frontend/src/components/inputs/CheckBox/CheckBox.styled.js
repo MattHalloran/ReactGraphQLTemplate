@@ -18,7 +18,7 @@ export const StyledCheckBox = styled.div`
         position: absolute;
         z-index: 1;
         border-radius: 2px;
-        background: ivory;
+        background: ${({ theme }) => theme.accentColor};
         width: 16px;
         height: 16px;
         margin: 2px;

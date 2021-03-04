@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { hexToRGB } from 'utils/opacityHex';
 
-
 export const StyledNavbar = styled.nav`
     position: fixed;
     background-color: ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)};
@@ -69,11 +68,20 @@ export const StyledNavbar = styled.nav`
         position: absolute;
     }
 
+    .nav-logo-container {
+        display: inline-block;
+        background: ${({ theme }) => theme.isLight ? '#0c3a0b' : '#757565'};
+        border-radius: 500px;
+        height: 12vh;
+        width: 12vh;
+        margin-top: -5px;
+    }
+
     .nav-logo {
-        -webkit-filter: drop-shadow(0.5px 0.5px 0 grey)
-                        drop-shadow(-0.5px -0.5px 0 grey);
-        filter: drop-shadow(0.5px 0.5px 0 grey) 
-                drop-shadow(-0.5px -0.5px 0 grey);
+        -webkit-filter: drop-shadow(0.5px 0.5px 0 ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)})
+                        drop-shadow(-0.5px -0.5px 0 ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)});
+        filter: drop-shadow(0.5px 0.5px 0 ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)}) 
+                drop-shadow(-0.5px -0.5px 0 ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)});
         vertical-align: middle;
         fill: black;
         margin-top: 5px;
@@ -86,9 +94,8 @@ export const StyledNavbar = styled.nav`
     }
     
     .nav-name {
-        font-size: 1.5em;
-        vertical-align: middle;
-        margin-left: -10px;
+        font-size: 2em;
+        margin-left: -25px;
         font-family: 'Kite One', sans-serif;
     }
 
