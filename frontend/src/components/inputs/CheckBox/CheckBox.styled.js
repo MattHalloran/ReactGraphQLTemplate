@@ -7,7 +7,7 @@ export const StyledCheckBox = styled.div`
 
     .border {
         position: relative;
-        border: 2px solid black;
+        border: 2px solid ${({ theme }) => theme.primaryText};;
         border-radius: 4px;
         width: 20px;
         height: 20px;

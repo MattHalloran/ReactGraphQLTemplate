@@ -34,14 +34,7 @@ def upload_availability(app, data):
             curr_sku = codes[i]
             # Look for existing SKU by code
             sku = SkuHandler.from_sku(curr_sku)
-            # If not found by code, search by plant
-            if sku is None:
-                plant = PlantHandler.from_latin(curr_latin)
-                # If found by plant, update sku with code
-                if plant and (skus := SkuHandler.from_plant(plant)):
-                    print(f'Found SKU {curr_sku} by plant instead of code')
-                    sku = skus[0]
-            # If SKU not found by code or plant, create from scratch
+            # If SKU not found by code, create from scratch
             if sku is None:
                 print(f'Could not find SKU associated with {curr_sku}. Attempting to create new one')
                 plant = PlantHandler.from_latin(curr_latin)
@@ -59,13 +52,13 @@ def upload_availability(app, data):
                 'status': SkuStatus.ACTIVE.value
             }
             if not is_cell_blank(common_names[i]):
-                print('IN COMMON NAME')
                 plant_dict['common_name'] = common_names[i]
             if not is_cell_blank(sizes[i]):
                 print(f"SIZE IS: unformatted: {str(sizes[i])} formatted: {str(sizes[i]).replace('#', '')}")
                 sku_dict['size'] = str(sizes[i]).replace('#', '')
             if not is_cell_blank(prices[i]):
-                sku_dict['price'] = str(prices[i]).replace('.', '0')  # Add 0 because price only has one decimal place
+                print(f"PRICE IS: unformatted: {float(prices[i])}  formatted: {int(float(prices[i]) * 100)}")
+                sku_dict['price'] = int(float(prices[i]) * 100)
             if not is_cell_blank(codes[i]):
                 sku_dict['sku'] = codes[i]
             if not is_cell_blank(quantities[i]):
@@ -81,4 +74,5 @@ def upload_availability(app, data):
                 SkuHandler.update(sku, sku_dict)
                 db.session.commit()
             print(f'SUCCESSFULLY ADDED SKU FOR {curr_sku}')
+            print('')
     return True
