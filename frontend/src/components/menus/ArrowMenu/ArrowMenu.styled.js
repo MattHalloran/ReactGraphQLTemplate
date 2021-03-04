@@ -17,6 +17,7 @@ const overlay_style = `
 `
 
 export const StyledArrowMenu = styled.div`
+
   #overlay {
     transition: 0.3s ease-in-out;
     ${({ open }) => open ? overlay_style : ''};
@@ -29,8 +30,8 @@ export const StyledArrowMenu = styled.div`
         transition: all 0.3s linear;
         position: fixed;
         transform: ${({ open }) => open ? 'translateX(400px) scaleX(-1)' : 'transformX(0px) scaleX(1)'};
-        fill: ${({ theme }) => theme.textPrimary};
-        stroke: black;
+        fill: ${({ theme }) => theme.headerText};
+        stroke: ${({ theme }) => theme.primaryText};
         stroke-width: 0.5px;
         padding: 5px;
     }

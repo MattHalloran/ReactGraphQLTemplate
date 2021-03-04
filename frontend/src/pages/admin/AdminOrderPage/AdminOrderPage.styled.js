@@ -9,13 +9,13 @@ export const StyledAdminOrderPage = styled.div`
 `;
 
 export const StyledOrderCard = styled.div`
-    background-color: ${({ theme }) => theme.bodySecondary};
+    background-color: ${({ theme }) => theme.darkPrimaryColor};
     color: black;
     margin: 20px;
     padding: 10px;
     min-width: 150px;
     min-height: 50px;
-    border: 2px solid ${({ theme }) => theme.textPrimary};
+    border: 2px solid ${({ theme }) => theme.primaryText};
     border-radius: 1em;
     cursor: pointer;
 `;

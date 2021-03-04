@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 export const StyledButton = styled.button`
-    background-color: ${({ disabled }) => disabled ? 'rgb(164, 164, 164)' : '#4CAF50'};
+    background-color: ${({ theme, disabled }) => disabled ? 'rgb(164, 164, 164)' : theme.accentColor};
     border: none;
-    color: ${({ theme }) => theme.textPrimary};
+    color: ${({ theme }) => theme.headerText};
     padding: 16px 32px;
     text-align: center;
     text-decoration: none;

@@ -12,7 +12,10 @@ function AboutPage({
     })
     return (
         <StyledAboutPage className="page" theme={theme}>
-            <h1>About {BUSINESS_NAME} Inc</h1>
+            <div className="header">
+                <h1>About {BUSINESS_NAME}</h1>
+            </div>
+            <div className="content">
             <br />
             <h3>For  40 years, New Life Nursery, Inc has been striving to grow the most beautiful, healthy and consistent plant material at competitive prices. Family owned and operated by the Gianaris Family, we continue to hold to our original motto: "Growing top quality material for buyers who are interested in the best".
 
@@ -23,6 +26,7 @@ function AboutPage({
             Warmest Wishes,
 
 The Gianaris Family</h3>
+            </div>
         </StyledAboutPage >
     );
 }

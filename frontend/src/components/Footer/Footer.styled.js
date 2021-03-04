@@ -1,13 +1,18 @@
 import styled from 'styled-components';
 
 export const StyledFooter = styled.footer`
-    background-color: ${({ theme }) => theme.bodySecondary};
-    color: ${({ theme }) => theme.textSecondary};
-    border-top: 2px solid black;
+    background-color: ${({ theme }) => theme.darkPrimaryColor};
+    color: ${({ theme }) => theme.headerText};
+    border-top: 2px solid ${({ theme }) => theme.primaryText};
     position: relative;
     bottom: 0;
     width: 100%;
     overflow: hidden;
+
+    a:link,
+    a:visited {
+        color: ${({ theme }) => theme.headerText};
+    }
 
     .flexed {
         display: grid;
@@ -20,7 +25,7 @@ export const StyledFooter = styled.footer`
         align-items: stretch;
 
         > * {
-            border-right: 1px solid black;
+            border-right: 1px solid ${({ theme }) => theme.primaryText};
         }
 
         > *:last-child {
@@ -30,12 +35,12 @@ export const StyledFooter = styled.footer`
 
     @media (max-width: ${({ theme }) => theme.mobile}) {
         .footer-group {
-            border: 1px solid black;
+            border: 1px solid ${({ theme }) => theme.primaryText};
         }
 
         .flexed {
             > *:last-child {
-                border-right: 1px solid black;
+                border-right: 1px solid ${({ theme }) => theme.primaryText};
             }
         }
     }

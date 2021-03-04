@@ -1,7 +1,11 @@
 import styled from 'styled-components';
+import { hexToRGB } from 'utils/opacityHex';
+
 
 export const StyledNavbar = styled.nav`
     position: fixed;
+    background-color: ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)};
+    color: ${({ theme }) => theme.headerText};
     top: 0;
     right: 0;
     left: 0;
@@ -15,7 +19,6 @@ export const StyledNavbar = styled.nav`
     padding: 2vh;
     padding-top: 1vh;
     padding-bottom: 1vh;
-    background-color: rgba(0,0,0,0.7);
     transform: ${({ visible }) => visible ? 'translateY(0%)' : 'translateY(-100%)'};
     transition: transform 0.3s ease-in-out;
     //disable text highlighting
@@ -24,6 +27,11 @@ export const StyledNavbar = styled.nav`
     -ms-user-select:none;
     user-select:none;
     -o-user-select:none;
+
+    a:link,
+    a:visited {
+        color: ${({ theme }) => theme.headerText};
+    }
 
     @media (max-width: 300px) {
         .nav-name {
@@ -62,6 +70,10 @@ export const StyledNavbar = styled.nav`
     }
 
     .nav-logo {
+        -webkit-filter: drop-shadow(0.5px 0.5px 0 grey)
+                        drop-shadow(-0.5px -0.5px 0 grey);
+        filter: drop-shadow(0.5px 0.5px 0 grey) 
+                drop-shadow(-0.5px -0.5px 0 grey);
         vertical-align: middle;
         fill: black;
         margin-top: 5px;
@@ -89,7 +101,7 @@ export const StyledNavbar = styled.nav`
     .iconic {
         stroke: none;
         margin-top: 5px;
-        fill: ${({ theme }) => theme.textPrimary};
+        fill: ${({ theme }) => theme.headerText};
     }
 
     .bottom {
@@ -98,7 +110,7 @@ export const StyledNavbar = styled.nav`
         justify-content: space-around;
         width: -moz-available;
         width: -webkit-fill-available;
-        background: ${({ theme }) => theme.bodyPrimary};
+        background: ${({ theme }) => theme.primaryColor};
 
         > * {
             margin: 10px 0;

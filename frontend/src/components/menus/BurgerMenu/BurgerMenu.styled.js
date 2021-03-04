@@ -42,7 +42,7 @@ export const StyledBurgerMenu = styled.div`
   .burger > * {
     width: 35px;
     height: 5px;
-    background-color: ${({ theme }) => theme.textPrimary};
+    background-color: ${({ theme }) => theme.headerText};
     margin: 6px 0;
     transition: 0.4s;
     border-radius: 50px;

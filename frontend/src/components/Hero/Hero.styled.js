@@ -27,12 +27,13 @@ export const StyledHero = styled.div`
     .title,
     .subtitle {
         padding: 0;
+        color: white;
         text-align: center;
         text-shadow:
-            -1px -1px 0 #000,  
-            1px -1px 0 #000,
-            -1px 1px 0 #000,
-            1px 1px 0 #000;
+            -1px -1px 0 ${({ theme }) => !theme.isLight ? '#000' : '#FFF'},  
+            1px -1px 0 ${({ theme }) => !theme.isLight ? '#000' : '#FFF'},
+            -1px 1px 0 ${({ theme }) => !theme.isLight ? '#000' : '#FFF'},
+            1px 1px 0 ${({ theme }) => !theme.isLight ? '#000' : '#FFF'};
     }
 
     .title {

@@ -81,17 +81,18 @@ function ShoppingPage() {
         let list = filters[field];
         if (!list || !Array.isArray(list) || list.length <= 0) return null;
         let options = list.map((item, index) => (
-            <tr key={index}>
-                <td><CheckBox group={field} label={item.label} value={item.value} checked={filters[field][index].checked ?? false} onChange={handleCheckBoxChange} /></td>
-            </tr>
+            <CheckBox key={index} 
+                group={field} 
+                label={item.label} 
+                value={item.value} 
+                checked={filters[field][index].checked ?? false} 
+                onChange={handleCheckBoxChange} />
         ))
         return <React.Fragment>
-            <table className="checkbox-group" onChange={onChange}>
-                <tbody>
-                    <tr><td>{title}</td></tr>
+            <fieldset className="checkbox-group" onChange={onChange}>
+                <legend>{title}</legend>
                     {options}
-                </tbody>
-            </table>
+            </fieldset>
         </React.Fragment>
     }
 
@@ -108,21 +109,22 @@ function ShoppingPage() {
     }, [user_roles])
 
     return (
-        <StyledShoppingPage className="page" theme={theme}>
-            <ArrowMenu >
+        <StyledShoppingPage theme={theme}>
+            <ArrowMenu>
+                <div className="shopping-menu">
                 <h2>Sort</h2>
                 <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
                 <h2>Search</h2>
                 <SearchBar onChange={(s) => setSearchString(s)}/>
                 <h2>Filters</h2>
-                {filters_to_checkbox('sizes', 'Sizes')}
-                {filters_to_checkbox('optimal_lights', 'Optimal Light')}
-                {filters_to_checkbox('drought_tolerances', 'Drought Tolerance')}
-                {filters_to_checkbox('grown_heights', 'Grown Height')}
-                {filters_to_checkbox('grown_spreads', 'Grown Spread')}
-                {filters_to_checkbox('growth_rates', 'Growth Rate')}
-                {filters_to_checkbox('salt_tolerances', 'Salt Tolerance')}
-                {filters_to_checkbox('attracts_polinators_and_wildlife', 'Pollinator')}
+                {filters_to_checkbox('size', 'Sizes')}
+                {filters_to_checkbox('optimal_light', 'Optimal Light')}
+                {filters_to_checkbox('drought_tolerance', 'Drought Tolerance')}
+                {filters_to_checkbox('grown_height', 'Grown Height')}
+                {filters_to_checkbox('grown_spread', 'Grown Spread')}
+                {filters_to_checkbox('growth_rate', 'Growth Rate')}
+                {filters_to_checkbox('salt_tolerance', 'Salt Tolerance')}
+                {filters_to_checkbox('attracts_polinators_and_wildlifes', 'Pollinator')}
                 {filters_to_checkbox('light_ranges', 'Light Range')}
                 {filters_to_checkbox('soil_moistures', 'Soil Moisture')}
                 {filters_to_checkbox('soil_phs', 'Soil PH')}
@@ -130,6 +132,7 @@ function ShoppingPage() {
                 {filters_to_checkbox('zones', 'Zone')}
                 {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
+                </div>
             </ArrowMenu>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString}/>
         </StyledShoppingPage>

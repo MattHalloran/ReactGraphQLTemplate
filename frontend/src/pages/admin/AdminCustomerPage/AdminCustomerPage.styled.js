@@ -26,7 +26,7 @@ export const StyledAdminCustomerPage = styled.div`
 `;
 
 export const StyledCustomerCard = styled.div`
-    background-color: ${({ theme }) => theme.bodySecondary};
+    background-color: ${({ theme }) => theme.darkPrimaryColor};
     color: black;
     margin: 20px;
     padding: 10px;

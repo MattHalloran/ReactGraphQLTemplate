@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { getTheme } from 'utils/storage';
 import { StyledDots } from './Dots.styled';
 
 const Dot = ({ active }) => {
@@ -9,9 +10,13 @@ const Dot = ({ active }) => {
 
 const MemoDot = memo(Dot)
 
-const Dots = ({ slides, activeSlide }) => {
+const Dots = ({ 
+    slides,
+    activeSlide,
+    theme = getTheme(),
+}) => {
   return (
-    <StyledDots>
+    <StyledDots theme={theme}>
       {slides.map((slide, i) => (
         <MemoDot key={slide} active={activeSlide === i} />
       ))}

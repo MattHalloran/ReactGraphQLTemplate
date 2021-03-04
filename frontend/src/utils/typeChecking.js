@@ -9,7 +9,11 @@ export const deepEqual = (a, b) => {
     return keys.every(k => deepEqual(a[k], b[k]));
 };
 
-// returns true if an object is a string
+/// Returns true if both objects contain the same keys
+export const matches = (obj, source) =>
+  Object.keys(source).every(key => obj.hasOwnProperty(key) && obj[key] === source[key]);
+
+// Returns true if an object is a string
 // https://stackoverflow.com/a/24941988
 export const isString = (obj) => {
     return (Object.prototype.toString.call(obj) === '[object String]');

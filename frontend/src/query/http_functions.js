@@ -376,6 +376,7 @@ export async function update_profile(session, data) {
         "session": session,
         "data": data
     });
+    console.log('UPDATING PROFILE WITH', data)
     let options = {
         body: json,
         method: 'post',

@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 export const StyledCollapsible = styled.header`
+background-color: ${({ theme }) => theme.primaryColor};
+
     .header{
         display: block;
         cursor: pointer;
@@ -10,14 +12,10 @@ export const StyledCollapsible = styled.header`
         border-left: 0;
         border-right: 0;
         padding: 15px;
-        background-color: ${({ theme }) => theme.bodySecondary};
+        background-color: ${({ theme }) => theme.darkPrimaryColor};
         box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, .6);
         color: #FFF;
         font-family: verdana;
-    }
-
-    .content{
-        
     }
 
     .collapse-arrow-wrapper {
@@ -29,7 +27,7 @@ export const StyledCollapsible = styled.header`
         width: 0;
         height: 0;
         border: 5px solid transparent;
-        ${({ is_open, theme }) => is_open? `border-bottom: 5px solid ${theme.textPrimary}` : `border-top: 5px solid ${theme.textPrimary}`};
+        ${({ is_open, theme }) => is_open? `border-bottom: 5px solid ${theme.headerText}` : `border-top: 5px solid ${theme.headerText}`};
         content: ' ';
         position: absolute;
         right: 10px;

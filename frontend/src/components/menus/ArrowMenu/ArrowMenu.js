@@ -11,6 +11,7 @@ import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
 function ArrowMenu({
     theme=getTheme(),
     children,
+    ...props
 }) {
     const [open, setOpen] = useState(false);
 
@@ -23,7 +24,7 @@ function ArrowMenu({
     }
 
     return (
-        <StyledArrowMenu theme={theme} open={open}>
+        <StyledArrowMenu theme={theme} open={open} {...props}>
             <div id="overlay"/>
             <Arrow onClick={toggleOpen} />
             <MenuContainer side="left" open={open} closeMenu={closeMenu}>

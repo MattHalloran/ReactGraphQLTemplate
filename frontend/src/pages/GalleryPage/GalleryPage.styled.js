@@ -28,7 +28,7 @@ export const StyledGalleryImage = styled.div`
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        stroke: ${({ theme }) => theme.textPrimary};
+        stroke: ${({ theme }) => theme.primaryText};
     }
 
     .arrow:hover {

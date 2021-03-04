@@ -4,7 +4,7 @@ export const StyledContactInfo = styled.div`
     list-style-type: none;
 
     .contact-header {
-        background-color: ${({ theme }) => theme.bodyPrimary};
+        background-color: ${({ theme }) => theme.primaryColor};
         padding: 10px;
         font-size: 1.5em;
         text-align: center;
@@ -18,8 +18,8 @@ export const StyledContactInfo = styled.div`
         display: block;
         margin: auto;
         text-align: left;
-        border-top: 3px solid ${({ theme }) => theme.textPrimary};
-        border-bottom: 3px solid ${({ theme }) => theme.textPrimary};
+        border-top: 3px solid ${({ theme }) => theme.primaryText};
+        border-bottom: 3px solid ${({ theme }) => theme.primaryText};
     }
 
     tbody {
@@ -59,7 +59,7 @@ export const StyledContactInfo = styled.div`
         display: inline-block;
         padding: 10px;
         border: 1px solid black;
-        background-color: darkgreen;
+        background-color: ${({ theme }) => theme.accentColor};
         border-radius: 200px;
         transition-duration: 0.4s;
 
@@ -68,7 +68,7 @@ export const StyledContactInfo = styled.div`
         }
 
         > * {
-            fill: ${({ theme }) => theme.textPrimary};
+            fill: ${({ theme }) => theme.headerText};
             stroke: none;
         }
     }

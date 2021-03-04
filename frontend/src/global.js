@@ -14,8 +14,9 @@ const menu_app_style = `position: fixed;
 export const GlobalStyles = createGlobalStyle`
 
     body {
-        background: ${({ theme }) => theme.bodyPrimary};
-        color: ${({ theme }) => theme.textPrimary};
+        background: ${({ theme }) => theme.backgroundColor};
+        box-shadow: inset 0 0 6vw 3vw rgb(0 0 0 / 10%);
+        color: ${({ theme }) => theme.primaryText};
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         -webkit-font-smoothing: antialiased;
@@ -31,15 +32,13 @@ export const GlobalStyles = createGlobalStyle`
         text-decoration: none;
     }
     a:hover {
-        color: ${({ theme }) => theme.hoverPrimary};
+        color: ${({ theme }) => theme.secondaryText};
         text-decoration: none;
     }
 
-    p, h1, h2,
-    h3, h4, h5,
-    h6, label, a:link,
+    a:link,
     a:visited {
-        color: ${({ theme }) => theme.textPrimary};
+        color: ${({ theme }) => theme.primaryText};
     }
 
     #App {
@@ -59,8 +58,32 @@ export const GlobalStyles = createGlobalStyle`
         min-height: 100vh;
     }
 
+    .card {
+        background: ${({ theme }) => theme.cardColor};
+        color: ${({ theme }) => theme.headerText};
+        overflow: hidden;
+    }
+
+    .header {
+        display: grid;
+        background: ${({ theme }) => theme.darkPrimaryColor};
+        color: ${({ theme }) => theme.headerText};
+    }
+
+    .content {
+        padding: 0 10px;
+    }
+
     .page {
-        padding-top: 13.5vh;
+        background: ${({ theme }) => theme.lightPrimaryColor};
+        min-height: 100vh;
+        margin-top: 15vh;
+        margin-left: 1vw;
+        margin-right: 1vw;
+        margin-bottom: 2vh;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
     }
 
     .icon-container {
@@ -71,7 +94,7 @@ export const GlobalStyles = createGlobalStyle`
             display: inline-block;
             text-align: center;
             stroke: none;
-            fill: ${({ theme }) => theme.textPrimary};
+            fill: ${({ theme }) => theme.headerText};
             cursor: pointer;
         }
     }

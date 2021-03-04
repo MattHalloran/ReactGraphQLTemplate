@@ -5,24 +5,51 @@ import PubSub from './pubsub';
 import { LOCAL_STORAGE, PUBS } from 'utils/consts';
 import { deepEqual, isString } from 'utils/typeChecking';
 import * as http from 'query/http_promises';
+import { light } from '@material-ui/core/styles/createPalette';
+import { deleteObjectKey } from './objectTools';
+import { deleteArrayObject } from './arrayTools';
 
-export const lightTheme = {
-    bodyPrimary: '#253A18', //dark green
-    bodySecondary: '#249526', //light green
-    textPrimary: '#F4F3EE', //off-white
-    textSecondary: '#BCB8B1', //off-grey
-    headerPrimary: '#34252F',
-    hoverPrimary: '#92817A',
+export const darkTheme = {
+    // bodyPrimary: '#253A18', //dark green
+    // bodySecondary: '#249526', //light green
+    // textPrimary: '#F4F3EE', //off-white
+    // textSecondary: '#BCB8B1', //off-grey
+    // headerPrimary: '#34252F',
+    // hoverPrimary: '#92817A',
+    isLight: false,
+    backgroundColor: '#1f1d1d',
+    primaryColor: '#254436',
+    lightPrimaryColor: '#565656',
+    darkPrimaryColor: '#1c2d25',
+    accentColor: '#2ea970',
+    cardColor: '#05581f',
+    primaryText: '#EEEEEE',
+    headerText: '#EEEEEE',
+    secondaryText: '#b9d2d2',
+    iconColor: '#EEEEEE',
+    dividerColor: '#b9d2d2',
     mobile: '576px',
 }
 
-export const darkTheme = {
-    bodyPrimary: '#0D0C1D',
-    bodySecondary: '#4A4A4A',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#D2C8C2',
-    headerPrimary: 'aliceblue',
-    hoverPrimary: '#EEEEEE',
+export const lightTheme = {
+    // bodyPrimary: '#0D0C1D',
+    // bodySecondary: '#4A4A4A',
+    // textPrimary: '#FFFFFF',
+    // textSecondary: '#D2C8C2',
+    // headerPrimary: 'aliceblue',
+    // hoverPrimary: '#EEEEEE',
+    isLight: true,
+    backgroundColor: '#d3d8d7',
+    primaryColor: '#3d921a',
+    lightPrimaryColor: '#48bf2a',
+    darkPrimaryColor: '#1E7E26',
+    accentColor: '#3549d8',
+    cardColor: '#1E7E26',
+    primaryText: '#212121',
+    headerText: '#EEEEEE',
+    secondaryText: '#757575',
+    iconColor: '#212121',
+    dividerColor: '#BDBDBD',
     mobile: '576px',
 }
 
@@ -32,17 +59,16 @@ export const themes = {
 }
 
 export function setTheme(themeString) {
-    let theme;
     switch (themeString) {
         case 'dark':
-            theme = darkTheme;
+            console.log('STORING DARK!!!!!')
+            storeItem(LOCAL_STORAGE.Theme, darkTheme);
             break;
         default:
-            theme = lightTheme;
+            console.log('STIRING LIGHT!!!!', themeString)
+            storeItem(LOCAL_STORAGE.Theme, lightTheme)
             break;
     }
-    localStorage.setItem(LOCAL_STORAGE.Theme, JSON.stringify(theme));
-    PubSub.publish(PUBS.Theme, theme);
 }
 
 export function getTheme() {
@@ -59,9 +85,10 @@ export function getTheme() {
                 }
             }
         }
+        storeItem(LOCAL_STORAGE.Theme, lightTheme);
+        return lightTheme;
     } catch (err) {
         console.error('Failed trying to get theme from local storage', err);
-    } finally {
         storeItem(LOCAL_STORAGE.Theme, lightTheme);
         return lightTheme;
     }
@@ -126,8 +153,11 @@ export const getItem = (key) => {
 }
 
 export const clearStorage = () => {
-    Object.values(LOCAL_STORAGE).forEach(entry => {
+    // Theme will be set to lightTheme instead of null
+    let values_to_clear = deleteArrayObject(Object.values(LOCAL_STORAGE), LOCAL_STORAGE.Theme);
+    values_to_clear.forEach(entry => {
         localStorage.setItem(entry, null);
         PubSub.publish(entry, null);
     })
+    setTheme('light');
 }

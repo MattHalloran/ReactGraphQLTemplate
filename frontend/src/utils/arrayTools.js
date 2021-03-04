@@ -15,6 +15,15 @@ export const deleteArrayIndex = (array, index) => {
     return array.filter((_, i) => i !== index);
 }
 
+export const deleteArrayObject = (array, obj) => {
+    var index = array.indexOf(obj);
+    if (index !== -1) {
+        let copy = [...array];
+        copy.splice(index, 1);
+        return copy;
+    }
+}
+
 export const findWithAttr = (array, attr, value) => {
     for(let i = 0; i < array.length; i += 1) {
         console.log('JUICE', array[i][attr], value)

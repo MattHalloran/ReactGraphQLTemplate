@@ -46,12 +46,10 @@ export const StyledInputText = styled.div`
     padding: 0px 16px;
     border: none;
     border-radius: 4px;
-    font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: normal;
     background-color: transparent;
-    color: #282828;
     outline: none;
     box-shadow: 0px 4px 20px 0px transparent;
     transition: 0.3s background-color ease-in-out, 0.3s box-shadow ease-in-out,
@@ -59,17 +57,11 @@ export const StyledInputText = styled.div`
     -webkit-appearance: none;
   }
   
-  input::-webkit-input-placeholder {
-    color: rgba(255, 255, 255, 0.8);
-  }
-  input::-moz-placeholder {
-    color: rgba(255, 255, 255, 0.8);
-  }
-  input:-ms-input-placeholder {
-    color: rgba(255, 255, 255, 0.8);
-  }
+  input::-webkit-input-placeholder,
+  input::-moz-placeholder,
+  input:-ms-input-placeholder,
   input:-moz-placeholder {
-    color: rgba(255, 255, 255, 0.8);
+    color: ${({ theme }) => theme.secondaryText};
   }
   
   input + label {
@@ -81,17 +73,9 @@ export const StyledInputText = styled.div`
     font-weight: 600;
     line-height: 24px;
     opacity: ${({ show_label }) => show_label ? '1' : '0'};
-    color: ${({ has_error, theme }) => has_error ? '#fc5c53' : theme.textPrimary};
+    color: ${({ has_error, theme }) => has_error ? '#fc5c53' : theme.secondaryText};
     pointer-events: none;
     transition: 0.1s all ease-in-out;
-  }
-
-  label {
-    text-shadow:
-    -1px -1px 0 #000,  
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
   }
   
 `;

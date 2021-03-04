@@ -5,7 +5,7 @@ export const StyledTooltip = styled.div`
     position: relative;
 
     :root {
-        --tooltip-text-color: ${({ theme }) => theme.textPrimary};
+        --tooltip-text-color: ${({ theme }) => theme.primaryText};
         --tooltip-background-color: black;
         --tooltip-margin: 30px;
         --tooltip-arrow-size: 6px;
@@ -14,13 +14,13 @@ export const StyledTooltip = styled.div`
     /* Absolute positioning */
     .Tooltip-Tip {
         position: absolute;
-        border: 2px solid ${({ theme }) => theme.textPrimary};
+        border: 2px solid ${({ theme }) => theme.primaryText};
         border-radius: 4px;
         bottom: 100%;
         left: 50%;
         transform: translateX(-50%);
         padding: 6px;
-        color: ${({ theme }) => theme.textPrimary};
+        color: ${({ theme }) => theme.primaryText};
         background: black;
         font-size: 14px;
         font-family: sans-serif;
