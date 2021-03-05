@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 export const StyledCollapsible = styled.header`
-background-color: ${({ theme }) => theme.primaryColor};
+background-color: ${({ theme }) => theme.lightPrimaryColor};
 
-    .header{
+    .header {
         display: block;
         cursor: pointer;
         border-style: solid;

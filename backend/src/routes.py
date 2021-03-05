@@ -244,10 +244,10 @@ def fetch_inventory():
     sort_map = {
         'az': (lambda p: p.latin_name, False),
         'za': (lambda p: p.latin_name, True),
-        'lth': (lambda p: PlantHandler.cheapest(p), False),
-        'htl': (lambda p: PlantHandler.priciest(p), True),
-        'new': (lambda p: PlantHandler.newest(p), True),
-        'old': (lambda p: PlantHandler.oldest(p), True),
+        'lth': (lambda p: (PlantHandler.cheapest(p), p.latin_name), False),
+        'htl': (lambda p: (PlantHandler.priciest(p), p.latin_name), True),
+        'new': (lambda p: (PlantHandler.newest(p), p.latin_name), True),
+        'old': (lambda p: (PlantHandler.oldest(p), p.latin_name), True),
     }
     # Sort the plants
     sort_data = sort_map.get(sorter, None)

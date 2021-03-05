@@ -27,11 +27,6 @@ export const StyledNavbar = styled.nav`
     user-select:none;
     -o-user-select:none;
 
-    a:link,
-    a:visited {
-        color: ${({ theme }) => theme.headerText};
-    }
-
     @media (max-width: 300px) {
         .nav-name {
             display: none;
@@ -97,6 +92,7 @@ export const StyledNavbar = styled.nav`
         font-size: 2em;
         margin-left: -25px;
         font-family: 'Kite One', sans-serif;
+        color: ${({ theme }) => theme.headerText};
     }
 
     .address-container {

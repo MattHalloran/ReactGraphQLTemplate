@@ -57,13 +57,6 @@ export const StyledInputText = styled.div`
     -webkit-appearance: none;
   }
   
-  input::-webkit-input-placeholder,
-  input::-moz-placeholder,
-  input:-ms-input-placeholder,
-  input:-moz-placeholder {
-    color: ${({ theme }) => theme.secondaryText};
-  }
-  
   input + label {
     position: absolute;
     top: 36px;

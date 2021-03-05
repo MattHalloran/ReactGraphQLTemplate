@@ -29,7 +29,7 @@ export const StyledMenuContainer = styled.nav`
   display: block;
   flex-direction: column;
   justify-content: center;
-  background: ${({ theme }) => theme.darkPrimaryColor};
+  background: ${({ theme }) => theme.primaryColor};
   color: ${({ theme }) => theme.headerText};
   height: 100vh;
   text-align: center;

@@ -5,7 +5,7 @@ from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, Use
 from sqlalchemy.orm.collections import InstrumentedList
 from src.api import db
 from src.config import Config
-from src.utils import resize_image
+from src.utils import resize_image, priceStringToDecimal
 from base64 import b64encode
 from src.auth import verify_token
 import time
@@ -898,25 +898,27 @@ class SkuHandler(Handler):
     def cheapest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.price, reverse=False)
+        sorted_skus = sorted(skus, key=lambda s: priceStringToDecimal(s.price), reverse=False)
+        return priceStringToDecimal(sorted_skus[0].price)
 
     @staticmethod
     def priciest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.price, reverse=True)
+        sorted_skus = sorted(skus, key=lambda s: priceStringToDecimal(s.price), reverse=True)
+        return priceStringToDecimal(sorted_skus[0].price)
 
     @staticmethod
     def newest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.date_added, reverse=False)
+        return sorted(skus, key=lambda s: s.date_added, reverse=False)[0].date_added
 
     @staticmethod
     def oldest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.date_added, reverse=True)
+        return sorted(skus, key=lambda s: s.date_added, reverse=True)[0].date_added
 
     @classmethod
     def hide_all(cls):

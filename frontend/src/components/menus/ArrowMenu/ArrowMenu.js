@@ -32,7 +32,7 @@ function ArrowMenu({
     return (
         <StyledArrowMenu theme={theme} open={open} {...props}>
             <div id="overlay"/>
-            <Arrow onClick={toggleOpen} />
+            {/* <Arrow onClick={toggleOpen} /> */}
             <MenuContainer side="left" open={open} closeMenu={closeMenu}>
                 {children}
             </MenuContainer>

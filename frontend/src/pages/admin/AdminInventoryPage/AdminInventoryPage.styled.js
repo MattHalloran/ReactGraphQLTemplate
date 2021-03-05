@@ -77,7 +77,7 @@ export const StyledCard = styled.div`
 `;
 
 export const StyledPlantPopup = styled.div`
-    background: ${({ theme }) => theme.primaryColor};
+    background: ${({ theme }) => theme.darkPrimaryColor};
     display: block;
     padding: 1em;
     padding-left: calc(150px + 1em);
