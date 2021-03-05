@@ -26,12 +26,6 @@ export const StyledNavbar = styled.nav`
     -ms-user-select:none;
     user-select:none;
     -o-user-select:none;
-
-    @media (max-width: 300px) {
-        .nav-name {
-            display: none;
-        }
-    }
     
     .right-align {
         position: relative;
@@ -95,6 +89,18 @@ export const StyledNavbar = styled.nav`
         color: ${({ theme }) => theme.headerText};
     }
 
+    @media (max-width: 450px) {
+        .nav-name {
+            font-size: 1.5em;
+        }
+    }
+
+    @media (max-width: 350px) {
+        .nav-name {
+            display: none;
+        }
+    }
+
     .address-container {
         display: flex;
         align-items: center;
@@ -113,7 +119,7 @@ export const StyledNavbar = styled.nav`
         justify-content: space-around;
         width: -moz-available;
         width: -webkit-fill-available;
-        background: ${({ theme }) => theme.primaryColor};
+        background: ${({ theme }) => theme.lightPrimaryColor};
 
         > * {
             margin: 10px 0;

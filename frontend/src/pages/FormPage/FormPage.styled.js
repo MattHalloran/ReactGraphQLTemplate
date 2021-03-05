@@ -6,10 +6,6 @@ export const StyledFormPage = styled.div`
     padding: 2em;
     margin-top: calc(14vh + 20px);
 
-    @media (max-width: ${({ theme }) => theme.mobile}) {
-        padding: 0;
-    }
-
     .form {
         display: grid;
         position: relative;
@@ -57,14 +53,15 @@ export const StyledFormPage = styled.div`
     .horizontal-input-container {
         display: flex;
         flex-direction: row;
-        align-items: flex-end;
+        align-items: stretch;
+        justify-content: space-between;
         width: 100%;
     }
     
     .horizontal-input-container > * {
+        display: block;
         margin-left: 5px;
         margin-right: 5px;
-        width: 100%;
     }
 
     .horizontal-input-container > *:first-child {
@@ -73,5 +70,18 @@ export const StyledFormPage = styled.div`
 
     .horizontal-input-container > *:last-child {
         margin-right: 0px;
+    }
+
+    @media (max-width: ${({ theme }) => theme.mobile}) {
+        padding: 0.5em;
+
+        .horizontal-input-container {
+            display: inline;
+        }
+
+        .horizontal-input-container > * {
+            margin-left: 0;
+            margin-right: 0;
+        }
     }
 `
