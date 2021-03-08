@@ -10,7 +10,7 @@ export const StyledButton = styled.button`
     display: inline-block;
     font-size: 16px;
     margin: 4px 2px;
-    transition-duration: 0.4s;
+    transition-duration: 0.2s;
     cursor: pointer;
     border-radius: 10px;
     pointer-events: ${({ disabled }) => disabled ? 'none' : ''};
@@ -24,6 +24,6 @@ export const StyledButton = styled.button`
         user-select:none;
 
     :hover {
-        box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.2);
     }
 `

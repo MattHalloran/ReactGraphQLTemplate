@@ -706,6 +706,7 @@ class User(db.Model):
     __tablename__ = Tables.USER.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
+    tag = Column(String(32), nullable=False, server_default="nenew")
     first_name = Column(String(30), nullable=False)
     last_name = Column(String(30), nullable=False)
     pronouns = Column(String(50), nullable=False, default=defaults['pronouns'])
@@ -744,6 +745,7 @@ class User(db.Model):
                  pronouns: str,
                  password: str,
                  existing_customer: bool):
+        self.tag = salt(32)
         self.last_login_attempt = time.time()
         self.first_name = first_name
         self.last_name = last_name

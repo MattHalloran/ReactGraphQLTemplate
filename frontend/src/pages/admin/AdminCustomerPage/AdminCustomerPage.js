@@ -6,12 +6,15 @@ import { ACCOUNT_STATUS, PUBS } from 'utils/consts';
 import { getSession, getTheme } from 'utils/storage';
 import Button from 'components/Button/Button';
 import { PubSub } from 'utils/pubsub';
+import Modal from 'components/wrappers/Modal/Modal';
+import CustomerInfo from 'components/CustomerInfo/CustomerInfo';
 
 function AdminCustomerPage() {
     const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     const [customers, setCustomers] = useState([]);
     const [selected, setSelected] = useState(-1);
+    const [infoOpen, setInfoOpen] = useState(false);
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
@@ -28,6 +31,7 @@ function AdminCustomerPage() {
         getCustomers(session)
             .then((response) => {
                 if (!mounted) return;
+                console.log('GOT CUSTOMERS', response.customers);
                 setCustomers(response.customers);
             })
             .catch((error) => {
@@ -85,13 +89,29 @@ function AdminCustomerPage() {
             });
     }, [selected]);
 
+    const new_user = () => {
+        alert('Coming soon!');
+        return;
+        //TODO
+    }
 
+    const view_user = () => setInfoOpen(true);
+
+    let popup = (infoOpen) ? (
+        <Modal onClose={() => setInfoOpen(false)}>
+            <CustomerInfo customer={customers[selected]}/>
+        </Modal>
+    ) : null;
+
+
+    let new_button = [new_user, 'New'];
     let approve_button = [approve_user, 'Approve'];
     let unlock_button = [unlock_user, 'Unlock'];
     let lock_button = [lock_user, 'Lock'];
     let delete_button = [delete_user, 'Delete'];
+    let view_button = [view_user, 'View']
 
-    let account_options = [];
+    let account_options = [new_button];
     let selected_display = '';
     if (selected >= 0) {
         selected_display = `${customers[selected]?.first_name} ${customers[selected]?.last_name}`
@@ -107,10 +127,12 @@ function AdminCustomerPage() {
                 account_options = [unlock_button, delete_button]
                 break;
         }
+        account_options.push(view_button);
     }
 
     return (
         <StyledAdminCustomerPage className="page" theme={theme}>
+            {popup}
             <div>
                 <h1>Selected user: {selected_display}</h1>
                 {account_options?.map((o, index) => <Button key={index} onClick={o[0]}>{o[1]}</Button>)}

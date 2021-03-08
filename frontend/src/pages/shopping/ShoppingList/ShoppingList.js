@@ -96,7 +96,7 @@ function ShoppingList({
         //First, determine if plants without availability shall be shown
         let visible_plants = loaded_plants;
         if (!showUnavailable) {
-            visible_plants = loaded_plants.filter(plant => {
+            visible_plants = loaded_plants?.filter(plant => {
                 if (plant.skus.length === 0) return true;
                 return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
             })
@@ -104,7 +104,7 @@ function ShoppingList({
         //Now, filter out everything that doesn't match the search string
         if (searchString.length > 0) {
             let search = searchString.trim().toLowerCase();
-            visible_plants = visible_plants.filter(plant => plant.latin_name?.toLowerCase().includes(search) || plant.common_name?.toLowerCase().includes(search));
+            visible_plants = visible_plants?.filter(plant => plant.latin_name?.toLowerCase().includes(search) || plant.common_name?.toLowerCase().includes(search));
         }
         //Find all applied filters
         let applied_filters = [];
@@ -126,7 +126,7 @@ function ShoppingList({
         }
         //Select all plants that contain the filters
         let filtered_plants = [];
-        for (let i = 0; i < visible_plants.length; i++) {
+        for (let i = 0; i < visible_plants?.length ?? 0; i++) {
             let curr_plant = visible_plants[i];
             filterloop:
             for (let j = 0; j < applied_filters.length; j++) {
@@ -156,7 +156,6 @@ function ShoppingList({
     }, [loaded_plants, filters, searchString, showUnavailable])
 
     const loadNextPage = useCallback(() => {
-        console.log('AAAAAAAA', loaded_plants, all_plant_ids)
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
         loading.current = true;
         //Grab all card thumbnail images
@@ -197,7 +196,7 @@ function ShoppingList({
     };
 
     const setInCart = (name, sku, operation, quantity) => {
-        if (!session?.email || !session?.token) return;
+        if (!session?.tag || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
             alert(`Error: Cannot add more than ${max_quantity}!`);
@@ -205,7 +204,7 @@ function ShoppingList({
         }
         let cart_copy = JSON.parse(JSON.stringify(cart));
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
-        updateCart(session, session.email, cart_copy)
+        updateCart(session, session.tag, cart_copy)
             .then(() => {
                 if (operation === 'ADD')
                     alert(`${quantity} ${name}(s) added to cart!`)

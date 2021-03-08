@@ -5,6 +5,7 @@ from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptio
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
 from src.messenger import welcome, reset_password
+from src.utils import salt
 from src.auth import generate_token, verify_token
 from src.config import Config
 from sqlalchemy import exc
@@ -68,11 +69,11 @@ def handle_exception(func):
 def verify_session(session):
     '''Verifies that the user supplied a valid session token
     Returns User object if valid, otherwise None'''
-    print('in veify session')
-    print(session)
-    temp = UserHandler.is_valid_session(session['email'], session['token'], app)
-    print(temp)
-    return UserHandler.is_valid_session(session['email'], session['token'], app).get('user', None)
+    tag = session.get('tag', None)
+    token = session.get('token', None)
+    if tag and token:
+        return UserHandler.is_valid_session(tag, token, app).get('user', None)
+    return None
 
 
 def verify_customer(session):
@@ -131,17 +132,13 @@ def register():
         return StatusCodes['FAILURE_EMAIL_EXISTS']
     # Create user
     user = UserHandler.create(data)
-    # Give the user a customer role
-    user.roles.append(RoleHandler.get_customer_role())
-    # Update the user's profile data
-    UserHandler.set_profile_data(user, data)
     # Create a session token
     token = generate_token(app, user)
     UserHandler.set_token(user, token)
     db.session.commit()
     return {
         **StatusCodes['SUCCESS'],
-        "token": token,
+        "session": {"tag": user.tag, "token": token},
         "user": UserHandler.to_dict(user)
     }
 
@@ -154,6 +151,8 @@ def login():
     (email, password) = getData('email', 'password')
     user = UserHandler.get_user_from_credentials(email, password)
     if user:
+        if user.tag == "nenew":
+            user.tag = salt(32)
         token = generate_token(app, user)
         print('RECEIVED TOKEN!!!!!!')
         UserHandler.set_token(user, token)
@@ -161,7 +160,7 @@ def login():
         return {
             **StatusCodes['SUCCESS'],
             "user": UserHandler.to_dict(user),
-            "token": token
+            "session": {"tag": user.tag, "token": token}
         }
     else:
         account_status = UserHandler.get_user_lock_status(email)
@@ -188,13 +187,14 @@ def send_password_reset_request():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def validate_token():
-    token = getJson('token')
-    is_valid = verify_token(app, token) if (token is not None) else False
-    status = StatusCodes['SUCCESS'] if is_valid else StatusCodes['FAILURE_NOT_VERIFIED']
-    return {
-        **status,
-        "token_is_valid": is_valid
-    }
+    session = getJson('session')
+    tag = session.get('tag', None)
+    token = session.get('token', None)
+    if not tag or not token:
+        return StatusCodes['ERROR_INVALID_ARGS']
+    if verify_token(app, token):
+        return StatusCodes['SUCCESS']
+    return StatusCodes['FAILURE_NOT_VERIFIED']
 
 
 if __name__ == '__main__':
@@ -244,10 +244,10 @@ def fetch_inventory():
     sort_map = {
         'az': (lambda p: p.latin_name, False),
         'za': (lambda p: p.latin_name, True),
-        'lth': (lambda p: PlantHandler.cheapest(p), False),
-        'htl': (lambda p: PlantHandler.priciest(p), True),
-        'new': (lambda p: PlantHandler.newest(p), True),
-        'old': (lambda p: PlantHandler.oldest(p), True),
+        'lth': (lambda p: (PlantHandler.cheapest(p), p.latin_name), False),
+        'htl': (lambda p: (PlantHandler.priciest(p), p.latin_name), True),
+        'new': (lambda p: (PlantHandler.newest(p), p.latin_name), True),
+        'old': (lambda p: (PlantHandler.oldest(p), p.latin_name), True),
     }
     # Sort the plants
     sort_data = sort_map.get(sorter, None)
@@ -336,7 +336,6 @@ def fetch_inventory_page():
 @handle_exception
 def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
-    print('boop le snoot')
     return {
         **StatusCodes['SUCCESS'],
         "images_meta": images_data
@@ -364,7 +363,6 @@ def upload_availability_file():
 @handle_exception
 def upload_gallery_image():
     (names, extensions, images) = getForm('name', 'extension', 'image')
-    print(f'NUMBER OF IMAGESSSS: {len(images)}')
     status = StatusCodes['SUCCESS']
     passed_indexes = []
     failed_indexes = []
@@ -418,10 +416,14 @@ def update_contact_info():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def fetch_profile_info():
-    (session) = getJson('session')
+    '''Fetches profile info for a customer'''
+    (session, tag) = getJson('session', 'tag')
+    # Only admins can view information for other profiles
+    if tag != session['tag'] and not verify_admin(session):
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
     if not verify_customer(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
-    user_data = UserHandler.get_profile_data(session['email'])
+    user_data = UserHandler.get_profile_data(tag)
     if user_data is None:
         print('FAILEDDDD')
         return StatusCodes['ERROR_UNKNOWN']
@@ -438,13 +440,14 @@ def fetch_profile_info():
 def update_profile():
     (session, data) = getData('session', 'data')
     user = verify_session(session)
-    # If session invalid, or existing password invalid
-    if not user or not UserHandler.get_user_from_credentials(session['email'], data['currentPassword']):
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    if UserHandler.set_profile_data(user, data):
+    if not user:
+        return StatusCodes["FAILURE_NOT_VERIFIED"]
+    if not UserHandler.is_password_valid(user, data['currentPassword']):
+        return StatusCodes["FAILURE_INCORRECT_CREDENTIALS"]
+    if UserHandler.update(user, data):
         return {
             **StatusCodes['SUCCESS'],
-            "profile": UserHandler.get_profile_data(session['email'])
+            "profile": UserHandler.get_profile_data(session['tag'])
         }
     return StatusCodes['ERROR_UNKNOWN']
 
@@ -546,7 +549,7 @@ def update_cart():
     Returns the updated cart data, so the frontend can verify update'''
     (session, who, cart) = getData('session', 'who', 'cart')
     # If changing a cart that doesn't belong to them, verify admin
-    if session['email'] is not who:
+    if session['tag'] != who:
         user = verify_admin(session)
     else:
         user = verify_customer(session)
@@ -558,8 +561,6 @@ def update_cart():
         return StatusCodes['ERROR_UNKNOWN']
     OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
-    print('yeet')
-    print(cart_obj.items)
     return {
         **StatusCodes['SUCCESS'],
         "cart": OrderHandler.to_dict(cart_obj)
@@ -608,13 +609,11 @@ def modify_sku():
 def modify_plant():
     '''Like or unlike an inventory item'''
     (session, operation, plant_data) = getData('session', 'operation', 'data')
-    print(f'PLANT DATA HERE IS {plant_data}')
     if not verify_admin(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     plant_obj = PlantHandler.from_id(plant_data['id'])
     if plant_obj is None and operation != 'ADD':
         return StatusCodes['ERROR_UNKNOWN']
-    print(f'PLANT IS {plant_obj.latin_name}')
     operation_to_status = {
         'HIDE': SkuStatus.INACTIVE.value,
         'UNHIDE': SkuStatus.ACTIVE.value,
@@ -633,7 +632,6 @@ def modify_plant():
         if plant_data['display_image'] is not None:
             image = ImageHandler.create_from_scratch(plant_data['display_image']['data'], 'TODO', Config.PLANT_FOLDER, ImageUses.DISPLAY)
             if image is not None:
-                print('SETTING PLANTS DISPLAY IMAGE')
                 PlantHandler.set_display_image(plant_obj, image)
                 db.session.commit()
 
@@ -645,9 +643,7 @@ def modify_plant():
                 return None
             if (trait := PlantTraitHandler.from_values(option, value)):
                 return trait
-            print(f'UPDATEE TRAIT A... {value}')
             new_trait = PlantTraitHandler.create(option, value)
-            print(f'UPDATE TRAIT B... {new_trait}')
             db.session.add(new_trait)
             return new_trait
         print(f"TODOOOOOOOO {plant_data}")

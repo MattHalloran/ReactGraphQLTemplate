@@ -10,6 +10,9 @@ import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession, getTheme } from 'utils/storage';
 import PubSub from 'utils/pubsub';
+import Button from 'components/Button/Button';
+import { XIcon } from 'assets/img';
+import { printAvailability } from 'utils/printAvailability';
 
 function ShoppingPage() {
     const [user_roles, setUserRoles] = useState(getRoles());
@@ -113,9 +116,26 @@ function ShoppingPage() {
         return false;
     }, [user_roles])
 
+    const resetSearchConstraints = () => {
+        handleSortChange(SORT_OPTIONS[0]);
+        setSearchString('')
+        let copy = {...filters};
+        for (const key in copy) {
+            let filter_group = copy[key];
+            for (let i = 0; i < filter_group.length; i++) {
+                filter_group[i].checked = false;
+            }
+        }
+        setFilters(copy);
+    }
+
     return (
         <StyledShoppingPage theme={theme}>
             <ArrowMenu>
+                <div className="options-container">
+                    <Button onClick={resetSearchConstraints}>Reset</Button>
+                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+                </div>
                 <div className="shopping-menu">
                 <h2>Sort</h2>
                 <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
@@ -138,11 +158,17 @@ function ShoppingPage() {
                 {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>
+                <div className="options-container">
+                    <Button onClick={resetSearchConstraints}>Reset</Button>
+                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+                </div>
             </ArrowMenu>
             <CheckBox className="unavailable-checkbox"
                 label='Show Currently Unavailable' 
                 checked={showCurrentlyUnavailable} 
                 onChange={handleCurrentlyUnavailableChange} />
+            <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
+            <Button onClick={printAvailability}>Print Availability</Button>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable}/>
         </StyledShoppingPage>
     );

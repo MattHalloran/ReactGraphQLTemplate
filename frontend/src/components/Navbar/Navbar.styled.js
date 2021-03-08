@@ -26,17 +26,6 @@ export const StyledNavbar = styled.nav`
     -ms-user-select:none;
     user-select:none;
     -o-user-select:none;
-
-    a:link,
-    a:visited {
-        color: ${({ theme }) => theme.headerText};
-    }
-
-    @media (max-width: 300px) {
-        .nav-name {
-            display: none;
-        }
-    }
     
     .right-align {
         position: relative;
@@ -61,6 +50,7 @@ export const StyledNavbar = styled.nav`
 
     .nav-link {
         text-decoration: none;
+        color: ${({ theme }) => theme.headerText};
     }
 
     .nav-brand {
@@ -70,7 +60,7 @@ export const StyledNavbar = styled.nav`
 
     .nav-logo-container {
         display: inline-block;
-        background: ${({ theme }) => theme.isLight ? '#0c3a0b' : '#757565'};
+        background: ${({ theme }) => theme.isLight ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)'};
         border-radius: 500px;
         height: 12vh;
         width: 12vh;
@@ -97,6 +87,19 @@ export const StyledNavbar = styled.nav`
         font-size: 2em;
         margin-left: -25px;
         font-family: 'Kite One', sans-serif;
+        color: ${({ theme }) => theme.headerText};
+    }
+
+    @media (max-width: 450px) {
+        .nav-name {
+            font-size: 1.5em;
+        }
+    }
+
+    @media (max-width: 350px) {
+        .nav-name {
+            display: none;
+        }
     }
 
     .address-container {
@@ -117,7 +120,7 @@ export const StyledNavbar = styled.nav`
         justify-content: space-around;
         width: -moz-available;
         width: -webkit-fill-available;
-        background: ${({ theme }) => theme.primaryColor};
+        background: ${({ theme }) => theme.lightPrimaryColor};
 
         > * {
             margin: 10px 0;

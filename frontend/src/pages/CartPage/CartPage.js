@@ -36,11 +36,11 @@ function CartPage() {
     })
 
     const updateOrder = () => {
-        if (!session?.email || !session?.token) {
+        if (!session?.tag || !session?.token) {
             alert('Error: Could not update order!');
             return;
         }
-        updateCart(session, session.email, changedCart)
+        updateCart(session, session.tag, changedCart)
             .then(() => {
                 alert('Order updated')
             })

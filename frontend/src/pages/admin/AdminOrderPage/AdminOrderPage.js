@@ -11,6 +11,8 @@ import { updateCart, setOrderStatus } from 'query/http_promises';
 import { updateObject } from 'utils/objectTools';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
+import CustomerInfo from 'components/CustomerInfo/CustomerInfo';
+import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
 
 const ORDER_STATES = [
     {
@@ -146,11 +148,11 @@ function OrderPopup({
     }
 
     const updateOrder = () => {
-        if (!session?.email || !session?.token) {
+        if (!session?.tag || !session?.token) {
             alert('Error: Could not update order!');
             return;
         }
-        updateCart(session, session.email, changedOrder)
+        updateCart(session, session.tag, changedOrder)
             .then(() => {
                 alert('Order updated')
             })
@@ -196,7 +198,8 @@ function OrderPopup({
                 <Button onClick={updateOrder}>Update Order</Button>
                 <Button onClick={approveOrder}>Approve</Button>
                 <Button onClick={denyOrder}>Deny</Button>
-                <Button>Contact</Button>
+                <PopupMenu obj={<Button>Contact</Button>}
+                menu={<CustomerInfo customer={order.customer}/>} />
             </div>
         </StyledOrderPopup>
     );

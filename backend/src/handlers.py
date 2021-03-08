@@ -5,7 +5,7 @@ from src.models import PlantTraitOptions, Role, Sku, SkuStatus, SkuDiscount, Use
 from sqlalchemy.orm.collections import InstrumentedList
 from src.api import db
 from src.config import Config
-from src.utils import resize_image
+from src.utils import resize_image, priceStringToDecimal
 from base64 import b64encode
 from src.auth import verify_token
 import time
@@ -170,8 +170,6 @@ class Handler(ABC):
         i_ids = [it.id for it in relationship]  # IDs in the items list
         d_ids = []  # IDs in the data list
         for d_obj in data:
-            print(f'd_obj is {d_obj}')
-            print(type(d_obj))
             # Object is not new - update
             if (d_id := d_obj.get('id', None)):
                 d_ids.append(d_id)
@@ -522,8 +520,10 @@ class OrderHandler(Handler):
             "id": customer.id,
             "first_name": customer.first_name,
             "last_name": customer.last_name,
+            "pronouns": customer.pronouns,
+            "emails": EmailHandler.all_dicts(customer.personal_email),
+            "phones": PhoneHandler.all_dicts(customer.personal_phone),
         }
-        print(as_dict)
         return as_dict
 
     @staticmethod
@@ -756,11 +756,9 @@ class PlantHandler(Handler):
 
     @staticmethod
     def set_display_image(model: Plant, image: Image):
-        print(f'PRE SET: {model.display_img}')
         model.display_img = image
         model.display_img_id = image.id
         db.session.commit()
-        print(f'POST SET: {model.display_img}')
 
     @staticmethod
     def get_display_image(model: Plant):
@@ -768,7 +766,6 @@ class PlantHandler(Handler):
         if not found'''
         # If the sku has a display image TODO doesn't account for full or thumb
         if model.display_img:
-            print(f'DISPLAY HERE: {model.display_img}')
             return model.display_img
         if len(model.flower_images) > 0:
             return model.flower_images[0]
@@ -895,25 +892,27 @@ class SkuHandler(Handler):
     def cheapest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.price, reverse=False)
+        sorted_skus = sorted(skus, key=lambda s: priceStringToDecimal(s.price), reverse=False)
+        return priceStringToDecimal(sorted_skus[0].price)
 
     @staticmethod
     def priciest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.price, reverse=True)
+        sorted_skus = sorted(skus, key=lambda s: priceStringToDecimal(s.price), reverse=True)
+        return priceStringToDecimal(sorted_skus[0].price)
 
     @staticmethod
     def newest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.date_added, reverse=False)
+        return sorted(skus, key=lambda s: s.date_added, reverse=False)[0].date_added
 
     @staticmethod
     def oldest(skus):
         if skus is None:
             return -1
-        return sorted(skus, key=lambda s: s.date_added, reverse=True)
+        return sorted(skus, key=lambda s: s.date_added, reverse=True)[0].date_added
 
     @classmethod
     def hide_all(cls):
@@ -940,10 +939,34 @@ class UserHandler(Handler):
         return ['existing_customer', 'password', 'login_attempts']
 
     @classmethod
+    def update(cls, obj: User, *args):
+        data = args[0]
+        success = True
+        if first_name := data.get('first_name', None):
+            obj.first_name = first_name
+        if last_name := data.get('last_name', None):
+            obj.last_name = last_name
+        if pronouns := data.get('pronouns', None):
+            obj.pronouns = pronouns
+        obj.theme = data.get('theme', obj.theme)
+        if emails := data.get('emails', None):
+            success = cls.update_relationship_list(obj.personal_email, EmailHandler, emails) and success
+        if phones := data.get('phones', None):
+            success = cls.update_relationship_list(obj.personal_phone, PhoneHandler, phones) and success
+        if existing_customer := data.get('existing_customer', None):
+            if not obj.account_approved and existing_customer:
+                obj.account_approved = True
+        if (password := data.get('password', None)):
+            obj.password = User.hashed_password(password)
+        db.session.commit()
+        return obj
+
+    @classmethod
     def create(cls, *args):
         user = super(UserHandler, cls).create(*args)
         # All users are customers by default
         user.roles.append(RoleHandler.get_customer_role())
+        cls.update(user, *args)
         return user
 
     @classmethod
@@ -951,8 +974,11 @@ class UserHandler(Handler):
         model = cls.convert_to_model(model)
         as_dict = UserHandler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
         as_dict['id'] = model.id
+        as_dict['tag'] = model.tag
         as_dict['account_status'] = model.account_status
         as_dict['roles'] = RoleHandler.all_dicts(model.roles)
+        as_dict['emails'] = EmailHandler.all_dicts(model.personal_email)
+        as_dict['phones'] = PhoneHandler.all_dicts(model.personal_phone)
         if len(model.orders) > 0:
             as_dict['cart'] = OrderHandler.to_dict(UserHandler.get_cart(model))
         else:
@@ -969,6 +995,10 @@ class UserHandler(Handler):
         return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
 
     @staticmethod
+    def from_tag(tag: str):
+        return db.session.query(User).filter_by(tag=tag).one_or_none()
+
+    @staticmethod
     def from_email(email: str):
         return User.query.filter(User.personal_email.any(email_address=email)).first()
 
@@ -976,8 +1006,6 @@ class UserHandler(Handler):
     def email_in_use(email: str):
         '''Returns True if the email is being used by an active account'''
         users = User.query.filter(User.personal_email.any(email_address=email)).all()
-        print('IN EMAIL IN USE')
-        print(users)
         if users is None:
             return True
         return any(user.account_status != AccountStatus.DELETED.value for user in users)
@@ -992,9 +1020,12 @@ class UserHandler(Handler):
         return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod
+    def is_password_valid(user: User, password: str):
+        return bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
+
+    @staticmethod
     def get_user_from_credentials(email: str, password: str):
-        user = UserHandler.from_email(email)
-        if user:
+        if (user := UserHandler.from_email(email)):
             # Reset login attempts after 15 minutes
             if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
                 print('Resetting soft account lock')
@@ -1003,10 +1034,9 @@ class UserHandler(Handler):
             user.login_attempts += 1
             db.session.commit()
             print(f'User login attempts: {user.login_attempts}')
-            print(bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')))
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
-               bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
+                    UserHandler.is_password_valid(user, password)):
                 user.account_status = AccountStatus.UNLOCKED.value
                 user.login_attempts = 0  # Reset login attemps
                 db.session.commit()
@@ -1029,15 +1059,15 @@ class UserHandler(Handler):
         model.session_token = token
 
     @staticmethod
-    def is_valid_session(email, token, app):
+    def is_valid_session(tag: str, token: str, app):
         '''Determines if the provided email and token combination
         makes a valid user session
         Returns a dict containing:
             1) a boolean indicating if the user is a customer
             2) the error message, if boolean is false
             3) the user object, if boolean is true'''
-        # First, try to find the user associated with the email
-        user = UserHandler.from_email(email)
+        # First, try to find the user associated with the tag
+        user = UserHandler.from_tag(tag)
         if not user:
             return {
                 'valid': False,
@@ -1056,10 +1086,10 @@ class UserHandler(Handler):
         }
 
     @staticmethod
-    def get_profile_data(email):
+    def get_profile_data(tag: str):
         '''Returns user profile data'''
         # Check if user esists
-        user = UserHandler.from_email(email)
+        user = UserHandler.from_tag(tag)
         if not user:
             return None
         return {
@@ -1074,27 +1104,6 @@ class UserHandler(Handler):
             "roles": RoleHandler.all_dicts(user.roles),
             "likes": SkuHandler.all_dicts(user.likes)
         }
-
-    @classmethod
-    def set_profile_data(cls, user, data: dict):
-        '''Sets user profile data'''
-        success = True
-        user.first_name = data.get('first_name', user.first_name)
-        user.last_name = data.get('last_name', user.last_name)
-        user.pronouns = data.get('pronouns', user.pronouns)
-        user.theme = data.get('theme', user.theme)
-        # TODO fix for multiple emails and phones
-        # if emails := data.get('emails', None):
-        #     success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
-        # if phones := data.get('phones', None):
-        #     success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
-        if existing_customer := data.get('existing_customer', None):
-            if not user.account_approved and existing_customer:
-                user.account_approved = True
-        if (password := data.get('password', None)):
-            user.password = User.hashed_password(password)
-        db.session.commit()
-        return True
 
     @staticmethod
     def get_user_lock_status(email: str):

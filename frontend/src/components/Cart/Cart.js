@@ -31,7 +31,6 @@ function Cart({
     cart,
     onUpdate,
 }) {
-    console.log('CART IS: ', cart)
     const [changedCart, setChangedCart] = useState(cart ?? {});
     const [theme, setTheme] = useState(getTheme());
     // Thumbnail data for every SKU
@@ -45,7 +44,6 @@ function Cart({
     }
 
     useEffect(() => {
-        console.log('Changedcart changed', changedCart)
         onUpdate(changedCart);
     }, [changedCart])
 
@@ -77,12 +75,10 @@ function Cart({
 
     const handleDeliveryChange = useCallback((sort_item, _) => {
         if (changedCart?.is_delivery === sort_item.value) return;
-        console.log('HANDLE DELIVERY CHANGE');
         setChangedCart(c => updateObject(c, 'is_delivery', sort_item.value));
     }, [changedCart])
 
     const updateItemQuantity = useCallback((sku, quantity) => {
-        console.log('UPDATE ITEM QUANTIT CALLED');
         let index = changedCart?.items?.findIndex(i => i.sku.sku === sku) ?? -1;
         if (index < 0 || index >= (changedCart?.items.length ?? -1)) {
             alert('Error: Could not update item quantity!');

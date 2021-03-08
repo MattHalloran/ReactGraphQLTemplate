@@ -12,7 +12,7 @@ def generate_token(app, user, expiration=TWO_WEEKS):
     s = Serializer(SECRET_KEY, expires_in=expiration)
     token = s.dumps({
         'id': user.id,
-        'email': user.personal_email[0].email_address,
+        'tag': user.tag,
     }).decode('utf-8')
     return token
 

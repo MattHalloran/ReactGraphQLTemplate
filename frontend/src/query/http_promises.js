@@ -10,13 +10,13 @@ import * as http from './http_functions';
 function promiseWrapper(http_func, ...args) {
     return new Promise(function (resolve, reject) {
         PubSub.publish(PUBS.Loading, true);
-        http_func(...args).then(data => {
+        http_func(...args).then(response => {
             PubSub.publish(PUBS.Loading, false);
-            if (data.ok) {
-                resolve(data);
+            if (response.ok) {
+                resolve(response);
             } else {
-                console.warn(`HTTP call ${http_func} failed with status ${data.status}`);
-                reject(data);
+                console.warn(`HTTP call ${http_func} failed with status ${response.status}`);
+                reject(response);
             }
         }).catch(err => {
             console.error(err);
@@ -32,7 +32,7 @@ export const getImage = (id, size) => promiseWrapper(http.fetch_image, id, size)
 export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, size);
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);
 export const uploadAvailability = (formData) => promiseWrapper(http.upload_availability, formData);
-export const getProfileInfo = (session) => promiseWrapper(http.fetch_profile_info, session);
+export const getProfileInfo = (session, tag) => promiseWrapper(http.fetch_profile_info, session, tag);
 export const updateProfile = (session, data) => promiseWrapper(http.update_profile, session, data);
 export const getLikes = (session) => promiseWrapper(http.fetch_likes, session);
 export const getCart = (session) => promiseWrapper(http.fetch_cart, session);
@@ -50,12 +50,12 @@ export const setOrderStatus = (session, id, status) => promiseWrapper(http.set_o
 
 export function submitOrder(session, cart) {
     return new Promise(function (resolve, reject) {
-        http.submit_order(session, cart).then(data => {
-            if (data.ok) {
+        http.submit_order(session, cart).then(response => {
+            if (response.ok) {
                 storeItem(LOCAL_STORAGE.Cart, null);
-                resolve(data);
+                resolve(response);
             } else {
-                reject(data);
+                reject(response);
             }
         })
     });
@@ -66,20 +66,18 @@ export const checkCookies = () => {
         let roles = getRoles();
         if (roles) PubSub.publish(PUBS.Roles, roles);
         let session = getSession();
-        if (!session || !session.email || !session.token) {
+        if (!session || !session.tag || !session.token) {
             console.log('SETTING SESSION TO NULL', session);
             storeItem(LOCAL_STORAGE.Session, null);
             reject(STATUS_CODES.FAILURE_NOT_VERIFIED);
         } else {
-            http.validate_token(session.token).then(data => {
-                if (data.ok) {
-                    console.log('COOKIE SUCCESS! SeTting session', session)
+            http.validate_token(session).then(response => {
+                if (response.ok) {
                     storeItem(LOCAL_STORAGE.Session, session);
-                    resolve(data);
+                    resolve(response);
                 } else {
-                    console.log('COOKIE FAILURE! session setting to null')
                     storeItem(LOCAL_STORAGE.Session, null);
-                    reject(data);
+                    reject(response);
                 }
             })
         }
@@ -103,25 +101,25 @@ export const login = (session, user) => {
 
 export function loginUser(email, password) {
     return new Promise(function (resolve, reject) {
-        http.login(email, password).then(data => {
-            if (data.ok) {
-                console.log('LOGIN OKAY', data.user)
-                login({email: email, token: data.token}, data.user);
-                resolve(data);
+        http.login(email, password).then(response => {
+            if (response.ok) {
+                login(response.session, response.user);
+                resolve(response);
             } else {
-                console.log('DATA NOT OKAY, logging out', data)
+                console.log('DATA NOT OKAY, logging out', response)
                 clearStorage();
-                reject(data);
+                reject(response);
             }
         })
     });
 }
 
-export function registerUser(email, data) {
+export function registerUser(data) {
     return new Promise(function (resolve, reject) {
-        http.create_user(data).then(response => {
+        console.log('data in register user is', data)
+        http.register(data).then(response => {
             if (response.ok) {
-                login({email: email, token: response.token }, response.user);
+                login(response.session, response.user);
                 resolve(data);
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')

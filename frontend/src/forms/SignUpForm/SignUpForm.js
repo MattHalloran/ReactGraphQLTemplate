@@ -54,7 +54,7 @@ function SignUpForm() {
             "password": password,
             "existing_customer": existingCustomer
         }
-        registerUser(email, data).then(() => {
+        registerUser(data).then(() => {
             if (existingCustomer) {
                 alert('Welcome to New Life Nursery! You may now begin shopping');
             } else {

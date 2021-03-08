@@ -60,7 +60,17 @@ def salt(length: int):
     '''Generates a random string of letters and numbers'''
     import random
     ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    chars=[]
+    chars = []
     for i in range(length):
         chars.append(random.choice(ALPHABET))
     return "".join(chars)
+
+
+def priceStringToDecimal(price: str):
+    from re import sub
+    from decimal import Decimal
+    from decimal import InvalidOperation
+    try:
+        return Decimal(sub(r'[^\d.]', '', price))
+    except InvalidOperation:
+        return 0

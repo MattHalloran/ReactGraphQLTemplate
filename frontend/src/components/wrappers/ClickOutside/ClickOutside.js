@@ -1,60 +1,48 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import makeID from 'utils/makeID';
 
-export class ClickOutside extends React.Component {
-  constructor(props) {
-    super(props);
+function ClickOutside({
+    active = false,
+    on_click_outside,
+    children,
+    ...props
+}) {
+    let listenerRef = useRef(null);
+    let wrapperID = useRef(makeID(10));
 
-    this.setWrapperRef = this.setWrapperRef.bind(this);
-    this.handleClickOutside = this.handleClickOutside.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    let was_active = prevProps.active !== null ? prevProps.active : true;
-    let is_active = this.props.active !== null ? this.props.active : true;
-    if (was_active && !is_active) {
-      document.removeEventListener('mousedown', this.handleClickOutside);
-    } else if (!was_active && is_active) {
-      document.addEventListener('mousedown', this.handleClickOutside);
+    const handleClickOutside = (event) => {
+        if (!document.getElementById(wrapperID.current)?.contains(event.target)) {
+            event.stopPropagation();
+            on_click_outside();
+        }
     }
-  }
 
-  componentDidMount() {
-    let active = this.props.active !== undefined ? this.props.active : true;
-    if (active) {
-      document.addEventListener('mousedown', this.handleClickOutside);
+    if (active && listenerRef.current === null) {
+        listenerRef.current = document.addEventListener('mouseup', handleClickOutside);
+    } else if (!active && listenerRef.current !== null) {
+        document.removeEventListener('mouseup', listenerRef);
+        listenerRef.current = null;
     }
-  }
 
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside);
-  }
+    useEffect(() => {
+        return (() => {
+            if (listenerRef.current !== null)
+                document.removeEventListener('mouseup', listenerRef);
+        })
+    })
 
-  setWrapperRef(node) {
-    this.wrapperRef = node;
-  }
-
-  handleClickOutside(event) {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      event.stopPropagation();
-      this.props.on_click_outside();
-    }
-  }
-
-  render() {
     return (
-      <div ref={this.setWrapperRef}
-           className={this.props.className}>
-        {this.props.children}
-      </div>
-    );
-  }
+        <div id={wrapperID.current} {...props}>
+            {children}
+        </div>
+    )
 }
 
 ClickOutside.propTypes = {
-  children: PropTypes.any.isRequired,
-  on_click_outside: PropTypes.func.isRequired,
-  active: PropTypes.bool,
-};
+    children: PropTypes.any.isRequired,
+    on_click_outside: PropTypes.func.isRequired,
+    active: PropTypes.bool,
+}
 
 export default ClickOutside;

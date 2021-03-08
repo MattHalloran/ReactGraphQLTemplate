@@ -41,6 +41,19 @@ export const GlobalStyles = createGlobalStyle`
         color: ${({ theme }) => theme.primaryText};
     }
 
+    ::placeholder {
+        color: ${({ theme }) => theme.secondaryText};
+        opacity: 1; /* Firefox */
+      }
+      
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+       color: ${({ theme }) => theme.secondaryText};
+      }
+      
+      ::-ms-input-placeholder { /* Microsoft Edge */
+       color: ${({ theme }) => theme.secondaryText};
+      }
+
     #App {
         text-align: center;
         ${({ menu_or_popup_open }) => menu_or_popup_open ? menu_app_style : ''};
@@ -96,7 +109,7 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     .page {
-        background: ${({ theme }) => theme.lightPrimaryColor};
+        background: ${({ theme }) => theme.lightBackgroundColor};
         min-height: 100vh;
         margin-top: 15vh;
         margin-left: 1vw;

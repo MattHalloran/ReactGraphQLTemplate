@@ -18,6 +18,7 @@ export const darkTheme = {
     // hoverPrimary: '#92817A',
     isLight: false,
     backgroundColor: '#1f1d1d',
+    lightBackgroundColor: '#565656',
     primaryColor: '#254436',
     lightPrimaryColor: '#565656',
     darkPrimaryColor: '#1c2d25',
@@ -39,10 +40,11 @@ export const lightTheme = {
     // headerPrimary: 'aliceblue',
     // hoverPrimary: '#EEEEEE',
     isLight: true,
-    backgroundColor: '#d3d8d7',
-    primaryColor: '#3d921a',
-    lightPrimaryColor: '#8fc581',
-    darkPrimaryColor: '#1E7E26',
+    backgroundColor: '#b4c1b9',
+    lightBackgroundColor: '#aab9a6',
+    primaryColor: '#1E7E26',
+    lightPrimaryColor: '#688e59',
+    darkPrimaryColor: '#125a28',
     accentColor: '#3549d8',
     cardColor: '#1E7E26',
     primaryText: '#212121',
@@ -112,12 +114,15 @@ export const getLikes = () => {
 
 export const getCart = () => {
     let data = getItem(LOCAL_STORAGE.Cart);
+    console.log('IN START OF GET CART', data);
     if (data) return data;
     //If cart not found, attempt to query backend
     let session = getSession();
     if (!session) return null;
     http.getCart(session).then(response => {
-        storeItem(LOCAL_STORAGE.Cart, response.cart);
+        console.log('STORING CART', response.cart)
+        storeItem(LOCAL_STORAGE.Cart, response.cart, true);
+        console.log('STORED CART ISSSSSSSS... ', getItem(LOCAL_STORAGE.Cart))
         return response.cart;
     }).catch(err => {
         console.error(err);
@@ -141,7 +146,9 @@ export const storeItem = (key, value, forceUpdate=false) => {
             value = JSON.parse(value)
         } catch (e) { }
     }
+    console.log('store item a', value)
     if (!forceUpdate && deepEqual(getItem(key), value)) return;
+    console.log('store item b', JSON.stringify(value))
     console.log("STORING ITEMMMM", key, value);
     localStorage.setItem(key, JSON.stringify(value));
     PubSub.publish(key, value);
@@ -149,7 +156,12 @@ export const storeItem = (key, value, forceUpdate=false) => {
 
 export const getItem = (key) => {
     let data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : null;
+    try {
+        return data ? JSON.parse(data) : null;
+    } catch(err) {
+        console.error(err);
+        return null;
+    }
 }
 
 export const clearStorage = () => {

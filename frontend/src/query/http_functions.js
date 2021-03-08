@@ -30,9 +30,9 @@ async function fetchWrapper(route, httpParams) {
     }
 }
 
-export async function validate_token(token) {
+export async function validate_token(session) {
     let json = JSON.stringify({
-        token: token,
+        session: session
     });
     let options = {
         body: json,
@@ -43,7 +43,7 @@ export async function validate_token(token) {
     return await fetchWrapper('validate_token', options);
 }
 
-export async function create_user(data) {
+export async function register(data) {
     let json = JSON.stringify({
         "data": data
     });
@@ -185,9 +185,10 @@ export async function update_contact_info(data) {
     return await fetchWrapper('update_contact_info', options);
 }
 
-export async function fetch_profile_info(session) {
+export async function fetch_profile_info(session, tag) {
     let json = JSON.stringify({
         "session": session,
+        "tag": tag,
     });
     let options = {
         body: json,
@@ -225,7 +226,6 @@ export async function fetch_cart(session) {
 }
 
 export async function set_like_sku(session, sku, liked) {
-    console.log('SET LIKE SKU', liked)
     let json = JSON.stringify({
         "session": session,
         "sku": sku,
@@ -376,7 +376,6 @@ export async function update_profile(session, data) {
         "session": session,
         "data": data
     });
-    console.log('UPDATING PROFILE WITH', data)
     let options = {
         body: json,
         method: 'post',
