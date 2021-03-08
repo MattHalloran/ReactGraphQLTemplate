@@ -42,8 +42,10 @@ function ProfileForm(props) {
     // Array profile fields
     const [emails, setEmails] = useState([""])
     const [emailErrors, setEmailErrors] = useState(null);
+    const email_ids = useRef();
     const [phones, setPhones] = useState([""])
     const [phoneErrors, setPhoneErrors] = useState(null);
+    const phone_ids = useRef();
     const [isLightTheme, setIsLightTheme] = useState(null);
     const [existingCustomer, setExistingCustomer] = useState(null);
     const [existingCustomerError, setExistingCustomerError] = useState(null);
@@ -61,7 +63,7 @@ function ProfileForm(props) {
         let mounted = true;
         document.title = `Profile | ${BUSINESS_NAME}`;
         if (!session) return;
-        getProfileInfo(session, session.email).then(response => {
+        getProfileInfo(session, session.tag).then(response => {
             console.log('GOT PROFILE INFOO!!!!!!', response);
             if (!mounted || editing) return;
             let user = response.user;
@@ -71,9 +73,11 @@ function ProfileForm(props) {
             // TODO convert emails and phones to strings first
             if (user.emails) {
                 setEmails(user.emails.map(o => o.email_address));
+                email_ids.current = user.emails.map(o => o.id);
             }
             if (user.phones) {
                 setPhones(user.phones.map(o => o.unformatted_number));
+                phone_ids.current = user.phones.map(o => o.id);
             }
             if (user.pronouns) {
                 setPronouns(user.pronouns);
@@ -118,8 +122,15 @@ function ProfileForm(props) {
             "first_name": firstName,
             "last_name": lastName,
             "pronouns": pronouns,
-            "emails": emails,
-            "phones": phones,
+            "emails": [{"id": email_ids.current[0], "email_address": emails[0], "receives_delivery_updates": true}],
+            "phones": [{
+                "id": phone_ids.current[0],
+                "unformatted_number": phones[0],
+                 "country_code": '+1',
+                 "extension": '',
+                 "is_mobile": true,
+                 "receives_delivery_updates": false
+            }],
             "existing_customer": existingCustomer,
             "theme": isLightTheme ? 'light' : 'dark',
         }

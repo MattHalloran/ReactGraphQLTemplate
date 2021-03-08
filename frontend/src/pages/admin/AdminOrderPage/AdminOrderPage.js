@@ -148,11 +148,11 @@ function OrderPopup({
     }
 
     const updateOrder = () => {
-        if (!session?.email || !session?.token) {
+        if (!session?.tag || !session?.token) {
             alert('Error: Could not update order!');
             return;
         }
-        updateCart(session, session.email, changedOrder)
+        updateCart(session, session.tag, changedOrder)
             .then(() => {
                 alert('Order updated')
             })

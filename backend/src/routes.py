@@ -68,11 +68,11 @@ def handle_exception(func):
 def verify_session(session):
     '''Verifies that the user supplied a valid session token
     Returns User object if valid, otherwise None'''
-    print('in veify session')
-    print(session)
-    temp = UserHandler.is_valid_session(session['email'], session['token'], app)
-    print(temp)
-    return UserHandler.is_valid_session(session['email'], session['token'], app).get('user', None)
+    tag = session.get('tag', None)
+    token = session.get('token', None)
+    if tag and token:
+        return UserHandler.is_valid_session(tag, token, app).get('user', None)
+    return None
 
 
 def verify_customer(session):
@@ -125,23 +125,22 @@ def consts():
 @handle_exception
 def register():
     (data) = getData('data')
+    print('woopiw woop')
+    print(data['first_name'])
+    print(data['last_name'])
     # If email is already registered
     if any(UserHandler.email_in_use(e['email_address']) for e in data['emails']):
         print('ERROR: Email exists')
         return StatusCodes['FAILURE_EMAIL_EXISTS']
     # Create user
     user = UserHandler.create(data)
-    # Give the user a customer role
-    user.roles.append(RoleHandler.get_customer_role())
-    # Update the user's profile data
-    UserHandler.set_profile_data(user, data)
     # Create a session token
     token = generate_token(app, user)
     UserHandler.set_token(user, token)
     db.session.commit()
     return {
         **StatusCodes['SUCCESS'],
-        "token": token,
+        "session": {"tag": user.tag, "token": token},
         "user": UserHandler.to_dict(user)
     }
 
@@ -161,7 +160,7 @@ def login():
         return {
             **StatusCodes['SUCCESS'],
             "user": UserHandler.to_dict(user),
-            "token": token
+            "session": {"tag": user.tag, "token": token}
         }
     else:
         account_status = UserHandler.get_user_lock_status(email)
@@ -188,13 +187,16 @@ def send_password_reset_request():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def validate_token():
-    token = getJson('token')
-    is_valid = verify_token(app, token) if (token is not None) else False
-    status = StatusCodes['SUCCESS'] if is_valid else StatusCodes['FAILURE_NOT_VERIFIED']
-    return {
-        **status,
-        "token_is_valid": is_valid
-    }
+    print('validating token)')
+    session = getJson('session')
+    print('1')
+    tag = session.get('tag', None)
+    token = session.get('token', None)
+    if not tag or not token:
+        return StatusCodes['ERROR_INVALID_ARGS']
+    if verify_token(app, token):
+        return StatusCodes['SUCCESS']
+    return StatusCodes['FAILURE_NOT_VERIFIED']
 
 
 if __name__ == '__main__':
@@ -419,13 +421,13 @@ def update_contact_info():
 @handle_exception
 def fetch_profile_info():
     '''Fetches profile info for a customer'''
-    (session, email) = getJson('session', 'email')
+    (session, tag) = getJson('session', 'tag')
     # Only admins can view information for other profiles
-    if email != session['email'] and not verify_admin(session):
+    if tag != session['tag'] and not verify_admin(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     if not verify_customer(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
-    user_data = UserHandler.get_profile_data(email)
+    user_data = UserHandler.get_profile_data(tag)
     if user_data is None:
         print('FAILEDDDD')
         return StatusCodes['ERROR_UNKNOWN']
@@ -442,13 +444,14 @@ def fetch_profile_info():
 def update_profile():
     (session, data) = getData('session', 'data')
     user = verify_session(session)
-    # If session invalid, or existing password invalid
-    if not user or not UserHandler.get_user_from_credentials(session['email'], data['currentPassword']):
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    if UserHandler.set_profile_data(user, data):
+    if not user:
+        return StatusCodes["FAILURE_NOT_VERIFIED"]
+    if not UserHandler.is_password_valid(user, data['currentPassword']):
+        return StatusCodes["FAILURE_INCORRECT_CREDENTIALS"]
+    if UserHandler.update(user, data):
         return {
             **StatusCodes['SUCCESS'],
-            "profile": UserHandler.get_profile_data(session['email'])
+            "profile": UserHandler.get_profile_data(session['tag'])
         }
     return StatusCodes['ERROR_UNKNOWN']
 
@@ -550,9 +553,11 @@ def update_cart():
     Returns the updated cart data, so the frontend can verify update'''
     (session, who, cart) = getData('session', 'who', 'cart')
     # If changing a cart that doesn't belong to them, verify admin
-    if session['email'] is not who:
+    if session['tag'] != who:
+        print(f"session tag is not who: {session['tag']} | {who}")
         user = verify_admin(session)
     else:
+        print(f"session tag is who: {session}")
         user = verify_customer(session)
     if not user:
         return StatusCodes['ERROR_NOT_AUTHORIZED']

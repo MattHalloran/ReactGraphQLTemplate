@@ -12,6 +12,7 @@ import { getRoles, getSession, getTheme } from 'utils/storage';
 import PubSub from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { XIcon } from 'assets/img';
+import { printAvailability } from 'utils/printAvailability';
 
 function ShoppingPage() {
     const [user_roles, setUserRoles] = useState(getRoles());
@@ -167,6 +168,7 @@ function ShoppingPage() {
                 checked={showCurrentlyUnavailable} 
                 onChange={handleCurrentlyUnavailableChange} />
             <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
+            <Button onClick={printAvailability}>Print Availability</Button>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable}/>
         </StyledShoppingPage>
     );

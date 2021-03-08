@@ -4,13 +4,14 @@ import { StyledFormPage } from './FormPage.styled';
 
 function FormPage({
     header,
+    autocomplete = 'on',
     children,
     maxWidth = '90%',
     theme = getTheme(),
 }) {
     return (
         <StyledFormPage theme={theme} maxWidth={maxWidth}>
-            <form className="form">
+            <form className="form" autocomplete={autocomplete}>
                 <div className="header">
                     <h1>{header}</h1>
                 </div>
@@ -24,6 +25,7 @@ function FormPage({
 
 FormPage.propTypes = {
     header: PropTypes.string.isRequired,
+    autocomplete: PropTypes.string,
     children: PropTypes.any,
     maxWidth: PropTypes.string,
     theme: PropTypes.object,

@@ -1,20 +1,11 @@
 //TODO code is messy because of cart item bubble. Clean it up
 
-import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { PubSub } from 'utils/pubsub';
-import { PUBS } from 'utils/consts';
-import { getCart } from 'utils/storage';
 
-function ShoppingCartIcon(props) {
-    const [cart, setCart] = useState(getCart());
-
-    useEffect(() => {
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
-        return (() => {
-            PubSub.unsubscribe(cartSub);
-        })
-    }, [])
+function ShoppingCartIcon({
+    cart,
+    ...props
+}) {
 
     let cart_bubble;
     if (cart?.items?.length > 0) {
@@ -22,6 +13,7 @@ function ShoppingCartIcon(props) {
                         border:'1px solid darkred',
                         borderRadius:'50px', 
                         backgroundColor:'red',
+                        color: 'white',
                         fontWeight:'bold',
                         width: '20px',
                         height: '20px',

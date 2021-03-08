@@ -89,6 +89,12 @@ function AdminCustomerPage() {
             });
     }, [selected]);
 
+    const new_user = () => {
+        alert('Coming soon!');
+        return;
+        //TODO
+    }
+
     const view_user = () => setInfoOpen(true);
 
     let popup = (infoOpen) ? (
@@ -98,13 +104,14 @@ function AdminCustomerPage() {
     ) : null;
 
 
+    let new_button = [new_user, 'New'];
     let approve_button = [approve_user, 'Approve'];
     let unlock_button = [unlock_user, 'Unlock'];
     let lock_button = [lock_user, 'Lock'];
     let delete_button = [delete_user, 'Delete'];
     let view_button = [view_user, 'View']
 
-    let account_options = [];
+    let account_options = [new_button];
     let selected_display = '';
     if (selected >= 0) {
         selected_display = `${customers[selected]?.first_name} ${customers[selected]?.last_name}`

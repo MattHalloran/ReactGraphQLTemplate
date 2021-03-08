@@ -28,7 +28,7 @@ import LogInForm from 'forms/LogInForm/LogInForm';
 import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 //Provide global themes
 import { GlobalStyles } from './global';
-import { getSession, getTheme } from './utils/storage';
+import { getSession, getTheme, getCart } from './utils/storage';
 //Authentication
 import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
 import { checkCookies } from 'query/http_promises';
@@ -46,6 +46,7 @@ function App() {
     const [session, setSession] = useState(getSession());
     const session_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
+    const [cart, setCart] = useState(getCart());
     const [theme, setTheme] = useState(getTheme());
     const [menu_open, setMenuOpen] = useState(false);
     const [arrow_open, setArrowOpen] = useState(false);
@@ -84,6 +85,7 @@ function App() {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
         let arrowSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, o) => setArrowOpen(open => o === 'toggle' ? !open : o));
         let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
@@ -92,6 +94,7 @@ function App() {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
+            PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(popupSub);
             PubSub.unsubscribe(arrowSub);
             PubSub.unsubscribe(menuSub);
@@ -113,7 +116,7 @@ function App() {
             <GlobalStyles theme={theme} menu_or_popup_open={menu_open || arrow_open || popup_open} />
             <div id="page-container">
                 <div id="content-wrap">
-                    <Navbar visible={nav_visible} session={session} user_roles={user_roles} />
+                    <Navbar visible={nav_visible} session={session} user_roles={user_roles} cart={cart} />
                     <Spinner spinning={false} />
                     <Switch>
                         {/* public pages */}

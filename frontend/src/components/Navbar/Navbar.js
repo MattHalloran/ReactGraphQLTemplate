@@ -86,7 +86,7 @@ function Hamburger(props) {
     } else {
         top_links.push([LINKS.Shopping, BagPlusIcon],
             [LINKS.Profile, PersonIcon],
-            [LINKS.Cart, ShoppingCartIcon]);
+            [LINKS.Cart, ShoppingCartIcon, {cart: props.cart}]);
     }
 
     nav_options.push(
@@ -102,8 +102,8 @@ function Hamburger(props) {
     return (
         <BurgerMenu theme={theme} {...props}>
             <div className="icon-container" style={{ margin: '10px 5px 10px 5px' }}>
-                {top_links.map(([link, Icon], index) => (
-                    <Icon key={index} width="40px" height="40px" onClick={() => history.push(link)} />
+                {top_links.map(([link, Icon, extra_props], index) => (
+                    <Icon key={index} {...extra_props} width="40px" height="40px" onClick={() => history.push(link)} />
                 ))}
                 <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
             </div>
@@ -128,7 +128,7 @@ Hamburger.propTypes = {
 
 }
 
-function NavList() {
+function NavList(props) {
     const [session, setSession] = useState(getSession());
     const [user_roles, setUserRoles] = useState(getRoles());
 
@@ -167,7 +167,7 @@ function NavList() {
     } else {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
         cart = (
-            <Link to={LINKS.Cart}><ShoppingCartIcon className="iconic" width="30px" height="30px" /></Link>
+            <Link to={LINKS.Cart}><ShoppingCartIcon cart={props.cart} className="iconic" width="30px" height="30px" /></Link>
         );
     }
 

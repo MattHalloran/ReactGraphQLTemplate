@@ -50,6 +50,7 @@ export const StyledNavbar = styled.nav`
 
     .nav-link {
         text-decoration: none;
+        color: ${({ theme }) => theme.headerText};
     }
 
     .nav-brand {
@@ -59,7 +60,7 @@ export const StyledNavbar = styled.nav`
 
     .nav-logo-container {
         display: inline-block;
-        background: ${({ theme }) => theme.isLight ? '#0c3a0b' : '#757565'};
+        background: ${({ theme }) => theme.isLight ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)'};
         border-radius: 500px;
         height: 12vh;
         width: 12vh;

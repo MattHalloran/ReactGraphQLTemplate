@@ -81,12 +81,15 @@ class Handler(ABC):
         if hasattr(cls.ModelType, 'defaults'):
             for key in cls.ModelType.defaults.keys():
                 if not data.get(key):
+                    print(f'setting default value: {key} | {cls.ModelType.defaults[key]}')
                     data[key] = cls.ModelType.defaults[key]
         # If any required fields are missing
         if not cls.data_has_required(cls.required_fields(), data):
             raise Exception('Cannot create object: one or more required fields missing')
         # Filter data
         filtered_data = cls.filter_data(data, cls.required_fields())
+        print('Create from dict filtered data')
+        print(filtered_data)
         return cls.ModelType(*filtered_data)
 
     @classmethod
@@ -108,6 +111,7 @@ class Handler(ABC):
         '''Used to create a new model, if data has passed preprocess checks'''
         filtered_data = cls.filter_data(data, cls.all_fields(), cls.protected_fields())
         for key in filtered_data.keys():
+            print(f'Updating from dict: {key} | {filtered_data[key]}')
             setattr(obj, key, filtered_data[key])
 
     @classmethod
@@ -945,10 +949,41 @@ class UserHandler(Handler):
         return ['existing_customer', 'password', 'login_attempts']
 
     @classmethod
+    def update(cls, obj: User, *args):
+        data = args[0]
+        print('in update user', data)
+        success = True
+        if first_name := data.get('first_name', None):
+            print(f'got first name: {first_name}')
+            obj.first_name = first_name
+        if last_name := data.get('last_name', None):
+            obj.last_name = last_name
+        if pronouns := data.get('pronouns', None):
+            obj.pronouns = pronouns
+        obj.theme = data.get('theme', obj.theme)
+        if emails := data.get('emails', None):
+            success = cls.update_relationship_list(obj.personal_email, EmailHandler, emails) and success
+        if phones := data.get('phones', None):
+            success = cls.update_relationship_list(obj.personal_phone, PhoneHandler, phones) and success
+        if existing_customer := data.get('existing_customer', None):
+            if not obj.account_approved and existing_customer:
+                obj.account_approved = True
+        if (password := data.get('password', None)):
+            obj.password = User.hashed_password(password)
+        db.session.commit()
+        return obj
+
+    @classmethod
     def create(cls, *args):
+        print('creating user')
+        print(args[0])
         user = super(UserHandler, cls).create(*args)
+        print(f'user created: {user.first_name}')
+        print(args[0])
         # All users are customers by default
         user.roles.append(RoleHandler.get_customer_role())
+        print(f'updating user: {user.first_name}')
+        cls.update(user, *args)
         return user
 
     @classmethod
@@ -956,6 +991,7 @@ class UserHandler(Handler):
         model = cls.convert_to_model(model)
         as_dict = UserHandler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
         as_dict['id'] = model.id
+        as_dict['tag'] = model.tag
         as_dict['account_status'] = model.account_status
         as_dict['roles'] = RoleHandler.all_dicts(model.roles)
         as_dict['emails'] = EmailHandler.all_dicts(model.personal_email)
@@ -974,6 +1010,10 @@ class UserHandler(Handler):
     def all_customers():
         users = UserHandler.all_objs()
         return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
+
+    @staticmethod
+    def from_tag(tag: str):
+        return db.session.query(User).filter_by(tag=tag).one_or_none()
 
     @staticmethod
     def from_email(email: str):
@@ -999,9 +1039,13 @@ class UserHandler(Handler):
         return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod
+    def is_password_valid(user: User, password: str):
+        print(f"Is Password valid? {bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))}")
+        return bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
+
+    @staticmethod
     def get_user_from_credentials(email: str, password: str):
-        user = UserHandler.from_email(email)
-        if user:
+        if (user := UserHandler.from_email(email)):
             # Reset login attempts after 15 minutes
             if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
                 print('Resetting soft account lock')
@@ -1010,10 +1054,9 @@ class UserHandler(Handler):
             user.login_attempts += 1
             db.session.commit()
             print(f'User login attempts: {user.login_attempts}')
-            print(bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')))
             # Return user if password is valid
             if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
-               bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))):
+                    UserHandler.is_password_valid(user, password)):
                 user.account_status = AccountStatus.UNLOCKED.value
                 user.login_attempts = 0  # Reset login attemps
                 db.session.commit()
@@ -1036,15 +1079,15 @@ class UserHandler(Handler):
         model.session_token = token
 
     @staticmethod
-    def is_valid_session(email, token, app):
+    def is_valid_session(tag: str, token: str, app):
         '''Determines if the provided email and token combination
         makes a valid user session
         Returns a dict containing:
             1) a boolean indicating if the user is a customer
             2) the error message, if boolean is false
             3) the user object, if boolean is true'''
-        # First, try to find the user associated with the email
-        user = UserHandler.from_email(email)
+        # First, try to find the user associated with the tag
+        user = UserHandler.from_tag(tag)
         if not user:
             return {
                 'valid': False,
@@ -1063,10 +1106,10 @@ class UserHandler(Handler):
         }
 
     @staticmethod
-    def get_profile_data(email):
+    def get_profile_data(tag: str):
         '''Returns user profile data'''
         # Check if user esists
-        user = UserHandler.from_email(email)
+        user = UserHandler.from_tag(tag)
         if not user:
             return None
         return {
@@ -1081,27 +1124,6 @@ class UserHandler(Handler):
             "roles": RoleHandler.all_dicts(user.roles),
             "likes": SkuHandler.all_dicts(user.likes)
         }
-
-    @classmethod
-    def set_profile_data(cls, user, data: dict):
-        '''Sets user profile data'''
-        success = True
-        user.first_name = data.get('first_name', user.first_name)
-        user.last_name = data.get('last_name', user.last_name)
-        user.pronouns = data.get('pronouns', user.pronouns)
-        user.theme = data.get('theme', user.theme)
-        # TODO fix for multiple emails and phones
-        # if emails := data.get('emails', None):
-        #     success = cls.update_relationship_list(user.personal_email, EmailHandler, emails) and success
-        # if phones := data.get('phones', None):
-        #     success = cls.update_relationship_list(user.personal_phone, PhoneHandler, phones) and success
-        if existing_customer := data.get('existing_customer', None):
-            if not user.account_approved and existing_customer:
-                user.account_approved = True
-        if (password := data.get('password', None)):
-            user.password = User.hashed_password(password)
-        db.session.commit()
-        return True
 
     @staticmethod
     def get_user_lock_status(email: str):
