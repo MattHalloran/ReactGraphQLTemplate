@@ -51,10 +51,6 @@ function ProfileForm(props) {
     const [existingCustomerError, setExistingCustomerError] = useState(null);
 
     useEffect(() => {
-        console.log('THEME IS', isLightTheme ? 'light': 'dark')
-    }, [isLightTheme])
-
-    useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return () => PubSub.unsubscribe(sessionSub);
     }, [])

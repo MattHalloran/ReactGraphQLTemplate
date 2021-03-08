@@ -706,7 +706,7 @@ class User(db.Model):
     __tablename__ = Tables.USER.value
     # ---------------Start columns-----------------
     id = Column(Integer, primary_key=True)
-    tag = Column(String(32), nullable=False, unique=True)
+    tag = Column(String(32), nullable=False, server_default="nenew")
     first_name = Column(String(30), nullable=False)
     last_name = Column(String(30), nullable=False)
     pronouns = Column(String(50), nullable=False, default=defaults['pronouns'])

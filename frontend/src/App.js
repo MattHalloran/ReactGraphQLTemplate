@@ -105,7 +105,6 @@ function App() {
     useEffect(() => {
         if (session == null && session_attempts.current < 5) {
             session_attempts.current++;
-            console.log('SESSION UPDATED IN APP', session)
             checkCookies().catch(err => console.error(err));
         }
     }, [session])

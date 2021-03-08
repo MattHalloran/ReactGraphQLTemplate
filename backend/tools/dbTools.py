@@ -87,7 +87,13 @@ def create_mock_data(app):
             print('Failed to add roles to database')
         # ******FOR TEST PURPOSES ONLY - you can try using this on the website, but it will not work******
         # Also please don't email me :)
-        admin_account = UserHandler.create('Bugs', 'Bunny', None, 'password', True)
+        admin_account = UserHandler.create({
+            "first_name": "Bugs",
+            "last_name": "Bunny",
+            "pronouns": "they/them",
+            "password": "password",
+            "existing_customer": True
+        })
         admin_email = EmailHandler.create('mdhalloran@yahoo.com', True)
         admin_account.personal_email.append(admin_email)
         admin_account.roles.append(admin)

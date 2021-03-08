@@ -156,7 +156,6 @@ function ShoppingList({
     }, [loaded_plants, filters, searchString, showUnavailable])
 
     const loadNextPage = useCallback(() => {
-        console.log('AAAAAAAA', loaded_plants, all_plant_ids)
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
         loading.current = true;
         //Grab all card thumbnail images

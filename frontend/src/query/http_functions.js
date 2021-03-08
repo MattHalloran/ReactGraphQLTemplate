@@ -226,7 +226,6 @@ export async function fetch_cart(session) {
 }
 
 export async function set_like_sku(session, sku, liked) {
-    console.log('SET LIKE SKU', liked)
     let json = JSON.stringify({
         "session": session,
         "sku": sku,
@@ -377,7 +376,6 @@ export async function update_profile(session, data) {
         "session": session,
         "data": data
     });
-    console.log('UPDATING PROFILE WITH', data)
     let options = {
         body: json,
         method: 'post',

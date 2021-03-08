@@ -5,6 +5,7 @@ from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptio
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
 from src.messenger import welcome, reset_password
+from src.utils import salt
 from src.auth import generate_token, verify_token
 from src.config import Config
 from sqlalchemy import exc
@@ -125,9 +126,6 @@ def consts():
 @handle_exception
 def register():
     (data) = getData('data')
-    print('woopiw woop')
-    print(data['first_name'])
-    print(data['last_name'])
     # If email is already registered
     if any(UserHandler.email_in_use(e['email_address']) for e in data['emails']):
         print('ERROR: Email exists')
@@ -153,6 +151,8 @@ def login():
     (email, password) = getData('email', 'password')
     user = UserHandler.get_user_from_credentials(email, password)
     if user:
+        if user.tag == "nenew":
+            user.tag = salt(32)
         token = generate_token(app, user)
         print('RECEIVED TOKEN!!!!!!')
         UserHandler.set_token(user, token)
@@ -187,9 +187,7 @@ def send_password_reset_request():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def validate_token():
-    print('validating token)')
     session = getJson('session')
-    print('1')
     tag = session.get('tag', None)
     token = session.get('token', None)
     if not tag or not token:
@@ -338,7 +336,6 @@ def fetch_inventory_page():
 @handle_exception
 def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
-    print('boop le snoot')
     return {
         **StatusCodes['SUCCESS'],
         "images_meta": images_data
@@ -366,7 +363,6 @@ def upload_availability_file():
 @handle_exception
 def upload_gallery_image():
     (names, extensions, images) = getForm('name', 'extension', 'image')
-    print(f'NUMBER OF IMAGESSSS: {len(images)}')
     status = StatusCodes['SUCCESS']
     passed_indexes = []
     failed_indexes = []
@@ -554,10 +550,8 @@ def update_cart():
     (session, who, cart) = getData('session', 'who', 'cart')
     # If changing a cart that doesn't belong to them, verify admin
     if session['tag'] != who:
-        print(f"session tag is not who: {session['tag']} | {who}")
         user = verify_admin(session)
     else:
-        print(f"session tag is who: {session}")
         user = verify_customer(session)
     if not user:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
@@ -567,8 +561,6 @@ def update_cart():
         return StatusCodes['ERROR_UNKNOWN']
     OrderHandler.update_from_dict(cart_obj, cart)
     db.session.commit()
-    print('yeet')
-    print(cart_obj.items)
     return {
         **StatusCodes['SUCCESS'],
         "cart": OrderHandler.to_dict(cart_obj)
@@ -617,13 +609,11 @@ def modify_sku():
 def modify_plant():
     '''Like or unlike an inventory item'''
     (session, operation, plant_data) = getData('session', 'operation', 'data')
-    print(f'PLANT DATA HERE IS {plant_data}')
     if not verify_admin(session):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     plant_obj = PlantHandler.from_id(plant_data['id'])
     if plant_obj is None and operation != 'ADD':
         return StatusCodes['ERROR_UNKNOWN']
-    print(f'PLANT IS {plant_obj.latin_name}')
     operation_to_status = {
         'HIDE': SkuStatus.INACTIVE.value,
         'UNHIDE': SkuStatus.ACTIVE.value,
@@ -642,7 +632,6 @@ def modify_plant():
         if plant_data['display_image'] is not None:
             image = ImageHandler.create_from_scratch(plant_data['display_image']['data'], 'TODO', Config.PLANT_FOLDER, ImageUses.DISPLAY)
             if image is not None:
-                print('SETTING PLANTS DISPLAY IMAGE')
                 PlantHandler.set_display_image(plant_obj, image)
                 db.session.commit()
 
@@ -654,9 +643,7 @@ def modify_plant():
                 return None
             if (trait := PlantTraitHandler.from_values(option, value)):
                 return trait
-            print(f'UPDATEE TRAIT A... {value}')
             new_trait = PlantTraitHandler.create(option, value)
-            print(f'UPDATE TRAIT B... {new_trait}')
             db.session.add(new_trait)
             return new_trait
         print(f"TODOOOOOOOO {plant_data}")

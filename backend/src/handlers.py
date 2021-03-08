@@ -81,15 +81,12 @@ class Handler(ABC):
         if hasattr(cls.ModelType, 'defaults'):
             for key in cls.ModelType.defaults.keys():
                 if not data.get(key):
-                    print(f'setting default value: {key} | {cls.ModelType.defaults[key]}')
                     data[key] = cls.ModelType.defaults[key]
         # If any required fields are missing
         if not cls.data_has_required(cls.required_fields(), data):
             raise Exception('Cannot create object: one or more required fields missing')
         # Filter data
         filtered_data = cls.filter_data(data, cls.required_fields())
-        print('Create from dict filtered data')
-        print(filtered_data)
         return cls.ModelType(*filtered_data)
 
     @classmethod
@@ -111,7 +108,6 @@ class Handler(ABC):
         '''Used to create a new model, if data has passed preprocess checks'''
         filtered_data = cls.filter_data(data, cls.all_fields(), cls.protected_fields())
         for key in filtered_data.keys():
-            print(f'Updating from dict: {key} | {filtered_data[key]}')
             setattr(obj, key, filtered_data[key])
 
     @classmethod
@@ -174,8 +170,6 @@ class Handler(ABC):
         i_ids = [it.id for it in relationship]  # IDs in the items list
         d_ids = []  # IDs in the data list
         for d_obj in data:
-            print(f'd_obj is {d_obj}')
-            print(type(d_obj))
             # Object is not new - update
             if (d_id := d_obj.get('id', None)):
                 d_ids.append(d_id)
@@ -530,7 +524,6 @@ class OrderHandler(Handler):
             "emails": EmailHandler.all_dicts(customer.personal_email),
             "phones": PhoneHandler.all_dicts(customer.personal_phone),
         }
-        print(as_dict)
         return as_dict
 
     @staticmethod
@@ -763,11 +756,9 @@ class PlantHandler(Handler):
 
     @staticmethod
     def set_display_image(model: Plant, image: Image):
-        print(f'PRE SET: {model.display_img}')
         model.display_img = image
         model.display_img_id = image.id
         db.session.commit()
-        print(f'POST SET: {model.display_img}')
 
     @staticmethod
     def get_display_image(model: Plant):
@@ -775,7 +766,6 @@ class PlantHandler(Handler):
         if not found'''
         # If the sku has a display image TODO doesn't account for full or thumb
         if model.display_img:
-            print(f'DISPLAY HERE: {model.display_img}')
             return model.display_img
         if len(model.flower_images) > 0:
             return model.flower_images[0]
@@ -951,10 +941,8 @@ class UserHandler(Handler):
     @classmethod
     def update(cls, obj: User, *args):
         data = args[0]
-        print('in update user', data)
         success = True
         if first_name := data.get('first_name', None):
-            print(f'got first name: {first_name}')
             obj.first_name = first_name
         if last_name := data.get('last_name', None):
             obj.last_name = last_name
@@ -975,14 +963,9 @@ class UserHandler(Handler):
 
     @classmethod
     def create(cls, *args):
-        print('creating user')
-        print(args[0])
         user = super(UserHandler, cls).create(*args)
-        print(f'user created: {user.first_name}')
-        print(args[0])
         # All users are customers by default
         user.roles.append(RoleHandler.get_customer_role())
-        print(f'updating user: {user.first_name}')
         cls.update(user, *args)
         return user
 
@@ -1023,8 +1006,6 @@ class UserHandler(Handler):
     def email_in_use(email: str):
         '''Returns True if the email is being used by an active account'''
         users = User.query.filter(User.personal_email.any(email_address=email)).all()
-        print('IN EMAIL IN USE')
-        print(users)
         if users is None:
             return True
         return any(user.account_status != AccountStatus.DELETED.value for user in users)
@@ -1040,7 +1021,6 @@ class UserHandler(Handler):
 
     @staticmethod
     def is_password_valid(user: User, password: str):
-        print(f"Is Password valid? {bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))}")
         return bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
 
     @staticmethod
