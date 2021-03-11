@@ -15,9 +15,7 @@ export const StyledNavbar = styled.nav`
     justify-content: space-between;
     min-height: 50px;
     height: 12vh;
-    padding: 2vh;
-    padding-top: 1vh;
-    padding-bottom: 1vh;
+    padding: 1vh 1vw;
     transform: ${({ visible }) => visible ? 'translateY(0%)' : 'translateY(-100%)'};
     transition: transform 0.3s ease-in-out;
     //disable text highlighting
@@ -59,12 +57,17 @@ export const StyledNavbar = styled.nav`
     }
 
     .nav-logo-container {
+        position: relative;
         display: inline-block;
+        vertical-align: top;
         background: ${({ theme }) => theme.isLight ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)'};
         border-radius: 500px;
+        top: 0;
+        left: 0;
+        min-height: 50px;
+        min-width: 50px;
         height: 12vh;
         width: 12vh;
-        margin-top: -5px;
     }
 
     .nav-logo {
@@ -74,18 +77,18 @@ export const StyledNavbar = styled.nav`
                 drop-shadow(-0.5px -0.5px 0 ${({ theme }) => hexToRGB(theme.darkPrimaryColor, 0.9)});
         vertical-align: middle;
         fill: black;
-        margin-top: 5px;
-        margin-bottom: 7px;
+        margin-top: 0.5vh;
+        margin-left: max(-5px, -5vw);
         min-height: 50px;
-        max-height: 12vh;
+        height: 12vh;
         transform: rotate(20deg);
-        margin-left: -15%;
         //filter: invert(1);
     }
     
     .nav-name {
+        position: relative;
         font-size: 2em;
-        margin-left: -25px;
+        margin-left: max(40px, 10vh);
         font-family: 'Kite One', sans-serif;
         color: ${({ theme }) => theme.headerText};
     }

@@ -37,8 +37,8 @@ function Navbar({
                 <div className="nav-logo-container">
                     <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
                 </div>
-                <span className="nav-name">{FULL_BUSINESS_NAME}</span>
             </Link>
+            <span className="nav-name">{FULL_BUSINESS_NAME}</span>
             {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
         </StyledNavbar>
     );
