@@ -113,9 +113,9 @@ function Hamburger(props) {
             { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link style={{color:`${theme.headerText}`}} to={link} onClick={onClick}>{text}</Link></p>
             ))}
-            <div className="bottom">
-                <SocialIcon fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-                <SocialIcon fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+            <div style={{display:'flex',justifyContent:'space-around',background:`${theme.lightPrimaryColor}`}}>
+                <SocialIcon style={{marginBottom:'0'}} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+                <SocialIcon style={{marginBottom:'0'}} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>
             <p>
                 &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link style={{color:`${theme.headerText}`}} to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link style={{color:`${theme.headerText}`}} to={LINKS.Terms}>Terms & Conditions</Link>

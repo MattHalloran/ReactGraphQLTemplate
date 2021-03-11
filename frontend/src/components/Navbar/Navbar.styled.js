@@ -116,17 +116,4 @@ export const StyledNavbar = styled.nav`
         margin-top: 5px;
         fill: ${({ theme }) => theme.headerText};
     }
-
-    .bottom {
-        display: flex;
-        bottom: 0;
-        justify-content: space-around;
-        width: -moz-available;
-        width: -webkit-fill-available;
-        background: ${({ theme }) => theme.lightPrimaryColor};
-
-        > * {
-            margin: 10px 0;
-        }
-    }
 `;
