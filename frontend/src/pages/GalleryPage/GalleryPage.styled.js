@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const StyledGalleryPage = styled.span`
+export const StyledGalleryPage = styled.div`
     .tile {
         min-width: 10%;
         min-height: 10%;

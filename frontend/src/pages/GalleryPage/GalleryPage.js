@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
@@ -24,7 +24,7 @@ function GalleryPage() {
     const urlParams = useParams();
     // [base64 data, alt]
     const [curr_img, setCurrImg] = useState(null);
-    const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id === urlParams.img) ?? -1, [images_meta, urlParams]);
+    const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
     const loading = useRef(false);
     const track_scrolling_id = 'scroll-tracked';
     //Estimates how many images will fill the screen
@@ -50,16 +50,20 @@ function GalleryPage() {
         // First check if the image data has already been retrieved
         if (index in full_images.current) {
             setCurrImg(full_images.current[index]);
-        } else {
+        } else if (index >= 0) {
             loading_full_image.current = true;
+            console.log(full_images.current);
             // Request the image from the backend
             getImage(id, 'l').then(response => {
+                console.log('GOT IMAGE RESPONSE', response);
                 let image_data = [`data:image/jpeg;base64,${response.image}`, response.alt];
                 setCurrImg(image_data);
                 full_images.current[index] = image_data;
             }).catch(error => {
                 console.error('FAILED TO LOAD FULL IMAGE', error)
             }).finally(() => loading_full_image.current = false);
+        } else {
+            setCurrImg(null);
         }
     }, [loading_full_image, full_images])
 
@@ -158,10 +162,6 @@ function GalleryPage() {
     const openImage = (_event, photo, index) => {
         history.push(LINKS.Gallery + '/' + photo.photo.key);
     }
-
-    const onSortEnd = useCallback(({ oldIndex, newIndex }) => {
-        setThumbnails(thumbs => arrayMove(thumbs, oldIndex, newIndex))
-    }, []);
 
     useEffect(() => {
         let mounted = true;

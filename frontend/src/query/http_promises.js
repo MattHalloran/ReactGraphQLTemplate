@@ -28,6 +28,7 @@ function promiseWrapper(http_func, ...args) {
 export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
 export const getGallery = () => promiseWrapper(http.fetch_gallery);
+export const updateGallery = (session, data) => promiseWrapper(http.update_gallery, session, data);
 export const getImage = (id, size) => promiseWrapper(http.fetch_image, id, size);
 export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, size);
 export const uploadGalleryImages = (formData) => promiseWrapper(http.upload_gallery_images, formData);

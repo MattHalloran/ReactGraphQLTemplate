@@ -18,7 +18,7 @@ function AdminCustomerPage() {
 
     useEffect(() => {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(0));
+        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(sessionSub);

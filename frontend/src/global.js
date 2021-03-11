@@ -14,7 +14,7 @@ const menu_app_style = `position: fixed;
 export const GlobalStyles = createGlobalStyle`
 
     body {
-        background: ${({ theme }) => theme.backgroundColor};
+        background: black;
         box-shadow: inset 0 0 6vw 3vw rgb(0 0 0 / 10%);
         color: ${({ theme }) => theme.primaryText};
         margin: 0;
@@ -56,6 +56,7 @@ export const GlobalStyles = createGlobalStyle`
 
     #App {
         text-align: center;
+        background: ${({ theme }) => theme.backgroundColor};
         ${({ menu_or_popup_open }) => menu_or_popup_open ? menu_app_style : ''};
     }
     
@@ -131,5 +132,15 @@ export const GlobalStyles = createGlobalStyle`
             fill: ${({ theme }) => theme.headerText};
             cursor: pointer;
         }
+    }
+
+    .no-select {
+        -webkit-touch-callout: none; /* iOS Safari */
+          -webkit-user-select: none; /* Safari */
+           -khtml-user-select: none; /* Konqueror HTML */
+             -moz-user-select: none; /* Old versions of Firefox */
+              -ms-user-select: none; /* Internet Explorer/Edge */
+                  user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome, Edge, Opera and Firefox */
     }
 `
