@@ -119,14 +119,14 @@ function ProfileForm(props) {
             "last_name": lastName,
             "pronouns": pronouns,
             "emails": [{"id": email_ids.current[0], "email_address": emails[0], "receives_delivery_updates": true}],
-            "phones": [{
-                "id": phone_ids.current[0],
-                "unformatted_number": phones[0],
-                 "country_code": '+1',
-                 "extension": '',
-                 "is_mobile": true,
-                 "receives_delivery_updates": false
-            }],
+            // "phones": [{
+            //     "id": phone_ids.current[0],
+            //     "unformatted_number": phones[0] ?? 'N/A',
+            //      "country_code": '+1',
+            //      "extension": '',
+            //      "is_mobile": true,
+            //      "receives_delivery_updates": false
+            // }],
             "existing_customer": existingCustomer,
             "theme": isLightTheme ? 'light' : 'dark',
         }

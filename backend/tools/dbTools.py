@@ -103,8 +103,8 @@ def create_mock_data(app):
         except Exception:
             print(traceback.format_exc())
             print('Failed to add admin account to database')
-        gallery_image = ImageHandler.create(Config.GALLERY_FOLDER, 'sponge', 'jpeg', 'test gallery image', 'fake hash', ImageUses.GALLERY, 100, 100)
-        db.session.add(gallery_image)
+        #gallery_image = ImageHandler.create(Config.GALLERY_FOLDER, 'sponge', 'jpeg', 'test gallery image', 'fake hash', ImageUses.GALLERY, 100, 100)
+        #db.session.add(gallery_image)
         db.session.commit()
 
 

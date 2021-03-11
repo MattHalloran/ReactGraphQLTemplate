@@ -149,6 +149,19 @@ export async function fetch_gallery() {
     return await fetchWrapper('fetch_gallery', options);
 }
 
+export async function update_gallery(session, data) {
+    let json = JSON.stringify({
+        "session": session,
+        "data": data,
+    });
+    let options = {
+        body: json,
+        method: 'post',
+        headers: HEADERS.Text,
+    }
+    return await fetchWrapper('update_gallery', options);
+}
+
 export async function upload_gallery_images(formData) {
     let options = {
         body: formData,

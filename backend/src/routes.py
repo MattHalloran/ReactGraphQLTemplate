@@ -342,6 +342,28 @@ def fetch_gallery():
     }
 
 
+# Updates gallery order, alts, and descriptions.
+# This cannot be used to update images
+# TODO reorder
+@app.route(f'{PREFIX}/update_gallery', methods=["POST"])
+@handle_exception
+def update_gallery():
+    (session, data) = getData('session', 'data')
+    if not verify_admin(session):
+        return StatusCodes['ERROR_NOT_AUTHORIZED']
+    success = True
+    curr_images = [img.id for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
+    for img in data:
+        curr_images.remove(img['id'])
+    # Images not included in the post data are removed
+    for id in curr_images:
+        image_model = ImageHandler.from_id(id)
+        if image_model:
+            db.session.delete(image_model)
+    db.session.commit()
+    return StatusCodes['SUCCESS'] if success else StatusCodes['ERROR_UNKNOWN']
+
+
 @app.route(f'{PREFIX}/upload_availability', methods=["POST"])
 @handle_exception
 def upload_availability_file():

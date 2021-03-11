@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
@@ -95,7 +95,7 @@ function GalleryPage() {
                 let img = response.images[i];
                 let new_data = {
                     "key": meta.id,
-                    "src": `data:image/jpeg;base64,${img}`,
+                    "src": `data:image/jpeg;base64,${img.src}`,
                     "width": meta.width,
                     "height": meta.height,
                 };
@@ -158,10 +158,6 @@ function GalleryPage() {
     const openImage = (_event, photo, index) => {
         history.push(LINKS.Gallery + '/' + photo.photo.key);
     }
-
-    const onSortEnd = useCallback(({ oldIndex, newIndex }) => {
-        setThumbnails(thumbs => arrayMove(thumbs, oldIndex, newIndex))
-    }, []);
 
     useEffect(() => {
         let mounted = true;
