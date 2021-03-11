@@ -3,11 +3,11 @@
 # Initially created with the help of https://www.youtube.com/watch?v=JRCJ6RtE3xU
 # Arguments
 #   recipients - who should receive this email
-#   to_text - This changes what the 'To' field of the email says. 
+#   to_text - This changes what the 'To' field of the email says.
 #             If left blank, the emails will be used
-#   message - This sets the text of the message. This is optional, depending on 
+#   message - This sets the text of the message. This is optional, depending on
 #             the html used
-#   html_file - The name of the html file being sent. 
+#   html_file - The name of the html file being sent.
 #              If left blank, a plaintext message will be sent
 # Author: Matt Halloran
 # Version: 20191104
@@ -23,7 +23,10 @@ from email.mime.image import MIMEImage
 from twilio.rest import Client
 import difflib
 import traceback
+from typing import Union
+import ssl
 
+MAIL_SERVICE = 'smtp.gmail.com'
 PORT_NUM = 465
 ASSET_LOCATION = '../assets/messaging'
 # Stored in environment variables so it's not uploaded to GitHub.
@@ -54,10 +57,18 @@ carrier_dict = {
 }
 
 
+# Parses an html file from a relative path
+# Returns html as a string
+def htmlToString(path: str) -> str:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(dir_path, path), 'rb') as f:
+        return f.read().decode('utf8')
+
+
 # Returns the email associated with a phone number. Currently only implemented for the US
 # Arguments:
 # 1) number - The phone number. This should preferrably include the country code (ex: '+16098675309')
-def numberToEmail(number: str):
+def numberToEmail(number: str) -> str:
     # Already an email
     if '@' in number:
         return number
@@ -79,27 +90,43 @@ def numberToEmail(number: str):
     return f'{number[-10:]}@{carrier_extension}'
 
 
+# Sends message using smtp
+def send_smtp_message(message: Union[MIMEMultipart, EmailMessage]) -> bool:
+    try:
+        with smtplib.SMTP_SSL(MAIL_SERVICE, PORT_NUM) as smtp:
+            smtp.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+            smtp.send_message(message)
+            return True
+    except Exception:
+        print(traceback.format_exc())
+        return False
+
+
 # Arguments:
 # recipients - a list of recipients. Can contain phone numbers or emails
 # to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
 # subject - The subject of the message
 # alt_text - The plaintext message, in case the recipient has html emails disabled
-# html_file - Path to an html file
+# html - String of html data
 # images - a list of MIMEImage (embedded images in the html file)
 # Notes:
 # 1) Emojis work for emails, but not phone numbers
-# 2) Please do not try sending an html file to an email
-def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_text: str = '', html_file: str = '', images: list = None):
+def send_html_email(recipients: list,
+                    to_text: str = '',
+                    subject: str = '',
+                    alt: str = '',
+                    html: str = '',
+                    images: list = None) -> bool:
 
     if len(recipients) == 0:
         print('No email addresses passed in')
-        return
+        return False
 
     # Fail if any recipients are phone numbers, as these cannot receive html texts
     for r in recipients:
         if '@' not in r:
             print('A phone number was passed in. These are not supported for html emails')
-            return
+            return False
 
     if to_text == '':
         if len(recipients) > 1:
@@ -115,29 +142,19 @@ def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_
     msg.preamble = 'This is a multi-part message in MIME format. '
 
     # Set plaintext and html versions as alternatives, so the email client can determine which to display
-    alternative = MIMEMultipart('alternative')
-    msg.attach(alternative)
-    altText = MIMEText(alt_text)
-    alternative.attach(altText)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, html_file), 'rb') as f:
-        email_html = MIMEText(f.read().decode('utf8'), 'html')
-        alternative.attach(email_html)
+    alt_mime = MIMEMultipart('alternative')
+    msg.attach(alt_mime)
+    if alt:
+        alt_mime.attach(MIMEText(alt))
+    if html:
+        alt_mime.attach(MIMEText(html, 'html'))
 
     # Add embedded images
     if images:
         for i in images:
             msg.attach(i)
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', PORT_NUM) as smtp:
-        try:
-            smtp.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            to_string = ', '.join(recipients)
-            print(f'Sending email to {to_string}')
-            smtp.send_message(msg)
-        except Exception as e:
-            print('caught exception')
-            print(repr(e))
+    return send_smtp_message(msg)
 
 
 # Arguments:
@@ -145,16 +162,14 @@ def send_html_email(recipients: list, to_text: str = '', subject: str = '', alt_
 # to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
 # subject - The subject of the message
 # message - The actual message, in plaintext. If sending an html file instead (such as a newsletter), it is still a good
-# idea to set this field in case some recipients have disabled HTML emails
-# html_file - Path to an html file, if sending one
-# Notes:
-# 1) Emojis work for emails, but not phone numbers
-# 2) Please do not try sending an html file to an email
-def send_plaintext_email(recipients: list, to_text: str = '', subject: str = '', message: str = ''):
+def send_plaintext_email(recipients: list,
+                         to_text: str = '',
+                         subject: str = '',
+                         message: str = '') -> bool:
 
     if len(recipients) == 0:
         print('No email addresses passed in')
-        return
+        return False
 
     # Convert any phone numbers into emails
     recipients = [numberToEmail(x) for x in recipients]
@@ -172,43 +187,35 @@ def send_plaintext_email(recipients: list, to_text: str = '', subject: str = '',
     msg['Bcc'] = recipients  # So recipients don't see other email addresses
     msg.set_content(message)
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', PORT_NUM) as smtp:
-        try:
-            smtp.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            to_string = ', '.join(recipients)
-            print(f'Sending email to {to_string}')
-            smtp.send_message(msg)
-        except Exception as e:
-            print('caught exception')
-            print(repr(e))
+    return send_smtp_message(msg)
 
 
 # Sends a welcome email. Used for newly-registered users
-def welcome(recipient: str):
+def welcome(recipient: str) -> bool:
     try:
-        # Define html location
-        html = 'emailTemplates/welcome.html'
-        # Load all embedded images into MIMEImage
-        fp = open(f'{ASSET_LOCATION}/img/Welcome-to-new-life.png', 'rb')
-        welcome_image_mime = MIMEImage(fp.read())
-        welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
-        fp.close()
+        # # Load all embedded images into MIMEImage
+        # fp = open(f'{ASSET_LOCATION}/img/Welcome-to-new-life.png', 'rb')
+        # welcome_image_mime = MIMEImage(fp.read())
+        # welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
+        # fp.close()
         # Define alt text in case recipient has html emails disabled
-        alt = f"These Hi [name],\n\nWelcome to New Life Nursery!\n\nYou're now registered for online ordering.\n\nWhat happens next?\n\nYou can view our inventory at [link]. After ordering, we will contact you for payment information."
+        html = "<h1>Welcome to New Life Nursery!</h1><p>You're now registered for online ordering.</p><h3>What happens next?</h3><p>You can view our availability at <a href=\"https://newlifenurseryinc.com/shopping\">https://newlifenurseryinc.com/shopping</a>.</p><p>After ordering, we will contact you for payment information.</p>"
+        alt = "Welcome to New Life Nursery! You're now registered for online ordering. You can view our availability at https://newlifenurseryinc.com/shopping. After ordering, we will contact you for payment information."
         sub = 'Welcome to New Life Nursery!'
-        send_html_email([recipient], subject=sub, alt_text=alt, html_file=html, images=[welcome_image_mime])
+        #return send_html_email([recipient], subject=sub, alt=alt, html=html)
+        return send_plaintext_email([recipient], 'boop', 'asdf', 'beeeeeeeeeeee')
     except Exception:
         print(traceback.format_exc())
+        return False
 
 
 # Sends a password reset request to the specified email
 def reset_password(recipient: str):
-    # Define html location
-    html = 'emailTemplates/reset-password.html'
     # Define alt text in case recipient has html emails disabled
     alt = "Too bad"
     sub = 'New Life Nursery Password Reset'
-    send_html_email([recipient], subject=sub, alt_text=alt, html_file=html)
+    html = htmlToString('emailTemplates/reset-password.html')
+    send_html_email([recipient], subject=sub, alt=alt, html=html)
 
 
 if __name__ == '__main__':
