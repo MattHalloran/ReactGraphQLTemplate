@@ -3,7 +3,7 @@
 import pandas as pd
 import math
 import numpy
-from src.api import db
+from src.api import create_app, db
 from src.models import SkuStatus
 from src.handlers import SkuHandler, PlantHandler
 
@@ -14,7 +14,7 @@ def is_cell_blank(cell):
     return False
 
 
-def upload_availability(app, data):
+def upload_availability(data):
     # Load in excel columns using pandas
     df = pd.read_excel(data)
     latin_names = df['Botanical Name']
@@ -25,6 +25,7 @@ def upload_availability(app, data):
     codes = df['Plant Code']
     quantities = df['Quantity']
     # TODO figure out rollback
+    app = create_app()
     with app.app_context():
         # First, hide all old SKUs. These can't be deleted, since they
         # can still be in orders

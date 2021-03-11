@@ -162,7 +162,7 @@ function AdminInventoryPage() {
         let form = new FormData();
         form.append('data', selected)
         uploadAvailability(form).then(() => {
-            alert('Successfully uploaded availability! Refresh page to see results');
+            alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
         }).catch(error => {
             console.error(error);
             alert('Error uploading availability!');

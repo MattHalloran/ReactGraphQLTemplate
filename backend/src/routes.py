@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_cors import CORS, cross_origin
-from src.api import create_app, db
+from src.api import create_app, db, q
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
@@ -374,10 +374,11 @@ def upload_availability_file():
     toread = io.BytesIO()
     toread.write(decoded)
     toread.seek(0)  # resets pointer
-    success = upload_availability(app, toread)
-    if success:
-        return StatusCodes['SUCCESS']
-    return StatusCodes['ERROR_UNKNOWN']
+    job = q.enqueue(upload_availability, toread)
+    return {
+        **StatusCodes['SUCCESS'],
+        "job_id": job.id
+    }
 
 
 # TODO - check image size and extension to make sure it is valid
