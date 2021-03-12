@@ -6,6 +6,7 @@ import time
 from src.utils import salt
 import os
 import json
+from typing import Optional
 
 
 # Used to help prevent typos. You may be wondering if you could
@@ -27,6 +28,7 @@ class Tables(Enum):
     PLANT = 'plant'
     PLANT_TRAIT = 'plant_trait'
     PLANT_TRAIT_ASSOCIATION = 'plant_trait_association'
+    TASK = 'queue_task'
     ROLE = 'role'
     SKU = 'sku'
     SKU_DISCOUNT = 'sku_discount'
@@ -88,6 +90,54 @@ plantTraits = db.Table(Tables.PLANT_TRAITS.value,
                        Column('trait_id', Integer, ForeignKey(
                            f'{Tables.PLANT_TRAIT.value}.id'))
                        )
+
+
+class TaskStatus(Enum):
+    UNKNOWN = -4
+    FAILED = -2
+    ACTIVE = 1
+    COMPLETED = 2
+
+
+# Holds information about a task that was sent to the task queue
+class Task(db.Model):
+    defaults = {
+        'status': TaskStatus.ACTIVE.value
+    }
+
+    __tablename__ = Tables.TASK.value
+    # ---------------Start columns-----------------
+    id = Column(Integer, primary_key=True)
+    # Id for the task process, not the model row
+    task_id = Column(Integer, nullable=False)
+    # Name associated with task
+    name = Column(String(100), nullable=False)
+    # Current status of task
+    status = Column(Integer, nullable=False, default=defaults['status'], server_default='1')
+    # Optional description associated with task
+    description = Column(String(1000))
+    # Optional result of task
+    result = Column(String)
+    # Optional result code of task
+    result_code = Column(Integer)
+    # ----------------End columns-------------------
+
+    def __init__(self,
+                 task_id: int,
+                 name: str,
+                 status: str = defaults['status'],
+                 description: str = None,
+                 result: str = None,
+                 result_code: Optional[int] = None):
+        self.task_id = task_id
+        self.status = status
+        self.name = name
+        self.description = description
+        self.result = result
+        self.result_code = result_code
+
+    def __repr__(self):
+        return f"{self.__tablename__}({self.id})"
 
 
 # One of the delivery addresses associated with a business
