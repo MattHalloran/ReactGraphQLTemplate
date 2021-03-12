@@ -23,7 +23,7 @@ from email.mime.image import MIMEImage
 from twilio.rest import Client
 import difflib
 import traceback
-from typing import Union
+from typing import Union, Optional
 import ssl
 
 MAIL_SERVICE = 'smtp.gmail.com'
@@ -112,7 +112,7 @@ def send_smtp_message(message: Union[MIMEMultipart, EmailMessage]) -> bool:
 # Notes:
 # 1) Emojis work for emails, but not phone numbers
 def send_html_email(recipients: list,
-                    to_text: str = '',
+                    to_text: Optional[str] = None,
                     subject: str = '',
                     alt: str = '',
                     html: str = '',
@@ -128,7 +128,7 @@ def send_html_email(recipients: list,
             print('A phone number was passed in. These are not supported for html emails')
             return False
 
-    if to_text == '':
+    if not to_text:
         if len(recipients) > 1:
             to_text = ', '.join(recipients)
         else:
@@ -163,7 +163,7 @@ def send_html_email(recipients: list,
 # subject - The subject of the message
 # message - The actual message, in plaintext. If sending an html file instead (such as a newsletter), it is still a good
 def send_plaintext_email(recipients: list,
-                         to_text: str = '',
+                         to_text: Optional[str] = None,
                          subject: str = '',
                          message: str = '') -> bool:
 
@@ -174,7 +174,7 @@ def send_plaintext_email(recipients: list,
     # Convert any phone numbers into emails
     recipients = [numberToEmail(x) for x in recipients]
 
-    if to_text == '':
+    if not to_text:
         if len(recipients) > 1:
             to_text = ', '.join(recipients)
         else:
@@ -190,7 +190,23 @@ def send_plaintext_email(recipients: list,
     return send_smtp_message(msg)
 
 
-# Sends a welcome email. Used for newly-registered users
+# Notifies main admin that there is a new customer
+def customer_notify_admin(name: str) -> bool:
+    html = f"<p>{name} has created an account with New Life Nursery. Website accounts can be viewed at <a href=\"https://newlifenurseryinc.com/admin/customers\">https://newlifenurseryinc.com/admin/customers</a></p>"
+    alt = f"{name} has created an account with New Life Nursery. Website accounts can be viewed at https://newlifenurseryinc.com/admin/customers"
+    sub = f"Account created for {name}"
+    return send_html_email([EMAIL_USERNAME], subject=sub, alt=alt, html=html)
+
+
+# Notifies main admin that an order has been made
+def order_notify_admin() -> bool:
+    html = "<p>A new order has been submitted. It can be viewed at <a href=\"https://newlifenurseryinc.com/admin/orders\">https://newlifenurseryinc.com/admin/orders</a></p>"
+    alt = "A new order has been submitted. It can be viewed at https://newlifenurseryinc.com/admin/orders"
+    sub = "New Order Received!"
+    return send_html_email([EMAIL_USERNAME], subject=sub, alt=alt, html=html)
+
+
+# Sends a welcome email to a new user
 def welcome(recipient: str) -> bool:
     try:
         # # Load all embedded images into MIMEImage
@@ -202,8 +218,7 @@ def welcome(recipient: str) -> bool:
         html = "<h1>Welcome to New Life Nursery!</h1><p>You're now registered for online ordering.</p><h3>What happens next?</h3><p>You can view our availability at <a href=\"https://newlifenurseryinc.com/shopping\">https://newlifenurseryinc.com/shopping</a>.</p><p>After ordering, we will contact you for payment information.</p>"
         alt = "Welcome to New Life Nursery! You're now registered for online ordering. You can view our availability at https://newlifenurseryinc.com/shopping. After ordering, we will contact you for payment information."
         sub = 'Welcome to New Life Nursery!'
-        #return send_html_email([recipient], subject=sub, alt=alt, html=html)
-        return send_plaintext_email([recipient], 'boop', 'asdf', 'beeeeeeeeeeee')
+        return send_html_email([recipient], subject=sub, alt=alt, html=html)
     except Exception:
         print(traceback.format_exc())
         return False
@@ -212,10 +227,11 @@ def welcome(recipient: str) -> bool:
 # Sends a password reset request to the specified email
 def reset_password(recipient: str):
     # Define alt text in case recipient has html emails disabled
-    alt = "Too bad"
-    sub = 'New Life Nursery Password Reset'
-    html = htmlToString('emailTemplates/reset-password.html')
-    send_html_email([recipient], subject=sub, alt=alt, html=html)
+    # alt = "Too bad"
+    # sub = 'New Life Nursery Password Reset'
+    # html = htmlToString('emailTemplates/reset-password.html')
+    # send_html_email([recipient], subject=sub, alt=alt, html=html)
+    print('TODO')
 
 
 if __name__ == '__main__':

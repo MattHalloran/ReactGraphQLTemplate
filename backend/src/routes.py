@@ -4,7 +4,7 @@ from src.api import create_app, db, q
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
-from src.messenger import welcome, reset_password
+from src.messenger import welcome, reset_password, order_notify_admin, customer_notify_admin
 from src.utils import salt
 from src.auth import generate_token, verify_token
 from src.config import Config
@@ -136,6 +136,7 @@ def register():
     token = generate_token(app, user)
     UserHandler.set_token(user, token)
     db.session.commit()
+    q.enqueue(customer_notify_admin, f'{user.first_name} {user.last_name}')
     return {
         **StatusCodes['SUCCESS'],
         "session": {"tag": user.tag, "token": token},
@@ -760,6 +761,7 @@ def submit_order():
     db.session.add(new_cart)
     user.orders.append(new_cart)
     db.session.commit()
+    q.enqueue(order_notify_admin)
     return {
         **StatusCodes['SUCCESS'],
         "cart": OrderHandler.to_dict(cart_obj)
