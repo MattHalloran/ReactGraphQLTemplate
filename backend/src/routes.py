@@ -29,14 +29,14 @@ with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as 
 
 
 # Helper method for grabbing form data from the request
-def getForm(*names):
+def getForm(*names) -> list:
     if (len(names) == 1):
         return request.form.getlist(names[0])
     return [request.form.getlist(name) for name in names]
 
 
 # Helper method for grabbing json data from the request
-def getJson(*names):
+def getJson(*names) -> list:
     incoming = request.get_json()
     if (len(names) == 1):
         return incoming[names[0]]
@@ -44,7 +44,7 @@ def getJson(*names):
 
 
 # Helper method for grabbing data from the request
-def getData(*names):
+def getData(*names) -> list:
     byte_data = request.data
     dict_str = byte_data.decode('UTF-8')
     data = json.loads(dict_str)

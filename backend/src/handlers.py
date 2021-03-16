@@ -13,6 +13,7 @@ import bcrypt
 import os
 import traceback
 import re
+from typing import Optional, Union, Tuple, NoReturn, List
 
 
 # Abstract method for model handling classes
@@ -198,17 +199,17 @@ class AddressHandler(Handler):
     ModelType = Address
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['tag', 'name', 'country', 'administrative_area',
                 'locality', 'postal_code', 'throughfare', 'premise',
                 'delivery_instructions']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['country', 'locality', 'postal_code', 'throughfare']
 
     @classmethod
-    def to_dict(cls, model: Address):
+    def to_dict(cls, model: Address) -> dict:
         model = cls.convert_to_model(model)
         return AddressHandler.simple_fields_to_dict(model, AddressHandler.all_fields())
 
@@ -217,15 +218,15 @@ class BusinessDiscountHandler(Handler):
     ModelType = BusinessDiscount
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['discount', 'title', 'comment', 'terms']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['discount', 'title']
 
     @classmethod
-    def to_dict(cls, model: BusinessDiscount):
+    def to_dict(cls, model: BusinessDiscount) -> dict:
         model = cls.convert_to_model(model)
         return BusinessDiscountHandler.simple_fields_to_dict(model, BusinessDiscountHandler.all_fields())
 
@@ -234,15 +235,15 @@ class BusinessHandler(Handler):
     ModelType = Business
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['name', 'email', 'Email', 'phone', 'subscribed_to_newsletters']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['name']
 
     @classmethod
-    def to_dict(cls, model: Business):
+    def to_dict(cls, model: Business) -> dict:
         model = cls.convert_to_model(model)
         as_dict = BusinessHandler.simple_fields_to_dict(model, ['name', 'subscribed_to_newsletters'])
         as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
@@ -252,14 +253,14 @@ class BusinessHandler(Handler):
         return as_dict
 
     @staticmethod
-    def add_address(model: Business, address: Address):
+    def add_address(model: Business, address: Address) -> bool:
         if address not in model.delivery_addresses:
             model.delivery_addresses.append(address)
             return True
         return False
 
     @staticmethod
-    def add_employee(model: Business, employee: User):
+    def add_employee(model: Business, employee: User) -> bool:
         if employee not in model.employees:
             model.employees.append(employee)
             return True
@@ -270,15 +271,15 @@ class ContactInfoHandler(Handler):
     ModelType = ContactInfo
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['name', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return []
 
     @classmethod
-    def to_dict(cls, model: ContactInfo):
+    def to_dict(cls, model: ContactInfo) -> dict:
         model = cls.convert_to_model(model)
         return ContactInfoHandler.simple_fields_to_dict(model, ContactInfoHandler.all_fields())
 
@@ -287,15 +288,15 @@ class EmailHandler(Handler):
     ModelType = Email
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['email_address', 'receives_delivery_updates']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['email_address', 'receives_delivery_updates']
 
     @classmethod
-    def to_dict(cls, model: Email):
+    def to_dict(cls, model: Email) -> dict:
         model = cls.convert_to_model(model)
         as_dict = EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
         as_dict['id'] = model.id
@@ -310,15 +311,15 @@ class FeedbackHandler(Handler):
     ModelType = Feedback
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['text']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['text']
 
     @classmethod
-    def to_dict(cls, model: Feedback):
+    def to_dict(cls, model: Feedback) -> dict:
         model = cls.convert_to_model(model)
         return FeedbackHandler.simple_fields_to_dict(model, FeedbackHandler.all_fields())
 
@@ -327,22 +328,22 @@ class ImageHandler(Handler):
     ModelType = Image
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['folder', 'file_name', 'extension',
                 'alt', 'hash', 'used_for', 'width', 'height']
 
     @classmethod
-    def to_dict(cls, model: Image):
+    def to_dict(cls, model: Image) -> dict:
         model = cls.convert_to_model(model)
         return ImageHandler.simple_fields_to_dict(model, ['id', 'hash', 'alt', 'used_for', 'width', 'height'])
 
     @staticmethod
-    def label_from_dimensions(width: int, height: int):
+    def label_from_dimensions(width: int, height: int) -> str:
         '''Returns closest size label, based on provided width and height'''
         if width > ImageSizes.L.value[0] or height > ImageSizes.L.value[1]:
             return 'l'
@@ -355,7 +356,7 @@ class ImageHandler(Handler):
         return 'xs'
 
     @staticmethod
-    def dimensions_from_label(label: str):
+    def dimensions_from_label(label: str) -> Tuple[int, int]:
         '''Returns dimensions of size label'''
         if label == 'l':
             return ImageSizes.L.value
@@ -406,7 +407,7 @@ class ImageHandler(Handler):
         return img_row
 
     @classmethod
-    def get_b64(cls, model, size: str):
+    def get_b64(cls, model, size: str) -> Optional[str]:
         '''Returns the base64 string representation of an image in the requested size,
         or the next best size available'''
         model = cls.convert_to_model(model)
@@ -485,15 +486,15 @@ class OrderItemHandler(Handler):
     ModelType = OrderItem
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['quantity', 'sku']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return []
 
     @classmethod
-    def to_dict(cls, model: OrderItem):
+    def to_dict(cls, model: OrderItem) -> dict:
         model = cls.convert_to_model(model)
         return {
             'id': model.id,
@@ -506,15 +507,15 @@ class OrderHandler(Handler):
     ModelType = Order
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['is_delivery', 'delivery_address', 'special_instructions', 'desired_delivery_date', 'items', 'user_id']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['quantity', 'sku']
 
     @classmethod
-    def to_dict(cls, model: Order):
+    def to_dict(cls, model: Order) -> dict:
         model = cls.convert_to_model(model)
         as_dict = OrderHandler.simple_fields_to_dict(model, ['status', 'special_instructions', 'is_delivery', 'desired_delivery_date'])
         as_dict['id'] = model.id
@@ -537,7 +538,7 @@ class OrderHandler(Handler):
         return db.session.query(Order).filter_by(status=status).all()
 
     @staticmethod
-    def set_status(model: Order, status: int):
+    def set_status(model: Order, status: int) -> NoReturn:
         model.status = status
 
     @classmethod
@@ -578,7 +579,7 @@ class OrderHandler(Handler):
             obj.is_delivery = is_delivery
 
     @classmethod
-    def empty_order(cls, model: Order):
+    def empty_order(cls, model: Order) -> bool:
         '''Remove all items in the order.
         Returns True if successful'''
         try:
@@ -597,15 +598,15 @@ class PhoneHandler(Handler):
     ModelType = Phone
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
 
     @classmethod
-    def to_dict(cls, model: Phone):
+    def to_dict(cls, model: Phone) -> dict:
         model = cls.convert_to_model(model)
         as_dict = PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
         as_dict['id'] = model.id
@@ -616,15 +617,15 @@ class PlantTraitHandler(Handler):
     ModelType = PlantTrait
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['trait', 'value']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['trait', 'value']
 
     @classmethod
-    def to_dict(cls, model: PlantTrait):
+    def to_dict(cls, model: PlantTrait) -> dict:
         model = cls.convert_to_model(model)
         return PlantTraitHandler.simple_fields_to_dict(model, PlantTraitHandler.all_fields())
 
@@ -634,7 +635,7 @@ class PlantTraitHandler(Handler):
         return db.session.query(PlantTrait).filter_by(trait=trait.value, value=value).one_or_none()
 
     @classmethod
-    def uniques_by_trait(cls, trait: PlantTraitOptions):
+    def uniques_by_trait(cls, trait: PlantTraitOptions) -> List[str]:
         '''Return all unique values for a given trait'''
         return [o[0] for o in cls.ModelType.query.with_entities(PlantTrait.value).filter_by(trait=trait.value).distinct(PlantTrait.value).all()]
 
@@ -643,17 +644,17 @@ class PlantHandler(Handler):
     ModelType = Plant
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['latin_name', 'common_name', 'plantnet_url', 'yards_url', 'description',
                 'jersey_native', 'drought_tolerance_id', 'grown_height_id',
                 'grown_spread_id', 'growth_rate_id', 'optimal_light_id', 'salt_tolerance_id']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['latin_name']
 
     @classmethod
-    def basic_dict(cls, model: Plant):
+    def basic_dict(cls, model: Plant) -> dict:
         '''Similar to the normal to_dict method, but without SKU data'''
         model = cls.convert_to_model(model)
 
@@ -692,7 +693,7 @@ class PlantHandler(Handler):
         return as_dict
 
     @classmethod
-    def to_dict(cls, model: Plant):
+    def to_dict(cls, model: Plant) -> dict:
         model = cls.convert_to_model(model)
         data = cls.basic_dict(model)
         data['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
@@ -703,13 +704,13 @@ class PlantHandler(Handler):
         return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
 
     @classmethod
-    def has_sku(cls, model):
+    def has_sku(cls, model) -> bool:
         '''Returns True if there are any SKUs associated with this plant'''
         model = cls.convert_to_model(model)
         return db.session.query(Sku).filter_by(plant_id=model.id).count() > 0
 
     @classmethod
-    def has_available_sku(cls, model):
+    def has_available_sku(cls, model) -> bool:
         '''Returns True if there are any SKUs VISIBLE TO THE CUSTOMER
         that are associated with this plant'''
         model = cls.convert_to_model(model)
@@ -760,7 +761,7 @@ class PlantHandler(Handler):
         return SkuHandler.oldest(skus)
 
     @staticmethod
-    def set_display_image(model: Plant, image: Image):
+    def set_display_image(model: Plant, image: Image) -> NoReturn:
         model.display_img = image
         model.display_img_id = image.id
         db.session.commit()
@@ -785,14 +786,14 @@ class PlantHandler(Handler):
         return None
 
     @classmethod
-    def get_thumb_display_b64(cls, model: Plant):
+    def get_thumb_display_b64(cls, model: Plant) -> Optional[str]:
         img = cls.get_display_image(model)
         if img is None:
             return None
         return ImageHandler.get_b64(img, 'm')
 
     @classmethod
-    def get_full_display_b64(cls, model: Plant):
+    def get_full_display_b64(cls, model: Plant) -> Optional[str]:
         img = cls.get_display_image(model)
         if img is None:
             return None
@@ -803,15 +804,15 @@ class RoleHandler(Handler):
     ModelType = Role
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['title', 'description']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['title']
 
     @classmethod
-    def to_dict(cls, model):
+    def to_dict(cls, model) -> dict:
         model = cls.convert_to_model(model)
         return RoleHandler.simple_fields_to_dict(model, RoleHandler.all_fields())
 
@@ -828,15 +829,15 @@ class SkuDiscountHandler(Handler):
     ModelType = SkuDiscount
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['discount', 'title', 'comment', 'terms']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['discount', 'title']
 
     @classmethod
-    def to_dict(cls, model: SkuDiscount):
+    def to_dict(cls, model: SkuDiscount) -> dict:
         model = cls.convert_to_model(model)
         return SkuDiscountHandler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields())
 
@@ -845,15 +846,15 @@ class SkuHandler(Handler):
     ModelType = Sku
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['sku', 'size', 'price', 'availability', 'is_discountable', 'status']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return []
 
     @classmethod
-    def to_dict(cls, model: Sku):
+    def to_dict(cls, model: Sku) -> dict:
         model = cls.convert_to_model(model)
         as_dict = SkuHandler.simple_fields_to_dict(model, SkuHandler.all_fields())
         as_dict['id'] = model.id
@@ -863,7 +864,7 @@ class SkuHandler(Handler):
         return as_dict
 
     @staticmethod
-    def add_discount(model: Sku, discount):
+    def add_discount(model: Sku, discount) -> bool:
         if not model.is_discountable:
             return False
         if discount in model.discounts:
@@ -872,7 +873,7 @@ class SkuHandler(Handler):
         return True
 
     @staticmethod
-    def set_plant(model: Sku, plant: Plant):
+    def set_plant(model: Sku, plant: Plant) -> NoReturn:
         model.plant = plant
 
     @staticmethod
@@ -920,7 +921,7 @@ class SkuHandler(Handler):
         return sorted(skus, key=lambda s: s.date_added, reverse=True)[0].date_added
 
     @classmethod
-    def hide_all(cls):
+    def hide_all(cls) -> NoReturn:
         '''Hides all SKUs from the customer'''
         skus = cls.all_objs()
         for sku in skus:
@@ -932,15 +933,15 @@ class UserHandler(Handler):
     ModelType = User
 
     @staticmethod
-    def all_fields():
+    def all_fields() -> List[str]:
         return ['first_name', 'last_name', 'pronouns', 'password', 'existing_customer']
 
     @staticmethod
-    def required_fields():
+    def required_fields() -> List[str]:
         return ['first_name', 'last_name', 'pronouns', 'password', 'existing_customer']
 
     @staticmethod
-    def protected_fields():
+    def protected_fields() -> List[str]:
         return ['existing_customer', 'password', 'login_attempts']
 
     @classmethod
@@ -975,7 +976,7 @@ class UserHandler(Handler):
         return user
 
     @classmethod
-    def to_dict(cls, model: User):
+    def to_dict(cls, model: User) -> dict:
         model = cls.convert_to_model(model)
         as_dict = UserHandler.simple_fields_to_dict(model, ['first_name', 'last_name', 'pronouns', 'existing_customer', 'theme'])
         as_dict['id'] = model.id
@@ -1000,7 +1001,7 @@ class UserHandler(Handler):
         return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
 
     @staticmethod
-    def tag_from_email(email: str):
+    def tag_from_email(email: str) -> Optional[str]:
         user = UserHandler.from_email(email)
         if user:
             return user.tag
@@ -1049,16 +1050,16 @@ class UserHandler(Handler):
         return True
 
     @staticmethod
-    def is_customer(user: User):
+    def is_customer(user: User) -> bool:
         print(RoleHandler.all_dicts(user.roles))
         return any(r.title == 'Customer' for r in user.roles)
 
     @staticmethod
-    def is_admin(user: User):
+    def is_admin(user: User) -> bool:
         return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod
-    def is_password_valid(user: User, password: str):
+    def is_password_valid(user: User, password: str) -> bool:
         return bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
 
     @staticmethod
@@ -1086,7 +1087,7 @@ class UserHandler(Handler):
             db.session.commit()
 
     @staticmethod
-    def set_token(model: User, token: str):
+    def set_token(model: User, token: str) -> NoReturn:
         '''Sets session token, which is used to validate
         near-term authenticated requests'''
         model.session_token = token
@@ -1139,7 +1140,7 @@ class UserHandler(Handler):
         }
 
     @staticmethod
-    def get_user_lock_status(email: str):
+    def get_user_lock_status(email: str) -> int:
         '''Returns -1 if account doesn't exist,
         account status otherwise'''
         try:
@@ -1165,7 +1166,7 @@ class UserHandler(Handler):
         return cart
 
     @staticmethod
-    def update_order(user: User, is_delivery: bool, requested_date: float, notes: str):
+    def update_order(user: User, is_delivery: bool, requested_date: float, notes: str) -> bool:
         cart = UserHandler.get_cart(user)
         if cart:
             cart.is_delivery = True
@@ -1176,7 +1177,7 @@ class UserHandler(Handler):
         return False
 
     @staticmethod
-    def submit_order(user: User):
+    def submit_order(user: User) -> bool:
         '''Submits the user's cart. Returns true if successful'''
         # Get cart
         cart = UserHandler.get_cart(user)
