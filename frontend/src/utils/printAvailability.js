@@ -56,12 +56,8 @@ export const printAvailability = () => {
                 head: header,
                 body: table_data,
             })
-            //doc.output('dataurlnewwindow', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
             let blob = doc.output('blob', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
             windowReference.location = URL.createObjectURL(blob);
-            // let blob = doc.output('blob');
-            // window.open('about', 'About Us')
-            // window.open(URL.createObjectURL(blob));
         })
         .catch(err => {
             console.error(err);
