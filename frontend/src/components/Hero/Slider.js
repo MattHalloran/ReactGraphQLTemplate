@@ -44,7 +44,7 @@ const Slider = ({
             transition: slidingDuration,
             translate: getWidth() * (index + 1)
         })
-    }, [timeoutRef, images, slidingDuration, wait])
+    }, [timeoutRef, images, slidingDuration])
 
     const wait = useCallback((index) => {
         setSlideIndex(index);

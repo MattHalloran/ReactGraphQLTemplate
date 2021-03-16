@@ -48,7 +48,8 @@ function Cart({
     }, [changedCart, onUpdate])
 
     useEffect(() => {
-        let ids = cart.items.map(it => it.sku.plant.id);
+        if(!cart) return;
+        let ids = cart.items.map(it => it.sku.plant.display_id);
         getImages(ids, 'm').then(response => {
             setThumbnails(response.images);
         }).catch(err => {
@@ -59,7 +60,7 @@ function Cart({
         return (() => {
             PubSub.unsubscribe(themeSub);
         })
-    }, [cart.items])
+    }, [cart])
 
     useLayoutEffect(() => {
         document.title = `Cart | ${BUSINESS_NAME}`;
