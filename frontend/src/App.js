@@ -129,12 +129,12 @@ function App() {
                                 <SignUpForm />
                             </FormPage>
                         )} />
-                        <Route exact path={LINKS.LogIn} render={() => (
+                        <Route exact path={`${LINKS.LogIn}/:code?`} render={() => (
                             <FormPage header="Log In" maxWidth="700px">
                                 <LogInForm />
                             </FormPage>
                         )} />
-                        <Route exact path={LINKS.ForgotPassword} render={() => (
+                        <Route exact path={`${LINKS.ForgotPassword}/:code?`} render={() => (
                             <FormPage header="Forgot Password" maxWidth="700px">
                                 <ForgotPasswordForm />
                             </FormPage>

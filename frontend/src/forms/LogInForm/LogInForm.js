@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import { loginUser } from 'query/http_promises';
+import { loginUser, applyVerificationCode } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
 import { LINKS } from 'utils/consts';
 import Button from 'components/Button/Button';
+import { getSession } from 'utils/storage';
 
 function LogInForm() {
     let history = useHistory();
@@ -14,6 +15,7 @@ function LogInForm() {
     const [password, setPassword] = useState("")
     const [passwordError, setPasswordError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
+    const urlParams = useParams();
     
     useEffect(() => {
         console.log('EMAIL ERROR:', emailError)
@@ -24,7 +26,10 @@ function LogInForm() {
     const toForgotPassword = () => history.replace('/forgot-password');
 
     const login = () => {
-        loginUser(email, password).then(() => {
+        loginUser(email, password, urlParams.code).then(response => {
+            if (urlParams.code && response.isEmailVerified) {
+                alert('Email has been verified!');
+            }
             history.push(LINKS.Shopping);
         }).catch(err => {
             console.error(err);

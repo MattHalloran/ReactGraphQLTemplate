@@ -11,6 +11,8 @@ from src.auth import verify_token
 import time
 import bcrypt
 import os
+import traceback
+import re
 
 
 # Abstract method for model handling classes
@@ -170,17 +172,20 @@ class Handler(ABC):
         i_ids = [it.id for it in relationship]  # IDs in the items list
         d_ids = []  # IDs in the data list
         for d_obj in data:
-            # Object is not new - update
-            if (d_id := d_obj.get('id', None)):
-                d_ids.append(d_id)
-                d_model = relationship_handler.from_id(d_id)
-                relationship_handler.update(d_model, d_obj)
-            # Object is new - create
-            else:
-                new_model = relationship_handler.create(d_obj)
-                relationship_handler.update(new_model, d_obj)
-                db.session.add(new_model)
-                relationship.append(new_model)
+            try:
+                # Object is not new - update
+                if (d_id := d_obj.get('id', None)):
+                    d_ids.append(d_id)
+                    d_model = relationship_handler.from_id(d_id)
+                    relationship_handler.update(d_model, d_obj)
+                # Object is new - create
+                else:
+                    new_model = relationship_handler.create(d_obj)
+                    relationship_handler.update(new_model, d_obj)
+                    db.session.add(new_model)
+                    relationship.append(new_model)
+            except Exception:
+                print(traceback.format_exc())
         for old in i_ids:
             # Object not found in data - delete
             if old not in d_ids:
@@ -995,6 +1000,13 @@ class UserHandler(Handler):
         return [UserHandler.to_dict(user) for user in users if UserHandler.is_customer(user)]
 
     @staticmethod
+    def tag_from_email(email: str):
+        user = UserHandler.from_email(email)
+        if user:
+            return user.tag
+        return None
+
+    @staticmethod
     def from_tag(tag: str):
         return db.session.query(User).filter_by(tag=tag).one_or_none()
 
@@ -1011,6 +1023,32 @@ class UserHandler(Handler):
         return any(user.account_status != AccountStatus.DELETED.value for user in users)
 
     @staticmethod
+    def phone_in_use(phone: str):
+        '''Returns True if the phone is being used by an active account'''
+        formatted_phone = re.sub("[^0-9]", "", phone)
+        # Only users that haven't been deleted
+        users = User.query.filter(User.account_status != AccountStatus.DELETED.value).all()
+        all_phones = [u.personal_phone for u in users]
+        # 2d to 1d
+        all_phones = sum(all_phones, [])
+        numbers = [p.unformatted_number for p in all_phones]
+        # Format numbers
+        numbers = [re.sub("[^0-9]", "", n) for n in numbers]
+        return any([num == formatted_phone for num in numbers])
+
+    @staticmethod
+    def verify_email(email: str, code: str) -> bool:
+        # TODO create more robust verification
+        user = UserHandler.from_email(email)
+        if not user:
+            return False
+        if code != user.tag:
+            return False
+        user.account_status = AccountStatus.UNLOCKED.value
+        db.session.commit()
+        return True
+
+    @staticmethod
     def is_customer(user: User):
         print(RoleHandler.all_dicts(user.roles))
         return any(r.title == 'Customer' for r in user.roles)
@@ -1025,32 +1063,27 @@ class UserHandler(Handler):
 
     @staticmethod
     def get_user_from_credentials(email: str, password: str):
-        if (user := UserHandler.from_email(email)):
-            # Reset login attempts after 15 minutes
-            if (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
-                print('Resetting soft account lock')
-                user.login_attempts = 0
-            user.last_login_attempt = time.time()
-            user.login_attempts += 1
+        # If user not found, or account not verified
+        if not (user := UserHandler.from_email(email)) or user.account_status == AccountStatus.WAITING_EMAIL_VERIFICATION.value:
+            return None
+        # Reset login attempts after 15 minutes
+        if user.account_status != AccountStatus.HARD_LOCK.value and (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
+            user.login_attempts = 0
             db.session.commit()
-            print(f'User login attempts: {user.login_attempts}')
-            # Return user if password is valid
-            if (user.login_attempts <= User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT and
-                    UserHandler.is_password_valid(user, password)):
-                user.account_status = AccountStatus.UNLOCKED.value
-                user.login_attempts = 0  # Reset login attemps
-                db.session.commit()
-                print('Found user')
-                return user
-            if user.login_attempts > User.LOGIN_ATTEMPTS_TO_HARD_LOCKOUT:
-                print(f'Hard-locking user {email}')
-                user.account_status = AccountStatus.HARD_LOCK.value
-                db.session.commit()
-            elif user.login_attempts > User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT:
-                print(f'Soft-locking user {email}')
-                user.account_status = AccountStatus.SOFT_LOCK.value
-                db.session.commit()
-        return None
+        # Return user if password is valid and account is unlocked
+        if user.account_status == AccountStatus.UNLOCKED.value and UserHandler.is_password_valid(user, password):
+            return user
+        # Update login attempt metadata
+        user.last_login_attempt = time.time()
+        user.login_attempts += 1
+        db.session.commit()
+        # If too many login attemps have been made
+        if user.account_status == AccountStatus.UNLOCKED.value and user.login_attempts > User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT:
+            user.account_status = AccountStatus.SOFT_LOCK.value
+            db.session.commit()
+        if user.account_status == AccountStatus.SOFT_LOCK.value and user.login_attempts > User.LOGIN_ATTEMPTS_TO_HARD_LOCKOUT:
+            user.account_status = AccountStatus.HARD_LOCK.value
+            db.session.commit()
 
     @staticmethod
     def set_token(model: User, token: str):

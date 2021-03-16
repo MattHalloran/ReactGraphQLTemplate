@@ -190,6 +190,22 @@ def send_plaintext_email(recipients: list,
     return send_smtp_message(msg)
 
 
+# Sends verification link to new customer
+def send_verification_link(email: str, user_tag: str) -> bool:
+    html = f"<p>Welcome to New Life Nursery!</p><p>Please click this link (<a href=\"https://newlifenurseryinc.com/login/{user_tag}\">https://newlifenurseryinc.com/login/{user_tag}</a>) to verify your account.</p><p>If you did not create an account with us, please ignore this message.</p>"
+    alt = f"Welcome to New Life Nursery! Please click this link (https://newlifenurseryinc.com/login/{user_tag}) to verify your account. If you did not create an account with us, please ignore this link."
+    sub = "Verify New Life Nursery Account"
+    return send_html_email([email], subject=sub, alt=alt, html=html)
+
+
+# Sends a password reset request to the specified email
+def reset_password_link(email: str, user_tag: str) -> bool:
+    html = f"<p>A password reset was requested for your New Life Nursery account.</p><p>If you sent this request, please click this link (<a href=\"https://newlifenurseryinc.com/forgot-password/{user_tag}\">https://newlifenurseryinc.com/verify/{user_tag}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>"
+    alt = f"A password reset was requested for your New Life Nursery account. If you sent this request, please click this link (https://newlifenurseryinc.com/forgot-password/{user_tag}) to continue. If you did not send this request, please ignore this email."
+    sub = "New Life Nursery Password Reset"
+    return send_html_email([email], subject=sub, alt=alt, html=html)
+
+
 # Notifies main admin that there is a new customer
 def customer_notify_admin(name: str) -> bool:
     html = f"<p>{name} has created an account with New Life Nursery. Website accounts can be viewed at <a href=\"https://newlifenurseryinc.com/admin/customers\">https://newlifenurseryinc.com/admin/customers</a></p>"
@@ -222,16 +238,6 @@ def welcome(recipient: str) -> bool:
     except Exception:
         print(traceback.format_exc())
         return False
-
-
-# Sends a password reset request to the specified email
-def reset_password(recipient: str):
-    # Define alt text in case recipient has html emails disabled
-    # alt = "Too bad"
-    # sub = 'New Life Nursery Password Reset'
-    # html = htmlToString('emailTemplates/reset-password.html')
-    # send_html_email([recipient], subject=sub, alt=alt, html=html)
-    print('TODO')
 
 
 if __name__ == '__main__':

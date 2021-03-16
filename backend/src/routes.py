@@ -4,7 +4,7 @@ from src.api import create_app, db, q
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
 from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
 from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
-from src.messenger import welcome, reset_password, order_notify_admin, customer_notify_admin
+from src.messenger import welcome, reset_password_link, order_notify_admin, customer_notify_admin, send_verification_link
 from src.utils import salt
 from src.auth import generate_token, verify_token
 from src.config import Config
@@ -130,6 +130,9 @@ def register():
     if any(UserHandler.email_in_use(e['email_address']) for e in data['emails']):
         print('ERROR: Email exists')
         return StatusCodes['FAILURE_EMAIL_EXISTS']
+    if any(UserHandler.phone_in_use(p['unformatted_number']) for p in data['phones']):
+        print('ERROR: Phone exists')
+        return StatusCodes['FAILURE_PHONE_EXISTS']
     # Create user
     user = UserHandler.create(data)
     # Create a session token
@@ -137,6 +140,8 @@ def register():
     UserHandler.set_token(user, token)
     db.session.commit()
     q.enqueue(customer_notify_admin, f'{user.first_name} {user.last_name}')
+    email = data['emails'][0]['email_address']
+    q.enqueue(send_verification_link, email, UserHandler.tag_from_email(email))
     return {
         **StatusCodes['SUCCESS'],
         "session": {"tag": user.tag, "token": token},
@@ -149,7 +154,9 @@ def register():
 @handle_exception
 def login():
     '''Generate a session token from a user's credentials'''
-    (email, password) = getData('email', 'password')
+    (email, password, verificationCode) = getData('email', 'password', 'verificationCode')
+    if isinstance(verificationCode, str) and len(verificationCode) > 0:
+        UserHandler.verify_email(email, verificationCode)
     user = UserHandler.get_user_from_credentials(email, password)
     if user:
         if user.tag == "nenew":
@@ -161,13 +168,17 @@ def login():
         return {
             **StatusCodes['SUCCESS'],
             "user": UserHandler.to_dict(user),
-            "session": {"tag": user.tag, "token": token}
+            "session": {"tag": user.tag, "token": token},
+            "isEmailVerified": user.account_status != AccountStatus.WAITING_EMAIL_VERIFICATION.value
         }
     else:
         account_status = UserHandler.get_user_lock_status(email)
         print(f'User account status is {account_status}')
         status = StatusCodes['FAILURE_INCORRECT_CREDENTIALS']
-        if account_status == -1:
+        if account_status == AccountStatus.WAITING_EMAIL_VERIFICATION.value:
+            status = StatusCodes['FAILURE_EMAIL_NOT_VERIFIED']
+            q.enqueue(send_verification_link, email, UserHandler.tag_from_email(email))
+        elif account_status == AccountStatus.DELETED.value:
             status = StatusCodes['FAILURE_NO_USER']
         elif account_status == AccountStatus.SOFT_LOCK.value:
             status = StatusCodes['FAILURE_SOFT_LOCKOUT']
@@ -180,7 +191,7 @@ def login():
 @handle_exception
 def send_password_reset_request():
     email = getData('email')
-    reset_password(email)
+    q.enqueue(reset_password_link, email, UserHandler.tag_from_email(email))
     return StatusCodes['SUCCESS']
 
 

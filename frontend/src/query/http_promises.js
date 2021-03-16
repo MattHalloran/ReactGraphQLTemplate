@@ -100,9 +100,9 @@ export const login = (session, user) => {
     setTheme(user.theme);
 }
 
-export function loginUser(email, password) {
+export function loginUser(email, password, verificationCode) {
     return new Promise(function (resolve, reject) {
-        http.login(email, password).then(response => {
+        http.login(email, password, verificationCode).then(response => {
             if (response.ok) {
                 login(response.session, response.user);
                 resolve(response);
