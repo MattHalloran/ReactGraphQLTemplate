@@ -2,7 +2,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db, q
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
-from src.handlers import UserHandler, SkuHandler
+from src.handlers import UserHandler, SkuHandler, OrderHandler
 from src.handlers import PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler
 from src.messenger import reset_password_link, order_notify_admin, customer_notify_admin, send_verification_link
 from src.utils import salt
