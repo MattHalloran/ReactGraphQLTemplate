@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import Navbar from 'components/Navbar/Navbar';
 import Spinner from 'components/Spinner/Spinner';

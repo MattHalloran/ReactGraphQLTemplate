@@ -4,9 +4,10 @@ import numpy as np
 from io import BytesIO
 from os import path
 from src.config import Config
+from typing import Tuple
 
 
-def find_available_file_names(folder: str, img_name: str, extension: str):
+def find_available_file_names(folder: str, img_name: str, extension: str) -> str:
     '''Using suggested image file name, returns file name
     that is not being used'''
     suggested_img_name = img_name
@@ -21,7 +22,7 @@ def find_available_file_names(folder: str, img_name: str, extension: str):
     raise Exception('Could not find an available file name!')
 
 
-def resize_image(image_str: str, dim: tuple):
+def resize_image(image_str: str, dim: tuple) -> Image:
     img = Image.open(BytesIO(image_str))
     (curr_width, curr_height) = img.size
     width = min(curr_width, dim[0])
@@ -30,7 +31,7 @@ def resize_image(image_str: str, dim: tuple):
     return img
 
 
-def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
+def get_image_meta(image_str: str, hash_size=8, mean=np.mean) -> Tuple[str, int, int]:
     """ Returns metadata about the image:
     1) Image hash, using the average hash algorithm
     2) Image width
@@ -56,7 +57,7 @@ def get_image_meta(image_str: str, hash_size=8, mean=np.mean):
     return (diff_as_string, width, height)
 
 
-def salt(length: int):
+def salt(length: int) -> str:
     '''Generates a random string of letters and numbers'''
     import random
     ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

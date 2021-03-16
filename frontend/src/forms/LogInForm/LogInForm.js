@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import { loginUser, applyVerificationCode } from 'query/http_promises';
+import { loginUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
 import { LINKS } from 'utils/consts';
 import Button from 'components/Button/Button';
-import { getSession } from 'utils/storage';
 
 function LogInForm() {
     let history = useHistory();
@@ -16,10 +15,6 @@ function LogInForm() {
     const [passwordError, setPasswordError] = useState(null);
     const [showErrors, setShowErrors] = useState(false);
     const urlParams = useParams();
-    
-    useEffect(() => {
-        console.log('EMAIL ERROR:', emailError)
-    }, [emailError])
 
     const toRegister = () => history.replace('/register');
 

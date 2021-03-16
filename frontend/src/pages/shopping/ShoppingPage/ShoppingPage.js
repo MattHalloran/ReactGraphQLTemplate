@@ -4,14 +4,13 @@ import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import ArrowMenu from 'components/menus/ArrowMenu/ArrowMenu';
-import { BUSINESS_NAME, USER_ROLES, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
+import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession, getTheme } from 'utils/storage';
 import PubSub from 'utils/pubsub';
 import Button from 'components/Button/Button';
-import { XIcon } from 'assets/img';
 import { printAvailability } from 'utils/printAvailability';
 
 function ShoppingPage() {
@@ -41,7 +40,6 @@ function ShoppingPage() {
         checkCookies().then(() => {
             getInventoryFilters()
                 .then((response) => {
-                    console.log("GOT INVENTORY FILTERS!!!!!!!!! BOOP", response)
                     if (!mounted) return;
                     // Add checked boolean to each filter
                     for (const [_, value] of Object.entries(response)) {
@@ -54,7 +52,6 @@ function ShoppingPage() {
                         }
                     }
                     setFilters(response);
-                    console.log('SETING FILTERSSSSSSSSSS', response);
                 })
                 .catch((error) => {
                     console.error("Failed to load filters", error);
@@ -65,10 +62,6 @@ function ShoppingPage() {
 
         return () => mounted = false;
     }, []);
-
-    useEffect(() => {
-        console.log("NEW FILTERSSS", filters);
-    }, [filters])
 
     const handleFiltersChange = useCallback((group, value, checked) => {
         let modified_filters = { ...filters };
@@ -103,18 +96,6 @@ function ShoppingPage() {
             </fieldset>
         </React.Fragment>
     }
-
-    const is_customer = useCallback(() => {
-        if (!user_roles instanceof Array) return;
-        user_roles?.forEach(r => {
-            console.log('SHOPPING PAGE FOUND ROLEEEEE', r)
-            if (r.title === USER_ROLES.Customer ||
-                r.title === USER_ROLES.Admin) {
-                return true;
-            }
-        })
-        return false;
-    }, [user_roles])
 
     const resetSearchConstraints = () => {
         handleSortChange(SORT_OPTIONS[0]);

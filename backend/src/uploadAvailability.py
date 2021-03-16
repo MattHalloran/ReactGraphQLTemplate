@@ -8,13 +8,13 @@ from src.models import SkuStatus
 from src.handlers import SkuHandler, PlantHandler
 
 
-def is_cell_blank(cell):
+def is_cell_blank(cell) -> bool:
     if type(cell) is float or type(cell) is numpy.float64:
         return math.isnan(cell)
     return False
 
 
-def upload_availability(data):
+def upload_availability(data) -> bool:
     # Load in excel columns using pandas
     df = pd.read_excel(data)
     latin_names = df['Botanical Name']

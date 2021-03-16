@@ -46,7 +46,6 @@ class Draggable extends React.PureComponent {
     };
     
     _onMouseMove = (event) => {
-        console.log('ON MOVEEEEEE', event.pageX - this._relX, event.pageY - this._relY)
         this.props.onMove(
             event.pageX - this._relX,
             event.pageY - this._relY,

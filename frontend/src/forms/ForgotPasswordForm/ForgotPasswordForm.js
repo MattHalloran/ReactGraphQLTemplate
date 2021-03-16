@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import { resetPasswordRequest } from 'query/http_promises';
 import * as validation from 'utils/validations';

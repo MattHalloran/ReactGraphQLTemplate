@@ -31,7 +31,6 @@ function AdminCustomerPage() {
         getCustomers(session)
             .then((response) => {
                 if (!mounted) return;
-                console.log('GOT CUSTOMERS', response.customers);
                 setCustomers(response.customers);
             })
             .catch((error) => {

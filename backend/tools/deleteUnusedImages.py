@@ -2,7 +2,7 @@
 # Image rows in the database (happens if the database was dropped)
 import os
 from os import listdir
-from os.path import isfile, join, dirname
+from os.path import isfile, join
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.api import db, create_app  # NOQA

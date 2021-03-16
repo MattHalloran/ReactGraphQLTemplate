@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import SliderContent from './SliderContent';
 import Slide from './Slide';
 import Dots from './Dots';
@@ -44,7 +44,7 @@ const Slider = ({
             transition: slidingDuration,
             translate: getWidth() * (index + 1)
         })
-    }, [timeoutRef])
+    }, [timeoutRef, images, slidingDuration, wait])
 
     const wait = useCallback((index) => {
         setSlideIndex(index);
@@ -54,7 +54,7 @@ const Slider = ({
             transition: 0,
             translate: getWidth() * index
         })
-    }, [timeoutRef])
+    }, [timeoutRef, play, slidingDelay])
 
     useEffect(() => {
         const resize = () => {
@@ -72,7 +72,7 @@ const Slider = ({
                 clearTimeout(timeoutRef.current);
             }
         }
-    }, [])
+    }, [autoPlay, wait])
 
     const handleResize = () => {
         setState({ ...state, translate: getWidth(), transition: 0 })

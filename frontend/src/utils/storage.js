@@ -2,11 +2,9 @@
 // TODO invalidate items after a while
 
 import PubSub from './pubsub';
-import { LOCAL_STORAGE, PUBS } from 'utils/consts';
+import { LOCAL_STORAGE } from 'utils/consts';
 import { deepEqual, isString } from 'utils/typeChecking';
 import * as http from 'query/http_promises';
-import { light } from '@material-ui/core/styles/createPalette';
-import { deleteObjectKey } from './objectTools';
 import { deleteArrayObject } from './arrayTools';
 
 export const darkTheme = {
@@ -114,15 +112,12 @@ export const getLikes = () => {
 
 export const getCart = () => {
     let data = getItem(LOCAL_STORAGE.Cart);
-    console.log('IN START OF GET CART', data);
     if (data) return data;
     //If cart not found, attempt to query backend
     let session = getSession();
     if (!session) return null;
     http.getCart(session).then(response => {
-        console.log('STORING CART', response.cart)
         storeItem(LOCAL_STORAGE.Cart, response.cart, true);
-        console.log('STORED CART ISSSSSSSS... ', getItem(LOCAL_STORAGE.Cart))
         return response.cart;
     }).catch(err => {
         console.error(err);
@@ -146,10 +141,7 @@ export const storeItem = (key, value, forceUpdate=false) => {
             value = JSON.parse(value)
         } catch (e) { }
     }
-    console.log('store item a', value)
     if (!forceUpdate && deepEqual(getItem(key), value)) return;
-    console.log('store item b', JSON.stringify(value))
-    console.log("STORING ITEMMMM", key, value);
     localStorage.setItem(key, JSON.stringify(value));
     PubSub.publish(key, value);
 }

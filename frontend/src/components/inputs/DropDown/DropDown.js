@@ -98,10 +98,8 @@ function DropDown({ allow_custom_input = false,
         if (multi_select) {
             let index = findIndex(selected, option);
             if (index >= 0) {
-                console.log('REMOVING SELECTED', index)
                 setSelected(s => s.splice(index, 1));
             } else {
-                console.log('SETTING SELECTED', option)
                 setSelected(s => [...s, option]);
             }
         } else {
@@ -120,8 +118,6 @@ function DropDown({ allow_custom_input = false,
                 is_selected = selected.value === option.value;
             }
         }
-
-        console.log('RENDER OPTION', option, is_selected, findIndex(selected, option));
         
         return (
             <div
