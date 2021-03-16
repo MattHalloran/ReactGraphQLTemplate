@@ -56,7 +56,7 @@ function SignUpForm() {
         }
         registerUser(data).then(() => {
             if (existingCustomer) {
-                alert('Welcome to New Life Nursery! You may now begin shopping');
+                alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
             } else {
                 alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
             }

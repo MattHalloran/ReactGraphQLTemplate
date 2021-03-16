@@ -25,10 +25,20 @@
         "ok": false,
         "msg": "Error: Invalid arguments supplied"
     },
+    "FAILURE_PHONE_EXISTS": {
+        "code": 452,
+        "ok": false,
+        "msg": "Error: Account with that phone number already exists"
+    },
     "FAILURE_EMAIL_EXISTS": {
         "code": 469,
         "ok": false,
         "msg": "Error: Account with that email already exists"
+    },
+    "FAILURE_EMAIL_NOT_VERIFIED": {
+        "code": 957,
+        "ok": false,
+        "msg": "Error: Email has not been verified yet. Sending new verification email"
     },
     "FAILURE_NO_USER": {
         "code": 969,

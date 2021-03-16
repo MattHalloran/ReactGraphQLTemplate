@@ -56,10 +56,12 @@ export async function register(data) {
     return await fetchWrapper('register', options);
 }
 
-export async function login(email, password) {
+// verificationCode is optional. Used to verify email
+export async function login(email, password, verificationCode) {
     let json = JSON.stringify({
         "email": email,
-        "password": password
+        "password": password,
+        "verificationCode": verificationCode ?? ''
     });
     let options = {
         body: json,

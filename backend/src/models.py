@@ -737,6 +737,7 @@ class Role(db.Model):
 
 class AccountStatus(Enum):
     DELETED = -1
+    WAITING_EMAIL_VERIFICATION = 4
     UNLOCKED = 1
     SOFT_LOCK = 2
     HARD_LOCK = 3
@@ -750,7 +751,7 @@ class User(db.Model):
         'theme': 'light',
         'image_file': 'default.jpg',
         'account_approved': False,
-        'account_status': AccountStatus.UNLOCKED.value,
+        'account_status': AccountStatus.WAITING_EMAIL_VERIFICATION.value,
     }
 
     __tablename__ = Tables.USER.value
@@ -804,7 +805,7 @@ class User(db.Model):
         # If they've ordered from here before (but before online ordering was available),
         # they are allowed to shop before approval
         if existing_customer:
-            self.account_status = AccountStatus.UNLOCKED.value
+            self.account_status = AccountStatus.WAITING_EMAIL_VERIFICATION.value
         else:
             self.account_status = AccountStatus.WAITING_APPROVAL.value
 
