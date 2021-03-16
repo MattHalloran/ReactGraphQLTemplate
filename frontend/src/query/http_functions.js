@@ -1,4 +1,4 @@
-const IP = 'http://localhost:5000';//https://newlifenurseryinc.com';
+const IP = 'http://192.168.0.10:5000';//https://newlifenurseryinc.com';
 // URL prefix used to signify calls to backend
 const PREFIX = 'api';
 // Headers used by fetch calls
