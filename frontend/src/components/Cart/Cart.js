@@ -45,7 +45,7 @@ function Cart({
 
     useEffect(() => {
         onUpdate(changedCart);
-    }, [changedCart])
+    }, [changedCart, onUpdate])
 
     useEffect(() => {
         let ids = cart.items.map(it => it.sku.plant.id);
@@ -59,7 +59,7 @@ function Cart({
         return (() => {
             PubSub.unsubscribe(themeSub);
         })
-    }, [])
+    }, [cart.items])
 
     useLayoutEffect(() => {
         document.title = `Cart | ${BUSINESS_NAME}`;
@@ -67,11 +67,11 @@ function Cart({
 
     const setNotes = useCallback((notes) => {
         setChangedCart(c => updateObject(c, 'special_instructions', notes));
-    }, [changedCart])
+    }, [])
 
     const setDeliveryDate = useCallback((date) => {
         setChangedCart(c => updateObject(c, 'desired_delivery_date', +date));
-    }, [changedCart])
+    }, [])
 
     const handleDeliveryChange = useCallback((sort_item, _) => {
         if (changedCart?.is_delivery === sort_item.value) return;
@@ -88,14 +88,6 @@ function Cart({
         let cart_copy = {...changedCart};
         cart_copy.items[index].quantity = quantity;
         setChangedCart(cart_copy);
-    }, [changedCart])
-
-    useEffect(() => {
-        console.log('THUMBNAILS UPDATED', thumbnails);
-    }, [thumbnails])
-
-    useEffect(() => {
-        console.log('CART UPDATED', changedCart);
     }, [changedCart])
 
     const deleteCartItem = useCallback((sku) => {

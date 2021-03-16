@@ -19,12 +19,11 @@ import smtplib
 from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
+# from email.mime.image import MIMEImage
 from twilio.rest import Client
 import difflib
 import traceback
 from typing import Union, Optional
-import ssl
 
 MAIL_SERVICE = 'smtp.gmail.com'
 PORT_NUM = 465
@@ -104,7 +103,8 @@ def send_smtp_message(message: Union[MIMEMultipart, EmailMessage]) -> bool:
 
 # Arguments:
 # recipients - a list of recipients. Can contain phone numbers or emails
-# to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
+# to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients,
+# but can actually be any text
 # subject - The subject of the message
 # alt_text - The plaintext message, in case the recipient has html emails disabled
 # html - String of html data
@@ -159,7 +159,8 @@ def send_html_email(recipients: list,
 
 # Arguments:
 # recipients - a list of recipients. Can contain phone numbers or emails
-# to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients, but can actually be any text
+# to_text - Who the recipients will think the email is sent to. Useful for bcc. Defaults to the list of recipients,
+# but can actually be any text
 # subject - The subject of the message
 # message - The actual message, in plaintext. If sending an html file instead (such as a newsletter), it is still a good
 def send_plaintext_email(recipients: list,
@@ -220,24 +221,6 @@ def order_notify_admin() -> bool:
     alt = "A new order has been submitted. It can be viewed at https://newlifenurseryinc.com/admin/orders"
     sub = "New Order Received!"
     return send_html_email([EMAIL_USERNAME], subject=sub, alt=alt, html=html)
-
-
-# Sends a welcome email to a new user
-def welcome(recipient: str) -> bool:
-    try:
-        # # Load all embedded images into MIMEImage
-        # fp = open(f'{ASSET_LOCATION}/img/Welcome-to-new-life.png', 'rb')
-        # welcome_image_mime = MIMEImage(fp.read())
-        # welcome_image_mime.add_header('Content-ID', '<welcomeImage>')
-        # fp.close()
-        # Define alt text in case recipient has html emails disabled
-        html = "<h1>Welcome to New Life Nursery!</h1><p>You're now registered for online ordering.</p><h3>What happens next?</h3><p>You can view our availability at <a href=\"https://newlifenurseryinc.com/shopping\">https://newlifenurseryinc.com/shopping</a>.</p><p>After ordering, we will contact you for payment information.</p>"
-        alt = "Welcome to New Life Nursery! You're now registered for online ordering. You can view our availability at https://newlifenurseryinc.com/shopping. After ordering, we will contact you for payment information."
-        sub = 'Welcome to New Life Nursery!'
-        return send_html_email([recipient], subject=sub, alt=alt, html=html)
-    except Exception:
-        print(traceback.format_exc())
-        return False
 
 
 if __name__ == '__main__':

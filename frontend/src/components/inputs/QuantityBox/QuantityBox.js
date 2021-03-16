@@ -45,7 +45,6 @@ function QuantityBox({
     }
 
     const startTouch = (adding) => {
-        console.log('START TOUCH')
         holdTimeout.current = setTimeout(() => {
             if (adding)
                 holdInterval.current = setInterval(incTick, HOLD_INTERVAL);
@@ -55,7 +54,6 @@ function QuantityBox({
     }
 
     const stopTouch = () => {
-        console.log('STOP TOUCH')
         clearTimeout(holdTimeout.current);
         clearInterval(holdInterval.current);
     }

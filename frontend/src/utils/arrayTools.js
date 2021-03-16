@@ -26,7 +26,6 @@ export const deleteArrayObject = (array, obj) => {
 
 export const findWithAttr = (array, attr, value) => {
     for(let i = 0; i < array.length; i += 1) {
-        console.log('JUICE', array[i][attr], value)
         if(array[i][attr] === value) {
             return i;
         }

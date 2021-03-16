@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledGalleryPhoto } from './GalleryPhoto.styled';
 import { SortableElement } from 'react-sortable-hoc';

@@ -6,7 +6,6 @@ import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
 import Gallery from 'react-photo-gallery';
 import { getGallery, getImages, getImage } from 'query/http_promises';
-import arrayMove from "array-move";
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
@@ -55,7 +54,6 @@ function GalleryPage() {
             console.log(full_images.current);
             // Request the image from the backend
             getImage(id, 'l').then(response => {
-                console.log('GOT IMAGE RESPONSE', response);
                 let image_data = [`data:image/jpeg;base64,${response.image}`, response.alt];
                 setCurrImg(image_data);
                 full_images.current[index] = image_data;
@@ -109,7 +107,6 @@ function GalleryPage() {
                     combined_data.push(new_data);
                 }
             }
-            console.log('COMBINED DATA:',combined_data)
             setThumbnails(thumbs => thumbs.concat(combined_data));
             loading.current = false;
         }).catch(error => {
@@ -214,7 +211,6 @@ function GalleryImage(props) {
 
     const handlers = {
         PREVIOUS: () => {
-            console.log('TRIGGA FINGA');
             props.goLeft()
         },
         NEXT: () => props.goRight(),

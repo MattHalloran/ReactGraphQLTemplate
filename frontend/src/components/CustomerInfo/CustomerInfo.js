@@ -7,7 +7,6 @@ function CustomerInfo({
     customer,
     theme = getTheme(),
 }) {
-    console.log('Customer info', customer)
     let customerInfo;
     if (customer) {
         customerInfo = <React.Fragment>

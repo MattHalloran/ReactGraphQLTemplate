@@ -1,14 +1,13 @@
-from flask import request, jsonify
+from flask import request
 from flask_cors import CORS, cross_origin
 from src.api import create_app, db, q
 from src.models import AccountStatus, Sku, SkuStatus, ImageUses, PlantTraitOptions, OrderStatus
-from src.handlers import BusinessHandler, UserHandler, SkuHandler, EmailHandler, OrderHandler, OrderItemHandler
-from src.handlers import PhoneHandler, PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler, RoleHandler
-from src.messenger import welcome, reset_password_link, order_notify_admin, customer_notify_admin, send_verification_link
+from src.handlers import UserHandler, SkuHandler
+from src.handlers import PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler
+from src.messenger import reset_password_link, order_notify_admin, customer_notify_admin, send_verification_link
 from src.utils import salt
 from src.auth import generate_token, verify_token
 from src.config import Config
-from sqlalchemy import exc
 import traceback
 from base64 import b64decode
 import json

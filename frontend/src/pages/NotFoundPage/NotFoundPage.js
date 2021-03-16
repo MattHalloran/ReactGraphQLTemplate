@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useEffect, useState } from 'react';
+import { useLayoutEffect, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';

@@ -3,11 +3,11 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
+import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getUnusedPlants, getInventoryFilters, modifySku, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
+import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
 import Button from 'components/Button/Button';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
@@ -16,7 +16,7 @@ import DropDown from 'components/inputs/DropDown/DropDown';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import InputText from 'components/inputs/InputText/InputText';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
-import { TrashIcon, EditIcon, HideIcon, NoImageIcon } from 'assets/img';
+import { NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 
@@ -140,7 +140,6 @@ function AdminInventoryPage() {
         let reader = new FileReader();
         reader.onloadend = () => {
             let fileData = reader.result;
-            console.log('GOT FILE DATAAAA', fileData);
             setSelected(fileData);
         }
         reader.readAsDataURL(file);
@@ -422,11 +421,7 @@ function PlantPopup({
     const removeSku = useCallback(() => {
         //let index = skus.findIndex(s => s.sku === selectedSku.sku)
         let index = skus.indexOf(selectedSku);
-        console.log('SLECTED', selectedSku)
-        console.log("INDEX IS", index)
         if (index < 0) return;
-        let spliced = skus.splice(index, 1);
-        console.log('SPLICED', spliced)
         setSkus(l => l.filter(s => s.sku !== selectedSku.sku))
     }, [skus, selectedSku])
 

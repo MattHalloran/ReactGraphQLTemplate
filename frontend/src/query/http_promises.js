@@ -86,7 +86,6 @@ export const checkCookies = () => {
 }
 
 export function logoutAndRedirect() {
-    console.log("LOGGIN OUT AND REDIRECTING")
     return (dispatch) => {
         dispatch(clearStorage);
         let history = useHistory();

@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from src.config import Config
 from flask_migrate import Migrate
 from rq import Queue
-from rq.job import Job
 from worker import conn
 
 db = SQLAlchemy()

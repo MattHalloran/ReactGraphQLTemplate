@@ -13,7 +13,7 @@ import bcrypt
 import os
 import traceback
 import re
-from typing import Optional, Union, Tuple, NoReturn, List
+from typing import Optional, Tuple, NoReturn, List
 
 
 # Abstract method for model handling classes

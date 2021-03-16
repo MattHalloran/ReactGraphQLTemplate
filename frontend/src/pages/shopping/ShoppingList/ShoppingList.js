@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
+import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
@@ -13,7 +13,6 @@ import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import DropDown from 'components/inputs/DropDown/DropDown';
-import { updateArray } from "utils/arrayTools";
 
 function ShoppingList({
     page_size,
@@ -67,7 +66,6 @@ function ShoppingList({
     }, [])
 
     useEffect(() => {
-        console.log('CURR INDEX UPDATED', curr_index)
         PubSub.publish(PUBS.PopupOpen, curr_index >= 0);
     }, [curr_index])
 
@@ -109,9 +107,7 @@ function ShoppingList({
         //Find all applied filters
         let applied_filters = [];
         for (const key in filters) {
-            //console.log('CURR KEY IS', key)
             let filter_group = filters[key];
-            //console.log('FILTER GROUP IS', filter_group)
             for (let i = 0; i < filter_group.length; i++) {
                 if (filter_group[i].checked) {
                     applied_filters.push([key, filter_group[i].label]);
@@ -120,7 +116,6 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length == 0) {
-            console.log('SETTING PLANTS', visible_plants);
             setPlants(visible_plants);
             return;
         }
@@ -179,9 +174,7 @@ function ShoppingList({
     //Load next page if scrolling near the bottom of the page
     const checkScroll = useCallback(() => {
         const divElement = document.getElementById(track_scrolling_id);
-        console.log('SCROLL CHeCK')
         if (divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight) {
-            console.log('BOTTOM REACHED')
             loadNextPage();
         }
     }, [track_scrolling_id, loadNextPage])
