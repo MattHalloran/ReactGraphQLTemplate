@@ -16,6 +16,7 @@
         "react": "^16.14.0",
         "react-datepicker": "^3.5.0",
         "react-dom": "^16.14.0",
+        "react-dynamic-sitemap": "^1.2.0",
         "react-hotkeys": "^2.0.0-pre9",
         "react-photo-gallery": "^8.0.0",
         "react-router-dom": "^5.2.0",

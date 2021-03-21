@@ -1,36 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Switch, Route } from 'react-router-dom';
 import Navbar from 'components/Navbar/Navbar';
 import Spinner from 'components/Spinner/Spinner';
 import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
-import { PUBS, LINKS, USER_ROLES } from 'utils/consts';
+import { PUBS } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
-import FormPage from 'pages/FormPage/FormPage';
-//Routes
-import HomePage from 'pages/HomePage/HomePage';
-import AboutPage from 'pages/AboutPage/AboutPage';
-import CartPage from 'pages/CartPage/CartPage';
-import GalleryPage from 'pages/GalleryPage/GalleryPage';
-import ShoppingPage from 'pages/shopping/ShoppingPage/ShoppingPage';
-import PrivacyPolicyPage from 'pages/PrivacyPolicyPage/PrivacyPolicyPage';
-import TermsPage from 'pages/TermsPage/TermsPage';
-import AdminMainPage from 'pages/admin/AdminMainPage/AdminMainPage';
-import AdminContactPage from 'pages/admin/AdminContactPage/AdminContactPage';
-import AdminCustomerPage from 'pages/admin/AdminCustomerPage/AdminCustomerPage';
-import AdminGalleryPage from 'pages/admin/AdminGalleryPage/AdminGalleryPage';
-import AdminInventoryPage from 'pages/admin/AdminInventoryPage/AdminInventoryPage';
-import AdminOrderPage from 'pages/admin/AdminOrderPage/AdminOrderPage';
-import NotFoundPage from 'pages/NotFoundPage/NotFoundPage';
-import ProfileForm from 'forms/ProfileForm/ProfileForm';
-import SignUpForm from 'forms/SignUpForm/SignUpForm';
-import LogInForm from 'forms/LogInForm/LogInForm';
-import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
-//Provide global themes
+import Routes from 'Routes';
 import { GlobalStyles } from './global';
 import { getSession, getTheme, getCart } from './utils/storage';
-//Authentication
-import RequireAuthentication from 'components/wrappers/RequireAuthentication/RequireAuthentication';
 import { checkCookies } from 'query/http_promises';
 
 const keyMap = {
@@ -117,76 +94,7 @@ function App() {
                 <div id="content-wrap">
                     <Navbar visible={nav_visible} session={session} user_roles={user_roles} cart={cart} />
                     <Spinner spinning={false} />
-                    <Switch>
-                        {/* public pages */}
-                        <Route exact path={LINKS.Home} component={HomePage} />
-                        <Route exact path={LINKS.About} component={AboutPage} />
-                        <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} />
-                        <Route exact path={LINKS.Terms} component={TermsPage} />
-                        <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} />
-                        <Route exact path={LINKS.Register} render={() => (
-                            <FormPage header="Sign Up" maxWidth="700px">
-                                <SignUpForm />
-                            </FormPage>
-                        )} />
-                        <Route exact path={`${LINKS.LogIn}/:code?`} render={() => (
-                            <FormPage header="Log In" maxWidth="700px">
-                                <LogInForm />
-                            </FormPage>
-                        )} />
-                        <Route exact path={`${LINKS.ForgotPassword}/:code?`} render={() => (
-                            <FormPage header="Forgot Password" maxWidth="700px">
-                                <ForgotPasswordForm />
-                            </FormPage>
-                        )} />
-                        {/* customer pages */}
-                        <Route exact path={LINKS.Profile} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Customer}>
-                                <FormPage header="Profile">
-                                    <ProfileForm session={session} />
-                                </FormPage>
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={`${LINKS.Shopping}/:sku?`} render={() => (
-                            <ShoppingPage user_roles={user_roles} session={session} />
-                        )} />
-                        <Route exact path={LINKS.Cart} render={() => (
-                            <CartPage user_roles={user_roles} session={session} />
-                        )} />
-                        {/* admin pages */}
-                        <Route exact path={LINKS.Admin} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminMainPage />
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={LINKS.AdminContactInfo} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminContactPage />
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={LINKS.AdminCustomers} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminCustomerPage />
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={LINKS.AdminGallery} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminGalleryPage />
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={LINKS.AdminInventory} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminInventoryPage />
-                            </RequireAuthentication>
-                        )} />
-                        <Route exact path={LINKS.AdminOrders} render={() => (
-                            <RequireAuthentication role={USER_ROLES.Admin}>
-                                <AdminOrderPage />
-                            </RequireAuthentication>
-                        )} />
-                        {/* 404 page */}
-                        <Route component={NotFoundPage} />
-                    </Switch>
+                    <Routes session={session} user_roles={user_roles}/>
                 </div>
                 <Footer />
             </div>
