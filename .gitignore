@@ -167,4 +167,4 @@ backend/plant_info/yards/yards*.json
 
 .eslintcache
 package-lock.json
-*.rdb
+*dump.rdb
