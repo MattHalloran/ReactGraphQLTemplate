@@ -1,10 +1,8 @@
 import { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { getTheme } from 'utils/storage';
 import { StyledTooltip } from './Tooltip.styled';
 
 function Tooltip({
-    theme = getTheme(),
     delay = 400,
     direction = 'top',
     content,
@@ -33,7 +31,7 @@ function Tooltip({
     }, [active, hideTip, showTip])
 
     return (
-        <StyledTooltip theme={theme}
+        <StyledTooltip
             onMouseEnter={() => showTip()}
             onMouseLeave={() => hideTip()}
             onClick={() => toggleTip()}>
@@ -49,7 +47,6 @@ function Tooltip({
 }
 
 Tooltip.propTypes = {
-    theme: PropTypes.object,
     delay: PropTypes.number,
     direction: PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
     content: PropTypes.any,

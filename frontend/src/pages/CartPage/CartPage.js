@@ -2,14 +2,13 @@ import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router';
 import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { getTheme, getCart, getSession } from 'utils/storage';
+import { getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { updateCart, submitOrder } from 'query/http_promises';
 import Cart from 'components/Cart/Cart';
 
 function CartPage() {
-    const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
     // Holds cart changes before update is final
     const [changedCart, setChangedCart] = useState(cart);
@@ -21,11 +20,9 @@ function CartPage() {
     }
 
     useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(sessionSub);
         })
@@ -68,7 +65,7 @@ function CartPage() {
     }, [cart, changedCart, session]);
 
     return (
-        <StyledCartPage className="page" theme={theme}>
+        <StyledCartPage className="page">
             <h2>Cart</h2>
             <Cart cart={cart} onUpdate={cartUpdate} />
             <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>

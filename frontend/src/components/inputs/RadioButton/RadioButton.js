@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types';
 import { StyledRadioButton } from './RadioButton.styled';
-import { getTheme } from 'utils/storage';
 
 function RadioButton({
-    theme=getTheme(),
     id,
     name,
     value,
@@ -13,7 +11,7 @@ function RadioButton({
 }) {
 
     return (
-        <StyledRadioButton theme={theme} {...props}>
+        <StyledRadioButton {...props}>
             <input type="radio" id={id} name={name} value="male" onChange={onChange} />
             <label for={name}>{label}</label>
         </StyledRadioButton>
@@ -21,7 +19,6 @@ function RadioButton({
 }
 
 RadioButton.propTypes = {
-    theme: PropTypes.object,
     id: PropTypes.string,
     name: PropTypes.string,
     value: PropTypes.string,

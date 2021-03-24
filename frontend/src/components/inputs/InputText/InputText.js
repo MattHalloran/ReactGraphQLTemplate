@@ -1,12 +1,10 @@
 import { useRef, useEffect } from "react";
 import PropTypes from 'prop-types';
-import { getTheme } from 'utils/storage';
 import { StyledInputText } from  './InputText.styled';
 import makeID from 'utils/makeID';
 
 function InputText({
     id = makeID(10),
-    theme = getTheme(),
     type = 'text',
     index,
     label,
@@ -50,7 +48,7 @@ function InputText({
     }
 
     return (
-        <StyledInputText icon={icon} theme={theme}
+        <StyledInputText icon={icon}
             has_error={error?.length > 0}
             show_label={showErrors || value?.length > 0}
             disabled={disabled}
@@ -75,7 +73,6 @@ function InputText({
 // validate - a function for validating the input string
 InputText.propTypes = {
     id: PropTypes.string,
-    theme: PropTypes.object,
     index: PropTypes.func,
     label: PropTypes.string,
     valueFunc: PropTypes.func,

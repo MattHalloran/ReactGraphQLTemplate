@@ -2,18 +2,15 @@ import PropTypes from 'prop-types';
 import { StyledModal } from './Modal.styled';
 import ClickOutside from '../ClickOutside/ClickOutside';
 import Button from 'components/Button/Button';
-import { getTheme } from 'utils/storage';
 
 // const ESCAPE_KEY = 27;
 
 function Modal({
-    theme = getTheme(),
     onClose,
     children,
 }) {
     return (
         <StyledModal
-            theme={theme}
             role="dialog"
             tabIndex="-1"
             aria-modal="true">

@@ -1,13 +1,10 @@
 import PropTypes from 'prop-types';
 import { StyledContactInfo } from './ContactInfo.styled';
 import { GeoIcon, EmailIcon, PhoneIcon } from 'assets/img';
-import { getTheme } from 'utils/storage';
 import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
 import Button from 'components/Button/Button';
 
-function ContactInfo({
-    theme = getTheme(),
-}) {
+function ContactInfo() {
 
     const openMaps = (e) => {
         window.location = GOOGLE_MAPS_ADDRESS;
@@ -25,7 +22,7 @@ function ContactInfo({
     }
 
     return (
-        <StyledContactInfo theme={theme}>
+        <StyledContactInfo>
                 <table className="hours-content-div">
                     <tbody>
                         <tr><th className="hours-header">Hours</th></tr>
@@ -63,7 +60,6 @@ function ContactInfo({
 }
 
 ContactInfo.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default ContactInfo;

@@ -1,27 +1,17 @@
-import { useLayoutEffect, useEffect, useState } from 'react';
+import { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { PubSub } from 'utils/pubsub';
+import { BUSINESS_NAME } from 'utils/consts';
 import Button from 'components/Button/Button';
-import { getTheme } from 'utils/storage';
 
 function NotFoundPage() {
-    const [theme, setTheme] = useState(getTheme());
-
-    useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        return (() => {
-            PubSub.unsubscribe(themeSub);
-        })
-    }, [])
 
     useLayoutEffect(() => {
         document.title = `404 | ${BUSINESS_NAME}`;
     })
 
     return (
-        <StyledNotFoundPage className="page" theme={theme}>
+        <StyledNotFoundPage className="page">
             <div className="center">
                 <h1>Page Not Found</h1>
                 <h3>Looks like you've followed a broken link or entered a URL that doesn't exist on this site</h3>

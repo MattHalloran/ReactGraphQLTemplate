@@ -1,11 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { getTheme } from 'utils/storage';
 import { StyledPopupMenu } from './PopupMenu.styled';
 import useOutsideClick from 'utils/useOutsideClick';
 
 function PopupMenu({
-    theme = getTheme(),
     obj,
     menu,
 }) {
@@ -23,7 +21,7 @@ function PopupMenu({
     },[open]));
 
     return (
-        <StyledPopupMenu theme={theme} onClick={open_menu}>
+        <StyledPopupMenu onClick={open_menu}>
             { obj }
             { open ? ( <div ref={clickRef} className="popup-menu-container">
                             { menu }
@@ -35,7 +33,6 @@ function PopupMenu({
 }
 
 PopupMenu.propTypes = {
-    theme: PropTypes.object,
     obj: PropTypes.any,
     menu: PropTypes.any,
 }

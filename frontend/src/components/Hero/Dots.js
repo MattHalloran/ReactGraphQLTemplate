@@ -1,27 +1,44 @@
-import { memo } from 'react';
-import { getTheme } from 'utils/storage';
-import { StyledDots } from './Dots.styled';
+import { makeStyles } from '@material-ui/core/styles';
 
-const Dot = ({ active }) => {
-  return (
-      <div className={`dot ${active ? 'active' : 'inactive'}`} />
-  )
-}
+const useStyles = makeStyles((theme) => ({
+    dotContainer: {
+        position: 'absolute',
+        bottom: '25px',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    dot: {
+        padding: '10px',
+        marginRight: '5px',
+        cursor: 'pointer',
+        borderRadius: '50%',
+        opacity: '80%',
+        border: '1px solid black',
+    },
+    active: {
+        background: theme.palette.primary.main,
+        opacity: '0.9',
+    },
+    inactive: {
+        background: 'white',
+    }
+}));
 
-const MemoDot = memo(Dot)
-
-const Dots = ({ 
+const Dots = ({
     slides,
-    activeSlide,
-    theme = getTheme(),
+    activeSlide
 }) => {
-  return (
-    <StyledDots theme={theme}>
-      {slides.map((slide, i) => (
-        <MemoDot key={slide} active={activeSlide === i} />
-      ))}
-    </StyledDots>
-  )
+    const classes = useStyles();
+    return (
+        <div className={classes.dotContainer}>
+            {slides.map((slide, i) => (
+                <div key={slide} className={`${classes.dot} ${activeSlide === i ? classes.active : classes.inactive}`} />
+            ))}
+        </div>
+    )
 }
 
 export default Dots

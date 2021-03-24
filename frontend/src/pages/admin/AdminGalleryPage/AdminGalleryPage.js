@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react
 import PropTypes from 'prop-types';
 import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
-import { getSession, getTheme } from 'utils/storage';
+import { getSession } from 'utils/storage';
 import Button from 'components/Button/Button';
 import FileUpload from 'components/FileUpload/FileUpload';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
@@ -54,9 +54,7 @@ function SortableComponent({ data, onSortEnd, deleteRow }) {
 }
 
 
-function AdminGalleryPage({
-    theme = getTheme(),
-}) {
+function AdminGalleryPage() {
     const [session, setSession] = useState(getSession());
     const [selected, setSelected] = useState([]);
     const [thumbnails, setThumbnails] = useState([]);
@@ -179,7 +177,7 @@ function AdminGalleryPage({
     }
 
     return (
-        <StyledAdminGalleryPage className="page" theme={theme}>
+        <StyledAdminGalleryPage className="page">
             <h1>Gallery Edit</h1>
             <div>
                 <h2>Select image(s) for upload</h2>
@@ -195,7 +193,6 @@ function AdminGalleryPage({
 }
 
 AdminGalleryPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default AdminGalleryPage;

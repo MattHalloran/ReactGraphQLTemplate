@@ -11,7 +11,7 @@ import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, upload
 import Button from 'components/Button/Button';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import { getTheme, getSession } from 'utils/storage';
+import { getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import InputText from 'components/inputs/InputText/InputText';
@@ -24,7 +24,6 @@ let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
-    const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     // Holds the selected availability file, if uploading one
     const [selected, setSelected] = useState(null);
@@ -42,10 +41,8 @@ function AdminInventoryPage() {
 
 
     useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(sessionSub);
         })
     }, [])
@@ -178,12 +175,12 @@ function AdminInventoryPage() {
 
     let popup = (currPlant) ? (
         <Modal onClose={() => setCurrPlant(null)}>
-            <PlantPopup session={session} theme={theme} plant={currPlant} trait_options={trait_options} />
+            <PlantPopup session={session} plant={currPlant} trait_options={trait_options} />
         </Modal>
     ) : null;
 
     return (
-        <StyledAdminInventoryPage className="page" theme={theme}>
+        <StyledAdminInventoryPage className="page">
             {popup}
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>
@@ -235,8 +232,7 @@ function PlantCard({
     onHide,
     onDelete,
     plant,
-    thumbnail,
-    theme = getTheme(),
+    thumbnail
 }) {
     let has_skus = plant.skus?.length > 0;
 
@@ -262,7 +258,7 @@ function PlantCard({
     }
 
     return (
-        <StyledCard className="card" theme={theme} onClick={onEdit}>
+        <StyledCard className="card" onClick={onEdit}>
             <h2 className="title">{plant.latin_name}</h2>
             <div className="display-image-container">
                 {display_image}
@@ -289,7 +285,6 @@ PlantCard.propTypes = {
 function PlantPopup({
     session = getSession(),
     plant,
-    theme = getTheme(),
     trait_options
 }) {
     console.log('PLANT POPUP', plant)
@@ -442,7 +437,7 @@ function PlantPopup({
     }
 
     return (
-        <StyledPlantPopup theme={theme}>
+        <StyledPlantPopup>
             <div className="sidenav">
                 <h3>SKUs</h3>
                 <div className="sku-list">
@@ -516,7 +511,6 @@ function PlantPopup({
 PlantPopup.propTypes = {
     session: PropTypes.object,
     sku: PropTypes.object.isRequired,
-    theme: PropTypes.object,
     trait_options: PropTypes.object,
 }
 

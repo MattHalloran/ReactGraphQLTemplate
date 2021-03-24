@@ -8,7 +8,7 @@ import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
 import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import Tooltip from 'components/Tooltip/Tooltip';
-import { getSession, getTheme, getCart } from "utils/storage";
+import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
@@ -23,7 +23,6 @@ function ShoppingList({
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
     const [session, setSession] = useState(getSession());
-    const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
     const [popup, setPopup] = useState(null);
     // Plant data for every loaded plant
@@ -56,11 +55,9 @@ function ShoppingList({
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         return (() => {
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
         })
     }, [])
@@ -222,8 +219,7 @@ function ShoppingList({
             <Modal onClose={() => history.goBack()}>
                 <ExpandedPlant plant={popup_data}
                     thumbnail={thumbnails?.length >= curr_index ? thumbnails[curr_index] : null}
-                    onCart={setInCart}
-                    theme={theme} />
+                    onCart={setInCart} />
             </Modal>
         );
     }, [plants, curr_index])
@@ -233,7 +229,6 @@ function ShoppingList({
             {popup}
             {plants?.map((item, index) =>
                 <PlantCard key={index}
-                    theme={theme}
                     cart={cart}
                     onClick={expandSku}
                     plant={item}
@@ -257,7 +252,6 @@ function PlantCard({
     thumbnail,
     onClick,
 }) {
-    const [theme] = useState(getTheme());
 
     let sizes = plant.skus.map(s => (
         <div>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
@@ -271,7 +265,7 @@ function PlantCard({
     }
 
     return (
-        <StyledPlantCard className="card" theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
+        <StyledPlantCard className="card" onClick={() => onClick(plant.skus[0].sku)}>
             <div className="title">
                 <h2>{plant.latin_name}</h2>
                 <h3>{plant.common_name}</h3>
@@ -290,7 +284,6 @@ PlantCard.propTypes = {
     plant: PropTypes.object.isRequired,
     thumbnail: PropTypes.string,
     onClick: PropTypes.func.isRequired,
-    theme: PropTypes.object,
 };
 
 export { PlantCard };
@@ -301,7 +294,6 @@ function ExpandedPlant({
     onCart,
 }) {
     console.log('EXPANDED PLANT', plant)
-    const [theme, setTheme] = useState(getTheme());
     const [quantity, setQuantity] = useState(1);
     const [image, setImage] = useState(null);
 
@@ -353,7 +345,7 @@ function ExpandedPlant({
     }
 
     return (
-        <StyledExpandedPlant theme={theme}>
+        <StyledExpandedPlant>
             <div className="title">
                 <h1>{plant.latin_name}</h1>
                 <h3>{plant.common_name}</h3>
@@ -426,8 +418,7 @@ function ExpandedPlant({
 ExpandedPlant.propTypes = {
     plant: PropTypes.object.isRequired,
     thumbnail: PropTypes.string,
-    onCart: PropTypes.func.isRequired,
-    theme: PropTypes.object,
+    onCart: PropTypes.func.isRequired
 };
 
 export { ExpandedPlant };

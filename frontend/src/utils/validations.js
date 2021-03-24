@@ -1,22 +1,35 @@
 // Contains all validations used by input components
 // Many of the validations return the default validation. It is set up
 // this way to make changing the behavior for individual input types much easier
+import _ from 'underscore';
 
 // Helper function for checking that all validated fields passed
 export const passedValidation = (...args) => {
-    args.forEach(arg => {
-        if (Array.isArray(arg)) {
+    let any_failed = args.some(arg => {
+        if (_.isArray(arg)) {
             // If an array of errors has a value that is not empty
             if (arg.filter(v => v).length > 0)
-                return false;
-        } else if (arg !== null && arg !== "") {
-            return false;
+                return true;
+        } else if (_.isString(arg)) {
+            if (!isStringBlank(arg))
+                return true;
+        } else {
+            console.warn(`Unsupported value passed to passedValidation: ${arg}`)
+            return true;
         }
     })
-    return true;
+    console.log('boop', any_failed)
+    return !any_failed
 }
 
 // =============================== String validations ======================================
+
+const isStringBlank = str => {
+    return str === null ||
+        str === undefined ||
+        str.length === 0 ||
+        str.trim() === '';
+}
 
 export const emailValidation = email => {
     let defaultValidation = defaultStringValidation('Email', email);
@@ -31,11 +44,8 @@ export const emailValidation = email => {
     return 'Please enter a valid email';
 }
 
-export const defaultStringValidation = (str, word) => {
-    return (str === null ||
-        str === undefined ||
-        str.length === 0 ||
-        str.trim() === '') ? `Must enter ${word}` : null;
+export const defaultStringValidation = (word, str) => {
+    return isStringBlank(str) ? `Must enter ${word}` : null;
 }
 
 // Name validation will most likely stick to default validation,
@@ -76,6 +86,10 @@ export const passwordValidation = password => {
         return null;
     }
     return 'Must have at least one number, upper-case letter, and lower-case letter'
+}
+
+export const confirmPasswordValidation = (password, confirmPassword) => {
+    return (password !== confirmPassword) ? 'Passwords do not match!' : null;
 }
 
 // Street 1 (ex: 123 Fish Street)

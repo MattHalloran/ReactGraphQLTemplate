@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledCustomerInfo } from './CustomerInfo.styled';
-import { getTheme } from 'utils/storage';
 
 function CustomerInfo({
     customer,
-    theme = getTheme(),
 }) {
     let customerInfo;
     if (customer) {
@@ -18,7 +16,7 @@ function CustomerInfo({
     }
 
     return (
-        <StyledCustomerInfo theme={theme}>
+        <StyledCustomerInfo>
                 {customerInfo}
         </StyledCustomerInfo >
     );
@@ -26,7 +24,6 @@ function CustomerInfo({
 
 CustomerInfo.propTypes = {
     customer: PropTypes.object.isRequired,
-    theme: PropTypes.object,
 }
 
 export default CustomerInfo;

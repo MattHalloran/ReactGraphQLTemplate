@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledSpinner } from './Spinner.styled';
 import { PUBS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 
 function Spinner({
-    theme = getTheme(),
     spinning,
 }) {
     let [spin_state, setSpinState] = useState(spinning);
@@ -17,7 +15,7 @@ function Spinner({
     }, [])
 
     return (
-        <StyledSpinner theme={theme}>
+        <StyledSpinner>
             {spin_state ? <span className="spinner">
                 <div style={{color: '#68a174'}} className="la-ball-spin-clockwise la-3x">
                     <div></div>
@@ -35,7 +33,6 @@ function Spinner({
 }
 
 Spinner.propTypes = {
-    theme: PropTypes.object,
     spinning: PropTypes.bool.isRequired,
 }
 

@@ -9,12 +9,10 @@ import { getGallery, getImages, getImage } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
 function GalleryPage() {
-    const [theme, setTheme] = useState(getTheme());
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
@@ -32,13 +30,6 @@ function GalleryPage() {
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => prevImage());
     // useHotkeys('arrowRight', () => nextImage());
-
-    useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        return (() => {
-            PubSub.unsubscribe(themeSub);
-        })
-    }, [])
 
     const loading_full_image = useRef(false);
     const loadImage = useCallback((index, id) => {
@@ -189,7 +180,7 @@ function GalleryPage() {
         </Modal>
     ) : null;
     return (
-        <StyledGalleryPage className="page" theme={theme} id={track_scrolling_id}>
+        <StyledGalleryPage className="page" id={track_scrolling_id}>
             {popup}
             <Gallery photos={thumbnails} onClick={openImage}/>
         </StyledGalleryPage>
@@ -197,7 +188,6 @@ function GalleryPage() {
 }
 
 GalleryPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default GalleryPage;

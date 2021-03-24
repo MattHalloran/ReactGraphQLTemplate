@@ -4,14 +4,12 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledArrowMenu } from './ArrowMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
-import { getTheme } from 'utils/storage';
 import Draggable from 'components/Draggable/Draggable';
 import ArrowRightCircleIcon from 'assets/img/ArrowRightCircleIcon';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 
 function ArrowMenu({
-    theme=getTheme(),
     children,
     ...props
 }) {
@@ -30,7 +28,7 @@ function ArrowMenu({
     const closeMenu = () => PubSub.publish(PUBS.ArrowMenuOpen, false);
 
     return (
-        <StyledArrowMenu theme={theme} open={open} {...props}>
+        <StyledArrowMenu open={open} {...props}>
             <div id="overlay"/>
             {/* <Arrow onClick={toggleOpen} /> */}
             <MenuContainer side="left" open={open} closeMenu={closeMenu}>
@@ -41,7 +39,6 @@ function ArrowMenu({
 }
 
 ArrowMenu.propTypes = {
-    theme: PropTypes.object,
     children: PropTypes.any,
 }
 

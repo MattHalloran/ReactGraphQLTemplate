@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import { loginUser } from 'query/http_promises';
 import * as validation from 'utils/validations';
-import InputText from 'components/inputs/InputText/InputText';
+import { Button, TextField, Link } from '@material-ui/core';
+import { FormControl, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { LINKS } from 'utils/consts';
-import Button from 'components/Button/Button';
+import { loginUser } from 'query/http_promises';
+
+const useStyles = makeStyles((theme) => ({
+    form: {
+        width: '100%',
+        marginTop: theme.spacing(3),
+    },
+    submit: {
+        margin: theme.spacing(3, 0, 2),
+    },
+}));
 
 function LogInForm() {
     let history = useHistory();
-    const [email, setEmail] = useHistoryState("li_email", "");
-    const [emailError, setEmailError] = useHistoryState("li_email_error", null);
-    const [password, setPassword] = useState("")
-    const [passwordError, setPasswordError] = useState(null);
-    const [showErrors, setShowErrors] = useState(false);
     const urlParams = useParams();
+    const classes = useStyles();
+    const [email, setEmail] = useHistoryState("li_email", "");
+    const [password, setPassword] = useHistoryState("li_password", "");
 
-    const toRegister = () => history.replace('/register');
-
-    const toForgotPassword = () => history.replace('/forgot-password');
+    let emailError = validation.emailValidation(email);
+    let passwordError = validation.defaultStringValidation('password', password);
+    let anyErrors = !validation.passedValidation(emailError, passwordError);
 
     const login = () => {
         loginUser(email, password, urlParams.code).then(response => {
@@ -34,56 +42,64 @@ function LogInForm() {
 
     const submit = (event) => {
         event.preventDefault();
-        setShowErrors(true);
-        if (!emailError && !passwordError) login();
+        if (anyErrors) {
+            alert('Please fill in required fields');
+            return;
+        }
+        login();
     }
 
     return (
-        <React.Fragment>
-            {/* I kid you not, the autofill will not work correctly if this isn't here */}
-            <InputText
-                style={{visibility:'hidden',display:'none'}}
-                label="Email"
-                type="email"
-                value={email}
-                valueFunc={setEmail}
-                error={emailError}
-                errorFunc={setEmailError}
-                validate={validation.emailValidation}
-                showErrors={showErrors}
-            />
-            <InputText
-                label="Email"
-                type="email"
-                value={email}
-                valueFunc={setEmail}
-                error={emailError}
-                errorFunc={setEmailError}
-                validate={validation.emailValidation}
-                showErrors={showErrors}
-            />
-            <InputText
-                label="Password"
-                type="password"
-                value={password}
-                valueFunc={setPassword}
-                error={passwordError}
-                errorFunc={setPasswordError}
-                validate={validation.defaultStringValidation}
-                showErrors={showErrors}
-            />
-            <Button className="primary submit" type="submit" onClick={submit}>
-                Submit
+        <FormControl className={classes.form} error={anyErrors}>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        error={emailError !== null}
+                        helperText={emailError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        error={passwordError !== null}
+                        helperText={passwordError}
+                    />
+                </Grid>
+            </Grid>
+            <Button
+                type="submit"
+                fullWidth
+                color="secondary"
+                className={classes.submit}
+                onClick={submit}
+            >
+                Sign Up
             </Button>
-            <h5 className="form-header-text"
-                onClick={toRegister}>&#8594;Sign Up</h5>
-            <h5 onClick={toForgotPassword}>Forgot Password?</h5>
-        </React.Fragment>
+            <Grid container justify="flex-end">
+                <Grid item>
+                    <Link href={LINKS.Register} variant="body2">
+                        Don't have an account? Sign up
+                </Link>
+                </Grid>
+            </Grid>
+        </FormControl>
     );
-}
-
-LogInForm.propTypes = {
-
 }
 
 export default LogInForm;

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link, useHistory } from 'react-router-dom';
 import BurgerMenu from 'components/menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { clearStorage, getTheme, getSession, getRoles } from 'utils/storage';
+import { clearStorage, getSession, getRoles } from 'utils/storage';
 import { StyledNavbar } from './Navbar.styled';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
 import { FULL_BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
@@ -12,11 +12,11 @@ import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
 import PubSub from 'utils/pubsub';
 import { SocialIcon } from 'react-social-icons';
+import { AppBar, Toolbar, Typography } from '@material-ui/core';
 
 const SHOW_HAMBURGER_AT = 800;
 
 function Navbar({
-    theme = getTheme(),
     visible,
     ...props
 }) {
@@ -32,20 +32,21 @@ function Navbar({
     const updateWindowDimensions = () => setShowHamburger(window.innerWidth <= SHOW_HAMBURGER_AT);
 
     return (
-        <StyledNavbar theme={theme} visible={visible}>
-            <Link to={LINKS.Home} className="nav-brand">
-                <div className="nav-logo-container">
-                    <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
-                </div>
-            </Link>
-            <span className="nav-name">{FULL_BUSINESS_NAME}</span>
-            {show_hamburger ? <Hamburger theme={theme} {...props} /> : <NavList {...props} />}
-        </StyledNavbar>
+        <AppBar position="absolute" >
+            <Toolbar>
+                {/* <Link to={LINKS.Home} className="nav-brand">
+                 <div className="nav-logo-container">
+                     <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
+                 </div>
+             </Link> */}
+                <Typography variant="h6">{FULL_BUSINESS_NAME}</Typography>
+                {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
+            </Toolbar>
+        </AppBar>
     );
 }
 
 Navbar.propTypes = {
-    theme: PropTypes.object,
     session: PropTypes.object,
     visible: PropTypes.bool.isRequired,
     user_roles: PropTypes.array,
@@ -54,7 +55,6 @@ Navbar.propTypes = {
 function Hamburger(props) {
     const [session, setSession] = useState(getSession());
     const [user_roles, setUserRoles] = useState(getRoles());
-    const [theme, setTheme] = useState(getTheme());
     let history = useHistory();
     let nav_options = [];
     let top_links = [];
@@ -62,11 +62,9 @@ function Hamburger(props) {
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(roleSub);
-            PubSub.unsubscribe(themeSub);
         })
     }, [])
 
@@ -86,7 +84,7 @@ function Hamburger(props) {
     } else {
         top_links.push([LINKS.Shopping, BagPlusIcon],
             [LINKS.Profile, PersonIcon],
-            [LINKS.Cart, ShoppingCartIcon, {cart: props.cart}]);
+            [LINKS.Cart, ShoppingCartIcon, { cart: props.cart }]);
     }
 
     nav_options.push(
@@ -100,7 +98,7 @@ function Hamburger(props) {
     }
 
     return (
-        <BurgerMenu theme={theme} {...props}>
+        <BurgerMenu {...props}>
             <div className="icon-container" style={{ margin: '10px 5px 10px 5px' }}>
                 {top_links.map(([link, Icon, extra_props], index) => (
                     <Icon key={index} {...extra_props} width="40px" height="40px" onClick={() => history.push(link)} />
@@ -110,16 +108,16 @@ function Hamburger(props) {
             <Collapsible contentClassName='' title="Contact" initial_open={true}>
                 <ContactInfo />
             </Collapsible>
-            { nav_options.map(([link, text, onClick], index) => (
-                <p key={index}><Link style={{color:`${theme.headerText}`}} to={link} onClick={onClick}>{text}</Link></p>
-            ))}
-            <div style={{display:'flex',justifyContent:'space-around',background:`${theme.lightPrimaryColor}`}}>
-                <SocialIcon style={{marginBottom:'0'}} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-                <SocialIcon style={{marginBottom:'0'}} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+            {/* { nav_options.map(([link, text, onClick], index) => (
+                <p key={index}><Link style={{ color: `${theme.headerText}` }} to={link} onClick={onClick}>{text}</Link></p>
+            ))} */}
+            {/* <div style={{ display: 'flex', justifyContent: 'space-around', background: `${theme.lightPrimaryColor}` }}>
+                <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
+                <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>
             <p>
-                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link style={{color:`${theme.headerText}`}} to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link style={{color:`${theme.headerText}`}} to={LINKS.Terms}>Terms & Conditions</Link>
-            </p>
+                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link style={{ color: `${theme.headerText}` }} to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link style={{ color: `${theme.headerText}` }} to={LINKS.Terms}>Terms & Conditions</Link>
+            </p> */}
         </BurgerMenu>
     );
 }

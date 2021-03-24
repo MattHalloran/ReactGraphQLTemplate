@@ -2,10 +2,8 @@ import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { StyledFileUpload } from './FileUpload.styled';
 import Button from 'components/Button/Button';
-import { getTheme } from 'utils/storage';
 
 function FileUpload({
-    theme = getTheme(),
     selectText = 'Select File',
     uploadText = 'Upload File',
     onUploadClick,
@@ -31,7 +29,7 @@ function FileUpload({
     }
 
     return (
-        <StyledFileUpload theme={theme}>
+        <StyledFileUpload>
             <input type="file" hidden ref={inputRef} onChange={fileUploadInputChange} {...props}/>
             <Button onClick={fileUploadAction}>{selectText}</Button>
             {uploadState}

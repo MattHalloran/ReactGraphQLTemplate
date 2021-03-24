@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledDropDown } from './DropDown.styled';
 import useOutsideClick from 'utils/useOutsideClick';
-import { getTheme } from 'utils/storage';
 import { isString } from 'utils/typeChecking';
 import makeID from 'utils/makeID';
 
@@ -15,7 +14,6 @@ function DropDown({ allow_custom_input = false,
     initial_value,
     placeholder,
     className = '',
-    theme=getTheme(),
 }) {
     const [is_open, setIsOpen] = useState(false);
     const [y, setY] = useState(0);
@@ -153,7 +151,7 @@ function DropDown({ allow_custom_input = false,
     </div>) : null
 
     return (
-        <StyledDropDown id={dropID.current} theme={theme} is_open={is_open} num_options={options?.length ?? 0} className={className} ref={clickRef} size_data={[window.innerHeight, y]}>
+        <StyledDropDown id={dropID.current} is_open={is_open} num_options={options?.length ?? 0} className={className} ref={clickRef} size_data={[window.innerHeight, y]}>
             <div className={'DropDown-control' + (disabled ? 'DropDown-disabled' : '')} onClick={() => setIsOpen(is => !is)} aria-haspopup='listbox'>
                 {control}
                 <span className='DropDown-arrow' />
@@ -177,8 +175,7 @@ DropDown.propTypes = {
     // initial selected string or {label, value} pair.
     // If not set, defaults to first object
     initial_value: PropTypes.object,
-    placeholder: PropTypes.string,
-    theme: PropTypes.object,
+    placeholder: PropTypes.string
 }
 
 export default DropDown;

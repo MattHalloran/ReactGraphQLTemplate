@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAdminOrderPage, StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
-import { getTheme, getSession, getItem } from 'utils/storage';
+import { getSession, getItem } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
@@ -53,9 +53,7 @@ const ORDER_STATES = [
     },
 ]
 
-function AdminOrderPage({
-    theme = getTheme(),
-}) {
+function AdminOrderPage() {
     const [session, setSession] = useState(getSession());
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     const [orders, setOrders] = useState([]);
@@ -82,12 +80,12 @@ function AdminOrderPage({
 
     let popup = (currOrder) ? (
         <Modal onClose={() => setCurrOrder(null)}>
-            <OrderPopup theme={theme} order={currOrder} />
+            <OrderPopup order={currOrder} />
         </Modal>
     ) : null;
 
     return (
-        <StyledAdminOrderPage className="page" theme={theme}>
+        <StyledAdminOrderPage className="page">
             {popup}
             <div className="content">
                 <h2>Sort By</h2>
@@ -102,13 +100,11 @@ function AdminOrderPage({
 }
 
 AdminOrderPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default AdminOrderPage;
 
 function OrderCard({
-    theme = getTheme(),
     onEdit,
     customer,
     items,
@@ -116,7 +112,7 @@ function OrderCard({
 }) {
     items.map(i => console.log(i))
     return (
-        <StyledOrderCard className="card" theme={theme} onClick={onEdit} >
+        <StyledOrderCard className="card" onClick={onEdit} >
             <p>{customer.first_name} {customer.last_name}</p>
             <p>Requested Date: {new Date(desired_delivery_date).getDate()}</p>
             <p>Items: {items.length}</p>
@@ -136,7 +132,6 @@ OrderCard.propTypes = {
 
 function OrderPopup({
     order,
-    theme = getTheme(),
 }) {
     console.log('ORDER POPUP', order);
     // Holds order changes before update is final
@@ -206,6 +201,5 @@ function OrderPopup({
 }
 
 OrderPopup.propTypes = {
-    order: PropTypes.object.isRequired,
-    theme: PropTypes.object,
+    order: PropTypes.object.isRequired
 }

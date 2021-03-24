@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types';
 import { StyledMenuContainer } from './MenuContainer.styled';
-import { getTheme } from 'utils/storage';
 import ClickOutside from 'components/wrappers/ClickOutside/ClickOutside';
 
 function MenuContainer({
-    theme = getTheme(),
     side = 'right',
     open = false,
     closeMenu,
@@ -32,7 +30,6 @@ function MenuContainer({
     return (
         <ClickOutside active={open} on_click_outside={closeMenu} >
             <StyledMenuContainer
-                theme={theme}
                 side={side}
                 open={open}
                 {...props}
@@ -46,7 +43,6 @@ function MenuContainer({
 }
 
 MenuContainer.propTypes = {
-    theme: PropTypes.object,
     side: PropTypes.string,
     open: PropTypes.bool.isRequired,
     closeMenu: PropTypes.func.isRequired,

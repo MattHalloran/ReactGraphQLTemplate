@@ -2,7 +2,6 @@ import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledCart } from './Cart.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 import { getImages } from 'query/http_promises';
 import { PubSub } from 'utils/pubsub';
 import { XIcon } from 'assets/img';
@@ -32,7 +31,6 @@ function Cart({
     onUpdate,
 }) {
     const [changedCart, setChangedCart] = useState(cart ?? {});
-    const [theme, setTheme] = useState(getTheme());
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
 
@@ -55,11 +53,6 @@ function Cart({
         }).catch(err => {
             console.error(err);
         });
-
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        return (() => {
-            PubSub.unsubscribe(themeSub);
-        })
     }, [cart])
 
     useLayoutEffect(() => {
@@ -148,7 +141,7 @@ function Cart({
     }, [thumbnails, changedCart])
 
     return (
-        <StyledCart theme={theme}>
+        <StyledCart>
             <table className="cart-table">
                 <thead>
                     <tr>

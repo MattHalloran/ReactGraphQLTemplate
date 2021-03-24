@@ -7,11 +7,9 @@ import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
-import { getTheme } from 'utils/storage';
 import { Portal } from 'components/Portal/Portal';
 
 function BurgerMenu({
-    theme = getTheme(),
     children,
     ...props
 }) {
@@ -39,7 +37,7 @@ function BurgerMenu({
     }, [history, closeMenu])
 
     return (
-        <StyledBurgerMenu theme={theme} open={open} {...props}>
+        <StyledBurgerMenu open={open} {...props}>
             <div id="overlay" />
             <div className="burger" onClick={toggleOpen}>
                 <div />
@@ -56,7 +54,6 @@ function BurgerMenu({
 }
 
 BurgerMenu.propTypes = {
-    theme: PropTypes.object,
     children: PropTypes.any,
 };
 

@@ -2,16 +2,13 @@ import { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledAboutPage } from './AboutPage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 
-function AboutPage({
-    theme = getTheme(),
-}) {
+function AboutPage() {
     useLayoutEffect(() => {
         document.title = `About | ${BUSINESS_NAME}`;
     })
     return (
-        <StyledAboutPage className="page" theme={theme}>
+        <StyledAboutPage className="page">
             <div className="header">
                 <h1>About {BUSINESS_NAME}</h1>
             </div>
@@ -28,7 +25,6 @@ function AboutPage({
 }
 
 AboutPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default AboutPage;

@@ -8,7 +8,7 @@ import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
-import { getRoles, getSession, getTheme } from 'utils/storage';
+import { getRoles, getSession } from 'utils/storage';
 import PubSub from 'utils/pubsub';
 import Button from 'components/Button/Button';
 import { printAvailability } from 'utils/printAvailability';
@@ -16,7 +16,6 @@ import { printAvailability } from 'utils/printAvailability';
 function ShoppingPage() {
     const [user_roles, setUserRoles] = useState(getRoles());
     const [session, setSession] = useState(getSession());
-    const [theme, setTheme] = useState(getTheme());
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
@@ -27,11 +26,9 @@ function ShoppingPage() {
         document.title = `Shop | ${BUSINESS_NAME}`;
         let userRolesSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t ?? getTheme()));
         return (() => {
             PubSub.unsubscribe(userRolesSub);
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(themeSub);
         })
     }, [])
 
@@ -111,7 +108,7 @@ function ShoppingPage() {
     }
 
     return (
-        <StyledShoppingPage theme={theme}>
+        <StyledShoppingPage>
             <ArrowMenu>
                 <div className="options-container">
                     <Button onClick={resetSearchConstraints}>Reset</Button>

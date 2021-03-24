@@ -3,11 +3,8 @@ import PropTypes from 'prop-types';
 import { StyledAdminMainPage } from './AdminMainPage.styled';
 import { useHistory } from 'react-router-dom';
 import { BUSINESS_NAME, LINKS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 
-function AdminMainPage({
-    theme = getTheme(),
-}) {
+function AdminMainPage() {
     let history = useHistory();
 
     useLayoutEffect(() => {
@@ -23,7 +20,7 @@ function AdminMainPage({
     ]
 
     return (
-        <StyledAdminMainPage className="page" theme={theme}>
+        <StyledAdminMainPage className="page">
             <div className="header">
                 <h1>Admin Portal</h1>
             </div>
@@ -41,7 +38,6 @@ function AdminMainPage({
 }
 
 AdminMainPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default AdminMainPage;

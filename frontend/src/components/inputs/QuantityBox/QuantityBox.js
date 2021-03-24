@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import PropTypes from 'prop-types';
-import { getTheme } from 'utils/storage';
 import { StyledQuantityBox } from './QuantityBox.styled';
 import Button from 'components/Button/Button';
 
@@ -14,7 +13,6 @@ function QuantityBox({
     validateFunc,
     ...props
 }) {
-    const [theme, setTheme] = useState(getTheme());
     const [value, setValue] = useState(initial_value ?? '');
     // Time for a button press to become a hold
     const HOLD_DELAY = 250;
@@ -59,7 +57,7 @@ function QuantityBox({
     }
 
     return (
-        <StyledQuantityBox theme={theme} has_error={error?.length > 0} {...props}>
+        <StyledQuantityBox has_error={error?.length > 0} {...props}>
             <Button className="minus" 
                 data-field="quantity" 
                 onClick={() => updateValue(value - step)}

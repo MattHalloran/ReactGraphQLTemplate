@@ -7,8 +7,11 @@ import { PUBS } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
 import { GlobalStyles } from './global';
-import { getSession, getTheme, getCart } from './utils/storage';
+import { getSession, getCart, getTheme } from './utils/storage';
 import { checkCookies } from 'query/http_promises';
+import { CssBaseline, Grid } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider, MuiThemeProvider } from '@material-ui/core/styles';
+import { lightTheme, darkTheme } from 'utils/theme';
 
 const keyMap = {
     OPEN_MENU: "left",
@@ -18,13 +21,13 @@ const keyMap = {
 };
 
 function App() {
+    const [theme, setTheme] = useState(getTheme());
     const [nav_visible, setNavVisible] = useState(true);
     const nav_visible_y = useRef(-1);
     const [session, setSession] = useState(getSession());
     const session_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
     const [cart, setCart] = useState(getCart());
-    const [theme, setTheme] = useState(getTheme());
     const [menu_open, setMenuOpen] = useState(false);
     const [arrow_open, setArrowOpen] = useState(false);
     const [popup_open, setPopupOpen] = useState(false);
@@ -60,7 +63,7 @@ function App() {
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o ?? getTheme()));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
@@ -89,15 +92,19 @@ function App() {
     return (
         <div id="App">
             <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-            <GlobalStyles theme={theme} menu_or_popup_open={menu_open || arrow_open || popup_open} />
-            <div id="page-container">
-                <div id="content-wrap">
-                    <Navbar visible={nav_visible} session={session} user_roles={user_roles} cart={cart} />
-                    <Spinner spinning={false} />
-                    <Routes session={session} user_roles={user_roles}/>
-                </div>
-                <Footer />
-            </div>
+            {/* <GlobalStyles theme={theme} menu_or_popup_open={menu_open || arrow_open || popup_open} /> */}
+            <CssBaseline />
+            {/* Other theming (default TextField variants, button text styling, etc) */}
+            <ThemeProvider theme={theme}>
+                <main id="page-container">
+                    <div id="content-wrap">
+                        <Navbar visible={nav_visible} session={session} user_roles={user_roles} cart={cart} />
+                        <Spinner spinning={false} />
+                        <Routes session={session} user_roles={user_roles} />
+                    </div>
+                    <Footer />
+                </main>
+            </ThemeProvider>
         </div>
     );
 }

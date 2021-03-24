@@ -3,24 +3,21 @@ import { StyledAdminCustomerPage, StyledCustomerCard } from './AdminCustomerPage
 import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';
 import { ACCOUNT_STATUS, PUBS } from 'utils/consts';
-import { getSession, getTheme } from 'utils/storage';
+import { getSession } from 'utils/storage';
 import Button from 'components/Button/Button';
 import { PubSub } from 'utils/pubsub';
 import Modal from 'components/wrappers/Modal/Modal';
 import CustomerInfo from 'components/CustomerInfo/CustomerInfo';
 
 function AdminCustomerPage() {
-    const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     const [customers, setCustomers] = useState([]);
     const [selected, setSelected] = useState(-1);
     const [infoOpen, setInfoOpen] = useState(false);
 
     useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(sessionSub);
         })
     }, [])
@@ -130,7 +127,7 @@ function AdminCustomerPage() {
     }
 
     return (
-        <StyledAdminCustomerPage className="page" theme={theme}>
+        <StyledAdminCustomerPage className="page">
             {popup}
             <div>
                 <h1>Selected user: {selected_display}</h1>
@@ -145,7 +142,6 @@ function AdminCustomerPage() {
 
 AdminCustomerPage.propTypes = {
     session: PropTypes.object.isRequired,
-    theme: PropTypes.object,
 }
 
 export default AdminCustomerPage;
@@ -157,10 +153,9 @@ function CustomerCard({
     account_status,
     is_selected = false,
     onClick,
-    theme = getTheme(),
 }) {
     return (
-        <StyledCustomerCard theme={theme} is_selected={is_selected} account_status={account_status} onClick={() => onClick(id)}>
+        <StyledCustomerCard is_selected={is_selected} account_status={account_status} onClick={() => onClick(id)}>
             <p>Name: {first_name} {last_name}</p>
         </StyledCustomerCard>
     );

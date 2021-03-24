@@ -4,16 +4,14 @@ import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american_hort_logo.jpg';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import { StyledFooter } from './Footer.styled';
-import { getTheme } from 'utils/storage';
 import { FULL_BUSINESS_NAME, GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
 import { printAvailability } from 'utils/printAvailability';
 
 function Footer({
-    theme = getTheme(),
 }) {
 
     return (
-        <StyledFooter theme={theme}>
+        <StyledFooter>
             <div className="flexed">
                 <div className="footer-group">
                     <ul className="footer-ul">
@@ -54,7 +52,6 @@ function Footer({
 }
 
 Footer.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default Footer;
