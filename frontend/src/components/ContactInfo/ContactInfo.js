@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { StyledContactInfo } from './ContactInfo.styled';
 import { GeoIcon, EmailIcon, PhoneIcon } from 'assets/img';
 import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 function ContactInfo({
     ...props

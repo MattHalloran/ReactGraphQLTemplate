@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import PropTypes from 'prop-types';
 import { StyledQuantityBox } from './QuantityBox.styled';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 function QuantityBox({
     initial_value = 0,

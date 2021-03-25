@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
 import { getSession } from 'utils/storage';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import FileUpload from 'components/FileUpload/FileUpload';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { moveArrayIndex, deleteArrayIndex } from 'utils/arrayTools';

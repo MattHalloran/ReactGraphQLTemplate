@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { getCustomers, modifyUser } from 'query/http_promises';
 import { ACCOUNT_STATUS, PUBS } from 'utils/consts';
 import { getSession } from 'utils/storage';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { PubSub } from 'utils/pubsub';
 import Modal from 'components/wrappers/Modal/Modal';
 import CustomerInfo from 'components/CustomerInfo/CustomerInfo';

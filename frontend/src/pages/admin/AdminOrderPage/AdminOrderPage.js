@@ -5,7 +5,7 @@ import { getSession, getItem } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import Cart from 'components/Cart/Cart';
 import { updateCart, setOrderStatus } from 'query/http_promises';
 import { updateObject } from 'utils/objectTools';

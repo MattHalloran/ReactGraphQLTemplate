@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { StyledModal } from './Modal.styled';
 import ClickOutside from '../ClickOutside/ClickOutside';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 // const ESCAPE_KEY = 27;
 

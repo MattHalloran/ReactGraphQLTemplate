@@ -5,7 +5,7 @@ import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
 import { useHistoryState } from 'utils/useHistoryState';
 import { LINKS, DEFAULT_PRONOUNS } from 'utils/consts';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 function AddEmployeeForm() {
   let history = useHistory();

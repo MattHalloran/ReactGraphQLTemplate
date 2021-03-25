@@ -4,7 +4,7 @@ import { useHistoryState } from 'utils/useHistoryState';
 import { resetPasswordRequest } from 'query/http_promises';
 import * as validation from 'utils/validations';
 import InputText from 'components/inputs/InputText/InputText';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 function ForgotPasswordForm() {
     let history = useHistory();

@@ -8,7 +8,7 @@ import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminI
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/Modal/Modal';
 import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { getSession } from 'utils/storage';

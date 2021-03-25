@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { StyledNotFoundPage } from './NotFoundPage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 
 function NotFoundPage() {
 

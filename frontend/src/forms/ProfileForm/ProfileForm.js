@@ -6,7 +6,7 @@ import { getProfileInfo, updateProfile } from 'query/http_promises';
 import { getSession, setTheme } from 'utils/storage';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';

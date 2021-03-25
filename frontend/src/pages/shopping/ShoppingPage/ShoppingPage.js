@@ -10,7 +10,7 @@ import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession } from 'utils/storage';
 import PubSub from 'utils/pubsub';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
 
 function ShoppingPage() {

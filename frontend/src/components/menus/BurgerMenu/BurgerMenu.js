@@ -5,7 +5,6 @@ import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
-import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
 import { Portal } from 'components/Portal/Portal';
 import { IconButton } from '@material-ui/core';

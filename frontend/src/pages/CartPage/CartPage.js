@@ -4,7 +4,7 @@ import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
 import { getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { updateCart, submitOrder } from 'query/http_promises';
 import Cart from 'components/Cart/Cart';
 

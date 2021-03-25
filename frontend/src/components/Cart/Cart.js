@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { StyledCart } from './Cart.styled';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getImages } from 'query/http_promises';
-import { PubSub } from 'utils/pubsub';
 import { XIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import { displayPrice } from 'utils/displayPrice';
@@ -11,7 +10,7 @@ import { NoImageIcon } from 'assets/img';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { deleteArrayIndex } from 'utils/arrayTools';
 import { updateObject } from 'utils/objectTools';
 
