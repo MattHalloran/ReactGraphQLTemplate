@@ -26,6 +26,8 @@ function LogInForm() {
 
     let emailError = validation.emailValidation(email);
     let passwordError = validation.defaultStringValidation('password', password);
+    console.log('HERE ARE THE ERRORS')
+    console.log(emailError, passwordError);
     let anyErrors = !validation.passedValidation(emailError, passwordError);
 
     const login = () => {

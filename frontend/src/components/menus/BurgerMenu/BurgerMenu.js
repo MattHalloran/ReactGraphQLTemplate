@@ -8,12 +8,21 @@ import { PUBS } from 'utils/consts';
 import { StyledBurgerMenu } from './BurgerMenu.styled';
 import MenuContainer from '../MenuContainer/MenuContainer';
 import { Portal } from 'components/Portal/Portal';
+import { IconButton } from '@material-ui/core';
+import MenuIcon from '@material-ui/icons/Menu';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+    },
+}));
 
 function BurgerMenu({
     children,
     ...props
 }) {
-    const history = useHistory();
+    let history = useHistory();
+    const classes = useStyles();
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -37,19 +46,17 @@ function BurgerMenu({
     }, [history, closeMenu])
 
     return (
-        <StyledBurgerMenu open={open} {...props}>
+        <div className={classes.root} open={open} {...props}>
             <div id="overlay" />
-            <div className="burger" onClick={toggleOpen}>
-                <div />
-                <div />
-                <div />
-            </div>
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
+                <MenuIcon />
+            </IconButton>
             <Portal>
                 <MenuContainer open={open} closeMenu={closeMenu}>
                     {children}
                 </MenuContainer>
             </Portal>
-        </StyledBurgerMenu>
+        </div>
     );
 }
 

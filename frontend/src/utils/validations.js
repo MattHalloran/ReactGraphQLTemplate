@@ -11,9 +11,10 @@ export const passedValidation = (...args) => {
             if (arg.filter(v => v).length > 0)
                 return true;
         } else if (_.isString(arg)) {
+            console.log('anus', arg)
             if (!isStringBlank(arg))
                 return true;
-        } else {
+        } else if (arg !== null) {
             console.warn(`Unsupported value passed to passedValidation: ${arg}`)
             return true;
         }

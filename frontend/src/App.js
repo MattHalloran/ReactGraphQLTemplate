@@ -6,12 +6,10 @@ import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
-import { GlobalStyles } from './global';
 import { getSession, getCart, getTheme } from './utils/storage';
 import { checkCookies } from 'query/http_promises';
-import { CssBaseline, Grid } from '@material-ui/core';
-import { createMuiTheme, ThemeProvider, MuiThemeProvider } from '@material-ui/core/styles';
-import { lightTheme, darkTheme } from 'utils/theme';
+import { CssBaseline } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core/styles';
 
 const keyMap = {
     OPEN_MENU: "left",
@@ -22,8 +20,6 @@ const keyMap = {
 
 function App() {
     const [theme, setTheme] = useState(getTheme());
-    const [nav_visible, setNavVisible] = useState(true);
-    const nav_visible_y = useRef(-1);
     const [session, setSession] = useState(getSession());
     const session_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
@@ -46,30 +42,14 @@ function App() {
         },
     };
 
-    // Determines when the nav becomes visible/invisible
-    const trackScrolling = useCallback(() => {
-        if (nav_visible_y === -1) nav_visible_y.current = window.pageYOffset;
-        let distance_scrolled = window.pageYOffset - nav_visible_y.current;
-        if ((distance_scrolled > 0 && !nav_visible) ||
-            (distance_scrolled < 0 && nav_visible)) {
-            nav_visible_y.current = window.pageYOffset;
-        }
-        if (distance_scrolled > 50 && nav_visible && window.pageYOffset > 100) {
-            setNavVisible(false);
-        } else if (distance_scrolled <= -50 && !nav_visible) {
-            setNavVisible(true);
-        }
-    }, [nav_visible]);
-
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(getTheme()));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
         let arrowSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, o) => setArrowOpen(open => o === 'toggle' ? !open : o));
         let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
-        document.addEventListener('scroll', trackScrolling);
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
@@ -78,9 +58,8 @@ function App() {
             PubSub.unsubscribe(popupSub);
             PubSub.unsubscribe(arrowSub);
             PubSub.unsubscribe(menuSub);
-            document.removeEventListener('scroll', trackScrolling);
         })
-    }, [trackScrolling])
+    }, [])
 
     useEffect(() => {
         if (session == null && session_attempts.current < 5) {
@@ -98,7 +77,7 @@ function App() {
             <ThemeProvider theme={theme}>
                 <main id="page-container">
                     <div id="content-wrap">
-                        <Navbar visible={nav_visible} session={session} user_roles={user_roles} cart={cart} />
+                        <Navbar session={session} user_roles={user_roles} cart={cart} />
                         <Spinner spinning={false} />
                         <Routes session={session} user_roles={user_roles} />
                     </div>

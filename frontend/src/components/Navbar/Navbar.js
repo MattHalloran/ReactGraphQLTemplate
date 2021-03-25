@@ -1,25 +1,95 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useHistory } from 'react-router-dom';
-import BurgerMenu from 'components/menus/BurgerMenu/BurgerMenu';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { clearStorage, getSession, getRoles } from 'utils/storage';
-import { StyledNavbar } from './Navbar.styled';
-import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { FULL_BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
-import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
-import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
-import PubSub from 'utils/pubsub';
-import { SocialIcon } from 'react-social-icons';
-import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import { FULL_BUSINESS_NAME, LINKS } from 'utils/consts';
+import { AppBar, Toolbar, Typography, Slide, IconButton, useScrollTrigger, Container } from '@material-ui/core';
+import MenuIcon from '@material-ui/icons/Menu';
+import { makeStyles } from '@material-ui/core/styles';
+import Hamburger from './Hamburger';
+import NavList from './NavList';
+import { useHistory } from 'react-router';
+import { hexToRGB } from 'utils/opacityHex';
 
 const SHOW_HAMBURGER_AT = 800;
 
+const useStyles = makeStyles((theme) => ({
+    toRight: {
+        marginLeft: 'auto',
+    },
+    navLogoContainer: {
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+    },
+    navLogoDiv: {
+        display: 'flex',
+        padding: 0,
+        cursor: 'pointer',
+        marginTop: '5px',
+        marginBottom: '5px',
+        marginRight: 'auto',
+        background: theme.palette.type === 'light' ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)',
+        borderRadius: '500px',
+        minHeight: '50px',
+        minWidth: '50px',
+        height: '12vh',
+        width: '12vh',
+    },
+    navLogo: {
+        '-webkit-filter': `drop-shadow(0.5px 0.5px 0 ${hexToRGB(theme.palette.primary.dark, 0.9)})
+                        drop-shadow(-0.5px -0.5px 0 ${hexToRGB(theme.palette.primary.dark, 0.9)})`,
+        filter: `drop-shadow(0.5px 0.5px 0 ${hexToRGB(theme.palette.primary.dark, 0.9)}) 
+                drop-shadow(-0.5px -0.5px 0 ${hexToRGB(theme.palette.primary.dark, 0.9)})`,
+        verticalAlign: 'middle',
+        fill: 'black',
+        marginTop: '0.5vh',
+        marginLeft: 'max(-5px, -5vw)',
+        minHeight: '50px',
+        height: "12vh",
+        transform: 'rotate(20deg)',
+        //filter: invert(1);
+    },
+    navName: {
+        position: 'relative',
+        cursor: 'pointer',
+        fontSize: '2em',
+        marginLeft: '-15px',
+        fontFamily: `'Kite One', sans-serif`,
+        color: theme.palette.primary.contrastText,
+    },
+    [theme.breakpoints.down(500)]: {
+        navName: {
+            fontSize: '1.5em',
+        }
+    },
+    [theme.breakpoints.down(350)]: {
+        navName: {
+            display: 'none',
+        }
+    },
+}));
+
+function HideOnScroll({
+    children,
+}) {
+    const trigger = useScrollTrigger();
+
+    return (
+        <Slide appear={false} direction="down" in={!trigger}>
+            {children}
+        </Slide>
+    );
+}
+
+HideOnScroll.propTypes = {
+    children: PropTypes.element.isRequired,
+};
+
 function Navbar({
-    visible,
     ...props
 }) {
+    let history = useHistory();
+    const classes = useStyles();
     const [show_hamburger, setShowHamburger] = useState(false);
 
     useEffect(() => {
@@ -32,168 +102,27 @@ function Navbar({
     const updateWindowDimensions = () => setShowHamburger(window.innerWidth <= SHOW_HAMBURGER_AT);
 
     return (
-        <AppBar position="absolute" >
-            <Toolbar>
-                {/* <Link to={LINKS.Home} className="nav-brand">
-                 <div className="nav-logo-container">
-                     <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className="nav-logo" />
-                 </div>
-             </Link> */}
-                <Typography variant="h6">{FULL_BUSINESS_NAME}</Typography>
-                {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
-            </Toolbar>
-        </AppBar>
+        <HideOnScroll>
+            <AppBar>
+                <Toolbar>
+                    <div className={classes.navLogoContainer} onClick={() => history.push(LINKS.Home)}>
+                        <div className={classes.navLogoDiv}>
+                            <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className={classes.navLogo} />
+                        </div>
+                        <Typography className={classes.navName} variant="h6" noWrap>{FULL_BUSINESS_NAME}</Typography>
+                    </div>
+                    <div className={classes.toRight}>
+                        {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
+                    </div>
+                </Toolbar>
+            </AppBar>
+        </HideOnScroll>
     );
 }
 
 Navbar.propTypes = {
     session: PropTypes.object,
-    visible: PropTypes.bool.isRequired,
     user_roles: PropTypes.array,
-}
-
-function Hamburger(props) {
-    const [session, setSession] = useState(getSession());
-    const [user_roles, setUserRoles] = useState(getRoles());
-    let history = useHistory();
-    let nav_options = [];
-    let top_links = [];
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(roleSub);
-        })
-    }, [])
-
-    // If an admin is logged in, display admin links
-    let roles = user_roles;
-    if (roles instanceof Array) {
-        roles?.forEach(r => {
-            if (r.title === USER_ROLES.Admin) {
-                top_links.push([LINKS.Admin, GearIcon]);
-            }
-        })
-    }
-
-    // If someone is not logged in, display sign up/log in links
-    if (!session) {
-        top_links.push([LINKS.LogIn, PersonPlusIcon]);
-    } else {
-        top_links.push([LINKS.Shopping, BagPlusIcon],
-            [LINKS.Profile, PersonIcon],
-            [LINKS.Cart, ShoppingCartIcon, { cart: props.cart }]);
-    }
-
-    nav_options.push(
-        [LINKS.Home, 'Home'],
-        [LINKS.Gallery, 'Gallery'],
-        [LINKS.About, 'About Us']
-    );
-
-    if (session !== null) {
-        nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
-    }
-
-    return (
-        <BurgerMenu {...props}>
-            <div className="icon-container" style={{ margin: '10px 5px 10px 5px' }}>
-                {top_links.map(([link, Icon, extra_props], index) => (
-                    <Icon key={index} {...extra_props} width="40px" height="40px" onClick={() => history.push(link)} />
-                ))}
-                <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
-            </div>
-            <Collapsible contentClassName='' title="Contact" initial_open={true}>
-                <ContactInfo />
-            </Collapsible>
-            {/* { nav_options.map(([link, text, onClick], index) => (
-                <p key={index}><Link style={{ color: `${theme.headerText}` }} to={link} onClick={onClick}>{text}</Link></p>
-            ))} */}
-            {/* <div style={{ display: 'flex', justifyContent: 'space-around', background: `${theme.lightPrimaryColor}` }}>
-                <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-                <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-            </div>
-            <p>
-                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link style={{ color: `${theme.headerText}` }} to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link style={{ color: `${theme.headerText}` }} to={LINKS.Terms}>Terms & Conditions</Link>
-            </p> */}
-        </BurgerMenu>
-    );
-}
-
-Hamburger.propTypes = {
-
-}
-
-function NavList(props) {
-    const [session, setSession] = useState(getSession());
-    const [user_roles, setUserRoles] = useState(getRoles());
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(roleSub);
-        })
-    }, [])
-
-    // Link, Link text, onClick function
-    let nav_options = [];
-    let about_options = [];
-
-    if (session !== null) {
-        nav_options.push([LINKS.Shopping, 'Availability']);
-        nav_options.push([LINKS.Profile, 'Profile']);
-    }
-
-    // If an admin is logged in, display admin links
-    if (user_roles instanceof Array) {
-        user_roles?.forEach(r => {
-            if (r.title === USER_ROLES.Admin) {
-                nav_options.push([LINKS.Admin, 'Admin']);
-            }
-        })
-    }
-
-    let cart;
-    // If someone is not logged in, display sign up/log in links
-    if (!session) {
-        nav_options.push([LINKS.Register, 'Sign Up'],
-            [LINKS.LogIn, 'Log In']);
-    } else {
-        nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
-        cart = (
-            <Link to={LINKS.Cart}><ShoppingCartIcon cart={props.cart} className="iconic" width="30px" height="30px" /></Link>
-        );
-    }
-
-    about_options.push([LINKS.About, 'About Us'],
-        [LINKS.Contact, 'Contact Us'],
-        [LINKS.Gallery, 'Gallery']);
-
-    const options_to_menu = (options) => {
-        return options.map(([link, text, onClick], index) => (
-            <li className="nav-item" key={index}>
-                <Link className="nav-link" to={link} onClick={onClick}>{text}</Link>
-            </li>
-        ));
-    }
-
-    return (
-        <ul className="nav-list">
-            <PopupMenu obj={<p style={{ marginRight: '10px' }}>Contact</p>}
-                menu={<ContactInfo />} />
-            <PopupMenu obj={<p style={{ marginRight: '8px' }}>About</p>} menu={options_to_menu(about_options)} />
-            {options_to_menu(nav_options)}
-            {cart}
-        </ul>
-    );
-}
-
-NavList.propTypes = {
-
 }
 
 export default Navbar;
