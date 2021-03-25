@@ -1,55 +1,42 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import BurgerMenu from 'components/menus/BurgerMenu/BurgerMenu';
-import { clearStorage, getSession, getRoles } from 'utils/storage';
+import { clearStorage, getSession } from 'utils/storage';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { FULL_BUSINESS_NAME, USER_ROLES, LINKS, PUBS } from 'utils/consts';
+import { FULL_BUSINESS_NAME, LINKS, PUBS } from 'utils/consts';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
-import { BagPlusIcon, PersonIcon, ShoppingCartIcon, XIcon, GearIcon, PersonPlusIcon } from 'assets/img';
+import { XIcon } from 'assets/img';
 import PubSub from 'utils/pubsub';
 import { SocialIcon } from 'react-social-icons';
+import { IconButton, SwipeableDrawer } from '@material-ui/core'
+import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
+import Copyright from 'components/Copyright/Copyright';
 
-const useStyles = makeStyles({
-    
-});
+const useStyles = makeStyles((theme) => ({
+    drawerPaper: {
+        background: theme.palette.primary.light,
+        borderLeft: `2px solid ${theme.palette.text.primary}`
+    }
+}));
 
 function Hamburger(props) {
     const classes = useStyles();
     const [session, setSession] = useState(getSession());
-    const [user_roles, setUserRoles] = useState(getRoles());
+    const [open, setOpen] = useState(false);
     let history = useHistory();
     let nav_options = [];
-    let top_links = [];
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
+        let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
+            setOpen(open => b === 'toggle' ? !open : b);
+        });
         return (() => {
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(roleSub);
+            PubSub.unsubscribe(openSub);
         })
     }, [])
-
-    // If an admin is logged in, display admin links
-    let roles = user_roles;
-    if (roles instanceof Array) {
-        roles?.forEach(r => {
-            if (r.title === USER_ROLES.Admin) {
-                top_links.push([LINKS.Admin, GearIcon]);
-            }
-        })
-    }
-
-    // If someone is not logged in, display sign up/log in links
-    if (!session) {
-        top_links.push([LINKS.LogIn, PersonPlusIcon]);
-    } else {
-        top_links.push([LINKS.Shopping, BagPlusIcon],
-            [LINKS.Profile, PersonIcon],
-            [LINKS.Cart, ShoppingCartIcon, { cart: props.cart }]);
-    }
 
     nav_options.push(
         [LINKS.Home, 'Home'],
@@ -61,28 +48,29 @@ function Hamburger(props) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
     }
 
+    const closeMenu = () => PubSub.publish(PUBS.BurgerMenuOpen, false);
+    const toggleOpen = () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle');
+
     return (
-        <BurgerMenu {...props}>
-            <div className="icon-container" style={{ margin: '10px 5px 10px 5px' }}>
-                {top_links.map(([link, Icon, extra_props], index) => (
-                    <Icon key={index} {...extra_props} width="40px" height="40px" onClick={() => history.push(link)} />
-                ))}
-                <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
-            </div>
-            <Collapsible contentClassName='' title="Contact" initial_open={true}>
-                <ContactInfo />
-            </Collapsible>
-            {/* { nav_options.map(([link, text, onClick], index) => (
+        <React.Fragment>
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
+                <MenuIcon />
+            </IconButton>
+            <SwipeableDrawer classes={{ paper:classes.drawerPaper }} anchor="right" open={open} onClose={closeMenu}>
+                    <XIcon width="40px" height="40px" onClick={() => PubSub.publish(PUBS.BurgerMenuOpen, false)} />
+                <Collapsible contentClassName='' title="Contact" initial_open={true}>
+                    <ContactInfo />
+                </Collapsible>
+                {/* { nav_options.map(([link, text, onClick], index) => (
                 <p key={index}><Link style={{ color: `${theme.headerText}` }} to={link} onClick={onClick}>{text}</Link></p>
             ))} */}
-            {/* <div style={{ display: 'flex', justifyContent: 'space-around', background: `${theme.lightPrimaryColor}` }}>
+                {/* <div style={{ display: 'flex', justifyContent: 'space-around', background: `${theme.lightPrimaryColor}` }}>
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-            </div>
-            <p>
-                &copy;{new Date().getFullYear()} {FULL_BUSINESS_NAME} | <Link style={{ color: `${theme.headerText}` }} to={LINKS.PrivacyPolicy}>Privacy</Link> | <Link style={{ color: `${theme.headerText}` }} to={LINKS.Terms}>Terms & Conditions</Link>
-            </p> */}
-        </BurgerMenu>
+            </div>*/}
+            <Copyright />
+          </SwipeableDrawer>
+        </React.Fragment>
     );
 }
 

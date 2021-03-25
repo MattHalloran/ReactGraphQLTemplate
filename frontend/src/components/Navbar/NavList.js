@@ -6,7 +6,7 @@ import { USER_ROLES, LINKS, PUBS } from 'utils/consts';
 import { ShoppingCartIcon } from 'assets/img';
 import PubSub from 'utils/pubsub';
 import { Container, Button, IconButton } from '@material-ui/core';
-import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
+import PopupMenu from 'components/PopupMenu/PopupMenu';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 
@@ -89,6 +89,7 @@ function NavList(props) {
             <Button
                 key={index}
                 variant="text"
+                size="large"
                 className={classes.navItem}
                 onClick={() => openLink(link)}
             >
@@ -102,6 +103,7 @@ function NavList(props) {
             <PopupMenu 
                 text="Contact"
                 variant="text"
+                size="large"
                 className={classes.navItem}
             >
                 <ContactInfo className={classes.contact} />
@@ -109,6 +111,7 @@ function NavList(props) {
             <PopupMenu
                 text="About"
                 variant="text"
+                size="large"
                 className={classes.navItem}
             >
                 {options_to_menu(about_options)}

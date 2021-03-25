@@ -4,15 +4,61 @@ import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
-import Gallery from 'react-photo-gallery';
 import { getGallery, getImages, getImage } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
+import { GridList, GridListTile } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+
+    },
+    gridList: {
+        spacing: 0,
+    },
+    tileImg: {
+        
+    }
+}));
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
+/**
+ * Data must be structured as follows:
+ *
+ * data = [
+ *   {
+ *     img: image,
+ *     title: 'Image',
+ *     author: 'author',
+ *     cols: 2,
+ *   },
+ *   {
+ *     [etc...]
+ *   },
+ * ];
+ */
+function ImageGridList({
+    data,
+    onClick,
+    ...props
+}) {
+    const classes = useStyles();
+    return (
+        <GridList cellHeight={300} className={classes.gridList} cols={Math.round(window.innerWidth/300)} spacing={1} {...props}>
+            {data.map((tile) => (
+                <GridListTile key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
+                    <img className={classes.tileImg} src={tile.img} alt={tile.title} />
+                </GridListTile>
+            ))}
+        </GridList>
+    );
+}
+
 function GalleryPage() {
+    const classes = useStyles();
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
@@ -76,7 +122,7 @@ function GalleryPage() {
         //Grab all thumbnail images
         let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
         let ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
-        getImages(ids, 'm').then(response => {
+        getImages(ids, 'ml').then(response => {
             let combined_data = [];
             //Combine metadata with thumbnail images
             for (let i = 0; i < ids.length; i++) {
@@ -88,9 +134,10 @@ function GalleryPage() {
                 let img = response.images[i];
                 let new_data = {
                     "key": meta.id,
-                    "src": `data:image/jpeg;base64,${img}`,
-                    "width": meta.width,
-                    "height": meta.height,
+                    "img": `data:image/jpeg;base64,${img}`,
+                    "title": meta.alt,
+                    "author": 'New Life Nursery', //TODO credit actual author, if not New Life
+                    "cols": Math.round((meta.width*0.9) / meta.height),
                 };
                 // Prevent identical images from being added multiple times, if checks
                 // up to this point have failed
@@ -147,8 +194,11 @@ function GalleryPage() {
         }
     }, [thumbnails, images_meta, curr_index, history]);
 
-    const openImage = (_event, photo, index) => {
-        history.push(LINKS.Gallery + '/' + photo.photo.key);
+    const openImage = (tile) => {
+        let key = tile?.key;
+        if (key) {
+            history.push(LINKS.Gallery + '/' + key);
+        }
     }
 
     useEffect(() => {
@@ -180,10 +230,10 @@ function GalleryPage() {
         </Modal>
     ) : null;
     return (
-        <StyledGalleryPage className="page" id={track_scrolling_id}>
+        <div className={classes.root} id={track_scrolling_id}>
             {popup}
-            <Gallery photos={thumbnails} onClick={openImage}/>
-        </StyledGalleryPage>
+            <ImageGridList data={thumbnails} onClick={openImage} />
+        </div>
     );
 }
 

@@ -10,12 +10,23 @@ import DropDown from 'components/inputs/DropDown/DropDown';
 import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession } from 'utils/storage';
 import PubSub from 'utils/pubsub';
-import { Button } from '@material-ui/core';
+import { Button, SwipeableDrawer } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    drawerPaper: {
+        background: theme.palette.primary.light,
+        borderRight: `2px solid ${theme.palette.text.primary}`,
+        minWidth: 400,
+    }
+}));
 
 function ShoppingPage() {
+    const classes = useStyles();
     const [user_roles, setUserRoles] = useState(getRoles());
     const [session, setSession] = useState(getSession());
+    const [open, setOpen] = useState(false);
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
@@ -26,9 +37,13 @@ function ShoppingPage() {
         document.title = `Shop | ${BUSINESS_NAME}`;
         let userRolesSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
+        let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
+            setOpen(open => b === 'toggle' ? !open : b);
+        });
         return (() => {
             PubSub.unsubscribe(userRolesSub);
             PubSub.unsubscribe(sessionSub);
+            PubSub.unsubscribe(openSub);
         })
     }, [])
 
@@ -79,17 +94,17 @@ function ShoppingPage() {
         let list = filters[field];
         if (!list || !Array.isArray(list) || list.length <= 0) return null;
         let options = list.map((item, index) => (
-            <CheckBox key={index} 
-                group={field} 
-                label={item.label} 
-                value={item.value} 
-                checked={filters[field][index].checked ?? false} 
+            <CheckBox key={index}
+                group={field}
+                label={item.label}
+                value={item.value}
+                checked={filters[field][index].checked ?? false}
                 onChange={handleFiltersChange} />
         ))
         return <React.Fragment>
             <fieldset className="checkbox-group" onChange={onChange}>
                 <legend>{title}</legend>
-                    {options}
+                {options}
             </fieldset>
         </React.Fragment>
     }
@@ -97,7 +112,7 @@ function ShoppingPage() {
     const resetSearchConstraints = () => {
         handleSortChange(SORT_OPTIONS[0]);
         setSearchString('')
-        let copy = {...filters};
+        let copy = { ...filters };
         for (const key in copy) {
             let filter_group = copy[key];
             for (let i = 0; i < filter_group.length; i++) {
@@ -107,47 +122,48 @@ function ShoppingPage() {
         setFilters(copy);
     }
 
+    let optionsContainer = (
+        <div className="options-container">
+            <Button onClick={resetSearchConstraints}>Reset</Button>
+            <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+        </div>
+    );
+
     return (
         <StyledShoppingPage>
-            <ArrowMenu>
-                <div className="options-container">
-                    <Button onClick={resetSearchConstraints}>Reset</Button>
-                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-                </div>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
+                { optionsContainer }
                 <div className="shopping-menu">
-                <h2>Sort</h2>
-                <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
-                <h2>Search</h2>
-                <SearchBar onChange={(s) => setSearchString(s)}/>
-                <h2>Filters</h2>
-                {filters_to_checkbox('size', 'Sizes')}
-                {filters_to_checkbox('optimal_light', 'Optimal Light')}
-                {filters_to_checkbox('drought_tolerance', 'Drought Tolerance')}
-                {filters_to_checkbox('grown_height', 'Grown Height')}
-                {filters_to_checkbox('grown_spread', 'Grown Spread')}
-                {filters_to_checkbox('growth_rate', 'Growth Rate')}
-                {filters_to_checkbox('salt_tolerance', 'Salt Tolerance')}
-                {filters_to_checkbox('attracts_polinators_and_wildlifes', 'Pollinator')}
-                {filters_to_checkbox('light_ranges', 'Light Range')}
-                {filters_to_checkbox('soil_moistures', 'Soil Moisture')}
-                {filters_to_checkbox('soil_phs', 'Soil PH')}
-                {filters_to_checkbox('soil_types', 'Soil Type')}
-                {filters_to_checkbox('zones', 'Zone')}
-                {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
+                    <h2>Sort</h2>
+                    <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
+                    <h2>Search</h2>
+                    <SearchBar onChange={(s) => setSearchString(s)} />
+                    <h2>Filters</h2>
+                    {filters_to_checkbox('size', 'Sizes')}
+                    {filters_to_checkbox('optimal_light', 'Optimal Light')}
+                    {filters_to_checkbox('drought_tolerance', 'Drought Tolerance')}
+                    {filters_to_checkbox('grown_height', 'Grown Height')}
+                    {filters_to_checkbox('grown_spread', 'Grown Spread')}
+                    {filters_to_checkbox('growth_rate', 'Growth Rate')}
+                    {filters_to_checkbox('salt_tolerance', 'Salt Tolerance')}
+                    {filters_to_checkbox('attracts_polinators_and_wildlifes', 'Pollinator')}
+                    {filters_to_checkbox('light_ranges', 'Light Range')}
+                    {filters_to_checkbox('soil_moistures', 'Soil Moisture')}
+                    {filters_to_checkbox('soil_phs', 'Soil PH')}
+                    {filters_to_checkbox('soil_types', 'Soil Type')}
+                    {filters_to_checkbox('zones', 'Zone')}
+                    {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>
-                <div className="options-container">
-                    <Button onClick={resetSearchConstraints}>Reset</Button>
-                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-                </div>
-            </ArrowMenu>
+                { optionsContainer }
+            </SwipeableDrawer>
             <CheckBox className="unavailable-checkbox"
-                label='Show Currently Unavailable' 
-                checked={showCurrentlyUnavailable} 
+                label='Show Currently Unavailable'
+                checked={showCurrentlyUnavailable}
                 onChange={handleCurrentlyUnavailableChange} />
             <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
             <Button onClick={printAvailability}>Print Availability</Button>
-            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable}/>
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable} />
         </StyledShoppingPage>
     );
 }

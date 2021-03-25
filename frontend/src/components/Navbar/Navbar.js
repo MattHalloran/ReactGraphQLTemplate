@@ -10,7 +10,7 @@ import NavList from './NavList';
 import { useHistory } from 'react-router';
 import { hexToRGB } from 'utils/opacityHex';
 
-const SHOW_HAMBURGER_AT = 800;
+const SHOW_HAMBURGER_AT = 960;
 
 const useStyles = makeStyles((theme) => ({
     toRight: {

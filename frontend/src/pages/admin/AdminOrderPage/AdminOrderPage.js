@@ -12,7 +12,7 @@ import { updateObject } from 'utils/objectTools';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
 import CustomerInfo from 'components/CustomerInfo/CustomerInfo';
-import PopupMenu from 'components/menus/PopupMenu/PopupMenu';
+import PopupMenu from 'components/PopupMenu/PopupMenu';
 
 const ORDER_STATES = [
     {

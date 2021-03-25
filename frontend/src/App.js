@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Navbar from 'components/Navbar/Navbar';
+import IconNav from 'components/IconNav/IconNav';
 import Spinner from 'components/Spinner/Spinner';
 import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
@@ -24,8 +25,6 @@ function App() {
     const session_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
     const [cart, setCart] = useState(getCart());
-    const [menu_open, setMenuOpen] = useState(false);
-    const [arrow_open, setArrowOpen] = useState(false);
     const [popup_open, setPopupOpen] = useState(false);
 
     const handlers = {
@@ -48,16 +47,12 @@ function App() {
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
-        let arrowSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, o) => setArrowOpen(open => o === 'toggle' ? !open : o));
-        let menuSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, o) => setMenuOpen(open => o === 'toggle' ? !open : o));
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(popupSub);
-            PubSub.unsubscribe(arrowSub);
-            PubSub.unsubscribe(menuSub);
         })
     }, [])
 
@@ -81,6 +76,7 @@ function App() {
                         <Spinner spinning={false} />
                         <Routes session={session} user_roles={user_roles} />
                     </div>
+                    <IconNav cart={cart}/>
                     <Footer />
                 </main>
             </ThemeProvider>
