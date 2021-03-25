@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { getSession, getRoles } from 'utils/storage';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
+import { BottomNavigation, BottomNavigationAction, Badge } from '@material-ui/core';
 import SettingsIcon from '@material-ui/icons/Settings';
 import ShopIcon from '@material-ui/icons/Shop';
 import PersonIcon from '@material-ui/icons/Person';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import { ShoppingCartIcon } from 'assets/img';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { LINKS, USER_ROLES, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 
@@ -56,18 +55,18 @@ function IconNav({
     if (roles instanceof Array) {
         roles?.forEach(r => {
             if (r.title === USER_ROLES.Admin) {
-                actions.push([LINKS.Admin, SettingsIcon, 'Admin', 'admin']);
+                actions.push([LINKS.Admin, SettingsIcon, 'Admin', 'admin', 0]);
             }
         })
     }
 
     // If someone is not logged in, display sign up/log in links
     if (!session) {
-        actions.push([LINKS.LogIn, PersonAddIcon, 'Log In', 'login']);
+        actions.push([LINKS.LogIn, PersonAddIcon, 'Log In', 'login', 0]);
     } else {
-        actions.push([LINKS.Shopping, ShopIcon, 'Availability', 'availability'],
-            [LINKS.Profile, PersonIcon, 'Profile', 'profile'],
-            [LINKS.Cart, ShoppingCartIcon, 'Cart', 'cart', { width: '30px', height: '30px', cart: props.cart }]);
+        actions.push([LINKS.Shopping, ShopIcon, 'Availability', 'availability', 0],
+            [LINKS.Profile, PersonIcon, 'Profile', 'profile', 0],
+            [LINKS.Cart, ShoppingCartIcon, 'Cart', 'cart', cart?.items?.length ?? 0]);
     }
 
     const handleChange = (event, newValue) => {
@@ -76,14 +75,14 @@ function IconNav({
 
     return (
         <BottomNavigation value={value} onChange={handleChange} className={classes.root} {...props}>
-            {actions.map(([link, Icon, label, value, extra_props], index) => (
+            {actions.map(([link, Icon, label, value, badgeNum], index) => (
                         <BottomNavigationAction 
                             key={index} 
                             className={classes.icon} 
                             label={label} 
                             value={value} 
                             onClick={() => history.push(link)}
-                            icon={<Icon {...extra_props} />} />
+                            icon={<Badge badgeContent={badgeNum} color="error"><Icon /></Badge>} />
                     ))}
         </BottomNavigation>
     );

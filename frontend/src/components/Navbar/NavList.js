@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { clearStorage, getSession, getRoles } from 'utils/storage';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
 import { USER_ROLES, LINKS, PUBS } from 'utils/consts';
-import { ShoppingCartIcon } from 'assets/img';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PubSub from 'utils/pubsub';
-import { Container, Button, IconButton } from '@material-ui/core';
+import { Container, Button, IconButton, Badge } from '@material-ui/core';
 import PopupMenu from 'components/PopupMenu/PopupMenu';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
@@ -75,7 +75,9 @@ function NavList(props) {
         nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
         cart = (
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => openLink(LINKS.Cart)}>
-                <ShoppingCartIcon cart={props.cart} className="iconic" width="30px" height="30px" />
+                <Badge badgeContent={props.cart?.items?.length ?? 0} color="error">
+                    <ShoppingCartIcon />
+                </Badge>
             </IconButton>
         );
     }

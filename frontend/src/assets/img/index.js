@@ -27,7 +27,6 @@ export { default as PhoneIcon } from './PhoneIcon';
 export { default as RangeIcon } from './RangeIcon';
 export { default as SaltIcon } from './SaltIcon';
 export { default as SearchIcon } from './SearchIcon';
-export { default as ShoppingCartIcon } from './ShoppingCartIcon';
 export { default as SoilTypeIcon } from './SoilTypeIcon';
 export { default as SunIcon } from './SunIcon';
 export { default as TrashIcon } from './TrashIcon';

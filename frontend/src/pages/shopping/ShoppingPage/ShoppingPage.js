@@ -6,10 +6,9 @@ import ShoppingList from '../ShoppingList/ShoppingList';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
-import CheckBox from 'components/inputs/CheckBox/CheckBox';
 import { getRoles, getSession } from 'utils/storage';
 import PubSub from 'utils/pubsub';
-import { Button, SwipeableDrawer } from '@material-ui/core';
+import { Button, SwipeableDrawer, Checkbox, FormControlLabel } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -74,8 +73,8 @@ function ShoppingPage() {
         setFilters(modified_filters)
     }, [filters])
 
-    const handleCurrentlyUnavailableChange = useCallback((_group, _value, checked) => {
-        setShowCurrentlyUnavailable(checked);
+    const handleCurrentlyUnavailableChange = useCallback((event) => {
+        setShowCurrentlyUnavailable(event.target.checked);
     }, [filters])
 
     const handleSortChange = (sort_item, _) => {
@@ -87,12 +86,14 @@ function ShoppingPage() {
         let list = filters[field];
         if (!list || !Array.isArray(list) || list.length <= 0) return null;
         let options = list.map((item, index) => (
-            <CheckBox key={index}
-                group={field}
-                label={item.label}
-                value={item.value}
-                checked={filters[field][index].checked ?? false}
-                onChange={handleFiltersChange} />
+            <FormControlLabel control={
+                <Checkbox key={index}
+                    group={field}
+                    value={item.value}
+                    checked={filters[field][index].checked ?? false}
+                    onChange={handleFiltersChange} />
+            }
+                label={item.label} />
         ))
         return <React.Fragment>
             <fieldset className="checkbox-group" onChange={onChange}>
@@ -125,7 +126,7 @@ function ShoppingPage() {
     return (
         <StyledShoppingPage>
             <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
-                { optionsContainer }
+                {optionsContainer}
                 <div className="shopping-menu">
                     <h2>Sort</h2>
                     <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
@@ -148,12 +149,15 @@ function ShoppingPage() {
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>
-                { optionsContainer }
+                {optionsContainer}
             </SwipeableDrawer>
-            <CheckBox className="unavailable-checkbox"
-                label='Show Currently Unavailable'
-                checked={showCurrentlyUnavailable}
-                onChange={handleCurrentlyUnavailableChange} />
+            <FormControlLabel
+                control={
+                    <Checkbox className="unavailable-checkbox"
+                        checked={showCurrentlyUnavailable}
+                        onChange={handleCurrentlyUnavailableChange} />
+                }
+                label="Show Currently Unavailable" />
             <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
             <Button color="secondary" onClick={printAvailability}>Print Availability</Button>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable} />
