@@ -66,7 +66,6 @@ function App() {
     return (
         <div id="App">
             <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-            {/* <GlobalStyles theme={theme} menu_or_popup_open={menu_open || arrow_open || popup_open} /> */}
             <CssBaseline />
             {/* Other theming (default TextField variants, button text styling, etc) */}
             <ThemeProvider theme={theme}>

@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom';
 import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
-import ArrowMenu from 'components/menus/ArrowMenu/ArrowMenu';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import DropDown from 'components/inputs/DropDown/DropDown';
@@ -24,8 +23,6 @@ const useStyles = makeStyles((theme) => ({
 
 function ShoppingPage() {
     const classes = useStyles();
-    const [user_roles, setUserRoles] = useState(getRoles());
-    const [session, setSession] = useState(getSession());
     const [open, setOpen] = useState(false);
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
@@ -35,14 +32,10 @@ function ShoppingPage() {
 
     useEffect(() => {
         document.title = `Shop | ${BUSINESS_NAME}`;
-        let userRolesSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });
         return (() => {
-            PubSub.unsubscribe(userRolesSub);
-            PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(openSub);
         })
     }, [])
@@ -124,8 +117,8 @@ function ShoppingPage() {
 
     let optionsContainer = (
         <div className="options-container">
-            <Button onClick={resetSearchConstraints}>Reset</Button>
-            <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+            <Button color="secondary" onClick={resetSearchConstraints}>Reset</Button>
+            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
         </div>
     );
 
@@ -161,8 +154,8 @@ function ShoppingPage() {
                 label='Show Currently Unavailable'
                 checked={showCurrentlyUnavailable}
                 onChange={handleCurrentlyUnavailableChange} />
-            <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
-            <Button onClick={printAvailability}>Print Availability</Button>
+            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
+            <Button color="secondary" onClick={printAvailability}>Print Availability</Button>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable} />
         </StyledShoppingPage>
     );

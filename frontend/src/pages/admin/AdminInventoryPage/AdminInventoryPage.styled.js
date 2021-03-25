@@ -3,76 +3,8 @@ import styled from 'styled-components';
 export const StyledAdminInventoryPage = styled.div`
     .card-flex {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         align-items: stretch;
-    }
-`;
-
-export const StyledCard = styled.div`
-    position: relative;
-    margin: 20px;
-    min-width: 150px;
-    min-height: 50px;
-    cursor: pointer;
-
-    .deleted {
-        border: 2px solid red;
-    }
-
-    .inactive {
-        border: 2px solid grey;
-    }
-
-    .active {
-        border: 2px solid lightgreen;
-    }
-
-    .title {
-        position: absolute;
-        width: 100%;
-        text-align: center;
-        background-color: rgba(0,0,0,.4);
-        margin: 0;
-        border-radius: 10px 10px 0 0;
-        padding: 0.5em 0 0.5em 0;
-        left: 0;
-        top: 0;
-        z-index: 2;
-    }
-
-    .display-image {
-        display: block;
-        position: absolute;
-        width: 100%;
-        max-height: 100%;
-        bottom: 0%;
-    }
-
-    .image-not-found {
-        bottom: -30%;
-    }
-
-    .display-image-container {
-        width: 100%;
-        position: relative; /* Ensures 1:1 Aspect Ratio */
-        height: 0; /* Ensures 1:1 Aspect Ratio */
-        padding-top: 100%; /* Ensures 1:1 Aspect Ratio */
-    }
-
-    .size-container {
-        display: block;
-        margin: 5px;
-        text-align: left;
-
-        > * {
-            display: inline-block;
-            background-color: ${({ theme }) => theme.accentColor};
-            border: 1px solid black;
-            border-radius: 10px;
-            max-width: 100px;
-            padding: 0 10px 0 10px;
-            margin: 5px 0 0 5px;
-        }
     }
 `;
 

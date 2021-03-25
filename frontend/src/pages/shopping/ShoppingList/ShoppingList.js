@@ -13,7 +13,8 @@ import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import DropDown from 'components/inputs/DropDown/DropDown';
-
+import PlantCard from 'components/PlantCard/PlantCard'
+;
 function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
@@ -246,47 +247,6 @@ ShoppingList.propTypes = {
 };
 
 export default ShoppingList;
-
-function PlantCard({
-    plant,
-    thumbnail,
-    onClick,
-}) {
-
-    let sizes = plant.skus.map(s => (
-        <div>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
-    ));
-
-    let display_image;
-    if (thumbnail) {
-        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image image-not-found" />
-    }
-
-    return (
-        <StyledPlantCard className="card" onClick={() => onClick(plant.skus[0].sku)}>
-            <div className="title">
-                <h2>{plant.latin_name}</h2>
-                <h3>{plant.common_name}</h3>
-            </div>
-            <div className="display-image-container">
-                {display_image}
-            </div>
-            <div className="size-container">
-                {sizes}
-            </div>
-        </StyledPlantCard>
-    );
-}
-
-PlantCard.propTypes = {
-    plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.string,
-    onClick: PropTypes.func.isRequired,
-};
-
-export { PlantCard };
 
 function ExpandedPlant({
     plant,

@@ -19,6 +19,7 @@ import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
+import PlantCard from 'components/PlantCard/PlantCard';
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
@@ -203,7 +204,7 @@ function AdminInventoryPage() {
                 <div className="card-flex">
                     {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onEdit={() => setCurrPlant(plant)}
+                        onClick={() => setCurrPlant(plant)}
                         thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
@@ -213,7 +214,7 @@ function AdminInventoryPage() {
                 <div className="card-flex">
                     {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onEdit={() => setCurrPlant(plant)}
+                        onClick={() => setCurrPlant(plant)}
                         thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
             </Collapsible>
@@ -226,61 +227,6 @@ AdminInventoryPage.propTypes = {
 }
 
 export default AdminInventoryPage;
-
-function PlantCard({
-    onEdit,
-    onHide,
-    onDelete,
-    plant,
-    thumbnail
-}) {
-    let has_skus = plant.skus?.length > 0;
-
-    const SkuStatus = {
-        '-2': 'deleted',
-        '-1': 'inactive',
-        '1': 'active',
-    }
-
-    const getStatus = (status) => {
-        return SkuStatus[status + ''] ?? 'deleted';
-    }
-
-    let sizes = plant.skus?.map(s => (
-        <div className={getStatus(s.status)}>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
-    ));
-
-    let display_image;
-    if (thumbnail) {
-        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image image-not-found" />
-    }
-
-    return (
-        <StyledCard className="card" onClick={onEdit}>
-            <h2 className="title">{plant.latin_name}</h2>
-            <div className="display-image-container">
-                {display_image}
-            </div>
-            <div className="size-container">
-                {sizes}
-            </div>
-            {/* <div className="icon-container">
-                <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
-                <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />
-                <TrashIcon width="30px" height="30px" onClick={() => onDelete(sku)} />
-            </div> */}
-        </StyledCard>
-    );
-}
-
-PlantCard.propTypes = {
-    data: PropTypes.object.isRequired,
-    // onEdit: PropTypes.func.isRequired,
-    // onHide: PropTypes.func.isRequired,
-    // onDelete: PropTypes.func.isRequired,
-}
 
 function PlantPopup({
     session = getSession(),
