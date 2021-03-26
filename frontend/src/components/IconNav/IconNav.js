@@ -11,6 +11,7 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { LINKS, USER_ROLES, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
+import getUserActions from 'utils/userActions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,7 +39,6 @@ function IconNav({
     const classes = useStyles();
     const [session, setSession] = useState(getSession());
     const [roles, setRoles] = useState(getRoles());
-    const [value, setValue] = useState('recents');
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
@@ -49,39 +49,21 @@ function IconNav({
         })
     }, [])
 
-    let actions = [];
-
-    // If an admin is logged in, display admin links
-    if (roles instanceof Array) {
-        roles?.forEach(r => {
-            if (r.title === USER_ROLES.Admin) {
-                actions.push([LINKS.Admin, SettingsIcon, 'Admin', 'admin', 0]);
-            }
-        })
-    }
-
-    // If someone is not logged in, display sign up/log in links
-    if (!session) {
-        actions.push([LINKS.LogIn, PersonAddIcon, 'Log In', 'login', 0]);
-    } else {
-        actions.push([LINKS.Shopping, ShopIcon, 'Availability', 'availability', 0],
-            [LINKS.Profile, PersonIcon, 'Profile', 'profile', 0],
-            [LINKS.Cart, ShoppingCartIcon, 'Cart', 'cart', cart?.items?.length ?? 0]);
-    }
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
+    let actions = getUserActions(session, roles, cart);
 
     return (
-        <BottomNavigation value={value} onChange={handleChange} className={classes.root} {...props}>
-            {actions.map(([link, Icon, label, value, badgeNum], index) => (
+        <BottomNavigation 
+            className={classes.root} 
+            showLabels
+            {...props}
+        >
+            {actions.map(([label, value, link, onClick, Icon, badgeNum], index) => (
                         <BottomNavigationAction 
                             key={index} 
                             className={classes.icon} 
                             label={label} 
                             value={value} 
-                            onClick={() => history.push(link)}
+                            onClick={() => {history.push(link); if(onClick) onClick()}}
                             icon={<Badge badgeContent={badgeNum} color="error"><Icon /></Badge>} />
                     ))}
         </BottomNavigation>

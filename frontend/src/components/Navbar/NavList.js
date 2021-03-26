@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { clearStorage, getSession, getRoles } from 'utils/storage';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { USER_ROLES, LINKS, PUBS } from 'utils/consts';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import { Container, Button, IconButton, Badge } from '@material-ui/core';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PopupMenu from 'components/PopupMenu/PopupMenu';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
+import getUserActions from 'utils/userActions';
+import _ from 'underscore';
+import { updateArray } from 'utils/arrayTools';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -43,59 +46,42 @@ function NavList(props) {
             PubSub.unsubscribe(roleSub);
         })
     }, [])
-
-    // Link, Link text, onClick function
-    let nav_options = [];
-    let about_options = [];
-
-    if (session !== null) {
-        nav_options.push([LINKS.Shopping, 'Availability']);
-        nav_options.push([LINKS.Profile, 'Profile']);
-    }
-
-    // If an admin is logged in, display admin links
-    if (user_roles instanceof Array) {
-        user_roles?.forEach(r => {
-            if (r.title === USER_ROLES.Admin) {
-                nav_options.push([LINKS.Admin, 'Admin']);
-            }
-        })
-    }
-
-    const openLink = (link) => {
-        history.push(link);
-    }
+    
+    let nav_options = getUserActions(session, user_roles, props.cart);
 
     let cart;
     // If someone is not logged in, display sign up/log in links
     if (!session) {
-        nav_options.push([LINKS.Register, 'Sign Up'],
-            [LINKS.LogIn, 'Log In']);
+        nav_options.push(['Sign Up', 'signup', LINKS.Register]);
     } else {
-        nav_options.push([LINKS.Home, 'Log Out', clearStorage]);
+        // Cart option is rendered differently, so we must take it out of the array
+        let cart_index = nav_options.length - 1;
+        let cart_option = nav_options[cart_index];
+        // Replace cart option with log out option
+        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, clearStorage]);
         cart = (
-            <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => openLink(LINKS.Cart)}>
-                <Badge badgeContent={props.cart?.items?.length ?? 0} color="error">
+            <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => history.push(LINKS.Cart)}>
+                <Badge badgeContent={cart_option[5]} color="error">
                     <ShoppingCartIcon />
                 </Badge>
             </IconButton>
         );
     }
 
-    about_options.push([LINKS.About, 'About Us'],
-        [LINKS.Contact, 'Contact Us'],
-        [LINKS.Gallery, 'Gallery']);
+    let about_options = [['About Us', 'about', () => history.push(LINKS.About)],
+        ['Contact Us', 'contact', () => history.push(LINKS.Contact)],
+        ['Gallery', 'gallery', () => history.push(LINKS.Gallery)]];
 
     const options_to_menu = (options) => {
-        return options.map(([link, text], index) => (
+        return options.map(([label, value, link, onClick], index) => (
             <Button
                 key={index}
                 variant="text"
                 size="large"
                 className={classes.navItem}
-                onClick={() => openLink(link)}
+                onClick={() => { history.push(link); if(onClick) onClick()}}
             >
-                {text}
+                {label}
             </Button>
         ));
     }
