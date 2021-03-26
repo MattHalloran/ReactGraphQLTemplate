@@ -1,30 +1,25 @@
 import { Link } from 'react-router-dom';
 import ProvenWinners from 'assets/img/proven-winners.png';
-import AmericanHort from 'assets/img/american_hort_logo.jpg';
+import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import { FULL_BUSINESS_NAME, GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
-import { List, ListItem, ListItemIcon, ListItemText, Grid } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase } from '@material-ui/core';
 import PhoneIcon from '@material-ui/icons/Phone';
 import PrintIcon from '@material-ui/icons/Print';
+import EmailIcon from '@material-ui/icons/Email';
 import Copyright from 'components/Copyright/Copyright';
 
 const useStyles = makeStyles((theme) => ({
-    footer: {
+    root: {
+        width: 'fit-content',
+        overflow: 'hidden',
         backgroundColor: `${theme.palette.primary.dark}`,
         color: `${theme.palette.primary.contrastText}`,
         borderTop: `2px solid ${theme.palette.text.primary}`,
         position: 'relative',
-        bottom: '0',
-        width: '100%',
-        overflow: 'hidden',
-        'li': {
-            display: 'block',
-        },
-        'a:link, a:visited': {
-            color: `${theme.palette.text.primary}`,
-        }
+        paddingBottom: '7vh',
     },
     footerGroup: {
         padding: '0 10px',
@@ -50,8 +45,14 @@ const useStyles = makeStyles((theme) => ({
             borderRight: 'none',
         }
     },
-    winnerDiv: {
-        display: 'grid',
+    imageContainer: {
+        maxWidth: '33vw',
+        padding: 10,
+    },
+    image: {
+        maxWidth: '100%',
+        maxHeight: 200,
+        background: theme.palette.primary.contrastText,
     },
     provenWinner: {
         maxHeight: 'min(100%,150px)',
@@ -60,6 +61,9 @@ const useStyles = makeStyles((theme) => ({
     },
     icon: {
         fill: theme.palette.primary.contrastText,
+    },
+    copyright: {
+        color: theme.palette.primary.contrastText,
     },
     [theme.breakpoints.down("sm")]: {
         footerGroup: {
@@ -77,9 +81,9 @@ function Footer({
 }) {
     const classes = useStyles();
     return (
-        <div>
-            <Grid container justify='center' className={classes.footer} spacing={1}>
-                <Grid item xs={12}>
+        <div className={classes.root}>
+            <Grid container justify='center' spacing={1}>
+                <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="a" href={LINKS.About} >
                             <ListItemText primary="About Us" />
@@ -108,7 +112,7 @@ function Footer({
                         </ListItem> */}
                     </List>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="h5" >
                             <ListItemText primary="NEW LIFE NURSERY INC." />
@@ -129,21 +133,30 @@ function Footer({
                             <ListItemText primary="(856) 451-1530" />
                         </ListItem>
                         <ListItem button component="a" aria-label="contact-email" href='mailto:info@newlifenurseryinc.com' >
-                            <ListItemText primary="Email: info@newlifenurseryinc.com" />
+                            <ListItemIcon>
+                                <EmailIcon className={classes.icon} />
+                            </ListItemIcon>
+                            <ListItemText primary="info@newlifenurseryinc.com" />
                         </ListItem>
                     </List>
                 </Grid>
-                <Grid item xs={12}>
-                    <a style={{ display: 'contents' }} href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img src={ProvenWinners} alt="We Sell Proven Winners - The #1 Plant Brand" className="proven-winner" /></a>
+                <Grid item xs={4}>
+                    <ButtonBase className={classes.imageContainer}>
+                        <a href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="We Sell Proven Winners - The #1 Plant Brand" src={ProvenWinners} /></a>
+                    </ButtonBase>
                 </Grid>
-                <Grid item xs={12}>
-                    <a style={{ display: 'contents' }} href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img src={AmericanHort} alt="Proud member of the AmericanHort" className="proven-winner" /></a>
+                <Grid item xs={4}>
+                    <ButtonBase className={classes.imageContainer}>
+                        <a href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="Proud member of the AmericanHort" src={AmericanHort} /></a>
+                    </ButtonBase>
                 </Grid>
-                <Grid item xs={12}>
-                    <a style={{ display: 'contents' }} href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img src={NJNLA} alt="Proud member of the New Jersey Nursery and Landscape Association" className="proven-winner" /></a>
+                <Grid item xs={4}>
+                    <ButtonBase className={classes.imageContainer}>
+                        <a href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="Proud member of the New Jersey Nursery and Landscape Association" src={NJNLA} /></a>
+                    </ButtonBase>
                 </Grid>
             </Grid>
-            <Copyright />
+            <Copyright className={classes.copyright} />
         </div>
     );
 }
