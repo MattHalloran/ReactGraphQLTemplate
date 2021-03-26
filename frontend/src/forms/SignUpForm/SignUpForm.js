@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import * as validation from 'utils/validations';
 import { Button, TextField, Checkbox, Link } from '@material-ui/core';
-import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio } from '@material-ui/core';
+import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES } from 'utils/consts';
 import { registerUser } from 'query/http_promises';
@@ -241,8 +241,10 @@ function SignUpForm() {
             <Grid container justify="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
-                        Already have an account? Sign in
-                </Link>
+                        <Typography component="body2">
+                            Already have an account? Sign in
+                        </Typography>
+                    </Link>
                 </Grid>
             </Grid>
         </FormControl>

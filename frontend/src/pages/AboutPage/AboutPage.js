@@ -1,6 +1,5 @@
 import { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
-import { StyledAboutPage } from './AboutPage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
 
 function AboutPage() {
@@ -8,7 +7,7 @@ function AboutPage() {
         document.title = `About | ${BUSINESS_NAME}`;
     })
     return (
-        <StyledAboutPage className="page">
+        <div id='page'>
             <div className="header">
                 <h1>About {BUSINESS_NAME}</h1>
             </div>
@@ -20,7 +19,7 @@ function AboutPage() {
                 <h3>Warmest Wishes,</h3>
                 <h2 style={{fontFamily:'fantasy'}}>The Gianaris Family</h2>
             </div>
-        </StyledAboutPage >
+        </div >
     );
 }
 

@@ -127,7 +127,7 @@ function AdminCustomerPage() {
     }
 
     return (
-        <StyledAdminCustomerPage className="page">
+        <StyledAdminCustomerPage id="page">
             {popup}
             <div>
                 <h1>Selected user: {selected_display}</h1>

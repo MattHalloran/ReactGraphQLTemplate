@@ -6,10 +6,6 @@ import { Typography, Card, CardContent, CardActions, Button } from '@material-ui
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        marginTop: 'max(12vh, 50px)',
-        padding: 10,
-    },
     header: {
         textAlign: 'center',
     },
@@ -43,7 +39,7 @@ function AdminMainPage() {
     ]
 
     return (
-        <div className={classes.root}>
+        <div id='page'>
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Admin Portal</Typography>
             </div>

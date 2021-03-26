@@ -3,13 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
-    page: {
-        maxWidth: '100%',
-        maxHeight: '100%',
-        padding: '2em',
-        marginTop: 'calc(14vh + 20px)',
-        backgroundColor: theme.palette.background.paper
-    },
     header: {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.background.default,
@@ -30,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("sm")]: {
         page: {
-            padding: '0'
+            padding: '0',
+            paddingTop: 'calc(14vh + 20px)',
         }
       },
 }));
@@ -44,7 +38,7 @@ function FormPage({
     const classes = useStyles();
 
     return (
-        <div className={classes.page} maxWidth={maxWidth}>
+        <div id='page' maxWidth={maxWidth}>
             <div className={classes.container}>
                 <Container className={classes.header}>
                     <Typography variant="h3" >{header}</Typography>

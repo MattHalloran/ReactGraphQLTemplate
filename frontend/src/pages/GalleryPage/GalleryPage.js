@@ -12,9 +12,6 @@ import { GridList, GridListTile } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-
-    },
     gridList: {
         spacing: 0,
     },
@@ -69,7 +66,7 @@ function GalleryPage() {
     const [curr_img, setCurrImg] = useState(null);
     const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
     const loading = useRef(false);
-    const track_scrolling_id = 'scroll-tracked';
+    const track_scrolling_id = 'page';
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
@@ -230,7 +227,7 @@ function GalleryPage() {
         </Modal>
     ) : null;
     return (
-        <div className={classes.root} id={track_scrolling_id}>
+        <div id='page'>
             {popup}
             <ImageGridList data={thumbnails} onClick={openImage} />
         </div>

@@ -181,7 +181,7 @@ function AdminInventoryPage() {
     ) : null;
 
     return (
-        <StyledAdminInventoryPage className="page">
+        <StyledAdminInventoryPage id="page">
             {popup}
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>

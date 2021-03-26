@@ -2,7 +2,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
 import * as validation from 'utils/validations';
 import { Button, TextField, Link } from '@material-ui/core';
-import { FormControl, Grid } from '@material-ui/core';
+import { FormControl, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS } from 'utils/consts';
 import { loginUser } from 'query/http_promises';
@@ -14,6 +14,10 @@ const useStyles = makeStyles((theme) => ({
     },
     submit: {
         margin: theme.spacing(3, 0, 2),
+    },
+    linkRight: {
+        display: 'block',
+        textAlign: 'right',
     },
 }));
 
@@ -93,11 +97,20 @@ function LogInForm() {
             >
                 Sign Up
             </Button>
-            <Grid container justify="flex-end">
-                <Grid item>
+            <Grid container spacing={2}>
+                <Grid item xs={6}>
+                    <Link href={LINKS.ForgotPassword} variant="body2">
+                        <Typography component="body2">
+                            Forgot Password?
+                        </Typography>
+                    </Link>
+                </Grid>
+                <Grid item xs={6}>
                     <Link href={LINKS.Register} variant="body2">
-                        Don't have an account? Sign up
-                </Link>
+                        <Typography component="body2" className={classes.linkRight}>
+                            Don't have an account? Sign up
+                        </Typography>
+                    </Link>
                 </Grid>
             </Grid>
         </FormControl>

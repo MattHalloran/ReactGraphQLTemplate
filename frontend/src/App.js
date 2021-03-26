@@ -18,6 +18,12 @@ const useStyles = makeStyles((theme) => ({
         body: {
             backgroundColor: 'black',
         },
+        '#page': {
+            minWidth: '100%',
+            minHeight: '100%',
+            padding: '1em',
+            paddingTop: 'calc(14vh + 20px)',
+        }
     },
     pageContainer: {
         background: theme.palette.background.default,

@@ -124,7 +124,7 @@ function ShoppingPage() {
     );
 
     return (
-        <StyledShoppingPage>
+        <StyledShoppingPage id='page'>
             <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
                 {optionsContainer}
                 <div className="shopping-menu">

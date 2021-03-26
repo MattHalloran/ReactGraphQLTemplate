@@ -177,7 +177,7 @@ function AdminGalleryPage() {
     }
 
     return (
-        <StyledAdminGalleryPage className="page">
+        <StyledAdminGalleryPage id="page">
             <h1>Gallery Edit</h1>
             <div>
                 <h2>Select image(s) for upload</h2>

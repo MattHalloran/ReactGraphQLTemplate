@@ -1,5 +1,4 @@
 import { useLayoutEffect } from 'react';
-import { StyledTermsPage } from './TermsPage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
 import { Typography } from '@material-ui/core';
 
@@ -10,7 +9,7 @@ function TermsPage() {
     })
 
     return (
-        <StyledTermsPage className="page">
+        <div id="page">
             <Typography variant="h2">Order Terms</Typography>
             <ul>
                 <li>Our prices are based on current market conditions and are subject to change without notice.</li>
@@ -41,7 +40,7 @@ function TermsPage() {
                 <li>Shipping must be paid C.O.D. to carrier and can be arranged by New Life Nursery upon request.</li>
                 <li>Spring orders must be shipped or picked up prior to April 15th, or the order may be released.</li>
             </ul>
-        </StyledTermsPage>
+        </div>
     );
 }
 

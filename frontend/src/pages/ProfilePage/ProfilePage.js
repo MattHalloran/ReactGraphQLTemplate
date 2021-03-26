@@ -1,5 +1,4 @@
 import { useLayoutEffect } from 'react';
-import { StyledProfilePage } from './ProfilePage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
 
 function ProfilePage() {
@@ -9,8 +8,9 @@ function ProfilePage() {
     })
 
     return (
-        <StyledProfilePage className="page">
-        </StyledProfilePage>
+        <div id="page">
+
+        </div>
     );
 }
 

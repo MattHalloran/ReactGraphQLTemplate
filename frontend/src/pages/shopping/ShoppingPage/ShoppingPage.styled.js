@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 
 export const StyledShoppingPage = styled.div`
-    margin-top: 15vh;
-
     .options-container {
         padding: 1vh 0;
     }

@@ -185,7 +185,7 @@ function OrderPopup({
     }
 
     return (
-        <StyledOrderPopup>
+        <StyledOrderPopup id='page'>
             <p>Customer: {order.customer.first_name} {order.customer.last_name}</p>
             <p>{status_string}</p>
             <Cart cart={changedOrder} onUpdate={orderUpdate} />

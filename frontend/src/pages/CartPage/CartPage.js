@@ -13,10 +13,6 @@ import { Typography, Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        marginTop: 'max(12vh, 50px)',
-        padding: 10,
-    },
     header: {
         textAlign: 'center',
     },
@@ -87,7 +83,7 @@ function CartPage() {
     }, [cart, changedCart, session]);
 
     return (
-        <div className={classes.root}>
+        <div id='page'>
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Cart</Typography>
             </div>
