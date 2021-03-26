@@ -11,6 +11,21 @@ import { getSession, getCart, getTheme } from './utils/storage';
 import { checkCookies } from 'query/http_promises';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    "@global": {
+        body: {
+            backgroundColor: 'black',
+        },
+    },
+    pageContainer: {
+        background: theme.palette.background.default,
+    },
+    contentWrap: {
+        minHeight: '100vh',
+    },
+}));
 
 const keyMap = {
     OPEN_MENU: "left",
@@ -20,6 +35,7 @@ const keyMap = {
 };
 
 function App() {
+    const classes = useStyles();
     const [theme, setTheme] = useState(getTheme());
     const [session, setSession] = useState(getSession());
     const session_attempts = useRef(0);
@@ -69,13 +85,13 @@ function App() {
             <CssBaseline />
             {/* Other theming (default TextField variants, button text styling, etc) */}
             <ThemeProvider theme={theme}>
-                <main id="page-container">
-                    <div id="content-wrap">
+                <main id="page-container" className={classes.pageContainer}>
+                    <div id="content-wrap" className={classes.contentWrap}>
                         <Navbar session={session} user_roles={user_roles} cart={cart} />
                         <Spinner spinning={false} />
                         <Routes session={session} user_roles={user_roles} />
                     </div>
-                    <IconNav cart={cart}/>
+                    <IconNav cart={cart} />
                     <Footer />
                 </main>
             </ThemeProvider>

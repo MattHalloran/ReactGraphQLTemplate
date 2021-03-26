@@ -4,18 +4,13 @@ import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { getSession, getRoles } from 'utils/storage';
 import { BottomNavigation, BottomNavigationAction, Badge } from '@material-ui/core';
-import SettingsIcon from '@material-ui/icons/Settings';
-import ShopIcon from '@material-ui/icons/Shop';
-import PersonIcon from '@material-ui/icons/Person';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { LINKS, USER_ROLES, PUBS } from 'utils/consts';
+import { PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import getUserActions from 'utils/userActions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        background: theme.palette.primary.light,
+        background: theme.palette.primary.dark,
         position: 'fixed',
         zIndex: 5,
         bottom: '0',

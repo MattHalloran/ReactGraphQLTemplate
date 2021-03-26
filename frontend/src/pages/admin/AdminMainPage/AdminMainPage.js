@@ -1,39 +1,70 @@
 import { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
-import { StyledAdminMainPage } from './AdminMainPage.styled';
 import { useHistory } from 'react-router-dom';
 import { BUSINESS_NAME, LINKS } from 'utils/consts';
+import { Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        marginTop: 'max(12vh, 50px)',
+        padding: 10,
+    },
+    header: {
+        textAlign: 'center',
+    },
+    card: {
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+        cursor: 'pointer',
+    },
+    flexed: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gridGap: '20px',
+        alignItems: 'stretch',
+    },
+}));
 
 function AdminMainPage() {
     let history = useHistory();
+    const classes = useStyles();
 
     useLayoutEffect(() => {
         document.title = `Admin Portal | ${BUSINESS_NAME}`;
     }, [])
 
     const card_data = [
-        ['orders', 'Orders', "Approve, create, and edit customer's orders"],
-        ['customers', 'Customers', "Approve new customers, edit customer information"],
-        ['inventory', 'Inventory', "Add, remove, and update inventory"],
-        ['gallery', 'Gallery', "Add, remove, and rearrange gallery images"],
-        ['contact-info', 'Contact Info', "Edit business hours and other contact information"],
+        ['Orders', "Approve, create, and edit customer's orders", LINKS.AdminOrders],
+        ['Customers', "Approve new customers, edit customer information", LINKS.AdminCustomers],
+        ['Inventory', "Add, remove, and update inventory", LINKS.AdminInventory],
+        ['Gallery', "Add, remove, and rearrange gallery images", LINKS.AdminGallery],
+        ['Contact Info', "Edit business hours and other contact information", LINKS.AdminContactInfo],
     ]
 
     return (
-        <StyledAdminMainPage className="page">
-            <div className="header">
-                <h1>Admin Portal</h1>
+        <div className={classes.root}>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Admin Portal</Typography>
             </div>
-            <div className="flexed">
-                {card_data.map(([link, title, description]) => (
-                    <div className="admin-card"
-                        onClick={() => history.push(`${LINKS.Admin}/${link}`)}>
-                        <h3>{title}</h3>
-                        <p>{description}</p>
-                    </div>
+            <div className={classes.flexed}>
+                {card_data.map(([title, description, link]) => (
+                    <Card className={classes.card}>
+                        <CardContent onClick={() => history.push(link)}>
+                            <Typography variant="h5" component="h2">
+                                {title}
+                            </Typography>
+                            <Typography variant="body2" component="p">
+                                {description}
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <Button size="small" onClick={() => history.push(link)}>Open</Button>
+                        </CardActions>
+                    </Card>
                 ))}
             </div>
-        </StyledAdminMainPage >
+        </div >
     );
 }
 

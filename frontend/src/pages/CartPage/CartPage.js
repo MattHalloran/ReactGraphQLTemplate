@@ -1,19 +1,41 @@
 import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router';
-import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
 import { getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import { Button } from '@material-ui/core';
 import { updateCart, submitOrder } from 'query/http_promises';
 import Cart from 'components/Cart/Cart';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import UpdateIcon from '@material-ui/icons/Update';
+import { Typography, Container } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        marginTop: 'max(12vh, 50px)',
+        padding: 10,
+    },
+    header: {
+        textAlign: 'center',
+    },
+    optionsContainer: {
+        width: 'fit-content',
+        justifyContent: 'center',
+    },
+    options: {
+        margin: 2,
+    },
+}));
 
 function CartPage() {
+    let history = useHistory();
+    const classes = useStyles();
     const [cart, setCart] = useState(getCart());
     // Holds cart changes before update is final
     const [changedCart, setChangedCart] = useState(cart);
     const [session, setSession] = useState(getSession());
-    let history = useHistory();
 
     const cartUpdate = (data) => {
         setChangedCart(data);
@@ -65,13 +87,17 @@ function CartPage() {
     }, [cart, changedCart, session]);
 
     return (
-        <StyledCartPage className="page">
-            <h2>Cart</h2>
+        <div className={classes.root}>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Cart</Typography>
+            </div>
             <Cart cart={cart} onUpdate={cartUpdate} />
-            <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
-            <Button onClick={updateOrder}>Update Order</Button>
-            <Button onClick={finalizeOrder}>Request Quote</Button>
-        </StyledCartPage>
+            <Container className={classes.optionsContainer}>
+                <Button className={classes.options} startIcon={<ArrowBackIcon />} onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
+                <Button className={classes.options} startIcon={<UpdateIcon />} onClick={updateOrder}>Update Order</Button>
+                <Button className={classes.options} endIcon={<ArrowForwardIcon />} onClick={finalizeOrder}>Request Quote</Button>
+            </Container>
+        </div>
     );
 }
 

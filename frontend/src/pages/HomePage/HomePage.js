@@ -1,8 +1,6 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import Hero from 'components/Hero/Hero';
 import { StyledHomePage } from './HomePage.styled';
-import { SocialIcon } from 'react-social-icons';
 import { BUSINESS_NAME } from 'utils/consts';
 
 function HomePage() {
@@ -14,10 +12,10 @@ function HomePage() {
     return (
         <StyledHomePage>
             <Hero text="Beautiful, healthy plants" subtext="At competitive prices" />
-            <Collapsible title="Follow Us on Social Media!" contentClassName="social-collapse">
+            {/* <Collapsible title="Follow Us on Social Media!" contentClassName="social-collapse">
                 <SocialIcon style={{width:'75px',height:'75px',margin:'15px'}} fgColor="#ffffff" url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon style={{width:'75px',height:'75px',margin:'15px'}} fgColor="#ffffff" url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
-            </Collapsible>
+            </Collapsible> */}
         </StyledHomePage >
     );
 }

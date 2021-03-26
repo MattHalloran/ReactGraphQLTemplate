@@ -4,7 +4,8 @@ const commonTheme = createMuiTheme({
     props: {
         // Style sheet name ⚛️
         MuiButton: {
-            variant: 'contained'
+            variant: 'contained',
+            color: 'secondary',
         },
         MuiTextField: {
             variant: 'outlined'
