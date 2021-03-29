@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 200,
         position: 'inherit',
     },
-    skuChip: {
+    chip: {
         margin: 2,
     },
     deleted: {
