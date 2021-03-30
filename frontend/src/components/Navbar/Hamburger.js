@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { clearStorage, getSession, getRoles } from 'utils/storage';
 import ContactInfo from 'components/ContactInfo/ContactInfo';

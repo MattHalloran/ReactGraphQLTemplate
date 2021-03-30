@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
@@ -44,6 +43,9 @@ const useStyles = makeStyles((theme) => ({
         '> *:last-child': {
             borderRight: 'none',
         }
+    },
+    upper: {
+        textTransform: 'uppercase',
     },
     imageContainer: {
         maxWidth: '33vw',
@@ -115,7 +117,7 @@ function Footer({
                 <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="h5" >
-                            <ListItemText primary="NEW LIFE NURSERY INC." />
+                            <ListItemText className={classes.upper} primary={FULL_BUSINESS_NAME} />
                         </ListItem>
                         <ListItem button component="a" aria-label="address" href={GOOGLE_MAPS_ADDRESS} >
                             <ListItemText primary="106 South Woodruff Road Bridgeton, NJ 08302" />

@@ -1,15 +1,14 @@
 import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { StyledCart } from './Cart.styled';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { BUSINESS_NAME } from 'utils/consts';
 import { getImages } from 'query/http_promises';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import { displayPrice } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
-import { Button, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { deleteArrayIndex } from 'utils/arrayTools';
 import { updateObject } from 'utils/objectTools';
-import { Paper, Grid, MenuItem, Checkbox, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
+import { Paper, Grid, MenuItem, Checkbox, TableContainer, Table, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import EnhancedTableHead from 'components/EnhancedTableHead/EnhancedTableHead';
 import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableToolbar';
 import { makeStyles } from '@material-ui/core/styles';

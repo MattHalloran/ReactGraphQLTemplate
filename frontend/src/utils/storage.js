@@ -5,7 +5,6 @@ import PubSub from './pubsub';
 import { LOCAL_STORAGE } from 'utils/consts';
 import { deepEqual, isString } from 'utils/typeChecking';
 import * as http from 'query/http_promises';
-import _ from 'underscore';
 import { lightTheme, darkTheme } from './theme';
 
 export function setTheme(themeString) {

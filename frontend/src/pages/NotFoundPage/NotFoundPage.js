@@ -27,7 +27,7 @@ function NotFoundPage() {
                 <h3>Looks like you've followed a broken link or entered a URL that doesn't exist on this site</h3>
                 <br />
                 <Link to="/">
-                    <Button className="primary">Go to Home</Button>
+                    <Button>Go to Home</Button>
                 </Link>
             </div>
         </div>

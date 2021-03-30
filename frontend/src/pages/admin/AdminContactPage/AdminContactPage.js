@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react';
-import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import PropTypes from 'prop-types';
 
 function AdminContactPage() {

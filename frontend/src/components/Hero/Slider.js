@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import SliderContent from './SliderContent';
 import Slide from './Slide';
 import Dots from './Dots';
@@ -33,18 +33,21 @@ const Slider = ({
     const sliderRef = useRef()
     const timeoutRef = useRef(null);
 
-    const play = useCallback((index) => {
-        timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
-        setTransition(slidingDuration);
-        setTranslate(width * (index + 1));
-    }, [timeoutRef, images, slidingDuration, width])
-
-    const wait = useCallback((index) => {
-        setSlideIndex(index);
-        timeoutRef.current = setTimeout(play, slidingDelay, index);
-        setTransition(0);
-        setTranslate(width * index);
-    }, [timeoutRef, play, slidingDelay, width])
+    // Play and wait have circular dependencies, so they must be memoized together
+    const { wait } = useMemo(() => {
+        const play = (index) => {
+            timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
+            setTransition(slidingDuration);
+            setTranslate(width * (index + 1));
+        };
+        const wait = (index) => {
+            setSlideIndex(index);
+            timeoutRef.current = setTimeout(play, slidingDelay, index);
+            setTransition(0);
+            setTranslate(width * index);
+        }
+        return { play, wait };
+    }, [timeoutRef, images, slidingDelay, slidingDuration, width])
 
     useEffect(() => {
         const onResize = window.addEventListener('resize', () => setWidth(window.innerWidth))

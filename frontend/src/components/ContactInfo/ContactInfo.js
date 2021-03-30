@@ -1,10 +1,8 @@
-import PropTypes from 'prop-types';
-import { StyledContactInfo } from './ContactInfo.styled';
 import RoomIcon from '@material-ui/icons/Room';
 import EmailIcon from '@material-ui/icons/Email';
 import PhoneIcon from '@material-ui/icons/Phone';
 import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
+import { Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({

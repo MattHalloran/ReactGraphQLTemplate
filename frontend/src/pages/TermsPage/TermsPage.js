@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
-import { BUSINESS_NAME, LINKS } from 'utils/consts';
-import { Typography, Breadcrumbs, Link } from '@material-ui/core';
+import { BUSINESS_NAME } from 'utils/consts';
+import { Typography } from '@material-ui/core';
+import PolicyBreadcrumbs from 'components/breadcrumbs/PolicyBreadcrumbs/PolicyBreadcrumbs';
 
 function TermsPage() {
 
@@ -10,10 +11,7 @@ function TermsPage() {
 
     return (
         <div id="page">
-            <Breadcrumbs separator="|" aria-label="Policies breadcrumb">
-                <Link href={LINKS.PrivacyPolicy}>Privacy</Link>
-                <Link href={LINKS.Terms}>{'Terms & Conditions'}</Link>
-            </Breadcrumbs>
+            <PolicyBreadcrumbs />
             <Typography variant="h3">Order Terms</Typography>
             <ul>
                 <li>Our prices are based on current market conditions and are subject to change without notice.</li>

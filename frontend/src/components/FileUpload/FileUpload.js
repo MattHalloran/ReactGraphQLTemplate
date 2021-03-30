@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { StyledFileUpload } from './FileUpload.styled';
 import { Button } from '@material-ui/core';
 
 function FileUpload({
@@ -29,12 +28,12 @@ function FileUpload({
     }
 
     return (
-        <StyledFileUpload>
+        <div>
             <input type="file" hidden ref={inputRef} onChange={fileUploadInputChange} {...props}/>
             <Button onClick={fileUploadAction}>{selectText}</Button>
             {uploadState}
             {showUploadButton && numSelected.current > 0 ? <Button onClick={onUploadClick}>{uploadText}</Button> : null}
-        </StyledFileUpload >
+        </div>
     );
 }
 

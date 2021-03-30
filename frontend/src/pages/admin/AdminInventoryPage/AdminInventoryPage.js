@@ -20,7 +20,7 @@ import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 import PlantCard from 'components/PlantCard/PlantCard';
 import { TextField } from '@material-ui/core';
-import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);

@@ -7,7 +7,7 @@ import { PubSub } from 'utils/pubsub';
 import CustomerCard from 'components/CustomerCard/CustomerCard';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     header: {

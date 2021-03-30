@@ -11,7 +11,7 @@ import { updateCart, setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
-import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {

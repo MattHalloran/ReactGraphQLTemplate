@@ -13,7 +13,7 @@ const useStyles = makeStyles({
 const Slide = ({ content, width }) => {
     const classes = useStyles({width});
     return (
-        <img className={classes.slide} src={content} />
+        <img className={classes.slide} src={content} alt='' />
     )
 }
 

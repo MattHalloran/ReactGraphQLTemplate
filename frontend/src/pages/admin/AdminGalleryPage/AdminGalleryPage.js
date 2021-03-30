@@ -16,7 +16,7 @@ import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableT
 import { updateArray } from 'utils/arrayTools';
 import GalleryCard from 'components/GalleryCard/GalleryCard';
 import { DataUsageRounded } from '@material-ui/icons';
-import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     paper: {

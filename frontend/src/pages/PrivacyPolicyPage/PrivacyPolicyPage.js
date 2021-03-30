@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
-import { BUSINESS_NAME, FULL_BUSINESS_NAME, LINKS } from 'utils/consts';
-import { Typography, Breadcrumbs, Link } from '@material-ui/core';
+import { BUSINESS_NAME, FULL_BUSINESS_NAME } from 'utils/consts';
+import { Typography } from '@material-ui/core';
+import PolicyBreadcrumbs from 'components/breadcrumbs/PolicyBreadcrumbs/PolicyBreadcrumbs';
 
 function PrivacyPolicyPage() {
 
@@ -10,10 +11,7 @@ function PrivacyPolicyPage() {
 
     return (
         <div id="page">
-            <Breadcrumbs separator="|" aria-label="Policies breadcrumb">
-                <Link href={LINKS.PrivacyPolicy}>Privacy</Link>
-                <Link href={LINKS.Terms}>{'Terms & Conditions'}</Link>
-            </Breadcrumbs>
+            <PolicyBreadcrumbs />
             <Typography variant="h3">Privacy Policy</Typography>
             <p>Last updated: November 30, 2020</p>
             <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>

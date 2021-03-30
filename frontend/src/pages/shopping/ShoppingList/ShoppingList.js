@@ -7,14 +7,14 @@ import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/Modal/Modal";
 import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
-import Tooltip from 'components/Tooltip/Tooltip';
 import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import DropDown from 'components/inputs/DropDown/DropDown';
-import PlantCard from 'components/PlantCard/PlantCard'
-;
+import PlantCard from 'components/PlantCard/PlantCard';
+import { Tooltip } from '@material-ui/core';
+
 function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
@@ -296,7 +296,7 @@ function ExpandedPlant({
         }
         return (
             <div className="trait-container">
-                <Tooltip content={title}>
+                <Tooltip title={title}>
                     <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
                     <p>: {field_string}</p>
                 </Tooltip>
