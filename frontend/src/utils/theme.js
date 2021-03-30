@@ -1,15 +1,19 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 
 const commonTheme = createMuiTheme({
-    props: {
+    components: {
         // Style sheet name ⚛️
         MuiButton: {
-            variant: 'contained',
-            color: 'secondary',
+            defaultProps: {
+                variant: 'contained',
+                color: 'secondary',
+            },
         },
         MuiTextField: {
-            variant: 'outlined'
-        }
+            defaultProps: {
+                variant: 'outlined'
+            },
+        },
     },
 });
 

@@ -14,12 +14,12 @@ import { PubSub } from 'utils/pubsub';
 import { getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
-import InputText from 'components/inputs/InputText/InputText';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 import PlantCard from 'components/PlantCard/PlantCard';
+import { TextField } from '@material-ui/core';
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
@@ -317,11 +317,11 @@ function PlantPopup({
     // Returns an input text or a dropdown, depending on if the field is in the trait options
     const getInput = (field, label, value, valueFunc, multi_select = true) => {
         if (!trait_options || !trait_options[field] || trait_options[field].length <= 0) return (
-            <InputText
+            <TextField
+                fullWidth
                 label={label}
-                type="text"
                 value={value}
-                valueFunc={valueFunc}
+                onChange={e => valueFunc(e.target.value)}
             />
         )
         return (
@@ -396,17 +396,15 @@ function PlantPopup({
                 <Button className="add-sku" onClick={newSku}>New SKU</Button>
             </div>
             <div className="plant-info-div">
-                <InputText
+                <TextField
                     label="Latin Name"
-                    type="text"
                     value={latin_name}
-                    valueFunc={setLatinName}
+                    onChange={e => setLatinName(e.target.value)}
                 />
-                <InputText
+                <TextField
                     label="Common Name"
-                    type="text"
                     value={common_name}
-                    valueFunc={setCommonName}
+                    onChange={e => setCommonName(e.target.value)}
                 />
                 <div className="third">
                     {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance, false)}
@@ -426,26 +424,23 @@ function PlantPopup({
             </div>
             <div className="sku-info-div">
                 <div className="half">
-                    <InputText
+                    <TextField
                         label="Plant Code"
-                        type="text"
                         value={code}
-                        valueFunc={setCode}
+                        onChange={e => setCode(e.target.value)}
                     />
                     {getInput('size', 'Size', size, setSize, false)}
                 </div>
                 <div className="half">
-                    <InputText
+                    <TextField
                         label="Price"
-                        type="text"
                         value={price}
-                        valueFunc={setPrice}
+                        onChange={e => setPrice(e.target.value)}
                     />
-                    <InputText
-                        label="Quanity"
-                        type="text"
+                    <TextField
+                        label="Quantity"
                         value={quantity}
-                        valueFunc={setQuantity}
+                        onChange={e => setQuantity(e.target.value)}
                     />
                 </div>
             </div>

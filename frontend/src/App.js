@@ -12,6 +12,7 @@ import { checkCookies } from 'query/http_promises';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
+import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -86,22 +87,24 @@ function App() {
     }, [session])
 
     return (
-        <div id="App">
-            <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-            <CssBaseline />
-            {/* Other theming (default TextField variants, button text styling, etc) */}
-            <ThemeProvider theme={theme}>
-                <main id="page-container" className={classes.pageContainer}>
-                    <div id="content-wrap" className={classes.contentWrap}>
-                        <Navbar session={session} user_roles={user_roles} cart={cart} />
-                        <Spinner spinning={false} />
-                        <Routes session={session} user_roles={user_roles} />
-                    </div>
-                    <IconNav cart={cart} />
-                    <Footer />
-                </main>
-            </ThemeProvider>
-        </div>
+        <StyledEngineProvider injectFirst>
+            <div id="App">
+                <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+                <CssBaseline />
+                {/* Other theming (default TextField variants, button text styling, etc) */}
+                <ThemeProvider theme={theme}>
+                    <main id="page-container" className={classes.pageContainer}>
+                        <div id="content-wrap" className={classes.contentWrap}>
+                            <Navbar session={session} user_roles={user_roles} cart={cart} />
+                            <Spinner spinning={false} />
+                            <Routes session={session} user_roles={user_roles} />
+                        </div>
+                        <IconNav cart={cart} />
+                        <Footer />
+                    </main>
+                </ThemeProvider>
+            </div>
+        </StyledEngineProvider>
     );
 }
 

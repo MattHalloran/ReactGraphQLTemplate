@@ -65,7 +65,7 @@ function ForgotPasswordForm() {
             >
                 Submit
             </Button>
-            <Grid container justify="flex-end">
+            <Grid container justifyContent="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
                         <Typography component="body2">

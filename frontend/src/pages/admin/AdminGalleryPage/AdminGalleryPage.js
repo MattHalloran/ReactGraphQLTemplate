@@ -1,64 +1,97 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
-import { StyledAdminGalleryPage } from './AdminGalleryPage.styled';
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
 import { getSession } from 'utils/storage';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import FileUpload from 'components/FileUpload/FileUpload';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { moveArrayIndex, deleteArrayIndex } from 'utils/arrayTools';
-import { XIcon, NoImageIcon } from 'assets/img';
+import { NoImageIcon } from 'assets/img';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
+import { makeStyles } from '@material-ui/core/styles';
+import { Table, TableBody, TableCell, TableContainer, TableRow, TextField, Paper, Checkbox } from '@material-ui/core';
+import EnhancedTableHead from 'components/EnhancedTableHead/EnhancedTableHead';
+import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableToolbar';
+import { updateArray } from 'utils/arrayTools';
+import GalleryCard from 'components/GalleryCard/GalleryCard';
+import { DataUsageRounded } from '@material-ui/icons';
+
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        width: '100%',
+        marginBottom: theme.spacing(2),
+        background: theme.palette.background.paper,
+    },
+    header: {
+        textAlign: 'center',
+    },
+    table: {
+        minWidth: 750,
+    },
+    image: {
+        maxHeight: 100,
+    },
+    visuallyHidden: {
+        border: 0,
+        clip: 'rect(0 0 0 0)',
+        height: 1,
+        margin: -1,
+        overflow: 'hidden',
+        padding: 0,
+        position: 'absolute',
+        top: 20,
+        width: 1,
+    },
+    cardFlex: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+        alignItems: 'stretch',
+    },
+}));
 
 // Sortable element steals the index parameter, so we must use i instead
-const SortableItem = SortableElement(({ i, value, deleteRow }) => {
-    let display_image;
-    if (value.src) {
-        display_image = <img src={value.src} className="cart-image" alt={value.alt} />
-    } else {
-        display_image = <NoImageIcon className="cart-image" />
-    }
+const SortableItem = SortableElement(({ i, row, onUpdate, onDelete }) => (
+    <GalleryCard
+        index={i}
+        src={row.src}
+        alt={row.alt}
+        description={row.description}
+        onUpdate={onUpdate}
+        onDelete={onDelete} />
+));
 
-    return (<tr>
-        <td><div className="product-row">
-            <XIcon width="30px" height="30px" onClick={() => deleteRow(i)} />
-            {display_image}
-        </div></td>
-        <td>{value.alt}</td>
-        <td>TODO</td>
-    </tr>);
-});
-
-const SortableList = SortableContainer(({ data, deleteRow }) => {
+const SortableList = SortableContainer(({ data, onUpdate, onDelete }) => {
+    const classes = useStyles();
     return (
-        <table className="cart-table no-select">
-            <thead>
-                <tr>
-                    <th style={{ width: '25%' }}>Image</th>
-                    <th style={{ width: '25%' }}>Tag</th>
-                    <th style={{ width: '50%' }}>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data?.map((value, index) => <SortableItem key={`item-${index}`} index={index} i={index} value={value} deleteRow={deleteRow} />)}
-            </tbody>
-        </table>
+        <div className={classes.cardFlex}>
+            {data.map((row, index) =>
+                <SortableItem
+                    key={`item-${index}`}
+                    index={index} i={index}
+                    row={row}
+                    onUpdate={onUpdate}
+                    onDelte={onDelete} />)}
+        </div>
     );
 });
 
-function SortableComponent({ data, onSortEnd, deleteRow }) {
+function SortableComponent({ data, onSortEnd, onUpdate, onDelete }) {
     return (
-        <SortableList distance={10} data={data} onSortEnd={onSortEnd} deleteRow={deleteRow} />
+        <SortableList
+            distance={10}
+            data={data}
+            onSortEnd={onSortEnd}
+            onUpdate={onUpdate}
+            onDelete={onDelete} />
     );
 }
 
-
 function AdminGalleryPage() {
+    const classes = useStyles();
     const [session, setSession] = useState(getSession());
-    const [selected, setSelected] = useState([]);
-    const [thumbnails, setThumbnails] = useState([]);
-    const images_meta = useRef([]);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [data, setData] = useState([]);
 
     useLayoutEffect(() => {
         document.title = "Edit Gallery";
@@ -69,37 +102,33 @@ function AdminGalleryPage() {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         getGallery().then(response => {
             if (!mounted) return;
-            images_meta.current = response.images_meta ?? [];
-            if (images_meta.current.length > 0) {
+            let response_meta = response.images_meta ?? [];
+            if (response_meta.length > 0) {
                 //Grab all thumbnail images
-                let ids = images_meta.current.map(meta => meta.id)
+                let ids = response_meta.map(meta => meta.id);
+                let data = [];
                 getImages(ids, 'm').then(response => {
-                    let combined_data = [];
                     //Combine metadata with thumbnail images
                     for (let i = 0; i < ids.length; i++) {
-                        let meta = images_meta.current[thumbnails.length + i];
+                        let meta = response_meta[i];
                         if (!meta) {
-                            console.log('META IS EMPTY', images_meta.current, i);
+                            console.log('META IS EMPTY', response_meta, i);
                             continue;
                         }
                         let img = response.images[i];
-                        let new_data = {
-                            "key": meta.id,
-                            "src": `data:image/jpeg;base64,${img}`,
-                            "alt": meta.alt,
-                        };
-                        // Prevent identical images from being added multiple times, if checks
-                        // up to this point have failed
-                        if (!images_meta.current.some(d => d.key === new_data.key)) {
-                            combined_data.push(new_data);
-                        }
+                        data.push({
+                            'key': meta.id,
+                            'src': `data:image/jpeg;base64,${img}`,
+                            'alt': meta.alt,
+                            'description': 'TODO',
+                        });
                     }
-                    setThumbnails(combined_data);
+                    setData(data);
                 }).catch(error => {
-                    console.error("Failed to load thumbnails!", error);
+                    console.error("Failed to load gallery data!", error);
                 });
             } else {
-                setThumbnails([]);
+                setData([]);
             }
         }).catch(error => {
             console.error("Failed to load gallery pictures!", error);
@@ -111,21 +140,13 @@ function AdminGalleryPage() {
         })
     }, [])
 
-    const deleteRow = (index) => {
-        if (index < 0) {
-            alert(`Error: Invalid index: ${index}`);
-            return;
-        }
-        setThumbnails(items => deleteArrayIndex(items, index))
-    }
-
     const onSortEnd = ({ oldIndex, newIndex }) => {
-        setThumbnails(items => moveArrayIndex(items, oldIndex, newIndex));
+        setData(d => moveArrayIndex(d, oldIndex, newIndex));
     };
 
     const fileSelectedHandler = (event) => {
         let newImages = event.target.files;
-        setSelected([]);
+        setSelectedFiles([]);
         for (let i = 0; i < newImages.length; i++) {
             let fileSplit = newImages[i].name.split('.');
             processImage(newImages[i], fileSplit[0], fileSplit[1]);
@@ -141,18 +162,18 @@ function AdminGalleryPage() {
                 extension: extension,
                 data: reader.result
             };
-            setSelected(images => [...images, imageData])
+            setSelectedFiles(images => [...images, imageData])
         }
         reader.readAsDataURL(file);
     }
 
     const uploadImages = useCallback(() => {
-        if (selected.length <= 0) {
+        if (selectedFiles.length <= 0) {
             alert('No images selected!');
             return;
         }
         let form = new FormData();
-        selected.forEach(img => {
+        selectedFiles.forEach(img => {
             form.append('name', img.name);
             form.append('extension', img.extension);
             form.append('image', img.data);
@@ -163,10 +184,15 @@ function AdminGalleryPage() {
             console.error(error);
             alert('Error uploading images!');
         });
-    }, [selected])
+    }, [selectedFiles])
 
-    const applyChanges = () => {
-        updateGallery(session, thumbnails.map(t => {return {id: t.key, alt: t.alt, description: t.description}}))
+    const applyChanges = useCallback(() => {
+        let gallery_data = data.map(d => ({
+            'id': d.key,
+            'alt': d.alt,
+            'description': d.description,
+        }));
+        updateGallery(session, gallery_data)
             .then(() => {
                 alert('Gallery updated!');
             })
@@ -174,40 +200,43 @@ function AdminGalleryPage() {
                 console.error(err);
                 alert('Error: Gallery failed to update!');
             })
-    }
+    }, [data])
+
+    const updateRow = useCallback((rowIndex, columnName, value) => {
+        // if (rowIndex < 0 || rowIndex >= state.keys.length) return;
+        // console.log('UPDATING ROW!', rowIndex, columnName, value);
+        // setState(state => ({
+        //     ...state,
+        //     [columnName]: updateArray(state[columnName], rowIndex, value),
+        // }));
+    }, [data])
+
+    const deleteRow = useCallback(() => {
+
+    }, [])
 
     return (
-        <StyledAdminGalleryPage id="page">
-            <h1>Gallery Edit</h1>
+        <div id='page' className={classes.root}>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Gallery Edit</Typography>
+            </div>
             <div>
                 <h2>Select image(s) for upload</h2>
                 <FileUpload selectText="Select" uploadText="Upload" onUploadClick={uploadImages} onUploadChange={fileSelectedHandler} multiple />
             </div>
             <h2>Reorder and delete images</h2>
-            <div>
-                <SortableComponent data={thumbnails} deleteRow={deleteRow} onSortEnd={onSortEnd} />
-            </div>
             <Button onClick={applyChanges}>Apply Changes</Button>
-        </StyledAdminGalleryPage>
-    );
-}
-
-AdminGalleryPage.propTypes = {
-}
-
-export default AdminGalleryPage;
-
-function ImageCard({
-    b64,
-}) {
-    return (
-        <div>
-            <img src={`data:image/jpeg;base64,${b64}`} width="100px" height="100px" />
-            <Button />
+            <SortableComponent
+                data={data}
+                onSortEnd={onSortEnd}
+                onUpdate={updateRow}
+                onDelete={deleteRow} />
         </div>
     );
 }
 
-ImageCard.propTypes = {
-    b64: PropTypes.object.isRequired
+AdminGalleryPage.propTypes = {
+
 }
+
+export default AdminGalleryPage;

@@ -82,7 +82,7 @@ function Footer({
     const classes = useStyles();
     return (
         <div className={classes.root}>
-            <Grid container justify='center' spacing={1}>
+            <Grid container justifyContent='center' spacing={1}>
                 <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="a" href={LINKS.About} >

@@ -842,9 +842,11 @@ class Business(db.Model):
     discounts = db.relationship('BusinessDiscount', secondary=businessDiscounts, backref='businesses')
     # -------------End relationships----------------
 
-    def __init__(self, name: str, email: Email, phone: Phone, subscribed_to_newsletters: bool):
-        self.emails.append(email)
-        self.phones.append(phone)
+    def __init__(self, name: str, email: Email = None, phone: Phone = None, subscribed_to_newsletters: bool = False):
+        if email:
+            self.emails.append(email)
+        if phone:
+            self.phones.append(phone)
         self.name = name
         self.subscribed_to_newsletters = subscribed_to_newsletters
 

@@ -1,7 +1,7 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { StyledShoppingPage } from './ShoppingPage.styled';
-import SearchBar from '../SearchBar/SearchBar';
+import SearchBar from '../../../components/SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";

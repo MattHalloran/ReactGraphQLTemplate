@@ -225,7 +225,7 @@ function SignUpForm() {
                 <Grid item xs={12}>
                     <FormControlLabel
                         control={<Checkbox value="allowExtraEmails" color="primary" onChange={handleCheckbox} />}
-                        label="I want to receive inspiration, marketing promotions and updates via email."
+                        label="I want to receive marketing promotions and updates via email."
                     />
                 </Grid>
             </Grid>
@@ -238,7 +238,7 @@ function SignUpForm() {
             >
                 Sign Up
             </Button>
-            <Grid container justify="flex-end">
+            <Grid container justifyContent="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
                         <Typography component="body2">

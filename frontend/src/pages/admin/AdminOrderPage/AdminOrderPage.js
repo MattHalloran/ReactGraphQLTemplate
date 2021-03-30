@@ -1,18 +1,24 @@
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { StyledAdminOrderPage, StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
-import { getSession, getItem } from 'utils/storage';
+import { StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
+import { getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import { Button } from '@material-ui/core';
 import Cart from 'components/Cart/Cart';
 import { updateCart, setOrderStatus } from 'query/http_promises';
-import { updateObject } from 'utils/objectTools';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
-import CustomerInfo from 'components/CustomerInfo/CustomerInfo';
-import PopupMenu from 'components/PopupMenu/PopupMenu';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    cardFlex: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, .5fr))',
+        gridGap: '20px',
+    },
+}));
 
 const ORDER_STATES = [
     {
@@ -54,6 +60,7 @@ const ORDER_STATES = [
 ]
 
 function AdminOrderPage() {
+    const classes = useStyles();
     const [session, setSession] = useState(getSession());
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     const [orders, setOrders] = useState([]);
@@ -85,17 +92,15 @@ function AdminOrderPage() {
     ) : null;
 
     return (
-        <StyledAdminOrderPage className="page">
+        <div id="page">
             {popup}
-            <div className="content">
-                <h2>Sort By</h2>
-                <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
-                <h3>Count: {orders?.length ?? 0}</h3>
-                <div className="card-flex">
-                    {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
-                </div>
+            <h2>Sort By</h2>
+            <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
+            <h3>Count: {orders?.length ?? 0}</h3>
+            <div className={classes.cardFlex}>
+                {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
             </div>
-        </StyledAdminOrderPage >
+        </div >
     );
 }
 
@@ -193,8 +198,6 @@ function OrderPopup({
                 <Button onClick={updateOrder}>Update Order</Button>
                 <Button onClick={approveOrder}>Approve</Button>
                 <Button onClick={denyOrder}>Deny</Button>
-                <PopupMenu obj={<Button>Contact</Button>}
-                menu={<CustomerInfo customer={order.customer}/>} />
             </div>
         </StyledOrderPopup>
     );

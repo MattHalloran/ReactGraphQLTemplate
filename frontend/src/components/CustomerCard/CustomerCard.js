@@ -32,6 +32,7 @@ function CustomerCard({
     id,
     first_name,
     last_name,
+    business,
     pronouns = DEFAULT_PRONOUNS[3],
     account_status = ACCOUNT_STATUS.Deleted,
     emails = null,
@@ -60,6 +61,11 @@ function CustomerCard({
     const view_orders = () => {
         console.log('TODOOO');
         alert('Coming soon!');
+    }
+
+    const edit = () => {
+        console.log('TODOOOO');
+        alert('Coming soon!')
     }
 
     const approve_user = () => {
@@ -107,13 +113,14 @@ function CustomerCard({
             });
     };
 
-    let orders_action = [view_orders, 'View Orders'];
+    let orders_action = [view_orders, 'Orders'];
+    let edit_action = [edit, 'Edit']
     let approve_action = [approve_user, 'Approve'];
     let unlock_action = [unlock_user, 'Unlock'];
     let lock_action = [lock_user, 'Lock'];
     let delete_action = [delete_user, 'Delete'];
 
-    let actions = [orders_action];
+    let actions = [orders_action, edit_action];
     switch (account_status) {
         case ACCOUNT_STATUS.Unlocked:
             actions.push(lock_action);
@@ -163,6 +170,7 @@ function CustomerCard({
                     {first_name} {last_name}
                 </Typography>
                 <p>Status: {status_map(account_status)[0]}</p>
+                <p>Business: {business.name}</p>
                 <p>Pronouns: {pronouns}</p>
                 {phoneChips}
                 {emailChips}
@@ -184,6 +192,7 @@ CustomerCard.propTypes = {
     id: PropTypes.number.isRequired,
     first_name: PropTypes.string.isRequired,
     last_name: PropTypes.string.isRequired,
+    business: PropTypes.object.isRequired,
     pronouns: PropTypes.string,
     account_status: PropTypes.number.isRequired,
     emails: PropTypes.array,

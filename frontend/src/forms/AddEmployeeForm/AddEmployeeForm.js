@@ -227,7 +227,7 @@ function AddEmployeeForm() {
                 <Grid item xs={12}>
                     <FormControlLabel
                         control={<Checkbox value="allowExtraEmails" color="primary" onChange={handleCheckbox} />}
-                        label="I want to receive inspiration, marketing promotions and updates via email."
+                        label="I want to receive marketing promotions and updates via email."
                     />
                 </Grid>
             </Grid>
@@ -240,7 +240,7 @@ function AddEmployeeForm() {
             >
                 Sign Up
             </Button>
-            <Grid container justify="flex-end">
+            <Grid container justifyContent="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
                         Already have an account? Sign in

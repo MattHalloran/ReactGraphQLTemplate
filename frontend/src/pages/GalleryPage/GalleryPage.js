@@ -8,11 +8,11 @@ import { getGallery, getImages, getImage } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { GridList, GridListTile } from '@material-ui/core';
+import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-    gridList: {
+    imageList: {
         spacing: 0,
     },
     tileImg: {
@@ -44,13 +44,13 @@ function ImageGridList({
 }) {
     const classes = useStyles();
     return (
-        <GridList cellHeight={300} className={classes.gridList} cols={Math.round(window.innerWidth/300)} spacing={1} {...props}>
+        <ImageList cellHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth/300)} spacing={1} {...props}>
             {data.map((tile) => (
-                <GridListTile key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
+                <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
                     <img className={classes.tileImg} src={tile.img} alt={tile.title} />
-                </GridListTile>
+                </ImageListItem>
             ))}
-        </GridList>
+        </ImageList>
     );
 }
 

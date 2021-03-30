@@ -246,10 +246,10 @@ class BusinessHandler(Handler):
     def to_dict(cls, model: Business) -> dict:
         model = cls.convert_to_model(model)
         as_dict = BusinessHandler.simple_fields_to_dict(model, ['name', 'subscribed_to_newsletters'])
-        as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
-        as_dict['employees'] = UserHandler.all_dicts(model.employees)
-        as_dict['phones'] = PhoneHandler.all_dicts(model.phones)
-        as_dict['emails'] = EmailHandler.all_dicts(model.emails)
+        #as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
+        #as_dict['employees'] = UserHandler.all_dicts(model.employees)
+        #as_dict['phones'] = PhoneHandler.all_dicts(model.phones)
+        #as_dict['emails'] = EmailHandler.all_dicts(model.emails)
         return as_dict
 
     @staticmethod
@@ -954,6 +954,11 @@ class UserHandler(Handler):
             obj.last_name = last_name
         if pronouns := data.get('pronouns', None):
             obj.pronouns = pronouns
+        if business := data.get('business', None):
+            bizz_obj = BusinessHandler.create(business)
+            db.session.add(bizz_obj)
+            db.session.commit()
+            obj.business_id = bizz_obj.id
         obj.theme = data.get('theme', obj.theme)
         if emails := data.get('emails', None):
             success = cls.update_relationship_list(obj.personal_email, EmailHandler, emails) and success
@@ -982,6 +987,7 @@ class UserHandler(Handler):
         as_dict['id'] = model.id
         as_dict['tag'] = model.tag
         as_dict['account_status'] = model.account_status
+        as_dict['business'] = BusinessHandler.to_dict(model.business_id)
         as_dict['roles'] = RoleHandler.all_dicts(model.roles)
         as_dict['emails'] = EmailHandler.all_dicts(model.personal_email)
         as_dict['phones'] = PhoneHandler.all_dicts(model.personal_phone)

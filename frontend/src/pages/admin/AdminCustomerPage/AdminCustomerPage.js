@@ -54,7 +54,7 @@ function AdminCustomerPage() {
     const onCustomersUpdate = (customers) => {
         setCustomers(customers);
     }
-
+    
     return (
         <div id="page">
             <div className={classes.header}>

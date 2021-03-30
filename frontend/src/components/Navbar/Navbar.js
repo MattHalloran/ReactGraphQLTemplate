@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '5px',
         marginBottom: '5px',
         marginRight: 'auto',
-        background: theme.palette.type === 'light' ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)',
+        background: theme.palette.mode === 'light' ? '#0c3a0b' : 'radial-gradient(circle at center, #757565 0, #757565, white 100%)',
         borderRadius: '500px',
         minHeight: '50px',
         minWidth: '50px',
