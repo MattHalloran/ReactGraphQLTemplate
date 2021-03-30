@@ -11,6 +11,7 @@ import { updateCart, setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
+import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
@@ -94,6 +95,7 @@ function AdminOrderPage() {
     return (
         <div id="page">
             {popup}
+            <AdminBreadcrumbs />
             <h2>Sort By</h2>
             <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
             <h3>Count: {orders?.length ?? 0}</h3>

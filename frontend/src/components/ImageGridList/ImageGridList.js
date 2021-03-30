@@ -91,7 +91,7 @@ ImageGridList.propTypes = {
     data: PropTypes.array.isRequired,
     cellHeight: PropTypes.number,
     sortable: PropTypes.bool,
-    onClick: PropTypes.func.
+    onClick: PropTypes.func
 }
 
 export default ImageGridList;

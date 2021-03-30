@@ -4,7 +4,7 @@ import { clearStorage, getSession, getRoles } from 'utils/storage';
 import ContactInfo from 'components/ContactInfo/ContactInfo';
 import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
-import { Container, Button, IconButton, Badge } from '@material-ui/core';
+import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PopupMenu from 'components/PopupMenu/PopupMenu';
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,6 +12,9 @@ import { useHistory } from 'react-router-dom';
 import getUserActions from 'utils/userActions';
 import _ from 'underscore';
 import { updateArray } from 'utils/arrayTools';
+import InfoIcon from '@material-ui/icons/Info';
+import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
+import HomeIcon from '@material-ui/icons/Home';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     contact: {
         width: '300px',
         height: '300px',
-    }
+    },
 }));
 
 function NavList(props) {
@@ -68,11 +71,24 @@ function NavList(props) {
         );
     }
 
-    let about_options = [['About Us', 'about', () => history.push(LINKS.About)],
-        ['Contact Us', 'contact', () => history.push(LINKS.Contact)],
-        ['Gallery', 'gallery', () => history.push(LINKS.Gallery)]];
+    let about_options = [
+        ['About Us', 'about', LINKS.About, null, InfoIcon],
+        ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
+    ]
 
-    const options_to_menu = (options) => {
+    const optionsToList = (options) => {
+        return options.map(([label, value, link, onClick, Icon], index) => (
+            <ListItem className={classes.menuItem} button key={index} onClick={() => { history.push(link); if (onClick) onClick() }}>
+                {Icon ?
+                    (<ListItemIcon>
+                            <Icon className={classes.menuIcon} />
+                    </ListItemIcon>) : null}
+                <ListItemText primary={label} />
+            </ListItem>
+        ))
+    }
+
+    const optionsToMenu = (options) => {
         return options.map(([label, value, link, onClick], index) => (
             <Button
                 key={index}
@@ -102,9 +118,11 @@ function NavList(props) {
                 size="large"
                 className={classes.navItem}
             >
-                {options_to_menu(about_options)}
+                <List>
+                    {optionsToList(about_options)}
+                </List>
             </PopupMenu>
-            {options_to_menu(nav_options)}
+            {optionsToMenu(nav_options)}
             {cart}
         </Container>
     );

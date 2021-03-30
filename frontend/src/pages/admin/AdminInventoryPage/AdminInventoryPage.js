@@ -20,6 +20,7 @@ import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 import PlantCard from 'components/PlantCard/PlantCard';
 import { TextField } from '@material-ui/core';
+import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
@@ -183,6 +184,7 @@ function AdminInventoryPage() {
     return (
         <StyledAdminInventoryPage id="page">
             {popup}
+            <AdminBreadcrumbs />
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>
             <ul>

@@ -7,6 +7,7 @@ import { PubSub } from 'utils/pubsub';
 import CustomerCard from 'components/CustomerCard/CustomerCard';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
+import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -57,6 +58,7 @@ function AdminCustomerPage() {
     
     return (
         <div id="page">
+            <AdminBreadcrumbs />
             <div className={classes.header}>
                 <Button onClick={new_user}>New Customer</Button>
             </div>

@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
-import { BUSINESS_NAME } from 'utils/consts';
-import { Typography } from '@material-ui/core';
+import { BUSINESS_NAME, LINKS } from 'utils/consts';
+import { Typography, Breadcrumbs, Link } from '@material-ui/core';
 
 function TermsPage() {
 
@@ -10,7 +10,11 @@ function TermsPage() {
 
     return (
         <div id="page">
-            <Typography variant="h2">Order Terms</Typography>
+            <Breadcrumbs separator="|" aria-label="Policies breadcrumb">
+                <Link href={LINKS.PrivacyPolicy}>Privacy</Link>
+                <Link href={LINKS.Terms}>{'Terms & Conditions'}</Link>
+            </Breadcrumbs>
+            <Typography variant="h3">Order Terms</Typography>
             <ul>
                 <li>Our prices are based on current market conditions and are subject to change without notice.</li>
                 <li>ORDERS THAT INVOLVE REMOVAL FROM OTHER NURSERY LOCATIONS REQUIRE A 50% DEPOSIT UP FRONT.</li>
@@ -24,7 +28,7 @@ function TermsPage() {
                 <li>Order cancellations or revisions must be made no later than 30 days before scheduled delivery and must be signed by both parties.</li>
                 <li>All orders are subject to stock on hand, crop conditions, and acts of nature beyond our control.</li>
             </ul>
-            <Typography variant="h2">Payment Terms</Typography>
+            <Typography variant="h3">Payment Terms</Typography>
             <ul>
                 <li>All new accounts are C.O.D only and must pay in cash or certified check upon delivery. In the event that an account is referred to an attorney for collection, the purchaser agrees to pay all costs, including attorney’s fees.</li>
                 <li>Invoices paid by credit card are subject to a 3% surcharge.</li>
@@ -32,7 +36,7 @@ function TermsPage() {
                 <li>Unpaid and past due accounts will require pre-payments on future orders.</li>
                 <li>Seller reserves the right to refuse shipment to customers whose account balances are 30 days beyond terms.</li>
             </ul>
-            <Typography variant="h2">Shipping Terms</Typography>
+            <Typography variant="h3">Shipping Terms</Typography>
             <ul>
                 <li>All plants travel at the expense and risk of the purchaser. We are not liable for material damaged while unloading or after delivery.</li>
                 <li>Please report claims within 48 hours of delivery. Damaged material must be returned to carrier in order to receive credit. Short counts and/or transit damage must be noted on the original invoice before the truck departs your location, and must be clearly noted with driver’s signature.</li>

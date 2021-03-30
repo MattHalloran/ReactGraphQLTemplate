@@ -8,7 +8,7 @@ import { getGallery, getImages, getImage } from 'query/http_promises';
 import Modal from 'components/wrappers/Modal/Modal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { ImageList, ImageListItem } from '@material-ui/core';
+import { ImageList, ImageListItem, Breadcrumbs, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -229,6 +229,10 @@ function GalleryPage() {
     return (
         <div id='page'>
             {popup}
+            <Breadcrumbs separator="|" aria-label="About us breadcrumb">
+                <Link href={LINKS.About}>About Us</Link>
+                <Link href={LINKS.Gallery}>Gallery</Link>
+            </Breadcrumbs>
             <ImageGridList data={thumbnails} onClick={openImage} />
         </div>
     );

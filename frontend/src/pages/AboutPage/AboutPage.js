@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, LINKS } from 'utils/consts';
+import { Breadcrumbs, Link } from '@material-ui/core';
 
 function AboutPage() {
     useLayoutEffect(() => {
@@ -8,6 +9,10 @@ function AboutPage() {
     })
     return (
         <div id='page'>
+            <Breadcrumbs separator="|" aria-label="About us breadcrumb">
+                <Link href={LINKS.About}>About Us</Link>
+                <Link href={LINKS.Gallery}>Gallery</Link>
+            </Breadcrumbs>
             <div className="header">
                 <h1>About {BUSINESS_NAME}</h1>
             </div>

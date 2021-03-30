@@ -16,6 +16,7 @@ import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableT
 import { updateArray } from 'utils/arrayTools';
 import GalleryCard from 'components/GalleryCard/GalleryCard';
 import { DataUsageRounded } from '@material-ui/icons';
+import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -217,6 +218,7 @@ function AdminGalleryPage() {
 
     return (
         <div id='page' className={classes.root}>
+            <AdminBreadcrumbs />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Gallery Edit</Typography>
             </div>

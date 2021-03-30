@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import AdminBreadcrumbs from 'pages/admin/AdminBreadcrumbs/AdminBreadcrumbs';
 import PropTypes from 'prop-types';
 
 function AdminContactPage() {
@@ -7,7 +8,7 @@ function AdminContactPage() {
     })
     return (
         <div itemID="page">
-
+            <AdminBreadcrumbs />
         </div>
     );
 }
