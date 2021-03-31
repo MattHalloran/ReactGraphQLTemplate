@@ -1,16 +1,7 @@
 import PropTypes from 'prop-types';
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
-import PubSub from 'utils/pubsub';
-import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
-import { getGallery, getImages, getImage } from 'query/http_promises';
-import Modal from 'components/wrappers/Modal/Modal';
-import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
 import { ImageList, ImageListItem } from '@material-ui/core';
-import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import { SortableContainer } from 'react-sortable-hoc';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({

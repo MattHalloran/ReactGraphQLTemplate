@@ -4,28 +4,39 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
+import { StyledAdminInventoryPage, StyledPlantPopup } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
-import Modal from 'components/wrappers/Modal/Modal';
+import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
 import { Button } from '@material-ui/core';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { getSession } from 'utils/storage';
 import DropDown from 'components/inputs/DropDown/DropDown';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
 import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 import PlantCard from 'components/PlantCard/PlantCard';
-import { TextField } from '@material-ui/core';
+import { TextField, Tabs, Tab, AppBar } from '@material-ui/core';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import TabPanel from 'components/TabPanel/TabPanel';
+import { DropzoneArea } from 'material-ui-dropzone';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+   toggleBar: {
+       background: theme.palette.primary.light,
+       color: theme.palette.primary.contrastText,
+   },
+}));
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
+    const classes = useStyles();
+    const [currTab, setCurrTab] = useState(0);
     const [session, setSession] = useState(getSession());
     // Holds the selected availability file, if uploading one
     const [selected, setSelected] = useState(null);
@@ -135,6 +146,14 @@ function AdminInventoryPage() {
     //         });
     // }
 
+    const fileSelectedHandler = (files) => {
+        if (files.length > 0) {
+            processFile(files[0]);
+        } else {
+            setSelected(null);
+        }
+    }
+
     const processFile = (file) => {
         let reader = new FileReader();
         reader.onloadend = () => {
@@ -142,17 +161,6 @@ function AdminInventoryPage() {
             setSelected(fileData);
         }
         reader.readAsDataURL(file);
-    }
-
-    // Processes a single file
-    const fileSelectedHandler = (event) => {
-        let files = event.target.files;
-        let extension = files[0].name.split('.')[1];
-        if (extension !== 'xls') {
-            alert('File must have the extension .xls');
-            return;
-        }
-        processFile(files[0]);
     }
 
     const sendAvailability = () => {
@@ -175,15 +183,11 @@ function AdminInventoryPage() {
         setAllSortBy(sort_item.value);
     }
 
-    let popup = (currPlant) ? (
-        <Modal onClose={() => setCurrPlant(null)}>
-            <PlantPopup session={session} plant={currPlant} trait_options={trait_options} />
-        </Modal>
-    ) : null;
-
     return (
         <StyledAdminInventoryPage id="page">
-            {popup}
+            <Modal open={currPlant !== null} onClose={() => setCurrPlant(null)}>
+                <PlantPopup session={session} plant={currPlant} trait_options={trait_options} />
+            </Modal>
             <AdminBreadcrumbs />
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>
@@ -196,11 +200,21 @@ function AdminInventoryPage() {
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
-            <div>
-                Upload Spreadsheet<FileUpload onUploadClick={sendAvailability} onUploadChange={fileSelectedHandler} />
-            </div>
-
-            <Collapsible title="Plants with active SKUs">
+            <DropzoneArea
+                acceptedFiles={['.xls']}
+                dropzoneText={"Drag and drop availability file here or click"}
+                onChange={fileSelectedHandler}
+                showAlerts={false}
+                filesLimit={1}
+            />
+            <Button onClick={sendAvailability}>Upload Availability</Button>
+            <AppBar className={classes.toggleBar} position="static">
+                <Tabs value={currTab} onChange={(_, value) => setCurrTab(value)} aria-label="simple tabs example">
+                    <Tab label="Plants with active SKUs" id='plants-with-active-skus-tab' aria-controls='plants-tabpanel-1' />
+                    <Tab label="Plants without active SKUs" id='plants-without-active-skus-tab' aria-controls='plants-tabpanel-2' />
+                </Tabs>
+            </AppBar>
+            <TabPanel value={currTab} index={0}>
                 <h2>Sort</h2>
                 <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
                 <div className="card-flex">
@@ -209,8 +223,8 @@ function AdminInventoryPage() {
                         onClick={() => setCurrPlant(plant)}
                         thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
-            </Collapsible>
-            <Collapsible title="Plants without active SKUs">
+            </TabPanel>
+            <TabPanel value={currTab} index={1}>
                 <h2>Sort</h2>
                 <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
                 <div className="card-flex">
@@ -219,7 +233,7 @@ function AdminInventoryPage() {
                         onClick={() => setCurrPlant(plant)}
                         thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
-            </Collapsible>
+            </TabPanel>
         </StyledAdminInventoryPage >
     );
 }

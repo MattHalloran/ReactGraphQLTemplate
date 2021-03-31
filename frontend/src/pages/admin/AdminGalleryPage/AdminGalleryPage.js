@@ -1,22 +1,16 @@
 import { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
 import { getSession } from 'utils/storage';
 import { Button, Typography } from '@material-ui/core';
 import FileUpload from 'components/FileUpload/FileUpload';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
-import { moveArrayIndex, deleteArrayIndex } from 'utils/arrayTools';
-import { NoImageIcon } from 'assets/img';
+import { moveArrayIndex } from 'utils/arrayTools';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
-import { Table, TableBody, TableCell, TableContainer, TableRow, TextField, Paper, Checkbox } from '@material-ui/core';
-import EnhancedTableHead from 'components/EnhancedTableHead/EnhancedTableHead';
-import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableToolbar';
-import { updateArray } from 'utils/arrayTools';
 import GalleryCard from 'components/GalleryCard/GalleryCard';
-import { DataUsageRounded } from '@material-ui/icons';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import { DropzoneArea } from 'material-ui-dropzone';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -145,12 +139,11 @@ function AdminGalleryPage() {
         setData(d => moveArrayIndex(d, oldIndex, newIndex));
     };
 
-    const fileSelectedHandler = (event) => {
-        let newImages = event.target.files;
+    const fileSelectedHandler = (files) => {
         setSelectedFiles([]);
-        for (let i = 0; i < newImages.length; i++) {
-            let fileSplit = newImages[i].name.split('.');
-            processImage(newImages[i], fileSplit[0], fileSplit[1]);
+        for (let i = 0; i < files.length; i++) {
+            let fileSplit = files[i].name.split('.');
+            processImage(files[i], fileSplit[0], fileSplit[1]);
         }
     }
 
@@ -222,10 +215,15 @@ function AdminGalleryPage() {
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Gallery Edit</Typography>
             </div>
-            <div>
-                <h2>Select image(s) for upload</h2>
-                <FileUpload selectText="Select" uploadText="Upload" onUploadClick={uploadImages} onUploadChange={fileSelectedHandler} multiple />
-            </div>
+            <h2>Upload new images</h2>
+            <DropzoneArea
+                acceptedFiles={['image/*']}
+                dropzoneText={"Drag and drop new images here or click"}
+                onChange={fileSelectedHandler}
+                showAlerts={false}
+                filesLimit={100}
+            />
+            <Button onClick={uploadImages}>Upload Images</Button>
             <h2>Reorder and delete images</h2>
             <Button onClick={applyChanges}>Apply Changes</Button>
             <SortableComponent

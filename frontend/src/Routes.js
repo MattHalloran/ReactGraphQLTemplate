@@ -25,7 +25,7 @@ import ForgotPasswordForm from 'forms/ForgotPasswordForm/ForgotPasswordForm';
 
 function Routes({
     session,
-    user_roles
+    user_roles,
 }) {
     return (
         <Switch>
@@ -34,7 +34,7 @@ function Routes({
             <Route path="/sitemap" component={Sitemap}/>
             <Route exact path={LINKS.About} component={AboutPage} sitemapIndex={true} priority={0.7} />
             <Route exact path={LINKS.PrivacyPolicy} component={PrivacyPolicyPage} sitemapIndex={true} priority={0.1} />
-            <Route exact path={LINKS.Terms} component={TermsPage} sitemapIndex={true} sitemapIndex={0.1} />
+            <Route exact path={LINKS.Terms} component={TermsPage} sitemapIndex={true} priority={0.1} />
             <Route exact path={`${LINKS.Gallery}/:img?`} component={GalleryPage} sitemapIndex={true} priority={0.3} />
             <Route exact path={LINKS.Register} sitemapIndex={true} priority={0.9} render={() => (
                 <FormPage header="Sign Up" maxWidth="700px">
@@ -103,8 +103,8 @@ function Routes({
 }
 
 Routes.propTypes = {
-    session: PropTypes.object.isRequired,
-    user_roles: PropTypes.object.isRequired
+    session: PropTypes.object,
+    user_roles: PropTypes.object,
 }
 
 export default Routes;

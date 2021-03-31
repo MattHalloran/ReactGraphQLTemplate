@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryImage } from './GalleryPage.styled';
 import { getGallery, getImages, getImage } from 'query/http_promises';
-import Modal from 'components/wrappers/Modal/Modal';
+import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
 import { ImageList, ImageListItem } from '@material-ui/core';

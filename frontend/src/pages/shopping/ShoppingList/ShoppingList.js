@@ -5,7 +5,7 @@ import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./Shop
 import { getImages, getImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
-import Modal from "components/wrappers/Modal/Modal";
+import Modal from "components/wrappers/StyledModal/StyledModal";
 import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';

@@ -1,5 +1,4 @@
 import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
 import { BUSINESS_NAME } from 'utils/consts';
 import InformationalBreadcrumbs from 'components/breadcrumbs/InformationalBreadcrumbs/InformationalBreadcrumbs';
 

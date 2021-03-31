@@ -132,6 +132,8 @@ function CustomerCard({
         case ACCOUNT_STATUS.HardLock:
             actions.push(unlock_action);
             break;
+        default:
+            break;
     }
     actions.push(delete_action);
 
