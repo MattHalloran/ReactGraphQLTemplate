@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { FormControl, InputLabel, Select, MenuItem, Chip } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import _ from 'underscore';
 
@@ -9,6 +9,10 @@ const useStyles = makeStyles((theme) => ({
     fullWidth: {
         width: '-webkit-fill-available',
     },
+    chips: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
 }));
 
 function Selector({
@@ -16,6 +20,7 @@ function Selector({
     selected,
     handleChange,
     fullWidth = false,
+    multiple = false,
     inputAriaLabel = 'select-label',
     noneOption = false,
     label = 'Select',
@@ -24,37 +29,46 @@ function Selector({
     const classes = useStyles();
     const theme = useTheme();
 
-    // Apply consistent formatting to data
-    let item_data = [];
-    options.forEach(o => {
-        if (_.isString(o)) {
-            item_data.push({
-                label: o,
-                value: o,
-            })
-        } else {
-            item_data.push(o);
-        }
-    })
-
-    //Makes checking if item is selected easier
-    let selected_array = selected;
-    if (!_.isArray(selected)) {
-        selected_array = [selected];
+    //Formats inputs into label array
+    const justLabels = (data) => {
+        let data_arr = _.isArray(data) ? data : [data];
+        let label_arr = [];
+        data_arr.forEach(o => {
+            if (_.isString(o)) {
+                label_arr.push(o)
+            } else {
+                label_arr.push(o?.label);
+            }
+        })
+        return label_arr;
     }
-    let selected_values = [];
-    selected_array.forEach(o => {
-        if (_.isString(o)) {
-            selected_values.push(o)
-        } else {
-            selected_values.push(o.value);
-        }
-    })
 
-    function getOptionStyle(value) {
+    // Formats inputs into label/value object array
+    const formatData = (data) => {
+        let data_arr = _.isArray(data) ? data : [data];
+        let formatted_arr = [];
+        data_arr.forEach(o => {
+            if (_.isString(o)) {
+                formatted_arr.push({
+                    label: o,
+                    value: o,
+                })
+            } else {
+                formatted_arr.push(o);
+            }
+        })
+        return formatted_arr;
+    }
+
+    let options_labels = justLabels(options);
+    let options_formatted = formatData(options);
+    let selected_labels = justLabels(selected);
+    let selected_formatted = formatData(selected);
+
+    function getOptionStyle(label) {
         return {
             fontWeight:
-                selected_values.indexOf(value) === -1
+                options_labels.indexOf(label) === -1
                     ? theme.typography.fontWeightRegular
                     : theme.typography.fontWeightMedium,
         };
@@ -68,13 +82,22 @@ function Selector({
                 value={selected}
                 onChange={handleChange}
                 label={label}
+                renderValue={() => {
+                    return multiple ? (
+                        <div className={classes.chips}>
+                            {selected_formatted.map((o) => (
+                                <Chip label={o.label} key={o.value} className={classes.chip} />
+                            ))}
+                        </div>
+                    ) : selected_labels
+                }}
                 {...props}
             >
                 {noneOption ? <MenuItem value="">
                     <em>None</em>
                 </MenuItem> : null}
-                {item_data.map((o) => (
-                    <MenuItem key={o.label} value={o.value} style={getOptionStyle(o.value)}>
+                {options_formatted.map((o) => (
+                    <MenuItem key={o.label} value={o.value} style={getOptionStyle(o.label)}>
                         {o.label}
                     </MenuItem>
                 ))}
@@ -87,6 +110,8 @@ Selector.propTypes = {
     options: PropTypes.array.isRequired,
     selected: PropTypes.array.isRequired,
     handleChange: PropTypes.func.isRequired,
+    fullWidth: PropTypes.bool,
+    multiple: PropTypes.bool,
     inputAriaLabel: PropTypes.string,
     noneOption: PropTypes.bool,
     label: PropTypes.string,

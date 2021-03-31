@@ -76,7 +76,7 @@ function PlantCard({
     }
 
     return (
-        <Card className={classes.root} onClick={onClick}>
+        <Card className={classes.root} onClick={() => onClick(plant)}>
             <CardActionArea>
                 {display_image}
                 <CardContent className={classes.content}>

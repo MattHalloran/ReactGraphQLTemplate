@@ -231,7 +231,7 @@ function ShoppingList({
             {plants?.map((item, index) =>
                 <PlantCard key={index}
                     cart={cart}
-                    onClick={expandSku}
+                    onClick={() => expandSku(item.skus[0].sku)}
                     plant={item}
                     thumbnail={thumbnails?.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}

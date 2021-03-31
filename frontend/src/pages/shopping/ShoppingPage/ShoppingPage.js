@@ -7,7 +7,7 @@ import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import Selector from 'components/Selector/Selector';
 import PubSub from 'utils/pubsub';
-import { Button, SwipeableDrawer, Checkbox, FormControlLabel } from '@material-ui/core';
+import { Container, Button, SwipeableDrawer, Checkbox, FormControlLabel, FormLabel, FormControl, FormGroup } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -16,7 +16,17 @@ const useStyles = makeStyles((theme) => ({
         background: theme.palette.primary.light,
         borderRight: `2px solid ${theme.palette.text.primary}`,
         minWidth: 400,
-    }
+    },
+    formControl: {
+        margin: theme.spacing(2),
+    },
+    optionsContainer: {
+        width: 'fit-content',
+        justifyContent: 'center',
+    },
+    options: {
+        margin: 2,
+    },
 }));
 
 function ShoppingPage() {
@@ -76,26 +86,20 @@ function ShoppingPage() {
         setShowCurrentlyUnavailable(event.target.checked);
     }, [filters])
 
-    const filters_to_checkbox = (field, title, onChange) => {
+    const filtersToSelector = (field, title, onChange) => {
         if (!filters) return;
-        let list = filters[field];
-        if (!list || !Array.isArray(list) || list.length <= 0) return null;
-        let options = list.map((item, index) => (
-            <FormControlLabel control={
-                <Checkbox key={index}
-                    group={field}
-                    value={item.value}
-                    checked={filters[field][index].checked ?? false}
-                    onChange={handleFiltersChange} />
-            }
-                label={item.label} />
-        ))
-        return <React.Fragment>
-            <fieldset className="checkbox-group" onChange={onChange}>
-                <legend>{title}</legend>
-                {options}
-            </fieldset>
-        </React.Fragment>
+        let options = filters[field];
+        if (!options || !Array.isArray(options) || options.length <= 0) return null;
+        let selected = options.filter(o => o.checked);
+        return (
+            <Selector
+                fullWidth
+                options={options}
+                selected={selected}
+                handleChange={(e) => handleFiltersChange(field, e.target.value, true)}
+                inputAriaLabel={`${field}-selector-label`}
+                label={title} />
+        )
     }
 
     const resetSearchConstraints = () => {
@@ -112,11 +116,27 @@ function ShoppingPage() {
     }
 
     let optionsContainer = (
-        <div className="options-container">
-            <Button color="secondary" onClick={resetSearchConstraints}>Reset</Button>
-            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-        </div>
+        <Container className={classes.optionsContainer}>
+            <Button className={classes.options} color="secondary" onClick={resetSearchConstraints}>Reset</Button>
+            <Button className={classes.options} color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+        </Container>
     );
+
+    let filterData = [
+        ['size', 'Sizes'],
+        ['optimal_light', 'Optimal Light'],
+        ['drought_tolerance', 'Drought Tolerance'],
+        ['grown_height', 'Grown Height'],
+        ['grown_spread', 'Grown Spread'],
+        ['growth_rate', 'Growth Rate'],
+        ['salt_tolerance', 'Salt Tolerance'],
+        ['attracts_polinators_and_wildlifes', 'Pollinator'],
+        ['light_ranges', 'Light Range'],
+        ['soil_moistures', 'Soil Moisture'],
+        ['soil_phs', 'Soil PH'],
+        ['soil_types', 'Soil Type'],
+        ['zones', 'Zone'],
+    ]
 
     return (
         <StyledShoppingPage id='page'>
@@ -133,19 +153,7 @@ function ShoppingPage() {
                     <h2>Search</h2>
                     <SearchBar onChange={(s) => setSearchString(s)} />
                     <h2>Filters</h2>
-                    {filters_to_checkbox('size', 'Sizes')}
-                    {filters_to_checkbox('optimal_light', 'Optimal Light')}
-                    {filters_to_checkbox('drought_tolerance', 'Drought Tolerance')}
-                    {filters_to_checkbox('grown_height', 'Grown Height')}
-                    {filters_to_checkbox('grown_spread', 'Grown Spread')}
-                    {filters_to_checkbox('growth_rate', 'Growth Rate')}
-                    {filters_to_checkbox('salt_tolerance', 'Salt Tolerance')}
-                    {filters_to_checkbox('attracts_polinators_and_wildlifes', 'Pollinator')}
-                    {filters_to_checkbox('light_ranges', 'Light Range')}
-                    {filters_to_checkbox('soil_moistures', 'Soil Moisture')}
-                    {filters_to_checkbox('soil_phs', 'Soil PH')}
-                    {filters_to_checkbox('soil_types', 'Soil Type')}
-                    {filters_to_checkbox('zones', 'Zone')}
+                    {filterData.map(d => filtersToSelector(...d))}
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>

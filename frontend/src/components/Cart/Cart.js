@@ -8,13 +8,15 @@ import { NoImageIcon } from 'assets/img';
 import { Typography } from '@material-ui/core';
 import { deleteArrayIndex } from 'utils/arrayTools';
 import { updateObject } from 'utils/objectTools';
-import { Paper, Grid, MenuItem, Checkbox, TableContainer, Table, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
+import { Paper, Grid, Checkbox, TableContainer, Table, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import EnhancedTableHead from 'components/EnhancedTableHead/EnhancedTableHead';
 import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableToolbar';
 import { makeStyles } from '@material-ui/core/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
+import Selector from 'components/Selector/Selector';
+import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
@@ -48,21 +50,22 @@ function Cart({
     onUpdate,
 }) {
     const classes = useStyles();
-    const [changedCart, setChangedCart] = useState(cart ?? {});
+    const [cartState, setCartState] = useState({
+        items: cart?.items ?? [],
+        is_delivery: cart?.is_delivery ?? true,
+        desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
+        special_instructions: cart?.special_instructions ?? '',
+    })
+
     const [selected, setSelected] = useState([]);
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
 
-    if (!changedCart.desired_delivery_date) {
-        changedCart.desired_delivery_date = +(new Date());
-    }
-    if (changedCart.special_instructions === null) {
-        changedCart.special_instructions = '';
-    }
+
 
     useEffect(() => {
-        onUpdate(changedCart);
-    }, [changedCart, onUpdate])
+        onUpdate(cartState);
+    }, [cartState, onUpdate])
 
     useEffect(() => {
         if (!cart) return;
@@ -80,7 +83,7 @@ function Cart({
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = changedCart?.items?.map((i) => i.id);
+            const newSelecteds = cartState.items.map((i) => i.id);
             setSelected(newSelecteds);
             return;
         }
@@ -108,43 +111,43 @@ function Cart({
     };
 
     const setNotes = useCallback((notes) => {
-        setChangedCart(c => updateObject(c, 'special_instructions', notes));
+        setCartState(c => updateObject(c, 'special_instructions', notes));
     }, [])
 
     const setDeliveryDate = useCallback((date) => {
-        setChangedCart(c => updateObject(c, 'desired_delivery_date', +date));
+        setCartState(c => updateObject(c, 'desired_delivery_date', +date));
     }, [])
 
-    const handleDeliveryChange = useCallback((event) => {
-        setChangedCart(c => updateObject(c, 'is_delivery', event.target.value));
+    const handleDeliveryChange = useCallback((value) => {
+        setCartState(c => updateObject(c, 'is_delivery', value));
     }, [])
 
     const updateItemQuantity = useCallback((sku, quantity) => {
-        let index = changedCart?.items?.findIndex(i => i.sku.sku === sku) ?? -1;
-        if (index < 0 || index >= (changedCart?.items.length ?? -1)) {
+        let index = cartState.items.findIndex(i => i.sku.sku === sku);
+        if (index < 0 || index >= (cartState.items.length)) {
             alert('Error: Could not update item quantity!');
             console.log(index);
             return;
         }
-        let cart_copy = { ...changedCart };
+        let cart_copy = { ...cartState };
         cart_copy.items[index].quantity = quantity;
-        setChangedCart(cart_copy);
-    }, [changedCart])
+        setCartState(cart_copy);
+    }, [cartState])
 
     const deleteCartItem = useCallback((sku) => {
-        let index = changedCart?.items?.findIndex(i => i.sku.sku === sku.sku) ?? -1;
+        let index = cartState.items.findIndex(i => i.sku.sku === sku.sku);
         if (index < 0) {
             alert(`Error: could not remove item for ${sku.sku}`);
             return;
         }
         setThumbnails(deleteArrayIndex(thumbnails, index));
-        let changed_item_list = deleteArrayIndex(changedCart.items, index);
-        setChangedCart(updateObject(changedCart, 'items', changed_item_list));
-    }, [thumbnails, changedCart])
+        let changed_item_list = deleteArrayIndex(cartState.items, index);
+        setCartState(updateObject(cartState, 'items', changed_item_list));
+    }, [thumbnails, cartState])
 
     let all_total = 0;
     const cart_item_to_row = useCallback((data, isSelected, key) => {
-        let index = changedCart?.items?.findIndex(i => i.sku.sku === data.sku.sku) ?? -1;
+        let index = cartState.items.findIndex(i => i.sku.sku === data.sku.sku);
         let thumbnail;
         if (index >= 0)
             thumbnail = thumbnails.length >= index ? thumbnails[index] : null
@@ -194,7 +197,7 @@ function Cart({
                 <TableCell className={classes.tableCol} align="right">{display_total}</TableCell>
             </TableRow>
         );
-    }, [thumbnails, changedCart])
+    }, [thumbnails, cartState])
 
     const headCells = [
         { id: 'product', align: 'left', disablePadding: true, label: 'Product' },
@@ -221,39 +224,30 @@ function Cart({
                         headCells={headCells}
                         numSelected={selected.length}
                         onSelectAllClick={handleSelectAllClick}
-                        rowCount={changedCart?.items?.length ?? 0}
+                        rowCount={cartState.items.length}
                     />
                     <TableBody>
-                        {changedCart?.items?.map((c, index) => cart_item_to_row(c, isSelected, index))}
+                        {cartState.items.map((c, index) => cart_item_to_row(c, isSelected, index))}
                     </TableBody>
                 </Table>
             </TableContainer>
             <p>Total: {displayPrice(all_total)}</p>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
-                    <TextField
-                        required
-                        select
+                <Selector
                         fullWidth
-                        id="delivery-select"
-                        label="Shipping Method"
-                        type="text"
-                        id="confirmPassword"
-                        value={changedCart?.is_delivery}
-                        onChange={handleDeliveryChange}
-                    >
-                        {DELIVERY_OPTIONS.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                        required
+                        options={DELIVERY_OPTIONS}
+                        selected={cartState.is_delivery ? DELIVERY_OPTIONS[1] : DELIVERY_OPTIONS[0]}
+                        handleChange={(e) => handleDeliveryChange(e.target.value)}
+                        inputAriaLabel='delivery-selector-label'
+                        label="Shipping Method" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
                             label="Delivery Date"
-                            value={new Date(changedCart.desired_delivery_date)}
+                            value={new Date(cartState.desired_delivery_date)}
                             onChange={(date) => {
                                 setDeliveryDate(date)
                             }}
@@ -267,7 +261,7 @@ function Cart({
                         label="Special Instructions"
                         fullWidth
                         multiline
-                        value={changedCart.special_instructions}
+                        value={cartState.special_instructions}
                         onChange={e => setNotes(e.target.value)}
                     />
                 </Grid>
