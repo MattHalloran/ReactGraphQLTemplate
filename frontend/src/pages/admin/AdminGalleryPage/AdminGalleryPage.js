@@ -2,7 +2,6 @@ import { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
 import { getSession } from 'utils/storage';
 import { Button, Typography } from '@material-ui/core';
-import FileUpload from 'components/FileUpload/FileUpload';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { moveArrayIndex } from 'utils/arrayTools';
 import { PubSub } from 'utils/pubsub';

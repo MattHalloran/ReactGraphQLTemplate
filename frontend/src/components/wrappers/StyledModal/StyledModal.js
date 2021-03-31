@@ -33,12 +33,16 @@ const useStyles = makeStyles((theme) => ({
     x: {
         fill: theme.palette.primary.contrastText,
     },
+    scrollable: {
+        overflowY: 'scroll',
+    },
 }));
 
 // const ESCAPE_KEY = 27;
 
 function StyledModal({
     open = true,
+    scrollable = false,
     onClose,
     children,
 }) {
@@ -51,7 +55,7 @@ function StyledModal({
             open={open}
             onClose={onClose}>
             <div style={{margin: 'auto', maxWidth: 'calc(100vw - 100px)', maxHeight: 'calc(100vh - 50px)'}} className={classes.content}>
-                <div className={classes.bodyChildren}>
+                <div className={`${classes.bodyChildren} ${scrollable ? classes.scrollable : ''}`}>
                     {children}
                 </div>
                 <IconButton
@@ -67,6 +71,7 @@ function StyledModal({
 
 StyledModal.propTypes = {
     open: PropTypes.bool,
+    scrollable: PropTypes.bool,
     children: PropTypes.any.isRequired,
     onClose: PropTypes.func.isRequired,
 }

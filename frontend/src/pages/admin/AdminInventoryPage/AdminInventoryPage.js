@@ -4,31 +4,32 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import { StyledAdminInventoryPage, StyledPlantPopup } from './AdminInventoryPage.styled';
+import { StyledAdminInventoryPage } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
 import { Button } from '@material-ui/core';
-import { SORT_OPTIONS, PUBS } from 'utils/consts';
+import { SORT_OPTIONS, PUBS, PLANT_ATTRIBUTES } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { getSession } from 'utils/storage';
-import DropDown from 'components/inputs/DropDown/DropDown';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
-import FileUpload from 'components/FileUpload/FileUpload';
 import makeID from 'utils/makeID';
 import PlantCard from 'components/PlantCard/PlantCard';
-import { TextField, Tabs, Tab, AppBar } from '@material-ui/core';
+import { Tooltip, IconButton, Tabs, Tab, AppBar, List, ListItem, ListItemText, ListSubheader, Grid, TextField } from '@material-ui/core';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import TabPanel from 'components/TabPanel/TabPanel';
-import { DropzoneArea } from 'material-ui-dropzone';
+import { DropzoneArea, DropzoneAreaBase } from 'material-ui-dropzone';
 import { makeStyles } from '@material-ui/core/styles';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import Selector from 'components/Selector/Selector';
 
 const useStyles = makeStyles((theme) => ({
-   toggleBar: {
-       background: theme.palette.primary.light,
-       color: theme.palette.primary.contrastText,
-   },
+    toggleBar: {
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+    },
 }));
 
 let copy = SORT_OPTIONS.slice();
@@ -175,17 +176,17 @@ function AdminInventoryPage() {
         });
     }
 
-    const handleExistingSort = (sort_item, _) => {
-        setExistingSortBy(sort_item.value);
-    }
-
-    const handleAllSort = (sort_item, _) => {
-        setAllSortBy(sort_item.value);
+    const handleSort = (value) => {
+        if (currTab === 0) {
+            setExistingSortBy(value);
+        } else {
+            setAllSortBy(value);
+        }
     }
 
     return (
         <StyledAdminInventoryPage id="page">
-            <Modal open={currPlant !== null} onClose={() => setCurrPlant(null)}>
+            <Modal scrollable={true} open={currPlant !== null} onClose={() => setCurrPlant(null)}>
                 <PlantPopup session={session} plant={currPlant} trait_options={trait_options} />
             </Modal>
             <AdminBreadcrumbs />
@@ -208,6 +209,14 @@ function AdminInventoryPage() {
                 filesLimit={1}
             />
             <Button onClick={sendAvailability}>Upload Availability</Button>
+            <h2>Sort</h2>
+            <Selector
+                fullWidth
+                options={currTab === 0 ? SORT_OPTIONS : PLANT_SORT_OPTIONS}
+                selected={currTab === 0 ? existing_sort_by : all_sort_by}
+                handleChange={(e) => handleSort(e.target.value)}
+                inputAriaLabel='sort-plants-selector-label'
+                label="Sort" />
             <AppBar className={classes.toggleBar} position="static">
                 <Tabs value={currTab} onChange={(_, value) => setCurrTab(value)} aria-label="simple tabs example">
                     <Tab label="Plants with active SKUs" id='plants-with-active-skus-tab' aria-controls='plants-tabpanel-1' />
@@ -215,8 +224,6 @@ function AdminInventoryPage() {
                 </Tabs>
             </AppBar>
             <TabPanel value={currTab} index={0}>
-                <h2>Sort</h2>
-                <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
                 <div className="card-flex">
                     {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
@@ -225,8 +232,6 @@ function AdminInventoryPage() {
                 </div>
             </TabPanel>
             <TabPanel value={currTab} index={1}>
-                <h2>Sort</h2>
-                <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
                 <div className="card-flex">
                     {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
@@ -244,14 +249,46 @@ AdminInventoryPage.propTypes = {
 
 export default AdminInventoryPage;
 
+const popupStyles = makeStyles((theme) => ({
+    root: {
+        float: 'left',
+        clear: 'none',
+    },
+    sideNav: {
+        width: '25%',
+        height: '100%',
+        float: 'left',
+        borderRight: `2px solid ${theme.palette.primary.contrastText}`,
+    },
+    bottom: {
+
+    },
+    content: {
+        width: '75%',
+        height: '100%',
+        float: 'right',
+    },
+    imageRow: {
+        minHeight: '100px',
+    },
+    skuOption: {
+
+    },
+    selected: {
+
+    },
+}));
+
 function PlantPopup({
     session = getSession(),
     plant,
     trait_options
 }) {
     console.log('PLANT POPUP', plant)
+    const classes = popupStyles();
     const [latin_name, setLatinName] = useState(plant.latin_name);
     const [common_name, setCommonName] = useState(plant.common_name);
+    const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0])
     const [drought_tolerance, setDroughtTolerance] = useState(plant.drought_tolerance?.value);
     const [grown_height, setGrownHeight] = useState(plant.grown_height?.value);
     const [grown_spread, setGrownSpread] = useState(plant.grown_spread?.value);
@@ -330,33 +367,34 @@ function PlantPopup({
             });
     }
 
-    // Returns an input text or a dropdown, depending on if the field is in the trait options
-    const getInput = (field, label, value, valueFunc, multi_select = true) => {
-        if (!trait_options || !trait_options[field] || trait_options[field].length <= 0) return (
-            <TextField
-                fullWidth
-                label={label}
-                value={value}
-                onChange={e => valueFunc(e.target.value)}
-            />
-        )
-        return (
-            <div>
-                <label>{label}</label>
-                <DropDown
-                    multi_select={multi_select}
-                    allow_custom_input={true}
-                    className="sorter"
-                    options={trait_options[field]}
-                    onChange={valueFunc} />
-            </div>
-        )
-    }
+    const getSelector = (label, field, value, valueFunc, multiSelect = false) => (
+        <Selector
+            fullWidth
+            size="small"
+            options={trait_options[field]}
+            selected={value}
+            handleChange={(e) => valueFunc(e.target.value)}
+            inputAriaLabel={`plant-attribute-${field}-selector-label`}
+            label={label}
+            multiple={multiSelect} />
+    )
 
-    const fileSelectedHandler = (event) => {
-        let imageFile = event.target.files[0];
-        let fileSplit = imageFile.name.split('.');
-        processImage(event.target.files[0], fileSplit[0], fileSplit[1]);
+    const getTextField = (label, field, value, valueFunc) => (
+        <TextField
+            fullWidth
+            size="small"
+            id={field}
+            label={label}
+            value={value}
+            onChange={e => valueFunc(e.target.value)}
+        />
+    )
+
+    const fileSelectedHandler = (files) => {
+        if (files.length === 0) return;
+        let file = files[0]
+        let fileSplit = file.name.split('.');
+        processImage(file, fileSplit[0], fileSplit[1]);
     }
 
     const processImage = (file, name, extension) => {
@@ -398,70 +436,144 @@ function PlantPopup({
         display_image = <NoImageIcon className="display-image" />
     }
 
+    const attribute_meta = {
+        'Drought Tolerance': ['drought_tolerance', drought_tolerance, setDroughtTolerance],
+        'Grown Height': ['grown_height', grown_height, setGrownHeight],
+        'Grown Spread': ['grown_spread', grown_spread, setGrownSpread],
+        'Growth Rate': ['growth_rate', growth_rate, setGrowthRate],
+        'Optimal Light': ['optimal_light', optimal_light, setOptimalLight],
+        'Salt Tolerance': ['salt_tolerance', salt_tolerance, setSaltTolerance],
+        'Size': ['size', size, setSize],
+    }
+
     return (
-        <StyledPlantPopup>
-            <div className="sidenav">
-                <h3>SKUs</h3>
-                <div className="sku-list">
+        <div>
+            <div className={classes.sideNav}>
+                <List
+                    aria-label="sku select"
+                    aria-labelledby="sku-select-subheader">
+                    <ListSubheader component="div" id="sku-select-subheader">
+                        SKUs
+                </ListSubheader>
                     {skus?.map(s => (
-                        <div className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
-                            onClick={() => setSelectedSku(s)}>{s.sku}</div>
+                        <ListItem
+                            button
+                            className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
+                            onClick={() => setSelectedSku(s)}>
+                            <ListItemText primary={s.sku} />
+                        </ListItem>
                     ))}
-                </div>
-                {selectedSku ? <Button className="delete-sku" onClick={removeSku}>Delete</Button> : null}
-                <Button className="add-sku" onClick={newSku}>New SKU</Button>
-            </div>
-            <div className="plant-info-div">
-                <TextField
-                    label="Latin Name"
-                    value={latin_name}
-                    onChange={e => setLatinName(e.target.value)}
-                />
-                <TextField
-                    label="Common Name"
-                    value={common_name}
-                    onChange={e => setCommonName(e.target.value)}
-                />
-                <div className="third">
-                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance, false)}
-                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight, false)}
-                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread, false)}
-                </div>
-                <div className="third">
-                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate, false)}
-                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight, false)}
-                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance, false)}
-                </div>
-                <div className="third">
-                    <p>Display Image</p>
-                    {display_image}
-                    <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
+                </List>
+                <div className={classes.bottom}>
+                    {selectedSku ?
+                        <Tooltip title="Delete SKU">
+                            <IconButton onClick={removeSku}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                        : null}
+                    <Tooltip title="New SKU">
+                        <IconButton onClick={newSku}>
+                            <AddBoxIcon />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             </div>
-            <div className="sku-info-div">
-                <div className="half">
-                    <TextField
-                        label="Plant Code"
-                        value={code}
-                        onChange={e => setCode(e.target.value)}
-                    />
-                    {getInput('size', 'Size', size, setSize, false)}
-                </div>
-                <div className="half">
-                    <TextField
-                        label="Price"
-                        value={price}
-                        onChange={e => setPrice(e.target.value)}
-                    />
-                    <TextField
-                        label="Quantity"
-                        value={quantity}
-                        onChange={e => setQuantity(e.target.value)}
-                    />
-                </div>
+            <div className={classes.content}>
+                <h3>Edit plant info</h3>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <TextField
+                            size="small"
+                            label="Latin Name"
+                            value={latin_name}
+                            onChange={e => setLatinName(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
+                            size="small"
+                            label="Common Name"
+                            value={common_name}
+                            onChange={e => setCommonName(e.target.value)}
+                        />
+                    </Grid>
+                    {/* Select which attribute you'd like to edit */}
+                    <Grid item xs={12}>
+                        <Selector
+                            fullWidth
+                            size="small"
+                            options={PLANT_ATTRIBUTES}
+                            selected={selectedAttribute}
+                            handleChange={(e) => setSelectedAttribute(e.target.value)}
+                            inputAriaLabel={"plant-attribute-select-label"}
+                            label={"Select attribute to edit"} />
+                    </Grid>
+                    {/* Pick from existing entries... */}
+                    <Grid item xs={6}>
+                        {getSelector('Existing value', ...attribute_meta[selectedAttribute])}
+                    </Grid>
+                    {/* ...or enter a custom value */}
+                    <Grid item xs={6}>
+                        {getTextField('New value', ...attribute_meta[selectedAttribute])}
+                    </Grid>
+                    {/* Display existing display image */}
+                    <Grid item xs={3}>
+                        <div className={classes.imageRow}>
+                            <p>Display Image</p>
+                            {display_image}
+                        </div>
+                    </Grid>
+                    {/* Replace display image */}
+                    <Grid item xs={9}>
+                        <DropzoneAreaBase
+                            acceptedFiles={['image/*']}
+                            dropzoneText={"Drag and drop new images here or click"}
+                            onChange={fileSelectedHandler}
+                            showAlerts={false}
+                            filesLimit={1}
+                            classes={{
+                                root: classes.imageRow,
+                            }}
+                        />
+                    </Grid>
+                </Grid>
+                <h3>Edit SKU info</h3>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <TextField
+                            size="small"
+                            label="Plant Code"
+                            value={code}
+                            onChange={e => setCode(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        {getSelector('Existing size', ...attribute_meta['Size'])}
+                    </Grid>
+                    <Grid item xs={6}>
+                        {getTextField('New size', ...attribute_meta['Size'])}
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
+                            size="small"
+                            label="Price"
+                            value={price}
+                            onChange={e => setPrice(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
+                            size="small"
+                            label="Quantity"
+                            value={quantity}
+                            onChange={e => setQuantity(e.target.value)}
+                        />
+                    </Grid>
+                </Grid>
+                <Button onClick={savePlant}>Apply Changes</Button>
             </div>
-            <Button onClick={savePlant}>Apply Changes</Button>
-        </StyledPlantPopup>
+        </div>
     );
 }
 

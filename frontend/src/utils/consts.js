@@ -9,6 +9,15 @@ export const GOOGLE_MAPS_ADDRESS = "https://www.google.com/maps/place/106+S+Wood
 export const STATUS_CODES = codes;
 export const ORDER_STATUS = orderStatus;
 
+export const PLANT_ATTRIBUTES = [
+    'Drought Tolerance',
+    'Grown Height',
+    'Grown Spread',
+    'Growth Rate',
+    'Optimal Light',
+    'Salt Tolerance',
+]
+
 export const DEFAULT_PRONOUNS = [
     "Custom",
     "he/him/his",
