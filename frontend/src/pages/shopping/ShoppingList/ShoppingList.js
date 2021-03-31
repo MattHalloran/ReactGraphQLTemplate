@@ -11,7 +11,7 @@ import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
-import DropDown from 'components/inputs/DropDown/DropDown';
+import Selector from 'components/Selector/Selector';
 import PlantCard from 'components/PlantCard/PlantCard';
 import { Tooltip } from '@material-ui/core';
 
@@ -280,10 +280,6 @@ function ExpandedPlant({
         display_image = <NoImageIcon className="display-image" />
     }
 
-    const handleSortChange = (item, _) => {
-        setSelected(item.value);
-    }
-
     const traitIconList = (field, Icon, title, alt) => {
         if (!plant || !plant[field]) return null;
         if (!alt) alt = title;
@@ -353,8 +349,13 @@ function ExpandedPlant({
             </div>
             <div className="icon-container bottom-div">
                 <div className="selecter">
-                    <label>Option</label>
-                    <DropDown options={order_options} onChange={handleSortChange} initial_value={order_options[0]} />
+                <Selector
+                    fullWidth
+                    options={order_options}
+                    selected={selected}
+                    handleChange={(e) => setSelected(e.target.value)}
+                    inputAriaLabel='options-selector-label'
+                    label="Option" />
                 </div>
                 <div className="quanter">
                     <label>Quantity</label>

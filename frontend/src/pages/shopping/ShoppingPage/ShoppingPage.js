@@ -5,8 +5,7 @@ import SearchBar from '../../../components/SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
-import DropDown from 'components/inputs/DropDown/DropDown';
-import { getRoles, getSession } from 'utils/storage';
+import Selector from 'components/Selector/Selector';
 import PubSub from 'utils/pubsub';
 import { Button, SwipeableDrawer, Checkbox, FormControlLabel } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
@@ -77,10 +76,6 @@ function ShoppingPage() {
         setShowCurrentlyUnavailable(event.target.checked);
     }, [filters])
 
-    const handleSortChange = (sort_item, _) => {
-        setSortBy(sort_item.value);
-    }
-
     const filters_to_checkbox = (field, title, onChange) => {
         if (!filters) return;
         let list = filters[field];
@@ -104,7 +99,7 @@ function ShoppingPage() {
     }
 
     const resetSearchConstraints = () => {
-        handleSortChange(SORT_OPTIONS[0]);
+        setSortBy(SORT_OPTIONS[0])
         setSearchString('')
         let copy = { ...filters };
         for (const key in copy) {
@@ -128,8 +123,13 @@ function ShoppingPage() {
             <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
                 {optionsContainer}
                 <div className="shopping-menu">
-                    <h2>Sort</h2>
-                    <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
+                    <Selector
+                        fullWidth
+                        options={SORT_OPTIONS}
+                        selected={sortBy}
+                        handleChange={(e) => setSortBy(e.target.value)}
+                        inputAriaLabel='sort-selector-label'
+                        label="Sort" />
                     <h2>Search</h2>
                     <SearchBar onChange={(s) => setSearchString(s)} />
                     <h2>Filters</h2>

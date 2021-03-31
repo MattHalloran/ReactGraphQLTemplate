@@ -2,7 +2,6 @@ import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
 import { getSession } from 'utils/storage';
-import DropDown from 'components/inputs/DropDown/DropDown';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { Button } from '@material-ui/core';
@@ -12,6 +11,7 @@ import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import Selector from 'components/Selector/Selector';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
@@ -82,10 +82,6 @@ function AdminOrderPage() {
             });
     }, [filter])
 
-    const handleFilterChange = (sort_item, _) => {
-        setFilter(sort_item.value);
-    }
-
     let popup = (currOrder) ? (
         <Modal onClose={() => setCurrOrder(null)}>
             <OrderPopup order={currOrder} />
@@ -96,8 +92,13 @@ function AdminOrderPage() {
         <div id="page">
             {popup}
             <AdminBreadcrumbs />
-            <h2>Sort By</h2>
-            <DropDown options={ORDER_STATES} onChange={handleFilterChange} initial_value={ORDER_STATES[4]} />
+            <Selector
+                fullWidth
+                options={ORDER_STATES}
+                selected={filter}
+                handleChange={(e) => setFilter(e.target.value)}
+                inputAriaLabel='order-type-selector-label'
+                label="Sort By" />
             <h3>Count: {orders?.length ?? 0}</h3>
             <div className={classes.cardFlex}>
                 {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}

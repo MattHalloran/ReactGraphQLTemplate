@@ -23,7 +23,6 @@ function Selector({
 }) {
     const classes = useStyles();
     const theme = useTheme();
-    console.log('lick my taint', selected, options)
 
     // Apply consistent formatting to data
     let item_data = [];
@@ -37,7 +36,6 @@ function Selector({
             item_data.push(o);
         }
     })
-    console.log('made item data', item_data)
 
     //Makes checking if item is selected easier
     let selected_array = selected;
