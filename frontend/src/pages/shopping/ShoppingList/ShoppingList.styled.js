@@ -79,12 +79,6 @@ export const StyledPlantCard = styled.div`
 export const StyledExpandedPlant = styled.div`
     background-color: ${({ theme }) => theme.darkPrimaryColor};
     color: ${({ theme }) => theme.headerText};
-    display: block;
-    width: -webkit-fill-available;
-    width: -moz-available;
-    height: 100%;
-    min-width: 60vw;
-    overflow-y: scroll;
 
     .main-div {
         padding-bottom: 30%;

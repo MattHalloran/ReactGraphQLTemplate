@@ -1,9 +1,40 @@
 import { useState, useRef } from "react";
 import PropTypes from 'prop-types';
-import { StyledQuantityBox } from './QuantityBox.styled';
-import { Button } from '@material-ui/core';
+import { IconButton, TextField } from '@material-ui/core';
+import RemoveIcon from '@material-ui/icons/Remove';
+import AddIcon from '@material-ui/icons/Add';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    main: {
+        background: theme.palette.primary.contrastText,
+        width: '60%',
+        "& input::-webkit-clear-button, & input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+            display: "none",
+     }
+    },
+    minus: {
+        minWidth: 30,
+        borderRadius: '5px 0 0 5px',
+        width: '20%',
+        background: theme.palette.secondary.dark,
+        '&:hover': {
+            background: theme.palette.secondary.main,
+        }
+    },
+    plus: {
+        minWidth: 30,
+        borderRadius: '0 5px 5px 0',
+        width: '20%',
+        background: theme.palette.secondary.dark,
+        '&:hover': {
+            background: theme.palette.secondary.main,
+        }
+    },
+}));
 
 function QuantityBox({
+    label = 'Quantity',
     initial_value = 0,
     min_value = -2097151,
     max_value = 2097151,
@@ -13,6 +44,7 @@ function QuantityBox({
     validateFunc,
     ...props
 }) {
+    const classes = useStyles();
     const [value, setValue] = useState(initial_value ?? '');
     // Time for a button press to become a hold
     const HOLD_DELAY = 250;
@@ -37,7 +69,7 @@ function QuantityBox({
     const incTick = () => {
         updateValue(v => Math.min(v + step, max_value));
     }
-    
+
     const decTick = () => {
         updateValue(v => v - step);
     }
@@ -57,33 +89,41 @@ function QuantityBox({
     }
 
     return (
-        <StyledQuantityBox has_error={error?.length > 0} {...props}>
-            <Button className="minus" 
-                data-field="quantity" 
-                onClick={() => updateValue(value - step)}
+        <div has_error={error?.length > 0} {...props}>
+            <IconButton
+                className={classes.minus}
+                aria-label='minus'
+                onClick={() => updateValue(value*1 - step)}
                 onTouchStart={() => startTouch(false)}
                 onTouchEnd={stopTouch}
-                onContextMenu={(e) => e.preventDefault()}>-</Button>
-            <input
+                onContextMenu={(e) => e.preventDefault()}>
+                <RemoveIcon />
+            </IconButton>
+            <TextField
+                className={classes.main}
                 type="number"
-                pattern="[0-9]*"
-                step={step}
-                min={min_value}
-                max={max_value}
+                variant="filled"
+                size="small"
+                inputProps={{ min: min_value, max: max_value }}
+                label={label}
                 value={value}
-                className="quantity-field"
-                onChange={(e) => updateValue(e.target.value)}/>
-            <Button className="plus" 
-                data-field="quantity" 
-                onClick={() => updateValue(value + step)}
+                onChange={(e) => updateValue(e.target.value)}
+            />
+            <IconButton
+                className={classes.plus}
+                aria-label='plus'
+                onClick={() => updateValue(value*1 + step)}
                 onTouchStart={() => startTouch(true)}
                 onTouchEnd={stopTouch}
-                onContextMenu={(e) => e.preventDefault()}>+</Button>
-        </StyledQuantityBox>
+                onContextMenu={(e) => e.preventDefault()} >
+                <AddIcon />
+            </IconButton>
+        </div>
     );
 }
 
 QuantityBox.propTypes = {
+    label: PropTypes.number,
     initial_value: PropTypes.number,
     min_value: PropTypes.number,
     max_value: PropTypes.number,

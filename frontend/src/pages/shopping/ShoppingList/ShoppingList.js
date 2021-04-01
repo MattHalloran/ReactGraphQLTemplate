@@ -1,19 +1,28 @@
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
 import { getImages, getImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import Modal from "components/wrappers/StyledModal/StyledModal";
-import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
+import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import Selector from 'components/Selector/Selector';
 import PlantCard from 'components/PlantCard/PlantCard';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip, Typography, Grid, IconButton } from '@material-ui/core';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+        alignItems: 'stretch',
+    },
+}));
 
 function ShoppingList({
     page_size,
@@ -23,6 +32,7 @@ function ShoppingList({
     searchString = '',
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
+    const classes = useStyles();
     const [session, setSession] = useState(getSession());
     const [cart, setCart] = useState(getCart());
     const [popup, setPopup] = useState(null);
@@ -217,7 +227,7 @@ function ShoppingList({
         }
         let popup_data = plants[curr_index];
         setPopup(
-            <Modal onClose={() => history.goBack()}>
+            <Modal scrollable={true} onClose={() => history.goBack()}>
                 <ExpandedPlant plant={popup_data}
                     thumbnail={thumbnails?.length >= curr_index ? thumbnails[curr_index] : null}
                     onCart={setInCart} />
@@ -226,7 +236,7 @@ function ShoppingList({
     }, [plants, curr_index])
 
     return (
-        <StyledShoppingList id={track_scrolling_id}>
+        <div className={classes.root} id={track_scrolling_id}>
             {popup}
             {plants?.map((item, index) =>
                 <PlantCard key={index}
@@ -235,7 +245,7 @@ function ShoppingList({
                     plant={item}
                     thumbnail={thumbnails?.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
-        </StyledShoppingList>
+        </div>
     );
 }
 
@@ -248,12 +258,41 @@ ShoppingList.propTypes = {
 
 export default ShoppingList;
 
+const popupStyles = makeStyles((theme) => ({
+    header: {
+        textAlign: 'center',
+    },
+    left: {
+        width: '50%',
+        height: '80%',
+        float: 'left',
+    },
+    right: {
+        width: '50%',
+        height: '80%',
+        float: 'right',
+    },
+    bottom: {
+        width: '100%',
+        height: '20%',
+        alignItems: 'center',
+    },
+    displayImage: {
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        bottom: '0%',
+    },
+}));
+
 function ExpandedPlant({
     plant,
     thumbnail,
     onCart,
 }) {
     console.log('EXPANDED PLANT', plant)
+    const classes = popupStyles();
     const [quantity, setQuantity] = useState(1);
     const [image, setImage] = useState(null);
 
@@ -275,15 +314,14 @@ function ExpandedPlant({
 
     let display_image;
     if (image) {
-        display_image = <img src={`data:image/jpeg;base64,${image}`} className="display-image" alt="TODO" />
+        display_image = <img src={`data:image/jpeg;base64,${image}`} className={classes.displayImage} alt="TODO" />
     } else {
-        display_image = <NoImageIcon className="display-image" />
+        display_image = <NoImageIcon className={classes.displayImage} />
     }
 
     const traitIconList = (field, Icon, title, alt) => {
         if (!plant || !plant[field]) return null;
         if (!alt) alt = title;
-        console.log('TRAIT ICON LIST', field)
         let field_string;
         if (Array.isArray(plant[field])) {
             field_string = plant[field].map((f) => f.value).join(', ')
@@ -291,9 +329,9 @@ function ExpandedPlant({
             field_string = plant[field].value;
         }
         return (
-            <div className="trait-container">
+            <div>
                 <Tooltip title={title}>
-                    <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
+                    <Icon width="25px" height="25px" title={title} alt={alt} />
                     <p>: {field_string}</p>
                 </Tooltip>
             </div>
@@ -301,78 +339,75 @@ function ExpandedPlant({
     }
 
     return (
-        <StyledExpandedPlant>
-            <div className="title">
-                <h1>{plant.latin_name}</h1>
-                <h3>{plant.common_name}</h3>
+        <div>
+            <div className={classes.header}>
+                <Typography gutterBottom variant="h4" component="h1">{plant.latin_name}</Typography>
+                <Typography gutterBottom variant="h5" component="h2">{plant.common_name}</Typography>
             </div>
-            <div className="main-div">
-                <div className="floating-half">
-                    {display_image}
-                </div>
-                <div className="floating-half">
-                    {plant.description ?
-                        <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
-                            <p>{plant.description}</p>
-                        </Collapsible>
-                        : null}
-                    <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
-                        <div className="sku">
-                            {/* TODO availability, sizes */}
-                        </div>
-                        <div className="general">
-                            <p>General</p>
-                            {traitIconList("zones", MapIcon, "Zones")}
-                            {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                            {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                            {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                            {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                        </div>
-                        <div className="bloom">
-                            <p>Bloom</p>
-                            {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                            {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                        </div>
-                        <div className="light">
-                            <p>Light</p>
-                            {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                            {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                        </div>
-                        <div className="soil">
-                            <p>Soil</p>
-                            {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                            {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                            {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                        </div>
+            <div className={classes.left}>
+                {display_image}
+            </div>
+            <div className={classes.right}>
+                {plant.description ?
+                    <Collapsible style={{ height: '20%' }} title="Description">
+                        <p>{plant.description}</p>
                     </Collapsible>
-                </div>
+                    : null}
+                <Collapsible style={{ height: '30%' }} title="General Information">
+                    <div>
+                        {/* TODO availability, sizes */}
+                    </div>
+                    <div>
+                        <p>General</p>
+                        {traitIconList("zones", MapIcon, "Zones")}
+                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
+                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
+                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+                    </div>
+                    <div>
+                        <p>Bloom</p>
+                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
+                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+                    </div>
+                    <div>
+                        <p>Light</p>
+                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
+                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+                    </div>
+                    <div>
+                        <p>Soil</p>
+                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
+                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
+                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
+                    </div>
+                </Collapsible>
             </div>
-            <div className="icon-container bottom-div">
-                <div className="selecter">
-                <Selector
-                    fullWidth
-                    options={order_options}
-                    selected={selected}
-                    handleChange={(e) => setSelected(e.target.value)}
-                    inputAriaLabel='options-selector-label'
-                    label="Option" />
-                </div>
-                <div className="quanter">
-                    <label>Quantity</label>
-                    <QuantityBox
-                        min_value={0}
-                        max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
-                        initial_value={1}
-                        value={quantity}
-                        valueFunc={setQuantity} />
-                </div>
-                <BagPlusIcon
-                    className="bag"
-                    width="30px"
-                    height="30px"
-                    onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected, 'ADD', quantity)} />
-            </div>
-        </StyledExpandedPlant>
+                <Grid className={classes.bottom} container spacing={1}>
+                    <Grid item xs={6}>
+                        <Selector
+                            fullWidth
+                            options={order_options}
+                            selected={selected}
+                            handleChange={(e) => setSelected(e.target.value)}
+                            inputAriaLabel='size-selector-label'
+                            label="Size" />
+                    </Grid>
+                    <Grid item xs={5}>
+                        <QuantityBox
+                            min_value={0}
+                            max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
+                            initial_value={1}
+                            value={quantity}
+                            valueFunc={setQuantity} />
+                    </Grid>
+                    <Grid item xs={1}>
+                        <IconButton onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected, 'ADD', quantity)}>
+                            <AddShoppingCartIcon />
+                        </IconButton>
+                    </Grid>
+                </Grid>
+        </div>
     );
 }
 
