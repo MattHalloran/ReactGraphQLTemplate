@@ -12,6 +12,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import ShareIcon from '@material-ui/icons/Share';
+import CloseIcon from '@material-ui/icons/Close';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import InstagramIcon from '@material-ui/icons/Instagram';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
@@ -28,6 +29,13 @@ const useStyles = makeStyles((theme) => ({
     menuItem: {
         color: theme.palette.primary.contrastText,
         borderBottom: `1px solid ${theme.palette.primary.dark}`,
+    },
+    close: {
+        color: theme.palette.primary.contrastText,
+        borderRadius: 0,
+        borderBottom: `1px solid ${theme.palette.primary.dark}`,
+        justifyContent: 'end',
+        direction: 'rtl',
     },
     menuIcon: {
         color: theme.palette.primary.contrastText,
@@ -67,6 +75,9 @@ function Hamburger(props) {
         })
     }, [])
 
+    const closeMenu = () => {console.log('CLOSING MENU');PubSub.publish(PUBS.BurgerMenuOpen, false);}
+    const toggleOpen = () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle');
+
     const handleContactClick = () => {
         setContactOpen(!contactOpen);
     };
@@ -82,7 +93,15 @@ function Hamburger(props) {
 
     const optionsToList = (options) => {
         return options.map(([label, value, link, onClick, Icon, badgeNum], index) => (
-            <ListItem className={classes.menuItem} button key={index} onClick={() => { history.push(link); if (onClick) onClick() }}>
+            <ListItem 
+                key={index}
+                className={classes.menuItem}
+                button
+                onClick={() => { 
+                    history.push(link); 
+                    if (onClick) onClick();
+                    closeMenu() 
+                }}>
                 {Icon ?
                     (<ListItemIcon>
                         <Badge badgeContent={badgeNum ?? 0} color="error">
@@ -105,15 +124,15 @@ function Hamburger(props) {
         user_actions.push(['Log Out', 'logout', LINKS.Home, clearStorage, ExitToAppIcon]);
     }
 
-    const closeMenu = () => PubSub.publish(PUBS.BurgerMenuOpen, false);
-    const toggleOpen = () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle');
-
     return (
         <React.Fragment>
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onClose={closeMenu}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open}>
+                <IconButton className={classes.close} onClick={closeMenu}>
+                    <CloseIcon fontSize="large" />
+                </IconButton>
                 <List>
                     {/* Collapsible contact information */}
                     <ListItem className={classes.menuItem} button onClick={handleContactClick}>

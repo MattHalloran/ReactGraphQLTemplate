@@ -1,6 +1,3 @@
-export { default as ArrowRightCircleIcon } from './ArrowRightCircleIcon';
-export { default as BagCheckFillIcon } from './BagCheckFillIcon';
-export { default as BagPlusIcon } from './BagPlusIcon';
 export { default as BeeIcon } from './BeeIcon';
 export { default as CalendarIcon } from './CalendarIcon';
 export { default as ChevronLeftIcon } from './ChevronLeftIcon';
@@ -17,11 +14,8 @@ export { default as MapIcon } from './MapIcon';
 export { default as NewLifeLogo } from './NewLifeLogo';
 export { default as NoImageIcon } from './NoImageIcon';
 export { default as NoWaterIcon } from './NoWaterIcon';
-export { default as PersonPlusIcon } from './PersonPlusIcon';
 export { default as PHIcon } from './PHIcon';
-export { default as PhoneIcon } from './PhoneIcon';
 export { default as RangeIcon } from './RangeIcon';
 export { default as SaltIcon } from './SaltIcon';
-export { default as SearchIcon } from './SearchIcon';
 export { default as SoilTypeIcon } from './SoilTypeIcon';
 export { default as SunIcon } from './SunIcon';

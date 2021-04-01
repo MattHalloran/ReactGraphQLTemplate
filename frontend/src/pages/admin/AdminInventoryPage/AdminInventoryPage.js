@@ -4,7 +4,6 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import { StyledAdminInventoryPage } from './AdminInventoryPage.styled';
 import PropTypes from 'prop-types';
 import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
@@ -29,6 +28,11 @@ const useStyles = makeStyles((theme) => ({
     toggleBar: {
         background: theme.palette.primary.light,
         color: theme.palette.primary.contrastText,
+    },
+    cardFlex: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        alignItems: 'stretch',
     },
 }));
 
@@ -185,7 +189,7 @@ function AdminInventoryPage() {
     }
 
     return (
-        <StyledAdminInventoryPage id="page">
+        <div id="page">
             <Modal scrollable={true} open={currPlant !== null} onClose={() => setCurrPlant(null)}>
                 <PlantPopup session={session} plant={currPlant} trait_options={trait_options} />
             </Modal>
@@ -224,7 +228,7 @@ function AdminInventoryPage() {
                 </Tabs>
             </AppBar>
             <TabPanel value={currTab} index={0}>
-                <div className="card-flex">
+                <div className={classes.cardFlex}>
                     {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)}
@@ -232,14 +236,14 @@ function AdminInventoryPage() {
                 </div>
             </TabPanel>
             <TabPanel value={currTab} index={1}>
-                <div className="card-flex">
+                <div className={classes.cardFlex}>
                     {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)}
                         thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
             </TabPanel>
-        </StyledAdminInventoryPage >
+        </div >
     );
 }
 
@@ -276,6 +280,14 @@ const popupStyles = makeStyles((theme) => ({
     },
     selected: {
 
+    },
+    displayImage: {
+        border: '1px solid black',
+        maxWidth: '100%',
+        maxWidth: '-webkit-fill-available',
+        maxHeight: '100%',
+        maxHeight: '-webkit-fill-available',
+        bottom: 0,
     },
 }));
 
@@ -431,9 +443,9 @@ function PlantPopup({
     }
     let display_image;
     if (image_data) {
-        display_image = <img src={image_data} className="display-image" alt="TODO" />
+        display_image = <img src={image_data} className={classes.displayImage} alt="TODO" />
     } else {
-        display_image = <NoImageIcon className="display-image" />
+        display_image = <NoImageIcon className={classes.displayImage} />
     }
 
     const attribute_meta = {

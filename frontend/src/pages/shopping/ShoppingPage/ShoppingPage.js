@@ -1,13 +1,12 @@
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StyledShoppingPage } from './ShoppingPage.styled';
 import SearchBar from '../../../components/SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import Selector from 'components/Selector/Selector';
 import PubSub from 'utils/pubsub';
-import { Container, Button, SwipeableDrawer, Checkbox, FormControlLabel, FormLabel, FormControl, FormGroup } from '@material-ui/core';
+import { Switch, Container, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -18,14 +17,11 @@ const useStyles = makeStyles((theme) => ({
         minWidth: 400,
     },
     formControl: {
-        margin: theme.spacing(2),
-    },
-    optionsContainer: {
-        width: 'fit-content',
+        display: 'flex',
         justifyContent: 'center',
-    },
-    options: {
-        margin: 2,
+        '& > *': {
+            margin: theme.spacing(1),
+        },
     },
 }));
 
@@ -35,7 +31,7 @@ function ShoppingPage() {
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
-    const [showCurrentlyUnavailable, setShowCurrentlyUnavailable] = useState(false);
+    const [hideOutOfStock, setHideOutOfStock] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
@@ -82,8 +78,8 @@ function ShoppingPage() {
         setFilters(modified_filters)
     }, [filters])
 
-    const handleCurrentlyUnavailableChange = useCallback((event) => {
-        setShowCurrentlyUnavailable(event.target.checked);
+    const handleHideChange = useCallback((event) => {
+        setHideOutOfStock(event.target.checked);
     }, [filters])
 
     const filtersToSelector = (field, title, onChange) => {
@@ -116,9 +112,9 @@ function ShoppingPage() {
     }
 
     let optionsContainer = (
-        <Container className={classes.optionsContainer}>
-            <Button className={classes.options} color="secondary" onClick={resetSearchConstraints}>Reset</Button>
-            <Button className={classes.options} color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
+        <Container className={classes.formControl}>
+            <Button color="secondary" onClick={resetSearchConstraints}>Reset</Button>
+            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
         </Container>
     );
 
@@ -139,10 +135,10 @@ function ShoppingPage() {
     ]
 
     return (
-        <StyledShoppingPage id='page'>
+        <div id='page'>
             <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
                 {optionsContainer}
-                <div className="shopping-menu">
+                <div>
                     <Selector
                         fullWidth
                         options={SORT_OPTIONS}
@@ -159,17 +155,22 @@ function ShoppingPage() {
                 </div>
                 {optionsContainer}
             </SwipeableDrawer>
-            <FormControlLabel
-                control={
-                    <Checkbox className="unavailable-checkbox"
-                        checked={showCurrentlyUnavailable}
-                        onChange={handleCurrentlyUnavailableChange} />
-                }
-                label="Show Currently Unavailable" />
-            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
-            <Button color="secondary" onClick={printAvailability}>Print Availability</Button>
-            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable} />
-        </StyledShoppingPage>
+            <div className={classes.formControl}>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={hideOutOfStock}
+                            onChange={handleHideChange}
+                            color="secondary"
+                        />
+                    }
+                    label="Hide out of stock"
+                />
+                <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
+                <Button color="secondary" onClick={printAvailability}>Print Availability</Button>
+            </div>
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} hideOutOfStock={hideOutOfStock} />
+        </div>
     );
 }
 

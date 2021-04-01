@@ -96,10 +96,10 @@ function ContactInfo({
                 } />
             </BottomNavigation>
             <Grid container spacing={2} justifyContent="center">
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
                     <Button fullWidth>Contact Form</Button>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
                     <Button fullWidth>Give Feedback</Button>
                 </Grid>
             </Grid>

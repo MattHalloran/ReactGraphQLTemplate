@@ -28,7 +28,7 @@ function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
-    showUnavailable,
+    hideOutOfStock,
     searchString = '',
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
@@ -101,7 +101,7 @@ function ShoppingList({
     useEffect(() => {
         //First, determine if plants without availability shall be shown
         let visible_plants = loaded_plants;
-        if (!showUnavailable) {
+        if (hideOutOfStock) {
             visible_plants = loaded_plants?.filter(plant => {
                 if (plant.skus.length === 0) return true;
                 return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
@@ -156,7 +156,7 @@ function ShoppingList({
             }
         }
         setPlants(filtered_plants);
-    }, [loaded_plants, filters, searchString, showUnavailable])
+    }, [loaded_plants, filters, searchString, hideOutOfStock])
 
     const loadNextPage = useCallback(() => {
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
