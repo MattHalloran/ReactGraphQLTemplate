@@ -13,23 +13,19 @@ const useStyles = makeStyles((theme) => ({
             display: "none",
      }
     },
-    minus: {
+    button: {
         minWidth: 30,
-        borderRadius: '5px 0 0 5px',
         width: '20%',
-        background: theme.palette.secondary.dark,
+        background: theme.palette.secondary.main,
         '&:hover': {
-            background: theme.palette.secondary.main,
+            background: theme.palette.secondary.dark,
         }
     },
+    minus: {
+        borderRadius: '5px 0 0 5px',
+    },
     plus: {
-        minWidth: 30,
         borderRadius: '0 5px 5px 0',
-        width: '20%',
-        background: theme.palette.secondary.dark,
-        '&:hover': {
-            background: theme.palette.secondary.main,
-        }
     },
 }));
 
@@ -91,7 +87,7 @@ function QuantityBox({
     return (
         <div has_error={error?.length > 0} {...props}>
             <IconButton
-                className={classes.minus}
+                className={`${classes.button} ${classes.minus}`}
                 aria-label='minus'
                 onClick={() => updateValue(value*1 - step)}
                 onTouchStart={() => startTouch(false)}
@@ -110,7 +106,7 @@ function QuantityBox({
                 onChange={(e) => updateValue(e.target.value)}
             />
             <IconButton
-                className={classes.plus}
+                className={`${classes.button} ${classes.plus}`}
                 aria-label='plus'
                 onClick={() => updateValue(value*1 + step)}
                 onTouchStart={() => startTouch(true)}

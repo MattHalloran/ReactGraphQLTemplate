@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Navbar from 'components/Navbar/Navbar';
 import IconNav from 'components/IconNav/IconNav';
-import Spinner from 'components/Spinner/Spinner';
 import Footer from 'components/Footer/Footer';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
@@ -9,7 +8,7 @@ import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
 import { getSession, getCart, getTheme } from './utils/storage';
 import { checkCookies } from 'query/http_promises';
-import { CssBaseline } from '@material-ui/core';
+import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
@@ -32,6 +31,13 @@ const useStyles = makeStyles((theme) => ({
     contentWrap: {
         minHeight: '100vh',
     },
+    spinner: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: '100000',
+    },
 }));
 
 const keyMap = {
@@ -49,6 +55,7 @@ function App() {
     const [user_roles, setUserRoles] = useState(null);
     const [cart, setCart] = useState(getCart());
     const [popup_open, setPopupOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handlers = {
         OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
@@ -70,12 +77,14 @@ function App() {
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
+        let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(popupSub);
+            PubSub.unsubscribe(loadingSub);
         })
     }, [])
 
@@ -96,7 +105,11 @@ function App() {
                     <main id="page-container" className={classes.pageContainer}>
                         <div id="content-wrap" className={classes.contentWrap}>
                             <Navbar session={session} user_roles={user_roles} cart={cart} />
-                            <Spinner spinning={false} />
+                            {loading ? 
+                                <div className={classes.spinner}>
+                                    <CircularProgress size={100} /> 
+                                </div>
+                            : null}
                             <Routes session={session} user_roles={user_roles} />
                         </div>
                         <IconNav cart={cart} />
