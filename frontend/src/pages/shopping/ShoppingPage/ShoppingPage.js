@@ -35,7 +35,7 @@ function ShoppingPage() {
     let history = useHistory();
 
     useEffect(() => {
-        document.title = `Shop | ${BUSINESS_NAME}`;
+        document.title = `Shop | ${BUSINESS_NAME.Short}`;
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });

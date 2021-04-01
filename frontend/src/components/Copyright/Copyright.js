@@ -1,6 +1,6 @@
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
-import { WEBSITE_URL, FULL_BUSINESS_NAME, LINKS } from 'utils/consts';
+import { WEBSITE_URL, BUSINESS_NAME, LINKS } from 'utils/consts';
 
 function Copyright({
     ...props
@@ -9,7 +9,7 @@ function Copyright({
       <Typography {...props} variant="body2" color="textSecondary" align="center">
         {`© ${new Date().getFullYear()} `}
         <Link color="inherit" href={WEBSITE_URL}>
-          {FULL_BUSINESS_NAME}
+          {BUSINESS_NAME.Long}
         </Link>
         {' | '}
         <Link color="inherit" href={LINKS.PrivacyPolicy}>

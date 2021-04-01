@@ -6,7 +6,7 @@ import FeaturedPlants from 'components/FeaturedPlants/FeaturedPlants';
 function HomePage() {
 
     useLayoutEffect(() => {
-        document.title = `Home | ${BUSINESS_NAME}`;
+        document.title = `Home | ${BUSINESS_NAME.Short}`;
     }, [])
 
     return (

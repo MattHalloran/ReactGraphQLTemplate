@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { FULL_BUSINESS_NAME, LINKS } from 'utils/consts';
+import { BUSINESS_NAME, LINKS } from 'utils/consts';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Hamburger from './Hamburger';
@@ -106,9 +106,9 @@ function Navbar({
                 <Toolbar>
                     <div className={classes.navLogoContainer} onClick={() => history.push(LINKS.Home)}>
                         <div className={classes.navLogoDiv}>
-                            <img src={Logo} alt={`${FULL_BUSINESS_NAME} Logo`} className={classes.navLogo} />
+                            <img src={Logo} alt={`${BUSINESS_NAME.Short} Logo`} className={classes.navLogo} />
                         </div>
-                        <Typography className={classes.navName} variant="h6" noWrap>{FULL_BUSINESS_NAME}</Typography>
+                        <Typography className={classes.navName} variant="h6" noWrap>{BUSINESS_NAME.Short}</Typography>
                     </div>
                     <div className={classes.toRight}>
                         {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}

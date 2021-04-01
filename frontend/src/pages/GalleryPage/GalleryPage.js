@@ -161,7 +161,7 @@ function GalleryPage() {
     }, [track_scrolling_id, loadNextPage])
 
     useLayoutEffect(() => {
-        document.title = `Gallery | ${BUSINESS_NAME}`;
+        document.title = `Gallery | ${BUSINESS_NAME.Short}`;
         document.addEventListener('scroll', checkScroll);
         return (() => document.removeEventListener('scroll', checkScroll));
     })

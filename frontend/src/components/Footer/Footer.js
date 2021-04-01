@@ -1,10 +1,11 @@
 import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
-import { FULL_BUSINESS_NAME, GOOGLE_MAPS_ADDRESS, LINKS } from 'utils/consts';
+import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, LINKS } from 'utils/consts';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
-import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
+import BusinessIcon from '@material-ui/icons/Business';
 import PhoneIcon from '@material-ui/icons/Phone';
 import PrintIcon from '@material-ui/icons/Print';
 import EmailIcon from '@material-ui/icons/Email';
@@ -82,6 +83,20 @@ const useStyles = makeStyles((theme) => ({
 function Footer({
 }) {
     const classes = useStyles();
+
+    const contactLinks = [
+        ['address', 'View in Google Maps', ADDRESS.Link, ADDRESS.Label, BusinessIcon],
+        ['contact-phone', 'Call Us', PHONE.Link, PHONE.Label, PhoneIcon],
+        ['contact-fax', 'Fax Us', FAX.Link, FAX.Label, PrintIcon],
+        ['contact-email', 'Email Us', EMAIL.Link, EMAIL.Label, EmailIcon],
+    ]
+
+    const bottomImages = [
+        ["https://www.provenwinners.com/", "We Sell Proven Winners - The #1 Plant Brand", ProvenWinners],
+        ["https://www.americanhort.org/", "Proud member of the AmericanHort", AmericanHort],
+        ["https://www.njnla.org/", "Proud member of the New Jersey Nursery and Landscape Association", NJNLA],
+    ]
+
     return (
         <div className={classes.root}>
             <Grid container justifyContent='center' spacing={1}>
@@ -117,46 +132,31 @@ function Footer({
                 <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="h5" >
-                            <ListItemText className={classes.upper} primary={FULL_BUSINESS_NAME} />
+                            <ListItemText className={classes.upper} primary={BUSINESS_NAME.Long} />
                         </ListItem>
-                        <ListItem button component="a" aria-label="address" href={GOOGLE_MAPS_ADDRESS} >
-                            <ListItemText primary="106 South Woodruff Road Bridgeton, NJ 08302" />
-                        </ListItem>
-                        <ListItem button component="a" aria-label="contact-phone" href='tel:+18564553601' >
-                            <ListItemIcon>
-                                <PhoneIcon className={classes.icon} />
-                            </ListItemIcon>
-                            <ListItemText primary="(856) 455-3601" />
-                        </ListItem>
-                        <ListItem button component="a" aria-label="contact-fax" href='tel:+18564511530' >
-                            <ListItemIcon>
-                                <PrintIcon className={classes.icon} />
-                            </ListItemIcon>
-                            <ListItemText primary="(856) 451-1530" />
-                        </ListItem>
-                        <ListItem button component="a" aria-label="contact-email" href='mailto:info@newlifenurseryinc.com' >
-                            <ListItemIcon>
-                                <EmailIcon className={classes.icon} />
-                            </ListItemIcon>
-                            <ListItemText primary="info@newlifenurseryinc.com" />
-                        </ListItem>
+                        {contactLinks.map(([label, tooltip, src, text, Icon]) => (
+                            <Tooltip title={tooltip}>
+                                <ListItem button component="a" aria-label={label} href={src}>
+                                    <ListItemIcon>
+                                        <Icon className={classes.icon} ></Icon>
+                                    </ListItemIcon>
+                                    <ListItemText primary={text} />
+                                </ListItem>
+                            </Tooltip>
+                        ))}
                     </List>
                 </Grid>
-                <Grid item xs={4}>
-                    <ButtonBase className={classes.imageContainer}>
-                        <a href="https://www.provenwinners.com/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="We Sell Proven Winners - The #1 Plant Brand" src={ProvenWinners} /></a>
-                    </ButtonBase>
-                </Grid>
-                <Grid item xs={4}>
-                    <ButtonBase className={classes.imageContainer}>
-                        <a href="https://www.americanhort.org/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="Proud member of the AmericanHort" src={AmericanHort} /></a>
-                    </ButtonBase>
-                </Grid>
-                <Grid item xs={4}>
-                    <ButtonBase className={classes.imageContainer}>
-                        <a href="https://www.njnla.org/" target="_blank" rel="noopener noreferrer"><img className={classes.image} alt="Proud member of the New Jersey Nursery and Landscape Association" src={NJNLA} /></a>
-                    </ButtonBase>
-                </Grid>
+                {bottomImages.map(([src, alt, img]) => (
+                    <Grid item xs={4}>
+                        <Tooltip title={alt}>
+                            <ButtonBase className={classes.imageContainer}>
+                                <a href={src} target="_blank" rel="noopener noreferrer">
+                                    <img className={classes.image} alt={alt} src={img} />
+                                </a>
+                            </ButtonBase>
+                        </Tooltip>
+                    </Grid>
+                ))}
             </Grid>
             <Copyright className={classes.copyright} />
         </div>

@@ -61,7 +61,7 @@ function ProfileForm(props) {
 
     useLayoutEffect(() => {
         let mounted = true;
-        document.title = `Profile | ${BUSINESS_NAME}`;
+        document.title = `Profile | ${BUSINESS_NAME.Short}`;
         if (!session) return;
         getProfileInfo(session, session.tag).then(response => {
             if (!mounted || editing) return;

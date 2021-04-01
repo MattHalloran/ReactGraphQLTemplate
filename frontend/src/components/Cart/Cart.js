@@ -78,7 +78,7 @@ function Cart({
     }, [cart])
 
     useLayoutEffect(() => {
-        document.title = `Cart | ${BUSINESS_NAME}`;
+        document.title = `Cart | ${BUSINESS_NAME.Short}`;
     })
 
     const handleSelectAllClick = (event) => {

@@ -1,8 +1,8 @@
 import RoomIcon from '@material-ui/icons/Room';
 import EmailIcon from '@material-ui/icons/Email';
 import PhoneIcon from '@material-ui/icons/Phone';
-import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
+import { ADDRESS, PHONE, EMAIL } from 'utils/consts';
+import { Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid, Icon } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -37,18 +37,8 @@ function ContactInfo({
 }) {
     const classes = useStyles();
 
-    const openMaps = (e) => {
-        window.location = GOOGLE_MAPS_ADDRESS;
-        e.preventDefault();
-    }
-
-    const openMail = (e) => {
-        window.location = "mailto:info@newlifenurseryinc.com";
-        e.preventDefault();
-    }
-
-    const openPhone = (e) => {
-        window.location = "tel:+18564553601";
+    const openLink = (e, link) => {
+        window.location = link;
         e.preventDefault();
     }
 
@@ -56,6 +46,12 @@ function ContactInfo({
         'MON-FRI: 8:00 am to 3:00 pm',
         'SAT-SUN: Closed',
         'Note: Closed daily from 12:00 pm to 1:00 pm',
+    ]
+
+    const contactInfo = [
+        [ADDRESS.Label, ADDRESS.Link, RoomIcon],
+        [PHONE.Label, PHONE.Link, PhoneIcon],
+        [EMAIL.Label, EMAIL.Link, EmailIcon]
     ]
 
     return (
@@ -79,21 +75,13 @@ function ContactInfo({
                 </Table>
             </TableContainer>
             <BottomNavigation className={classes.nav} showLabels>
-                <BottomNavigationAction className={classes.navAction} label="106 South Woodruff Road Bridgeton, NJ 08302" onClick={openMaps} icon={
-                    <IconButton className={classes.iconButton}>
-                        <RoomIcon />
-                    </IconButton>
-                } />
-                <BottomNavigationAction className={classes.navAction} label="info@newlifenurseryinc.com" onClick={openMail} icon={
-                    <IconButton className={classes.iconButton}>
-                        <EmailIcon />
-                    </IconButton>
-                } />
-                <BottomNavigationAction className={classes.navAction} label="(856) 455-3601" onClick={openPhone} icon={
-                    <IconButton className={classes.iconButton}>
-                        <PhoneIcon />
-                    </IconButton>
-                } />
+                {contactInfo.map(([label, link, Icon]) => (
+                    <BottomNavigationAction className={classes.navAction} label={label} onClick={(e) => openLink(e, link)} icon={
+                        <IconButton className={classes.iconButton}>
+                            <Icon />
+                        </IconButton>
+                    } />
+                ))}
             </BottomNavigation>
             <Grid container spacing={2} justifyContent="center">
                 <Grid item xs={6}>
@@ -106,8 +94,5 @@ function ContactInfo({
         </div>
     );
 }
-
-ContactInfo.propTypes = {
-            }
 
 export default ContactInfo;

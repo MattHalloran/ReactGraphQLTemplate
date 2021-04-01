@@ -47,7 +47,7 @@ function CartPage() {
     }, [])
 
     useLayoutEffect(() => {
-        document.title = `Cart | ${BUSINESS_NAME}`;
+        document.title = `Cart | ${BUSINESS_NAME.Short}`;
     })
 
     const updateOrder = () => {
@@ -71,14 +71,14 @@ function CartPage() {
             alert('Cannot finalize order: cart is empty');
             return;
         }
-        if (!window.confirm('This will submit the order to New Life Nursery. We will contact you for further information. Are you sure you want to continue?')) return;
+        if (!window.confirm(`This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`)) return;
         submitOrder(session, changedCart)
             .then(() => {
                 alert('Order submitted! We will be in touch with you soon :)')
             })
             .catch(err => {
                 console.error(err);
-                alert('Failed to submit order. Please contact New Life Nursery');
+                alert(`Failed to submit order. Please contact ${BUSINESS_NAME.Short}`);
             })
     }, [cart, changedCart, session]);
 

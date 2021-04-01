@@ -17,7 +17,7 @@ function NotFoundPage() {
     const classes = useStyles();
 
     useLayoutEffect(() => {
-        document.title = `404 | ${BUSINESS_NAME}`;
+        document.title = `404 | ${BUSINESS_NAME.Short}`;
     })
 
     return (

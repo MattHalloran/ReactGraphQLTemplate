@@ -6,7 +6,7 @@ import PolicyBreadcrumbs from 'components/breadcrumbs/PolicyBreadcrumbs/PolicyBr
 function TermsPage() {
 
     useLayoutEffect(() => {
-        document.title = `Terms & Conditions | ${BUSINESS_NAME}`;
+        document.title = `Terms & Conditions | ${BUSINESS_NAME.Short}`;
     })
 
     return (
@@ -39,7 +39,7 @@ function TermsPage() {
                 <li>All plants travel at the expense and risk of the purchaser. We are not liable for material damaged while unloading or after delivery.</li>
                 <li>Please report claims within 48 hours of delivery. Damaged material must be returned to carrier in order to receive credit. Short counts and/or transit damage must be noted on the original invoice before the truck departs your location, and must be clearly noted with driver’s signature.</li>
                 <li>All pickups must be arranged at least one day in advance.</li>
-                <li>Shipping must be paid C.O.D. to carrier and can be arranged by New Life Nursery upon request.</li>
+                <li>Shipping must be paid C.O.D. to carrier and can be arranged by {BUSINESS_NAME.Long} upon request.</li>
                 <li>Spring orders must be shipped or picked up prior to April 15th, or the order may be released.</li>
             </ul>
         </div>

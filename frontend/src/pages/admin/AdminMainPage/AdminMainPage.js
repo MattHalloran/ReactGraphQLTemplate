@@ -27,7 +27,7 @@ function AdminMainPage() {
     const classes = useStyles();
 
     useLayoutEffect(() => {
-        document.title = `Admin Portal | ${BUSINESS_NAME}`;
+        document.title = `Admin Portal | ${BUSINESS_NAME.Short}`;
     }, [])
 
     const card_data = [
