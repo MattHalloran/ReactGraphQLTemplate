@@ -51,6 +51,7 @@ function Cart({
 }) {
     const classes = useStyles();
     const [cartState, setCartState] = useState({
+        ...cart,
         items: cart?.items ?? [],
         is_delivery: cart?.is_delivery ?? true,
         desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
@@ -188,7 +189,6 @@ function Cart({
                 <TableCell className={classes.tableCol} align="right">{display_price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
                     <QuantityBox
-                        className="quant"
                         min_value={0}
                         max_value={data.sku?.quantity ?? 100}
                         initial_value={quantity}

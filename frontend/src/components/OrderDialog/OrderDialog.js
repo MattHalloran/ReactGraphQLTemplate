@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: theme.spacing(2),
         flex: 1,
     },
+    container: {
+        padding: theme.spacing(1),
+    },
     optionsContainer: {
         width: 'fit-content',
         justifyContent: 'center',
@@ -41,54 +44,62 @@ function OrderDialog({
     console.log('ORDER POPUP', order);
     const classes = useStyles();
     // Holds order changes before update is final
-    const [changedOrder, setChangedOrder] = useState(order);
-    const [session, setSession] = useState(getSession());
+    const [session] = useState(getSession());
 
     const orderUpdate = (data) => {
-        setChangedOrder(data);
+        order = data;
     }
 
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
+            console.log('oh no oh no oh no no no no no ')
             alert('Error: Could not update order!');
             return;
         }
-        updateCart(session, session.tag, changedOrder)
+        updateCart(session, session.tag, order)
             .then(() => {
                 alert('Order updated')
             })
             .catch(err => {
-                console.error(err, changedOrder);
+                console.error(err, order);
                 alert('Error: Could not update order!');
                 return;
             })
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder?.id, ORDER_STATUS.APPROVED)
+        setOrderStatus(session, order?.id, ORDER_STATUS.APPROVED)
             .then(() => {
                 alert('Order status set to \'Approved\'')
             }).catch(err => {
                 console.error(err);
                 alert('Error: could not approve order!')
             })
-    }, [changedOrder])
+    }, [order])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder?.id, ORDER_STATUS.REJECTED)
+        setOrderStatus(session, order?.id, ORDER_STATUS.REJECTED)
             .then(() => {
                 alert('Order status set to \'Denied\'')
             }).catch(err => {
                 console.error(err);
                 alert('Error: could not approve order!')
             })
-    }, [changedOrder])
+    }, [order])
 
     let status_string;
     let status_index = findWithAttr(ORDER_STATES, 'value', order?.status);
     if (status_index >= 0) {
         status_string = `Status: ${ORDER_STATES[status_index].label}`
     }
+
+    let buttons = (
+        <Container className={classes.optionsContainer}>
+            <Button startIcon={<UpdateIcon />} onClick={updateOrder}>Update</Button>
+            <Button startIcon={<ThumbUpIcon />} onClick={approveOrder}>Approve</Button>
+            <Button startIcon={<ThumbDownIcon />} onClick={denyOrder}>Deny</Button>
+        </Container>
+    );
 
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
@@ -99,22 +110,21 @@ function OrderDialog({
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
                         {order?.customer?.first_name} {order?.customer?.last_name}'s Order
-                        </Typography>
-                    <Container className={classes.optionsContainer}>
-                        <Button startIcon={<UpdateIcon />} onClick={updateOrder}>Update</Button>
-                        <Button startIcon={<ThumbUpIcon />} onClick={approveOrder}>Approve</Button>
-                        <Button startIcon={<ThumbDownIcon />} onClick={denyOrder}>Deny</Button>
-                    </Container>
+                    </Typography>
+                    {buttons}
                 </Toolbar>
             </AppBar>
-            <p>{status_string}</p>
-            <Cart cart={changedOrder} onUpdate={orderUpdate} />
+            <div className={classes.container}>
+                <Typography variant="body1" gutterBottom>{status_string}</Typography>
+                <Cart cart={order} onUpdate={orderUpdate} />
+                {buttons}
+            </div>
         </Dialog>
     );
 }
 
 OrderDialog.propTypes = {
-    order: PropTypes.object.isRequired,
+    order: PropTypes.object,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,
 }

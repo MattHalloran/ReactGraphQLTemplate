@@ -14,6 +14,7 @@ import Selector from 'components/Selector/Selector';
 import PlantCard from 'components/PlantCard/PlantCard';
 import { Tooltip, Typography, Grid, IconButton } from '@material-ui/core';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import PlantDialog from 'components/PlantDialog/PlantDialog';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +36,6 @@ function ShoppingList({
     const classes = useStyles();
     const [session, setSession] = useState(getSession());
     const [cart, setCart] = useState(getCart());
-    const [popup, setPopup] = useState(null);
     // Plant data for every loaded plant
     const [loaded_plants, setLoadedPlants] = useState([]);
     const all_plant_ids = useRef([]);
@@ -218,24 +218,13 @@ function ShoppingList({
             })
     }
 
-    useEffect(() => {
-        if (curr_index < 0) {
-            setPopup(null);
-            return;
-        }
-        let popup_data = plants[curr_index];
-        setPopup(
-            <Modal scrollable={true} onClose={() => history.goBack()}>
-                <ExpandedPlant plant={popup_data}
-                    thumbnail={thumbnails?.length >= curr_index ? thumbnails[curr_index] : null}
-                    onCart={setInCart} />
-            </Modal>
-        );
-    }, [plants, curr_index])
-
     return (
         <div className={classes.root} id={track_scrolling_id}>
-            {popup}
+            <PlantDialog
+                plant={curr_index >= 0 ? plants[curr_index] : null}
+                onCart={setInCart}
+                open={curr_index >= 0}
+                onClose={() => history.goBack()} />
             {plants?.map((item, index) =>
                 <PlantCard key={index}
                     cart={cart}
@@ -255,164 +244,3 @@ ShoppingList.propTypes = {
 };
 
 export default ShoppingList;
-
-const popupStyles = makeStyles((theme) => ({
-    header: {
-        textAlign: 'center',
-    },
-    left: {
-        width: '50%',
-        height: '80%',
-        float: 'left',
-    },
-    right: {
-        width: '50%',
-        height: '80%',
-        float: 'right',
-    },
-    bottom: {
-        width: '100%',
-        height: '20%',
-        alignItems: 'center',
-    },
-    displayImage: {
-        display: 'block',
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        bottom: '0%',
-    },
-}));
-
-function ExpandedPlant({
-    plant,
-    thumbnail,
-    onCart,
-}) {
-    console.log('EXPANDED PLANT', plant)
-    const classes = popupStyles();
-    const [quantity, setQuantity] = useState(1);
-    const [image, setImage] = useState(null);
-
-    useEffect(() => {
-        getImage(plant.display_id, 'l').then(response => {
-            setImage(response.image);
-        }).catch(error => {
-            console.error(error);
-        })
-    }, [])
-
-    let order_options = plant.skus?.map(s => {
-        return {
-            label: `#${s.size} : ${displayPrice(s.price)}`,
-            value: s
-        }
-    });
-    const [selected, setSelected] = useState(order_options[0].value);
-
-    let display_image;
-    if (image) {
-        display_image = <img src={`data:image/jpeg;base64,${image}`} className={classes.displayImage} alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className={classes.displayImage} />
-    }
-
-    const traitIconList = (field, Icon, title, alt) => {
-        if (!plant || !plant[field]) return null;
-        if (!alt) alt = title;
-        let field_string;
-        if (Array.isArray(plant[field])) {
-            field_string = plant[field].map((f) => f.value).join(', ')
-        } else {
-            field_string = plant[field].value;
-        }
-        return (
-            <div>
-                <Tooltip title={title}>
-                    <Icon width="25px" height="25px" title={title} alt={alt} />
-                    <p>: {field_string}</p>
-                </Tooltip>
-            </div>
-        )
-    }
-
-    return (
-        <div>
-            <div className={classes.header}>
-                <Typography gutterBottom variant="h4" component="h1">{plant.latin_name}</Typography>
-                <Typography gutterBottom variant="h5" component="h2">{plant.common_name}</Typography>
-            </div>
-            <div className={classes.left}>
-                {display_image}
-            </div>
-            <div className={classes.right}>
-                {plant.description ?
-                    <Collapsible style={{ height: '20%' }} title="Description">
-                        <p>{plant.description}</p>
-                    </Collapsible>
-                    : null}
-                <Collapsible style={{ height: '30%' }} title="General Information">
-                    <div>
-                        {/* TODO availability, sizes */}
-                    </div>
-                    <div>
-                        <p>General</p>
-                        {traitIconList("zones", MapIcon, "Zones")}
-                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                    </div>
-                    <div>
-                        <p>Bloom</p>
-                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                    </div>
-                    <div>
-                        <p>Light</p>
-                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                    </div>
-                    <div>
-                        <p>Soil</p>
-                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                    </div>
-                </Collapsible>
-            </div>
-                <Grid className={classes.bottom} container spacing={1}>
-                    <Grid item xs={6}>
-                        <Selector
-                            fullWidth
-                            options={order_options}
-                            selected={selected}
-                            handleChange={(e) => setSelected(e.target.value)}
-                            inputAriaLabel='size-selector-label'
-                            label="Size" />
-                    </Grid>
-                    <Grid item xs={5}>
-                        <QuantityBox
-                            min_value={0}
-                            max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
-                            initial_value={1}
-                            value={quantity}
-                            valueFunc={setQuantity} />
-                    </Grid>
-                    <Grid item xs={1}>
-                        <IconButton onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected, 'ADD', quantity)}>
-                            <AddShoppingCartIcon />
-                        </IconButton>
-                    </Grid>
-                </Grid>
-        </div>
-    );
-}
-
-ExpandedPlant.propTypes = {
-    plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.string,
-    onCart: PropTypes.func.isRequired
-};
-
-export { ExpandedPlant };

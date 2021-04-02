@@ -6,6 +6,9 @@ import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+    },
     main: {
         background: theme.palette.primary.contrastText,
         width: '60%',
@@ -85,7 +88,7 @@ function QuantityBox({
     }
 
     return (
-        <div has_error={error?.length > 0} {...props}>
+        <div className={classes.root} has_error={error?.length > 0} {...props}>
             <IconButton
                 className={`${classes.button} ${classes.minus}`}
                 aria-label='minus'

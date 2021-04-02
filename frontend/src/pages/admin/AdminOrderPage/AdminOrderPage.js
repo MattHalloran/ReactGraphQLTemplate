@@ -1,16 +1,9 @@
-import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
+import { useLayoutEffect, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getSession } from 'utils/storage';
 import { getOrders } from 'query/http_promises';
-import Modal from 'components/wrappers/StyledModal/StyledModal';
-import { Button, Card, CardActions, CardContent, Typography, Container } from '@material-ui/core';
-import Cart from 'components/Cart/Cart';
-import { updateCart, setOrderStatus } from 'query/http_promises';
-import { findWithAttr } from 'utils/arrayTools';
-import { ORDER_STATUS, ORDER_STATES } from 'utils/consts';
-import UpdateIcon from '@material-ui/icons/Update';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import { Button, Card, CardActions, CardContent, Typography } from '@material-ui/core';
+import { ORDER_STATES } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import Selector from 'components/Selector/Selector';
@@ -48,10 +41,10 @@ function AdminOrderPage() {
 
     return (
         <div id="page">
-            <OrderDialog 
+            {currOrder ? (<OrderDialog 
                 order={currOrder}
                 open={currOrder !== null}
-                onClose={() => setCurrOrder(null)} />
+                onClose={() => setCurrOrder(null)} />) : null}
             <AdminBreadcrumbs />
             <Selector
                 fullWidth

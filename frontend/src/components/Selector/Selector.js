@@ -36,7 +36,7 @@ function Selector({
         let formatted_select = [];
         for (let i = 0; i < select_arr.length; i++) {
             let curr_select = select_arr[i];
-            let curr_select_val = (_.isString(curr_select) || _.isNumber(curr_select)) ? curr_select : curr_select.value;
+            let curr_select_val = (_.isString(curr_select) || _.isNumber(curr_select)) ? curr_select : curr_select?.value;
             for(let j = 0; j < options.length; j++) {
                 let curr_option = options[j];
                 if (curr_option.value === curr_select_val) {
