@@ -19,9 +19,9 @@ const useStyles = makeStyles((theme) => ({
     optionsContainer: {
         width: 'fit-content',
         justifyContent: 'center',
-    },
-    options: {
-        margin: 2,
+        '& > *': {
+            margin: theme.spacing(1),
+        },
     },
 }));
 
@@ -89,9 +89,9 @@ function CartPage() {
             </div>
             <Cart cart={cart} onUpdate={cartUpdate} />
             <Container className={classes.optionsContainer}>
-                <Button className={classes.options} startIcon={<ArrowBackIcon />} onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
-                <Button className={classes.options} startIcon={<UpdateIcon />} onClick={updateOrder}>Update Order</Button>
-                <Button className={classes.options} endIcon={<ArrowForwardIcon />} onClick={finalizeOrder}>Request Quote</Button>
+                <Button startIcon={<ArrowBackIcon />} onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
+                <Button startIcon={<UpdateIcon />} onClick={updateOrder}>Update Order</Button>
+                <Button endIcon={<ArrowForwardIcon />} onClick={finalizeOrder}>Request Quote</Button>
             </Container>
         </div>
     );

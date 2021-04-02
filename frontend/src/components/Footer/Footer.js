@@ -21,30 +21,6 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         paddingBottom: '7vh',
     },
-    footerGroup: {
-        padding: '0 10px',
-        minWidth: '150px',
-        height: 'auto',
-        'li': {
-            paddingBottom: '10px',
-        }
-    },
-    flexed: {
-        display: 'grid',
-        padding: '5px',
-        gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
-        gridGap: '10px',
-        '-webkit-align-items': 'stretch',
-        '-webkit-box-align': 'stretch',
-        '-ms-flex-align': 'stretch',
-        alignItems: 'stretch',
-        '> *': {
-            borderRight: `1px solid ${theme.palette.text.primary}`,
-        },
-        '> *:last-child': {
-            borderRight: 'none',
-        }
-    },
     upper: {
         textTransform: 'uppercase',
     },
@@ -57,26 +33,11 @@ const useStyles = makeStyles((theme) => ({
         maxHeight: 200,
         background: theme.palette.primary.contrastText,
     },
-    provenWinner: {
-        maxHeight: 'min(100%,150px)',
-        maxWidth: 'min(100%,150px)',
-        margin: 'auto',
-    },
     icon: {
         fill: theme.palette.primary.contrastText,
     },
     copyright: {
         color: theme.palette.primary.contrastText,
-    },
-    [theme.breakpoints.down("sm")]: {
-        footerGroup: {
-            border: `1px solid ${theme.palette.text.primary}`,
-        },
-        flexed: {
-            '> *:last-child': {
-                borderRight: `1px solid ${theme.palette.text.primary}`,
-            }
-        }
     },
 }));
 
@@ -135,7 +96,7 @@ function Footer({
                             <ListItemText className={classes.upper} primary={BUSINESS_NAME.Long} />
                         </ListItem>
                         {contactLinks.map(([label, tooltip, src, text, Icon]) => (
-                            <Tooltip title={tooltip}>
+                            <Tooltip title={tooltip} placement="left">
                                 <ListItem button component="a" aria-label={label} href={src}>
                                     <ListItemIcon>
                                         <Icon className={classes.icon} ></Icon>
@@ -148,7 +109,7 @@ function Footer({
                 </Grid>
                 {bottomImages.map(([src, alt, img]) => (
                     <Grid item xs={4}>
-                        <Tooltip title={alt}>
+                        <Tooltip title={alt} placement="bottom">
                             <ButtonBase className={classes.imageContainer}>
                                 <a href={src} target="_blank" rel="noopener noreferrer">
                                     <img className={classes.image} alt={alt} src={img} />

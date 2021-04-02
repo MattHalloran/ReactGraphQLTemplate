@@ -1,17 +1,20 @@
 import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { StyledOrderCard, StyledOrderPopup } from './AdminOrderPage.styled';
 import { getSession } from 'utils/storage';
 import { getOrders } from 'query/http_promises';
 import Modal from 'components/wrappers/StyledModal/StyledModal';
-import { Button } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, Typography, Container } from '@material-ui/core';
 import Cart from 'components/Cart/Cart';
 import { updateCart, setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
-import { ORDER_STATUS } from 'utils/consts';
+import { ORDER_STATUS, ORDER_STATES } from 'utils/consts';
+import UpdateIcon from '@material-ui/icons/Update';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import { makeStyles } from '@material-ui/core/styles';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import Selector from 'components/Selector/Selector';
+import OrderDialog from 'components/OrderDialog/OrderDialog';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
@@ -20,45 +23,6 @@ const useStyles = makeStyles((theme) => ({
         gridGap: '20px',
     },
 }));
-
-const ORDER_STATES = [
-    {
-        label: 'Canceled by Admin',
-        value: -4,
-    },
-    {
-        label: 'Canceled by User',
-        value: -3,
-    },
-    {
-        label: 'Pending Cancel',
-        value: -2,
-    },
-    {
-        label: 'Rejected',
-        value: -1,
-    },
-    {
-        label: 'Pending',
-        value: 1,
-    },
-    {
-        label: 'Approved',
-        value: 2,
-    },
-    {
-        label: 'Scheduled',
-        value: 3,
-    },
-    {
-        label: 'In Transit',
-        value: 4,
-    },
-    {
-        label: 'Delivered',
-        value: 5,
-    },
-]
 
 function AdminOrderPage() {
     const classes = useStyles();
@@ -82,15 +46,12 @@ function AdminOrderPage() {
             });
     }, [filter])
 
-    let popup = (currOrder) ? (
-        <Modal onClose={() => setCurrOrder(null)}>
-            <OrderPopup order={currOrder} />
-        </Modal>
-    ) : null;
-
     return (
         <div id="page">
-            {popup}
+            <OrderDialog 
+                order={currOrder}
+                open={currOrder !== null}
+                onClose={() => setCurrOrder(null)} />
             <AdminBreadcrumbs />
             <Selector
                 fullWidth
@@ -112,19 +73,46 @@ AdminOrderPage.propTypes = {
 
 export default AdminOrderPage;
 
+const cardStyles = makeStyles((theme) => ({
+    root: {
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
+        margin: theme.spacing(1),
+        padding: 10,
+        minWidth: 150,
+        minHeight: 50,
+        cursor: 'pointer',
+    },
+    button: {
+        color: theme.palette.primary.contrastText,
+    },
+}));
+
 function OrderCard({
     onEdit,
     customer,
     items,
     desired_delivery_date,
 }) {
+    const classes = cardStyles();
     items.map(i => console.log(i))
     return (
-        <StyledOrderCard className="card" onClick={onEdit} >
-            <p>{customer.first_name} {customer.last_name}</p>
-            <p>Requested Date: {new Date(desired_delivery_date).getDate()}</p>
-            <p>Items: {items.length}</p>
-        </StyledOrderCard>
+        <Card className={classes.root} onClick={onEdit}>
+            <CardContent>
+                <Typography variant="h6" component="h3" gutterBottom>
+                    {customer.first_name} {customer.last_name}
+                </Typography>
+                <Typography variant="body1" component="h4">
+                    Requested Date: {new Date(desired_delivery_date).getDate()}
+                </Typography>
+                <Typography variant="body1" component="h4">
+                    Items: {items.length}
+                </Typography>
+            </CardContent>
+            <CardActions>
+                <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
+            </CardActions>
+        </Card>
     );
 }
 
@@ -137,75 +125,39 @@ OrderCard.propTypes = {
     onClick: PropTypes.func,
 }
 
+// const popupStyles = makeStyles((theme) => ({
+//     root: {
+//         padding: theme.spacing(1),
+//     },
+//     optionsContainer: {
+//         width: 'fit-content',
+//         justifyContent: 'center',
+//         '& > *': {
+//             margin: theme.spacing(1),
+//         },
+//     },
+// }));
 
-function OrderPopup({
-    order,
-}) {
-    console.log('ORDER POPUP', order);
-    // Holds order changes before update is final
-    const [changedOrder, setChangedOrder] = useState(order);
-    const [session, setSession] = useState(getSession());
 
-    const orderUpdate = (data) => {
-        setChangedOrder(data);
-    }
+// function OrderPopup({
+//     order,
+// }) {
+    
 
-    const updateOrder = () => {
-        if (!session?.tag || !session?.token) {
-            alert('Error: Could not update order!');
-            return;
-        }
-        updateCart(session, session.tag, changedOrder)
-            .then(() => {
-                alert('Order updated')
-            })
-            .catch(err => {
-                console.error(err, changedOrder);
-                alert('Error: Could not update order!');
-                return;
-            })
-    }
+//     return (
+//         <div className={classes.root}>
+//             <p>Customer: {order.customer.first_name} {order.customer.last_name}</p>
+//             <p>{status_string}</p>
+//             <Cart cart={changedOrder} onUpdate={orderUpdate} />
+//             <Container className={classes.optionsContainer}>
+//                 <Button startIcon={<UpdateIcon />} onClick={updateOrder}>Update Order</Button>
+//                 <Button startIcon={<ThumbUpIcon />} onClick={approveOrder}>Approve</Button>
+//                 <Button startIcon={<ThumbDownIcon />} onClick={denyOrder}>Deny</Button>
+//             </Container>
+//         </div>
+//     );
+// }
 
-    const approveOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, ORDER_STATUS.APPROVED)
-            .then(() => {
-                alert('Order status set to \'Approved\'')
-            }).catch(err => {
-                console.error(err);
-                alert('Error: could not approve order!')
-            })
-    }, [changedOrder])
-
-    const denyOrder = useCallback(() => {
-        setOrderStatus(session, changedOrder.id, ORDER_STATUS.REJECTED)
-            .then(() => {
-                alert('Order status set to \'Denied\'')
-            }).catch(err => {
-                console.error(err);
-                alert('Error: could not approve order!')
-            })
-    }, [changedOrder])
-
-    let status_string;
-    let status_index = findWithAttr(ORDER_STATES, 'value', order.status);
-    if (status_index >= 0) {
-        status_string = `Status: ${ORDER_STATES[status_index].label}`
-    }
-
-    return (
-        <StyledOrderPopup id='page'>
-            <p>Customer: {order.customer.first_name} {order.customer.last_name}</p>
-            <p>{status_string}</p>
-            <Cart cart={changedOrder} onUpdate={orderUpdate} />
-            <div>
-                <Button onClick={updateOrder}>Update Order</Button>
-                <Button onClick={approveOrder}>Approve</Button>
-                <Button onClick={denyOrder}>Deny</Button>
-            </div>
-        </StyledOrderPopup>
-    );
-}
-
-OrderPopup.propTypes = {
-    order: PropTypes.object.isRequired
-}
+// OrderPopup.propTypes = {
+//     order: PropTypes.object.isRequired
+// }

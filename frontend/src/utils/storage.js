@@ -61,6 +61,7 @@ export const getSession = () => {
 }
 
 export const storeItem = (key, value, forceUpdate=false) => {
+    console.log('Storing item', key, value)
     // If JSON was passed in instead of an object
     if (isString(value) && value.length > 0 && value[0] === '{') {
         try {
@@ -83,6 +84,7 @@ export const getItem = (key) => {
 }
 
 export const clearStorage = () => {
+    console.log('Clearing storage')
     let values_to_clear = Object.values(LOCAL_STORAGE);
     values_to_clear.forEach(entry => {
         localStorage.setItem(entry, null);

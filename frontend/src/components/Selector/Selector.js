@@ -29,41 +29,37 @@ function Selector({
     const classes = useStyles();
     const theme = useTheme();
 
-    //Formats inputs into label array
-    const justLabels = (data) => {
-        let data_arr = _.isArray(data) ? data : [data];
-        let label_arr = [];
-        data_arr.forEach(o => {
-            if (_.isString(o)) {
-                label_arr.push(o)
-            } else {
-                label_arr.push(o?.label);
+    // Formats selected into label/value object array.
+    // Needs formatted options to get missing labels
+    const formatSelected = (selected, options) => {
+        let select_arr = _.isArray(selected) ? selected : [selected];
+        let formatted_select = [];
+        for (let i = 0; i < select_arr.length; i++) {
+            let curr_select = select_arr[i];
+            let curr_select_val = (_.isString(curr_select) || _.isNumber(curr_select)) ? curr_select : curr_select.value;
+            for(let j = 0; j < options.length; j++) {
+                let curr_option = options[j];
+                if (curr_option.value === curr_select_val) {
+                    formatted_select.push({
+                        label: curr_option.label,
+                        value: curr_select_val,
+                    });
+                }
             }
-        })
-        return label_arr;
+        }
+        return formatted_select;
     }
 
-    // Formats inputs into label/value object array
-    const formatData = (data) => {
-        let data_arr = _.isArray(data) ? data : [data];
-        let formatted_arr = [];
-        data_arr.forEach(o => {
-            if (_.isString(o)) {
-                formatted_arr.push({
+    let options_formatted = options.map(o => (
+        (_.isString(o) || _.isNumber(o)) ?
+                {
                     label: o,
-                    value: o,
-                })
-            } else {
-                formatted_arr.push(o);
-            }
-        })
-        return formatted_arr;
-    }
-
-    let options_labels = justLabels(options);
-    let options_formatted = formatData(options);
-    let selected_labels = justLabels(selected);
-    let selected_formatted = formatData(selected);
+                    value: o
+                } : o
+    ));
+    let options_labels = options_formatted.map(o => o.label);
+    let selected_formatted = formatSelected(selected, options_formatted);
+    let selected_labels = selected_formatted.map(s => s.label);
 
     function getOptionStyle(label) {
         return {
@@ -89,7 +85,7 @@ function Selector({
                                 <Chip label={o.label} key={o.value} className={classes.chip} />
                             ))}
                         </div>
-                    ) : selected_labels
+                    ) : selected_labels[0]
                 }}
                 {...props}
             >
@@ -108,7 +104,7 @@ function Selector({
 
 Selector.propTypes = {
     options: PropTypes.array.isRequired,
-    selected: PropTypes.array.isRequired,
+    selected: PropTypes.any.isRequired,
     handleChange: PropTypes.func.isRequired,
     fullWidth: PropTypes.bool,
     multiple: PropTypes.bool,

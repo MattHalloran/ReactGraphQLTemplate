@@ -8,6 +8,7 @@ from src.config import Config
 from src.utils import resize_image, priceStringToDecimal
 from base64 import b64encode
 from src.auth import verify_token
+from sqlalchemy import func
 import time
 import bcrypt
 import os
@@ -304,7 +305,7 @@ class EmailHandler(Handler):
 
     @staticmethod
     def from_email_address(email: str):
-        return db.session.query(Email).filter_by(email_address=email).one_or_none()
+        return db.session.query(Email).filter_by(func.lower(Email.email_address) == func.lower(email)).one_or_none()
 
 
 class FeedbackHandler(Handler):
@@ -1019,12 +1020,12 @@ class UserHandler(Handler):
 
     @staticmethod
     def from_email(email: str):
-        return User.query.filter(User.personal_email.any(email_address=email)).first()
+        return User.query.filter(User.personal_email.any(func.lower(Email.email_address)==func.lower(email))).first()
 
     @staticmethod
     def email_in_use(email: str):
         '''Returns True if the email is being used by an active account'''
-        users = User.query.filter(User.personal_email.any(email_address=email)).all()
+        users = UserHandler.from_email(email)
         if users is None:
             return True
         return any(user.account_status != AccountStatus.DELETED.value for user in users)
@@ -1062,6 +1063,8 @@ class UserHandler(Handler):
 
     @staticmethod
     def is_admin(user: User) -> bool:
+        print('in is_admin')
+        print(user.roles)
         return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod

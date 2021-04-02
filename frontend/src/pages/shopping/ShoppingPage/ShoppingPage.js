@@ -99,7 +99,7 @@ function ShoppingPage() {
     }
 
     const resetSearchConstraints = () => {
-        setSortBy(SORT_OPTIONS[0])
+        setSortBy(SORT_OPTIONS[0].value)
         setSearchString('')
         let copy = { ...filters };
         for (const key in copy) {

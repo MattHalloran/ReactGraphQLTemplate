@@ -78,8 +78,6 @@ function ShoppingList({
     }, [curr_index])
 
     useEffect(() => {
-        console.log('GRABBING ALL SKUS', sort)
-        console.log(typeof sort);
         if (!session) return;
         let mounted = true;
         getInventory(sort, page_size, false)

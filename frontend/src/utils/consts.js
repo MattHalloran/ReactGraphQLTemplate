@@ -4,7 +4,7 @@ import orderStatus from 'query/orderStatus.json';
 export const WEBSITE_URL = 'https://www.newlifenurseryinc.com/';
 export const BUSINESS_NAME = {
     Short: 'New Life Nursery Inc.',
-    long: 'New Life Nursery Inc.',
+    Long: 'New Life Nursery Inc.',
 }
 export const ADDRESS = {
     Label: '106 South Woodruff Road Bridgeton, NJ 08302',
@@ -25,6 +25,45 @@ export const EMAIL = {
 
 export const STATUS_CODES = codes;
 export const ORDER_STATUS = orderStatus;
+
+export const ORDER_STATES = [
+    {
+        label: 'Canceled by Admin',
+        value: -4,
+    },
+    {
+        label: 'Canceled by User',
+        value: -3,
+    },
+    {
+        label: 'Pending Cancel',
+        value: -2,
+    },
+    {
+        label: 'Rejected',
+        value: -1,
+    },
+    {
+        label: 'Pending',
+        value: 1,
+    },
+    {
+        label: 'Approved',
+        value: 2,
+    },
+    {
+        label: 'Scheduled',
+        value: 3,
+    },
+    {
+        label: 'In Transit',
+        value: 4,
+    },
+    {
+        label: 'Delivered',
+        value: 5,
+    },
+]
 
 export const PLANT_ATTRIBUTES = [
     'Drought Tolerance',

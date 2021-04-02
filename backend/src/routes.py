@@ -92,6 +92,9 @@ def verify_admin(session):
     2) Is an admin
     Returns User object if both checks pass, otherwise None'''
     user = verify_session(session)
+    print('verifying admin')
+    print(session)
+    print(user)
     if user and UserHandler.is_admin(user):
         return user
     return None

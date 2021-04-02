@@ -59,7 +59,7 @@ export async function register(data) {
 // verificationCode is optional. Used to verify email
 export async function login(email, password, verificationCode) {
     let json = JSON.stringify({
-        "email": email,
+        "email": email.toLowerCase(),
         "password": password,
         "verificationCode": verificationCode ?? ''
     });
@@ -74,7 +74,7 @@ export async function login(email, password, verificationCode) {
 
 export async function send_password_reset_request(email) {
     let json = JSON.stringify({
-        "email": email,
+        "email": email.toLowerCase(),
     });
     let options = {
         body: json,

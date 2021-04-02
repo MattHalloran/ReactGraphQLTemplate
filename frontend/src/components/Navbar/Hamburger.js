@@ -129,7 +129,7 @@ function Hamburger(props) {
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onClose={closeMenu}>
                 <IconButton className={classes.close} onClick={closeMenu}>
                     <CloseIcon fontSize="large" />
                 </IconButton>

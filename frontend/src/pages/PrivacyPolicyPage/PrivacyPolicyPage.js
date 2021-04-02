@@ -284,7 +284,7 @@ function PrivacyPolicyPage() {
                 =================================================================================================*/}
 
             <Typography variant="h3">When this policy applies</Typography>
-            <p>This Privacy Policy applies to all of the services offered by {FULL_BUSINESS_NAME.Long}. and its affiliates. This Privacy Policy does not apply to services that have separate privacy policies that do not incorporate this Privacy Policy.</p>
+            <p>This Privacy Policy applies to all of the services offered by {BUSINESS_NAME.Long}. and its affiliates. This Privacy Policy does not apply to services that have separate privacy policies that do not incorporate this Privacy Policy.</p>
             <p>This Privacy Policy does not apply to:</p>
             <ul>
                 <li>The information practices of other companies and organizations that advertize our services</li>

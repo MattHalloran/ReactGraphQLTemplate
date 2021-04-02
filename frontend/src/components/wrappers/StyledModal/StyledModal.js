@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     },
     bodyChildren: {
         borderRadius: '10px',
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.light,
         color: theme.palette.primary.contrastText,
         border: `3px solid ${theme.palette.primary.contrastText}`,
     },

@@ -2,7 +2,7 @@ import RoomIcon from '@material-ui/icons/Room';
 import EmailIcon from '@material-ui/icons/Email';
 import PhoneIcon from '@material-ui/icons/Phone';
 import { ADDRESS, PHONE, EMAIL } from 'utils/consts';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid, Icon } from '@material-ui/core';
+import { Tooltip, Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid, Icon } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -49,9 +49,9 @@ function ContactInfo({
     ]
 
     const contactInfo = [
-        [ADDRESS.Label, ADDRESS.Link, RoomIcon],
-        [PHONE.Label, PHONE.Link, PhoneIcon],
-        [EMAIL.Label, EMAIL.Link, EmailIcon]
+        ['Open in Google Maps', ADDRESS.Label, ADDRESS.Link, RoomIcon],
+        ['Call Us', PHONE.Label, PHONE.Link, PhoneIcon],
+        ['Email Us', EMAIL.Label, EMAIL.Link, EmailIcon]
     ]
 
     return (
@@ -75,12 +75,14 @@ function ContactInfo({
                 </Table>
             </TableContainer>
             <BottomNavigation className={classes.nav} showLabels>
-                {contactInfo.map(([label, link, Icon]) => (
-                    <BottomNavigationAction className={classes.navAction} label={label} onClick={(e) => openLink(e, link)} icon={
-                        <IconButton className={classes.iconButton}>
-                            <Icon />
-                        </IconButton>
-                    } />
+                {contactInfo.map(([tooltip, label, link, Icon]) => (
+                    <Tooltip title={tooltip} placement="top">
+                        <BottomNavigationAction className={classes.navAction} label={label} onClick={(e) => openLink(e, link)} icon={
+                            <IconButton className={classes.iconButton}>
+                                <Icon />
+                            </IconButton>
+                        } />
+                    </Tooltip>
                 ))}
             </BottomNavigation>
             <Grid container spacing={2} justifyContent="center">
