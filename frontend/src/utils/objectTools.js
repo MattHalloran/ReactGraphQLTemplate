@@ -1,16 +1,16 @@
 // Functions for manipulating state objects
 
-export const addToObject = (array, key, value) => {
-    return {...array, [key]: value};
+export const addToObject = (object, key, value) => {
+    return {...object, [key]: value};
 }
 
-export const updateObject = (array, key, value) => {
-    if (JSON.stringify(array.key) === JSON.stringify(value)) return array;
-    return {...array, [key]: value};
+export const updateObject = (object, key, value) => {
+    if (JSON.stringify(object.key) === JSON.stringify(value)) return object;
+    return {...object, [key]: value};
 }
 
-export const deleteObjectKey = (array, key) => {
-    let copy = {...array};
+export const deleteObjectKey = (object, key) => {
+    let copy = {...object};
     delete copy[key];
     return copy;
 }

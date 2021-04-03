@@ -414,8 +414,6 @@ class ImageHandler(Handler):
         model = cls.convert_to_model(model)
         if model is None:
             return None
-        print('got model')
-        print(type(model))
         # First, check if the image exists in the exact requested size
         file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
         if os.path.exists(file_path):
@@ -785,20 +783,6 @@ class PlantHandler(Handler):
         if len(model.habit_images) > 0:
             return model.habit_images[0]
         return None
-
-    @classmethod
-    def get_thumb_display_b64(cls, model: Plant) -> Optional[str]:
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_b64(img, 'm')
-
-    @classmethod
-    def get_full_display_b64(cls, model: Plant) -> Optional[str]:
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_b64(img, 'l')
 
 
 class RoleHandler(Handler):

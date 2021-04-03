@@ -1,22 +1,23 @@
 import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getImages } from 'query/http_promises';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import { displayPrice } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
-import { Typography } from '@material-ui/core';
+import { IconButton, Typography } from '@material-ui/core';
 import { deleteArrayIndex } from 'utils/arrayTools';
 import { updateObject } from 'utils/objectTools';
-import { Paper, Grid, Checkbox, TableContainer, Table, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
-import EnhancedTableHead from 'components/EnhancedTableHead/EnhancedTableHead';
-import EnhancedTableToolbar from 'components/EnhancedTableToolbar/EnhancedTableToolbar';
+import CloseIcon from '@material-ui/icons/Close';
+import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
-import Selector from 'components/Selector/Selector';
+import Selector from 'components/inputs/Selector/Selector';
+import AlertDialog from 'components/AlertDialog/AlertDialog';
 import _ from 'underscore';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
@@ -48,6 +49,7 @@ const DELIVERY_OPTIONS = [
 function Cart({
     cart,
     onUpdate,
+    ...props
 }) {
     const classes = useStyles();
     const [cartState, setCartState] = useState({
@@ -55,14 +57,11 @@ function Cart({
         items: cart?.items ?? [],
         is_delivery: cart?.is_delivery ?? true,
         desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
-        special_instructions: cart?.special_instructions ?? '',
+        special_instructions: cart?.special_instructions,
     })
-
-    const [selected, setSelected] = useState([]);
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
-
-
+    let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b);
 
     useEffect(() => {
         onUpdate(cartState);
@@ -81,35 +80,6 @@ function Cart({
     useLayoutEffect(() => {
         document.title = `Cart | ${BUSINESS_NAME.Short}`;
     })
-
-    const handleSelectAllClick = (event) => {
-        if (event.target.checked) {
-            const newSelecteds = cartState.items.map((i) => i.id);
-            setSelected(newSelecteds);
-            return;
-        }
-        setSelected([]);
-    };
-
-    const handleClick = (event, name) => {
-        const selectedIndex = selected.indexOf(name);
-        let newSelected = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
-        }
-
-        setSelected(newSelected);
-    };
 
     const setNotes = useCallback((notes) => {
         setCartState(c => updateObject(c, 'special_instructions', notes));
@@ -146,12 +116,11 @@ function Cart({
         setCartState(updateObject(cartState, 'items', changed_item_list));
     }, [thumbnails, cartState])
 
-    let all_total = 0;
-    const cart_item_to_row = useCallback((data, isSelected, key) => {
+    const cart_item_to_row = useCallback((data, key) => {
         let index = cartState.items.findIndex(i => i.sku.sku === data.sku.sku);
         let thumbnail;
-        if (index >= 0)
-            thumbnail = thumbnails.length >= index ? thumbnails[index] : null
+        if (index >= 0 && index < thumbnails.length)
+            thumbnail = thumbnails[index];
         let quantity = data.quantity;
         let price = parseInt(data.sku.price);
         let display_price;
@@ -160,11 +129,9 @@ function Cart({
         if (isNaN(price)) {
             display_price = 'TBD';
             display_total = 'TBD';
-            all_total = 'TBD';
         } else {
             display_price = displayPrice(price);
             display_total = displayPrice(quantity * price);
-            if (typeof (all_total) === 'number') all_total += (quantity * price);
         }
         if (thumbnail) {
             display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="cart-image" alt="TODO" />
@@ -172,15 +139,12 @@ function Cart({
             display_image = <NoImageIcon className="cart-image" />
         }
 
-        const isItemSelected = isSelected(key);
-
         return (
-            <TableRow key={key} onClick={() => handleClick(key)}>
+            <TableRow key={key}>
                 <TableCell padding="checkbox">
-                    <Checkbox
-                        checked={isItemSelected}
-                        inputProps={{ 'aria-labelledby': `enhanced-table-checkbox-${key}` }}
-                    />
+                    <IconButton onClick={() => deleteCartItem(data.sku)}>
+                        <CloseIcon />
+                    </IconButton>
                 </TableCell>
                 <TableCell className={classes.tableCol} component="th" scope="row">
                     {display_image}
@@ -206,35 +170,31 @@ function Cart({
         { id: 'total', align: 'right', disablePadding: false, label: 'Total' },
     ]
 
-    const isSelected = (key) => selected.indexOf(key) !== -1;
-
-    const removeItems = () => {
-        alert('TODO')
-    }
-
     return (
-        <div>
-            <EnhancedTableToolbar
-                title="Cart"
-                numSelected={selected.length}
-                onDelete={removeItems} />
+        <div {...props} >
             <TableContainer className={classes.tablePaper} component={Paper}>
                 <Table aria-label="cart table">
-                    <EnhancedTableHead
-                        headCells={headCells}
-                        numSelected={selected.length}
-                        onSelectAllClick={handleSelectAllClick}
-                        rowCount={cartState.items.length}
-                    />
+                    <TableHead>
+                        <TableRow>
+                            {headCells.map(({ id, align, disablePadding, label }, index) => (
+                                <TableCell
+                                    key={id}
+                                    id={id}
+                                    align={align}
+                                    disablePadding={disablePadding}
+                                >{label}</TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
                     <TableBody>
-                        {cartState.items.map((c, index) => cart_item_to_row(c, isSelected, index))}
+                        {cartState.items.map((c, index) => cart_item_to_row(c, index))}
                     </TableBody>
                 </Table>
             </TableContainer>
             <p>Total: {displayPrice(all_total)}</p>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
-                <Selector
+                    <Selector
                         fullWidth
                         required
                         options={DELIVERY_OPTIONS}

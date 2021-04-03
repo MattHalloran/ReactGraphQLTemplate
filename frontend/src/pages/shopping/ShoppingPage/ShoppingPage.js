@@ -1,10 +1,10 @@
 import { memo, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import SearchBar from '../../../components/SearchBar/SearchBar';
+import SearchBar from '../../../components/inputs/SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
-import Selector from 'components/Selector/Selector';
+import Selector from 'components/inputs/Selector/Selector';
 import PubSub from 'utils/pubsub';
 import { Switch, Container, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import { printAvailability } from 'utils/printAvailability';

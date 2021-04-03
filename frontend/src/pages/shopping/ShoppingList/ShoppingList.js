@@ -10,11 +10,11 @@ import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
-import Selector from 'components/Selector/Selector';
-import PlantCard from 'components/PlantCard/PlantCard';
+import Selector from 'components/inputs/Selector/Selector';
+import PlantCard from 'components/cards/PlantCard/PlantCard';
 import { Tooltip, Typography, Grid, IconButton } from '@material-ui/core';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import PlantDialog from 'components/PlantDialog/PlantDialog';
+import PlantDialog from 'components/dialogs/PlantDialog/PlantDialog';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -72,10 +72,6 @@ function ShoppingList({
             PubSub.unsubscribe(cartSub);
         })
     }, [])
-
-    useEffect(() => {
-        PubSub.publish(PUBS.PopupOpen, curr_index >= 0);
-    }, [curr_index])
 
     useEffect(() => {
         if (!session) return;

@@ -103,10 +103,8 @@ function GalleryPage() {
     useEffect(() => {
         if (urlParams.img) {
             loadImage(curr_index, urlParams.img);
-            PubSub.publish(PUBS.PopupOpen, true);
         } else {
             setCurrImg([null, null]);
-            PubSub.publish(PUBS.PopupOpen, false);
         }
     }, [urlParams, curr_index, loadImage])
 

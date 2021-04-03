@@ -7,7 +7,7 @@ import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIc
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
-import Selector from 'components/Selector/Selector';
+import Selector from 'components/inputs/Selector/Selector';
 import CloseIcon from '@material-ui/icons/Close';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 

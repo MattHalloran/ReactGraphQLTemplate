@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import Navbar from 'components/Navbar/Navbar';
-import IconNav from 'components/IconNav/IconNav';
-import Footer from 'components/Footer/Footer';
+import Navbar from 'components/navigation/Navbar/Navbar';
+import IconNav from 'components/navigation/IconNav/IconNav';
+import Footer from 'components/navigation/Footer/Footer';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
@@ -12,6 +12,7 @@ import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
+import AlertDialog from 'components/AlertDialog/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -54,20 +55,14 @@ function App() {
     const session_attempts = useRef(0);
     const [user_roles, setUserRoles] = useState(null);
     const [cart, setCart] = useState(getCart());
-    const [popup_open, setPopupOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handlers = {
         OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
         TOGGLE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle'),
         CLOSE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, false),
-        CLOSE_POPUP: () => PubSub.publish(PUBS.PopupOpen, false),
         CLOSE_MENU_OR_POPUP: () => {
-            if (popup_open) {
-                handlers.CLOSE_POPUP();
-            } else {
-                handlers.CLOSE_MENU();
-            }
+            handlers.CLOSE_MENU();
         },
     };
 
@@ -76,14 +71,12 @@ function App() {
         let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(getTheme()));
         let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
-        let popupSub = PubSub.subscribe(PUBS.PopupOpen, (_, o) => setPopupOpen(open => o === 'toggle' ? !open : o));
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
             PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(cartSub);
-            PubSub.unsubscribe(popupSub);
             PubSub.unsubscribe(loadingSub);
         })
     }, [])
@@ -110,6 +103,7 @@ function App() {
                                     <CircularProgress size={100} /> 
                                 </div>
                             : null}
+                            <AlertDialog />
                             <Routes session={session} user_roles={user_roles} />
                         </div>
                         <IconNav cart={cart} />

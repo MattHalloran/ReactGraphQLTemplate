@@ -4,7 +4,7 @@ import { getCustomers } from 'query/http_promises';
 import { PUBS } from 'utils/consts';
 import { getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
-import CustomerCard from 'components/CustomerCard/CustomerCard';
+import CustomerCard from 'components/cards/CustomerCard/CustomerCard';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';

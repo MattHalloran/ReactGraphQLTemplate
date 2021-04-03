@@ -7,79 +7,19 @@ import { moveArrayIndex } from 'utils/arrayTools';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
-import GalleryCard from 'components/GalleryCard/GalleryCard';
+import GalleryCard from 'components/cards/GalleryCard/GalleryCard';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import { DropzoneArea } from 'material-ui-dropzone';
+import GalleryTable from 'components/tables/GalleryTable/GalleryTable';
 
 const useStyles = makeStyles((theme) => ({
-    paper: {
-        width: '100%',
-        marginBottom: theme.spacing(2),
-        background: theme.palette.background.paper,
-    },
     header: {
         textAlign: 'center',
     },
-    table: {
-        minWidth: 750,
-    },
-    image: {
-        maxHeight: 100,
-    },
-    visuallyHidden: {
-        border: 0,
-        clip: 'rect(0 0 0 0)',
-        height: 1,
-        margin: -1,
-        overflow: 'hidden',
-        padding: 0,
-        position: 'absolute',
-        top: 20,
-        width: 1,
-    },
-    cardFlex: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-        alignItems: 'stretch',
+    padTop: {
+        marginTop: theme.spacing(2),
     },
 }));
-
-// Sortable element steals the index parameter, so we must use i instead
-const SortableItem = SortableElement(({ i, row, onUpdate, onDelete }) => (
-    <GalleryCard
-        index={i}
-        src={row.src}
-        alt={row.alt}
-        description={row.description}
-        onUpdate={onUpdate}
-        onDelete={onDelete} />
-));
-
-const SortableList = SortableContainer(({ data, onUpdate, onDelete }) => {
-    const classes = useStyles();
-    return (
-        <div className={classes.cardFlex}>
-            {data.map((row, index) =>
-                <SortableItem
-                    key={`item-${index}`}
-                    index={index} i={index}
-                    row={row}
-                    onUpdate={onUpdate}
-                    onDelte={onDelete} />)}
-        </div>
-    );
-});
-
-function SortableComponent({ data, onSortEnd, onUpdate, onDelete }) {
-    return (
-        <SortableList
-            distance={10}
-            data={data}
-            onSortEnd={onSortEnd}
-            onUpdate={onUpdate}
-            onDelete={onDelete} />
-    );
-}
 
 function AdminGalleryPage() {
     const classes = useStyles();
@@ -134,10 +74,6 @@ function AdminGalleryPage() {
         })
     }, [])
 
-    const onSortEnd = ({ oldIndex, newIndex }) => {
-        setData(d => moveArrayIndex(d, oldIndex, newIndex));
-    };
-
     const fileSelectedHandler = (files) => {
         setSelectedFiles([]);
         for (let i = 0; i < files.length; i++) {
@@ -179,8 +115,8 @@ function AdminGalleryPage() {
         });
     }, [selectedFiles])
 
-    const applyChanges = useCallback(() => {
-        let gallery_data = data.map(d => ({
+    const applyChanges = useCallback((changed_data) => {
+        let gallery_data = changed_data.map(d => ({
             'id': d.key,
             'alt': d.alt,
             'description': d.description,
@@ -195,18 +131,10 @@ function AdminGalleryPage() {
             })
     }, [data])
 
-    const updateRow = useCallback((rowIndex, columnName, value) => {
-        // if (rowIndex < 0 || rowIndex >= state.keys.length) return;
-        // console.log('UPDATING ROW!', rowIndex, columnName, value);
-        // setState(state => ({
-        //     ...state,
-        //     [columnName]: updateArray(state[columnName], rowIndex, value),
-        // }));
-    }, [data])
-
-    const deleteRow = useCallback(() => {
-
-    }, [])
+    function updateData(data) {
+        console.log('updating datat', data)
+        setData(data);
+    }
 
     return (
         <div id='page' className={classes.root}>
@@ -222,14 +150,12 @@ function AdminGalleryPage() {
                 showAlerts={false}
                 filesLimit={100}
             />
-            <Button onClick={uploadImages}>Upload Images</Button>
+            <Button className={classes.padTop} fullWidth onClick={uploadImages}>Upload Images</Button>
             <h2>Reorder and delete images</h2>
-            <Button onClick={applyChanges}>Apply Changes</Button>
-            <SortableComponent
+            <GalleryTable 
                 data={data}
-                onSortEnd={onSortEnd}
-                onUpdate={updateRow}
-                onDelete={deleteRow} />
+                onUpdate={updateData}
+                onApply={applyChanges}/>
         </div>
     );
 }

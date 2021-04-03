@@ -6,8 +6,9 @@ import { Button, Card, CardActions, CardContent, Typography } from '@material-ui
 import { ORDER_STATES } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
-import Selector from 'components/Selector/Selector';
-import OrderDialog from 'components/OrderDialog/OrderDialog';
+import Selector from 'components/inputs/Selector/Selector';
+import OrderDialog from 'components/dialogs/OrderDialog/OrderDialog';
+import OrderCard from 'components/cards/OrderCard/OrderCard';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
@@ -65,92 +66,3 @@ AdminOrderPage.propTypes = {
 }
 
 export default AdminOrderPage;
-
-const cardStyles = makeStyles((theme) => ({
-    root: {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        margin: theme.spacing(1),
-        padding: 10,
-        minWidth: 150,
-        minHeight: 50,
-        cursor: 'pointer',
-    },
-    button: {
-        color: theme.palette.primary.contrastText,
-    },
-}));
-
-function OrderCard({
-    onEdit,
-    customer,
-    items,
-    desired_delivery_date,
-}) {
-    const classes = cardStyles();
-    items.map(i => console.log(i))
-    return (
-        <Card className={classes.root} onClick={onEdit}>
-            <CardContent>
-                <Typography variant="h6" component="h3" gutterBottom>
-                    {customer.first_name} {customer.last_name}
-                </Typography>
-                <Typography variant="body1" component="h4">
-                    Requested Date: {new Date(desired_delivery_date).getDate()}
-                </Typography>
-                <Typography variant="body1" component="h4">
-                    Items: {items.length}
-                </Typography>
-            </CardContent>
-            <CardActions>
-                <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
-            </CardActions>
-        </Card>
-    );
-}
-
-OrderCard.propTypes = {
-    id: PropTypes.number,
-    onEdit: PropTypes.func.isRequired,
-    first_name: PropTypes.string,
-    last_name: PropTypes.string,
-    account_status: PropTypes.number,
-    onClick: PropTypes.func,
-}
-
-// const popupStyles = makeStyles((theme) => ({
-//     root: {
-//         padding: theme.spacing(1),
-//     },
-//     optionsContainer: {
-//         width: 'fit-content',
-//         justifyContent: 'center',
-//         '& > *': {
-//             margin: theme.spacing(1),
-//         },
-//     },
-// }));
-
-
-// function OrderPopup({
-//     order,
-// }) {
-    
-
-//     return (
-//         <div className={classes.root}>
-//             <p>Customer: {order.customer.first_name} {order.customer.last_name}</p>
-//             <p>{status_string}</p>
-//             <Cart cart={changedOrder} onUpdate={orderUpdate} />
-//             <Container className={classes.optionsContainer}>
-//                 <Button startIcon={<UpdateIcon />} onClick={updateOrder}>Update Order</Button>
-//                 <Button startIcon={<ThumbUpIcon />} onClick={approveOrder}>Approve</Button>
-//                 <Button startIcon={<ThumbDownIcon />} onClick={denyOrder}>Deny</Button>
-//             </Container>
-//         </div>
-//     );
-// }
-
-// OrderPopup.propTypes = {
-//     order: PropTypes.object.isRequired
-// }

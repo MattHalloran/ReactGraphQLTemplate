@@ -1,6 +1,7 @@
 
 // Convert price stored in database to user-friendly version
 export const displayPrice = (price) => {
+    console.log('in display price', price, !price)
     if (!price) return 'N/A';
     let result = price/100;
     if (isNaN(result)) return price;
