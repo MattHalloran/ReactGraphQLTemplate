@@ -96,20 +96,20 @@ function ProfileForm(props) {
         event.preventDefault();
         // If the user did not enter their current password, they cannot change anything
         if (currentPassword.length === 0) {
-            alert('Please enter your current password');
+            PubSub.publish(PUBS.Snack, {message: 'Please enter your current password.', severity: 'error'});
             return;
         }
         // If the user is trying to update their password
         if (newPassword.length > 0 || confirmPassword.length > 0) {
             if (newPassword !== confirmPassword) {
-                alert('New password and confirm password do not match!')
+                PubSub.publish(PUBS.Snack, {message: 'Confirm passwod does not match.', severity: 'error'});
                 return;
             }
         }
         // If the user is trying to update their profile information TODO add checks for emails and phones
         if (firstName !== fetched_profile.firstName || lastName !== fetched_profile.lastName) {
             if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError, phoneError)) {
-                alert('Validation failed! Please check fields');
+                PubSub.publish(PUBS.Snack, {message: 'Validation failed. Please check fields.', severity: 'error'});
                 return;
             }
 
@@ -136,7 +136,7 @@ function ProfileForm(props) {
             data.password = newPassword;
         updateProfile(session, data)
             .then(() => {
-                alert('Profile updated!');
+                PubSub.publish(PUBS.Snack, {message: 'Profile updated.'});
             })
             .catch(err => {
                 console.error(err.msg);

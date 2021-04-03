@@ -4,8 +4,9 @@ import * as validation from 'utils/validations';
 import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { LINKS } from 'utils/consts';
+import { LINKS, PUBS } from 'utils/consts';
 import { loginUser } from 'query/http_promises';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -37,7 +38,7 @@ function LogInForm() {
     const login = () => {
         loginUser(email, password, urlParams.code).then(response => {
             if (urlParams.code && response.isEmailVerified) {
-                alert('Email has been verified!');
+                PubSub.publish(PUBS.Snack, {message: 'Email verified.'});
             }
             history.push(LINKS.Shopping);
         }).catch(err => {
@@ -49,7 +50,7 @@ function LogInForm() {
     const submit = (event) => {
         event.preventDefault();
         if (anyErrors) {
-            alert('Please fill in required fields');
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields', severity: 'error'});
             return;
         }
         login();

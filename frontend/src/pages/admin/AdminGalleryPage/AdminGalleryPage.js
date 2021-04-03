@@ -98,7 +98,7 @@ function AdminGalleryPage() {
 
     const uploadImages = useCallback(() => {
         if (selectedFiles.length <= 0) {
-            alert('No images selected!');
+            PubSub.publish(PUBS.Snack, {message: 'No images selected.', severity: 'error'});
             return;
         }
         let form = new FormData();
@@ -108,10 +108,10 @@ function AdminGalleryPage() {
             form.append('image', img.data);
         });
         uploadGalleryImages(form).then(response => {
-            alert('Successfully uploaded ' + response.passed_indexes?.length + ' images!');
+            PubSub.publish(PUBS.Snack, {message: `Uploaded ${response.passed_indexes?.length} images.`});
         }).catch(error => {
             console.error(error);
-            alert('Error uploading images!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to upload images.', severity: 'error'});
         });
     }, [selectedFiles])
 
@@ -123,11 +123,11 @@ function AdminGalleryPage() {
         }));
         updateGallery(session, gallery_data)
             .then(() => {
-                alert('Gallery updated!');
+                PubSub.publish(PUBS.Snack, {message: 'Gallery updated.'});
             })
             .catch(err => {
                 console.error(err);
-                alert('Error: Gallery failed to update!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to update gallery.', severity: 'error'});
             })
     }, [data])
 

@@ -7,8 +7,9 @@ import * as validation from 'utils/validations';
 import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES } from 'utils/consts';
+import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
 import { registerUser } from 'query/http_promises';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -84,7 +85,7 @@ function AddEmployeeForm() {
                     history.push(LINKS.ForgotPassword);
                 }
             } else {
-                alert(err.msg);
+                PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
             }
         })
     }
@@ -92,7 +93,7 @@ function AddEmployeeForm() {
     const submit = (event) => {
         event.preventDefault();
         if (anyErrors) {
-            alert('Please fill in required fields');
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
         register();

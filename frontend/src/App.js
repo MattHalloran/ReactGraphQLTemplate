@@ -13,6 +13,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import AlertDialog from 'components/AlertDialog/AlertDialog';
+import Snack from 'components/Snack/Snack';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -104,6 +105,7 @@ function App() {
                                 </div>
                             : null}
                             <AlertDialog />
+                            <Snack />
                             <Routes session={session} user_roles={user_roles} />
                         </div>
                         <IconNav cart={cart} />

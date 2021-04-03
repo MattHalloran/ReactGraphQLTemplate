@@ -130,7 +130,8 @@ export const LOCAL_STORAGE = {
 export const PUBS = {
     ...LOCAL_STORAGE,
     Loading: "loading",
-    DialogOpen: "dialogOpen",
+    AlertDialog: "alertDialog",
+    Snack: "snack",
     BurgerMenuOpen: "burgerMenuOpen",
     ArrowMenuOpen: "arrowMenuOpen",
 }

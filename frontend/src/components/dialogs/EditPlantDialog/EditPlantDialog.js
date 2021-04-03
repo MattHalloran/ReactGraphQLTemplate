@@ -11,8 +11,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import makeID from 'utils/makeID';
-import { PLANT_ATTRIBUTES } from 'utils/consts';
+import { PLANT_ATTRIBUTES, PUBS } from 'utils/consts';
 import { DropzoneAreaBase } from 'material-ui-dropzone';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -101,11 +102,11 @@ function EditPlantDialog({
         console.log('GOING TO MODIFY PLANT', plant_data)
         modifyPlant(session, 'UPDATE', plant_data)
             .then(() => {
-                alert('SKU Updated!')
+                PubSub.publish(PUBS.Snack, {message: 'SKU Updated.'});
             })
             .catch((error) => {
                 console.error(error);
-                alert('Failed to update SKU!')
+                PubSub.publish(PUBS.Snack, {message: 'Failed to update SKU.', severity: 'error'});
             });
     }
 

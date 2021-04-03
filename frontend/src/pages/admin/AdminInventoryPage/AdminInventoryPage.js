@@ -170,7 +170,7 @@ function AdminInventoryPage() {
             alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
         }).catch(error => {
             console.error(error);
-            alert('Error uploading availability!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to upload availability.', severity: 'error'});
         });
     }
 

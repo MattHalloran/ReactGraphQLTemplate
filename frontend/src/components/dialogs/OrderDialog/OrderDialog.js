@@ -59,18 +59,17 @@ function OrderDialog({
 
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
-            console.log('oh no oh no oh no no no no no ')
-            alert('Error: Could not update order!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to update order', severity: 'error'});
             return;
         }
         updateCart(session, session.tag, order)
             .then(() => {
                 setChangedOrder(order);
-                PubSub.publish(PUBS.AlertDialog, {message: 'Order successfully updated.'});
+                PubSub.publish(PUBS.Snack, {message: 'Order successfully updated.'});
             })
             .catch(err => {
                 console.error(err, order);
-                alert('Error: Could not update order!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
                 return;
             })
     }
@@ -78,20 +77,20 @@ function OrderDialog({
     const approveOrder = useCallback(() => {
         setOrderStatus(session, order?.id, ORDER_STATUS.APPROVED)
             .then(() => {
-                alert('Order status set to \'Approved\'')
+                PubSub.publish(PUBS.Snack, {message: 'Order status set to \'Approved\'.'});
             }).catch(err => {
                 console.error(err);
-                alert('Error: could not approve order!')
+                PubSub.publish(PUBS.Snack, {message: 'Failed to approve order.', severity: 'error'});
             })
     }, [order])
 
     const denyOrder = useCallback(() => {
         setOrderStatus(session, order?.id, ORDER_STATUS.REJECTED)
             .then(() => {
-                alert('Order status set to \'Denied\'')
+                PubSub.publish(PUBS.Snack, {message: 'Order status set to \'Denied\''});
             }).catch(err => {
                 console.error(err);
-                alert('Error: could not approve order!')
+                PubSub.publish(PUBS.Snack, {message: 'Failed to deny order.', severity: 'error'});
             })
     }, [order])
 

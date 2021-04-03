@@ -4,7 +4,8 @@ import { modifyUser } from 'query/http_promises';
 import PhoneIcon from '@material-ui/icons/Phone';
 import EmailIcon from '@material-ui/icons/Email';
 import { Button, Card, CardContent, CardActions, Typography, Chip } from '@material-ui/core';
-import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from 'utils/consts';
+import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -75,7 +76,7 @@ function CustomerCard({
             })
             .catch(err => {
                 console.error(err);
-                alert('Error: Failed to approve user!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to approve user.', severity: 'error'});
             });
     }
 
@@ -86,7 +87,7 @@ function CustomerCard({
             })
             .catch(err => {
                 console.error(err);
-                alert('Error: Failed to unlock user!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to unlock user.', severity: 'error'});
             });
     }
 
@@ -97,7 +98,7 @@ function CustomerCard({
             })
             .catch(err => {
                 console.error(err);
-                alert('Error: Failed to lock user!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to lock user.', severity: 'error'});
             });
     }
 
@@ -109,7 +110,7 @@ function CustomerCard({
             })
             .catch(err => {
                 console.error(err);
-                alert('Error: Failed to delete user!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to delete user.', severity: 'error'});
             });
     };
 

@@ -1,9 +1,10 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-import { BUSINESS_NAME, SORT_OPTIONS } from 'utils/consts';
+import { BUSINESS_NAME, PUBS, SORT_OPTIONS } from 'utils/consts';
 import { displayPrice } from 'utils/displayPrice';
 import { getInventory } from "query/http_promises";
 import { getSession } from "./storage";
+import PubSub from "./pubsub";
 
 const TITLE_FONT_SIZE = 30;
 const LIST_FONT_SIZE = 24;
@@ -61,7 +62,6 @@ export const printAvailability = () => {
         })
         .catch(err => {
             console.error(err);
-            alert(err)
-            alert('Error: Could not load inventory');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to load inventory.', severity: 'error'});
         });
 }

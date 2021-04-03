@@ -96,7 +96,7 @@ function Cart({
     const updateItemQuantity = useCallback((sku, quantity) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku);
         if (index < 0 || index >= (cartState.items.length)) {
-            alert('Error: Could not update item quantity!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to update item quantity', severity: 'error'});
             console.log(index);
             return;
         }
@@ -108,7 +108,7 @@ function Cart({
     const deleteCartItem = useCallback((sku) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku.sku);
         if (index < 0) {
-            alert(`Error: could not remove item for ${sku.sku}`);
+            PubSub.publish(PUBS.Snack, {message: `Failed to remove item for ${sku.sku}`, severity: 'error'});
             return;
         }
         setThumbnails(deleteArrayIndex(thumbnails, index));

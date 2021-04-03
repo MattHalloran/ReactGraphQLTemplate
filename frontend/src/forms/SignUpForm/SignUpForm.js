@@ -5,8 +5,9 @@ import * as validation from 'utils/validations';
 import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES } from 'utils/consts';
+import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
 import { registerUser } from 'query/http_promises';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -90,7 +91,7 @@ function SignUpForm() {
     const submit = (event) => {
         event.preventDefault();
         if (anyErrors) {
-            alert('Please fill in required fields');
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
         register();

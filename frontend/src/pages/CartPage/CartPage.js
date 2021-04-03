@@ -62,34 +62,34 @@ function CartPage() {
 
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
-            alert('Error: Could not update order!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
         updateCart(session, session.tag, changedCart)
             .then(() => {
                 setCart(changedCart);
-                PubSub.publish(PUBS.AlertDialog, {message: 'Order updated!'});
+                PubSub.publish(PUBS.Snack, {message: 'Order updated.'});
             })
             .catch(err => {
                 console.error(err, changedCart);
-                alert('Error: Could not update order!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
                 return;
             })
     }
 
     const finalizeOrder = useCallback(() => {
         if (cart.items.length <= 0) {
-            alert('Cannot finalize order: cart is empty');
+            PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
         if (!window.confirm(`This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`)) return;
         submitOrder(session, changedCart)
             .then(() => {
-                alert('Order submitted! We will be in touch with you soon :)')
+                PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
             })
             .catch(err => {
                 console.error(err);
-                alert(`Failed to submit order. Please contact ${BUSINESS_NAME.Short}`);
+                PubSub.publish(PUBS.Snack, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
             })
     }, [cart, changedCart, session]);
 

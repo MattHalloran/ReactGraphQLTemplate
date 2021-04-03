@@ -210,7 +210,7 @@ function ShoppingList({
             })
             .catch(err => {
                 console.error(err, cart_copy);
-                alert('Operation failed. Please try again');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to add to cart.', severity: 'error'});
             })
     }
 
