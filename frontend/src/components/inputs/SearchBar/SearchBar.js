@@ -1,26 +1,35 @@
 import PropTypes from "prop-types";
-import { InputBase, Paper } from '@material-ui/core';
+import { TextField, InputAdornment, IconButton } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 
 function SearchBar({
+    label = 'Search...',
     value,
     onChange,
+    ...props
 }) {
 
     return (
-        <Paper component="form">
-            <InputBase
-                placeholder="Search..."
-                inputProps={{ 'aria-label': 'search inventory' }}
-                value={value}
-                onChange={e => onChange(e.target.value)}
-            />
-            <SearchIcon />
-        </Paper>
+        <TextField
+            label={label}
+            value={value}
+            onChange={onChange}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment>
+                        <IconButton>
+                            <SearchIcon />
+                        </IconButton>
+                    </InputAdornment>
+                )
+            }}
+            {...props}
+        />
     );
 }
 
 SearchBar.propTypes = {
+    label: PropTypes.string,
     value: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
 }

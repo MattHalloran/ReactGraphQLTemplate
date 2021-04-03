@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     error: {
         background: theme.palette.error.dark,
         color: theme.palette.error.contrastText,
-    }
+    },
 }));
 
 function Snack() {

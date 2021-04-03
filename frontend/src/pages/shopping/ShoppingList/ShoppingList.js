@@ -190,6 +190,10 @@ function ShoppingList({
         history.push(LINKS.Shopping + "/" + sku);
     };
 
+    const toCart = () => {
+        history.push(LINKS.Cart);
+    }
+
     const setInCart = (name, sku, operation, quantity) => {
         if (!session?.tag || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
@@ -201,12 +205,27 @@ function ShoppingList({
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
         updateCart(session, session.tag, cart_copy)
             .then(() => {
-                if (operation === 'ADD')
-                    alert(`${quantity} ${name}(s) added to cart!`)
-                else if (operation === 'SET')
-                    alert(`${name} quantity updated to ${quantity}!`)
-                else if (operation === 'DELETE')
-                    alert(`${name} 'removed from' cart!`)
+                if (operation === 'ADD') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${quantity} ${name}(s) added to cart.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
+                else if (operation === 'SET') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${name} quantity updated to ${quantity}.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
+                else if (operation === 'DELETE') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${name} 'removed from' cart.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
             })
             .catch(err => {
                 console.error(err, cart_copy);

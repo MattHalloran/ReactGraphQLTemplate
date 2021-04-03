@@ -3,11 +3,10 @@ import { useHistoryState } from 'utils/useHistoryState';
 import PropTypes from 'prop-types';
 import * as validation from 'utils/validations';
 import { getProfileInfo, updateProfile } from 'query/http_promises';
-import { getSession, setTheme } from 'utils/storage';
+import { getSession, setTheme as storeTheme } from 'utils/storage';
 import { BUSINESS_NAME, PUBS, DEFAULT_PRONOUNS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import { Button, Container, FormLabel, Grid, TextField, Checkbox } from '@material-ui/core';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Button, Container, FormLabel, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
@@ -18,6 +17,10 @@ const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
         marginTop: theme.spacing(3),
+    },
+    buttons: {
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
 }));
 
@@ -37,7 +40,7 @@ function ProfileForm(props) {
     const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [isLightTheme, setIsLightTheme] = useState(null);
+    const [theme, setTheme] = useState('light');
     const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
     const [extraEmails, setExtraEmails] = useHistoryState("su_extra_email", null);
 
@@ -96,20 +99,20 @@ function ProfileForm(props) {
         event.preventDefault();
         // If the user did not enter their current password, they cannot change anything
         if (currentPassword.length === 0) {
-            PubSub.publish(PUBS.Snack, {message: 'Please enter your current password.', severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: 'Please enter your current password.', severity: 'error' });
             return;
         }
         // If the user is trying to update their password
         if (newPassword.length > 0 || confirmPassword.length > 0) {
             if (newPassword !== confirmPassword) {
-                PubSub.publish(PUBS.Snack, {message: 'Confirm passwod does not match.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Confirm passwod does not match.', severity: 'error' });
                 return;
             }
         }
         // If the user is trying to update their profile information TODO add checks for emails and phones
         if (firstName !== fetched_profile.firstName || lastName !== fetched_profile.lastName) {
             if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError, phoneError)) {
-                PubSub.publish(PUBS.Snack, {message: 'Validation failed. Please check fields.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Validation failed. Please check fields.', severity: 'error' });
                 return;
             }
 
@@ -130,13 +133,13 @@ function ProfileForm(props) {
             //      "receives_delivery_updates": false
             // }],
             "existing_customer": existingCustomer,
-            "theme": isLightTheme ? 'light' : 'dark',
+            "theme": theme,
         }
         if (newPassword !== '')
             data.password = newPassword;
         updateProfile(session, data)
             .then(() => {
-                PubSub.publish(PUBS.Snack, {message: 'Profile updated.'});
+                PubSub.publish(PUBS.Snack, { message: 'Profile updated.' });
             })
             .catch(err => {
                 console.error(err.msg);
@@ -145,16 +148,16 @@ function ProfileForm(props) {
     }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
     const handleThemeSelect = (event) => {
-        setIsLightTheme(event.target.value == 'true');
-        setTheme(event.target.value === 'true' ? 'light' : 'dark');
+        setTheme(event.target.value);
+        storeTheme(event.target.value);
     }
 
     const handleCustomerSelect = (event) => {
-        setExistingCustomer(event.target.value == 'true');
+        setExistingCustomer(event.target.value);
     }
 
     const handleExtraEmailsSelect = (event) => {
-        setExtraEmails(event.target.value == 'true');
+        setExtraEmails(event.target.value);
     }
 
     return (
@@ -250,24 +253,31 @@ function ProfileForm(props) {
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Theme</FormLabel>
-                            <RadioGroup aria-label="theme-check" name="theme-check" value={isLightTheme} onChange={handleThemeSelect}>
-                                <FormControlLabel value="true" control={<Radio />} label="Light" />
-                                <FormControlLabel value="false" control={<Radio />} label="Dark" />
+                            <RadioGroup aria-label="theme-check" name="theme-check" value={theme} onChange={handleThemeSelect}>
+                                <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
+                                <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
                             </RadioGroup>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
-                            <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleCustomerSelect}>
-                                <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                                <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-                            </RadioGroup>
+                            <FormControlLabel
+                                required
+                                control={
+                                    <Checkbox
+                                        checked={existingCustomer}
+                                        onChange={handleCustomerSelect}
+                                        name="existing-customer-check"
+                                    />
+                                }
+                                label="I have ordered from New Life Nursery before"
+                            />
                             <FormHelperText>{existingCustomerError}</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControlLabel
-                            control={<Checkbox value="allowExtraEmails" color="primary" onChange={handleExtraEmailsSelect} />}
+                            control={<Checkbox checked={extraEmails} value="allowExtraEmails" onChange={handleExtraEmailsSelect} />}
                             label="I want to receive marketing promotions and updates via email."
                         />
                     </Grid>
@@ -318,14 +328,18 @@ function ProfileForm(props) {
                     </Grid>
                 </Grid>
             </Container>
-            <div>
-                <Button onClick={toggleEdit}>
-                    {editing ? "Cancel" : "Edit"}
-                </Button>
-                <Button type="submit" onClick={submit} disabled={!editing}>
-                    Update
+            <Grid className={classes.buttons} container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <Button fullWidth onClick={toggleEdit}>
+                        {editing ? "Cancel" : "Edit"}
+                    </Button>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Button fullWidth type="submit" onClick={submit} disabled={!editing}>
+                        Update
                  </Button>
-            </div>
+                </Grid>
+            </Grid>
         </FormControl>
     );
 }

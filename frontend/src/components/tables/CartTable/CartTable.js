@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
     tableIcon: {
         color: theme.palette.primary.contrastText,
     },
+    tableHead: {
+        background: theme.palette.primary.main,
+    },
     tableCol: {
         verticalAlign: 'middle',
         '& > *': {
@@ -61,7 +64,7 @@ function Cart({
     })
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
-    let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b);
+    let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b, 0);
 
     useEffect(() => {
         onUpdate(cartState);
@@ -164,6 +167,7 @@ function Cart({
     }, [thumbnails, cartState])
 
     const headCells = [
+        { id: 'close', align: 'left', disablePadding: true, label: '' },
         { id: 'product', align: 'left', disablePadding: true, label: 'Product' },
         { id: 'price', align: 'right', disablePadding: false, label: 'Price' },
         { id: 'quantity', align: 'right', disablePadding: false, label: 'Quantity' },
@@ -174,7 +178,7 @@ function Cart({
         <div {...props} >
             <TableContainer className={classes.tablePaper} component={Paper}>
                 <Table aria-label="cart table">
-                    <TableHead>
+                    <TableHead className={classes.tableHead}>
                         <TableRow>
                             {headCells.map(({ id, align, disablePadding, label }, index) => (
                                 <TableCell

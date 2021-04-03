@@ -6,15 +6,20 @@ import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
 import Selector from 'components/inputs/Selector/Selector';
 import PubSub from 'utils/pubsub';
-import { Switch, Container, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
+import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
+import RestoreIcon from '@material-ui/icons/Restore';
+import CloseIcon from '@material-ui/icons/Close';
+import FilterListIcon from '@material-ui/icons/FilterList';
+import PrintIcon from '@material-ui/icons/Print';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
         background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
         borderRight: `2px solid ${theme.palette.text.primary}`,
-        minWidth: 400,
+        padding: theme.spacing(1),
     },
     formControl: {
         display: 'flex',
@@ -22,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
         '& > *': {
             margin: theme.spacing(1),
         },
+    },
+    padBottom: {
+        marginBottom: theme.spacing(2),
     },
 }));
 
@@ -89,6 +97,7 @@ function ShoppingPage() {
         let selected = options.filter(o => o.checked);
         return (
             <Selector
+                className={`${classes.padBottom} ${classes.selector}`}
                 fullWidth
                 options={options}
                 selected={selected}
@@ -112,10 +121,24 @@ function ShoppingPage() {
     }
 
     let optionsContainer = (
-        <Container className={classes.formControl}>
-            <Button color="secondary" onClick={resetSearchConstraints}>Reset</Button>
-            <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-        </Container>
+        <Grid className={classes.padBottom} container spacing={2}>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    color="secondary"
+                    startIcon={<RestoreIcon />}
+                    onClick={resetSearchConstraints}
+                >Reset</Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    color="secondary"
+                    startIcon={<CloseIcon />}
+                    onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}
+                >Close</Button>
+            </Grid>
+        </Grid>
     );
 
     let filterData = [
@@ -147,7 +170,7 @@ function ShoppingPage() {
                         inputAriaLabel='sort-selector-label'
                         label="Sort" />
                     <h2>Search</h2>
-                    <SearchBar onChange={(s) => setSearchString(s)} />
+                    <SearchBar className={classes.padBottom} fullWidth onChange={(e) => setSearchString(e.target.value)} />
                     <h2>Filters</h2>
                     {filterData.map(d => filtersToSelector(...d))}
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
@@ -166,8 +189,16 @@ function ShoppingPage() {
                     }
                     label="Hide out of stock"
                 />
-                <Button color="secondary" onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
-                <Button color="secondary" onClick={printAvailability}>Print Availability</Button>
+                <Button
+                    color="secondary"
+                    startIcon={<FilterListIcon />}
+                    onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}
+                >Filter</Button>
+                <Button
+                    color="secondary"
+                    startIcon={<PrintIcon />}
+                    onClick={printAvailability}
+                >Print</Button>
             </div>
             <ShoppingList sort={sortBy} filters={filters} searchString={searchString} hideOutOfStock={hideOutOfStock} />
         </div>

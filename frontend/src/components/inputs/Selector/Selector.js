@@ -72,7 +72,7 @@ function Selector({
 
     return (
         <FormControl variant="outlined" className={`${classes.root} ${fullWidth ? classes.fullWidth : ''}`}>
-            <InputLabel id={inputAriaLabel}>{label}</InputLabel>
+            <InputLabel id={inputAriaLabel} shrink={selected_labels.length > 0}>{label}</InputLabel>
             <Select
                 labelId={inputAriaLabel}
                 value={selected}

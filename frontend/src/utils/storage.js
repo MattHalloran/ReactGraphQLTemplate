@@ -15,6 +15,7 @@ export function setTheme(themeString) {
 
 export function getTheme() {
     let themeString = localStorage.getItem(LOCAL_STORAGE.Theme);
+    console.log('GETTING THEME', themeString)
     if (themeString === 'dark')
         return darkTheme;
     return lightTheme;
