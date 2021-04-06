@@ -1,9 +1,9 @@
 import { LINKS } from 'utils/consts';
 import { Breadcrumbs, Link } from '@material-ui/core';
 
-function AdminBreadcrumbs() {
+function AdminBreadcrumbs({...props}) {
     return (
-            <Breadcrumbs separator="|" aria-label="Admin breadcrumb">
+            <Breadcrumbs separator="|" aria-label="Admin breadcrumb" {...props}>
                 <Link href={LINKS.AdminOrders}>Orders</Link>
                 <Link href={LINKS.AdminCustomers}>Customers</Link>
                 <Link href={LINKS.AdminInventory}>Inventory</Link>

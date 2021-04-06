@@ -13,8 +13,11 @@ import OrderCard from 'components/cards/OrderCard/OrderCard';
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, .5fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
         gridGap: '20px',
+    },
+    padBottom: {
+        marginBottom: theme.spacing(2),
     },
 }));
 
@@ -46,7 +49,7 @@ function AdminOrderPage() {
                 order={currOrder}
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs className={classes.padBottom}/>
             <Selector
                 fullWidth
                 options={ORDER_STATES}

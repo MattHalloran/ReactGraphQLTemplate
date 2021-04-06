@@ -684,7 +684,9 @@ class PlantHandler(Handler):
                         'attracts_pollinators_and_wildlifes', 'bloom_times', 'bloom_colors',
                         'zones', 'plant_types', 'physiographic_regions', 'soil_moistures',
                         'soil_phs', 'soil_types', 'light_ranges']
-        [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
+        for field in trait_fields:
+            trait_obj = getattr(model, field)
+            as_dict[field] = trait_obj.value if trait_obj else None
         as_dict['id'] = model.id
         display_image = cls.get_display_image(model)
         if display_image:

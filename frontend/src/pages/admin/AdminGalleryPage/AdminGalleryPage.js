@@ -1,13 +1,10 @@
-import { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useCallback, useState, useEffect, useLayoutEffect } from 'react';
 import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
 import { getSession } from 'utils/storage';
 import { Button, Typography } from '@material-ui/core';
-import { SortableContainer, SortableElement } from 'react-sortable-hoc';
-import { moveArrayIndex } from 'utils/arrayTools';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
-import GalleryCard from 'components/cards/GalleryCard/GalleryCard';
 import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 import { DropzoneArea } from 'material-ui-dropzone';
 import GalleryTable from 'components/tables/GalleryTable/GalleryTable';

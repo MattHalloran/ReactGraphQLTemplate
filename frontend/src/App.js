@@ -12,7 +12,7 @@ import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
-import AlertDialog from 'components/AlertDialog/AlertDialog';
+import AlertDialog from 'components/dialogs/AlertDialog/AlertDialog';
 import Snack from 'components/Snack/Snack';
 
 const useStyles = makeStyles((theme) => ({

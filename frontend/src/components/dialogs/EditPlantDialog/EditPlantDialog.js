@@ -1,19 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getSession } from 'utils/storage';
 import { makeStyles } from '@material-ui/core/styles';
 import { modifyPlant } from 'query/http_promises';
-import { Dialog, AppBar, Toolbar, IconButton, Slide, Container, Tooltip, Grid, TextField, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
+import { Dialog, AppBar, Toolbar, IconButton, Slide, Tooltip, Grid, TextField, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { NoImageIcon } from 'assets/img';
 import Selector from 'components/inputs/Selector/Selector';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import RestoreIcon from '@material-ui/icons/Restore';
+import UpdateIcon from '@material-ui/icons/Update';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import makeID from 'utils/makeID';
 import { PLANT_ATTRIBUTES, PUBS } from 'utils/consts';
 import { DropzoneAreaBase } from 'material-ui-dropzone';
 import PubSub from 'utils/pubsub';
+import _ from 'underscore';
+import { deleteArrayIndex, updateArray } from 'utils/arrayTools';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -29,18 +33,12 @@ const useStyles = makeStyles((theme) => ({
         borderRight: `2px solid ${theme.palette.primary.contrastText}`,
     },
     optionsContainer: {
-        width: 'fit-content',
-        justifyContent: 'center',
-        '& > *': {
-            margin: theme.spacing(1),
-        },
+        padding: theme.spacing(2),
     },
     displayImage: {
         border: '1px solid black',
         maxWidth: '100%',
-        maxWidth: '-webkit-fill-available',
         maxHeight: '100%',
-        maxHeight: '-webkit-fill-available',
         bottom: 0,
     },
     content: {
@@ -52,7 +50,8 @@ const useStyles = makeStyles((theme) => ({
         minHeight: '100px',
     },
     selected: {
-
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
     },
 }));
 
@@ -69,46 +68,75 @@ function EditPlantDialog({
 }) {
     console.log('PLANT POPUP', plant)
     const classes = useStyles();
-    plant = {
-        ...plant,
-        skus: plant?.skus ?? [],
-        latin_name: plant?.latin_name ?? '',
-        common_name: plant?.common_name ?? '',
-        drought_tolerance: plant?.drought_tolerance ?? '',
-        grown_height: plant?.grown_height ?? '',
-        grown_spread: plant?.grown_spread ?? '',
-        growth_rate: plant?.growth_rate ?? '',
-        optimal_light: plant?.optimal_light ?? '',
-        salt_tolerance: plant?.salt_tolerance ?? '',
-    };
-    console.log('PLANT ISSSSSSS', plant)
+    const [changedPlant, setChangedPlant] = useState(plant);
 
     // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
-    // Used to display selected SKU info
-    const [selectedSku, setSelectedSku] = useState({
-        code: '',
-        size: '',
-        price: '',
-        quantity: '',
-    });
+    const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
     const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0])
+
+    useEffect(() => {
+        plant = {
+            ...plant,
+            skus: plant?.skus ?? [],
+            latin_name: plant?.latin_name ?? '',
+            common_name: plant?.common_name ?? '',
+            drought_tolerance: plant?.drought_tolerance ?? '',
+            grown_height: plant?.grown_height ?? '',
+            grown_spread: plant?.grown_spread ?? '',
+            growth_rate: plant?.growth_rate ?? '',
+            optimal_light: plant?.optimal_light ?? '',
+            salt_tolerance: plant?.salt_tolerance ?? '',
+        };
+        setChangedPlant(plant);
+    }, [plant])
+
+    function revertPlant() {
+        setChangedPlant(plant);
+    }
 
     const savePlant = () => {
         let plant_data = {
-            ...plant,
+            ...changedPlant,
             display_image: selectedImage,
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
         modifyPlant(session, 'UPDATE', plant_data)
             .then(() => {
-                PubSub.publish(PUBS.Snack, {message: 'SKU Updated.'});
+                PubSub.publish(PUBS.Snack, { message: 'SKU Updated.' });
             })
             .catch((error) => {
                 console.error(error);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to update SKU.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update SKU.', severity: 'error' });
             });
     }
+
+    function updatePlantField(field, value) {
+        console.log('UPDATING PLANT FIELD', field, value)
+        setChangedPlant(p => ({
+            ...p,
+            [field]: value,
+        }));
+    }
+
+    function updateSkuField(field, value) {
+        console.log('UPDATING SKU FIELD', field, value, selectedSkuIndex)
+        if (selectedSkuIndex < 0) return;
+        setChangedPlant(p => {
+            let skus_list = p.skus;
+            let new_sku = skus_list[selectedSkuIndex];
+            new_sku[field] = value
+            skus_list = updateArray(skus_list, selectedSkuIndex, new_sku);
+            return ({
+                ...p,
+                skus: skus_list,
+            })
+        });
+    }
+
+    useEffect(() => {
+        console.log('changed plant is:::::', changedPlant);
+    }, [changedPlant])
 
     function getSelector(label, field, multiSelect = false) {
         console.log('IN SELECTORRRRRR', field, plant)
@@ -117,8 +145,8 @@ function EditPlantDialog({
                 fullWidth
                 size="small"
                 options={trait_options ? trait_options[field] : []}
-                selected={plant[field]}
-                handleChange={(e) => plant[field] = e.target.value}
+                selected={changedPlant ? changedPlant[field] : null}
+                handleChange={(e) => updatePlantField(field, e.target.value)}
                 inputAriaLabel={`plant-attribute-${field}-selector-label`}
                 label={label}
                 multiple={multiSelect} />
@@ -132,8 +160,8 @@ function EditPlantDialog({
                 size="small"
                 id={field}
                 label={label}
-                value={plant[field]}
-                onChange={e => plant[field] = e.target.value}
+                value={changedPlant ? changedPlant[field] : null}
+                onChange={e => updatePlantField(field, e.target.value)}
             />
         )
     }
@@ -158,18 +186,24 @@ function EditPlantDialog({
     }
 
     function newSku() {
-        plant.skus = plant.skus.concat({ sku: makeID(10) });
+        setChangedPlant(p => ({
+            ...p,
+            skus: p.skus.concat({ sku: makeID(10) }),
+        }));
     }
 
     function removeSku() {
-        if (plant.skus.indexOf(selectedSku) < 0) return;
-        plant.skus = plant.skus.filter(s => s.sku !== selectedSku.sku);
+        if (selectedSkuIndex < 0) return;
+        setChangedPlant(p => ({
+            ...p,
+            skus: deleteArrayIndex(p.skus, selectedSkuIndex),
+        }));
     }
 
     //Show display image from uploaded image.
     //If no upload image, from model data.
     //If not model data, show NoImageIcon
-    let image_data = selectedImage?.data ?? plant.displayImage;
+    let image_data = selectedImage?.data ?? changedPlant?.displayImage;
     let display_image;
     if (image_data) {
         display_image = <img src={image_data} className={classes.displayImage} alt="TODO" />
@@ -187,10 +221,26 @@ function EditPlantDialog({
         'Size': ['size'],
     }
 
+    let changes_made = !_.isEqual(plant, changedPlant);
     let options = (
-        <Container className={classes.optionsContainer}>
-            <Button onClick={savePlant}>Apply Changes</Button>
-        </Container>
+        <Grid className={classes.optionsContainer} container spacing={2}>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    disabled={!changes_made}
+                    startIcon={<RestoreIcon />}
+                    onClick={revertPlant}
+                >Revert</Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    disabled={!changes_made}
+                    startIcon={<UpdateIcon />}
+                    onClick={savePlant}
+                >Update</Button>
+            </Grid>
+        </Grid>
     );
 
     return (
@@ -211,17 +261,17 @@ function EditPlantDialog({
                         <ListSubheader component="div" id="sku-select-subheader">
                             SKUs
                 </ListSubheader>
-                        {plant.skus.map(s => (
+                        {plant?.skus.map((s, index) => (
                             <ListItem
                                 button
-                                className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
-                                onClick={() => setSelectedSku(s)}>
+                                className={`sku-option ${index === selectedSkuIndex ? classes.selected : ''}`}
+                                onClick={() => setSelectedSkuIndex(changedPlant?.skus?.indexOf(s) ?? -1)}>
                                 <ListItemText primary={s.sku} />
                             </ListItem>
                         ))}
                     </List>
                     <div>
-                        {selectedSku ?
+                        {selectedSkuIndex >= 0 ?
                             <Tooltip title="Delete SKU">
                                 <IconButton onClick={removeSku}>
                                     <DeleteIcon />
@@ -242,16 +292,16 @@ function EditPlantDialog({
                             <TextField
                                 size="small"
                                 label="Latin Name"
-                                value={plant.latin_name}
-                                onChange={e => plant.latin_name = e.target.value}
+                                value={changedPlant?.latin_name}
+                                onChange={e => updatePlantField('latin_name', e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 size="small"
                                 label="Common Name"
-                                value={plant.common_name}
-                                onChange={e => plant.common_name = e.target.value}
+                                value={changedPlant?.common_name}
+                                onChange={e => updatePlantField('common_name', e.target.value)}
                             />
                         </Grid>
                         {/* Select which attribute you'd like to edit */}
@@ -300,8 +350,8 @@ function EditPlantDialog({
                             <TextField
                                 size="small"
                                 label="Plant Code"
-                                value={selectedSku.code}
-                                onChange={e => selectedSku.code = e.target.value}
+                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.sku : null}
+                                onChange={e => updateSkuField('sku', e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -314,16 +364,16 @@ function EditPlantDialog({
                             <TextField
                                 size="small"
                                 label="Price"
-                                value={selectedSku.price}
-                                onChange={e => selectedSku.price = e.target.value}
+                                value={changedPlant ? displayPrice(changedPlant.skus[selectedSkuIndex]?.price) : null}
+                                onChange={e => updateSkuField('price', displayPriceToDatabase(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 size="small"
                                 label="Quantity"
-                                value={selectedSku.quantity}
-                                onChange={e => selectedSku.quantity = e.target.value}
+                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.quantity : null}
+                                onChange={e => updateSkuField('quantity', e.target.value)}
                             />
                         </Grid>
                     </Grid>

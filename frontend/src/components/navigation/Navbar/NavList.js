@@ -25,6 +25,13 @@ const useStyles = makeStyles((theme) => ({
         background: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
         textTransform: 'none',
+        verticalAlign: 'text-top',
+    },
+    menuItem: {
+        color: theme.palette.primary.contrastText,
+    },
+    menuIcon: {
+        fill: theme.palette.primary.contrastText,
     },
     contact: {
         width: '300px',
@@ -62,7 +69,7 @@ function NavList(props) {
         cart = (
             <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => history.push(LINKS.Cart)}>
                 <Badge badgeContent={cart_option[5]} color="error">
-                    <ShoppingCartIcon />
+                    <ShoppingCartIcon/>
                 </Badge>
             </IconButton>
         );

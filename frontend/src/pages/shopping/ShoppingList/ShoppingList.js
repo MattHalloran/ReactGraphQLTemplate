@@ -235,11 +235,12 @@ function ShoppingList({
 
     return (
         <div className={classes.root} id={track_scrolling_id}>
-            <PlantDialog
+            {(curr_index >= 0) ? <PlantDialog
                 plant={curr_index >= 0 ? plants[curr_index] : null}
                 onCart={setInCart}
                 open={curr_index >= 0}
-                onClose={() => history.goBack()} />
+                onClose={() => history.goBack()} /> : null}
+            
             {plants?.map((item, index) =>
                 <PlantCard key={index}
                     cart={cart}

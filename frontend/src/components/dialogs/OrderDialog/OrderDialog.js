@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getSession } from 'utils/storage';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Container } from '@material-ui/core';
+import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Container, Grid } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import Cart from 'components/tables/CartTable/CartTable';
 import { updateCart, setOrderStatus } from 'query/http_promises';
@@ -25,12 +25,11 @@ const useStyles = makeStyles((theme) => ({
     container: {
         padding: theme.spacing(1),
     },
-    optionsContainer: {
-        width: 'fit-content',
-        justifyContent: 'center',
-        '& > *': {
-            margin: theme.spacing(1),
-        },
+    topOption: {
+        width: 'max(9em, 40%)',
+        align: 'right',
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
 }));
 
@@ -59,17 +58,17 @@ function OrderDialog({
 
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
-            PubSub.publish(PUBS.Snack, {message: 'Failed to update order', severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: 'Failed to update order', severity: 'error' });
             return;
         }
         updateCart(session, session.tag, order)
             .then(() => {
                 setChangedOrder(order);
-                PubSub.publish(PUBS.Snack, {message: 'Order successfully updated.'});
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
             })
             .catch(err => {
                 console.error(err, order);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update order.', severity: 'error' });
                 return;
             })
     }
@@ -77,20 +76,20 @@ function OrderDialog({
     const approveOrder = useCallback(() => {
         setOrderStatus(session, order?.id, ORDER_STATUS.APPROVED)
             .then(() => {
-                PubSub.publish(PUBS.Snack, {message: 'Order status set to \'Approved\'.'});
+                PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to approve order.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error' });
             })
     }, [order])
 
     const denyOrder = useCallback(() => {
         setOrderStatus(session, order?.id, ORDER_STATUS.REJECTED)
             .then(() => {
-                PubSub.publish(PUBS.Snack, {message: 'Order status set to \'Denied\''});
+                PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to deny order.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error' });
             })
     }, [order])
 
@@ -100,25 +99,37 @@ function OrderDialog({
         status_string = `Status: ${ORDER_STATES[status_index].label}`
     }
 
-    let buttons = (
-        <Container className={classes.optionsContainer}>
-            <Button 
-                startIcon={<UpdateIcon />} 
-                onClick={updateOrder} 
-                disabled={_.isEqual(order, changedOrder)}
-            >Update</Button>
-            <Button 
-                startIcon={<ThumbUpIcon />} 
-                onClick={approveOrder}
-                disabled={!_.isEqual(order, changedOrder)}
-            >Approve</Button>
-            <Button 
-                startIcon={<ThumbDownIcon />} 
-                onClick={denyOrder}
-                disabled={!_.isEqual(order, changedOrder)}
-            >Deny</Button>
-        </Container>
-    );
+    function optionButtons(is_top) {
+        let sm_num = is_top ? 12 : 4;
+        return (
+            <Grid className={is_top ? classes.topOption : ''} container spacing={1}>
+                <Grid item xs={12} sm={sm_num} md={4}>
+                    <Button
+                        fullWidth
+                        startIcon={<UpdateIcon />}
+                        onClick={updateOrder}
+                        disabled={_.isEqual(order, changedOrder)}
+                    >Update</Button>
+                </Grid>
+                <Grid item xs={12} sm={sm_num} md={4}>
+                    <Button
+                        fullWidth
+                        startIcon={<ThumbUpIcon />}
+                        onClick={approveOrder}
+                        disabled={!_.isEqual(order, changedOrder)}
+                    >Approve</Button>
+                </Grid>
+                <Grid item xs={12} sm={sm_num} md={4}>
+                    <Button
+                        fullWidth
+                        startIcon={<ThumbDownIcon />}
+                        onClick={denyOrder}
+                        disabled={!_.isEqual(order, changedOrder)}
+                    >Deny</Button>
+                </Grid>
+            </Grid>
+        )
+    }
 
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
@@ -130,13 +141,14 @@ function OrderDialog({
                     <Typography variant="h6" className={classes.title}>
                         {order?.customer?.first_name} {order?.customer?.last_name}'s Order
                     </Typography>
-                    {buttons}
+                    {optionButtons(true)}
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>
                 <Typography variant="body1" gutterBottom>{status_string}</Typography>
                 <Cart cart={order} onUpdate={orderUpdate} />
-                {buttons}
+                <br/>
+                {optionButtons(false)}
             </div>
         </Dialog>
     );

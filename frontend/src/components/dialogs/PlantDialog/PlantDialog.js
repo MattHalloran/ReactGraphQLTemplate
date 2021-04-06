@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import { Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Divider, List, ListItem, ListItemAvatar, Avatar, ListItemIcon, ListItemText, Tooltip, Grid } from '@material-ui/core';
+import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Divider, List, ListItem, ListItemAvatar, Avatar, ListItemText, Tooltip, Grid } from '@material-ui/core';
 import { getImage } from "query/http_promises";
 import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
-import ImageIcon from '@material-ui/icons/Image';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
 import Selector from 'components/inputs/Selector/Selector';
@@ -49,6 +48,9 @@ const useStyles = makeStyles((theme) => ({
     avatar: {
         background: 'transparent',
     },
+    optionsContainer: {
+        marginBottom: theme.spacing(1),
+    },
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -90,9 +92,13 @@ function PlantDialog({
                 value: s.id,
             }
         })
+        // If options is unchanged, do not set
+        let curr_values = order_options.map(o => o.value);
+        let new_values = options.map(o => o.value);
+        if (_.isEqual(curr_values, new_values)) return;
         setOrderOptions(options);
         setSelected(order_options.length > 0 ? order_options[0].value : null);
-    }, [plant])
+    }, [plant, order_options])
 
     let display_image;
     if (image) {
@@ -106,9 +112,9 @@ function PlantDialog({
         if (!alt) alt = title;
         let field_string;
         if (Array.isArray(plant[field])) {
-            field_string = plant[field].map((f) => f.value).join(', ')
+            field_string = plant[field].map(f => f).join(', ')
         } else {
-            field_string = plant[field].value;
+            field_string = plant[field];
         }
         return (
             <div>
@@ -125,8 +131,8 @@ function PlantDialog({
     }
 
     let options = (
-        <Grid container spacing={2}>
-            <Grid item xs={5}>
+        <Grid className={classes.optionsContainer} container spacing={2}>
+            <Grid item xs={6} sm={4}>
                 <Selector
                     fullWidth
                     options={order_options}
@@ -135,7 +141,7 @@ function PlantDialog({
                     inputAriaLabel='size-selector-label'
                     label="Size" />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={6} sm={4}>
                 <QuantityBox
                     min_value={0}
                     max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
@@ -143,12 +149,14 @@ function PlantDialog({
                     value={quantity}
                     valueFunc={setQuantity} />
             </Grid>
-            <Grid item xs={2}>
-                <Tooltip title="Add to cart">
-                    <IconButton onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected_sku, 'ADD', quantity)}>
-                        <AddShoppingCartIcon />
-                    </IconButton>
-                </Tooltip>
+            <Grid item xs={12} sm={4}>
+                <Button
+                    disabled={selected===null}
+                    fullWidth
+                    color="secondary"
+                    startIcon={<AddShoppingCartIcon />}
+                    onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected_sku, 'ADD', quantity)}
+                >Order</Button>
             </Grid>
         </Grid>
     );

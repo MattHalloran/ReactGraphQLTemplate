@@ -43,7 +43,7 @@ function AlertDialog() {
                     {state.firstButtonText}
                 </Button>
                 {state.secondButtonText ? (
-                    <Button onClick={state.secondButtonClicked} color="primary">
+                    <Button onClick={state.secondButtonClicked ?? (() => setState(default_state))} color="primary">
                         {state.secondButtonText}
                     </Button>
                 ) : null}

@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     card: {
-        background: theme.palette.primary.light,
+        background: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
         cursor: 'pointer',
     },
@@ -19,6 +19,9 @@ const useStyles = makeStyles((theme) => ({
         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
         gridGap: '20px',
         alignItems: 'stretch',
+    },
+    button: {
+        color: theme.palette.secondary.light,
     },
 }));
 
@@ -45,8 +48,8 @@ function AdminMainPage() {
             </div>
             <div className={classes.flexed}>
                 {card_data.map(([title, description, link]) => (
-                    <Card className={classes.card}>
-                        <CardContent onClick={() => history.push(link)}>
+                    <Card className={classes.card} onClick={() => history.push(link)}>
+                        <CardContent>
                             <Typography variant="h5" component="h2">
                                 {title}
                             </Typography>
@@ -55,7 +58,7 @@ function AdminMainPage() {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button size="small" onClick={() => history.push(link)}>Open</Button>
+                            <Button className={classes.button} variant="text" size="small" onClick={() => history.push(link)}>Open</Button>
                         </CardActions>
                     </Card>
                 ))}

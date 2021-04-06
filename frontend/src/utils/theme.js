@@ -32,7 +32,7 @@ export const lightTheme = createMuiTheme({
             dark: '#007ac1',
         },
         background: {
-            default: '#fafafa',
+            default: '#dae7da',
             paper: '#ffffff',
         },
     }

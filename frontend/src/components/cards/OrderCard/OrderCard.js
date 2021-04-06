@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
-import { Button, Card, CardActions, CardContent, Typography, Chip } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, Typography, IconButton } from '@material-ui/core';
 import PhoneIcon from '@material-ui/icons/Phone';
 import EmailIcon from '@material-ui/icons/Email';
+import ListDialog from 'components/dialogs/ListDialog/ListDialog';
 import { makeStyles } from '@material-ui/core/styles';
+import { useState } from 'react';
 
 const cardStyles = makeStyles((theme) => ({
     root: {
@@ -15,7 +17,10 @@ const cardStyles = makeStyles((theme) => ({
         cursor: 'pointer',
     },
     button: {
-        color: theme.palette.primary.contrastText,
+        color: theme.palette.secondary.light,
+    },
+    icon: {
+        fill: theme.palette.secondary.light,
     },
 }));
 
@@ -26,52 +31,68 @@ function OrderCard({
     desired_delivery_date,
 }) {
     const classes = cardStyles();
-    
-    const callPhone = (number) => {
-        let tel = `tel:${number}`;
-        window.location.href = tel;
-    }
+    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+    const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
-    let phoneChips = customer.phones?.map(p => (
-        <Chip
-            className={classes.chip}
-            onClick={() => callPhone(`${p.country_code}${p.unformatted_number}`)}
-            icon={<PhoneIcon />}
-            label={p.unformatted_number}
-            color="secondary" />
-    ));
+    const callPhone = (number) => {
+        setPhoneDialogOpen(false);
+        if (!number) return;
+        let url = `tel:${number}`;
+        window.location.href = url;
+    }
 
     const sendEmail = (address, subject = '', body = '') => {
-        let mailto = `mailto:${address}?subject=${subject}&body=${body}`;
-        window.location.href = mailto;
+        setEmailDialogOpen(false);
+        if (!address) return;
+        let url = `mailto:${address}?subject=${subject}&body=${body}`;
+        window.open(url, '_blank', 'noopener,noreferrer')
     }
 
-    let emailChips = customer.emails?.map(e => (
-        <Chip
-            className={classes.chip}
-            onClick={() => sendEmail(e.email_address)}
-            icon={<EmailIcon />}
-            label={e.email_address}
-            color="secondary" />
-    ));
+    // Phone and email [label, value] pairs
+    let phone_list = customer.phones?.map(p => (
+        [p.unformatted_number, `${p.country_code}${p.unformatted_number}`]
+    )) ?? [];
+    let email_list = customer.emails?.map(e => (
+        [e.email_address, e.email_address]
+    )) ?? [];
 
     return (
-        <Card className={classes.root} onClick={onEdit}>
-            <CardContent>
+        <Card className={classes.root}>
+            {phoneDialogOpen ? (
+                <ListDialog
+                    title="Select Phone"
+                    data={phone_list}
+                    onClose={callPhone} />
+            ) : null}
+            {emailDialogOpen ? (
+                <ListDialog
+                    title="Select Email"
+                    data={email_list}
+                    onClose={sendEmail} />
+            ) : null}
+            <CardContent onClick={onEdit}>
                 <Typography variant="h6" component="h3" gutterBottom>
                     {customer.first_name} {customer.last_name}
                 </Typography>
                 <Typography variant="body1" component="h4">
-                    Requested Date: {new Date(desired_delivery_date).getDate()}
+                    Requested Date: {new Date(desired_delivery_date).toLocaleString('en-US').split(',')[0]}
                 </Typography>
                 <Typography variant="body1" component="h4">
                     Items: {items.length}
                 </Typography>
-                {phoneChips}
-                {emailChips}
             </CardContent>
             <CardActions>
                 <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
+                {(phone_list.length > 0) ?
+                    (<IconButton onClick={() => setPhoneDialogOpen(true)}>
+                        <PhoneIcon className={classes.icon} />
+                    </IconButton>)
+                    : null}
+                {(email_list.length > 0) ?
+                    (<IconButton onClick={() => setEmailDialogOpen(true)}>
+                        <EmailIcon className={classes.icon} />
+                    </IconButton>)
+                    : null}
             </CardActions>
         </Card>
     );

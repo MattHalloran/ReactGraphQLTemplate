@@ -83,6 +83,7 @@ function AdminInventoryPage() {
         getInventory(existing_sort_by, 0, true)
             .then((response) => {
                 setExisting(response.page_results);
+                console.log('SET all plantsssssssssss', response.page_results)
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);

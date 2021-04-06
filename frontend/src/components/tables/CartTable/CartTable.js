@@ -15,7 +15,7 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
 import Selector from 'components/inputs/Selector/Selector';
-import AlertDialog from 'components/AlertDialog/AlertDialog';
+import AlertDialog from 'components/dialogs/AlertDialog/AlertDialog';
 import _ from 'underscore';
 import PubSub from 'utils/pubsub';
 

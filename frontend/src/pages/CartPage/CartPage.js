@@ -48,7 +48,10 @@ function CartPage() {
     }
 
     useEffect(() => {
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => {console.log('cart set from pub');setCart(o)});
+        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => { 
+            setCart(o); 
+            setChangedCart(o) 
+        });
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
             PubSub.unsubscribe(cartSub);
@@ -77,23 +80,31 @@ function CartPage() {
             })
     }
 
-    const finalizeOrder = useCallback(() => {
-        if (cart.items.length <= 0) {
-            PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
-            return;
-        }
-        if (!window.confirm(`This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`)) return;
+    function requestQuote() {
         submitOrder(session, changedCart)
             .then(() => {
                 PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
+                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
             })
+    }
+
+    const finalizeOrder = useCallback(() => {
+        if (cart.items.length <= 0) {
+            PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
+            return;
+        }
+        PubSub.publish(PUBS.AlertDialog, {
+            message: `This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`,
+            firstButtonText: 'Yes',
+            firstButtonClicked: requestQuote,
+            secondButtonText: 'No',
+        });
     }, [cart, changedCart, session]);
 
-    console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart.items, changedCart.items))
+    console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>

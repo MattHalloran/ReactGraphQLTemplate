@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme) => ({
         background: theme.palette.error.dark,
         color: theme.palette.error.contrastText,
     },
+    button: {
+        color: theme.palette.secondary.light,
+    },
 }));
 
 function Snack() {
@@ -45,7 +48,7 @@ function Snack() {
     useEffect(() => {
         let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...default_state, ...o }));
         return () => PubSub.unsubscribe(snackSub);
-    }, [])
+    }, [default_state])
 
     return (
         <Snackbar
@@ -61,7 +64,7 @@ function Snack() {
             message={state.message}
             action={
                 <React.Fragment>
-                    {state.buttonText ? <Button color="secondary" size="small" onClick={state.buttonClicked}>
+                    {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>
                         {state.buttonText}
                     </Button> : null}
                     <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(default_state)}>
