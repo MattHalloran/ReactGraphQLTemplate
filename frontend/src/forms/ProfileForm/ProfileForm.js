@@ -1,54 +1,61 @@
-import React, { useEffect, useState, useRef, useLayoutEffect, useCallback } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect, useCallback } from 'react'
+import { useHistoryState } from 'utils/useHistoryState';
 import PropTypes from 'prop-types';
-import InputText from 'components/inputs/InputText/InputText';
 import * as validation from 'utils/validations';
 import { getProfileInfo, updateProfile } from 'query/http_promises';
-import { getSession, setTheme } from 'utils/storage';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
+import { getSession, setTheme as storeTheme } from 'utils/storage';
+import { BUSINESS_NAME, PUBS, DEFAULT_PRONOUNS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import Button from 'components/Button/Button';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Button, Container, FormLabel, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { makeStyles } from '@material-ui/core/styles';
 
-// Profile fields:
-// first_name: str
-// last_name: str
-// image_file: object
-// pronouns: str
-// theme: str
-// personal_email: array
-// personal_phone: array
-// orders: array (last order is cart)
+const useStyles = makeStyles((theme) => ({
+    form: {
+        width: '100%',
+        marginTop: theme.spacing(3),
+    },
+    buttons: {
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+}));
+
 function ProfileForm(props) {
-    const fetched_profile = useRef({});
+    const classes = useStyles();
     const [session, setSession] = useState(getSession());
     const [editing, setEditing] = useState(false);
-    const [showErrors, setShowErrors] = useState(false);
-    // String profile fields
-    const [picSrc, setPicSrc] = useState(null);
-    const [firstName, setFirstName] = useState("")
-    const [firstNameError, setFirstNameError] = useState(null);
-    const [lastName, setLastName] = useState("")
-    const [lastNameError, setLastNameError] = useState(null);
-    const [pronouns, setPronouns] = useState("")
-    const [pronounsError, setPronounsError] = useState(null);
+    const fetched_profile = useRef({});
+    const [firstName, setFirstName] = useHistoryState("su_first_name", "");
+    const [lastName, setLastName] = useHistoryState("su_last_name", "");
+    const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
+    const [business, setBusiness] = useHistoryState("su_bizz", null);
+    const [email, setEmail] = useHistoryState("su_email", "");
+    const email_id = useRef();
+    const [phone, setPhone] = useHistoryState("su_phone", "");
+    const phone_id = useRef();
     const [currentPassword, setCurrentPassword] = useState("")
-    const [password, setPassword] = useState("")
-    const [passwordError, setPasswordError] = useState(null);
-    const [confirmPassword, setConfirmPassword] = useState("")
-    // Array profile fields
-    const [emails, setEmails] = useState([""])
-    const [emailErrors, setEmailErrors] = useState(null);
-    const email_ids = useRef();
-    const [phones, setPhones] = useState([""])
-    const [phoneErrors, setPhoneErrors] = useState(null);
-    const phone_ids = useRef();
-    const [isLightTheme, setIsLightTheme] = useState(null);
-    const [existingCustomer, setExistingCustomer] = useState(null);
-    const [existingCustomerError, setExistingCustomerError] = useState(null);
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [theme, setTheme] = useState('light');
+    const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
+    const [extraEmails, setExtraEmails] = useHistoryState("su_extra_email", null);
+
+    let firstNameError = validation.firstNameValidation(firstName);
+    let lastNameError = validation.lastNameValidation(lastName);
+    let pronounsError = validation.pronounValidation(pronouns);
+    let businessError = validation.businessValidation(business);
+    let emailError = validation.emailValidation(email);
+    let phoneError = validation.phoneNumberValidation(phone);
+    let newPasswordError = validation.passwordValidation(newPassword);
+    let confirmPasswordError = validation.confirmPasswordValidation(newPassword, confirmPassword);
+    let existingCustomerError = '';
+    let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
+        emailError, phoneError, newPasswordError, confirmPasswordError, existingCustomerError);
+
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
@@ -57,7 +64,7 @@ function ProfileForm(props) {
 
     useLayoutEffect(() => {
         let mounted = true;
-        document.title = `Profile | ${BUSINESS_NAME}`;
+        document.title = `Profile | ${BUSINESS_NAME.Short}`;
         if (!session) return;
         getProfileInfo(session, session.tag).then(response => {
             if (!mounted || editing) return;
@@ -67,12 +74,12 @@ function ProfileForm(props) {
             if (user.last_name) setLastName(user.last_name)
             // TODO convert emails and phones to strings first
             if (user.emails) {
-                setEmails(user.emails.map(o => o.email_address));
-                email_ids.current = user.emails.map(o => o.id);
+                setEmail(user.emails[0].email_address);
+                email_id.current = user.emails[0].id
             }
             if (user.phones) {
-                setPhones(user.phones.map(o => o.unformatted_number));
-                phone_ids.current = user.phones.map(o => o.id);
+                setPhone(user.phones[0].unformatted_number);
+                phone_id.current = user.phones[0].id
             }
             if (user.pronouns) {
                 setPronouns(user.pronouns);
@@ -90,23 +97,22 @@ function ProfileForm(props) {
 
     const submit = useCallback((event) => {
         event.preventDefault();
-        setShowErrors(true);
         // If the user did not enter their current password, they cannot change anything
         if (currentPassword.length === 0) {
-            alert('Please enter your current password');
+            PubSub.publish(PUBS.Snack, { message: 'Please enter your current password.', severity: 'error' });
             return;
         }
         // If the user is trying to update their password
-        if (password.length > 0 || confirmPassword.length > 0) {
-            if (password !== confirmPassword) {
-                alert('New password and confirm password do not match!')
+        if (newPassword.length > 0 || confirmPassword.length > 0) {
+            if (newPassword !== confirmPassword) {
+                PubSub.publish(PUBS.Snack, { message: 'Confirm passwod does not match.', severity: 'error' });
                 return;
             }
         }
         // If the user is trying to update their profile information TODO add checks for emails and phones
         if (firstName !== fetched_profile.firstName || lastName !== fetched_profile.lastName) {
-            if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, emailErrors, phoneErrors)) {
-                alert('Validation failed! Please check fields');
+            if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError, phoneError)) {
+                PubSub.publish(PUBS.Snack, { message: 'Validation failed. Please check fields.', severity: 'error' });
                 return;
             }
 
@@ -117,7 +123,7 @@ function ProfileForm(props) {
             "first_name": firstName,
             "last_name": lastName,
             "pronouns": pronouns,
-            "emails": [{"id": email_ids.current[0], "email_address": emails[0], "receives_delivery_updates": true}],
+            "emails": [{ "id": email_id.current, "email_address": email, "receives_delivery_updates": true }],
             // "phones": [{
             //     "id": phone_ids.current[0],
             //     "unformatted_number": phones[0] ?? 'N/A',
@@ -127,155 +133,214 @@ function ProfileForm(props) {
             //      "receives_delivery_updates": false
             // }],
             "existing_customer": existingCustomer,
-            "theme": isLightTheme ? 'light' : 'dark',
+            "theme": theme,
         }
-        if (password !== '')
-            data.password = password;
+        if (newPassword !== '')
+            data.password = newPassword;
         updateProfile(session, data)
             .then(() => {
-                alert('Profile updated!');
+                PubSub.publish(PUBS.Snack, { message: 'Profile updated.' });
             })
             .catch(err => {
                 console.error(err.msg);
                 alert(err.msg);
             })
-    }, [fetched_profile, password, confirmPassword, currentPassword, firstName, lastName, pronouns, emails, phones, existingCustomer])
-
-    // Helper method for updating InputText objects created through a map
-    const updateFieldArray = (stateFunc, value, index) => {
-        console.log('TODO')
-    }
+    }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
     const handleThemeSelect = (event) => {
-        setIsLightTheme(event.target.value == 'true');
-        setTheme(event.target.value === 'true' ? 'light' : 'dark');
+        setTheme(event.target.value);
+        storeTheme(event.target.value);
     }
 
     const handleCustomerSelect = (event) => {
-        setExistingCustomer(event.target.value == 'true');
+        setExistingCustomer(event.target.value);
+    }
+
+    const handleExtraEmailsSelect = (event) => {
+        setExtraEmails(event.target.value);
     }
 
     return (
-        <React.Fragment>
-            <div id="profile-image-div">
-            </div>
-            {/* Main profile info section */}
-            <div className="half">
-                <h4>Update Profile Info</h4>
-                <InputText
-                    label="First Name"
-                    type="text"
-                    value={firstName}
-                    valueFunc={setFirstName}
-                    error={firstNameError}
-                    errorFunc={setFirstNameError}
-                    validate={validation.firstNameValidation}
-                    showErrors={showErrors}
-                    autocomplete="John"
-                    disabled={!editing}
-                />
-                <InputText
-                    label="Last Name"
-                    type="text"
-                    value={lastName}
-                    valueFunc={setLastName}
-                    error={lastNameError}
-                    errorFunc={setLastNameError}
-                    validate={validation.lastNameValidation}
-                    showErrors={showErrors}
-                    autocomplete="Doe"
-                    disabled={!editing}
-                />
-                <InputText
-                    label="Pronouns"
-                    type="text"
-                    value={pronouns}
-                    valueFunc={setPronouns}
-                    error={pronounsError}
-                    errorFunc={setPronounsError}
-                    validate={validation.pronounValidation}
-                    showErrors={showErrors}
-                    disabled={!editing}
-                />
-                {emails.map((email, index) => (
-                    <InputText
-                        index={index}
-                        label={`Email #${index + 1}`}
-                        type="text"
-                        value={email}
-                        valueFunc={(v, i) => updateFieldArray(setEmails, v, i)}
-                        errorFunc={(v, i) => updateFieldArray(setEmailErrors, v, i)}
-                        validate={validation.pronounValidation}
-                        showErrors={showErrors}
-                        disabled={!editing}
-                    />
-                ))}
-                {phones.map((phone, index) => (
-                    <InputText
-                        index={index}
-                        label={`Phone #${index + 1}`}
-                        type="text"
-                        value={phone}
-                        valueFunc={(v, i) => updateFieldArray(setPhones, v, i)}
-                        errorFunc={(v, i) => updateFieldArray(setPhoneErrors, v, i)}
-                        validate={validation.pronounValidation}
-                        showErrors={showErrors}
-                        disabled={!editing}
-                    />
-                ))}
-                <FormControl component="fieldset">
-                    <RadioGroup aria-label="theme-check" name="theme-check" value={isLightTheme} onChange={handleThemeSelect}>
-                        <FormControlLabel value={true} control={<Radio />} label="Light Theme" />
-                        <FormControlLabel value={false} control={<Radio />} label="Dark Theme" />
-                    </RadioGroup>
-                    <FormHelperText>{existingCustomerError}</FormHelperText>
-                </FormControl>
-                <FormControl component="fieldset">
-                    <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleCustomerSelect}>
-                        <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
-                        <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
-                    </RadioGroup>
-                    <FormHelperText>{existingCustomerError}</FormHelperText>
-                </FormControl>
-            </div>
-            {/* Change password section */}
-            <div className="half">
-                <h4>Update Password</h4>
-                <InputText
-                    label="New Password"
-                    type="password"
-                    value={password}
-                    valueFunc={setPassword}
-                    error={passwordError}
-                    errorFunc={setPasswordError}
-                    validate={validation.passwordValidation}
-                    showErrors={showErrors}
-                    disabled={!editing}
-                />
-                <InputText
-                    label="Confirm New Password"
-                    type="password"
-                    value={confirmPassword}
-                    valueFunc={setConfirmPassword}
-                    disabled={!editing}
-                />
-            </div>
-            <div className="buttons-div">
-                <InputText
-                    label="Current Password"
-                    type="password"
-                    value={currentPassword}
-                    valueFunc={setCurrentPassword}
-                    disabled={!editing}
-                />
-                <Button className="primary" onClick={toggleEdit}>
-                    {editing ? "Cancel" : "Edit"}
-                </Button>
-                <Button className="primary" type="submit" onClick={submit} disabled={!editing}>
-                    Update
-                </Button>
-            </div>
-        </React.Fragment>
+        <FormControl className={classes.form} error={anyErrors}>
+            <Container>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            autoComplete="fname"
+                            name="firstName"
+                            required
+                            fullWidth
+                            id="firstName"
+                            label="First Name"
+                            autoFocus
+                            value={firstName}
+                            onChange={e => setFirstName(e.target.value)}
+                            error={firstNameError !== null}
+                            helperText={firstNameError}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            required
+                            fullWidth
+                            id="lastName"
+                            label="Last Name"
+                            name="lastName"
+                            autoComplete="lname"
+                            value={lastName}
+                            onChange={e => setLastName(e.target.value)}
+                            error={lastNameError !== null}
+                            helperText={lastNameError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            id="pronouns"
+                            label="Pronouns"
+                            name="pronouns"
+                            autoComplete="pronouns"
+                            defaultValue={DEFAULT_PRONOUNS[3]}
+                            value={pronouns}
+                            onChange={e => setPronouns(e.target.value)}
+                            error={pronounsError !== null}
+                            helperText={pronounsError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            id="business"
+                            label="Business"
+                            name="business"
+                            autoComplete="business"
+                            value={business}
+                            onChange={e => setBusiness(e.target.value)}
+                            error={businessError !== null}
+                            helperText={businessError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            error={emailError !== null}
+                            helperText={emailError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            id="phone"
+                            label="Phone Number"
+                            name="phone"
+                            autoComplete="phone"
+                            value={phone}
+                            onChange={e => setPhone(e.target.value)}
+                            error={phoneError !== null}
+                            helperText={phoneError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl component="fieldset">
+                            <FormLabel component="legend">Theme</FormLabel>
+                            <RadioGroup aria-label="theme-check" name="theme-check" value={theme} onChange={handleThemeSelect}>
+                                <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
+                                <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl component="fieldset">
+                            <FormControlLabel
+                                required
+                                control={
+                                    <Checkbox
+                                        checked={existingCustomer}
+                                        onChange={handleCustomerSelect}
+                                        name="existing-customer-check"
+                                    />
+                                }
+                                label="I have ordered from New Life Nursery before"
+                            />
+                            <FormHelperText>{existingCustomerError}</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControlLabel
+                            control={<Checkbox checked={extraEmails} value="allowExtraEmails" onChange={handleExtraEmailsSelect} />}
+                            label="I want to receive marketing promotions and updates via email."
+                        />
+                    </Grid>
+                </Grid>
+            </Container>
+            <Container>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            name="current-password"
+                            label="Current Password"
+                            type="password"
+                            id="current-password"
+                            autoComplete="current-password"
+                            value={currentPassword}
+                            onChange={e => setCurrentPassword(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            name="new-password"
+                            label="New Password"
+                            type="password"
+                            id="new-password"
+                            autoComplete="current-password"
+                            value={newPassword}
+                            onChange={e => setNewPassword(e.target.value)}
+                            error={newPasswordError !== null}
+                            helperText={newPasswordError}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            required
+                            fullWidth
+                            name="confirmPassword"
+                            label="Confirm Password"
+                            type="password"
+                            id="confirm-password"
+                            autoComplete="current-password"
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                        />
+                    </Grid>
+                </Grid>
+            </Container>
+            <Grid className={classes.buttons} container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <Button fullWidth onClick={toggleEdit}>
+                        {editing ? "Cancel" : "Edit"}
+                    </Button>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Button fullWidth type="submit" onClick={submit} disabled={!editing}>
+                        Update
+                 </Button>
+                </Grid>
+            </Grid>
+        </FormControl>
     );
 }
 

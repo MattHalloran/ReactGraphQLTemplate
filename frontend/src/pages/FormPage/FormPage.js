@@ -1,25 +1,53 @@
+import { Container, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { getTheme } from 'utils/storage';
-import { StyledFormPage } from './FormPage.styled';
+
+const useStyles = makeStyles((theme) => ({
+    header: {
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.background.default,
+        padding: '1em',
+        textAlign: 'center'
+    },
+    container: {
+        display: 'grid',
+        position: 'relative',
+        boxShadow: '0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%)',
+        minWidth: '300px',
+        maxWidth: 'min(100%, 700px)',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        marginBottom: '20px'
+    },
+    [theme.breakpoints.down("sm")]: {
+        page: {
+            padding: '0',
+            paddingTop: 'calc(14vh + 20px)',
+        }
+      },
+}));
 
 function FormPage({
     header,
     autocomplete = 'on',
     children,
     maxWidth = '90%',
-    theme = getTheme(),
 }) {
+    const classes = useStyles();
+
     return (
-        <StyledFormPage theme={theme} maxWidth={maxWidth}>
-            <form className="form" autocomplete={autocomplete}>
-                <div className="header">
-                    <h1>{header}</h1>
-                </div>
-                <div className="form-body">
+        <div id='page' maxWidth={maxWidth}>
+            <div className={classes.container}>
+                <Container className={classes.header}>
+                    <Typography variant="h3" >{header}</Typography>
+                </Container>
+                <Container>
                     {children}
-                </div>
-            </form>
-        </StyledFormPage>
+                </Container>
+            </div>
+        </div>
     );
 }
 
@@ -28,7 +56,6 @@ FormPage.propTypes = {
     autocomplete: PropTypes.string,
     children: PropTypes.any,
     maxWidth: PropTypes.string,
-    theme: PropTypes.object,
 }
 
 export default FormPage;

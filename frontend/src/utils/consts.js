@@ -1,12 +1,78 @@
 import codes from 'query/codes.json';
 import orderStatus from 'query/orderStatus.json';
 
-export const BUSINESS_NAME = "New Life Nursery Inc.";
-export const FULL_BUSINESS_NAME = "New Life Nursery Inc.";
-export const GOOGLE_MAPS_ADDRESS = "https://www.google.com/maps/place/106+S+Woodruff+Rd,+Bridgeton,+NJ+08302/@39.4559443,-75.1793432,17z/";
+export const WEBSITE_URL = 'https://www.newlifenurseryinc.com/';
+export const BUSINESS_NAME = {
+    Short: 'New Life Nursery Inc.',
+    Long: 'New Life Nursery Inc.',
+}
+export const ADDRESS = {
+    Label: '106 South Woodruff Road Bridgeton, NJ 08302',
+    Link: 'https://www.google.com/maps/place/106+S+Woodruff+Rd,+Bridgeton,+NJ+08302/@39.4559443,-75.1793432,17z/',
+}
+export const PHONE = {
+    Label: '(856) 455-3601',
+    Link: 'tel:+18564553601',
+}
+export const FAX = {
+    Label: '(856) 451-1530',
+    Link: 'tel:+18564511530',
+}
+export const EMAIL = {
+    Label: 'info@newlifenurseryinc.com',
+    Link: 'mailto:info@newlifenurseryinc.com',
+}
 
 export const STATUS_CODES = codes;
 export const ORDER_STATUS = orderStatus;
+
+export const ORDER_STATES = [
+    {
+        label: 'Canceled by Admin',
+        value: -4,
+    },
+    {
+        label: 'Canceled by User',
+        value: -3,
+    },
+    {
+        label: 'Pending Cancel',
+        value: -2,
+    },
+    {
+        label: 'Rejected',
+        value: -1,
+    },
+    {
+        label: 'Pending',
+        value: 1,
+    },
+    {
+        label: 'Approved',
+        value: 2,
+    },
+    {
+        label: 'Scheduled',
+        value: 3,
+    },
+    {
+        label: 'In Transit',
+        value: 4,
+    },
+    {
+        label: 'Delivered',
+        value: 5,
+    },
+]
+
+export const PLANT_ATTRIBUTES = [
+    'Drought Tolerance',
+    'Grown Height',
+    'Grown Spread',
+    'Growth Rate',
+    'Optimal Light',
+    'Salt Tolerance',
+]
 
 export const DEFAULT_PRONOUNS = [
     "Custom",
@@ -64,7 +130,8 @@ export const LOCAL_STORAGE = {
 export const PUBS = {
     ...LOCAL_STORAGE,
     Loading: "loading",
-    PopupOpen: "popupOpen",
+    AlertDialog: "alertDialog",
+    Snack: "snack",
     BurgerMenuOpen: "burgerMenuOpen",
     ArrowMenuOpen: "arrowMenuOpen",
 }

@@ -3,18 +3,60 @@ import { useParams, useHistory } from 'react-router-dom';
 import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
-import { StyledGalleryPage, StyledGalleryImage } from './GalleryPage.styled';
-import Gallery from 'react-photo-gallery';
+import { StyledGalleryImage } from './GalleryPage.styled';
 import { getGallery, getImages, getImage } from 'query/http_promises';
-import Modal from 'components/wrappers/Modal/Modal';
+import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { getTheme } from 'utils/storage';
+import { ImageList, ImageListItem } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import InformationalBreadcrumbs from 'components/breadcrumbs/InformationalBreadcrumbs/InformationalBreadcrumbs';
+
+const useStyles = makeStyles((theme) => ({
+    imageList: {
+        spacing: 0,
+    },
+    tileImg: {
+        
+    }
+}));
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
+/**
+ * Data must be structured as follows:
+ *
+ * data = [
+ *   {
+ *     img: image,
+ *     title: 'Image',
+ *     author: 'author',
+ *     cols: 2,
+ *   },
+ *   {
+ *     [etc...]
+ *   },
+ * ];
+ */
+function ImageGridList({
+    data,
+    onClick,
+    ...props
+}) {
+    const classes = useStyles();
+    return (
+        <ImageList cellHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth/300)} spacing={1} {...props}>
+            {data.map((tile) => (
+                <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
+                    <img className={classes.tileImg} src={tile.img} alt={tile.title} />
+                </ImageListItem>
+            ))}
+        </ImageList>
+    );
+}
+
 function GalleryPage() {
-    const [theme, setTheme] = useState(getTheme());
+    const classes = useStyles();
     const [thumbnails, setThumbnails] = useState([]);
     // Key = corresponding thumbnail index, value = expanded imgae
     const full_images = useRef({});
@@ -25,20 +67,13 @@ function GalleryPage() {
     const [curr_img, setCurrImg] = useState(null);
     const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
     const loading = useRef(false);
-    const track_scrolling_id = 'scroll-tracked';
+    const track_scrolling_id = 'page';
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => prevImage());
     // useHotkeys('arrowRight', () => nextImage());
-
-    useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        return (() => {
-            PubSub.unsubscribe(themeSub);
-        })
-    }, [])
 
     const loading_full_image = useRef(false);
     const loadImage = useCallback((index, id) => {
@@ -68,10 +103,8 @@ function GalleryPage() {
     useEffect(() => {
         if (urlParams.img) {
             loadImage(curr_index, urlParams.img);
-            PubSub.publish(PUBS.PopupOpen, true);
         } else {
             setCurrImg([null, null]);
-            PubSub.publish(PUBS.PopupOpen, false);
         }
     }, [urlParams, curr_index, loadImage])
 
@@ -85,7 +118,7 @@ function GalleryPage() {
         //Grab all thumbnail images
         let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
         let ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
-        getImages(ids, 'm').then(response => {
+        getImages(ids, 'ml').then(response => {
             let combined_data = [];
             //Combine metadata with thumbnail images
             for (let i = 0; i < ids.length; i++) {
@@ -97,9 +130,10 @@ function GalleryPage() {
                 let img = response.images[i];
                 let new_data = {
                     "key": meta.id,
-                    "src": `data:image/jpeg;base64,${img}`,
-                    "width": meta.width,
-                    "height": meta.height,
+                    "img": `data:image/jpeg;base64,${img}`,
+                    "title": meta.alt,
+                    "author": 'New Life Nursery', //TODO credit actual author, if not New Life
+                    "cols": Math.round((meta.width*0.9) / meta.height),
                 };
                 // Prevent identical images from being added multiple times, if checks
                 // up to this point have failed
@@ -125,7 +159,7 @@ function GalleryPage() {
     }, [track_scrolling_id, loadNextPage])
 
     useLayoutEffect(() => {
-        document.title = `Gallery | ${BUSINESS_NAME}`;
+        document.title = `Gallery | ${BUSINESS_NAME.Short}`;
         document.addEventListener('scroll', checkScroll);
         return (() => document.removeEventListener('scroll', checkScroll));
     })
@@ -156,8 +190,11 @@ function GalleryPage() {
         }
     }, [thumbnails, images_meta, curr_index, history]);
 
-    const openImage = (_event, photo, index) => {
-        history.push(LINKS.Gallery + '/' + photo.photo.key);
+    const openImage = (tile) => {
+        let key = tile?.key;
+        if (key) {
+            history.push(LINKS.Gallery + '/' + key);
+        }
     }
 
     useEffect(() => {
@@ -189,15 +226,15 @@ function GalleryPage() {
         </Modal>
     ) : null;
     return (
-        <StyledGalleryPage className="page" theme={theme} id={track_scrolling_id}>
+        <div id='page'>
             {popup}
-            <Gallery photos={thumbnails} onClick={openImage}/>
-        </StyledGalleryPage>
+            <InformationalBreadcrumbs />
+            <ImageGridList data={thumbnails} onClick={openImage} />
+        </div>
     );
 }
 
 GalleryPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default GalleryPage;

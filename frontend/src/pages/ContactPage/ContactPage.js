@@ -1,22 +1,18 @@
 import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
-import { StyledContactPage } from './ContactPage.styled';
 import { BUSINESS_NAME } from 'utils/consts';
-import { getTheme } from 'utils/storage';
 
-function ContactPage({
-    theme = getTheme(),
-}) {
+function ContactPage() {
     useLayoutEffect(() => {
-        document.title = `Contact | ${BUSINESS_NAME}`;
+        document.title = `Contact | ${BUSINESS_NAME.Short}`;
     })
     return (
-        <StyledContactPage className="page" theme={theme}></StyledContactPage>
+        <div id='page'>
+
+        </div>
     );
 }
 
 ContactPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 

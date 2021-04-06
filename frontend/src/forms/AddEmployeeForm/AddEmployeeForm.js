@@ -1,148 +1,255 @@
-import React, { useState } from 'react';
+//TODO not used yet. Currently same as signup form
+
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { registerUser } from 'query/http_promises';
-import * as validation from 'utils/validations';
-import InputText from 'components/inputs/InputText/InputText';
 import { useHistoryState } from 'utils/useHistoryState';
-import { LINKS, DEFAULT_PRONOUNS } from 'utils/consts';
-import Button from 'components/Button/Button';
+import * as validation from 'utils/validations';
+import { Button, TextField, Checkbox, Link } from '@material-ui/core';
+import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
+import { registerUser } from 'query/http_promises';
+import PubSub from 'utils/pubsub';
+
+const useStyles = makeStyles((theme) => ({
+    form: {
+        width: '100%',
+        marginTop: theme.spacing(3),
+    },
+    submit: {
+        margin: theme.spacing(3, 0, 2),
+    },
+}));
 
 function AddEmployeeForm() {
-  let history = useHistory();
-  const [firstName, setFirstName] = useHistoryState("su_first_name", "");
-  const [firstNameError, setFirstNameError] = useHistoryState("su_first_name_error", null);
-  const [lastName, setLastName] = useHistoryState("su_last_name", "");
-  const [lastNameError, setLastNameError] = useHistoryState("su_last_name_error", null);
-  const [pronouns, setPronouns] = useHistoryState("su_pronoun", DEFAULT_PRONOUNS[3]);
-  const [pronounsError, setPronounsError] = useHistoryState("su_pronoun_error", null);
-  const [customPronouns, setCustomPronouns] = useHistoryState("su_custom_pronoun", "");
-  const [customPronounsError, setCustomPronounsError] = useHistoryState("su_custom_pronoun_error", null);
-  const [email, setEmail] = useHistoryState("su_email", "");
-  const [emailError, setEmailError] = useHistoryState("su_email_error", null);
-  const [password, setPassword] = useState("")
-  const [passwordError, setPasswordError] = useState(null);
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
-  const [existingCustomerError, setExistingCustomerError] = useHistoryState("su_existing_error", null);
-  const [showErrors, setShowErrors] = useState(false);
+    let history = useHistory();
+    const classes = useStyles();
+    const [firstName, setFirstName] = useHistoryState("ae_first_name", "");
+    const [lastName, setLastName] = useHistoryState("ae_last_name", "");
+    const [pronouns, setPronouns] = useHistoryState("ae_pronoun", DEFAULT_PRONOUNS[3]);
+    const [business, setBusiness] = useHistoryState("ae_bizz", null);
+    const [email, setEmail] = useHistoryState("ae_email", "");
+    const [phone, setPhone] = useHistoryState("ae_phone", "");
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [existingCustomer, setExistingCustomer] = useHistoryState("ae_existing", null);
 
-  const toLogin = () => {
-    history.replace('/login');
-  }
+    let firstNameError = validation.firstNameValidation(firstName);
+    let lastNameError = validation.lastNameValidation(lastName);
+    let pronounsError = validation.pronounValidation(pronouns);
+    let businessError = validation.businessValidation(business);
+    let emailError = validation.emailValidation(email);
+    let phoneError = validation.phoneNumberValidation(phone);
+    let passwordError = validation.passwordValidation(password);
+    let confirmPasswordError = validation.confirmPasswordValidation(password, confirmPassword);
+    let existingCustomerError = '';
+    let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
+        emailError, phoneError, passwordError, confirmPasswordError, existingCustomerError);
 
-  const register = () => {
-    registerUser(firstName, lastName, pronouns, email, password, existingCustomer).then(() => {
-      history.push(LINKS.Shopping);
-    }).catch(err => {
-      console.error(err);
-      alert(err.msg);
-    })
-  }
-
-  const submit = (event) => {
-    event.preventDefault();
-    setShowErrors(true);
-    console.log('PRONOUNSSSS', pronouns, pronounsError);
-    return;
-    if (validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError,
-    passwordError, existingCustomerError) && password === confirmPassword) {
-      register();
+    const handleCheckbox = (event) => {
+        console.log('TODO')
     }
-  }
 
-  const handleRadioSelect = (event) => {
-    setExistingCustomer(event.target.value);
-  }
+    const handleRadioSelect = (event) => {
+        setExistingCustomer(event.target.value);
+    }
 
-  return (
-    <React.Fragment>
-      <div className="horizontal-input-container">
-        <InputText
-          label="First Name"
-          type="text"
-          value={firstName}
-          valueFunc={setFirstName}
-          error={firstNameError}
-          errorFunc={setFirstNameError}
-          validate={validation.firstNameValidation}
-          showErrors={showErrors}
-        />
-        <InputText
-          label="Last Name"
-          type="text"
-          value={lastName}
-          valueFunc={setLastName}
-          error={lastNameError}
-          errorFunc={setLastNameError}
-          validate={validation.lastNameValidation}
-          showErrors={showErrors}
-        />
-      </div>
-      <div className="horizontal-input-container">
-        <InputText
-          label="Pronouns"
-          value={pronouns}
-          valueFunc={setPronouns}
-          select
-          SelectProps={{
-            native: true,
-          }} >
-          {DEFAULT_PRONOUNS.map((pro) => (
-            <option key={pro} value={pro}>
-              {pro}
-            </option>
-          ))}
-        </InputText>
-        {pronouns === DEFAULT_PRONOUNS[0] ?
-          <InputText
-            label="Enter pronouns"
-            type="text"
-            value={customPronouns}
-            valueFunc={setCustomPronouns}
-            error={customPronounsError}
-            errorFunc={setCustomPronounsError}
-            validate={validation.pronounValidation}
-            showErrors={showErrors}
-          />
-          : null}
-      </div>
-      <InputText
-        label="Email"
-        type="email"
-        value={email}
-        valueFunc={setEmail}
-        error={emailError}
-        errorFunc={setEmailError}
-        validate={validation.emailValidation}
-        showErrors={showErrors}
-      />
-      <InputText
-        label="Password"
-        type="password"
-        value={password}
-        valueFunc={setPassword}
-        error={passwordError}
-        errorFunc={setPasswordError}
-        validate={validation.passwordValidation}
-        showErrors={showErrors}
-      />
-      <InputText
-        label="Confirm Password"
-        type="password"
-        value={confirmPassword}
-        valueFunc={setConfirmPassword}
-      />
-      <div className="form-group">
-        <Button className="primary submit" type="submit" onClick={submit}>Submit</Button>
-        <h5 className="form-header-text"
-          onClick={toLogin}>&#8594;Log In</h5>
-      </div>
-    </React.Fragment>
-  );
-}
+    const register = () => {
+        let data = {
+            "first_name": firstName,
+            "last_name": lastName,
+            "pronouns": pronouns,
+            "business": business,
+            "emails": [{ "email_address": email, "receives_delivery_updates": true }],
+            "phones": [{
+                "unformatted_number": phone,
+                "country_code": '+1',
+                "extension": '',
+                "is_mobile": true,
+                "receives_delivery_updates": false
+            }],
+            "password": password,
+            "existing_customer": existingCustomer
+        }
+        registerUser(data).then(() => {
+            if (existingCustomer) {
+                alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
+            } else {
+                alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
+            }
+            history.push(LINKS.Shopping);
+        }).catch(err => {
+            console.error(err);
+            if (err.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
+                if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
+                    history.push(LINKS.ForgotPassword);
+                }
+            } else {
+                PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
+            }
+        })
+    }
 
-AddEmployeeForm.propTypes = {
+    const submit = (event) => {
+        event.preventDefault();
+        if (anyErrors) {
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
+            return;
+        }
+        register();
+    }
 
+    return (
+        <FormControl className={classes.form} error={anyErrors}>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        autoComplete="fname"
+                        name="firstName"
+                        required
+                        fullWidth
+                        id="firstName"
+                        label="First Name"
+                        autoFocus
+                        value={firstName}
+                        onChange={e => setFirstName(e.target.value)}
+                        error={firstNameError !== null}
+                        helperText={firstNameError}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="lastName"
+                        label="Last Name"
+                        name="lastName"
+                        autoComplete="lname"
+                        value={lastName}
+                        onChange={e => setLastName(e.target.value)}
+                        error={lastNameError !== null}
+                        helperText={lastNameError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="pronouns"
+                        label="Pronouns"
+                        name="pronouns"
+                        autoComplete="pronouns"
+                        defaultValue={DEFAULT_PRONOUNS[3]}
+                        value={pronouns}
+                        onChange={e => setPronouns(e.target.value)}
+                        error={pronounsError !== null}
+                        helperText={pronounsError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="business"
+                        label="Business"
+                        name="business"
+                        autoComplete="business"
+                        value={business}
+                        onChange={e => setBusiness(e.target.value)}
+                        error={businessError !== null}
+                        helperText={businessError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        error={emailError !== null}
+                        helperText={emailError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="phone"
+                        label="Phone Number"
+                        name="phone"
+                        autoComplete="phone"
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
+                        error={phoneError !== null}
+                        helperText={phoneError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        error={passwordError !== null}
+                        helperText={passwordError}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        name="confirmPassword"
+                        label="Confirm Password"
+                        type="password"
+                        id="confirmPassword"
+                        autoComplete="current-password"
+                        value={confirmPassword}
+                        onChange={e => setConfirmPassword(e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <FormControl component="fieldset">
+                        <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
+                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                        </RadioGroup>
+                        <FormHelperText>{existingCustomerError}</FormHelperText>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormControlLabel
+                        control={<Checkbox value="allowExtraEmails" color="primary" onChange={handleCheckbox} />}
+                        label="I want to receive marketing promotions and updates via email."
+                    />
+                </Grid>
+            </Grid>
+            <Button
+                type="submit"
+                fullWidth
+                color="secondary"
+                className={classes.submit}
+                onClick={submit}
+            >
+                Sign Up
+            </Button>
+            <Grid container justifyContent="flex-end">
+                <Grid item>
+                    <Link href={LINKS.LogIn} variant="body2">
+                        Already have an account? Sign in
+                </Link>
+                </Grid>
+            </Grid>
+        </FormControl>
+    );
 }
 
 export default AddEmployeeForm;

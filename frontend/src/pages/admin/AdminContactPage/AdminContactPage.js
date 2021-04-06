@@ -1,23 +1,18 @@
 import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
-import { StyledAdminContactPage } from './AdminContactPage.styled';
-import { getTheme } from 'utils/storage';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
-function AdminContactPage({
-    theme = getTheme(),
-}) {
+function AdminContactPage() {
     useLayoutEffect(() => {
         document.title = "Edit Contact Info";
     })
     return (
-        <StyledAdminContactPage className="page" theme={theme}>
-
-        </StyledAdminContactPage>
+        <div itemID="page">
+            <AdminBreadcrumbs />
+        </div>
     );
 }
 
 AdminContactPage.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default AdminContactPage;

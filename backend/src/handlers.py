@@ -8,6 +8,7 @@ from src.config import Config
 from src.utils import resize_image, priceStringToDecimal
 from base64 import b64encode
 from src.auth import verify_token
+from sqlalchemy import func
 import time
 import bcrypt
 import os
@@ -246,10 +247,10 @@ class BusinessHandler(Handler):
     def to_dict(cls, model: Business) -> dict:
         model = cls.convert_to_model(model)
         as_dict = BusinessHandler.simple_fields_to_dict(model, ['name', 'subscribed_to_newsletters'])
-        as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
-        as_dict['employees'] = UserHandler.all_dicts(model.employees)
-        as_dict['phones'] = PhoneHandler.all_dicts(model.phones)
-        as_dict['emails'] = EmailHandler.all_dicts(model.emails)
+        #as_dict['delivery_addresses'] = AddressHandler.all_dicts(model.delivery_addresses)
+        #as_dict['employees'] = UserHandler.all_dicts(model.employees)
+        #as_dict['phones'] = PhoneHandler.all_dicts(model.phones)
+        #as_dict['emails'] = EmailHandler.all_dicts(model.emails)
         return as_dict
 
     @staticmethod
@@ -304,7 +305,7 @@ class EmailHandler(Handler):
 
     @staticmethod
     def from_email_address(email: str):
-        return db.session.query(Email).filter_by(email_address=email).one_or_none()
+        return db.session.query(Email).filter_by(func.lower(Email.email_address) == func.lower(email)).one_or_none()
 
 
 class FeedbackHandler(Handler):
@@ -413,8 +414,6 @@ class ImageHandler(Handler):
         model = cls.convert_to_model(model)
         if model is None:
             return None
-        print('got model')
-        print(type(model))
         # First, check if the image exists in the exact requested size
         file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
         if os.path.exists(file_path):
@@ -685,7 +684,9 @@ class PlantHandler(Handler):
                         'attracts_pollinators_and_wildlifes', 'bloom_times', 'bloom_colors',
                         'zones', 'plant_types', 'physiographic_regions', 'soil_moistures',
                         'soil_phs', 'soil_types', 'light_ranges']
-        [array_to_dict(as_dict, PlantTraitHandler.to_dict, field) for field in trait_fields]
+        for field in trait_fields:
+            trait_obj = getattr(model, field)
+            as_dict[field] = trait_obj.value if trait_obj else None
         as_dict['id'] = model.id
         display_image = cls.get_display_image(model)
         if display_image:
@@ -784,20 +785,6 @@ class PlantHandler(Handler):
         if len(model.habit_images) > 0:
             return model.habit_images[0]
         return None
-
-    @classmethod
-    def get_thumb_display_b64(cls, model: Plant) -> Optional[str]:
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_b64(img, 'm')
-
-    @classmethod
-    def get_full_display_b64(cls, model: Plant) -> Optional[str]:
-        img = cls.get_display_image(model)
-        if img is None:
-            return None
-        return ImageHandler.get_b64(img, 'l')
 
 
 class RoleHandler(Handler):
@@ -954,6 +941,11 @@ class UserHandler(Handler):
             obj.last_name = last_name
         if pronouns := data.get('pronouns', None):
             obj.pronouns = pronouns
+        if business := data.get('business', None):
+            bizz_obj = BusinessHandler.create(business)
+            db.session.add(bizz_obj)
+            db.session.commit()
+            obj.business_id = bizz_obj.id
         obj.theme = data.get('theme', obj.theme)
         if emails := data.get('emails', None):
             success = cls.update_relationship_list(obj.personal_email, EmailHandler, emails) and success
@@ -982,6 +974,7 @@ class UserHandler(Handler):
         as_dict['id'] = model.id
         as_dict['tag'] = model.tag
         as_dict['account_status'] = model.account_status
+        as_dict['business'] = BusinessHandler.to_dict(model.business_id)
         as_dict['roles'] = RoleHandler.all_dicts(model.roles)
         as_dict['emails'] = EmailHandler.all_dicts(model.personal_email)
         as_dict['phones'] = PhoneHandler.all_dicts(model.personal_phone)
@@ -1013,12 +1006,12 @@ class UserHandler(Handler):
 
     @staticmethod
     def from_email(email: str):
-        return User.query.filter(User.personal_email.any(email_address=email)).first()
+        return User.query.filter(User.personal_email.any(func.lower(Email.email_address)==func.lower(email))).first()
 
     @staticmethod
     def email_in_use(email: str):
         '''Returns True if the email is being used by an active account'''
-        users = User.query.filter(User.personal_email.any(email_address=email)).all()
+        users = UserHandler.from_email(email)
         if users is None:
             return True
         return any(user.account_status != AccountStatus.DELETED.value for user in users)
@@ -1056,6 +1049,8 @@ class UserHandler(Handler):
 
     @staticmethod
     def is_admin(user: User) -> bool:
+        print('in is_admin')
+        print(user.roles)
         return any(r.title == 'Admin' for r in user.roles)
 
     @staticmethod

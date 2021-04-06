@@ -1,37 +1,54 @@
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StyledShoppingPage } from './ShoppingPage.styled';
-import SearchBar from '../SearchBar/SearchBar';
+import SearchBar from '../../../components/inputs/SearchBar/SearchBar';
 import ShoppingList from '../ShoppingList/ShoppingList';
-import ArrowMenu from 'components/menus/ArrowMenu/ArrowMenu';
 import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
-import DropDown from 'components/inputs/DropDown/DropDown';
-import CheckBox from 'components/inputs/CheckBox/CheckBox';
-import { getRoles, getSession, getTheme } from 'utils/storage';
+import Selector from 'components/inputs/Selector/Selector';
 import PubSub from 'utils/pubsub';
-import Button from 'components/Button/Button';
+import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
+import RestoreIcon from '@material-ui/icons/Restore';
+import CloseIcon from '@material-ui/icons/Close';
+import FilterListIcon from '@material-ui/icons/FilterList';
+import PrintIcon from '@material-ui/icons/Print';
 import { printAvailability } from 'utils/printAvailability';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    drawerPaper: {
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+        borderRight: `2px solid ${theme.palette.text.primary}`,
+        padding: theme.spacing(1),
+    },
+    formControl: {
+        display: 'flex',
+        justifyContent: 'center',
+        '& > *': {
+            margin: theme.spacing(1),
+        },
+    },
+    padBottom: {
+        marginBottom: theme.spacing(2),
+    },
+}));
 
 function ShoppingPage() {
-    const [user_roles, setUserRoles] = useState(getRoles());
-    const [session, setSession] = useState(getSession());
-    const [theme, setTheme] = useState(getTheme());
+    const classes = useStyles();
+    const [open, setOpen] = useState(false);
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
-    const [showCurrentlyUnavailable, setShowCurrentlyUnavailable] = useState(false);
+    const [hideOutOfStock, setHideOutOfStock] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
-        document.title = `Shop | ${BUSINESS_NAME}`;
-        let userRolesSub = PubSub.subscribe(PUBS.Roles, (_, r) => setUserRoles(r));
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, s) => setSession(s));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, t) => setTheme(t ?? getTheme()));
+        document.title = `Shop | ${BUSINESS_NAME.Short}`;
+        let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
+            setOpen(open => b === 'toggle' ? !open : b);
+        });
         return (() => {
-            PubSub.unsubscribe(userRolesSub);
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(themeSub);
+            PubSub.unsubscribe(openSub);
         })
     }, [])
 
@@ -69,38 +86,31 @@ function ShoppingPage() {
         setFilters(modified_filters)
     }, [filters])
 
-    const handleCurrentlyUnavailableChange = useCallback((_group, _value, checked) => {
-        setShowCurrentlyUnavailable(checked);
+    const handleHideChange = useCallback((event) => {
+        setHideOutOfStock(event.target.checked);
     }, [filters])
 
-    const handleSortChange = (sort_item, _) => {
-        setSortBy(sort_item.value);
-    }
-
-    const filters_to_checkbox = (field, title, onChange) => {
+    const filtersToSelector = (field, title, onChange) => {
         if (!filters) return;
-        let list = filters[field];
-        if (!list || !Array.isArray(list) || list.length <= 0) return null;
-        let options = list.map((item, index) => (
-            <CheckBox key={index} 
-                group={field} 
-                label={item.label} 
-                value={item.value} 
-                checked={filters[field][index].checked ?? false} 
-                onChange={handleFiltersChange} />
-        ))
-        return <React.Fragment>
-            <fieldset className="checkbox-group" onChange={onChange}>
-                <legend>{title}</legend>
-                    {options}
-            </fieldset>
-        </React.Fragment>
+        let options = filters[field];
+        if (!options || !Array.isArray(options) || options.length <= 0) return null;
+        let selected = options.filter(o => o.checked);
+        return (
+            <Selector
+                className={`${classes.padBottom} ${classes.selector}`}
+                fullWidth
+                options={options}
+                selected={selected}
+                handleChange={(e) => handleFiltersChange(field, e.target.value, true)}
+                inputAriaLabel={`${field}-selector-label`}
+                label={title} />
+        )
     }
 
     const resetSearchConstraints = () => {
-        handleSortChange(SORT_OPTIONS[0]);
+        setSortBy(SORT_OPTIONS[0].value)
         setSearchString('')
-        let copy = {...filters};
+        let copy = { ...filters };
         for (const key in copy) {
             let filter_group = copy[key];
             for (let i = 0; i < filter_group.length; i++) {
@@ -110,48 +120,88 @@ function ShoppingPage() {
         setFilters(copy);
     }
 
+    let optionsContainer = (
+        <Grid className={classes.padBottom} container spacing={2}>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    color="secondary"
+                    startIcon={<RestoreIcon />}
+                    onClick={resetSearchConstraints}
+                >Reset</Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <Button
+                    fullWidth
+                    color="secondary"
+                    startIcon={<CloseIcon />}
+                    onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}
+                >Close</Button>
+            </Grid>
+        </Grid>
+    );
+
+    let filterData = [
+        ['size', 'Sizes'],
+        ['optimal_light', 'Optimal Light'],
+        ['drought_tolerance', 'Drought Tolerance'],
+        ['grown_height', 'Grown Height'],
+        ['grown_spread', 'Grown Spread'],
+        ['growth_rate', 'Growth Rate'],
+        ['salt_tolerance', 'Salt Tolerance'],
+        ['attracts_polinators_and_wildlifes', 'Pollinator'],
+        ['light_ranges', 'Light Range'],
+        ['soil_moistures', 'Soil Moisture'],
+        ['soil_phs', 'Soil PH'],
+        ['soil_types', 'Soil Type'],
+        ['zones', 'Zone'],
+    ]
+
     return (
-        <StyledShoppingPage theme={theme}>
-            <ArrowMenu>
-                <div className="options-container">
-                    <Button onClick={resetSearchConstraints}>Reset</Button>
-                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-                </div>
-                <div className="shopping-menu">
-                <h2>Sort</h2>
-                <DropDown className="sorter" options={SORT_OPTIONS} onChange={handleSortChange} initial_value={SORT_OPTIONS[0]} />
-                <h2>Search</h2>
-                <SearchBar onChange={(s) => setSearchString(s)}/>
-                <h2>Filters</h2>
-                {filters_to_checkbox('size', 'Sizes')}
-                {filters_to_checkbox('optimal_light', 'Optimal Light')}
-                {filters_to_checkbox('drought_tolerance', 'Drought Tolerance')}
-                {filters_to_checkbox('grown_height', 'Grown Height')}
-                {filters_to_checkbox('grown_spread', 'Grown Spread')}
-                {filters_to_checkbox('growth_rate', 'Growth Rate')}
-                {filters_to_checkbox('salt_tolerance', 'Salt Tolerance')}
-                {filters_to_checkbox('attracts_polinators_and_wildlifes', 'Pollinator')}
-                {filters_to_checkbox('light_ranges', 'Light Range')}
-                {filters_to_checkbox('soil_moistures', 'Soil Moisture')}
-                {filters_to_checkbox('soil_phs', 'Soil PH')}
-                {filters_to_checkbox('soil_types', 'Soil Type')}
-                {filters_to_checkbox('zones', 'Zone')}
-                {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
+        <div id='page'>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
+                {optionsContainer}
+                <div>
+                    <Selector
+                        fullWidth
+                        options={SORT_OPTIONS}
+                        selected={sortBy}
+                        handleChange={(e) => setSortBy(e.target.value)}
+                        inputAriaLabel='sort-selector-label'
+                        label="Sort" />
+                    <h2>Search</h2>
+                    <SearchBar className={classes.padBottom} fullWidth onChange={(e) => setSearchString(e.target.value)} />
+                    <h2>Filters</h2>
+                    {filterData.map(d => filtersToSelector(...d))}
+                    {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>
-                <div className="options-container">
-                    <Button onClick={resetSearchConstraints}>Reset</Button>
-                    <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>Close</Button>
-                </div>
-            </ArrowMenu>
-            <CheckBox className="unavailable-checkbox"
-                label='Show Currently Unavailable' 
-                checked={showCurrentlyUnavailable} 
-                onChange={handleCurrentlyUnavailableChange} />
-            <Button onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}>Filter Results</Button>
-            <Button onClick={printAvailability}>Print Availability</Button>
-            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} showUnavailable={showCurrentlyUnavailable}/>
-        </StyledShoppingPage>
+                {optionsContainer}
+            </SwipeableDrawer>
+            <div className={classes.formControl}>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={hideOutOfStock}
+                            onChange={handleHideChange}
+                            color="secondary"
+                        />
+                    }
+                    label="Hide out of stock"
+                />
+                <Button
+                    color="secondary"
+                    startIcon={<FilterListIcon />}
+                    onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}
+                >Filter</Button>
+                <Button
+                    color="secondary"
+                    startIcon={<PrintIcon />}
+                    onClick={printAvailability}
+                >Print</Button>
+            </div>
+            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} hideOutOfStock={hideOutOfStock} />
+        </div>
     );
 }
 

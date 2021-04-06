@@ -1,94 +1,82 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import SliderContent from './SliderContent';
 import Slide from './Slide';
 import Dots from './Dots';
-import { StyledSlider } from './Slider.styled.js';
+import { makeStyles } from '@material-ui/core/styles';
 
-const DEFAULT_SLIDING_DELAY = 3000;
-const DEFAULT_SLIDING_DURATION = 1000;
-const getWidth = () => window.innerWidth;
+const DEFAULT_DELAY = 3000;
+const DEFAULT_DURATION = 1000;
+
+const useStyles = makeStyles({
+    slider: {
+        position: 'relative',
+        height: '100vh',
+        width: '100vw',
+        margin: '0 auto',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+    },
+});
 
 const Slider = ({
     images = [],
     autoPlay = true,
-    slidingDelay = DEFAULT_SLIDING_DELAY,
-    slidingDuration = DEFAULT_SLIDING_DURATION,
+    slidingDelay = DEFAULT_DELAY,
+    slidingDuration = DEFAULT_DURATION,
 }) => {
-    const [slides] = useState(() => {
-        // Make sure the first image is at both the beginning and end of the array
-        let copy = [...images];
-        copy.push(images[0]);
-        return copy.map((s, i) => (
-            <Slide width={getWidth()} key={s + i} content={s} />
-        ))
-    });
+    const classes = useStyles();
+    const [width, setWidth] = useState(window.innerWidth);
+    const [slides, setSlides] = useState(null);
     const [slideIndex, setSlideIndex] = useState(0);
-    const [state, setState] = useState({
-        translate: 0,
-        transition: 0,
-    })
-
-    const { translate, transition } = state
-
-    const resizeRef = useRef()
+    const [translate, setTranslate] = useState(0);
+    const [transition, setTransition] = useState(0);
     const sliderRef = useRef()
     const timeoutRef = useRef(null);
 
-    useEffect(() => {
-        resizeRef.current = handleResize
-    })
-
-    const play = useCallback((index) => {
-        timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
-        setState({
-            transition: slidingDuration,
-            translate: getWidth() * (index + 1)
-        })
-    }, [timeoutRef, images, slidingDuration])
-
-    const wait = useCallback((index) => {
-        setSlideIndex(index);
-        timeoutRef.current = setTimeout(play, slidingDelay, index);
-        //setSlides(s => rotateArray(s, false));
-        setState({
-            transition: 0,
-            translate: getWidth() * index
-        })
-    }, [timeoutRef, play, slidingDelay])
-
-    useEffect(() => {
-        const resize = () => {
-            resizeRef.current()
+    // Play and wait have circular dependencies, so they must be memoized together
+    const { wait } = useMemo(() => {
+        const play = (index) => {
+            timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
+            setTransition(slidingDuration);
+            setTranslate(width * (index + 1));
+        };
+        const wait = (index) => {
+            setSlideIndex(index);
+            timeoutRef.current = setTimeout(play, slidingDelay, index);
+            setTransition(0);
+            setTranslate(width * index);
         }
+        return { play, wait };
+    }, [timeoutRef, images, slidingDelay, slidingDuration, width])
 
-        const onResize = window.addEventListener('resize', resize)
-
+    useEffect(() => {
+        const onResize = window.addEventListener('resize', () => setWidth(window.innerWidth))
         if (autoPlay) wait(0);
 
         return () => {
             window.removeEventListener('resize', onResize)
-
-            if (autoPlay) {
-                clearTimeout(timeoutRef.current);
-            }
+            clearTimeout(timeoutRef.current);
         }
     }, [autoPlay, wait])
 
-    const handleResize = () => {
-        setState({ ...state, translate: getWidth(), transition: 0 })
-    }
+    useEffect(() => {
+        let copy = [...images, images[0]];
+        setSlides(copy.map((s, i) => (
+            <Slide width={width} key={s + i} content={s} />
+        )))
+    }, [width, images])
 
     return (
-        <StyledSlider ref={sliderRef}>
+        <div className={classes.slider} ref={sliderRef}>
             <SliderContent
                 translate={translate}
                 transition={transition}
-                width={getWidth() * slides.length}
+                width={width * (slides?.length ?? 0)}
             >
                 {slides}
             </SliderContent>
             <Dots slides={images} activeSlide={slideIndex} />
-        </StyledSlider>
+        </div>
     )
 }
 

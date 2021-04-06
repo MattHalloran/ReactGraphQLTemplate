@@ -1,80 +1,148 @@
 import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router';
-import { StyledCartPage } from './CartPage.styled';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { getTheme, getCart, getSession } from 'utils/storage';
+import { getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
-import Button from 'components/Button/Button';
+import { Button } from '@material-ui/core';
 import { updateCart, submitOrder } from 'query/http_promises';
-import Cart from 'components/Cart/Cart';
+import Cart from 'components/tables/CartTable/CartTable';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import UpdateIcon from '@material-ui/icons/Update';
+import { Typography, Container, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import _ from 'underscore';
+
+const useStyles = makeStyles((theme) => ({
+    header: {
+        textAlign: 'center',
+    },
+    padTop: {
+        paddingTop: theme.spacing(2),
+    },
+    gridItem: {
+        display: 'flex',
+    },
+    optionsContainer: {
+        width: 'fit-content',
+        justifyContent: 'center',
+        '& > *': {
+            margin: theme.spacing(1),
+        },
+    },
+}));
 
 function CartPage() {
-    const [theme, setTheme] = useState(getTheme());
+    let history = useHistory();
+    const classes = useStyles();
     const [cart, setCart] = useState(getCart());
     // Holds cart changes before update is final
     const [changedCart, setChangedCart] = useState(cart);
     const [session, setSession] = useState(getSession());
-    let history = useHistory();
+
+    console.log('LOADING CART PAGE', cart, changedCart)
 
     const cartUpdate = (data) => {
+        console.log('CART UPDATE', data)
         setChangedCart(data);
     }
 
     useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
+        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => { 
+            setCart(o); 
+            setChangedCart(o) 
+        });
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(sessionSub);
         })
     }, [])
 
     useLayoutEffect(() => {
-        document.title = `Cart | ${BUSINESS_NAME}`;
+        document.title = `Cart | ${BUSINESS_NAME.Short}`;
     })
 
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
-            alert('Error: Could not update order!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
         updateCart(session, session.tag, changedCart)
             .then(() => {
-                alert('Order updated')
+                setCart(changedCart);
+                PubSub.publish(PUBS.Snack, {message: 'Order updated.'});
             })
             .catch(err => {
                 console.error(err, changedCart);
-                alert('Error: Could not update order!');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
                 return;
+            })
+    }
+
+    function requestQuote() {
+        submitOrder(session, changedCart)
+            .then(() => {
+                PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
+            })
+            .catch(err => {
+                console.error(err);
+                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
             })
     }
 
     const finalizeOrder = useCallback(() => {
         if (cart.items.length <= 0) {
-            alert('Cannot finalize order: cart is empty');
+            PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
-        if (!window.confirm('This will submit the order to New Life Nursery. We will contact you for further information. Are you sure you want to continue?')) return;
-        submitOrder(session, changedCart)
-            .then(() => {
-                alert('Order submitted! We will be in touch with you soon :)')
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Failed to submit order. Please contact New Life Nursery');
-            })
+        PubSub.publish(PUBS.AlertDialog, {
+            message: `This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`,
+            firstButtonText: 'Yes',
+            firstButtonClicked: requestQuote,
+            secondButtonText: 'No',
+        });
     }, [cart, changedCart, session]);
 
+    console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
+    let options = (
+        <Grid className={classes.padTop} container spacing={2}>
+            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+                <Button 
+                    fullWidth 
+                    startIcon={<ArrowBackIcon />} 
+                    onClick={() => history.push(LINKS.Shopping)}
+                    disabled={!_.isEqual(cart, changedCart)}
+                >Continue Shopping</Button>
+            </Grid>
+            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+                <Button 
+                    fullWidth 
+                    startIcon={<UpdateIcon />} 
+                    onClick={updateOrder}
+                    disabled={_.isEqual(cart, changedCart)}
+                >Update Order</Button>
+            </Grid>
+            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+                <Button 
+                    fullWidth 
+                    endIcon={<ArrowForwardIcon />} 
+                    onClick={finalizeOrder}
+                    disabled={!_.isEqual(cart, changedCart)}
+                >Request Quote</Button>
+            </Grid>
+        </Grid>
+    )
+
     return (
-        <StyledCartPage className="page" theme={theme}>
-            <h2>Cart</h2>
-            <Cart cart={cart} onUpdate={cartUpdate} />
-            <Button onClick={() => history.push(LINKS.Shopping)}>Continue Shopping</Button>
-            <Button onClick={updateOrder}>Update Order</Button>
-            <Button onClick={finalizeOrder}>Request Quote</Button>
-        </StyledCartPage>
+        <div id='page'>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Cart</Typography>
+            </div>
+            { options}
+            <Cart className={classes.padTop} cart={cart} onUpdate={cartUpdate} />
+            { options}
+        </div>
     );
 }
 

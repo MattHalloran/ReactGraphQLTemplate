@@ -3,28 +3,39 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import { StyledAdminInventoryPage, StyledPlantPopup, StyledCard } from './AdminInventoryPage.styled';
-import PropTypes from 'prop-types';
-import Modal from 'components/wrappers/Modal/Modal';
-import { getInventory, getUnusedPlants, getInventoryFilters, modifyPlant, uploadAvailability, getImages } from 'query/http_promises';
-import Button from 'components/Button/Button';
+import { useLayoutEffect, useState, useEffect } from 'react';
+import { getInventory, getUnusedPlants, getInventoryFilters, uploadAvailability, getImages } from 'query/http_promises';
+import { Button } from '@material-ui/core';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import { getTheme, getSession } from 'utils/storage';
-import DropDown from 'components/inputs/DropDown/DropDown';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
-import InputText from 'components/inputs/InputText/InputText';
-import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
-import { NoImageIcon } from 'assets/img';
-import FileUpload from 'components/FileUpload/FileUpload';
-import makeID from 'utils/makeID';
+import { getSession } from 'utils/storage';
+import PlantCard from 'components/cards/PlantCard/PlantCard';
+import { Tabs, Tab, AppBar } from '@material-ui/core';
+import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import TabPanel from 'components/TabPanel/TabPanel';
+import { DropzoneArea } from 'material-ui-dropzone';
+import { makeStyles } from '@material-ui/core/styles';
+import Selector from 'components/inputs/Selector/Selector';
+import EditPlantDialog from 'components/dialogs/EditPlantDialog/EditPlantDialog';
+
+const useStyles = makeStyles((theme) => ({
+    toggleBar: {
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+    },
+    cardFlex: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        alignItems: 'stretch',
+    },
+}));
 
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
-    const [theme, setTheme] = useState(getTheme());
+    const classes = useStyles();
+    const [currTab, setCurrTab] = useState(0);
     const [session, setSession] = useState(getSession());
     // Holds the selected availability file, if uploading one
     const [selected, setSelected] = useState(null);
@@ -42,10 +53,8 @@ function AdminInventoryPage() {
 
 
     useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         return (() => {
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(sessionSub);
         })
     }, [])
@@ -74,6 +83,7 @@ function AdminInventoryPage() {
         getInventory(existing_sort_by, 0, true)
             .then((response) => {
                 setExisting(response.page_results);
+                console.log('SET all plantsssssssssss', response.page_results)
             })
             .catch((error) => {
                 console.error("Failed to load inventory", error);
@@ -136,6 +146,14 @@ function AdminInventoryPage() {
     //         });
     // }
 
+    const fileSelectedHandler = (files) => {
+        if (files.length > 0) {
+            processFile(files[0]);
+        } else {
+            setSelected(null);
+        }
+    }
+
     const processFile = (file) => {
         let reader = new FileReader();
         reader.onloadend = () => {
@@ -143,17 +161,6 @@ function AdminInventoryPage() {
             setSelected(fileData);
         }
         reader.readAsDataURL(file);
-    }
-
-    // Processes a single file
-    const fileSelectedHandler = (event) => {
-        let files = event.target.files;
-        let extension = files[0].name.split('.')[1];
-        if (extension !== 'xls') {
-            alert('File must have the extension .xls');
-            return;
-        }
-        processFile(files[0]);
     }
 
     const sendAvailability = () => {
@@ -164,27 +171,27 @@ function AdminInventoryPage() {
             alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
         }).catch(error => {
             console.error(error);
-            alert('Error uploading availability!');
+            PubSub.publish(PUBS.Snack, {message: 'Failed to upload availability.', severity: 'error'});
         });
     }
 
-    const handleExistingSort = (sort_item, _) => {
-        setExistingSortBy(sort_item.value);
+    const handleSort = (value) => {
+        if (currTab === 0) {
+            setExistingSortBy(value);
+        } else {
+            setAllSortBy(value);
+        }
     }
-
-    const handleAllSort = (sort_item, _) => {
-        setAllSortBy(sort_item.value);
-    }
-
-    let popup = (currPlant) ? (
-        <Modal onClose={() => setCurrPlant(null)}>
-            <PlantPopup session={session} theme={theme} plant={currPlant} trait_options={trait_options} />
-        </Modal>
-    ) : null;
 
     return (
-        <StyledAdminInventoryPage className="page" theme={theme}>
-            {popup}
+        <div id="page">
+            <EditPlantDialog
+                session={session}
+                plant={currPlant}
+                trait_options={trait_options}
+                open={currPlant !== null}
+                onClose={() => setCurrPlant(null)} />
+            <AdminBreadcrumbs />
             <h1>Welcome to the inventory manager!</h1>
             <h3>This page has the following features:</h3>
             <ul>
@@ -196,31 +203,45 @@ function AdminInventoryPage() {
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
-            <div>
-                Upload Spreadsheet<FileUpload onUploadClick={sendAvailability} onUploadChange={fileSelectedHandler} />
-            </div>
-
-            <Collapsible title="Plants with active SKUs">
-                <h2>Sort</h2>
-                <DropDown options={SORT_OPTIONS} onChange={handleExistingSort} initial_value={SORT_OPTIONS[0]} />
-                <div className="card-flex">
+            <DropzoneArea
+                acceptedFiles={['.xls']}
+                dropzoneText={"Drag and drop availability file here or click"}
+                onChange={fileSelectedHandler}
+                showAlerts={false}
+                filesLimit={1}
+            />
+            <Button onClick={sendAvailability}>Upload Availability</Button>
+            <h2>Sort</h2>
+            <Selector
+                fullWidth
+                options={currTab === 0 ? SORT_OPTIONS : PLANT_SORT_OPTIONS}
+                selected={currTab === 0 ? existing_sort_by : all_sort_by}
+                handleChange={(e) => handleSort(e.target.value)}
+                inputAriaLabel='sort-plants-selector-label'
+                label="Sort" />
+            <AppBar className={classes.toggleBar} position="static">
+                <Tabs value={currTab} onChange={(_, value) => setCurrTab(value)} aria-label="simple tabs example">
+                    <Tab label="Plants with active SKUs" id='plants-with-active-skus-tab' aria-controls='plants-tabpanel-1' />
+                    <Tab label="Plants without active SKUs" id='plants-without-active-skus-tab' aria-controls='plants-tabpanel-2' />
+                </Tabs>
+            </AppBar>
+            <TabPanel value={currTab} index={0}>
+                <div className={classes.cardFlex}>
                     {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onEdit={() => setCurrPlant(plant)}
+                        onClick={() => setCurrPlant(plant)}
                         thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
                 </div>
-            </Collapsible>
-            <Collapsible title="Plants without active SKUs">
-                <h2>Sort</h2>
-                <DropDown options={PLANT_SORT_OPTIONS} onChange={handleAllSort} initial_value={PLANT_SORT_OPTIONS[0]} />
-                <div className="card-flex">
+            </TabPanel>
+            <TabPanel value={currTab} index={1}>
+                <div className={classes.cardFlex}>
                     {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onEdit={() => setCurrPlant(plant)}
+                        onClick={() => setCurrPlant(plant)}
                         thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
                 </div>
-            </Collapsible>
-        </StyledAdminInventoryPage >
+            </TabPanel>
+        </div >
     );
 }
 
@@ -229,295 +250,3 @@ AdminInventoryPage.propTypes = {
 }
 
 export default AdminInventoryPage;
-
-function PlantCard({
-    onEdit,
-    onHide,
-    onDelete,
-    plant,
-    thumbnail,
-    theme = getTheme(),
-}) {
-    let has_skus = plant.skus?.length > 0;
-
-    const SkuStatus = {
-        '-2': 'deleted',
-        '-1': 'inactive',
-        '1': 'active',
-    }
-
-    const getStatus = (status) => {
-        return SkuStatus[status + ''] ?? 'deleted';
-    }
-
-    let sizes = plant.skus?.map(s => (
-        <div className={getStatus(s.status)}>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
-    ));
-
-    let display_image;
-    if (thumbnail) {
-        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image image-not-found" />
-    }
-
-    return (
-        <StyledCard className="card" theme={theme} onClick={onEdit}>
-            <h2 className="title">{plant.latin_name}</h2>
-            <div className="display-image-container">
-                {display_image}
-            </div>
-            <div className="size-container">
-                {sizes}
-            </div>
-            {/* <div className="icon-container">
-                <EditIcon width="30px" height="30px" onClick={() => onEdit(sku)} />
-                <HideIcon width="30px" height="30px" onClick={() => onHide(sku)} />
-                <TrashIcon width="30px" height="30px" onClick={() => onDelete(sku)} />
-            </div> */}
-        </StyledCard>
-    );
-}
-
-PlantCard.propTypes = {
-    data: PropTypes.object.isRequired,
-    // onEdit: PropTypes.func.isRequired,
-    // onHide: PropTypes.func.isRequired,
-    // onDelete: PropTypes.func.isRequired,
-}
-
-function PlantPopup({
-    session = getSession(),
-    plant,
-    theme = getTheme(),
-    trait_options
-}) {
-    console.log('PLANT POPUP', plant)
-    const [latin_name, setLatinName] = useState(plant.latin_name);
-    const [common_name, setCommonName] = useState(plant.common_name);
-    const [drought_tolerance, setDroughtTolerance] = useState(plant.drought_tolerance?.value);
-    const [grown_height, setGrownHeight] = useState(plant.grown_height?.value);
-    const [grown_spread, setGrownSpread] = useState(plant.grown_spread?.value);
-    const [growth_rate, setGrowthRate] = useState(plant.growth_rate?.value);
-    const [optimal_light, setOptimalLight] = useState(plant.optimal_light?.value);
-    const [salt_tolerance, setSaltTolerance] = useState(plant.salt_tolerance?.value);
-
-    // Used for display image upload
-    const [selectedImage, setSelectedImage] = useState(null);
-    // Used to display selected SKU info
-    const [selectedSku, setSelectedSku] = useState(null);
-    const [skus, setSkus] = useState(plant.skus ?? []);
-    const [code, setCode] = useState(selectedSku?.sku);
-    const [size, setSize] = useState(selectedSku?.size);
-    const [price, setPrice] = useState(selectedSku?.price);
-    const [quantity, setQuantity] = useState(selectedSku?.availability);
-
-    useEffect(() => {
-        if (!selectedSku) return;
-        selectedSku['sku'] = code;
-    }, [code])
-
-    useEffect(() => {
-        if (!selectedSku) return;
-        selectedSku['size'] = size;
-    }, [size])
-
-    useEffect(() => {
-        if (!selectedSku) return;
-        selectedSku['price'] = displayPriceToDatabase(price);
-    }, [price])
-
-    useEffect(() => {
-        if (!selectedSku) return;
-        selectedSku['availability'] = quantity;
-    }, [quantity])
-
-    useEffect(() => {
-        console.log('NEW SKU', selectedSku);
-        if (!selectedSku) return;
-        setCode(selectedSku['sku']);
-        setSize(selectedSku['size']);
-        setPrice(displayPrice(selectedSku['price']));
-        setQuantity(selectedSku['availability']);
-        setLatinName(selectedSku['plant']['latin_name']);
-        setCommonName(selectedSku['plant']['common_name']);
-        setDroughtTolerance(selectedSku['plant']['drought_tolerance']?.value);
-        setGrownHeight(selectedSku['plant']['grown_height']?.value);
-        setGrownSpread(selectedSku['plant']['grown_spread']?.value)
-        setOptimalLight(selectedSku['plant']['optimal_light']?.value);
-        setSaltTolerance(selectedSku['plant']['salt_tolerance']?.value);
-    }, [selectedSku])
-
-    const savePlant = () => {
-        let plant_data = {
-            "id": plant['id'],
-            "latin_name": latin_name,
-            "common_name": common_name,
-            "drought_tolerance": drought_tolerance,
-            "grown_height": grown_height,
-            "grown_spread": grown_spread,
-            "growth_rate": growth_rate,
-            "optimal_light": optimal_light,
-            "salt_tolerance": salt_tolerance,
-            "skus": skus,
-            "display_image": selectedImage,
-        }
-        console.log('GOING TO MODIFY PLANT', plant_data)
-        modifyPlant(session, 'UPDATE', plant_data)
-            .then(() => {
-                alert('SKU Updated!')
-            })
-            .catch((error) => {
-                console.error(error);
-                alert('Failed to update SKU!')
-            });
-    }
-
-    // Returns an input text or a dropdown, depending on if the field is in the trait options
-    const getInput = (field, label, value, valueFunc, multi_select = true) => {
-        if (!trait_options || !trait_options[field] || trait_options[field].length <= 0) return (
-            <InputText
-                label={label}
-                type="text"
-                value={value}
-                valueFunc={valueFunc}
-            />
-        )
-        return (
-            <div>
-                <label>{label}</label>
-                <DropDown
-                    multi_select={multi_select}
-                    allow_custom_input={true}
-                    className="sorter"
-                    options={trait_options[field]}
-                    onChange={valueFunc} />
-            </div>
-        )
-    }
-
-    const fileSelectedHandler = (event) => {
-        let imageFile = event.target.files[0];
-        let fileSplit = imageFile.name.split('.');
-        processImage(event.target.files[0], fileSplit[0], fileSplit[1]);
-    }
-
-    const processImage = (file, name, extension) => {
-        let reader = new FileReader();
-        reader.onloadend = () => {
-            setSelectedImage({
-                name: name,
-                extension: extension,
-                data: reader.result
-            });
-        }
-        reader.readAsDataURL(file);
-    }
-
-    const newSku = () => {
-        setSkus(l => l.concat({ sku: makeID(10) }))
-    }
-
-    const removeSku = useCallback(() => {
-        //let index = skus.findIndex(s => s.sku === selectedSku.sku)
-        let index = skus.indexOf(selectedSku);
-        if (index < 0) return;
-        setSkus(l => l.filter(s => s.sku !== selectedSku.sku))
-    }, [skus, selectedSku])
-
-    //Show display image from uploaded image.
-    //If no upload image, from model data.
-    //If not model data, show NoImageIcon
-    let image_data;
-    if (selectedImage?.data) {
-        image_data = selectedImage?.data
-    } else if (plant.display_image) {
-        image_data = `data:image/jpeg;base64,${plant.display_image}`
-    }
-    let display_image;
-    if (image_data) {
-        display_image = <img src={image_data} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image" />
-    }
-
-    return (
-        <StyledPlantPopup theme={theme}>
-            <div className="sidenav">
-                <h3>SKUs</h3>
-                <div className="sku-list">
-                    {skus?.map(s => (
-                        <div className={`sku-option ${s === selectedSku ? 'selected' : ''}`}
-                            onClick={() => setSelectedSku(s)}>{s.sku}</div>
-                    ))}
-                </div>
-                {selectedSku ? <Button className="delete-sku" onClick={removeSku}>Delete</Button> : null}
-                <Button className="add-sku" onClick={newSku}>New SKU</Button>
-            </div>
-            <div className="plant-info-div">
-                <InputText
-                    label="Latin Name"
-                    type="text"
-                    value={latin_name}
-                    valueFunc={setLatinName}
-                />
-                <InputText
-                    label="Common Name"
-                    type="text"
-                    value={common_name}
-                    valueFunc={setCommonName}
-                />
-                <div className="third">
-                    {getInput('drought_tolerance', 'Drought Tolerance', drought_tolerance, setDroughtTolerance, false)}
-                    {getInput('grown_height', 'Grown Height', grown_height, setGrownHeight, false)}
-                    {getInput('grown_spread', 'Grown Spread', grown_spread, setGrownSpread, false)}
-                </div>
-                <div className="third">
-                    {getInput('growth_rate', 'Growth Rate', growth_rate, setGrowthRate, false)}
-                    {getInput('optimal_light', 'Optimal Light', optimal_light, setOptimalLight, false)}
-                    {getInput('salt_tolerance', 'Salt Tolerance', salt_tolerance, setSaltTolerance, false)}
-                </div>
-                <div className="third">
-                    <p>Display Image</p>
-                    {display_image}
-                    <FileUpload selectText="Select" showFileName={false} showUploadButton={false} onUploadChange={fileSelectedHandler} />
-                </div>
-            </div>
-            <div className="sku-info-div">
-                <div className="half">
-                    <InputText
-                        label="Plant Code"
-                        type="text"
-                        value={code}
-                        valueFunc={setCode}
-                    />
-                    {getInput('size', 'Size', size, setSize, false)}
-                </div>
-                <div className="half">
-                    <InputText
-                        label="Price"
-                        type="text"
-                        value={price}
-                        valueFunc={setPrice}
-                    />
-                    <InputText
-                        label="Quanity"
-                        type="text"
-                        value={quantity}
-                        valueFunc={setQuantity}
-                    />
-                </div>
-            </div>
-            <Button onClick={savePlant}>Apply Changes</Button>
-        </StyledPlantPopup>
-    );
-}
-
-PlantPopup.propTypes = {
-    session: PropTypes.object,
-    sku: PropTypes.object.isRequired,
-    theme: PropTypes.object,
-    trait_options: PropTypes.object,
-}
-
-export { PlantPopup };

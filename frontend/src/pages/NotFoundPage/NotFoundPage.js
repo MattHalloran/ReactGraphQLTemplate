@@ -1,36 +1,36 @@
-import { useLayoutEffect, useEffect, useState } from 'react';
+import { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { StyledNotFoundPage } from './NotFoundPage.styled';
-import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { PubSub } from 'utils/pubsub';
-import Button from 'components/Button/Button';
-import { getTheme } from 'utils/storage';
+import { BUSINESS_NAME } from 'utils/consts';
+import { Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    center: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translateX(-50%) translateY(-50%)',
+    },
+}));
 
 function NotFoundPage() {
-    const [theme, setTheme] = useState(getTheme());
-
-    useEffect(() => {
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
-        return (() => {
-            PubSub.unsubscribe(themeSub);
-        })
-    }, [])
+    const classes = useStyles();
 
     useLayoutEffect(() => {
-        document.title = `404 | ${BUSINESS_NAME}`;
+        document.title = `404 | ${BUSINESS_NAME.Short}`;
     })
 
     return (
-        <StyledNotFoundPage className="page" theme={theme}>
-            <div className="center">
+        <div id="page">
+            <div className={classes.center}>
                 <h1>Page Not Found</h1>
                 <h3>Looks like you've followed a broken link or entered a URL that doesn't exist on this site</h3>
                 <br />
                 <Link to="/">
-                    <Button className="primary">Go to Home</Button>
+                    <Button>Go to Home</Button>
                 </Link>
             </div>
-        </StyledNotFoundPage>
+        </div>
     );
 }
 

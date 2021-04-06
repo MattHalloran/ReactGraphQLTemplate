@@ -1,69 +1,101 @@
-import PropTypes from 'prop-types';
-import { StyledContactInfo } from './ContactInfo.styled';
-import { GeoIcon, EmailIcon, PhoneIcon } from 'assets/img';
-import { getTheme } from 'utils/storage';
-import { GOOGLE_MAPS_ADDRESS } from 'utils/consts';
-import Button from 'components/Button/Button';
+import RoomIcon from '@material-ui/icons/Room';
+import EmailIcon from '@material-ui/icons/Email';
+import PhoneIcon from '@material-ui/icons/Phone';
+import { ADDRESS, PHONE, EMAIL } from 'utils/consts';
+import { Tooltip, Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        background: theme.palette.primary.light,
+    },
+    tableHead: {
+        background: theme.palette.primary.main,
+    },
+    tableHeadCell: {
+        color: theme.palette.primary.contrastText,
+    },
+    tableRow: {
+        background: theme.palette.background.paper,
+    },
+    nav: {
+        background: 'transparent',
+        height: 'fit-content',
+    },
+    navAction: {
+        alignItems: 'baseline',
+        color: theme.palette.primary.contrastText,
+        overflowWrap: 'anywhere',
+    },
+    iconButton: {
+        background: theme.palette.secondary.main,
+        fill: theme.palette.secondary.contrastText,
+    },
+}));
 
 function ContactInfo({
-    theme = getTheme(),
+    ...props
 }) {
+    const classes = useStyles();
 
-    const openMaps = (e) => {
-        window.location = GOOGLE_MAPS_ADDRESS;
+    const openLink = (e, link) => {
+        window.location = link;
         e.preventDefault();
     }
 
-    const openMail = (e) => {
-        window.location = "mailto:info@newlifenurseryinc.com";
-        e.preventDefault();
-    }
+    const hours = [
+        'MON-FRI: 8:00 am to 3:00 pm',
+        'SAT-SUN: Closed',
+        'Note: Closed daily from 12:00 pm to 1:00 pm',
+    ]
 
-    const openPhone = (e) => {
-        window.location = "tel:+18564553601";
-        e.preventDefault();
-    }
+    const contactInfo = [
+        ['Open in Google Maps', ADDRESS.Label, ADDRESS.Link, RoomIcon],
+        ['Call Us', PHONE.Label, PHONE.Link, PhoneIcon],
+        ['Email Us', EMAIL.Label, EMAIL.Link, EmailIcon]
+    ]
 
     return (
-        <StyledContactInfo theme={theme}>
-                <table className="hours-content-div">
-                    <tbody>
-                        <tr><th className="hours-header">Hours</th></tr>
-                        <tr><td>MON-FRI: 8:00 am to 3:00 pm</td></tr>
-                        <tr><td>SAT-SUN: Closed</td></tr>
-                        <tr><td>Note: Closed daily from 12:00 pm to 1:00 pm</td></tr>
-                    </tbody>
-                </table>
-                <div className="icon-container external-links">
-                    <div className="icon-group" onClick={openMaps}>
-                        <div className="icon">
-                            <GeoIcon width="30px" height="30px"/>
-                        </div>
-                        <p className="external-link-text">106 South Woodruff Road<br />Bridgeton, NJ 08302</p>
-                    </div>
-                    <div className="icon-group" onClick={openMail}>
-                        <div className="icon">
-                            <EmailIcon width="30px" height="30px" />
-                        </div>
-                        <p className="external-link-text">info@newlifenurseryinc.com</p>
-                    </div>
-                    <div className="icon-group" onClick={openPhone}>
-                        <div className="icon">
-                            <PhoneIcon width="30px" height="30px"/>
-                        </div>
-                        <p className="external-link-text">(856) 455-3601</p>
-                    </div>
-                </div>
-                <div className="icon-container external-links bottom-div">
-                    <Button>Contact Form</Button>
-                    <Button>Give Feedback</Button>
-                </div>
-        </StyledContactInfo >
+        <div className={classes.root} {...props}>
+            <TableContainer>
+                <Table aria-label="contact-hours-table" size="small">
+                    <TableHead className={classes.tableHead}>
+                        <TableRow>
+                            <TableCell className={classes.tableHeadCell}>Hours</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {hours.map((row, index) => (
+                            <TableRow key={index} className={classes.tableRow}>
+                                <TableCell>
+                                    {row}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <BottomNavigation className={classes.nav} showLabels>
+                {contactInfo.map(([tooltip, label, link, Icon]) => (
+                    <Tooltip title={tooltip} placement="top">
+                        <BottomNavigationAction className={classes.navAction} label={label} onClick={(e) => openLink(e, link)} icon={
+                            <IconButton className={classes.iconButton}>
+                                <Icon />
+                            </IconButton>
+                        } />
+                    </Tooltip>
+                ))}
+            </BottomNavigation>
+            <Grid container spacing={2} justifyContent="center">
+                <Grid item xs={6}>
+                    <Button fullWidth onClick={() => alert('Coming soon!')}>Contact Form</Button>
+                </Grid>
+                <Grid item xs={6}>
+                    <Button fullWidth onClick={() => alert('Coming soon!')}>Give Feedback</Button>
+                </Grid>
+            </Grid>
+        </div>
     );
-}
-
-ContactInfo.propTypes = {
-    theme: PropTypes.object,
 }
 
 export default ContactInfo;

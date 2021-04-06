@@ -1,31 +1,41 @@
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { StyledShoppingList, StyledPlantCard, StyledExpandedPlant } from "./ShoppingList.styled";
 import { getImages, getImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
-import Modal from "components/wrappers/Modal/Modal";
-import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, BagPlusIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
-import Tooltip from 'components/Tooltip/Tooltip';
-import { getSession, getTheme, getCart } from "utils/storage";
+import Modal from "components/wrappers/StyledModal/StyledModal";
+import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
+import { getSession, getCart } from "utils/storage";
 import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
 import Collapsible from 'components/wrappers/Collapsible/Collapsible';
 import { displayPrice } from 'utils/displayPrice';
-import DropDown from 'components/inputs/DropDown/DropDown';
+import Selector from 'components/inputs/Selector/Selector';
+import PlantCard from 'components/cards/PlantCard/PlantCard';
+import { Tooltip, Typography, Grid, IconButton } from '@material-ui/core';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import PlantDialog from 'components/dialogs/PlantDialog/PlantDialog';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+        alignItems: 'stretch',
+    },
+}));
 
 function ShoppingList({
     page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
-    showUnavailable,
+    hideOutOfStock,
     searchString = '',
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
+    const classes = useStyles();
     const [session, setSession] = useState(getSession());
-    const [theme, setTheme] = useState(getTheme());
     const [cart, setCart] = useState(getCart());
-    const [popup, setPopup] = useState(null);
     // Plant data for every loaded plant
     const [loaded_plants, setLoadedPlants] = useState([]);
     const all_plant_ids = useRef([]);
@@ -56,22 +66,14 @@ function ShoppingList({
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o));
         let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
         return (() => {
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(cartSub);
         })
     }, [])
 
     useEffect(() => {
-        PubSub.publish(PUBS.PopupOpen, curr_index >= 0);
-    }, [curr_index])
-
-    useEffect(() => {
-        console.log('GRABBING ALL SKUS', sort)
-        console.log(typeof sort);
         if (!session) return;
         let mounted = true;
         getInventory(sort, page_size, false)
@@ -93,7 +95,7 @@ function ShoppingList({
     useEffect(() => {
         //First, determine if plants without availability shall be shown
         let visible_plants = loaded_plants;
-        if (!showUnavailable) {
+        if (hideOutOfStock) {
             visible_plants = loaded_plants?.filter(plant => {
                 if (plant.skus.length === 0) return true;
                 return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
@@ -148,7 +150,7 @@ function ShoppingList({
             }
         }
         setPlants(filtered_plants);
-    }, [loaded_plants, filters, searchString, showUnavailable])
+    }, [loaded_plants, filters, searchString, hideOutOfStock])
 
     const loadNextPage = useCallback(() => {
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
@@ -188,6 +190,10 @@ function ShoppingList({
         history.push(LINKS.Shopping + "/" + sku);
     };
 
+    const toCart = () => {
+        history.push(LINKS.Cart);
+    }
+
     const setInCart = (name, sku, operation, quantity) => {
         if (!session?.tag || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
@@ -199,47 +205,50 @@ function ShoppingList({
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
         updateCart(session, session.tag, cart_copy)
             .then(() => {
-                if (operation === 'ADD')
-                    alert(`${quantity} ${name}(s) added to cart!`)
-                else if (operation === 'SET')
-                    alert(`${name} quantity updated to ${quantity}!`)
-                else if (operation === 'DELETE')
-                    alert(`${name} 'removed from' cart!`)
+                if (operation === 'ADD') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${quantity} ${name}(s) added to cart.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
+                else if (operation === 'SET') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${name} quantity updated to ${quantity}.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
+                else if (operation === 'DELETE') {
+                    PubSub.publish(PUBS.Snack, { 
+                        message: `${name} 'removed from' cart.`, 
+                        buttonText: 'View Cart',
+                        buttonClicked: toCart,
+                    });
+                }
             })
             .catch(err => {
                 console.error(err, cart_copy);
-                alert('Operation failed. Please try again');
+                PubSub.publish(PUBS.Snack, {message: 'Failed to add to cart.', severity: 'error'});
             })
     }
 
-    useEffect(() => {
-        if (curr_index < 0) {
-            setPopup(null);
-            return;
-        }
-        let popup_data = plants[curr_index];
-        setPopup(
-            <Modal onClose={() => history.goBack()}>
-                <ExpandedPlant plant={popup_data}
-                    thumbnail={thumbnails?.length >= curr_index ? thumbnails[curr_index] : null}
-                    onCart={setInCart}
-                    theme={theme} />
-            </Modal>
-        );
-    }, [plants, curr_index])
-
     return (
-        <StyledShoppingList id={track_scrolling_id}>
-            {popup}
+        <div className={classes.root} id={track_scrolling_id}>
+            {(curr_index >= 0) ? <PlantDialog
+                plant={curr_index >= 0 ? plants[curr_index] : null}
+                onCart={setInCart}
+                open={curr_index >= 0}
+                onClose={() => history.goBack()} /> : null}
+            
             {plants?.map((item, index) =>
                 <PlantCard key={index}
-                    theme={theme}
                     cart={cart}
-                    onClick={expandSku}
+                    onClick={() => expandSku(item.skus[0].sku)}
                     plant={item}
                     thumbnail={thumbnails?.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
-        </StyledShoppingList>
+        </div>
     );
 }
 
@@ -251,183 +260,3 @@ ShoppingList.propTypes = {
 };
 
 export default ShoppingList;
-
-function PlantCard({
-    plant,
-    thumbnail,
-    onClick,
-}) {
-    const [theme] = useState(getTheme());
-
-    let sizes = plant.skus.map(s => (
-        <div>Size: #{s.size}<br />Price: {displayPrice(s.price)}<br />Avail: {s.availability}</div>
-    ));
-
-    let display_image;
-    if (thumbnail) {
-        display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image image-not-found" />
-    }
-
-    return (
-        <StyledPlantCard className="card" theme={theme} onClick={() => onClick(plant.skus[0].sku)}>
-            <div className="title">
-                <h2>{plant.latin_name}</h2>
-                <h3>{plant.common_name}</h3>
-            </div>
-            <div className="display-image-container">
-                {display_image}
-            </div>
-            <div className="size-container">
-                {sizes}
-            </div>
-        </StyledPlantCard>
-    );
-}
-
-PlantCard.propTypes = {
-    plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.string,
-    onClick: PropTypes.func.isRequired,
-    theme: PropTypes.object,
-};
-
-export { PlantCard };
-
-function ExpandedPlant({
-    plant,
-    thumbnail,
-    onCart,
-}) {
-    console.log('EXPANDED PLANT', plant)
-    const [theme, setTheme] = useState(getTheme());
-    const [quantity, setQuantity] = useState(1);
-    const [image, setImage] = useState(null);
-
-    useEffect(() => {
-        getImage(plant.display_id, 'l').then(response => {
-            setImage(response.image);
-        }).catch(error => {
-            console.error(error);
-        })
-    }, [])
-
-    let order_options = plant.skus?.map(s => {
-        return {
-            label: `#${s.size} : ${displayPrice(s.price)}`,
-            value: s
-        }
-    });
-    const [selected, setSelected] = useState(order_options[0].value);
-
-    let display_image;
-    if (image) {
-        display_image = <img src={`data:image/jpeg;base64,${image}`} className="display-image" alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className="display-image" />
-    }
-
-    const handleSortChange = (item, _) => {
-        setSelected(item.value);
-    }
-
-    const traitIconList = (field, Icon, title, alt) => {
-        if (!plant || !plant[field]) return null;
-        if (!alt) alt = title;
-        console.log('TRAIT ICON LIST', field)
-        let field_string;
-        if (Array.isArray(plant[field])) {
-            field_string = plant[field].map((f) => f.value).join(', ')
-        } else {
-            field_string = plant[field].value;
-        }
-        return (
-            <div className="trait-container">
-                <Tooltip content={title}>
-                    <Icon className="trait-icon" width="25px" height="25px" title={title} alt={alt} />
-                    <p>: {field_string}</p>
-                </Tooltip>
-            </div>
-        )
-    }
-
-    return (
-        <StyledExpandedPlant theme={theme}>
-            <div className="title">
-                <h1>{plant.latin_name}</h1>
-                <h3>{plant.common_name}</h3>
-            </div>
-            <div className="main-div">
-                <div className="floating-half">
-                    {display_image}
-                </div>
-                <div className="floating-half">
-                    {plant.description ?
-                        <Collapsible className="description-container" style={{ height: '20%' }} title="Description">
-                            <p>{plant.description}</p>
-                        </Collapsible>
-                        : null}
-                    <Collapsible className="trait-list" style={{ height: '30%' }} title="General Information">
-                        <div className="sku">
-                            {/* TODO availability, sizes */}
-                        </div>
-                        <div className="general">
-                            <p>General</p>
-                            {traitIconList("zones", MapIcon, "Zones")}
-                            {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                            {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                            {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                            {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
-                        </div>
-                        <div className="bloom">
-                            <p>Bloom</p>
-                            {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                            {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
-                        </div>
-                        <div className="light">
-                            <p>Light</p>
-                            {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                            {traitIconList("optimal_light", SunIcon, "Optimal Light")}
-                        </div>
-                        <div className="soil">
-                            <p>Soil</p>
-                            {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                            {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                            {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
-                        </div>
-                    </Collapsible>
-                </div>
-            </div>
-            <div className="icon-container bottom-div">
-                <div className="selecter">
-                    <label>Option</label>
-                    <DropDown options={order_options} onChange={handleSortChange} initial_value={order_options[0]} />
-                </div>
-                <div className="quanter">
-                    <label>Quantity</label>
-                    <QuantityBox
-                        min_value={0}
-                        max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
-                        initial_value={1}
-                        value={quantity}
-                        valueFunc={setQuantity} />
-                </div>
-                <BagPlusIcon
-                    className="bag"
-                    width="30px"
-                    height="30px"
-                    onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected, 'ADD', quantity)} />
-            </div>
-        </StyledExpandedPlant>
-    );
-}
-
-ExpandedPlant.propTypes = {
-    plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.string,
-    onCart: PropTypes.func.isRequired,
-    theme: PropTypes.object,
-};
-
-export { ExpandedPlant };
