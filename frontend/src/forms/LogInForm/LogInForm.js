@@ -96,7 +96,7 @@ function LogInForm() {
                 className={classes.submit}
                 onClick={submit}
             >
-                Sign Up
+                Log In
             </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
