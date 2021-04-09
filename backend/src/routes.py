@@ -18,7 +18,8 @@ from src.uploadAvailability import upload_availability
 
 app = create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-PREFIX = '/api'
+VERSION = 'v1'
+PREFIX = f'/api/{VERSION}'
 with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as f:
     print('READING CODES')
     StatusCodes = json.load(f)
