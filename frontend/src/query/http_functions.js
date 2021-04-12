@@ -86,19 +86,6 @@ export async function send_password_reset_request(email) {
     return await fetchWrapper('reset_password_request', options);
 }
 
-export async function fetch_customers(session) {
-    let json = JSON.stringify({
-        "session": session
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-        credentials: 'include',
-    }
-    return await fetchWrapper('fetch_customers', options);
-}
-
 export async function fetch_unused_plants(sorter) {
     let json = JSON.stringify({
         "sorter": sorter,

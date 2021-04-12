@@ -42,7 +42,6 @@ export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fe
 export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
-export const getCustomers = (session) => promiseWrapper(http.fetch_customers, session);
 export const modifySku = (session, sku, operation, data) => promiseWrapper(http.modify_sku, session, sku, operation, data);
 export const modifyPlant = (session, operation, data) => promiseWrapper(http.modify_plant, session, operation, data);
 export const modifyUser = (session, id, operation) => promiseWrapper(http.modify_user, session, id, operation);

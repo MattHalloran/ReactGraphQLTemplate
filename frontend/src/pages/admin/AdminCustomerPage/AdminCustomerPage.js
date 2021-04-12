@@ -23,13 +23,17 @@ function AdminCustomerPage({
     session
 }) {
     const classes = useStyles();
-    const { data: customerData } = useGet({
-        path: "http://localhost:5000/api/v1/customers",
+    const [customers, setCustomers] = useState(null);
+    useGet({
+        path: "customers",
         queryParams: { session: session },
-        onError: () => PubSub.publish(PUBS.Snack, { message: 'Failed to load customers', severity: 'error' })
-    })
-    const [changedCustomers, setChangedCustomers] = useState(null);
-    console.log('CUSTOMERS ISSSSSS', customerData?.customers)
+        resolve: (response) => {
+            if (response.ok)
+                setCustomers(response.customers);
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })    
 
     useLayoutEffect(() => {
         document.title = "Customer Page";
@@ -42,7 +46,7 @@ function AdminCustomerPage({
     }
 
     const onCustomersUpdate = (customers) => {
-        setChangedCustomers(customers);
+        setCustomers(customers);
     }
     
     return (
@@ -52,7 +56,7 @@ function AdminCustomerPage({
                 <Button onClick={new_user}>New Customer</Button>
             </div>
             <div className={classes.cardFlex}>
-                {customerData?.customers?.map((c, index) =>
+                {customers?.map((c, index) =>
                 <CustomerCard key={index}
                     session={session}
                     onUpdate={onCustomersUpdate}

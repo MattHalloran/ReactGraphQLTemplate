@@ -91,7 +91,7 @@ function App() {
     }, [session])
 
     return (
-        <RestfulProvider base="http://localhost:5000/api/v1/openapi.json">
+        <RestfulProvider base="http://localhost:5000/api/v1/">
             <StyledEngineProvider injectFirst>
                 <div id="App">
                     <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
