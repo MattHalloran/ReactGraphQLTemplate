@@ -78,7 +78,7 @@ function Routes({
             )} />
             <Route exact path={LINKS.AdminCustomers} render={() => (
                 <RequireAuthentication role={USER_ROLES.Admin}>
-                    <AdminCustomerPage />
+                    <AdminCustomerPage session={session} />
                 </RequireAuthentication>
             )} />
             <Route exact path={LINKS.AdminGallery} render={() => (

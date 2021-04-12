@@ -1,8 +1,7 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { getCustomers } from 'query/http_promises';
+import { useGet } from "restful-react";
 import { PUBS } from 'utils/consts';
-import { getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import CustomerCard from 'components/cards/CustomerCard/CustomerCard';
 import { makeStyles } from '@material-ui/core/styles';
@@ -20,31 +19,21 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminCustomerPage() {
+function AdminCustomerPage({
+    session
+}) {
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
-    const [customers, setCustomers] = useState([]);
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-        })
-    }, [])
+    const { data: customerData } = useGet({
+        path: "http://localhost:5000/api/v1/customers",
+        queryParams: { session: session },
+        onError: () => PubSub.publish(PUBS.Snack, { message: 'Failed to load customers', severity: 'error' })
+    })
+    const [changedCustomers, setChangedCustomers] = useState(null);
+    console.log('CUSTOMERS ISSSSSS', customerData?.customers)
 
     useLayoutEffect(() => {
-        let mounted = true;
         document.title = "Customer Page";
-        getCustomers(session)
-            .then((response) => {
-                if (!mounted) return;
-                setCustomers(response.customers);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
-        return () => mounted = false;
-    }, [session])
+    }, [])
 
     const new_user = () => {
         alert('Coming soon!');
@@ -53,7 +42,7 @@ function AdminCustomerPage() {
     }
 
     const onCustomersUpdate = (customers) => {
-        setCustomers(customers);
+        setChangedCustomers(customers);
     }
     
     return (
@@ -63,7 +52,7 @@ function AdminCustomerPage() {
                 <Button onClick={new_user}>New Customer</Button>
             </div>
             <div className={classes.cardFlex}>
-                {customers?.map((c, index) =>
+                {customerData?.customers?.map((c, index) =>
                 <CustomerCard key={index}
                     session={session}
                     onUpdate={onCustomersUpdate}

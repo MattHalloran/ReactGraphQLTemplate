@@ -7,6 +7,7 @@ import { PUBS } from 'utils/consts';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
 import { getSession, getCart, getTheme } from './utils/storage';
+import { RestfulProvider } from "restful-react";
 import { checkCookies } from 'query/http_promises';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
@@ -90,30 +91,32 @@ function App() {
     }, [session])
 
     return (
-        <StyledEngineProvider injectFirst>
-            <div id="App">
-                <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                <CssBaseline />
-                {/* Other theming (default TextField variants, button text styling, etc) */}
-                <ThemeProvider theme={theme}>
-                    <main id="page-container" className={classes.pageContainer}>
-                        <div id="content-wrap" className={classes.contentWrap}>
-                            <Navbar session={session} user_roles={user_roles} cart={cart} />
-                            {loading ? 
-                                <div className={classes.spinner}>
-                                    <CircularProgress size={100} /> 
-                                </div>
-                            : null}
-                            <AlertDialog />
-                            <Snack />
-                            <Routes session={session} user_roles={user_roles} />
-                        </div>
-                        <IconNav cart={cart} />
-                        <Footer />
-                    </main>
-                </ThemeProvider>
-            </div>
-        </StyledEngineProvider>
+        <RestfulProvider base="http://localhost:5000/api/v1/openapi.json">
+            <StyledEngineProvider injectFirst>
+                <div id="App">
+                    <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+                    <CssBaseline />
+                    {/* Other theming (default TextField variants, button text styling, etc) */}
+                    <ThemeProvider theme={theme}>
+                        <main id="page-container" className={classes.pageContainer}>
+                            <div id="content-wrap" className={classes.contentWrap}>
+                                <Navbar session={session} user_roles={user_roles} cart={cart} />
+                                {loading ?
+                                    <div className={classes.spinner}>
+                                        <CircularProgress size={100} />
+                                    </div>
+                                    : null}
+                                <AlertDialog />
+                                <Snack />
+                                <Routes session={session} user_roles={user_roles} />
+                            </div>
+                            <IconNav cart={cart} />
+                            <Footer />
+                        </main>
+                    </ThemeProvider>
+                </div>
+            </StyledEngineProvider>
+        </RestfulProvider>
     );
 }
 

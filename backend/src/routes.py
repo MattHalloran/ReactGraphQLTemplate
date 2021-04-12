@@ -24,8 +24,17 @@ with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as 
     print('READING CODES')
     StatusCodes = json.load(f)
     print(type(StatusCodes))
+with open(os.path.join(os.path.dirname(__file__), 'openapi.json'), 'r') as f:
+    OpenApi = json.load(f)
 
 # ============= Helper Methods ========================
+
+
+# Helper method for grabbing query data
+def getQuery(*names) -> list:
+    if (len(names) == 1):
+        return request.args.get(names[0])
+    return [request.args.get(name) for name in names]
 
 
 # Helper method for grabbing form data from the request
@@ -103,14 +112,11 @@ def verify_admin(session):
 # =========== End Helper Methods ========================
 
 
-@app.route(f'{PREFIX}/ping', methods=['POST'])
+@app.route(f'{PREFIX}/openapi.json', methods=['GET'])
 @handle_exception
-def ping():
+def openapi():
     '''Used for testing client/server connection'''
-    return {
-        **StatusCodes['SUCCESS'],
-        "result": 'pong'
-    }
+    return OpenApi
 
 
 @app.route(f'{PREFIX}/consts', methods=['GET'])
@@ -524,13 +530,13 @@ def fetch_cart():
     }
 
 
-@app.route(f'{PREFIX}/fetch_customers', methods=["POST"])
+@app.route(f'{PREFIX}/customers', methods=["GET"])
 @cross_origin(supports_credentials=True)
 @handle_exception
-def fetch_customers():
+def customers():
     # Grab data
-    (session) = getJson('session')
-    if not verify_admin(session):
+    (tag, token) = getQuery('session[tag]', 'session[token]')
+    if not verify_admin({'tag': tag, 'token': token}):
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
         **StatusCodes['SUCCESS'],
