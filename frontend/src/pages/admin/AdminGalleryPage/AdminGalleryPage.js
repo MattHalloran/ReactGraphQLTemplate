@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useLayoutEffect } from 'react';
-import { uploadGalleryImages, getGallery, getImages, updateGallery } from 'query/http_promises';
-import { getSession } from 'utils/storage';
+import { uploadGalleryImages, getImages, updateGallery } from 'query/http_promises';
+import { useGet, useMutate } from "restful-react";
+import PropTypes from 'prop-types';
 import { Button, Typography } from '@material-ui/core';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
@@ -18,57 +19,54 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminGalleryPage() {
+function AdminGalleryPage({
+    session
+}) {
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [data, setData] = useState([]);
+    useGet({
+        path: "gallery",
+        resolve: (response) => {
+            if (response.ok) {
+                let response_meta = response.images_meta ?? [];
+                if (response_meta.length > 0) {
+                    //Grab all thumbnail images
+                    let ids = response_meta.map(meta => meta.id);
+                    let data = [];
+                    getImages(ids, 'm').then(response => {
+                        //Combine metadata with thumbnail images
+                        for (let i = 0; i < ids.length; i++) {
+                            let meta = response_meta[i];
+                            if (!meta) {
+                                console.log('META IS EMPTY', response_meta, i);
+                                continue;
+                            }
+                            let img = response.images[i];
+                            data.push({
+                                'key': meta.id,
+                                'src': `data:image/jpeg;base64,${img}`,
+                                'alt': meta.alt,
+                                'description': 'TODO',
+                            });
+                        }
+                        setData(data);
+                    }).catch(error => {
+                        let msg = 'Failed to load gallery data!'
+                        console.error(msg, error);
+                        PubSub.publish(PUBS.Snack, { message: msg, severity: 'error' });
+                    });
+                } else {
+                    setData([]);
+                }
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     useLayoutEffect(() => {
         document.title = "Edit Gallery";
-    }, [])
-
-    useEffect(() => {
-        let mounted = true;
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        getGallery().then(response => {
-            if (!mounted) return;
-            let response_meta = response.images_meta ?? [];
-            if (response_meta.length > 0) {
-                //Grab all thumbnail images
-                let ids = response_meta.map(meta => meta.id);
-                let data = [];
-                getImages(ids, 'm').then(response => {
-                    //Combine metadata with thumbnail images
-                    for (let i = 0; i < ids.length; i++) {
-                        let meta = response_meta[i];
-                        if (!meta) {
-                            console.log('META IS EMPTY', response_meta, i);
-                            continue;
-                        }
-                        let img = response.images[i];
-                        data.push({
-                            'key': meta.id,
-                            'src': `data:image/jpeg;base64,${img}`,
-                            'alt': meta.alt,
-                            'description': 'TODO',
-                        });
-                    }
-                    setData(data);
-                }).catch(error => {
-                    console.error("Failed to load gallery data!", error);
-                });
-            } else {
-                setData([]);
-            }
-        }).catch(error => {
-            console.error("Failed to load gallery pictures!", error);
-        })
-
-        return (() => {
-            mounted = false;
-            PubSub.unsubscribe(sessionSub);
-        })
     }, [])
 
     const fileSelectedHandler = (files) => {
@@ -95,7 +93,7 @@ function AdminGalleryPage() {
 
     const uploadImages = useCallback(() => {
         if (selectedFiles.length <= 0) {
-            PubSub.publish(PUBS.Snack, {message: 'No images selected.', severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: 'No images selected.', severity: 'error' });
             return;
         }
         let form = new FormData();
@@ -105,10 +103,10 @@ function AdminGalleryPage() {
             form.append('image', img.data);
         });
         uploadGalleryImages(form).then(response => {
-            PubSub.publish(PUBS.Snack, {message: `Uploaded ${response.passed_indexes?.length} images.`});
+            PubSub.publish(PUBS.Snack, { message: `Uploaded ${response.passed_indexes?.length} images.` });
         }).catch(error => {
             console.error(error);
-            PubSub.publish(PUBS.Snack, {message: 'Failed to upload images.', severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: 'Failed to upload images.', severity: 'error' });
         });
     }, [selectedFiles])
 
@@ -120,11 +118,11 @@ function AdminGalleryPage() {
         }));
         updateGallery(session, gallery_data)
             .then(() => {
-                PubSub.publish(PUBS.Snack, {message: 'Gallery updated.'});
+                PubSub.publish(PUBS.Snack, { message: 'Gallery updated.' });
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to update gallery.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update gallery.', severity: 'error' });
             })
     }, [data])
 
@@ -149,16 +147,16 @@ function AdminGalleryPage() {
             />
             <Button className={classes.padTop} fullWidth onClick={uploadImages}>Upload Images</Button>
             <h2>Reorder and delete images</h2>
-            <GalleryTable 
+            <GalleryTable
                 data={data}
                 onUpdate={updateData}
-                onApply={applyChanges}/>
+                onApply={applyChanges} />
         </div>
     );
 }
 
 AdminGalleryPage.propTypes = {
-
+    session: PropTypes.object.isRequired,
 }
 
 export default AdminGalleryPage;

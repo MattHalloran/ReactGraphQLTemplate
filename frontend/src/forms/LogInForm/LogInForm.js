@@ -5,8 +5,10 @@ import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, PUBS } from 'utils/consts';
-import { loginUser } from 'query/http_promises';
+import { useMutate } from "restful-react";
 import PubSub from 'utils/pubsub';
+import { storeLogin } from 'query/http_promises';
+import { clearStorage } from 'utils/storage';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -29,22 +31,32 @@ function LogInForm() {
     const [email, setEmail] = useHistoryState("li_email", "");
     const [password, setPassword] = useHistoryState("li_password", "");
 
+    const { mutate: loginUser, loading } = useMutate({
+        verb: 'PUT',
+        path: 'login',
+        resolve: (response) => {
+            if (response.ok) {
+                storeLogin(response.session, response.user)
+                if (response.emailVerified) PubSub.publish(PUBS.Snack, {message: 'Email verified.'});
+                history.push(LINKS.Shopping);
+            }
+            else {
+                clearStorage();
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
+
     let emailError = validation.emailValidation(email);
     let passwordError = validation.defaultStringValidation('password', password);
-    console.log('HERE ARE THE ERRORS')
-    console.log(emailError, passwordError);
     let anyErrors = !validation.passedValidation(emailError, passwordError);
 
     const login = () => {
-        loginUser(email, password, urlParams.code).then(response => {
-            if (urlParams.code && response.isEmailVerified) {
-                PubSub.publish(PUBS.Snack, {message: 'Email verified.'});
-            }
-            history.push(LINKS.Shopping);
-        }).catch(err => {
-            console.error(err);
-            alert(err.msg);
-        })
+        const formData = new FormData()
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('verificationCode', urlParams.code);
+        loginUser(formData);
     }
 
     const submit = (event) => {

@@ -1006,7 +1006,7 @@ class UserHandler(Handler):
 
     @staticmethod
     def from_email(email: str):
-        return User.query.filter(User.personal_email.any(func.lower(Email.email_address)==func.lower(email))).first()
+        return User.query.filter(User.personal_email.any(func.lower(Email.email_address) == func.lower(email))).first()
 
     @staticmethod
     def email_in_use(email: str):

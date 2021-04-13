@@ -40,8 +40,8 @@ def getQuery(*names) -> list:
 # Helper method for grabbing form data from the request
 def getForm(*names) -> list:
     if (len(names) == 1):
-        return request.form.getlist(names[0])
-    return [request.form.getlist(name) for name in names]
+        return request.form.getlist(names[0])[0]
+    return [request.form.getlist(name)[0] for name in names]
 
 
 # Helper method for grabbing json data from the request
@@ -158,12 +158,12 @@ def register():
     }
 
 
-@app.route(f'{PREFIX}/login', methods=['POST'])
+@app.route(f'{PREFIX}/login', methods=['PUT'])
 @cross_origin(supports_credentials=True)
 @handle_exception
 def login():
     '''Generate a session token from a user's credentials'''
-    (email, password, verificationCode) = getData('email', 'password', 'verificationCode')
+    (email, password, verificationCode) = getForm('email', 'password', 'verificationCode')
     if isinstance(verificationCode, str) and len(verificationCode) > 0:
         UserHandler.verify_email(email, verificationCode)
     user = UserHandler.get_user_from_credentials(email, password)
@@ -353,7 +353,7 @@ def fetch_inventory_page():
 
 
 # Returns display information of all gallery photos.
-@app.route(f'{PREFIX}/fetch_gallery', methods=["POST"])
+@app.route(f'{PREFIX}/gallery', methods=["GET"])
 @handle_exception
 def fetch_gallery():
     images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]

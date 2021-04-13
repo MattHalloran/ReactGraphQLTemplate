@@ -58,22 +58,6 @@ export async function register(data) {
     return await fetchWrapper('register', options);
 }
 
-// verificationCode is optional. Used to verify email
-export async function login(email, password, verificationCode) {
-    let json = JSON.stringify({
-        "email": email.toLowerCase(),
-        "password": password,
-        "verificationCode": verificationCode ?? ''
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include',
-    }
-    return await fetchWrapper('login', options);
-}
-
 export async function send_password_reset_request(email) {
     let json = JSON.stringify({
         "email": email.toLowerCase(),
@@ -130,14 +114,6 @@ export async function fetch_inventory_page(ids) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper('fetch_inventory_page', options);
-}
-
-export async function fetch_gallery() {
-    let options = {
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('fetch_gallery', options);
 }
 
 export async function update_gallery(session, data) {

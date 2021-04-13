@@ -27,7 +27,6 @@ function promiseWrapper(http_func, ...args) {
 
 export const getContactInfo = () => promiseWrapper(http.fetch_contact_info);
 export const updateContactInfo = (data) => promiseWrapper(http.update_contact_info, data);
-export const getGallery = () => promiseWrapper(http.fetch_gallery);
 export const updateGallery = (session, data) => promiseWrapper(http.update_gallery, session, data);
 export const getImage = (id, size) => promiseWrapper(http.fetch_image, id, size);
 export const getImages = (ids, size) => promiseWrapper(http.fetch_images, ids, size);
@@ -92,25 +91,10 @@ export function logoutAndRedirect() {
     };
 }
 
-export const login = (session, user) => {
+export const storeLogin = (session, user) => {
     storeItem(LOCAL_STORAGE.Session, session);
     storeItem(LOCAL_STORAGE.Roles, user.roles);
     setTheme(user.theme);
-}
-
-export function loginUser(email, password, verificationCode) {
-    return new Promise(function (resolve, reject) {
-        http.login(email, password, verificationCode).then(response => {
-            if (response.ok) {
-                login(response.session, response.user);
-                resolve(response);
-            } else {
-                console.log('DATA NOT OKAY, logging out', response)
-                clearStorage();
-                reject(response);
-            }
-        })
-    });
 }
 
 export function registerUser(data) {
@@ -118,7 +102,7 @@ export function registerUser(data) {
         console.log('data in register user is', data)
         http.register(data).then(response => {
             if (response.ok) {
-                login(response.session, response.user);
+                storeLogin(response.session, response.user);
                 resolve(data);
             } else {
                 console.log('REGISTER FAIL LOGGING OUT')

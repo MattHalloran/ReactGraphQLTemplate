@@ -4,7 +4,8 @@ import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryImage } from './GalleryPage.styled';
-import { getGallery, getImages, getImage } from 'query/http_promises';
+import { useGet } from "restful-react";
+import { getImages, getImage } from 'query/http_promises';
 import Modal from 'components/wrappers/StyledModal/StyledModal';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
@@ -70,6 +71,23 @@ function GalleryPage() {
     const track_scrolling_id = 'page';
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
+
+    useGet({
+        path: "gallery",
+        resolve: (response) => {
+            if (response.ok) {
+                images_meta.current = response.images_meta ?? [];
+                console.log('IMAGES META SET', images_meta.current);
+                if (images_meta.current.length === 0) {
+                    setThumbnails([]);
+                } else {
+                    loadNextPage();
+                }
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => prevImage());
@@ -196,24 +214,6 @@ function GalleryPage() {
             history.push(LINKS.Gallery + '/' + key);
         }
     }
-
-    useEffect(() => {
-        let mounted = true;
-        getGallery().then(response => {
-            if (!mounted) return;
-            images_meta.current = response.images_meta ?? [];
-            console.log('IMAGES META SET', images_meta.current);
-            if (images_meta.current.length === 0) {
-                setThumbnails([]);
-            } else {
-                loadNextPage();
-            }
-        }).catch(error => {
-            console.error("Failed to load gallery pictures!", error);
-        })
-
-        return () => mounted = false;
-    }, [loadNextPage])
 
     let popup = (curr_img && curr_img[0]) ? (
         <Modal onClose={() => history.goBack()}>
