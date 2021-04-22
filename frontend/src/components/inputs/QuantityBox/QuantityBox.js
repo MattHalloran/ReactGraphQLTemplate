@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
 import PropTypes from 'prop-types';
 import { IconButton, TextField } from '@material-ui/core';
-import RemoveIcon from '@material-ui/icons/Remove';
-import AddIcon from '@material-ui/icons/Add';
+import {
+    Add as AddIcon,
+    Remove as RemoveIcon
+} from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles';
 import { modifyUser } from 'query/http_promises';
-import PhoneIcon from '@material-ui/icons/Phone';
-import EmailIcon from '@material-ui/icons/Email';
+import {
+    Email as EmailIcon,
+    Phone as PhoneIcon,
+} from '@material-ui/icons';
 import { Button, Card, CardContent, CardActions, Typography, Chip } from '@material-ui/core';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';

@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { clearStorage, getSession, getRoles } from 'utils/storage';
-import ContactInfo from 'components/ContactInfo/ContactInfo';
+import { clearStorage } from 'utils/storage';
+import { 
+    ContactInfo,
+    Copyright
+} from 'components';
 import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
-import InfoIcon from '@material-ui/icons/Info';
-import ContactSupportIcon from '@material-ui/icons/ContactSupport';
-import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
-import HomeIcon from '@material-ui/icons/Home';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import ShareIcon from '@material-ui/icons/Share';
-import CloseIcon from '@material-ui/icons/Close';
-import FacebookIcon from '@material-ui/icons/Facebook';
-import InstagramIcon from '@material-ui/icons/Instagram';
+import {
+    Close as CloseIcon,
+    ContactSupport as ContactSupportIcon,
+    ExitToApp as ExitToAppIcon,
+    ExplandLess as ExplandLessIcon,
+    ExplandMore as ExpandMoreIcon,
+    Facebook as FacebookIcon,
+    Home as HomeIcon,
+    Menu as MenuIcon,
+    Info as InfoIcon,
+    Instagram as InstagramIcon,
+    PhotoLibrary as PhotoLibraryIcon,
+    Share as ShareIcon,
+} from '@material-ui/icons';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
-import Copyright from 'components/Copyright/Copyright';
 import getUserActions from 'utils/userActions';
 
 const useStyles = makeStyles((theme) => ({
@@ -53,24 +58,22 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Hamburger(props) {
+function Hamburger({
+    session,
+    roles,
+    cart
+}) {
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
-    const [user_roles, setUserRoles] = useState(getRoles());
     const [contactOpen, setContactOpen] = useState(true);
     const [socialOpen, setSocialOpen] = useState(false);
     const [open, setOpen] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
         let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });
         return (() => {
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(roleSub);
             PubSub.unsubscribe(openSub);
         })
     }, [])
@@ -119,7 +122,7 @@ function Hamburger(props) {
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
     ]
 
-    let user_actions = getUserActions(session, user_roles, props.cart);
+    let user_actions = getUserActions(session, roles, cart);
     if (session !== null) {
         user_actions.push(['Log Out', 'logout', LINKS.Home, clearStorage, ExitToAppIcon]);
     }
@@ -178,7 +181,9 @@ function Hamburger(props) {
 }
 
 Hamburger.propTypes = {
-
+    session: PropTypes.object,
+    roles: PropTypes.array,
+    cart: PropTypes.object,
 }
 
 export default Hamburger;

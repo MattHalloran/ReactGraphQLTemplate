@@ -85,9 +85,12 @@ HideOnScroll.propTypes = {
 };
 
 function Navbar({
-    ...props
+    session,
+    roles,
+    cart
 }) {
     let history = useHistory();
+    let props = { session: session, roles: roles, cart: cart}
     const classes = useStyles();
     const [show_hamburger, setShowHamburger] = useState(false);
 
@@ -121,7 +124,8 @@ function Navbar({
 
 Navbar.propTypes = {
     session: PropTypes.object,
-    user_roles: PropTypes.array,
+    roles: PropTypes.array,
+    cart: PropTypes.object,
 }
 
 export default Navbar;

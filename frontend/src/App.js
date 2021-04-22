@@ -1,20 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
-import Navbar from 'components/navigation/Navbar/Navbar';
-import IconNav from 'components/navigation/IconNav/IconNav';
-import Footer from 'components/navigation/Footer/Footer';
+import {
+    AlertDialog,
+    Footer,
+    IconNav,
+    Navbar,
+    Snack
+} from 'components';
 import PubSub from 'utils/pubsub';
-import { PUBS } from 'utils/consts';
+import { PUBS, COOKIE } from 'utils/consts';
+import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
-import { getSession, getCart, getTheme } from './utils/storage';
+import { lightTheme, darkTheme } from 'utils/theme';
+import { useGet } from "restful-react";
 import { RestfulProvider } from "restful-react";
 import { checkCookies } from 'query/http_promises';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
-import AlertDialog from 'components/dialogs/AlertDialog/AlertDialog';
-import Snack from 'components/Snack/Snack';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -52,12 +56,21 @@ const keyMap = {
 
 function App() {
     const classes = useStyles();
-    const [theme, setTheme] = useState(getTheme());
-    const [session, setSession] = useState(getSession());
+    const [session, setSession] = useState(Cookies.get(COOKIE.Session));
     const session_attempts = useRef(0);
-    const [user_roles, setUserRoles] = useState(null);
-    const [cart, setCart] = useState(getCart());
+    const [user, setUser] = useState({});
+    const [theme, setTheme] = useState(lightTheme);
+    let cart = user.orders?.length > 0 ? user.orders[user.orders.length-1] : null;
     const [loading, setLoading] = useState(false);
+
+    useGet({
+        path: "profile",
+        queryParams: { session: session, tag: session?.tag },
+        resolve: (response) => {
+            setUser(response.user ?? {});
+            setTheme(response.user?.theme === 'dark' ? darkTheme : lightTheme);
+        }
+    })
 
     const handlers = {
         OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
@@ -70,15 +83,13 @@ function App() {
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(getTheme()));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
+        let userSub = PubSub.subscribe(PUBS.User, (_, o) => setUser(o));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o === 'dark' ? darkTheme : lightTheme));
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
             PubSub.unsubscribe(sessionSub);
+            PubSub.unsubscribe(userSub);
             PubSub.unsubscribe(themeSub);
-            PubSub.unsubscribe(roleSub);
-            PubSub.unsubscribe(cartSub);
             PubSub.unsubscribe(loadingSub);
         })
     }, [])
@@ -100,7 +111,7 @@ function App() {
                     <ThemeProvider theme={theme}>
                         <main id="page-container" className={classes.pageContainer}>
                             <div id="content-wrap" className={classes.contentWrap}>
-                                <Navbar session={session} user_roles={user_roles} cart={cart} />
+                                <Navbar session={session} roles={user.roles} cart={cart} />
                                 {loading ?
                                     <div className={classes.spinner}>
                                         <CircularProgress size={100} />
@@ -108,10 +119,10 @@ function App() {
                                     : null}
                                 <AlertDialog />
                                 <Snack />
-                                <Routes session={session} user_roles={user_roles} />
+                                <Routes session={session} roles={user.roles} cart={cart} />
                             </div>
-                            <IconNav cart={cart} />
-                            <Footer />
+                            <IconNav session={session} roles={user.roles} cart={cart} />
+                            <Footer session={session} />
                         </main>
                     </ThemeProvider>
                 </div>

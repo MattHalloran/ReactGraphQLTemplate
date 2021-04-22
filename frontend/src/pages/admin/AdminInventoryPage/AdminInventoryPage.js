@@ -4,19 +4,22 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import { useLayoutEffect, useState, useEffect } from 'react';
-import { getInventory, getUnusedPlants, getInventoryFilters, uploadAvailability, getImages } from 'query/http_promises';
+import PropTypes from "prop-types";
+import { getInventory, getUnusedPlants, getInventoryFilters, getImages } from 'query/http_promises';
+import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import { getSession } from 'utils/storage';
-import PlantCard from 'components/cards/PlantCard/PlantCard';
+import {
+    AdminBreadcrumbs,
+    EditPlantDialog,
+    PlantCard,
+    Selector,
+    TabPanel
+} from 'components';
 import { Tabs, Tab, AppBar } from '@material-ui/core';
-import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
-import TabPanel from 'components/TabPanel/TabPanel';
 import { DropzoneArea } from 'material-ui-dropzone';
 import { makeStyles } from '@material-ui/core/styles';
-import Selector from 'components/inputs/Selector/Selector';
-import EditPlantDialog from 'components/dialogs/EditPlantDialog/EditPlantDialog';
 
 const useStyles = makeStyles((theme) => ({
     toggleBar: {
@@ -33,10 +36,11 @@ const useStyles = makeStyles((theme) => ({
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
-function AdminInventoryPage() {
+function AdminInventoryPage({
+    session,
+}) {
     const classes = useStyles();
     const [currTab, setCurrTab] = useState(0);
-    const [session, setSession] = useState(getSession());
     // Holds the selected availability file, if uploading one
     const [selected, setSelected] = useState(null);
     // Holds the list of plants with existing SKUs
@@ -51,13 +55,19 @@ function AdminInventoryPage() {
     const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
     const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
 
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-        })
-    }, [])
+    const { mutate: uploadAvailability } = useMutate({
+        verb: 'PUT',
+        path: 'availability',
+        resolve: (response) => {
+            if (response.ok) {
+                alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
+            }
+            else {
+                console.error(response.msg);
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
 
     useEffect(() => {
         let ids = existing?.map(p => p.display_id);
@@ -103,7 +113,6 @@ function AdminInventoryPage() {
 
     useLayoutEffect(() => {
         let mounted = true;
-        document.title = "Edit Inventory Info";
         getInventoryFilters()
             .then((response) => {
                 if (!mounted) return;
@@ -167,12 +176,7 @@ function AdminInventoryPage() {
         if (!selected) return;
         let form = new FormData();
         form.append('data', selected)
-        uploadAvailability(form).then(() => {
-            alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
-        }).catch(error => {
-            console.error(error);
-            PubSub.publish(PUBS.Snack, {message: 'Failed to upload availability.', severity: 'error'});
-        });
+        uploadAvailability(form);
     }
 
     const handleSort = (value) => {
@@ -246,7 +250,7 @@ function AdminInventoryPage() {
 }
 
 AdminInventoryPage.propTypes = {
-
+    session: PropTypes.object,
 }
 
 export default AdminInventoryPage;

@@ -1,17 +1,20 @@
-import { useEffect, useState } from 'react';
-import { clearStorage, getSession, getRoles } from 'utils/storage';
-import ContactInfo from 'components/ContactInfo/ContactInfo';
-import { LINKS, PUBS } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { clearStorage } from 'utils/storage';
+import PropTypes from 'prop-types';
+import {
+    ContactInfo,
+    PopupMenu
+} from 'components';
+import { LINKS } from 'utils/consts';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import PopupMenu from 'components/PopupMenu/PopupMenu';
+import {
+    Info as InfoIcon,
+    PhotoLibrary as PhotoLibraryIcon,
+    ShoppingCart as ShoppingCartIcon
+} from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 import getUserActions from 'utils/userActions';
 import { updateArray } from 'utils/arrayTools';
-import InfoIcon from '@material-ui/icons/Info';
-import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -39,24 +42,17 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function NavList(props) {
+function NavList({
+    session,
+    roles,
+    cart
+}) {
     let history = useHistory();
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
-    const [user_roles, setUserRoles] = useState(getRoles());
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let roleSub = PubSub.subscribe(PUBS.Roles, (_, o) => setUserRoles(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(roleSub);
-        })
-    }, [])
     
-    let nav_options = getUserActions(session, user_roles, props.cart);
+    let nav_options = getUserActions(session, roles, cart);
 
-    let cart;
+    let cart_button;
     // If someone is not logged in, display sign up/log in links
     if (!session) {
         nav_options.push(['Sign Up', 'signup', LINKS.Register]);
@@ -66,7 +62,7 @@ function NavList(props) {
         let cart_option = nav_options[cart_index];
         // Replace cart option with log out option
         nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, clearStorage]);
-        cart = (
+        cart_button = (
             <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => history.push(LINKS.Cart)}>
                 <Badge badgeContent={cart_option[5]} color="error">
                     <ShoppingCartIcon/>
@@ -127,13 +123,15 @@ function NavList(props) {
                 </List>
             </PopupMenu>
             {optionsToMenu(nav_options)}
-            {cart}
+            {cart_button}
         </Container>
     );
 }
 
 NavList.propTypes = {
-
+    session: PropTypes.object,
+    roles: PropTypes.array,
+    cart: PropTypes.object,
 }
 
 export default NavList;

@@ -161,7 +161,7 @@ def plants_to_model():
             PlantHandler.update(plant_obj, plant_args)
             # Now collect many-to-many relationship data
             update_relationship_field(plant.get('attracts_pollinators_and_wildlife', None),
-                                      PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE,
+                                      PlantTraitOptions.ATTRACTS,
                                       plant_obj,
                                       'attracts_pollinators_and_wildlifes')
             update_relationship_field(plant.get('bloom_times', None),

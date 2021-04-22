@@ -1,15 +1,18 @@
-import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
-import { getCart, getSession } from 'utils/storage';
 import { PubSub } from 'utils/pubsub';
 import { Button } from '@material-ui/core';
-import { updateCart, submitOrder } from 'query/http_promises';
-import Cart from 'components/tables/CartTable/CartTable';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import UpdateIcon from '@material-ui/icons/Update';
-import { Typography, Container, Grid } from '@material-ui/core';
+import { useMutate } from "restful-react";
+import { submitOrder } from 'query/http_promises';
+import { CartTable as Cart } from 'components';
+import {
+    ArrowBack as ArrowBackIcon,
+    ArrowForward as ArrowForwardIcon,
+    Update as UpdateIcon
+} from '@material-ui/icons';
+import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from 'underscore';
 
@@ -32,52 +35,43 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function CartPage() {
+function CartPage({
+    session,
+    cart,
+}) {
     let history = useHistory();
     const classes = useStyles();
-    const [cart, setCart] = useState(getCart());
     // Holds cart changes before update is final
     const [changedCart, setChangedCart] = useState(cart);
-    const [session, setSession] = useState(getSession());
 
     console.log('LOADING CART PAGE', cart, changedCart)
+
+    const { mutate: updateCart, loading } = useMutate({
+        verb: 'PUT',
+        path: 'cart',
+        resolve: (response) => {
+            if (response.ok) {
+                setChangedCart(response.cart);
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
+            }
+            else {
+                console.error(response.msg);
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
 
     const cartUpdate = (data) => {
         console.log('CART UPDATE', data)
         setChangedCart(data);
     }
 
-    useEffect(() => {
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => { 
-            setCart(o); 
-            setChangedCart(o) 
-        });
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        return (() => {
-            PubSub.unsubscribe(cartSub);
-            PubSub.unsubscribe(sessionSub);
-        })
-    }, [])
-
-    useLayoutEffect(() => {
-        document.title = `Cart | ${BUSINESS_NAME.Short}`;
-    })
-
     const updateOrder = () => {
         if (!session?.tag || !session?.token) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
-        updateCart(session, session.tag, changedCart)
-            .then(() => {
-                setCart(changedCart);
-                PubSub.publish(PUBS.Snack, {message: 'Order updated.'});
-            })
-            .catch(err => {
-                console.error(err, changedCart);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
-                return;
-            })
+        updateCart(session, session.tag, changedCart);
     }
 
     function requestQuote() {
@@ -147,7 +141,8 @@ function CartPage() {
 }
 
 CartPage.propTypes = {
-
+    session: PropTypes.object,
+    cart: PropTypes.object,
 }
 
 export default CartPage;

@@ -281,6 +281,9 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Tag"
                     }
                 ],
                 "responses": {
@@ -305,6 +308,12 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Tag"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Customer"
                     }
                 ],
                 "responses": {
@@ -612,41 +621,8 @@
                         "$ref": "#/components/responses/UnexpectedError"
                     }
                 }
-            }
-        },
-        "/upload-availability": {
-            "put": {
-                "summary": "Upload a new availability file. Must be an admin",
-                "operationId": "uploadGallery",
-                "tags": [
-                    "admin"
-                ],
-                "requestBody": {
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "data": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "default": {
-                        "$ref": "#/components/responses/UnexpectedError"
-                    }
-                }
-            }
-        },
-        "/upload-gallery": {
-            "put": {
+            },
+            "post": {
                 "summary": "Add images to the gallery. Must be an admin",
                 "operationId": "uploadGallery",
                 "tags": [
@@ -665,6 +641,37 @@
                                         "type": "string"
                                     },
                                     "image": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/availability": {
+            "put": {
+                "summary": "Upload a new availability file. Must be an admin",
+                "operationId": "uploadGallery",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
                                         "type": "string"
                                     }
                                 }
@@ -778,6 +785,24 @@
                         "ml",
                         "l"
                     ]
+                }
+            },
+            "Tag": {
+                "name": "tag",
+                "in": "header",
+                "description": "a user's tag. Used by admins to retrieve data of customers",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "Customer": {
+                "name": "customerData",
+                "in": "header",
+                "description": "customer data, including cart",
+                "required": true,
+                "schema": {
+                    "type": "#/components/schemas/Session"
                 }
             },
             "Session": {

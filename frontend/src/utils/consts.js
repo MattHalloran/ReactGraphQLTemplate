@@ -23,6 +23,10 @@ export const EMAIL = {
     Link: 'mailto:info@newlifenurseryinc.com',
 }
 
+// The amount of days a user stays signed in
+// This should match the duration specified in the backend
+export const SESSION_DAYS = 14;
+
 export const STATUS_CODES = codes;
 export const ORDER_STATUS = orderStatus;
 
@@ -119,16 +123,17 @@ export const USER_ROLES = {
     Admin: "Admin",
 }
 
-export const LOCAL_STORAGE = {
+export const COOKIE = {
+    User: "user",
     Likes: "likes",
     Cart: "cart",
     Theme: "theme",
-    Session: "session",
+    Session: "session-f234y7fdiafhdja2",
     Roles: "roles",
 }
 
 export const PUBS = {
-    ...LOCAL_STORAGE,
+    ...COOKIE,
     Loading: "loading",
     AlertDialog: "alertDialog",
     Snack: "snack",

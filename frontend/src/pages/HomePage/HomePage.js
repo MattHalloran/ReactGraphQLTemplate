@@ -1,14 +1,9 @@
-import { useLayoutEffect } from 'react';
-import Hero from 'components/Hero/Hero';
-import { BUSINESS_NAME } from 'utils/consts';
-import FeaturedPlants from 'components/FeaturedPlants/FeaturedPlants';
+import { 
+    FeaturedPlants,
+    Hero 
+} from 'components';
 
 function HomePage() {
-
-    useLayoutEffect(() => {
-        document.title = `Home | ${BUSINESS_NAME.Short}`;
-    }, [])
-
     return (
         <div>
             <Hero text="Beautiful, healthy plants" subtext="At competitive prices" />

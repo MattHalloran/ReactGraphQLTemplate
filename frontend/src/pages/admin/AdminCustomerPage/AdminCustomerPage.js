@@ -1,12 +1,14 @@
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useGet } from "restful-react";
 import { PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
-import CustomerCard from 'components/cards/CustomerCard/CustomerCard';
+import {
+    AdminBreadcrumbs,
+    CustomerCard
+} from 'components';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -33,11 +35,7 @@ function AdminCustomerPage({
             else
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
         }
-    })    
-
-    useLayoutEffect(() => {
-        document.title = "Customer Page";
-    }, [])
+    })
 
     const new_user = () => {
         alert('Coming soon!');

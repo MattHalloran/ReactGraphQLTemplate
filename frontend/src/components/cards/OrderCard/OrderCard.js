@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
 import { Button, Card, CardActions, CardContent, Typography, IconButton } from '@material-ui/core';
-import PhoneIcon from '@material-ui/icons/Phone';
-import EmailIcon from '@material-ui/icons/Email';
-import ListDialog from 'components/dialogs/ListDialog/ListDialog';
+import { 
+    Email as EmailIcon,
+    Phone as PhoneIcon
+ } from "@material-ui/icons";
+import { ListDialog } from 'components';
 import { makeStyles } from '@material-ui/core/styles';
 import { useState } from 'react';
 

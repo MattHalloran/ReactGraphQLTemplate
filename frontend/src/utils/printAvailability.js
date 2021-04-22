@@ -3,7 +3,6 @@ import 'jspdf-autotable';
 import { BUSINESS_NAME, PUBS, SORT_OPTIONS } from 'utils/consts';
 import { displayPrice } from 'utils/displayPrice';
 import { getInventory } from "query/http_promises";
-import { getSession } from "./storage";
 import PubSub from "./pubsub";
 
 const TITLE_FONT_SIZE = 30;
@@ -37,12 +36,12 @@ const data_to_table = (data, showPrice) => {
     return result;
 }
 
-export const printAvailability = () => {
+export const printAvailability = (session) => {
     let windowReference = window.open();
     console.log(windowReference);
     getInventory(SORT_OPTIONS[0].value, 0, false)
         .then(response => {
-            let showPrice = getSession() !== null;
+            let showPrice = session !== null;
             let table_data = data_to_table(response.page_results, showPrice);
             // Default export is a4 paper, portrait, using millimeters for units
             const doc = new jsPDF();

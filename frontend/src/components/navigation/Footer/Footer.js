@@ -1,15 +1,18 @@
 import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
+import PropTypes from 'prop-types';
 import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, LINKS } from 'utils/consts';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
-import BusinessIcon from '@material-ui/icons/Business';
-import PhoneIcon from '@material-ui/icons/Phone';
-import PrintIcon from '@material-ui/icons/Print';
-import EmailIcon from '@material-ui/icons/Email';
-import Copyright from 'components/Copyright/Copyright';
+import {
+    Business as BusinessIcon,
+    Email as EmailIcon,
+    Phone as PhoneIcon,
+    Print as PrintIcon
+} from '@material-ui/icons';
+import { Copyright } from 'components';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Footer({
+    session
 }) {
     const classes = useStyles();
 
@@ -79,7 +83,7 @@ function Footer({
                         >
                             <ListItemText primary="Credit App" />
                         </ListItem>
-                        <ListItem button href={LINKS.About} onClick={printAvailability} >
+                        <ListItem button href={LINKS.About} onClick={() => printAvailability(session)} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
                         <ListItem button component="a" href={LINKS.Gallery} >
@@ -122,6 +126,10 @@ function Footer({
             <Copyright className={classes.copyright} />
         </div>
     );
+}
+
+Footer.propTypes = {
+    session: PropTypes.object,
 }
 
 export default Footer;

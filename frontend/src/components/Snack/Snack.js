@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IconButton, Button, Snackbar } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { Close as CloseIcon } from '@material-ui/icons';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';

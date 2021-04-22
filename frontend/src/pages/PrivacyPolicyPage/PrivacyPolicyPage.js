@@ -1,14 +1,8 @@
-import { useLayoutEffect } from 'react';
 import { BUSINESS_NAME, ADDRESS, PHONE, EMAIL } from 'utils/consts';
 import { Typography } from '@material-ui/core';
-import PolicyBreadcrumbs from 'components/breadcrumbs/PolicyBreadcrumbs/PolicyBreadcrumbs';
+import { PolicyBreadcrumbs } from 'components';
 
 function PrivacyPolicyPage() {
-
-    useLayoutEffect(() => {
-        document.title = `Privacy Policy | ${BUSINESS_NAME.Short}`;
-    })
-
     return (
         <div id="page">
             <PolicyBreadcrumbs />

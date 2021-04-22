@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { TextField, InputAdornment, IconButton } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { Search as SearchIcon } from '@material-ui/icons';
 
 function SearchBar({
     label = 'Search...',

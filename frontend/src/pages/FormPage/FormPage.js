@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import { BUSINESS_NAME } from 'utils/consts';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -30,18 +32,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function FormPage({
-    header,
+    title,
     autocomplete = 'on',
     children,
     maxWidth = '90%',
 }) {
     const classes = useStyles();
 
+    useEffect(() => {
+        document.title = `${title} | ${BUSINESS_NAME}`;
+    }, [title])
+
     return (
         <div id='page' maxWidth={maxWidth}>
             <div className={classes.container}>
                 <Container className={classes.header}>
-                    <Typography variant="h3" >{header}</Typography>
+                    <Typography variant="h3" >{title}</Typography>
                 </Container>
                 <Container>
                     {children}
@@ -52,7 +58,7 @@ function FormPage({
 }
 
 FormPage.propTypes = {
-    header: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
     autocomplete: PropTypes.string,
     children: PropTypes.any,
     maxWidth: PropTypes.string,

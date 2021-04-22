@@ -1,7 +1,5 @@
-import { useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { BUSINESS_NAME, LINKS } from 'utils/consts';
+import { LINKS } from 'utils/consts';
 import { Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -28,10 +26,6 @@ const useStyles = makeStyles((theme) => ({
 function AdminMainPage() {
     let history = useHistory();
     const classes = useStyles();
-
-    useLayoutEffect(() => {
-        document.title = `Admin Portal | ${BUSINESS_NAME.Short}`;
-    }, [])
 
     const card_data = [
         ['Orders', "Approve, create, and edit customer's orders", LINKS.AdminOrders],

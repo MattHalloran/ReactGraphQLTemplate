@@ -116,95 +116,6 @@ export async function fetch_inventory_page(ids) {
     return await fetchWrapper('fetch_inventory_page', options);
 }
 
-export async function update_gallery(session, data) {
-    let json = JSON.stringify({
-        "session": session,
-        "data": data,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('update_gallery', options);
-}
-
-export async function upload_gallery_images(formData) {
-    let options = {
-        body: formData,
-        method: 'post',
-    }
-    return await fetchWrapper('upload_gallery_image', options);
-}
-
-export async function upload_availability(formData) {
-    let options = {
-        body: formData,
-        method: 'post',
-    }
-    return await fetchWrapper('upload_availability', options);
-}
-
-export async function fetch_contact_info() {
-    let options = {
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('fetch_contact_info', options);
-}
-
-export async function update_contact_info(data) {
-    let json = JSON.stringify({
-        "data": data,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('update_contact_info', options);
-}
-
-export async function fetch_profile_info(session, tag) {
-    let json = JSON.stringify({
-        "session": session,
-        "tag": tag,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicatonJsonAccept,
-        credentials: 'include',
-    }
-    return await fetchWrapper('fetch_profile_info', options);
-}
-
-export async function fetch_likes(session) {
-    let json = JSON.stringify({
-        "session": session,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicatonJsonAccept,
-        credentials: 'include',
-    }
-    return await fetchWrapper('fetch_likes', options);
-}
-
-export async function fetch_cart(session) {
-    let json = JSON.stringify({
-        "session": session,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicatonJsonAccept,
-        credentials: 'include',
-    }
-    return await fetchWrapper('fetch_cart', options);
-}
-
 export async function set_like_sku(session, sku, liked) {
     let json = JSON.stringify({
         "session": session,
@@ -233,21 +144,6 @@ export async function set_order_status(session, id, status) {
         credentials: 'include'
     }
     return await fetchWrapper('set_order_status', options);
-}
-
-export async function update_cart(session, who, cart) {
-    let json = JSON.stringify({
-        "session": session,
-        "who": who,
-        "cart": cart,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include'
-    }
-    return await fetchWrapper('update_cart', options);
 }
 
 export async function modify_sku(session, sku, operation, data) {
@@ -349,18 +245,4 @@ export async function fetch_images(ids, size) {
         headers: HEADERS.Text,
     }
     return await fetchWrapper('fetch_images', options);
-}
-
-export async function update_profile(session, data) {
-    let json = JSON.stringify({
-        "session": session,
-        "data": data
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include'
-    }
-    return await fetchWrapper('update_profile', options);
 }

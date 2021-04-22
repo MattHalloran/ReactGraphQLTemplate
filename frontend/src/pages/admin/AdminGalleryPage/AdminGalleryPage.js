@@ -1,14 +1,16 @@
-import { useCallback, useState, useEffect, useLayoutEffect } from 'react';
-import { uploadGalleryImages, getImages, updateGallery } from 'query/http_promises';
+import { useCallback, useState } from 'react';
+import { getImages } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import PropTypes from 'prop-types';
 import { Button, Typography } from '@material-ui/core';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
-import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import {
+    AdminBreadcrumbs,
+    GalleryTable
+} from 'components';
 import { DropzoneArea } from 'material-ui-dropzone';
-import GalleryTable from 'components/tables/GalleryTable/GalleryTable';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -65,9 +67,24 @@ function AdminGalleryPage({
         }
     })
 
-    useLayoutEffect(() => {
-        document.title = "Edit Gallery";
-    }, [])
+    const { mutate: updateGallery } = useMutate({
+        verb: 'PUT',
+        path: 'gallery',
+        resolve: (response) => {
+            if (response.ok) {
+                PubSub.publish(PUBS.Snack, { message: 'Gallery updated.' });
+            }
+            else {
+                console.error(response.msg);
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
+
+    const { mutate: uploadGalleryImages } = useMutate({
+        verb: 'POST',
+        path: 'gallery',
+    });
 
     const fileSelectedHandler = (files) => {
         setSelectedFiles([]);
@@ -116,14 +133,7 @@ function AdminGalleryPage({
             'alt': d.alt,
             'description': d.description,
         }));
-        updateGallery(session, gallery_data)
-            .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'Gallery updated.' });
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update gallery.', severity: 'error' });
-            })
+        updateGallery(session, gallery_data);
     }, [data])
 
     function updateData(data) {

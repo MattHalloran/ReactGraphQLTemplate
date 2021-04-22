@@ -237,7 +237,7 @@ def fetch_inventory_filters():
         "growth_rate": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.GROWTH_RATE),
         "salt_tolerance": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SALT_TOLERANCE),
         "light_ranges": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.LIGHT_RANGE),
-        "attracts_pollinators_and_wildlifes": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE),
+        "attracts_pollinators_and_wildlifes": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.ATTRACTS),
         "soil_moistures": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_MOISTURE),
         "soil_phs": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_PH),
         "soil_types": PlantTraitHandler.uniques_by_trait(PlantTraitOptions.SOIL_TYPE),
@@ -353,47 +353,60 @@ def fetch_inventory_page():
 
 
 # Returns display information of all gallery photos.
-@app.route(f'{PREFIX}/gallery', methods=["GET"])
+@app.route(f'{PREFIX}/gallery', methods=["GET", "PUT", "POST"])
 @handle_exception
-def fetch_gallery():
-    images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
-    return {
-        **StatusCodes['SUCCESS'],
-        "images_meta": images_data
-    }
+def gallery():
+    if request.method == 'GET':
+        images_data = [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
+        return {
+            **StatusCodes['SUCCESS'],
+            "images_meta": images_data
+        }
+    elif request.method == 'PUT':
+        (session, data) = getData('session', 'data')
+        if not verify_admin(session):
+            return StatusCodes['ERROR_NOT_AUTHORIZED']
+        success = True
+        # Grab all gallery images
+        curr_images = [img.id for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
+        # Remove the images in curr_images that show in the post data (i.e. images that should stay)
+        # Also update the alt and descriptions of each image in the post data
+        for img in data:
+            curr_images.remove(img['id'])
+            image_model = ImageHandler.from_id(img['id'])
+            if image_model and (image_model.alt is not img['alt']):
+                ImageHandler.update_from_dict(image_model, img)
+        # Images not included in the post data are removed
+        for id in curr_images:
+            image_model = ImageHandler.from_id(id)
+            if image_model:
+                db.session.delete(image_model)
+        db.session.commit()
+        return StatusCodes['SUCCESS'] if success else StatusCodes['ERROR_UNKNOWN']
+    else:
+        (names, extensions, images) = getForm('name', 'extension', 'image')
+        status = StatusCodes['SUCCESS']
+        passed_indexes = []
+        failed_indexes = []
+        # Iterate through images
+        for i in range(len(images)):
+            img_data = images[i]
+            image = ImageHandler.create_from_scratch(img_data, 'TODO', Config.GALLERY_FOLDER, ImageUses.GALLERY)
+            if image is None:
+                status = StatusCodes['ERROR_UNKNOWN']
+                failed_indexes.append(i)
+            else:
+                passed_indexes.append(i)
+        return {
+            **status,
+            "passed_indexes": passed_indexes,
+            "failed_indexes": failed_indexes,
+        }
 
 
-# Updates gallery order, alts, and descriptions.
-# This cannot be used to update images
-# TODO reorder
-@app.route(f'{PREFIX}/update_gallery', methods=["POST"])
+@app.route(f'{PREFIX}/availability', methods=["POST"])
 @handle_exception
-def update_gallery():
-    (session, data) = getData('session', 'data')
-    if not verify_admin(session):
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    success = True
-    # Grab all gallery images
-    curr_images = [img.id for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
-    # Remove the images in curr_images that show in the post data (i.e. images that should stay)
-    # Also update the alt and descriptions of each image in the post data
-    for img in data:
-        curr_images.remove(img['id'])
-        image_model = ImageHandler.from_id(img['id'])
-        if image_model and (image_model.alt is not img['alt']):
-            ImageHandler.update_from_dict(image_model, img)
-    # Images not included in the post data are removed
-    for id in curr_images:
-        image_model = ImageHandler.from_id(id)
-        if image_model:
-            db.session.delete(image_model)
-    db.session.commit()
-    return StatusCodes['SUCCESS'] if success else StatusCodes['ERROR_UNKNOWN']
-
-
-@app.route(f'{PREFIX}/upload_availability', methods=["POST"])
-@handle_exception
-def upload_availability_file():
+def availability():
     # Check to make sure requestor is an admin TODO
     (data) = getForm('data')
     b64 = data[0].split('base64,')[1]
@@ -408,126 +421,71 @@ def upload_availability_file():
     }
 
 
-# TODO - check image size and extension to make sure it is valid
-@app.route(f'{PREFIX}/upload_gallery_image', methods=["POST"])
+@app.route(f'{PREFIX}/contacts', methods=["GET"])
 @handle_exception
-def upload_gallery_image():
-    (names, extensions, images) = getForm('name', 'extension', 'image')
-    status = StatusCodes['SUCCESS']
-    passed_indexes = []
-    failed_indexes = []
-    # Iterate through images
-    for i in range(len(images)):
-        img_data = images[i]
-        image = ImageHandler.create_from_scratch(img_data, 'TODO', Config.GALLERY_FOLDER, ImageUses.GALLERY)
-        if image is None:
-            status = StatusCodes['ERROR_UNKNOWN']
-            failed_indexes.append(i)
-        else:
-            passed_indexes.append(i)
-    return {
-        **status,
-        "passed_indexes": passed_indexes,
-        "failed_indexes": failed_indexes,
-    }
-
-
-@app.route(f'{PREFIX}/fetch_all_contact_infos', methods=["POST"])
-@handle_exception
-def fetch_all_contact_infos():
+def contacts():
     return {
         **StatusCodes['SUCCESS'],
         "contact_infos": ContactInfoHandler.all_dicts()
     }
 
 
-@app.route(f'{PREFIX}/fetch_contact_info', methods=["POST"])
+@app.route(f'{PREFIX}/contact', methods=["GET", "PUT"])
 @handle_exception
-def fetch_contact_info():
-    print('TODOOOO')
-    return False
+def contact():
+    if request.method == 'GET':
+        print('TODOOOO')
+        return False
+    else:
+        # TODO verify admin
+        json = request.form.to_dict(flat=False)
+        id = json['id']
+        contact = ContactInfoHandler.from_id(id)
+        if contact is None:
+            return StatusCodes['ERROR_UNKNOWN']
+        ContactInfoHandler.update(json)
+        db.session.commit()
+        return StatusCodes['SUCCESS']
 
 
-# First verifies that the user is an admin, then updates company contact info
-@app.route(f'{PREFIX}/update_contact_info', methods=["POST"])
-@handle_exception
-def update_contact_info():
-    json = request.form.to_dict(flat=False)
-    id = json['id']
-    contact = ContactInfoHandler.from_id(id)
-    if contact is None:
-        return StatusCodes['ERROR_UNKNOWN']
-    ContactInfoHandler.update(json)
-    db.session.commit()
-    return StatusCodes['SUCCESS']
-
-
-@app.route(f'{PREFIX}/fetch_profile_info', methods=["POST"])
+@app.route(f'{PREFIX}/profile', methods=["GET", "PUT"])
 @cross_origin(supports_credentials=True)
 @handle_exception
-def fetch_profile_info():
-    '''Fetches profile info for a customer'''
-    (session, tag) = getJson('session', 'tag')
-    # Only admins can view information for other profiles
-    if tag != session['tag'] and not verify_admin(session):
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    if not verify_customer(session):
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    user_data = UserHandler.get_profile_data(tag)
-    if user_data is None:
-        print('FAILEDDDD')
-        return StatusCodes['ERROR_UNKNOWN']
-    print('SUCESS BABYYYYY')
-    return {
-        **StatusCodes['SUCCESS'],
-        "user": user_data
-    }
-
-
-@app.route(f'{PREFIX}/update_profile', methods=["POST"])
-@cross_origin(supports_credentials=True)
-@handle_exception
-def update_profile():
-    (session, data) = getData('session', 'data')
-    user = verify_session(session)
-    if not user:
-        return StatusCodes["FAILURE_NOT_VERIFIED"]
-    if not UserHandler.is_password_valid(user, data['currentPassword']):
-        return StatusCodes["FAILURE_INCORRECT_CREDENTIALS"]
-    if UserHandler.update(user, data):
+def profile():
+    if request.method == 'GET':
+        (session, tag) = getJson('session', 'tag')
+        # Only admins can view information for other profiles
+        if tag != session['tag'] and not verify_admin(session):
+            return StatusCodes['ERROR_NOT_AUTHORIZED']
+        if not verify_customer(session):
+            return StatusCodes['ERROR_NOT_AUTHORIZED']
+        user_data = UserHandler.get_profile_data(tag)
+        if user_data is None:
+            print('FAILEDDDD')
+            return StatusCodes['ERROR_UNKNOWN']
+        print('SUCESS BABYYYYY')
         return {
             **StatusCodes['SUCCESS'],
-            "profile": UserHandler.get_profile_data(session['tag'])
+            "user": user_data
         }
-    return StatusCodes['ERROR_UNKNOWN']
-
-
-@app.route(f'{PREFIX}/fetch_likes', methods=["POST"])
-@cross_origin(supports_credentials=True)
-@handle_exception
-def fetch_likes():
-    (session) = getJson('session')
-    user = verify_customer(session)
-    if not user:
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    return {
-        **StatusCodes['SUCCESS'],
-        "likes": SkuHandler.all_dicts(user.likes)
-    }
-
-
-@app.route(f'{PREFIX}/fetch_cart', methods=["POST"])
-@cross_origin(supports_credentials=True)
-@handle_exception
-def fetch_cart():
-    (session) = getJson('session')
-    user = verify_customer(session)
-    if not user:
-        return StatusCodes['ERROR_NOT_AUTHORIZED']
-    return {
-        **StatusCodes['SUCCESS'],
-        "cart": OrderHandler.to_dict(UserHandler.get_cart(user))
-    }
+    else:
+        (session, tag, data) = getData('session', 'tag', 'data')
+        # Only admins can view information for other profiles
+        if tag != session['tag'] and not verify_admin(session):
+            return StatusCodes['ERROR_NOT_AUTHORIZED']
+        if not verify_customer(session):
+            return StatusCodes['ERROR_NOT_AUTHORIZED']
+        user = verify_session(session)
+        if not user:
+            return StatusCodes["FAILURE_NOT_VERIFIED"]
+        if not UserHandler.is_password_valid(user, data['currentPassword']):
+            return StatusCodes["FAILURE_INCORRECT_CREDENTIALS"]
+        if UserHandler.update(user, data):
+            return {
+                **StatusCodes['SUCCESS'],
+                "profile": UserHandler.get_profile_data(session['tag'])
+            }
+        return StatusCodes['ERROR_UNKNOWN']
 
 
 @app.route(f'{PREFIX}/customers', methods=["GET"])
@@ -590,16 +548,16 @@ def set_order_status():
     }
 
 
-@app.route(f'{PREFIX}/update_cart', methods=["POST"])
+@app.route(f'{PREFIX}/cart', methods=["PUT"])
 @cross_origin(supports_credentials=True)
 @handle_exception
-def update_cart():
+def cart():
     '''Updates the cart for the specified user.
     Only admins can update other carts.
     Returns the updated cart data, so the frontend can verify update'''
-    (session, who, cart) = getData('session', 'who', 'cart')
+    (session, tag, cart) = getData('session', 'who', 'cart')
     # If changing a cart that doesn't belong to them, verify admin
-    if session['tag'] != who:
+    if session['tag'] != tag:
         user = verify_admin(session)
     else:
         user = verify_customer(session)
@@ -680,7 +638,10 @@ def modify_plant():
             db.session.add(plant_obj)
         # Set display image
         if plant_data['display_image'] is not None:
-            image = ImageHandler.create_from_scratch(plant_data['display_image']['data'], 'TODO', Config.PLANT_FOLDER, ImageUses.DISPLAY)
+            image = ImageHandler.create_from_scratch(plant_data['display_image']['data'],
+                                                     'TODO',
+                                                     Config.PLANT_FOLDER,
+                                                     ImageUses.DISPLAY)
             if image is not None:
                 PlantHandler.set_display_image(plant_obj, image)
                 db.session.commit()

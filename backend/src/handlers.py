@@ -956,6 +956,10 @@ class UserHandler(Handler):
                 obj.account_approved = True
         if (password := data.get('password', None)):
             obj.password = User.hashed_password(password)
+        if orders := data.get('orders', None):
+            for o in orders:
+                if order_obj := OrderHandler.from_id(o['id'])
+                    success = OrderHandler.update_from_dict(cart_obj, cart) and success
         db.session.commit()
         return obj
 

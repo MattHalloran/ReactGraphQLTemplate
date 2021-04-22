@@ -2,20 +2,22 @@ import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
 import { getImages } from 'query/http_promises';
-import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
+import {
+    AlertDialog,
+    QuantityBox,
+    Selector
+} from 'components';
 import { displayPrice } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
 import { IconButton, Typography } from '@material-ui/core';
 import { deleteArrayIndex } from 'utils/arrayTools';
 import { updateObject } from 'utils/objectTools';
-import CloseIcon from '@material-ui/icons/Close';
+import { Close as CloseIcon } from '@material-ui/icons';
 import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
-import Selector from 'components/inputs/Selector/Selector';
-import AlertDialog from 'components/dialogs/AlertDialog/AlertDialog';
 import _ from 'underscore';
 import PubSub from 'utils/pubsub';
 

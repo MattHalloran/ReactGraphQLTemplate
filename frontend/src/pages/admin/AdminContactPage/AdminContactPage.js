@@ -1,10 +1,6 @@
-import { useLayoutEffect } from 'react';
-import AdminBreadcrumbs from 'components/breadcrumbs/AdminBreadcrumbs/AdminBreadcrumbs';
+import { AdminBreadcrumbs } from 'components';
 
 function AdminContactPage() {
-    useLayoutEffect(() => {
-        document.title = "Edit Contact Info";
-    })
     return (
         <div itemID="page">
             <AdminBreadcrumbs />

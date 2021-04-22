@@ -1,16 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { getSession } from 'utils/storage';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Container, Grid } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import Cart from 'components/tables/CartTable/CartTable';
-import { updateCart, setOrderStatus } from 'query/http_promises';
+import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Grid } from '@material-ui/core';
+import {
+    Close as CloseIcon,
+    ThumbDown as ThumbDownIcon,
+    ThumbUp as ThumbUpIcon,
+    Update as UpdateIcon
+} from '@material-ui/icons';
+import { CartTable as Cart } from 'components';
+import { useMutate } from "restful-react";
+import { setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
 import { ORDER_STATUS, ORDER_STATES, PUBS } from 'utils/consts';
-import UpdateIcon from '@material-ui/icons/Update';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import _ from 'underscore';
 import PubSub from 'utils/pubsub';
 
@@ -38,6 +40,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 function OrderDialog({
+    session,
     order,
     open = true,
     onClose,
@@ -45,8 +48,22 @@ function OrderDialog({
     console.log('ORDER POPUP', order);
     const classes = useStyles();
     // Holds order changes before update is final
-    const [session] = useState(getSession());
     const [changedOrder, setChangedOrder] = useState(order);
+
+    const { mutate: updateCart, loading } = useMutate({
+        verb: 'PUT',
+        path: 'cart',
+        resolve: (response) => {
+            if (response.ok) {
+                setChangedOrder(order);
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
+            }
+            else {
+                console.error(response.msg, order);
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
 
     const orderUpdate = (data) => {
         setChangedOrder(data)
@@ -57,20 +74,11 @@ function OrderDialog({
     }, [order])
 
     const updateOrder = () => {
-        if (!session?.tag || !session?.token) {
+        if (!session) {
             PubSub.publish(PUBS.Snack, { message: 'Failed to update order', severity: 'error' });
             return;
         }
-        updateCart(session, session.tag, order)
-            .then(() => {
-                setChangedOrder(order);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            })
-            .catch(err => {
-                console.error(err, order);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update order.', severity: 'error' });
-                return;
-            })
+        updateCart(session, session.tag, order);
     }
 
     const approveOrder = useCallback(() => {
@@ -155,6 +163,7 @@ function OrderDialog({
 }
 
 OrderDialog.propTypes = {
+    session: PropTypes.object,
     order: PropTypes.object,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,

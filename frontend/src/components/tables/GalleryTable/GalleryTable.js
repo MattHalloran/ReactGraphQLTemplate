@@ -2,8 +2,10 @@ import { Component, useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { Button, Grid, Checkbox, TextField, TableContainer, Table, TableBody, TableCell, TableRow, Paper } from '@material-ui/core';
 import { NoImageIcon } from 'assets/img';
-import EnhancedTableHead from 'components/tables/EnhancedTableHead/EnhancedTableHead';
-import EnhancedTableToolbar from 'components/tables/EnhancedTableToolbar/EnhancedTableToolbar';
+import {
+    EnhancedTableHead,
+    EnhancedTableToolbar
+} from 'components';
 import { makeStyles } from '@material-ui/core/styles';
 import { updateArray } from "utils/arrayTools";
 

@@ -4,12 +4,16 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Divider, List, ListItem, ListItemAvatar, Avatar, ListItemText, Tooltip, Grid } from '@material-ui/core';
 import { getImage } from "query/http_promises";
 import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
-import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
+import {
+    Collapsible,
+    QuantityBox,
+    Selector
+} from 'components';
 import { displayPrice } from 'utils/displayPrice';
-import Selector from 'components/inputs/Selector/Selector';
-import CloseIcon from '@material-ui/icons/Close';
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import {
+    AddShoppingCart as AddShoppingCartIcon,
+    Close as CloseIcon
+} from '@material-ui/icons';
 import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({

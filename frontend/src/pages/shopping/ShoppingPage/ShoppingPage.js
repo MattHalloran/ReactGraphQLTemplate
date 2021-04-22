@@ -1,16 +1,21 @@
 import { memo, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import SearchBar from '../../../components/inputs/SearchBar/SearchBar';
+import {
+    SearchBar,
+    Selector
+} from 'components';
 import ShoppingList from '../ShoppingList/ShoppingList';
-import { BUSINESS_NAME, SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
+import { SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
 import { getInventoryFilters, checkCookies } from "query/http_promises";
-import Selector from 'components/inputs/Selector/Selector';
 import PubSub from 'utils/pubsub';
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
-import RestoreIcon from '@material-ui/icons/Restore';
-import CloseIcon from '@material-ui/icons/Close';
-import FilterListIcon from '@material-ui/icons/FilterList';
-import PrintIcon from '@material-ui/icons/Print';
+import {
+    Close as CloseIcon,
+    FilterList as FilterListIcon,
+    Print as PrintIcon,
+    Restore as RestoreIcon
+} from '@material-ui/icons';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -33,7 +38,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ShoppingPage() {
+function ShoppingPage({
+    session,
+    cart,
+}) {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [filters, setFilters] = useState(null);
@@ -43,7 +51,6 @@ function ShoppingPage() {
     let history = useHistory();
 
     useEffect(() => {
-        document.title = `Shop | ${BUSINESS_NAME.Short}`;
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });
@@ -197,16 +204,24 @@ function ShoppingPage() {
                 <Button
                     color="secondary"
                     startIcon={<PrintIcon />}
-                    onClick={printAvailability}
+                    onClick={() => printAvailability(session)}
                 >Print</Button>
             </div>
-            <ShoppingList sort={sortBy} filters={filters} searchString={searchString} hideOutOfStock={hideOutOfStock} />
+            <ShoppingList 
+                session={session} 
+                cart={cart} 
+                sort={sortBy} 
+                filters={filters} 
+                searchString={searchString} 
+                hideOutOfStock={hideOutOfStock} 
+            />
         </div>
     );
 }
 
 ShoppingPage.propTypes = {
-
+    session: PropTypes.object,
+    cart: PropTypes.object,
 }
 
 export default memo(ShoppingPage);

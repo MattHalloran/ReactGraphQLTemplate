@@ -1,14 +1,8 @@
-import { useLayoutEffect } from 'react';
 import { BUSINESS_NAME } from 'utils/consts';
 import { Typography } from '@material-ui/core';
-import PolicyBreadcrumbs from 'components/breadcrumbs/PolicyBreadcrumbs/PolicyBreadcrumbs';
+import { PolicyBreadcrumbs } from 'components';
 
 function TermsPage() {
-
-    useLayoutEffect(() => {
-        document.title = `Terms & Conditions | ${BUSINESS_NAME.Short}`;
-    })
-
     return (
         <div id="page">
             <PolicyBreadcrumbs />

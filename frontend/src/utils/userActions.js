@@ -1,8 +1,10 @@
-import SettingsIcon from '@material-ui/icons/Settings';
-import ShopIcon from '@material-ui/icons/Shop';
-import PersonIcon from '@material-ui/icons/Person';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import {
+    Person as PersonIcon,
+    PersonAdd as PersonAddIcon,
+    Settings as SettingsIcon,
+    Shop as ShopIcon,
+    ShoppingCart as ShoppingCartIcon
+} from '@material-ui/icons';
 import { LINKS, USER_ROLES } from 'utils/consts';
 
 // Returns user actions, in a list of this format:

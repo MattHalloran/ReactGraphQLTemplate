@@ -416,7 +416,7 @@ class PlantTraitOptions(Enum):
     OPTIMAL_LIGHT = 'Optimal light'
     PLANT_TYPE = 'Plant type'
     SALT_TOLERANCE = 'Salt tolerance'
-    ATTRACTS_POLLINATORS_AND_WILDLIFE = 'Attracts pollinators and wildlife'
+    ATTRACTS = 'Attracts pollinators and wildlife'
     BLOOM_TIME = 'Bloom time'
     BLOOM_COLOR = 'Bloom color'
     ZONE = 'Zone'
@@ -508,7 +508,7 @@ class Plant(db.Model):
                                                          secondary=plantTraits,
                                                          primaryjoin=id == plantTraits.c.plant_id,
                                                          secondaryjoin="and_(PlantTrait.id==plant_traits.c.trait_id, "
-                                                         f"PlantTrait.trait=='{PlantTraitOptions.ATTRACTS_POLLINATORS_AND_WILDLIFE.value}')")
+                                                         f"PlantTrait.trait=='{PlantTraitOptions.ATTRACTS.value}')")
     bloom_times = db.relationship('PlantTrait',
                                   secondary=plantTraits,
                                   primaryjoin=id == plantTraits.c.plant_id,

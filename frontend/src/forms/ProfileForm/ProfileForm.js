@@ -2,8 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect, useCallback } from 'react
 import { useHistoryState } from 'utils/useHistoryState';
 import PropTypes from 'prop-types';
 import * as validation from 'utils/validations';
-import { getProfileInfo, updateProfile } from 'query/http_promises';
-import { getSession, setTheme as storeTheme } from 'utils/storage';
+import { useGet, useMutate } from "restful-react";
 import { BUSINESS_NAME, PUBS, DEFAULT_PRONOUNS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { Button, Container, FormLabel, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
@@ -24,9 +23,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ProfileForm(props) {
+function ProfileForm({
+    session
+}) {
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
     const [editing, setEditing] = useState(false);
     const fetched_profile = useRef({});
     const [firstName, setFirstName] = useHistoryState("su_first_name", "");
@@ -56,18 +56,10 @@ function ProfileForm(props) {
     let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
         emailError, phoneError, newPasswordError, confirmPasswordError, existingCustomerError);
 
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        return () => PubSub.unsubscribe(sessionSub);
-    }, [])
-
-    useLayoutEffect(() => {
-        let mounted = true;
-        document.title = `Profile | ${BUSINESS_NAME.Short}`;
-        if (!session) return;
-        getProfileInfo(session, session.tag).then(response => {
-            if (!mounted || editing) return;
+    useGet({
+        path: "profile",
+        queryParams: { session: session, tag: session.tag },
+        resolve: (response) => {
             let user = response.user;
             fetched_profile.current = user;
             if (user.first_name) setFirstName(user.first_name);
@@ -84,10 +76,25 @@ function ProfileForm(props) {
             if (user.pronouns) {
                 setPronouns(user.pronouns);
             }
-        }).catch(err => {
-            console.error(err);
-        })
-        return () => mounted = false;
+        }
+    })
+
+    const { mutate: updateProfile, loading } = useMutate({
+        verb: 'PUT',
+        path: 'profile',
+        resolve: (response) => {
+            if (response.ok) {
+                PubSub.publish(PUBS.Snack, { message: 'Profile updated.' });
+            }
+            else {
+                console.error(response.msg);
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error'})
+            }
+        }
+    });
+
+    useLayoutEffect(() => {
+        document.title = `Profile | ${BUSINESS_NAME.Short}`;
     }, [])
 
     const toggleEdit = (event) => {
@@ -137,19 +144,12 @@ function ProfileForm(props) {
         }
         if (newPassword !== '')
             data.password = newPassword;
-        updateProfile(session, data)
-            .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'Profile updated.' });
-            })
-            .catch(err => {
-                console.error(err.msg);
-                alert(err.msg);
-            })
+        updateProfile(session, data);
     }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
     const handleThemeSelect = (event) => {
         setTheme(event.target.value);
-        storeTheme(event.target.value);
+        PubSub.publish(PUBS.Theme, event.target.value);
     }
 
     const handleCustomerSelect = (event) => {

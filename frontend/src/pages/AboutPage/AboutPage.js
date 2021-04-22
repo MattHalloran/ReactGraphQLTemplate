@@ -1,11 +1,7 @@
-import { useLayoutEffect } from 'react';
 import { BUSINESS_NAME, PHONE } from 'utils/consts';
-import InformationalBreadcrumbs from 'components/breadcrumbs/InformationalBreadcrumbs/InformationalBreadcrumbs';
+import { InformationalBreadcrumbs } from 'components';
 
 function AboutPage() {
-    useLayoutEffect(() => {
-        document.title = `About | ${BUSINESS_NAME.Short}`;
-    })
     return (
         <div id='page'>
             <InformationalBreadcrumbs />

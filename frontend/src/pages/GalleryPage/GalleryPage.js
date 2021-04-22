@@ -6,12 +6,14 @@ import PubSub from 'utils/pubsub';
 import { StyledGalleryImage } from './GalleryPage.styled';
 import { useGet } from "restful-react";
 import { getImages, getImage } from 'query/http_promises';
-import Modal from 'components/wrappers/StyledModal/StyledModal';
+import {
+    InformationalBreadcrumbs,
+    StyledModal as Modal,
+} from 'components';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
+import { PUBS, LINKS } from 'utils/consts';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import InformationalBreadcrumbs from 'components/breadcrumbs/InformationalBreadcrumbs/InformationalBreadcrumbs';
 
 const useStyles = makeStyles((theme) => ({
     imageList: {
@@ -177,7 +179,6 @@ function GalleryPage() {
     }, [track_scrolling_id, loadNextPage])
 
     useLayoutEffect(() => {
-        document.title = `Gallery | ${BUSINESS_NAME.Short}`;
         document.addEventListener('scroll', checkScroll);
         return (() => document.removeEventListener('scroll', checkScroll));
     })

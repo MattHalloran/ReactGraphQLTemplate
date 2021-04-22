@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { getSession } from 'utils/storage';
 import { makeStyles } from '@material-ui/core/styles';
 import { modifyPlant } from 'query/http_promises';
 import { Dialog, AppBar, Toolbar, IconButton, Slide, Tooltip, Grid, TextField, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { NoImageIcon } from 'assets/img';
-import Selector from 'components/inputs/Selector/Selector';
-import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Delete';
-import AddBoxIcon from '@material-ui/icons/AddBox';
-import RestoreIcon from '@material-ui/icons/Restore';
-import UpdateIcon from '@material-ui/icons/Update';
+import { Selector } from 'components';
+import {
+    AddBox as AddBoxIcon,
+    Close as CloseIcon,
+    Delete as DeleteIcon,
+    Restore as RestoreIcon,
+    Update as UpdateIcon
+} from '@material-ui/icons';
 import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
 import makeID from 'utils/makeID';
 import { PLANT_ATTRIBUTES, PUBS } from 'utils/consts';
@@ -60,7 +61,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 function EditPlantDialog({
-    session = getSession(),
+    session,
     plant,
     trait_options,
     open = true,

@@ -1,6 +1,8 @@
-import RoomIcon from '@material-ui/icons/Room';
-import EmailIcon from '@material-ui/icons/Email';
-import PhoneIcon from '@material-ui/icons/Phone';
+import { 
+    Email as EmailIcon,
+    Phone as PhoneIcon,
+    Room as RoomIcon
+ } from "@material-ui/icons";
 import { ADDRESS, PHONE, EMAIL } from 'utils/consts';
 import { Tooltip, Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';

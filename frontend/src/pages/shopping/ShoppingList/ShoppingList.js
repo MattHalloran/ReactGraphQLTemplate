@@ -1,20 +1,14 @@
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getImages, getImage, getInventory, getInventoryPage, updateCart } from "query/http_promises";
+import { useMutate } from "restful-react";
+import { getImages, getInventory, getInventoryPage } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
-import Modal from "components/wrappers/StyledModal/StyledModal";
-import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
-import { getSession, getCart } from "utils/storage";
-import QuantityBox from 'components/inputs/QuantityBox/QuantityBox';
-import Collapsible from 'components/wrappers/Collapsible/Collapsible';
-import { displayPrice } from 'utils/displayPrice';
-import Selector from 'components/inputs/Selector/Selector';
-import PlantCard from 'components/cards/PlantCard/PlantCard';
-import { Tooltip, Typography, Grid, IconButton } from '@material-ui/core';
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import PlantDialog from 'components/dialogs/PlantDialog/PlantDialog';
+import {
+    PlantCard,
+    PlantDialog
+} from 'components';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,6 +20,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ShoppingList({
+    session,
+    cart,
     page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
@@ -34,8 +30,6 @@ function ShoppingList({
 }) {
     page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
     const classes = useStyles();
-    const [session, setSession] = useState(getSession());
-    const [cart, setCart] = useState(getCart());
     // Plant data for every loaded plant
     const [loaded_plants, setLoadedPlants] = useState([]);
     const all_plant_ids = useRef([]);
@@ -52,6 +46,11 @@ function ShoppingList({
     let curr_index = plants?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
     const loading = useRef(false);
 
+    const { mutate: updateCart } = useMutate({
+        verb: 'PUT',
+        path: 'cart',
+    });
+
     useEffect(() => {
         let ids = plants?.map(p => p.display_id);
         if (!ids) return;
@@ -63,15 +62,6 @@ function ShoppingList({
     }, [plants])
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
-
-    useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let cartSub = PubSub.subscribe(PUBS.Cart, (_, o) => setCart(o));
-        return (() => {
-            PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(cartSub);
-        })
-    }, [])
 
     useEffect(() => {
         if (!session) return;
@@ -253,6 +243,8 @@ function ShoppingList({
 }
 
 ShoppingList.propTypes = {
+    session: PropTypes.object,
+    cart: PropTypes.object,
     page_size: PropTypes.number,
     sort: PropTypes.string,
     filters: PropTypes.object,
