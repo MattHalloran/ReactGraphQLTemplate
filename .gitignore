@@ -168,3 +168,4 @@ backend/plant_info/yards/yards*.json
 .eslintcache
 package-lock.json
 *dump.rdb
+*nohup.out
