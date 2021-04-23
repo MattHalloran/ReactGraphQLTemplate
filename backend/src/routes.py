@@ -26,6 +26,10 @@ with open(os.path.join(os.path.dirname(__file__), "consts/codes.json"), 'r') as 
     print(type(StatusCodes))
 with open(os.path.join(os.path.dirname(__file__), 'openapi.json'), 'r') as f:
     OpenApi = json.load(f)
+with open(os.path.join(os.path.dirname(__file__), 'terms.md'), 'r') as f:
+    TermsFile = f.read()
+with open(os.path.join(os.path.dirname(__file__), 'privacy.md'), 'r') as f:
+    PrivacyFile = f.read()
 
 # ============= Helper Methods ========================
 
@@ -110,6 +114,18 @@ def verify_admin():
 def openapi():
     '''Used for testing client/server connection'''
     return OpenApi
+
+
+@app.route(f'{PREFIX}/terms.md', methods=['GET'])
+@handle_exception
+def terms():
+    return TermsFile
+
+
+@app.route(f'{PREFIX}/privacy.md', methods=['GET'])
+@handle_exception
+def privacy():
+    return PrivacyFile
 
 
 @app.route(f'{PREFIX}/consts', methods=['GET'])
