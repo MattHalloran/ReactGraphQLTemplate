@@ -102,13 +102,13 @@ function App() {
     };
 
     useEffect(() => {
-        let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
-            PubSub.unsubscribe(sessionSub);
             PubSub.unsubscribe(loadingSub);
         })
     }, [])
+
+    const redirect = (link) => history.push(link);
 
     return (
         <RestfulProvider 
@@ -122,7 +122,13 @@ function App() {
                     <ThemeProvider theme={theme}>
                         <main id="page-container" className={classes.pageContainer}>
                             <div id="content-wrap" className={classes.contentWrap}>
-                                <Navbar session={session} roles={session?.roles} cart={cart} />
+                                <Navbar 
+                                    session={session} 
+                                    onSessionUpdate={setSession} 
+                                    roles={session?.roles} 
+                                    cart={cart} 
+                                    onRedirect={redirect}
+                                />
                                 {loading ?
                                     <div className={classes.spinner}>
                                         <CircularProgress size={100} />
@@ -136,7 +142,7 @@ function App() {
                                     sessionFailed={sessionFailed} 
                                     roles={session?.roles} 
                                     cart={cart} 
-                                    onRedirect={(link) => history.push(link)}
+                                    onRedirect={redirect}
                                 />
                             </div>
                             <IconNav session={session} roles={session?.roles} cart={cart} />

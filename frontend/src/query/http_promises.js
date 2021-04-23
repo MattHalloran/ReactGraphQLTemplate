@@ -46,25 +46,3 @@ export function submitOrder(cart) {
         })
     });
 }
-
-export function logoutAndRedirect() {
-    PubSub.publish(PUBS.Session, null);
-    let history = useHistory();
-    history.push(LINKS.Home);
-}
-
-export function registerUser(data) {
-    return new Promise(function (resolve, reject) {
-        console.log('data in register user is', data)
-        http.register(data).then(response => {
-            if (response.ok) {
-                PubSub.publish(PUBS.Session, response.session);
-                resolve(data);
-            } else {
-                console.log('REGISTER FAIL LOGGING OUT');
-                PubSub.publish(PUBS.Session, null);
-                reject(response);
-            }
-        })
-    });
-}

@@ -3,7 +3,7 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { LINKS, PUBS } from 'utils/consts';
+import { LINKS } from 'utils/consts';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import {
     Info as InfoIcon,
@@ -11,10 +11,8 @@ import {
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom';
 import getUserActions from 'utils/userActions';
 import { updateArray } from 'utils/arrayTools';
-import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -44,10 +42,11 @@ const useStyles = makeStyles((theme) => ({
 
 function NavList({
     session,
+    onSessionUpdate,
     roles,
-    cart
+    cart,
+    onRedirect
 }) {
-    let history = useHistory();
     const classes = useStyles();
     
     let nav_options = getUserActions(session, roles, cart);
@@ -61,9 +60,9 @@ function NavList({
         let cart_index = nav_options.length - 1;
         let cart_option = nav_options[cart_index];
         // Replace cart option with log out option
-        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, () => PubSub.publish(PUBS.Session, null)]);
+        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, () => onSessionUpdate(null)]);
         cart_button = (
-            <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => history.push(LINKS.Cart)}>
+            <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => onRedirect(LINKS.Cart)}>
                 <Badge badgeContent={cart_option[5]} color="error">
                     <ShoppingCartIcon/>
                 </Badge>
@@ -78,7 +77,7 @@ function NavList({
 
     const optionsToList = (options) => {
         return options.map(([label, value, link, onClick, Icon], index) => (
-            <ListItem className={classes.menuItem} button key={index} onClick={() => { history.push(link); if (onClick) onClick() }}>
+            <ListItem className={classes.menuItem} button key={index} onClick={() => { onRedirect(link); if (onClick) onClick() }}>
                 {Icon ?
                     (<ListItemIcon>
                             <Icon className={classes.menuIcon} />
@@ -95,7 +94,7 @@ function NavList({
                 variant="text"
                 size="large"
                 className={classes.navItem}
-                onClick={() => { history.push(link); if(onClick) onClick()}}
+                onClick={() => { onRedirect(link); if(onClick) onClick()}}
             >
                 {label}
             </Button>

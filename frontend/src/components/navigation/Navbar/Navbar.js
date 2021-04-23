@@ -86,11 +86,19 @@ HideOnScroll.propTypes = {
 
 function Navbar({
     session,
+    onSessionUpdate,
     roles,
-    cart
+    cart,
+    onRedirect
 }) {
     let history = useHistory();
-    let props = { session: session, roles: roles, cart: cart}
+    let props = { 
+        session: session, 
+        onSessionUpdate: onSessionUpdate,
+        roles: roles, 
+        cart: cart,
+        onRedirect: onRedirect
+    }
     const classes = useStyles();
     const [show_hamburger, setShowHamburger] = useState(false);
 

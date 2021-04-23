@@ -8,7 +8,6 @@ import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
-import { registerUser } from 'query/http_promises';
 import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
@@ -71,23 +70,23 @@ function AddEmployeeForm() {
             "password": password,
             "existing_customer": existingCustomer
         }
-        registerUser(data).then(() => {
-            if (existingCustomer) {
-                alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
-            } else {
-                alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
-            }
-            history.push(LINKS.Shopping);
-        }).catch(err => {
-            console.error(err);
-            if (err.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
-                if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
-                    history.push(LINKS.ForgotPassword);
-                }
-            } else {
-                PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
-            }
-        })
+        // registerUser(data).then(() => {
+        //     if (existingCustomer) {
+        //         alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
+        //     } else {
+        //         alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
+        //     }
+        //     history.push(LINKS.Shopping);
+        // }).catch(err => {
+        //     console.error(err);
+        //     if (err.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
+        //         if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
+        //             history.push(LINKS.ForgotPassword);
+        //         }
+        //     } else {
+        //         PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
+        //     }
+        // })
     }
 
     const submit = (event) => {

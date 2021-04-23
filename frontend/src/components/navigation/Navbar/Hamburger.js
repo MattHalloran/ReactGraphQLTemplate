@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
 import { 
     ContactInfo,
     Copyright
@@ -59,14 +58,15 @@ const useStyles = makeStyles((theme) => ({
 
 function Hamburger({
     session,
+    onSessionUpdate,
     roles,
-    cart
+    cart,
+    onRedirect
 }) {
     const classes = useStyles();
     const [contactOpen, setContactOpen] = useState(true);
     const [socialOpen, setSocialOpen] = useState(false);
     const [open, setOpen] = useState(false);
-    let history = useHistory();
 
     useEffect(() => {
         let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
@@ -100,9 +100,9 @@ function Hamburger({
                 className={classes.menuItem}
                 button
                 onClick={() => { 
-                    history.push(link); 
+                    onRedirect(link); 
                     if (onClick) onClick();
-                    closeMenu() 
+                    closeMenu();
                 }}>
                 {Icon ?
                     (<ListItemIcon>
@@ -123,7 +123,7 @@ function Hamburger({
 
     let user_actions = getUserActions(session, roles, cart);
     if (session !== null) {
-        user_actions.push(['Log Out', 'logout', LINKS.Home, () => PubSub.publish(PUBS.Session, null), ExitToAppIcon]);
+        user_actions.push(['Log Out', 'logout', LINKS.Home, () => onSessionUpdate(null), ExitToAppIcon]);
     }
 
     return (
