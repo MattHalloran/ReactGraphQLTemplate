@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ProfileForm({
-    session
+    user_tag
 }) {
     const classes = useStyles();
     const [editing, setEditing] = useState(false);
@@ -58,7 +58,7 @@ function ProfileForm({
 
     useGet({
         path: "profile",
-        queryParams: { session: session, tag: session.tag },
+        queryParams: { tag: user_tag },
         resolve: (response) => {
             let user = response.user;
             fetched_profile.current = user;
@@ -144,7 +144,7 @@ function ProfileForm({
         }
         if (newPassword !== '')
             data.password = newPassword;
-        updateProfile(session, data);
+        updateProfile(data);
     }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
     const handleThemeSelect = (event) => {
@@ -345,7 +345,7 @@ function ProfileForm({
 }
 
 ProfileForm.propTypes = {
-    session: PropTypes.object,
+    user_tag: PropTypes.string.isRequired,
 }
 
 export default ProfileForm;

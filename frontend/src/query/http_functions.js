@@ -32,19 +32,6 @@ async function fetchWrapper(route, httpParams) {
     }
 }
 
-export async function validate_token(session) {
-    let json = JSON.stringify({
-        session: session
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicatonJsonAccept,
-        credentials: 'include',
-    }
-    return await fetchWrapper('validate_token', options);
-}
-
 export async function register(data) {
     let json = JSON.stringify({
         "data": data
@@ -116,9 +103,8 @@ export async function fetch_inventory_page(ids) {
     return await fetchWrapper('fetch_inventory_page', options);
 }
 
-export async function set_like_sku(session, sku, liked) {
+export async function set_like_sku(sku, liked) {
     let json = JSON.stringify({
-        "session": session,
         "sku": sku,
         "liked": liked
     });
@@ -131,9 +117,8 @@ export async function set_like_sku(session, sku, liked) {
     return await fetchWrapper('set_like_sku', options);
 }
 
-export async function set_order_status(session, id, status) {
+export async function set_order_status(id, status) {
     let json = JSON.stringify({
-        "session": session,
         "id": id,
         "status": status,
     });
@@ -146,9 +131,8 @@ export async function set_order_status(session, id, status) {
     return await fetchWrapper('set_order_status', options);
 }
 
-export async function modify_sku(session, sku, operation, data) {
+export async function modify_sku(sku, operation, data) {
     let json = JSON.stringify({
-        "session": session,
         "sku": sku,
         "operation": operation,
         "data": data
@@ -162,9 +146,8 @@ export async function modify_sku(session, sku, operation, data) {
     return await fetchWrapper('modify_sku', options);
 }
 
-export async function modify_plant(session, operation, data) {
+export async function modify_plant(operation, data) {
     let json = JSON.stringify({
-        "session": session,
         "operation": operation,
         "data": data
     });
@@ -178,9 +161,8 @@ export async function modify_plant(session, operation, data) {
     return await fetchWrapper('modify_plant', options);
 }
 
-export async function modify_user(session, id, operation) {
+export async function modify_user(id, operation) {
     let json = JSON.stringify({
-        "session": session,
         "id": id,
         "operation": operation
     });
@@ -193,9 +175,8 @@ export async function modify_user(session, id, operation) {
     return await fetchWrapper('modify_user', options);
 }
 
-export async function submit_order(session, cart) {
+export async function submit_order(cart) {
     let json = JSON.stringify({
-        "session": session,
         "cart": cart,
     });
     let options = {
@@ -207,9 +188,8 @@ export async function submit_order(session, cart) {
     return await fetchWrapper('submit_order', options);
 }
 
-export async function fetch_orders(session, status) {
+export async function fetch_orders(status) {
     let json = JSON.stringify({
-        "session": session,
         "status": status
     });
     let options = {
@@ -219,30 +199,4 @@ export async function fetch_orders(session, status) {
         credentials: 'include'
     }
     return await fetchWrapper('fetch_orders', options);
-}
-
-export async function fetch_image(id, size) {
-    let json = JSON.stringify({
-        "id": id,
-        "size": size
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('fetch_image', options);
-}
-
-export async function fetch_images(ids, size) {
-    let json = JSON.stringify({
-        "ids": ids,
-        "size": size
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('fetch_images', options);
 }

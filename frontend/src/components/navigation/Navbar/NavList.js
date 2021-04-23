@@ -1,10 +1,9 @@
-import { clearStorage } from 'utils/storage';
 import PropTypes from 'prop-types';
 import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { LINKS } from 'utils/consts';
+import { LINKS, PUBS } from 'utils/consts';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import {
     Info as InfoIcon,
@@ -15,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 import getUserActions from 'utils/userActions';
 import { updateArray } from 'utils/arrayTools';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,7 +61,7 @@ function NavList({
         let cart_index = nav_options.length - 1;
         let cart_option = nav_options[cart_index];
         // Replace cart option with log out option
-        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, clearStorage]);
+        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, () => PubSub.publish(PUBS.Session, null)]);
         cart_button = (
             <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => history.push(LINKS.Cart)}>
                 <Badge badgeContent={cart_option[5]} color="error">

@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import PropTypes from 'prop-types';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { SortableContainer } from 'react-sortable-hoc';
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,25 +11,6 @@ const useStyles = makeStyles((theme) => ({
 
     }
 }));
-
-function ListWrap({
-    sortable,
-    cellHeight,
-    onClick,
-    ...props
-}) {
-    const classes = useStyles();
-    let list = (
-        <ImageList cellHeight={cellHeight} className={classes.imageList} cols={Math.round(window.innerWidth / cellHeight)} spacing={1} {...props}>
-            {data.map((tile) => (
-                <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick && onClick(tile)}>
-                    <img className={classes.tileImg} src={tile.img} alt={tile.title} />
-                </ImageListItem>
-            ))}
-        </ImageList>
-    );
-    return sortable ? SortableContainer(list) : list;
-}
 
 /**
  * Data must be structured as follows:
@@ -65,17 +45,9 @@ function ImageGridList({
             ))}
         </ImageList>
     );
-    let list = sortable ? SortableContainer(list) : list;
+    let list = sortable ? SortableContainer(listBase) : listBase;
 
-    return (
-        <ImageList cellHeight={cellHeight} className={classes.imageList} cols={Math.round(window.innerWidth / cellHeight)} spacing={1} {...props}>
-            {data.map((tile) => (
-                <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick && onClick(tile)}>
-                    <img className={classes.tileImg} src={tile.img} alt={tile.title} />
-                </ImageListItem>
-            ))}
-        </ImageList>
-    );
+    return list;
 }
 
 ImageGridList.propTypes = {

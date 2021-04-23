@@ -4,8 +4,7 @@
 // 3) Create a new SKU, either from scratch or by using plant species info
 
 import { useLayoutEffect, useState, useEffect } from 'react';
-import PropTypes from "prop-types";
-import { getInventory, getUnusedPlants, getInventoryFilters, getImages } from 'query/http_promises';
+import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
 import { SORT_OPTIONS, PUBS } from 'utils/consts';
@@ -37,7 +36,6 @@ let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage({
-    session,
 }) {
     const classes = useStyles();
     const [currTab, setCurrTab] = useState(0);
@@ -54,6 +52,32 @@ function AdminInventoryPage({
     const [trait_options, setTraitOptions] = useState(null);
     const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
     const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+    let existing_image_ids = existing?.map(p => p.display_id);
+    let all_image_ids = all?.map(p => p.display_id);
+
+    useGet({
+        path: "images",
+        queryParams: { ids: existing_image_ids, size: 'm' },
+        resolve: (response) => {
+            if (response.ok) {
+                setExistingThumbnails(response.images);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
+
+    useGet({
+        path: "images",
+        queryParams: { ids: all_image_ids, size: 'm' },
+        resolve: (response) => {
+            if (response.ok) {
+                setAllThumbnails(response.images);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     const { mutate: uploadAvailability } = useMutate({
         verb: 'PUT',
@@ -68,26 +92,6 @@ function AdminInventoryPage({
             }
         }
     });
-
-    useEffect(() => {
-        let ids = existing?.map(p => p.display_id);
-        if (!ids) return;
-        getImages(ids, 'm').then(response => {
-            setExistingThumbnails(response.images);
-        }).catch(err => {
-            console.error(err);
-        });
-    }, [existing])
-
-    useEffect(() => {
-        let ids = existing?.map(p => p.display_id);
-        if (!ids) return;
-        getImages(ids, 'm').then(response => {
-            setAllThumbnails(response.images);
-        }).catch(err => {
-            console.error(err);
-        });
-    }, [all])
 
     useEffect(() => {
         getInventory(existing_sort_by, 0, true)
@@ -128,7 +132,7 @@ function AdminInventoryPage({
 
     // const deleteSku = (sku) => {
     //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-    //     modifySku(session, sku.sku, 'DELETE', {})
+    //     modifySku(sku.sku, 'DELETE', {})
     //         .then((response) => {
     //             //TODO update list to reflect status chagne
     //             console.log('TODOOO')
@@ -145,7 +149,7 @@ function AdminInventoryPage({
 
     // const hideSku = (sku) => {
     //     let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-    //     modifySku(session, sku.sku, operation, {})
+    //     modifySku(sku.sku, operation, {})
     //         .then((response) => {
     //             //TODO update list to reflect status chagne
     //             console.log('TODOOO')
@@ -190,7 +194,6 @@ function AdminInventoryPage({
     return (
         <div id="page">
             <EditPlantDialog
-                session={session}
                 plant={currPlant}
                 trait_options={trait_options}
                 open={currPlant !== null}
@@ -250,7 +253,6 @@ function AdminInventoryPage({
 }
 
 AdminInventoryPage.propTypes = {
-    session: PropTypes.object,
 }
 
 export default AdminInventoryPage;

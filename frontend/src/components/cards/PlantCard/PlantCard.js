@@ -1,8 +1,17 @@
 import PropTypes from 'prop-types'
+import { 
+    Button,
+    Card, 
+    CardActionArea,
+    CardActions,
+    CardContent,
+    CardMedia, 
+    Chip,
+    Typography
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { displayPrice } from 'utils/displayPrice';
 import { NoImageIcon } from 'assets/img';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, Card, CardContent, CardActionArea, CardMedia, CardActions, Typography, Chip } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     root: {

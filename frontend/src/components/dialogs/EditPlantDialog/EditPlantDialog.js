@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import { modifyPlant } from 'query/http_promises';
-import { Dialog, AppBar, Toolbar, IconButton, Slide, Tooltip, Grid, TextField, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
-import { NoImageIcon } from 'assets/img';
-import { Selector } from 'components';
+import {  
+    AppBar,   
+    Button,
+    Dialog, 
+    Grid,
+    IconButton,
+    List, 
+    ListItem, 
+    ListItemText, 
+    ListSubheader,
+    Slide,
+    TextField,
+    Toolbar,   
+    Tooltip
+} from '@material-ui/core';
 import {
     AddBox as AddBoxIcon,
     Close as CloseIcon,
@@ -12,13 +22,26 @@ import {
     Restore as RestoreIcon,
     Update as UpdateIcon
 } from '@material-ui/icons';
-import { displayPrice, displayPriceToDatabase } from 'utils/displayPrice';
+import { makeStyles } from '@material-ui/core/styles';
+import { modifyPlant } from 'query/http_promises';
+import { NoImageIcon } from 'assets/img';
+import { Selector } from 'components';
+import { 
+    displayPrice, 
+    displayPriceToDatabase 
+} from 'utils/displayPrice';
 import makeID from 'utils/makeID';
-import { PLANT_ATTRIBUTES, PUBS } from 'utils/consts';
+import { 
+    PLANT_ATTRIBUTES, 
+    PUBS 
+} from 'utils/consts';
 import { DropzoneAreaBase } from 'material-ui-dropzone';
 import PubSub from 'utils/pubsub';
 import _ from 'underscore';
-import { deleteArrayIndex, updateArray } from 'utils/arrayTools';
+import { 
+    deleteArrayIndex, 
+    updateArray 
+} from 'utils/arrayTools';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -61,7 +84,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 function EditPlantDialog({
-    session,
     plant,
     trait_options,
     open = true,
@@ -102,7 +124,7 @@ function EditPlantDialog({
             display_image: selectedImage,
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
-        modifyPlant(session, 'UPDATE', plant_data)
+        modifyPlant('UPDATE', plant_data)
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'SKU Updated.' });
             })
@@ -386,7 +408,6 @@ function EditPlantDialog({
 }
 
 EditPlantDialog.propTypes = {
-    session: PropTypes.object,
     sku: PropTypes.object.isRequired,
     trait_options: PropTypes.object,
     open: PropTypes.bool,

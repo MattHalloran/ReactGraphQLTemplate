@@ -1,11 +1,28 @@
+import {  
+    Button, 
+    BottomNavigation, 
+    BottomNavigationAction, 
+    Grid,
+    IconButton, 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer, 
+    TableHead,
+    TableRow, 
+    Tooltip 
+} from '@material-ui/core';
 import { 
     Email as EmailIcon,
     Phone as PhoneIcon,
     Room as RoomIcon
- } from "@material-ui/icons";
-import { ADDRESS, PHONE, EMAIL } from 'utils/consts';
-import { Tooltip, Button, Table, TableBody, TableCell, TableContainer, TableRow, TableHead, BottomNavigation, BottomNavigationAction, IconButton, Grid } from '@material-ui/core';
+} from "@material-ui/icons";
 import { makeStyles } from '@material-ui/core/styles';
+import { 
+    ADDRESS, 
+    EMAIL,
+    PHONE 
+} from 'utils/consts';
 
 const useStyles = makeStyles((theme) => ({
     root: {

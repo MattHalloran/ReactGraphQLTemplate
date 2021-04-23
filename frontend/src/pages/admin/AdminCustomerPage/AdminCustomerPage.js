@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 import { useGet } from "restful-react";
 import { PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
@@ -22,13 +21,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function AdminCustomerPage({
-    session
 }) {
     const classes = useStyles();
     const [customers, setCustomers] = useState(null);
     useGet({
         path: "customers",
-        queryParams: { session: session },
         resolve: (response) => {
             if (response.ok)
                 setCustomers(response.customers);
@@ -56,7 +53,6 @@ function AdminCustomerPage({
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>
                 <CustomerCard key={index}
-                    session={session}
                     onUpdate={onCustomersUpdate}
                     {...c} />)}
             </div>
@@ -65,7 +61,6 @@ function AdminCustomerPage({
 }
 
 AdminCustomerPage.propTypes = {
-    session: PropTypes.object.isRequired,
 }
 
 export default AdminCustomerPage;

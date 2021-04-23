@@ -1,18 +1,31 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Grid } from '@material-ui/core';
+import { 
+    AppBar,
+    Button, 
+    Dialog, 
+    Grid,
+    IconButton, 
+    Slide,
+    Toolbar,  
+    Typography,   
+} from '@material-ui/core';
 import {
     Close as CloseIcon,
     ThumbDown as ThumbDownIcon,
     ThumbUp as ThumbUpIcon,
     Update as UpdateIcon
 } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 import { CartTable as Cart } from 'components';
 import { useMutate } from "restful-react";
 import { setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
-import { ORDER_STATUS, ORDER_STATES, PUBS } from 'utils/consts';
+import { 
+    ORDER_STATES, 
+    ORDER_STATUS, 
+    PUBS 
+} from 'utils/consts';
 import _ from 'underscore';
 import PubSub from 'utils/pubsub';
 
@@ -40,12 +53,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 function OrderDialog({
-    session,
     order,
     open = true,
     onClose,
 }) {
-    console.log('ORDER POPUP', order);
     const classes = useStyles();
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);
@@ -74,15 +85,11 @@ function OrderDialog({
     }, [order])
 
     const updateOrder = () => {
-        if (!session) {
-            PubSub.publish(PUBS.Snack, { message: 'Failed to update order', severity: 'error' });
-            return;
-        }
-        updateCart(session, session.tag, order);
+        updateCart(order);
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(session, order?.id, ORDER_STATUS.APPROVED)
+        setOrderStatus(order?.id, ORDER_STATUS.APPROVED)
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
@@ -92,7 +99,7 @@ function OrderDialog({
     }, [order])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(session, order?.id, ORDER_STATUS.REJECTED)
+        setOrderStatus(order?.id, ORDER_STATUS.REJECTED)
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {
@@ -163,7 +170,6 @@ function OrderDialog({
 }
 
 OrderDialog.propTypes = {
-    session: PropTypes.object,
     order: PropTypes.object,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,

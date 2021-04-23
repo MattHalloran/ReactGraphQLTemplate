@@ -1,7 +1,6 @@
 import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { BUSINESS_NAME, PUBS } from 'utils/consts';
-import { getImages } from 'query/http_promises';
 import {
     AlertDialog,
     QuantityBox,
@@ -20,6 +19,7 @@ import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
 import _ from 'underscore';
 import PubSub from 'utils/pubsub';
+import { useGet } from 'restful-react';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
@@ -67,24 +67,23 @@ function Cart({
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
     let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b, 0);
+    let image_ids = cart?.items?.map(it => it.sku.plant.display_id);
+
+    useGet({
+        path: "images",
+        queryParams: { ids: image_ids, size: 'm' },
+        resolve: (response) => {
+            if (response.ok) {
+                setThumbnails(response.images);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     useEffect(() => {
         onUpdate(cartState);
     }, [cartState, onUpdate])
-
-    useEffect(() => {
-        if (!cart) return;
-        let ids = cart.items.map(it => it.sku.plant.display_id);
-        getImages(ids, 'm').then(response => {
-            setThumbnails(response.images);
-        }).catch(err => {
-            console.error(err);
-        });
-    }, [cart])
-
-    useLayoutEffect(() => {
-        document.title = `Cart | ${BUSINESS_NAME.Short}`;
-    })
 
     const setNotes = useCallback((notes) => {
         setCartState(c => updateObject(c, 'special_instructions', notes));

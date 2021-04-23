@@ -1,12 +1,19 @@
 import PropTypes from 'prop-types';
-import { Button, Card, CardActions, CardContent, Typography, IconButton } from '@material-ui/core';
+import { useState } from 'react';
+import { 
+    Button, 
+    Card, 
+    CardActions, 
+    CardContent, 
+    IconButton,
+    Typography
+ } from '@material-ui/core';
 import { 
     Email as EmailIcon,
     Phone as PhoneIcon
  } from "@material-ui/icons";
-import { ListDialog } from 'components';
 import { makeStyles } from '@material-ui/core/styles';
-import { useState } from 'react';
+import { ListDialog } from 'components';
 
 const cardStyles = makeStyles((theme) => ({
     root: {

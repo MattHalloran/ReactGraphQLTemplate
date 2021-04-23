@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function AdminOrderPage({
-    session
 }) {
     const classes = useStyles();
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
@@ -31,7 +30,7 @@ function AdminOrderPage({
     const [currOrder, setCurrOrder] = useState(null);
 
     useEffect(() => {
-        getOrders(session, filter)
+        getOrders(filter)
             .then((response) => {
                 setOrders(response.orders);
             })
@@ -43,7 +42,6 @@ function AdminOrderPage({
     return (
         <div id="page">
             {currOrder ? (<OrderDialog 
-                session={session}
                 order={currOrder}
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
@@ -64,7 +62,6 @@ function AdminOrderPage({
 }
 
 AdminOrderPage.propTypes = {
-    session: PropTypes.object,
 }
 
 export default AdminOrderPage;

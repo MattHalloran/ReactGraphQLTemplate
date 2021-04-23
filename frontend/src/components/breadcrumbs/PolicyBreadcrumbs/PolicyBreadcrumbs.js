@@ -1,5 +1,8 @@
+import { 
+    Breadcrumbs, 
+    Link 
+} from '@material-ui/core';
 import { LINKS } from 'utils/consts';
-import { Breadcrumbs, Link } from '@material-ui/core';
 
 function PolicyBreadcrumbs({...props}) {
     return (

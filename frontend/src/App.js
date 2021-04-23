@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     AlertDialog,
     Footer,
@@ -7,18 +7,18 @@ import {
     Snack
 } from 'components';
 import PubSub from 'utils/pubsub';
-import { PUBS, COOKIE } from 'utils/consts';
+import { PUBS, COOKIE, SESSION_DAYS } from 'utils/consts';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
 import { lightTheme, darkTheme } from 'utils/theme';
 import { useGet } from "restful-react";
 import { RestfulProvider } from "restful-react";
-import { checkCookies } from 'query/http_promises';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -56,21 +56,41 @@ const keyMap = {
 
 function App() {
     const classes = useStyles();
-    const [session, setSession] = useState(Cookies.get(COOKIE.Session));
-    const session_attempts = useRef(0);
-    const [user, setUser] = useState({});
+    const [session, setSession] = useState(() => {
+        try {
+            return JSON.parse(Cookies.get(COOKIE.Session));
+        } catch {
+            Cookies.set(COOKIE.Session, null);
+            return null;
+        }
+    });
+    const [sessionFailed, setSessionFailed] = useState(session === null);
     const [theme, setTheme] = useState(lightTheme);
-    let cart = user.orders?.length > 0 ? user.orders[user.orders.length-1] : null;
+    const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
+    let history = useHistory();
+
+    useEffect(() => {
+        console.log('SESSION UPDATED!!!!!!!')
+        console.log(session);
+        if (session !== null) {
+            Cookies.set(COOKIE.Session, JSON.stringify(session), { expires: SESSION_DAYS })
+            setTheme(session?.theme === 'dark' ? darkTheme : lightTheme);
+            setCart(session?.orders?.length > 0 ? session.orders[session.orders.length-1] : null);
+        } else {
+            Cookies.set(COOKIE.Session, null);
+        }
+    }, [session])
 
     useGet({
-        path: "profile",
-        queryParams: { session: session, tag: session?.tag },
+        path: 'http://localhost:5000/api/v1/validate_session',
+        lazy: sessionFailed,
+        queryParams: { session: { tag: session?.tag, token: session?.token } },
         resolve: (response) => {
-            setUser(response.user ?? {});
-            setTheme(response.user?.theme === 'dark' ? darkTheme : lightTheme);
+            setSession(response.session);
+            setSessionFailed(!response.ok);
         }
-    })
+    }, [])
 
     const handlers = {
         OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
@@ -83,26 +103,17 @@ function App() {
 
     useEffect(() => {
         let sessionSub = PubSub.subscribe(PUBS.Session, (_, o) => setSession(o));
-        let userSub = PubSub.subscribe(PUBS.User, (_, o) => setUser(o));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, o) => setTheme(o === 'dark' ? darkTheme : lightTheme));
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
             PubSub.unsubscribe(sessionSub);
-            PubSub.unsubscribe(userSub);
-            PubSub.unsubscribe(themeSub);
             PubSub.unsubscribe(loadingSub);
         })
     }, [])
 
-    useEffect(() => {
-        if (session == null && session_attempts.current < 5) {
-            session_attempts.current++;
-            checkCookies().catch(err => console.error(err));
-        }
-    }, [session])
-
     return (
-        <RestfulProvider base="http://localhost:5000/api/v1/">
+        <RestfulProvider 
+            base="http://localhost:5000/api/v1/" 
+            requestOptions={() => ({ headers: { session: { tag: session?.tag, token: session?.token } } })}>
             <StyledEngineProvider injectFirst>
                 <div id="App">
                     <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
@@ -111,7 +122,7 @@ function App() {
                     <ThemeProvider theme={theme}>
                         <main id="page-container" className={classes.pageContainer}>
                             <div id="content-wrap" className={classes.contentWrap}>
-                                <Navbar session={session} roles={user.roles} cart={cart} />
+                                <Navbar session={session} roles={session?.roles} cart={cart} />
                                 {loading ?
                                     <div className={classes.spinner}>
                                         <CircularProgress size={100} />
@@ -119,9 +130,16 @@ function App() {
                                     : null}
                                 <AlertDialog />
                                 <Snack />
-                                <Routes session={session} roles={user.roles} cart={cart} />
+                                <Routes 
+                                    session={session} 
+                                    onSessionUpdate={setSession} 
+                                    sessionFailed={sessionFailed} 
+                                    roles={session?.roles} 
+                                    cart={cart} 
+                                    onRedirect={(link) => history.push(link)}
+                                />
                             </div>
-                            <IconNav session={session} roles={user.roles} cart={cart} />
+                            <IconNav session={session} roles={session?.roles} cart={cart} />
                             <Footer session={session} />
                         </main>
                     </ThemeProvider>

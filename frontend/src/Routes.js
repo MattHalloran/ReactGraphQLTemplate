@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { LINKS, USER_ROLES, BUSINESS_NAME } from 'utils/consts';
-import { RequireAuthentication } from 'components';
 import Sitemap from 'Sitemap';
-import { 
+import {
     AboutPage,
     AdminContactPage,
     AdminCustomerPage,
@@ -30,21 +29,34 @@ import {
 
 function Routes({
     session,
+    onSessionUpdate,
+    sessionFailed,
     roles,
     cart,
+    onRedirect
 }) {
+
+    console.log('IN ROUTES', session)
+
+    const common = {
+        sessionFailed: sessionFailed,
+        onSessionUpdate: onSessionUpdate,
+        onRedirect: onRedirect,
+        roles: roles,
+    }
+
     return (
         <Switch>
             {/* START PUBLIC PAGES */}
-            <Route 
-                path="/sitemap" 
+            <Route
+                path="/sitemap"
                 component={Sitemap}
             />
-            <Route 
-                exact 
-                path={LINKS.Home} 
-                sitemapIndex={true} 
-                priority={1.0} 
+            <Route
+                exact
+                path={LINKS.Home}
+                sitemapIndex={true}
+                priority={1.0}
                 changefreq="monthly"
                 render={() => (
                     <Page title={`Home | ${BUSINESS_NAME.Short}`}>
@@ -52,178 +64,172 @@ function Routes({
                     </Page>
                 )}
             />
-            <Route 
-                exact 
-                path={LINKS.About} 
-                sitemapIndex={true} 
-                priority={0.7} 
+            <Route
+                exact
+                path={LINKS.About}
+                sitemapIndex={true}
+                priority={0.7}
                 render={() => (
-                    <Page title={`About | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`About | ${BUSINESS_NAME.Short}`} {...common}>
                         <AboutPage />
                     </Page>
                 )}
             />
-            <Route 
-                exact 
-                path={LINKS.PrivacyPolicy} 
-                sitemapIndex={true} 
-                priority={0.1} 
+            <Route
+                exact
+                path={LINKS.PrivacyPolicy}
+                sitemapIndex={true}
+                priority={0.1}
                 render={() => (
-                    <Page title={`Privacy Policy | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`Privacy Policy | ${BUSINESS_NAME.Short}`} {...common}>
                         <PrivacyPolicyPage />
                     </Page>
                 )}
             />
-            <Route 
-                exact 
-                path={LINKS.Terms} 
-                sitemapIndex={true} 
-                priority={0.1} 
+            <Route
+                exact
+                path={LINKS.Terms}
+                sitemapIndex={true}
+                priority={0.1}
                 render={() => (
-                    <Page title={`Terms & Conditions | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`Terms & Conditions | ${BUSINESS_NAME.Short}`} {...common}>
                         <TermsPage />
                     </Page>
                 )}
             />
-            <Route 
-                exact 
-                path={`${LINKS.Gallery}/:img?`} 
-                sitemapIndex={true} 
-                priority={0.3} 
+            <Route
+                exact
+                path={`${LINKS.Gallery}/:img?`}
+                sitemapIndex={true}
+                priority={0.3}
                 render={() => (
-                    <Page title={`Gallery | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`Gallery | ${BUSINESS_NAME.Short}`} {...common}>
                         <GalleryPage />
                     </Page>
                 )}
             />
-            <Route 
-                exact 
-                path={LINKS.Register} 
-                sitemapIndex={true} 
-                priority={0.9} 
+            <Route
+                exact
+                path={LINKS.Register}
+                sitemapIndex={true}
+                priority={0.9}
                 render={() => (
-                    <FormPage title="Sign Up" maxWidth="700px">
-                        <SignUpForm />
-                    </FormPage>
-                )} 
+                    <Page title={`Sign Up | ${BUSINESS_NAME.Short}`} {...common}>
+                        <FormPage title="Sign Up" maxWidth="700px">
+                            <SignUpForm {...common} />
+                        </FormPage>
+                    </Page>
+                )}
             />
-            <Route 
-                exact 
-                path={`${LINKS.LogIn}/:code?`} 
-                sitemapIndex={true} 
-                priority={0.8} 
+            <Route
+                exact
+                path={`${LINKS.LogIn}/:code?`}
+                sitemapIndex={true}
+                priority={0.8}
                 render={() => (
-                    <FormPage title="Log In" maxWidth="700px">
-                        <LogInForm />
-                    </FormPage>
-                )} 
+                    <Page title={`Log In | ${BUSINESS_NAME.Short}`} {...common}>
+                        <FormPage title="Log In" maxWidth="700px">
+                            <LogInForm {...common} />
+                        </FormPage>
+                    </Page>
+                )}
             />
-            <Route 
-                exact 
-                path={`${LINKS.ForgotPassword}/:code?`} 
-                sitemapIndex={true} 
-                priority={0.1} 
+            <Route
+                exact
+                path={`${LINKS.ForgotPassword}/:code?`}
+                sitemapIndex={true}
+                priority={0.1}
                 render={() => (
-                    <FormPage title="Forgot Password" maxWidth="700px">
-                        <ForgotPasswordForm />
-                    </FormPage>
-                )} 
+                    <Page title={`Forgot Password | ${BUSINESS_NAME.Short}`} {...common}>
+                        <FormPage title="Forgot Password" maxWidth="700px">
+                            <ForgotPasswordForm />
+                        </FormPage>
+                    </Page>
+                )}
             />
             {/* END PUBLIC PAGES */}
             {/* START CUSTOMER PAGES */}
-            <Route 
-                exact 
-                path={LINKS.Profile} 
-                sitemapIndex={true} 
-                priority={0.4} 
+            <Route
+                exact
+                path={LINKS.Profile}
+                sitemapIndex={true}
+                priority={0.4}
                 render={() => (
-                    <RequireAuthentication roles={roles} role={USER_ROLES.Customer}>
+                    <Page title={`Profile | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Customer}>
                         <FormPage title="Profile">
-                            <ProfileForm session={session} />
+                            <ProfileForm user_tag={session?.tag} />
                         </FormPage>
-                    </RequireAuthentication>
-                )} 
+                    </Page>
+                )}
             />
-            <Route 
-                exact 
-                path={`${LINKS.Shopping}/:sku?`} 
-                sitemapIndex={true} 
-                priority={0.9} 
+            <Route
+                exact
+                path={`${LINKS.Shopping}/:sku?`}
+                sitemapIndex={true}
+                priority={0.9}
                 render={() => (
-                    <Page title={`Shop | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`Shop | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Customer} redirect={LINKS.LogIn}>
                         <ShoppingPage session={session} cart={cart} />
                     </Page>
-                )} 
+                )}
             />
-            <Route 
-                exact 
-                path={LINKS.Cart} 
+            <Route
+                exact
+                path={LINKS.Cart}
                 render={() => (
-                    <Page title={`Cart | ${BUSINESS_NAME.Short}`}>
-                        <CartPage session={session} cart={cart} />
+                    <Page title={`Cart | ${BUSINESS_NAME.Short}`} {...common}>
+                        <CartPage user_tag={session?.tag} cart={cart} />
                     </Page>
-                )} 
+                )}
             />
             {/* END CUSTOMER PAGES */}
             {/* START ADMIN PAGES */}
-            <Route 
-                exact 
-                path={LINKS.Admin} 
+            <Route
+                exact
+                path={LINKS.Admin}
                 render={() => (
-                    <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                        <Page title={`Admin Portal | ${BUSINESS_NAME.Short}`}>
-                            <AdminMainPage />
-                        </Page>
-                    </RequireAuthentication>
-                )} 
+                    <Page title={`Admin Portal | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Admin}>
+                        <AdminMainPage />
+                    </Page>
+                )}
             />
-            <Route 
-                exact 
-                path={LINKS.AdminContactInfo} 
+            <Route
+                exact
+                path={LINKS.AdminContactInfo}
                 render={() => (
-                    <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                        <Page title={"Edit Contact Info"}>
-                            <AdminContactPage />
-                        </Page>
-                    </RequireAuthentication>
-                )} 
+                    <Page title={"Edit Contact Info"} {...common} authRole={USER_ROLES.Admin}>
+                        <AdminContactPage />
+                    </Page>
+                )}
             />
             <Route exact path={LINKS.AdminCustomers} render={() => (
-                <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                    <Page title={"Customer Page"}>
-                        <AdminCustomerPage session={session} />
-                    </Page>
-                </RequireAuthentication>
+                <Page title={"Customer Page"} {...common} authRole={USER_ROLES.Admin}>
+                    <AdminCustomerPage />
+                </Page>
             )} />
             <Route exact path={LINKS.AdminGallery} render={() => (
-                <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                    <Page title={"Edit Gallery"}>
-                        <AdminGalleryPage session={session} />
-                    </Page>
-                </RequireAuthentication>
+                <Page title={"Edit Gallery"} {...common} authRole={USER_ROLES.Admin}>
+                    <AdminGalleryPage />
+                </Page>
             )} />
             <Route exact path={LINKS.AdminInventory} render={() => (
-                <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                    <Page title={"Edit Inventory Info"}>
-                        <AdminInventoryPage session={session} />
-                    </Page>
-                </RequireAuthentication>
+                <Page title={"Edit Inventory Info"} {...common} authRole={USER_ROLES.Admin}>
+                    <AdminInventoryPage />
+                </Page>
             )} />
             <Route exact path={LINKS.AdminOrders} render={() => (
-                <RequireAuthentication roles={roles} role={USER_ROLES.Admin}>
-                    <Page title={"Order Page"}>
-                        <AdminOrderPage session={session} />
-                    </Page>
-                </RequireAuthentication>
+                <Page title={"Order Page"} {...common} authRole={USER_ROLES.Admin}>
+                    <AdminOrderPage />
+                </Page>
             )} />
             {/* END ADMIN PAGES */}
             {/* 404 page */}
             <Route
                 render={() => (
-                    <Page title={`404 | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`404 | ${BUSINESS_NAME.Short}`} {...common}>
                         <NotFoundPage />
                     </Page>
-                )}  
+                )}
             />
         </Switch>
     );
@@ -231,8 +237,11 @@ function Routes({
 
 Routes.propTypes = {
     session: PropTypes.object,
+    onSessionUpdate: PropTypes.func.isRequired,
+    sessionFailed: PropTypes.bool.isRequired,
     roles: PropTypes.array,
     cart: PropTypes.object,
+    onRedirect: PropTypes.func.isRequired,
 }
 
 export default Routes;

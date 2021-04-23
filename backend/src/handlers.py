@@ -958,7 +958,7 @@ class UserHandler(Handler):
             obj.password = User.hashed_password(password)
         if orders := data.get('orders', None):
             for o in orders:
-                if order_obj := OrderHandler.from_id(o['id'])
+                if order_obj := OrderHandler.from_id(o['id']):
                     success = OrderHandler.update_from_dict(cart_obj, cart) and success
         db.session.commit()
         return obj
@@ -1092,31 +1092,32 @@ class UserHandler(Handler):
         model.session_token = token
 
     @staticmethod
-    def is_valid_session(tag: str, token: str, app):
+    def pack_session(user: User, token: str):
+        '''Returns a formatted session object,
+        with extra information about the user'''
+        return {
+            'tag': user.tag,
+            'token': token,
+            'theme': user.theme,
+            'roles': RoleHandler.all_dicts(user.roles),
+            'orders': OrderHandler.all_dicts(user.orders)
+        }
+
+    @staticmethod
+    def is_valid_session(session, app):
         '''Determines if the provided email and token combination
         makes a valid user session
-        Returns a dict containing:
-            1) a boolean indicating if the user is a customer
-            2) the error message, if boolean is false
-            3) the user object, if boolean is true'''
+        Returns a session with theme and user data if True'''
+        token = session.get('token', None) if session is not None else None
+        tag = session.get('tag', None) if session is not None else None
         # First, try to find the user associated with the tag
         user = UserHandler.from_tag(tag)
         if not user:
-            return {
-                'valid': False,
-                'error': 'No user with that email'
-            }
+            return False
         # Check if supplied token is equal to the user's token
         if not token == user.session_token or not verify_token(app, user.session_token):
-            return {
-                'valid': False,
-                'error': 'Invalid token'
-            }
-        # Check if the user
-        return {
-            'valid': True,
-            'user': user
-        }
+            return False
+        return UserHandler.pack_session(user, token)
 
     @staticmethod
     def get_profile_data(tag: str):

@@ -1,9 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Divider, List, ListItem, ListItemAvatar, Avatar, ListItemText, Tooltip, Grid } from '@material-ui/core';
-import { getImage } from "query/http_promises";
-import { NoImageIcon, NoWaterIcon, RangeIcon, PHIcon, SoilTypeIcon, ColorWheelIcon, CalendarIcon, EvaporationIcon, BeeIcon, MapIcon, SaltIcon, SunIcon } from 'assets/img';
+import { 
+    AppBar,
+    Avatar,
+    Button, 
+    Dialog, 
+    Divider,  
+    Grid,
+    IconButton,  
+    List, 
+    ListItem, 
+    ListItemAvatar, 
+    ListItemText,
+    Slide, 
+    Toolbar, 
+    Typography 
+} from '@material-ui/core';
+import { useGet } from "restful-react";
+import { 
+    BeeIcon,
+    CalendarIcon,
+    ColorWheelIcon, 
+    EvaporationIcon,
+    MapIcon,
+    NoImageIcon, 
+    NoWaterIcon, 
+    PHIcon,
+    RangeIcon,       
+    SaltIcon, 
+    SoilTypeIcon,
+    SunIcon 
+} from 'assets/img';
 import {
     Collapsible,
     QuantityBox,
@@ -81,13 +109,17 @@ function PlantDialog({
     const [selected, setSelected] = useState(null);
     let selected_sku = plant.skus.find(s => s.id === selected);
 
-    useEffect(() => {
-        getImage(plant.display_id, 'l').then(response => {
-            setImage(response.image);
-        }).catch(error => {
-            console.error(error);
-        })
-    }, [])
+    useGet({
+        path: "image",
+        queryParams: { id: plant.display_id, size: 'l' },
+        resolve: (response) => {
+            if (response.ok) {
+                setImage(response.image);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     useEffect(() => {
         let options = plant.skus?.map(s => {

@@ -1,12 +1,23 @@
 import PropTypes from 'prop-types'
-import { makeStyles } from '@material-ui/core/styles';
-import { modifyUser } from 'query/http_promises';
+import { 
+    Button,
+    Card,
+    CardActions,
+    CardContent, 
+    Chip,
+    Typography 
+} from '@material-ui/core';
 import {
     Email as EmailIcon,
     Phone as PhoneIcon,
 } from '@material-ui/icons';
-import { Button, Card, CardContent, CardActions, Typography, Chip } from '@material-ui/core';
-import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
+import { makeStyles } from '@material-ui/core/styles';
+import { modifyUser } from 'query/http_promises';
+import { 
+    ACCOUNT_STATUS, 
+    DEFAULT_PRONOUNS, 
+    PUBS 
+} from 'utils/consts';
 import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CustomerCard({
-    session,
     id,
     first_name,
     last_name,
@@ -72,7 +82,7 @@ function CustomerCard({
     }
 
     const approve_user = () => {
-        modifyUser(session, id, 'APPROVE')
+        modifyUser(id, 'APPROVE')
             .then(response => {
                 onUpdate(response.customers);
             })
@@ -83,7 +93,7 @@ function CustomerCard({
     }
 
     const unlock_user = () => {
-        modifyUser(session, id, 'UNLOCK')
+        modifyUser(id, 'UNLOCK')
             .then(response => {
                 onUpdate(response.customers);
             })
@@ -94,7 +104,7 @@ function CustomerCard({
     }
 
     const lock_user = () => {
-        modifyUser(session, id, 'LOCK')
+        modifyUser(id, 'LOCK')
             .then(response => {
                 onUpdate(response.customers);
             })
@@ -106,7 +116,7 @@ function CustomerCard({
 
     const delete_user = () => {
         if (!window.confirm(`Are you sure you want to delete the account for ${first_name} ${last_name}?`)) return;
-        modifyUser(session, id, 'DELETE')
+        modifyUser(id, 'DELETE')
             .then(response => {
                 onUpdate(response.customers);
             })
@@ -193,7 +203,6 @@ function CustomerCard({
 }
 
 CustomerCard.propTypes = {
-    session: PropTypes.object.isRequired,
     id: PropTypes.number.isRequired,
     first_name: PropTypes.string.isRequired,
     last_name: PropTypes.string.isRequired,

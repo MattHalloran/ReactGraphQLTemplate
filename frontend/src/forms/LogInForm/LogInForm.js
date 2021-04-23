@@ -7,8 +7,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, PUBS } from 'utils/consts';
 import { useMutate } from "restful-react";
 import PubSub from 'utils/pubsub';
-import { storeLogin } from 'query/http_promises';
-import { clearStorage } from 'utils/storage';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -24,7 +22,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function LogInForm() {
+function LogInForm({
+    onSessionUpdate,
+    onRedirect
+}) {
     let history = useHistory();
     const urlParams = useParams();
     const classes = useStyles();
@@ -36,12 +37,12 @@ function LogInForm() {
         path: 'login',
         resolve: (response) => {
             if (response.ok) {
-                storeLogin(response.session, response.user)
+                onSessionUpdate(response.session);
                 if (response.emailVerified) PubSub.publish(PUBS.Snack, {message: 'Email verified.'});
-                history.push(LINKS.Shopping);
+                onRedirect(LINKS.Shopping);
             }
             else {
-                clearStorage();
+                PubSub.publish(PUBS.Session, null);
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             }
         }

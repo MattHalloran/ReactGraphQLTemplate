@@ -1,6 +1,12 @@
-import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import { WEBSITE_URL, BUSINESS_NAME, LINKS } from 'utils/consts';
+import {
+    Link,
+    Typography
+} from '@material-ui/core';
+import { 
+    BUSINESS_NAME,
+    LINKS,
+    WEBSITE_URL
+} from 'utils/consts';
 
 function Copyright({
     ...props

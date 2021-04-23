@@ -4,8 +4,8 @@ import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import PubSub from 'utils/pubsub';
 import { StyledGalleryImage } from './GalleryPage.styled';
+import Cookies from 'js-cookie';
 import { useGet } from "restful-react";
-import { getImages, getImage } from 'query/http_promises';
 import {
     InformationalBreadcrumbs,
     StyledModal as Modal,
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         spacing: 0,
     },
     tileImg: {
-        
+
     }
 }));
 
@@ -48,7 +48,7 @@ function ImageGridList({
 }) {
     const classes = useStyles();
     return (
-        <ImageList cellHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth/300)} spacing={1} {...props}>
+        <ImageList cellHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth / 300)} spacing={1} {...props}>
             {data.map((tile) => (
                 <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
                     <img className={classes.tileImg} src={tile.img} alt={tile.title} />
@@ -66,13 +66,11 @@ function GalleryPage() {
     const images_meta = useRef([]);
     let history = useHistory();
     const urlParams = useParams();
-    // [base64 data, alt]
-    const [curr_img, setCurrImg] = useState(null);
-    const curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
     const loading = useRef(false);
     const track_scrolling_id = 'page';
     //Estimates how many images will fill the screen
     const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
+    let curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
 
     useGet({
         path: "gallery",
@@ -95,38 +93,42 @@ function GalleryPage() {
     // useHotkeys('arrowLeft', () => prevImage());
     // useHotkeys('arrowRight', () => nextImage());
 
-    const loading_full_image = useRef(false);
-    const loadImage = useCallback((index, id) => {
-        // If this function hasn't finished yet
-        if (loading_full_image.current) return;
-        // If there is an image to load
-        if (!id) return;
-        // First check if the image data has already been retrieved
-        if (index in full_images.current) {
-            setCurrImg(full_images.current[index]);
-        } else if (index >= 0) {
-            loading_full_image.current = true;
-            console.log(full_images.current);
-            // Request the image from the backend
-            getImage(id, 'l').then(response => {
-                let image_data = [`data:image/jpeg;base64,${response.image}`, response.alt];
-                setCurrImg(image_data);
-                full_images.current[index] = image_data;
-            }).catch(error => {
-                console.error('FAILED TO LOAD FULL IMAGE', error)
-            }).finally(() => loading_full_image.current = false);
-        } else {
-            setCurrImg(null);
+    let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
+    let next_img_ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
+    const { refetch: loadNextImages } = useGet({
+        path: "images",
+        lazy: true,
+        queryParams: { ids: next_img_ids, size: 'ml' },
+        resolve: (response) => {
+            if (response.ok) {
+                let combined_data = [];
+                //Combine metadata with thumbnail images
+                for (let i = 0; i < next_img_ids.length; i++) {
+                    let meta = images_meta.current[thumbnails.length + i];
+                    if (!meta) {
+                        console.log('META IS EMPTY', images_meta.current, i);
+                        continue;
+                    }
+                    let img = response.images[i];
+                    let new_data = {
+                        "key": meta.id,
+                        "img": `data:image/jpeg;base64,${img}`,
+                        "title": meta.alt,
+                        "author": 'New Life Nursery', //TODO credit actual author, if not New Life
+                        "cols": Math.round((meta.width * 0.9) / meta.height),
+                    };
+                    // Prevent identical images from being added multiple times, if checks
+                    // up to this point have failed
+                    if (!images_meta.current.some(d => d.key === new_data.key)) {
+                        combined_data.push(new_data);
+                    }
+                }
+                setThumbnails(thumbs => thumbs.concat(combined_data));
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
         }
-    }, [loading_full_image, full_images])
-
-    useEffect(() => {
-        if (urlParams.img) {
-            loadImage(curr_index, urlParams.img);
-        } else {
-            setCurrImg([null, null]);
-        }
-    }, [urlParams, curr_index, loadImage])
+    })
 
     useEffect(() => {
         loading.current = false;
@@ -135,38 +137,7 @@ function GalleryPage() {
     const loadNextPage = useCallback(() => {
         if (loading.current || images_meta.current.length <= thumbnails.length) return;
         loading.current = true;
-        //Grab all thumbnail images
-        let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
-        let ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
-        getImages(ids, 'ml').then(response => {
-            let combined_data = [];
-            //Combine metadata with thumbnail images
-            for (let i = 0; i < ids.length; i++) {
-                let meta = images_meta.current[thumbnails.length + i];
-                if (!meta) {
-                    console.log('META IS EMPTY', images_meta.current, i);
-                    continue;
-                }
-                let img = response.images[i];
-                let new_data = {
-                    "key": meta.id,
-                    "img": `data:image/jpeg;base64,${img}`,
-                    "title": meta.alt,
-                    "author": 'New Life Nursery', //TODO credit actual author, if not New Life
-                    "cols": Math.round((meta.width*0.9) / meta.height),
-                };
-                // Prevent identical images from being added multiple times, if checks
-                // up to this point have failed
-                if (!images_meta.current.some(d => d.key === new_data.key)) {
-                    combined_data.push(new_data);
-                }
-            }
-            setThumbnails(thumbs => thumbs.concat(combined_data));
-            loading.current = false;
-        }).catch(error => {
-            console.error("Failed to load thumbnails!", error);
-            loading.current = false;
-        });
+        loadNextImages().then(() => loading.current = false)
         return () => loading.current = false;
     }, [thumbnails, page_size]);
 
@@ -216,11 +187,10 @@ function GalleryPage() {
         }
     }
 
-    let popup = (curr_img && curr_img[0]) ? (
+    let popup = (urlParams.img) ? (
         <Modal onClose={() => history.goBack()}>
             <GalleryImage
-                src={curr_img[0]}
-                alt={curr_img[1]}
+                id={urlParams.img}
                 goLeft={prevImage}
                 goRight={nextImage} >
             </GalleryImage>
@@ -240,7 +210,29 @@ GalleryPage.propTypes = {
 
 export default GalleryPage;
 
-function GalleryImage(props) {
+function GalleryImage({
+    id,
+    goLeft,
+    goRight
+}) {
+    const [data, setData] = useState(JSON.parse(Cookies.get(`nln-img-${id}`)) ?? {});
+
+    useGet({
+        path: "image",
+        queryParams: { id: id, size: 'l' },
+        resolve: (response) => {
+            if (response.ok) {
+                let image_data = {
+                    src: `data:image/jpeg;base64,${response.image}`,
+                    alt: response.alt
+                }
+                Cookies.set(`nln-img-${id}`, JSON.stringify(image_data));
+                setData(image_data);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     const keyMap = {
         PREVIOUS: "left",
@@ -248,10 +240,8 @@ function GalleryImage(props) {
     };
 
     const handlers = {
-        PREVIOUS: () => {
-            props.goLeft()
-        },
-        NEXT: () => props.goRight(),
+        PREVIOUS: goLeft,
+        NEXT: goRight,
     };
 
     useEffect(() => {
@@ -261,9 +251,9 @@ function GalleryImage(props) {
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
             <StyledGalleryImage id='boop'>
-                <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={props.goLeft} />
-                <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={props.goRight} />
-                <img src={props.src} alt={props.alt} />
+                <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={goLeft} />
+                <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={goRight} />
+                <img src={data.src} alt={data.alt} />
             </StyledGalleryImage>
         </HotKeys>
     );

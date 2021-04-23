@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { BUSINESS_NAME } from 'utils/consts';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -38,10 +36,6 @@ function FormPage({
     maxWidth = '90%',
 }) {
     const classes = useStyles();
-
-    useEffect(() => {
-        document.title = `${title} | ${BUSINESS_NAME}`;
-    }, [title])
 
     return (
         <div id='page' maxWidth={maxWidth}>

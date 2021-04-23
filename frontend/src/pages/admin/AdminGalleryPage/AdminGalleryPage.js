@@ -1,7 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getImages } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
-import PropTypes from 'prop-types';
 import { Button, Typography } from '@material-ui/core';
 import { PubSub } from 'utils/pubsub';
 import { PUBS } from 'utils/consts';
@@ -22,11 +20,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function AdminGalleryPage({
-    session
 }) {
     const classes = useStyles();
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [data, setData] = useState([]);
+
     useGet({
         path: "gallery",
         resolve: (response) => {
@@ -34,30 +32,34 @@ function AdminGalleryPage({
                 let response_meta = response.images_meta ?? [];
                 if (response_meta.length > 0) {
                     //Grab all thumbnail images
-                    let ids = response_meta.map(meta => meta.id);
+                    let image_ids = response_meta.map(meta => meta.id);
                     let data = [];
-                    getImages(ids, 'm').then(response => {
-                        //Combine metadata with thumbnail images
-                        for (let i = 0; i < ids.length; i++) {
-                            let meta = response_meta[i];
-                            if (!meta) {
-                                console.log('META IS EMPTY', response_meta, i);
-                                continue;
+                    useGet({
+                        path: "images",
+                        queryParams: { ids: image_ids, size: 'm' },
+                        resolve: (response) => {
+                            if (response.ok) {
+                                //Combine metadata with thumbnail images
+                                for (let i = 0; i < ids.length; i++) {
+                                    let meta = response_meta[i];
+                                    if (!meta) {
+                                        console.log('META IS EMPTY', response_meta, i);
+                                        continue;
+                                    }
+                                    let img = response.images[i];
+                                    data.push({
+                                        'key': meta.id,
+                                        'src': `data:image/jpeg;base64,${img}`,
+                                        'alt': meta.alt,
+                                        'description': 'TODO',
+                                    });
+                                }
+                                setData(data);
                             }
-                            let img = response.images[i];
-                            data.push({
-                                'key': meta.id,
-                                'src': `data:image/jpeg;base64,${img}`,
-                                'alt': meta.alt,
-                                'description': 'TODO',
-                            });
+                            else
+                                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
                         }
-                        setData(data);
-                    }).catch(error => {
-                        let msg = 'Failed to load gallery data!'
-                        console.error(msg, error);
-                        PubSub.publish(PUBS.Snack, { message: msg, severity: 'error' });
-                    });
+                    })
                 } else {
                     setData([]);
                 }
@@ -133,7 +135,7 @@ function AdminGalleryPage({
             'alt': d.alt,
             'description': d.description,
         }));
-        updateGallery(session, gallery_data);
+        updateGallery(gallery_data);
     }, [data])
 
     function updateData(data) {
@@ -166,7 +168,6 @@ function AdminGalleryPage({
 }
 
 AdminGalleryPage.propTypes = {
-    session: PropTypes.object.isRequired,
 }
 
 export default AdminGalleryPage;

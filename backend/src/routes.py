@@ -6,7 +6,7 @@ from src.handlers import UserHandler, SkuHandler, OrderHandler
 from src.handlers import PlantHandler, PlantTraitHandler, ImageHandler, ContactInfoHandler
 from src.messenger import reset_password_link, order_notify_admin, customer_notify_admin, send_verification_link
 from src.utils import salt
-from src.auth import generate_token, verify_token
+from src.auth import generate_token
 from src.config import Config
 import traceback
 from base64 import b64decode
@@ -75,37 +75,30 @@ def handle_exception(func):
     return decorated
 
 
-def verify_session(session):
+def verify_session():
     '''Verifies that the user supplied a valid session token
     Returns User object if valid, otherwise None'''
-    tag = session.get('tag', None)
-    token = session.get('token', None)
-    if tag and token:
-        return UserHandler.is_valid_session(tag, token, app).get('user', None)
+    if (session := request.headers.get('session', None)):
+        return UserHandler.is_valid_session(session, app).get('user', None)
     return None
 
 
-def verify_customer(session):
+def verify_customer():
     '''Verifies that the user:
     1) Supplied a valid session token
     2) Is a customer
     Returns User object if both checks pass, otherwise None'''
-    user = verify_session(session)
-    if user and UserHandler.is_customer(user):
+    if (user := verify_session()) and UserHandler.is_customer(user):
         return user
     return None
 
 
-def verify_admin(session):
+def verify_admin():
     '''Verifies that the user:
     1) Supplied a valid session token
     2) Is an admin
     Returns User object if both checks pass, otherwise None'''
-    user = verify_session(session)
-    print('verifying admin')
-    print(session)
-    print(user)
-    if user and UserHandler.is_admin(user):
+    if (user := verify_session()) and UserHandler.is_admin(user):
         return user
     return None
 
@@ -153,7 +146,7 @@ def register():
     q.enqueue(send_verification_link, email, UserHandler.tag_from_email(email))
     return {
         **StatusCodes['SUCCESS'],
-        "session": {"tag": user.tag, "token": token},
+        "session": UserHandler.pack_session(user, token),
         "user": UserHandler.to_dict(user)
     }
 
@@ -177,7 +170,7 @@ def login():
         return {
             **StatusCodes['SUCCESS'],
             "user": UserHandler.to_dict(user),
-            "session": {"tag": user.tag, "token": token},
+            "session": UserHandler.pack_session(user, token),
             "isEmailVerified": user.account_status != AccountStatus.WAITING_EMAIL_VERIFICATION.value
         }
     else:
@@ -204,17 +197,15 @@ def send_password_reset_request():
     return StatusCodes['SUCCESS']
 
 
-@app.route(f'{PREFIX}/validate_token', methods=["POST"])
+@app.route(f'{PREFIX}/validate_session', methods=["GET"])
 @cross_origin(supports_credentials=True)
 @handle_exception
-def validate_token():
-    session = getJson('session')
-    tag = session.get('tag', None)
-    token = session.get('token', None)
-    if not tag or not token:
-        return StatusCodes['ERROR_INVALID_ARGS']
-    if verify_token(app, token):
-        return StatusCodes['SUCCESS']
+def validate_session():
+    if (session := UserHandler.is_valid_session(request.headers.get('session', None), app)):
+        return {
+            **StatusCodes['SUCCESS'],
+            'session': session
+        }
     return StatusCodes['FAILURE_NOT_VERIFIED']
 
 
@@ -319,9 +310,9 @@ def fetch_unused_plants():
     }
 
 
-@app.route(f'{PREFIX}/fetch_image', methods=["POST"])
+@app.route(f'{PREFIX}/image', methods=["GET"])
 @handle_exception
-def fetch_image():
+def image():
     '''Fetches info for an image'''
     (id, size) = getData('id', 'size')
     return {
@@ -330,9 +321,9 @@ def fetch_image():
     }
 
 
-@app.route(f'{PREFIX}/fetch_images', methods=["POST"])
+@app.route(f'{PREFIX}/images', methods=["GET"])
 @handle_exception
-def fetch_images():
+def images():
     '''Fetches info for a list of images'''
     (ids, size) = getData('ids', 'size')
     return {
@@ -363,8 +354,8 @@ def gallery():
             "images_meta": images_data
         }
     elif request.method == 'PUT':
-        (session, data) = getData('session', 'data')
-        if not verify_admin(session):
+        (data) = getData('data')
+        if not verify_admin():
             return StatusCodes['ERROR_NOT_AUTHORIZED']
         success = True
         # Grab all gallery images
@@ -453,11 +444,11 @@ def contact():
 @handle_exception
 def profile():
     if request.method == 'GET':
-        (session, tag) = getJson('session', 'tag')
+        (tag) = getJson('tag')
         # Only admins can view information for other profiles
-        if tag != session['tag'] and not verify_admin(session):
+        if tag != request.headers['session']['tag'] and not verify_admin():
             return StatusCodes['ERROR_NOT_AUTHORIZED']
-        if not verify_customer(session):
+        if not verify_customer():
             return StatusCodes['ERROR_NOT_AUTHORIZED']
         user_data = UserHandler.get_profile_data(tag)
         if user_data is None:
@@ -469,13 +460,13 @@ def profile():
             "user": user_data
         }
     else:
-        (session, tag, data) = getData('session', 'tag', 'data')
+        (tag, data) = getData('tag', 'data')
         # Only admins can view information for other profiles
-        if tag != session['tag'] and not verify_admin(session):
+        if tag != request.headers['session']['tag'] and not verify_admin():
             return StatusCodes['ERROR_NOT_AUTHORIZED']
-        if not verify_customer(session):
+        if not verify_customer():
             return StatusCodes['ERROR_NOT_AUTHORIZED']
-        user = verify_session(session)
+        user = verify_session()
         if not user:
             return StatusCodes["FAILURE_NOT_VERIFIED"]
         if not UserHandler.is_password_valid(user, data['currentPassword']):
@@ -483,7 +474,7 @@ def profile():
         if UserHandler.update(user, data):
             return {
                 **StatusCodes['SUCCESS'],
-                "profile": UserHandler.get_profile_data(session['tag'])
+                "profile": UserHandler.get_profile_data(tag)
             }
         return StatusCodes['ERROR_UNKNOWN']
 
@@ -492,9 +483,7 @@ def profile():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def customers():
-    # Grab data
-    (tag, token) = getQuery('session[tag]', 'session[token]')
-    if not verify_admin({'tag': tag, 'token': token}):
+    if not verify_admin():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
         **StatusCodes['SUCCESS'],
@@ -508,8 +497,8 @@ def customers():
 def set_like_sku():
     '''Like or unlike an inventory item'''
     # Grab data
-    (session, sku_str, liked) = getData('session', 'sku', 'liked')
-    user = verify_customer(session)
+    (sku_str, liked) = getData('sku', 'liked')
+    user = verify_customer()
     if not user:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     sku = SkuHandler.from_sku(sku_str)
@@ -534,8 +523,8 @@ def set_like_sku():
 @handle_exception
 def set_order_status():
     '''Sets the order status for an order'''
-    (session, id, status) = getData('session', 'id', 'status')
-    if not verify_admin(session):
+    (id, status) = getData('id', 'status')
+    if not verify_admin():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     order_obj = OrderHandler.from_id(id)
     if order_obj is None:
@@ -555,12 +544,13 @@ def cart():
     '''Updates the cart for the specified user.
     Only admins can update other carts.
     Returns the updated cart data, so the frontend can verify update'''
-    (session, tag, cart) = getData('session', 'who', 'cart')
+    (cart) = getData('cart')
     # If changing a cart that doesn't belong to them, verify admin
-    if session['tag'] != tag:
-        user = verify_admin(session)
+    user_id = cart['customer']['id']
+    if verify_admin():
+        user = UserHandler.from_id(user_id)
     else:
-        user = verify_customer(session)
+        user = verify_session()
     if not user:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     cart_obj = OrderHandler.from_id(cart['id'])
@@ -581,8 +571,8 @@ def cart():
 @handle_exception
 def modify_sku():
     '''Like or unlike an inventory item'''
-    (session, sku, operation, sku_data) = getData('session', 'sku', 'operation', 'data')
-    if not verify_admin(session):
+    (sku, operation, sku_data) = getData('sku', 'operation', 'data')
+    if not verify_admin():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     sku_obj = SkuHandler.from_sku(sku)
     if sku_obj is None:
@@ -616,8 +606,8 @@ def modify_sku():
 @handle_exception
 def modify_plant():
     '''Like or unlike an inventory item'''
-    (session, operation, plant_data) = getData('session', 'operation', 'data')
-    if not verify_admin(session):
+    (operation, plant_data) = getData('operation', 'data')
+    if not verify_admin():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     plant_obj = PlantHandler.from_id(plant_data['id'])
     if plant_obj is None and operation != 'ADD':
@@ -695,8 +685,8 @@ def modify_plant():
 @handle_exception
 def modify_user():
     '''Like or unlike an inventory item'''
-    (session, id, operation) = getData('session', 'id', 'operation')
-    admin = verify_admin(session)
+    (id, operation) = getData('id', 'operation')
+    admin = verify_admin()
     if not admin:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     user = UserHandler.from_id(id)
@@ -734,9 +724,9 @@ def modify_user():
 @cross_origin(supports_credentials=True)
 @handle_exception
 def submit_order():
-    (session, cart) = getData('session', 'cart')
+    (cart) = getData('cart')
     # If changing a cart that doesn't belong to them, verify admin
-    user = verify_customer(session)
+    user = verify_customer()
     if not user:
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     cart_obj = OrderHandler.from_id(cart['id'])
@@ -760,8 +750,8 @@ def submit_order():
 @handle_exception
 def fetch_orders():
     '''Fetch orders that match the provided state'''
-    (session, status) = getData('session', 'status')
-    if not verify_admin(session):
+    (status) = getData('status')
+    if not verify_admin():
         return StatusCodes['ERROR_NOT_AUTHORIZED']
     return {
         **StatusCodes['SUCCESS'],

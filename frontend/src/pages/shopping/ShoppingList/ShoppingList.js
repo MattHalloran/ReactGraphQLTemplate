@@ -1,8 +1,8 @@
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useMutate } from "restful-react";
-import { getImages, getInventory, getInventoryPage } from "query/http_promises";
+import { useGet, useMutate } from "restful-react";
+import { getInventory, getInventoryPage } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
 import {
@@ -51,15 +51,17 @@ function ShoppingList({
         path: 'cart',
     });
 
-    useEffect(() => {
-        let ids = plants?.map(p => p.display_id);
-        if (!ids) return;
-        getImages(ids, 'm').then(response => {
-            setThumbnails(response.images);
-        }).catch(err => {
-            console.error(err);
-        });
-    }, [plants])
+    useGet({
+        path: "images",
+        queryParams: { ids: plants?.map(p => p.display_id), size: 'm' },
+        resolve: (response) => {
+            if (response.ok) {
+                setThumbnails(response.images);
+            }
+            else
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -193,7 +195,7 @@ function ShoppingList({
         }
         let cart_copy = JSON.parse(JSON.stringify(cart));
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
-        updateCart(session, session.tag, cart_copy)
+        updateCart(session?.tag, cart_copy)
             .then(() => {
                 if (operation === 'ADD') {
                     PubSub.publish(PUBS.Snack, { 

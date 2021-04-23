@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { clearStorage } from 'utils/storage';
 import { 
     ContactInfo,
     Copyright
@@ -12,8 +11,8 @@ import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
     ExitToApp as ExitToAppIcon,
-    ExplandLess as ExplandLessIcon,
-    ExplandMore as ExpandMoreIcon,
+    ExpandLess as ExpandLessIcon,
+    ExpandMore as ExpandMoreIcon,
     Facebook as FacebookIcon,
     Home as HomeIcon,
     Menu as MenuIcon,
@@ -124,7 +123,7 @@ function Hamburger({
 
     let user_actions = getUserActions(session, roles, cart);
     if (session !== null) {
-        user_actions.push(['Log Out', 'logout', LINKS.Home, clearStorage, ExitToAppIcon]);
+        user_actions.push(['Log Out', 'logout', LINKS.Home, () => PubSub.publish(PUBS.Session, null), ExitToAppIcon]);
     }
 
     return (
@@ -141,7 +140,7 @@ function Hamburger({
                     <ListItem className={classes.menuItem} button onClick={handleContactClick}>
                         <ListItemIcon><ContactSupportIcon className={classes.menuIcon} /></ListItemIcon>
                         <ListItemText primary="Contact Us" />
-                        {contactOpen ? <ExpandLess /> : <ExpandMore />}
+                        {contactOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={contactOpen} timeout="auto" unmountOnExit>
                         <ContactInfo />
@@ -150,7 +149,7 @@ function Hamburger({
                     <ListItem className={classes.menuItem} button onClick={handleSocialClick}>
                         <ListItemIcon><ShareIcon className={classes.menuIcon} /></ListItemIcon>
                         <ListItemText primary="Socials" />
-                        {socialOpen ? <ExpandLess /> : <ExpandMore />}
+                        {socialOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={socialOpen} timeout="auto" unmountOnExit>
                         <ListItem className={classes.menuItem} button onClick={() => newTab("https://www.facebook.com/newlifenurseryinc/")}>

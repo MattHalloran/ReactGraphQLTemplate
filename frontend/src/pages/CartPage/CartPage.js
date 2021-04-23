@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CartPage({
-    session,
+    user_tag,
     cart,
 }) {
     let history = useHistory();
@@ -67,15 +67,15 @@ function CartPage({
     }
 
     const updateOrder = () => {
-        if (!session?.tag || !session?.token) {
+        if (!user_tag) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
-        updateCart(session, session.tag, changedCart);
+        updateCart(user_tag, changedCart);
     }
 
     function requestQuote() {
-        submitOrder(session, changedCart)
+        submitOrder(changedCart)
             .then(() => {
                 PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
             })
@@ -96,7 +96,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, session]);
+    }, [cart, changedCart, user_tag]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
@@ -141,7 +141,7 @@ function CartPage({
 }
 
 CartPage.propTypes = {
-    session: PropTypes.object,
+    user_tag: PropTypes.string,
     cart: PropTypes.object,
 }
 

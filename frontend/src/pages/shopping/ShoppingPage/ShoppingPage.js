@@ -7,7 +7,7 @@ import {
 } from 'components';
 import ShoppingList from '../ShoppingList/ShoppingList';
 import { SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
-import { getInventoryFilters, checkCookies } from "query/http_promises";
+import { getInventoryFilters } from "query/http_promises";
 import PubSub from 'utils/pubsub';
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import {
@@ -61,31 +61,26 @@ function ShoppingPage({
 
     useEffect(() => {
         let mounted = true;
-        checkCookies().then(() => {
-            getInventoryFilters()
-                .then((response) => {
-                    if (!mounted) return;
-                    // Add checked boolean to each filter
-                    for (const [_, value] of Object.entries(response)) {
-                        for (let i = 0; i < value.length; i++) {
-                            value[i] = {
-                                label: value[i],
-                                value: i,
-                                checked: false,
-                            }
+        getInventoryFilters()
+            .then((response) => {
+                if (!mounted) return;
+                // Add checked boolean to each filter
+                for (const [_, value] of Object.entries(response)) {
+                    for (let i = 0; i < value.length; i++) {
+                        value[i] = {
+                            label: value[i],
+                            value: i,
+                            checked: false,
                         }
                     }
-                    setFilters(response);
-                })
-                .catch((error) => {
-                    console.error("Failed to load filters", error);
-                });
-        }).catch(() => {
-            history.push(LINKS.LogIn);
-        })
-
+                }
+                setFilters(response);
+            })
+            .catch((error) => {
+                console.error("Failed to load filters", error);
+            });
         return () => mounted = false;
-    }, []);
+    }, [session])
 
     const handleFiltersChange = useCallback((group, value, checked) => {
         let modified_filters = { ...filters };
@@ -207,13 +202,13 @@ function ShoppingPage({
                     onClick={() => printAvailability(session)}
                 >Print</Button>
             </div>
-            <ShoppingList 
-                session={session} 
-                cart={cart} 
-                sort={sortBy} 
-                filters={filters} 
-                searchString={searchString} 
-                hideOutOfStock={hideOutOfStock} 
+            <ShoppingList
+                session={session}
+                cart={cart}
+                sort={sortBy}
+                filters={filters}
+                searchString={searchString}
+                hideOutOfStock={hideOutOfStock}
             />
         </div>
     );

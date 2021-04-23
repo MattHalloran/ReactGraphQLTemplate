@@ -11,7 +11,6 @@ export const passedValidation = (...args) => {
             if (arg.filter(v => v).length > 0)
                 return true;
         } else if (_.isString(arg)) {
-            console.log('anus', arg)
             if (!isStringBlank(arg))
                 return true;
         } else if (arg !== null) {
@@ -19,7 +18,6 @@ export const passedValidation = (...args) => {
             return true;
         }
     })
-    console.log('boop', any_failed)
     return !any_failed
 }
 
