@@ -7,7 +7,7 @@ import {
     Snack
 } from 'components';
 import PubSub from 'utils/pubsub';
-import { PUBS, COOKIE, SESSION_DAYS } from 'utils/consts';
+import { PUBS, COOKIE, SESSION_DAYS, URL_BASE } from 'utils/consts';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
@@ -83,7 +83,7 @@ function App() {
     }, [session])
 
     useGet({
-        path: 'http://localhost:5000/api/v1/validate_session',
+        path: `${URL_BASE}validate_session`,
         lazy: sessionFailed,
         queryParams: { session: { tag: session?.tag, token: session?.token } },
         resolve: (response) => {
@@ -112,7 +112,7 @@ function App() {
 
     return (
         <RestfulProvider 
-            base="http://localhost:5000/api/v1/" 
+            base={URL_BASE} 
             requestOptions={() => ({ headers: { session: { tag: session?.tag, token: session?.token } } })}>
             <StyledEngineProvider injectFirst>
                 <div id="App">

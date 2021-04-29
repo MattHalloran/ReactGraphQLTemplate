@@ -12,17 +12,6 @@ export const StyledGalleryPage = styled.div`
 `;
 
 export const StyledGalleryImage = styled.div`
-    display: flex;
-    width: 100%;
-    height: 100%;
-
-    img {
-        max-height: 90vh;
-        max-width: 100%;
-        display: block;
-        border-radius: 10px;
-        object-fit: contain;
-    }
 
     .arrow {
         position: absolute;

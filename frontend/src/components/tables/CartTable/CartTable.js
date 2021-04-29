@@ -67,11 +67,11 @@ function Cart({
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
     let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b, 0);
-    let image_ids = cart?.items?.map(it => it.sku.plant.display_id);
+    let image_keys = cart?.items?.map(it => it.sku.plant.display_key);
 
     useGet({
         path: "images",
-        queryParams: { ids: image_ids, size: 'm' },
+        queryParams: { keys: image_keys, size: 'm' },
         resolve: (response) => {
             if (response.ok) {
                 setThumbnails(response.images);

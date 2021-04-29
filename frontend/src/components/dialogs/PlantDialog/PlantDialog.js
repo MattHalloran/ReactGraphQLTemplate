@@ -103,7 +103,7 @@ function PlantDialog({
     }
     const classes = useStyles();
     const [quantity, setQuantity] = useState(1);
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState(JSON.parse(Cookies.get(`nln-img-${plant.display_key}`)));
     const [order_options, setOrderOptions] = useState([]);
     // Stores the id of the selected sku
     const [selected, setSelected] = useState(null);
@@ -111,10 +111,16 @@ function PlantDialog({
 
     useGet({
         path: "image",
-        queryParams: { id: plant.display_id, size: 'l' },
+        lazy: image !== null,
+        queryParams: { key: plant.display_key, size: 'l' },
         resolve: (response) => {
             if (response.ok) {
-                setImage(response.image);
+                let image_data = {
+                    src: `data:image/jpeg;base64,${response.image}`,
+                    alt: response.alt
+                }
+                setImage(image_data);
+                Cookies.set(`nln-img-${id}`, JSON.stringify(image_data));
             }
             else
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });

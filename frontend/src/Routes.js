@@ -36,8 +36,6 @@ function Routes({
     onRedirect
 }) {
 
-    console.log('IN ROUTES', session)
-
     const common = {
         sessionFailed: sessionFailed,
         onSessionUpdate: onSessionUpdate,
@@ -142,7 +140,7 @@ function Routes({
                 render={() => (
                     <Page title={`Forgot Password | ${BUSINESS_NAME.Short}`} {...common}>
                         <FormPage title="Forgot Password" maxWidth="700px">
-                            <ForgotPasswordForm />
+                            <ForgotPasswordForm {...common} />
                         </FormPage>
                     </Page>
                 )}

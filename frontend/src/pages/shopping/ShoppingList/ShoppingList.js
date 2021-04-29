@@ -38,7 +38,6 @@ function ShoppingList({
     // Thumbnail data for every plant
     const [thumbnails, setThumbnails] = useState([]);
     // Full image data for every sku group
-    const [full_images, setFullImages] = useState([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams();
@@ -53,7 +52,8 @@ function ShoppingList({
 
     useGet({
         path: "images",
-        queryParams: { ids: plants?.map(p => p.display_id), size: 'm' },
+        lazy: plants === null,
+        queryParams: { keys: plants?.map(p => p.display_key), size: 'm' },
         resolve: (response) => {
             if (response.ok) {
                 setThumbnails(response.images);

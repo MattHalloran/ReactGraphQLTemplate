@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useLayoutEffect, useCallback } from 'react'
+import { useState, useRef, useLayoutEffect, useCallback } from 'react'
 import { useHistoryState } from 'utils/useHistoryState';
 import PropTypes from 'prop-types';
 import * as validation from 'utils/validations';
@@ -124,27 +124,20 @@ function ProfileForm({
             }
 
         }
+        let form = FormData(event.target);
+        form.set('emails', [{ "id": email_id.current, "email_address": email, "receives_delivery_updates": true }]);
+        // form.set('phones', [{
+        //     "id": phone_ids.current[0],
+        //     "unformatted_number": phones[0] ?? 'N/A',
+        //      "country_code": '+1',
+        //      "extension": '',
+        //      "is_mobile": true,
+        //      "receives_delivery_updates": false
+        // }]);
         // Now that all checks have passed, we can send post a profile update
-        let data = {
-            "currentPassword": currentPassword,
-            "first_name": firstName,
-            "last_name": lastName,
-            "pronouns": pronouns,
-            "emails": [{ "id": email_id.current, "email_address": email, "receives_delivery_updates": true }],
-            // "phones": [{
-            //     "id": phone_ids.current[0],
-            //     "unformatted_number": phones[0] ?? 'N/A',
-            //      "country_code": '+1',
-            //      "extension": '',
-            //      "is_mobile": true,
-            //      "receives_delivery_updates": false
-            // }],
-            "existing_customer": existingCustomer,
-            "theme": theme,
-        }
         if (newPassword !== '')
-            data.password = newPassword;
-        updateProfile(data);
+            form.set('password', newPassword);
+        updateProfile(form);
     }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
     const handleThemeSelect = (event) => {

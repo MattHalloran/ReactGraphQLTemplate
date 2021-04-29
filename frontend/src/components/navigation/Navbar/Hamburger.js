@@ -131,7 +131,7 @@ function Hamburger({
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onClose={closeMenu}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onOpen={()=>{}} onClose={closeMenu}>
                 <IconButton className={classes.close} onClick={closeMenu}>
                     <CloseIcon fontSize="large" />
                 </IconButton>

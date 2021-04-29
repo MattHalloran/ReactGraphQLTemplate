@@ -1,6 +1,13 @@
 import codes from 'query/codes.json';
 import orderStatus from 'query/orderStatus.json';
 
+const IP = 'http://192.168.0.8:5000';//https://newlifenurseryinc.com';
+// URL prefix used to signify calls to backend
+const PREFIX = 'api';
+// API version
+const VERSION = 'v1';
+export const URL_BASE = `${IP}/${PREFIX}/${VERSION}/`
+
 export const WEBSITE_URL = 'https://www.newlifenurseryinc.com/';
 export const BUSINESS_NAME = {
     Short: 'New Life Nursery Inc.',

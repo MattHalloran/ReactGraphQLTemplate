@@ -406,13 +406,13 @@ class ImageHandler(Handler):
         db.session.add(img_row)
         db.session.commit()
         return img_row
-
+        
     @classmethod
-    def get_b64(cls, model, size: str) -> Optional[str]:
+    def get_b64(cls, key: str, size: str) -> Optional[str]:
         '''Returns the base64 string representation of an image in the requested size,
         or the next best size available'''
-        model = cls.convert_to_model(model)
-        if model is None:
+        base64_prefix = 'data:image/jpeg;base64,'
+        if not (model := ImageHandler.from_hash(key)):
             return None
         # First, check if the image exists in the exact requested size
         file_path = f'{Config.BASE_IMAGE_DIR}/{model.folder}/{model.file_name}-{size}.{model.extension}'
@@ -423,7 +423,7 @@ class ImageHandler(Handler):
             # Convert image to a base64 string
             base64_bytes = b64encode(byte_content)
             base64_string = base64_bytes.decode('utf-8')
-            return base64_string
+            return base64_prefix + base64_string
         # If it didn't exist, try to find a larger version and scale it down
         larger_labels = ['l', 'ml', 'm', 's', 'xs']
         requested_index = larger_labels.index(size)
@@ -445,7 +445,7 @@ class ImageHandler(Handler):
                 # Convert image to a base64 string
                 base64_bytes = b64encode(byte_content)
                 base64_string = base64_bytes.decode('utf-8')
-                return base64_string
+                return base64_prefix + base64_string
         # If a larger size didn't exist, try to return a smaller size
         smaller_labels = ['l', 'ml', 'm', 's', 'xs']
         requested_index = smaller_labels.index(size)
@@ -459,7 +459,7 @@ class ImageHandler(Handler):
                     byte_content = open_file.read()
                 base64_bytes = b64encode(byte_content)
                 base64_string = base64_bytes.decode('utf-8')
-                return base64_string
+                return base64_prefix + base64_string
         # Finally, if no image found, return None
         return None
 
@@ -473,6 +473,8 @@ class ImageHandler(Handler):
 
     @staticmethod
     def from_hash(hash: str):
+        if hash is None:
+            return None
         return db.session.query(Image).filter_by(hash=hash).one_or_none()
 
     @staticmethod
@@ -690,7 +692,7 @@ class PlantHandler(Handler):
         as_dict['id'] = model.id
         display_image = cls.get_display_image(model)
         if display_image:
-            as_dict['display_id'] = display_image.id
+            as_dict['display_key'] = display_image.hash
         return as_dict
 
     @classmethod

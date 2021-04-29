@@ -52,12 +52,12 @@ function AdminInventoryPage({
     const [trait_options, setTraitOptions] = useState(null);
     const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
     const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
-    let existing_image_ids = existing?.map(p => p.display_id);
-    let all_image_ids = all?.map(p => p.display_id);
+    let existing_image_keys = existing?.map(p => p.display_key);
+    let all_image_keys = all?.map(p => p.display_key);
 
     useGet({
         path: "images",
-        queryParams: { ids: existing_image_ids, size: 'm' },
+        queryParams: { keys: existing_image_keys, size: 'm' },
         resolve: (response) => {
             if (response.ok) {
                 setExistingThumbnails(response.images);
@@ -69,7 +69,7 @@ function AdminInventoryPage({
 
     useGet({
         path: "images",
-        queryParams: { ids: all_image_ids, size: 'm' },
+        queryParams: { keys: all_image_keys, size: 'm' },
         resolve: (response) => {
             if (response.ok) {
                 setAllThumbnails(response.images);

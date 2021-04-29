@@ -32,11 +32,11 @@ function AdminGalleryPage({
                 let response_meta = response.images_meta ?? [];
                 if (response_meta.length > 0) {
                     //Grab all thumbnail images
-                    let image_ids = response_meta.map(meta => meta.id);
+                    let image_keys = response_meta.map(meta => meta.hash);
                     let data = [];
                     useGet({
                         path: "images",
-                        queryParams: { ids: image_ids, size: 'm' },
+                        queryParams: { keys: image_keys, size: 'm' },
                         resolve: (response) => {
                             if (response.ok) {
                                 //Combine metadata with thumbnail images
@@ -48,7 +48,7 @@ function AdminGalleryPage({
                                     }
                                     let img = response.images[i];
                                     data.push({
-                                        'key': meta.id,
+                                        'key': meta.hash,
                                         'src': `data:image/jpeg;base64,${img}`,
                                         'alt': meta.alt,
                                         'description': 'TODO',

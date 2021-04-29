@@ -6,9 +6,7 @@ import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
-import { registerUser } from 'query/http_promises';
 import { useMutate } from "restful-react";
-import Cookies from 'js-cookie';
 import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
@@ -81,24 +79,17 @@ function SignUpForm({
         }
     });
 
-    const register = () => {
-        let data = {
-            "first_name": firstName,
-            "last_name": lastName,
-            "pronouns": pronouns,
-            "business": business,
-            "emails": [{ "email_address": email, "receives_delivery_updates": true }],
-            "phones": [{
-                "unformatted_number": phone,
-                "country_code": '+1',
-                "extension": '',
-                "is_mobile": true,
-                "receives_delivery_updates": false
-            }],
-            "password": password,
-            "existing_customer": existingCustomer
-        }
-        registerUser(data);
+    const register = (event) => {
+        let form = new FormData(event.target);
+        form.set('emails', [{ "email_address": email, "receives_delivery_updates": true }]);
+        form.set('phones', [{
+            "unformatted_number": phone,
+            "country_code": '+1',
+            "extension": '',
+            "is_mobile": true,
+            "receives_delivery_updates": false
+        }]);
+        registerUser(form);
     }
 
     const submit = (event) => {

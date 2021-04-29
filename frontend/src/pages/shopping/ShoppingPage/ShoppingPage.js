@@ -161,7 +161,7 @@ function ShoppingPage({
 
     return (
         <div id='page'>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={()=>{}} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
                 {optionsContainer}
                 <div>
                     <Selector

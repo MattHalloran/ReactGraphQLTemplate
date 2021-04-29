@@ -53,23 +53,21 @@ function AddEmployeeForm() {
         setExistingCustomer(event.target.value);
     }
 
-    const register = () => {
-        let data = {
-            "first_name": firstName,
-            "last_name": lastName,
-            "pronouns": pronouns,
-            "business": business,
-            "emails": [{ "email_address": email, "receives_delivery_updates": true }],
-            "phones": [{
-                "unformatted_number": phone,
-                "country_code": '+1',
-                "extension": '',
-                "is_mobile": true,
-                "receives_delivery_updates": false
-            }],
-            "password": password,
-            "existing_customer": existingCustomer
+    const addEmployee = (event) => {
+        event.preventDefault();
+        if (anyErrors) {
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
+            return;
         }
+        const form = new FormData(event.target);
+        form.set('emails', [{ "email_address": email, "receives_delivery_updates": true }])
+        form.set('phones', [{
+            "unformatted_number": phone,
+            "country_code": '+1',
+            "extension": '',
+            "is_mobile": true,
+            "receives_delivery_updates": false
+        }])
         // registerUser(data).then(() => {
         //     if (existingCustomer) {
         //         alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
@@ -87,15 +85,6 @@ function AddEmployeeForm() {
         //         PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
         //     }
         // })
-    }
-
-    const submit = (event) => {
-        event.preventDefault();
-        if (anyErrors) {
-            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
-            return;
-        }
-        register();
     }
 
     return (
@@ -236,7 +225,7 @@ function AddEmployeeForm() {
                 fullWidth
                 color="secondary"
                 className={classes.submit}
-                onClick={submit}
+                onClick={addEmployee}
             >
                 Sign Up
             </Button>

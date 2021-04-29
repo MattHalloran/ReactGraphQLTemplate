@@ -99,8 +99,8 @@ function Footer({
                         <ListItem button component="h5" >
                             <ListItemText className={classes.upper} primary={BUSINESS_NAME.Long} />
                         </ListItem>
-                        {contactLinks.map(([label, tooltip, src, text, Icon]) => (
-                            <Tooltip title={tooltip} placement="left">
+                        {contactLinks.map(([label, tooltip, src, text, Icon], key) => (
+                            <Tooltip key={key} title={tooltip} placement="left">
                                 <ListItem button component="a" aria-label={label} href={src}>
                                     <ListItemIcon>
                                         <Icon className={classes.icon} ></Icon>
@@ -111,8 +111,8 @@ function Footer({
                         ))}
                     </List>
                 </Grid>
-                {bottomImages.map(([src, alt, img]) => (
-                    <Grid item xs={4}>
+                {bottomImages.map(([src, alt, img], key) => (
+                    <Grid key={key} item xs={4}>
                         <Tooltip title={alt} placement="bottom">
                             <ButtonBase className={classes.imageContainer}>
                                 <a href={src} target="_blank" rel="noopener noreferrer">

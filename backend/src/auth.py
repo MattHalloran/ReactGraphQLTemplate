@@ -6,7 +6,7 @@ import os
 from typing import Optional
 
 TWO_WEEKS = 1209600
-SECRET_KEY = os.environ.get("NLN_SIGN_KEY")
+SECRET_KEY = os.environ.get("COOKIE_SECRET")
 
 
 def generate_token(app, user, expiration=TWO_WEEKS) -> str:

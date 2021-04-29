@@ -1,4 +1,0 @@
-requirements.txt is important for deployment of the backend (and anyone picking up your project later).
-It lists all python requirements needed to run the application. To create/update this file, go to the backend directory in a terminal and enter:
-    1) source site_env/bin/activate     (if not already in the python virtual environment)
-    2) pip freeze > requirements.txt

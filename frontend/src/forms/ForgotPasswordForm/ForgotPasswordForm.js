@@ -1,11 +1,10 @@
-import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import { resetPasswordRequest } from 'query/http_promises';
 import { Button, TextField, Link, Typography } from '@material-ui/core';
 import { FormControl, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS } from 'utils/consts';
 import * as validation from 'utils/validations';
+import { useMutate } from 'restful-react';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -17,24 +16,30 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ForgotPasswordForm() {
-    let history = useHistory();
+function ForgotPasswordForm({
+    onRedirect
+}) {
     const classes = useStyles();
     const [email, setEmail] = useHistoryState("li_email", "");
     let emailError = validation.emailValidation(email);
 
-    const forgotPassword = () => {
-        resetPasswordRequest(email).then(() => {
-            history.replace('/');
-        }).catch(error => {
-            console.error(error);
-        })
-    }
+    const { mutate: resetPassword } = useMutate({
+        verb: 'PUT',
+        path: 'reset-password',
+        resolve: (response) => {
+            if (response.ok) {
+                onRedirect(LINKS.Home);
+            }
+            else {
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }
+        }
+    });
 
     const submit = (event) => {
         event.preventDefault();
         if (!emailError) {
-            forgotPassword();
+            resetPassword(email);
         }
     }
 

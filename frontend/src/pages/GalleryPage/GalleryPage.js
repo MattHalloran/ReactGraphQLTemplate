@@ -2,18 +2,21 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { useParams, useHistory } from 'react-router-dom';
 import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
+import Carousel from 'react-gallery-carousel';
+import 'react-gallery-carousel/dist/index.css';
 import PubSub from 'utils/pubsub';
-import { StyledGalleryImage } from './GalleryPage.styled';
-import Cookies from 'js-cookie';
 import { useGet } from "restful-react";
 import {
     InformationalBreadcrumbs,
     StyledModal as Modal,
 } from 'components';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { PUBS, LINKS } from 'utils/consts';
+import { PUBS, LINKS, URL_BASE } from 'utils/consts';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { getImage, getImages } from 'query/http_promises';
+import SwipeableViews from 'react-swipeable-views';
+import { NoImageIcon } from 'assets/img';
 
 const useStyles = makeStyles((theme) => ({
     imageList: {
@@ -21,6 +24,22 @@ const useStyles = makeStyles((theme) => ({
     },
     tileImg: {
 
+    },
+    popupMain: {
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+    },
+    popupImg: {
+        maxHeight: '90vh',
+        maxWidth: '100%',
+        display: 'block',
+        borderRadius: '10px',
+        objectFit: 'contain',
+    },
+    carousel: {
+        width: '100%',
+        height: 'calc(100vw * 0.8)'
     }
 }));
 
@@ -48,10 +67,10 @@ function ImageGridList({
 }) {
     const classes = useStyles();
     return (
-        <ImageList cellHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth / 300)} spacing={1} {...props}>
+        <ImageList rowHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth / 300)} spacing={1} {...props}>
             {data.map((tile) => (
-                <ImageListItem key={tile.img} cols={tile.cols || 1} onClick={() => onClick(tile)}>
-                    <img className={classes.tileImg} src={tile.img} alt={tile.title} />
+                <ImageListItem key={tile.id} cols={tile.cols || 1} onClick={() => onClick(tile)}>
+                    <img className={classes.tileImg} src={tile.src} alt={tile.alt} />
                 </ImageListItem>
             ))}
         </ImageList>
@@ -60,29 +79,36 @@ function ImageGridList({
 
 function GalleryPage() {
     const classes = useStyles();
-    const [thumbnails, setThumbnails] = useState([]);
-    // Key = corresponding thumbnail index, value = expanded imgae
-    const full_images = useRef({});
-    const images_meta = useRef([]);
-    let history = useHistory();
-    const urlParams = useParams();
-    const loading = useRef(false);
-    const track_scrolling_id = 'page';
-    //Estimates how many images will fill the screen
-    const page_size = Math.ceil(window.innerHeight / 200) * Math.ceil(window.innerWidth / 200);
-    let curr_index = useMemo(() => images_meta.current?.findIndex(m => m.id == urlParams.img) ?? -1, [images_meta, urlParams]);
+    const [imageKeys, setImageKeys] = useState([]);
+    const [imageData, setImageData] = useState([]);
+
+    useEffect(() => {
+        if (imageKeys.length === 0)
+            setImageData([]);
+        else {
+            let combined_data = [];
+            //Combine metadata with thumbnail images
+            for (let i = 0; i < imageKeys.length; i++) {
+                let new_data = {
+                    "id": imageKeys[i],
+                    "src": `${URL_BASE}image?key=${imageKeys[i]}&size=l`,
+                    "thumbnail": `${URL_BASE}image?key=${imageKeys[i]}&size=s`,
+                };
+                combined_data.push(new_data);
+            }
+            setImageData(combined_data);
+            // let images = [900, 800, 700, 600, 500].map((size) => ({
+            //     src: `https://placedog.net/${size}/${size}`
+            //   }));
+            // setImageData(images);
+        }
+    }, [imageKeys])
 
     useGet({
         path: "gallery",
         resolve: (response) => {
             if (response.ok) {
-                images_meta.current = response.images_meta ?? [];
-                console.log('IMAGES META SET', images_meta.current);
-                if (images_meta.current.length === 0) {
-                    setThumbnails([]);
-                } else {
-                    loadNextPage();
-                }
+                setImageKeys(response.data ?? []);
             }
             else
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
@@ -90,117 +116,13 @@ function GalleryPage() {
     })
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
-    // useHotkeys('arrowLeft', () => prevImage());
-    // useHotkeys('arrowRight', () => nextImage());
+    // useHotkeys('arrowLeft', () => navigate(-1));
+    // useHotkeys('arrowRight', () => navigate(1));
 
-    let load_to = Math.min(images_meta.current.length, thumbnails.length + page_size - 1);
-    let next_img_ids = images_meta.current.map(meta => meta.id).slice(thumbnails.length, load_to);
-    const { refetch: loadNextImages } = useGet({
-        path: "images",
-        lazy: true,
-        queryParams: { ids: next_img_ids, size: 'ml' },
-        resolve: (response) => {
-            if (response.ok) {
-                let combined_data = [];
-                //Combine metadata with thumbnail images
-                for (let i = 0; i < next_img_ids.length; i++) {
-                    let meta = images_meta.current[thumbnails.length + i];
-                    if (!meta) {
-                        console.log('META IS EMPTY', images_meta.current, i);
-                        continue;
-                    }
-                    let img = response.images[i];
-                    let new_data = {
-                        "key": meta.id,
-                        "img": `data:image/jpeg;base64,${img}`,
-                        "title": meta.alt,
-                        "author": 'New Life Nursery', //TODO credit actual author, if not New Life
-                        "cols": Math.round((meta.width * 0.9) / meta.height),
-                    };
-                    // Prevent identical images from being added multiple times, if checks
-                    // up to this point have failed
-                    if (!images_meta.current.some(d => d.key === new_data.key)) {
-                        combined_data.push(new_data);
-                    }
-                }
-                setThumbnails(thumbs => thumbs.concat(combined_data));
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-        }
-    })
-
-    useEffect(() => {
-        loading.current = false;
-    }, [thumbnails])
-
-    const loadNextPage = useCallback(() => {
-        if (loading.current || images_meta.current.length <= thumbnails.length) return;
-        loading.current = true;
-        loadNextImages().then(() => loading.current = false)
-        return () => loading.current = false;
-    }, [thumbnails, page_size]);
-
-    //Load next page if scrolling near the bottom of the page
-    const checkScroll = useCallback(() => {
-        const divElement = document.getElementById(track_scrolling_id);
-        if (divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight) {
-            loadNextPage();
-        }
-    }, [track_scrolling_id, loadNextPage])
-
-    useLayoutEffect(() => {
-        document.addEventListener('scroll', checkScroll);
-        return (() => document.removeEventListener('scroll', checkScroll));
-    })
-
-    const prevImage = useCallback(() => {
-        if (thumbnails.length <= 0) return;
-        // Default to last image if none open
-        if (curr_index < 0) {
-            history.push(LINKS.Gallery + '/' + images_meta.current[thumbnails.length - 1].id);
-        } else {
-            // Find previous image index using modulus
-            let prev_index = (curr_index + images_meta.current.length - 1) % images_meta.current.length;
-            let id = images_meta.current[prev_index].id
-            history.replace(LINKS.Gallery + '/' + id);
-        }
-    }, [thumbnails, images_meta, curr_index, history]);
-
-    const nextImage = useCallback(() => {
-        if (thumbnails.length <= 0) return;
-        // Default to first image if none open
-        if (curr_index < 0) {
-            history.push(LINKS.Gallery + '/' + images_meta.current[0].id);
-        } else {
-            // Find next image index using modulus
-            let next_index = (curr_index + 1) % images_meta.current.length;
-            let id = images_meta.current[next_index].id;
-            history.replace(LINKS.Gallery + '/' + id);
-        }
-    }, [thumbnails, images_meta, curr_index, history]);
-
-    const openImage = (tile) => {
-        let key = tile?.key;
-        if (key) {
-            history.push(LINKS.Gallery + '/' + key);
-        }
-    }
-
-    let popup = (urlParams.img) ? (
-        <Modal onClose={() => history.goBack()}>
-            <GalleryImage
-                id={urlParams.img}
-                goLeft={prevImage}
-                goRight={nextImage} >
-            </GalleryImage>
-        </Modal>
-    ) : null;
     return (
         <div id='page'>
-            {popup}
             <InformationalBreadcrumbs />
-            <ImageGridList data={thumbnails} onClick={openImage} />
+            <Carousel className={classes.carousel} canAutoPlay={false} images={imageData} />
         </div>
     );
 }
@@ -209,61 +131,3 @@ GalleryPage.propTypes = {
 }
 
 export default GalleryPage;
-
-function GalleryImage({
-    id,
-    goLeft,
-    goRight
-}) {
-    const [data, setData] = useState(JSON.parse(Cookies.get(`nln-img-${id}`)) ?? {});
-
-    useGet({
-        path: "image",
-        queryParams: { id: id, size: 'l' },
-        resolve: (response) => {
-            if (response.ok) {
-                let image_data = {
-                    src: `data:image/jpeg;base64,${response.image}`,
-                    alt: response.alt
-                }
-                Cookies.set(`nln-img-${id}`, JSON.stringify(image_data));
-                setData(image_data);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-        }
-    })
-
-    const keyMap = {
-        PREVIOUS: "left",
-        NEXT: "right",
-    };
-
-    const handlers = {
-        PREVIOUS: goLeft,
-        NEXT: goRight,
-    };
-
-    useEffect(() => {
-        document.getElementById('boop').focus()
-    }, [])
-
-    return (
-        <HotKeys keyMap={keyMap} handlers={handlers}>
-            <StyledGalleryImage id='boop'>
-                <ChevronLeftIcon width="50px" height="50px" className="arrow left" onClick={goLeft} />
-                <ChevronRightIcon width="50px" height="50px" className="arrow right" onClick={goRight} />
-                <img src={data.src} alt={data.alt} />
-            </StyledGalleryImage>
-        </HotKeys>
-    );
-}
-
-GalleryImage.propTypes = {
-    src: PropTypes.string.isRequired, // base-64 image data
-    alt: PropTypes.string.isRequired,
-    goLeft: PropTypes.func.isRequired,
-    goRight: PropTypes.func.isRequired,
-}
-
-export { GalleryImage };

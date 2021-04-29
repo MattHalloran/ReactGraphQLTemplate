@@ -1,9 +1,9 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { LINKS, PUBS } from 'utils/consts';
+import { LINKS, PUBS, COOKIE, URL_BASE } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import * as http from './http_functions';
-
+import Localbase from 'localbase';
 
 // Helper method for basic http calls
 function promiseWrapper(http_func, ...args) {
@@ -28,11 +28,9 @@ export const getUnusedPlants = (sorter) => promiseWrapper(http.fetch_unused_plan
 export const getInventory = (sorter, page_size, admin) => promiseWrapper(http.fetch_inventory, sorter, page_size, admin);
 export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_page, ids);
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
-export const resetPasswordRequest = (email) => promiseWrapper(http.send_password_reset_request, email);
 export const modifySku = (sku, operation, data) => promiseWrapper(http.modify_sku, sku, operation, data);
 export const modifyPlant = (operation, data) => promiseWrapper(http.modify_plant, operation, data);
 export const modifyUser = (id, operation) => promiseWrapper(http.modify_user, id, operation);
-export const getOrders = (status) => promiseWrapper(http.fetch_orders, status)
 export const setOrderStatus = (id, status) => promiseWrapper(http.set_order_status, id, status);
 
 export function submitOrder(cart) {
@@ -45,4 +43,66 @@ export function submitOrder(cart) {
             }
         })
     });
+}
+
+// Retrieves image from backend or frontend, 
+// depending on if it is cached
+export async function getImage(key, size) {
+    let db = new Localbase('db');
+    let collection = 'images';
+    let image_key = `nln-img-${key}-${size}`;
+    let image = await db.collection(collection).doc(image_key).get();
+    console.log('STORED IMAGE ISSS', image)
+    if (image !== null && image.src !== null) {
+        return {
+            ok: true,
+            data: image
+        }
+    }
+    let response = await http.fetch_image(key, size);
+    if (response.ok) {
+        db.collection(collection).add(response.data, image_key);
+    }
+    return response;
+}
+
+
+// Retrieves images from backend or frontend, 
+// depending on if they are cached
+export async function getImages(keys, size) {
+    let db = new Localbase('db');
+    let collection = 'images';
+    let prefix = 'nln-img';
+    let images = new Array(keys.length).fill(null);
+    let img_keys = [...keys];
+    // Find cached images
+    for (let i = 0; i < keys.length; i++) {
+        let image_key = `${prefix}-${img_keys[i]}-${size}`;
+        let image = await db.collection(collection).doc(image_key).get();
+        if (image !== null && image.src !== null) {
+            images[i] = image;
+            img_keys[i] = null;
+        }
+    }
+    // Query uncached images
+    let response = await http.fetch_images(img_keys, size);
+    console.log('GOT RESPONSE: ', response)
+    if (response.ok) {
+        for (let i = 0; i < response.data.length; i++) {
+            let image = response.data[i];
+            if (image !== null && image.src !== null) {
+                db.collection(collection).add(image, `${prefix}-${img_keys[i]}-${size}`);
+                images[i] = image;
+            }
+        }
+        return {
+            ok: true,
+            data: images
+        }
+    }
+    return {
+        ok: false,
+        data: images,
+        msg: 'Failed to load some images'
+    }
 }

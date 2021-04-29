@@ -1,0 +1,1428 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "New Life Nursery",
+        "description": "New Life Nursery is a wholesale plant distributor, located in Southern New Jersey. We strive to provide beautiful, healthy plants at competitive prices.",
+        "termsOfService": "https://newlifenurseryinc.com/terms-and-conditions",
+        "license": {
+            "name": "MIT"
+        },
+        "contact": {
+            "email": "newlifenurseryinc@gmail.com"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://newlifenurseryinc.com/v1"
+        }
+    ],
+    "paths": {
+        "/session": {
+            "get": {
+                "summary": "Details about the current user session",
+                "operationId": "validateSession",
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details about the current user session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/register": {
+            "put": {
+                "summary": "Create a new account",
+                "operationId": "registerUser",
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "name": "first_name",
+                        "in": "header",
+                        "description": "User's first name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "John"
+                        }
+                    },
+                    {
+                        "name": "last_name",
+                        "in": "header",
+                        "description": "User's last name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Smith"
+                        }
+                    },
+                    {
+                        "name": "pronouns",
+                        "in": "header",
+                        "description": "Pronouns the user identifies as",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "they/them"
+                        }
+                    },
+                    {
+                        "name": "business",
+                        "in": "header",
+                        "description": "Name of business associated with the user",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Main Street Plants"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Password"
+                    },
+                    {
+                        "name": "receives_delivery_updates",
+                        "in": "header",
+                        "description": "Indicates if the user would like to receive email updates",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "existing_customer",
+                        "in": "header",
+                        "description": "Indicates if the user has previously ordered from New Life Nursery without an account",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details about the current user session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "put": {
+                "summary": "Log in to existing account",
+                "operationId": "loginUser",
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Password"
+                    },
+                    {
+                        "name": "verificationCode",
+                        "in": "header",
+                        "description": "Code sent to email to verify account. Only needs to be done once",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details about the current user session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/Customer"
+                                        },
+                                        "session": {
+                                            "$ref": "#/components/schemas/Session"
+                                        },
+                                        "emailVerified": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/reset-password": {
+            "get": {
+                "summary": "Sends a password reset email",
+                "operationId": "sendResetPassword",
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Email"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Sets a new password for a user",
+                "operationId": "resetPassword",
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "header",
+                        "description": "Password reset code sent to the user's email",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Password"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/customers": {
+            "get": {
+                "summary": "Details about all customers. Must be an admin",
+                "operationId": "getCustomers",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details about all customers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Customer"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "summary": "User's profile information",
+                "operationId": "getProfile",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Tag"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details about all customers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Customer"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update user's profile",
+                "operationId": "updateProfile",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Tag"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Customer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "summary": "Array of order data with specified status",
+                "operationId": "getOrders",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "name": "orderStatus",
+                        "in": "header",
+                        "description": "order status",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/OrderStatus"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of order data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Order"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/order": {
+            "put": {
+                "summary": "Update an order, including its status. Must either be the user associated with the order, or an admin",
+                "operationId": "updateOrder",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "header",
+                        "description": "order object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/contact": {
+            "get": {
+                "summary": "Get contact info",
+                "operationId": "getContactInfo",
+                "responses": {
+                    "200": {
+                        "description": "Business contact info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContactInfo"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update contact info. Must be an admin",
+                "operationId": "updateContactInfo",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    },
+                    {
+                        "name": "contactInfo",
+                        "in": "header",
+                        "description": "contact info",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/ContactInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/inactive-plants": {
+            "get": {
+                "summary": "Array of plant data, for plants without SKUs. Must be an admin",
+                "operationId": "getUnusedPlants",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Session"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of plant data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Plant"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/active-plants": {
+            "get": {
+                "summary": "Array of plant data, for plants with SKUs",
+                "operationId": "getPlants",
+                "parameters": [
+                    {
+                        "name": "showZero",
+                        "in": "header",
+                        "description": "show plants with no available inventory",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of plant data, and array of filters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "plantData": {
+                                            "$ref": "#/components/schemas/Plant"
+                                        },
+                                        "filters": {
+                                            "$ref": "#/components/schemas/PlantFilters"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/plant": {
+            "put": {
+                "summary": "Update a single plant. Must be an admin",
+                "operationId": "updatePlant",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "name": "plantData",
+                        "in": "header",
+                        "description": "updated plant object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Plant"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/sku": {
+            "put": {
+                "summary": "Update a single SKU. Must be an admin",
+                "operationId": "updateSKU",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "name": "skuData",
+                        "in": "header",
+                        "description": "updated SKU object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Sku"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/gallery": {
+            "get": {
+                "summary": "Array of gallery image data",
+                "operationId": "getGallery",
+                "responses": {
+                    "200": {
+                        "description": "Array of gallery image data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ImageData"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Updates gallery image data. Must be an admin",
+                "operationId": "setGallery",
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "name": "imageData",
+                        "in": "header",
+                        "description": "image data array",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/ImageData"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add images to the gallery. Must be an admin",
+                "operationId": "uploadGallery",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "extension": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/availability": {
+            "put": {
+                "summary": "Upload a new availability file. Must be an admin",
+                "operationId": "uploadGallery",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/images": {
+            "get": {
+                "summary": "Array of base64 image data",
+                "operationId": "getImages",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "header",
+                        "description": "id array",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/ImageSize"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of base64 image data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        },
+        "/image": {
+            "get": {
+                "summary": "Base64 image data",
+                "operationId": "getImage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ImageSize"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Base64 image data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/UnexpectedError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "Id": {
+                "name": "id",
+                "in": "header",
+                "description": "object's ID",
+                "required": true,
+                "schema": {
+                    "type": "integer"
+                }
+            },
+            "ImageSize": {
+                "name": "imageSize",
+                "in": "header",
+                "description": "image size",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "xs",
+                        "s",
+                        "m",
+                        "ml",
+                        "l"
+                    ]
+                }
+            },
+            "Tag": {
+                "name": "tag",
+                "in": "header",
+                "description": "a user's tag. Used by admins to retrieve data of customers",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "Customer": {
+                "name": "customerData",
+                "in": "header",
+                "description": "customer data, including cart",
+                "required": true,
+                "schema": {
+                    "type": "#/components/schemas/Session"
+                }
+            },
+            "Session": {
+                "name": "session",
+                "in": "cookie",
+                "description": "current user session",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/Session"
+                }
+            },
+            "Email": {
+                "name": "email",
+                "in": "header",
+                "description": "User's email address",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/Email"
+                }
+            },
+            "Password": {
+                "name": "password",
+                "in": "header",
+                "description": "User's new password",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "example": "hunter123"
+                }
+            }
+        },
+        "schemas": {
+            "Session": {
+                "type": "object",
+                "required": [
+                    "tag",
+                    "token"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ImageData": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "alt"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "hash": {
+                        "type": "string"
+                    },
+                    "alt": {
+                        "type": "string"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Customer": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "tag": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "pronouns": {
+                        "type": "string"
+                    },
+                    "business": {
+                        "type": "string"
+                    },
+                    "theme": {
+                        "type": "string"
+                    },
+                    "existing_customer": {
+                        "type": "boolean"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Role"
+                        }
+                    },
+                    "emails": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Email"
+                        }
+                    },
+                    "phones": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Phone"
+                        }
+                    },
+                    "cart_id": {
+                        "type": "integer"
+                    },
+                    "cart_size": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Order": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/OrderStatus"
+                    },
+                    "special_instructions": {
+                        "type": "string"
+                    },
+                    "is_delivery": {
+                        "type": "boolean"
+                    },
+                    "desired_delivery_date": {
+                        "type": "number"
+                    },
+                    "items": {
+                        "type": "array"
+                    },
+                    "delivery_address": {
+                        "$ref": "#/components/schemas/Address"
+                    },
+                    "customer": {
+                        "$ref": "#/components/schemas/Customer"
+                    }
+                }
+            },
+            "OrderStatus": {
+                "type": "integer",
+                "enum": [
+                    -4,
+                    -3,
+                    -2,
+                    -1,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            "Role": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Email": {
+                "type": "object",
+                "properties": {
+                    "email_address": {
+                        "type": "string",
+                        "example": "somerandomemail@gmail.com"
+                    },
+                    "receives_delivery_updates": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                }
+            },
+            "Phone": {
+                "type": "object",
+                "required": [
+                    "unformatted_number"
+                ],
+                "properties": {
+                    "unformatted_number": {
+                        "type": "string"
+                    },
+                    "country_code": {
+                        "type": "string"
+                    },
+                    "extension": {
+                        "type": "string"
+                    },
+                    "is_mobile": {
+                        "type": "boolean"
+                    },
+                    "receives_delivery_updates": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Address": {
+                "type": "object",
+                "required": [
+                    "administrative_area",
+                    "locality",
+                    "postal_code",
+                    "throughfare"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2,
+                        "example": "US"
+                    },
+                    "administrative_area": {
+                        "type": "string"
+                    },
+                    "sub_administrative_area": {
+                        "type": "string"
+                    },
+                    "locality": {
+                        "type": "string"
+                    },
+                    "postal_code": {
+                        "type": "string"
+                    },
+                    "throughfare": {
+                        "type": "string"
+                    },
+                    "premise": {
+                        "type": "string"
+                    },
+                    "delivery_instructions": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ContactInfo": {
+                "type": "object",
+                "required": [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday"
+                ],
+                "properties": {
+                    "monday": {
+                        "type": "string"
+                    },
+                    "tuesday": {
+                        "type": "string"
+                    },
+                    "wednesday": {
+                        "type": "string"
+                    },
+                    "thursday": {
+                        "type": "string"
+                    },
+                    "friday": {
+                        "type": "string"
+                    },
+                    "saturday": {
+                        "type": "string"
+                    },
+                    "sunday": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Plant": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "display_key": {
+                        "type": "string"
+                    },
+                    "skus": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "latin_name": {
+                        "type": "string"
+                    },
+                    "common_name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "jersery_native": {
+                        "type": "string"
+                    },
+                    "deer_resistance": {
+                        "type": "string"
+                    },
+                    "drought_tolerance": {
+                        "type": "string"
+                    },
+                    "grown_height": {
+                        "type": "string"
+                    },
+                    "grown_spread": {
+                        "type": "string"
+                    },
+                    "growth_rate": {
+                        "type": "string"
+                    },
+                    "optimal_light": {
+                        "type": "string"
+                    },
+                    "salt_tolerance": {
+                        "type": "string"
+                    },
+                    "attracts_pollinators_and_wildlifes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "bloom_times": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "bloom_colors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "zones": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "plant_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "physiographic_regions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_moistures": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_phs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "light_ranges": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "flower_images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImageData"
+                        }
+                    },
+                    "leaf_images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImageData"
+                        }
+                    },
+                    "fruit_images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImageData"
+                        }
+                    },
+                    "bark_images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImageData"
+                        }
+                    },
+                    "habit_images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImageData"
+                        }
+                    }
+                }
+            },
+            "Sku": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string"
+                    },
+                    "availability": {
+                        "type": "integer"
+                    },
+                    "is_discountable": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "enum": [
+                            -2,
+                            -1,
+                            1
+                        ]
+                    },
+                    "discounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Discount"
+                        }
+                    },
+                    "plant_id": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "PlantFilters": {
+                "type": "object",
+                "properties": {
+                    "size": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "optimal_light": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "drought_tolerance": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "grown_height": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "grown_spread": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "growth_rate": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "salt_tolerance": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "light_ranges": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "attracts_pollinators_and_wildlifes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_moistures": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_phs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "soil_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "zones": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "Discount": {
+                "type": "object",
+                "properties": {
+                    "discount": {
+                        "type": "number"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "comment": {
+                        "type": "string"
+                    },
+                    "terms": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "message"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "msg": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "UnexpectedError": {
+                "description": "unexpected error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

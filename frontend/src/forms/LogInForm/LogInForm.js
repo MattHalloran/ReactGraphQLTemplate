@@ -52,21 +52,15 @@ function LogInForm({
     let passwordError = validation.defaultStringValidation('password', password);
     let anyErrors = !validation.passedValidation(emailError, passwordError);
 
-    const login = () => {
-        const formData = new FormData()
-        formData.append('email', email);
-        formData.append('password', password);
-        formData.append('verificationCode', urlParams.code);
-        loginUser(formData);
-    }
-
-    const submit = (event) => {
+    const login = (event) => {
         event.preventDefault();
         if (anyErrors) {
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields', severity: 'error'});
             return;
         }
-        login();
+        const form = new FormData(event.target);
+        form.set('verificationCode', urlParams.code);
+        loginUser(formData);
     }
 
     return (
@@ -107,7 +101,7 @@ function LogInForm({
                 fullWidth
                 color="secondary"
                 className={classes.submit}
-                onClick={submit}
+                onClick={login}
             >
                 Log In
             </Button>

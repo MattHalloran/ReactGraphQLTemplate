@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { getOrders } from 'query/http_promises';
-import { ORDER_STATES } from 'utils/consts';
+import { useGet } from "restful-react";
+import { ORDER_STATES, PUBS } from 'utils/consts';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     AdminBreadcrumbs,
@@ -9,6 +8,7 @@ import {
     OrderDialog,
     Selector
 } from 'components';
+import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {
@@ -25,18 +25,21 @@ function AdminOrderPage({
 }) {
     const classes = useStyles();
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
-    const [orders, setOrders] = useState([]);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
 
+    const { data: orders, refetch: getOrders } = useGet({
+        path: "orders",
+        lazy: true,
+        queryParams: { filter: filter },
+        resolve: (response) => {
+            if (!response.ok)
+                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+        }
+    })
+
     useEffect(() => {
-        getOrders(filter)
-            .then((response) => {
-                setOrders(response.orders);
-            })
-            .catch((error) => {
-                console.error("Failed to load orders", error);
-            });
+        getOrders();
     }, [filter])
 
     return (

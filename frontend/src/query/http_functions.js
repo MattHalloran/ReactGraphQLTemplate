@@ -1,10 +1,6 @@
-const IP = 'http://192.168.0.10:5000';//https://newlifenurseryinc.com';
-// URL prefix used to signify calls to backend
-const PREFIX = 'api';
-// API version
-const VERSION = 'v1';
+import { URL_BASE } from 'utils/consts';
 // Headers used by fetch calls
-const HEADERS = {
+export const HEADERS = {
     ApplicatonJsonAccept: {
         'Accept': 'application/json', // eslint-disable-line quote-props
         'Content-Type': 'application/json',
@@ -21,40 +17,15 @@ const HEADERS = {
 // Parameters:
 // url - string
 // httpParams - object containing fetch options
-async function fetchWrapper(route, httpParams) {
+export async function fetchWrapper(route, httpParams) {
     try {
-        let response = await fetch(`${IP}/${PREFIX}/${VERSION}/${route}`, httpParams);
+        let response = await fetch(`${URL_BASE}${route}`, httpParams);
         let json = await response.json();
         return json;
     } catch (err) {
         console.error(err);
         return err;
     }
-}
-
-export async function register(data) {
-    let json = JSON.stringify({
-        "data": data
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include',
-    }
-    return await fetchWrapper('register', options);
-}
-
-export async function send_password_reset_request(email) {
-    let json = JSON.stringify({
-        "email": email.toLowerCase(),
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-    }
-    return await fetchWrapper('reset_password_request', options);
 }
 
 export async function fetch_unused_plants(sorter) {
@@ -66,7 +37,7 @@ export async function fetch_unused_plants(sorter) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper('fetch_unused_plants', options);
+    return await fetchWrapper('unused_plants', options);
 }
 
 export async function fetch_inventory(sorter, page_size, admin) {
@@ -80,7 +51,7 @@ export async function fetch_inventory(sorter, page_size, admin) {
         method: 'post',
         headers: HEADERS.ApplicationJson,
     }
-    return await fetchWrapper('fetch_inventory', options);
+    return await fetchWrapper('inventory', options);
 }
 
 export async function fetch_inventory_filters() {
@@ -88,7 +59,7 @@ export async function fetch_inventory_filters() {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper('fetch_inventory_filters', options);
+    return await fetchWrapper('inventory_filters', options);
 }
 
 export async function fetch_inventory_page(ids) {
@@ -100,21 +71,7 @@ export async function fetch_inventory_page(ids) {
         method: 'post',
         headers: HEADERS.Text,
     }
-    return await fetchWrapper('fetch_inventory_page', options);
-}
-
-export async function set_like_sku(sku, liked) {
-    let json = JSON.stringify({
-        "sku": sku,
-        "liked": liked
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include'
-    }
-    return await fetchWrapper('set_like_sku', options);
+    return await fetchWrapper('inventory_page', options);
 }
 
 export async function set_order_status(id, status) {
@@ -128,7 +85,7 @@ export async function set_order_status(id, status) {
         headers: HEADERS.Text,
         credentials: 'include'
     }
-    return await fetchWrapper('set_order_status', options);
+    return await fetchWrapper('order_status', options);
 }
 
 export async function modify_sku(sku, operation, data) {
@@ -188,15 +145,18 @@ export async function submit_order(cart) {
     return await fetchWrapper('submit_order', options);
 }
 
-export async function fetch_orders(status) {
-    let json = JSON.stringify({
-        "status": status
-    });
+export async function fetch_image(key, size) {
     let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include'
+        method: 'get',
+        headers: HEADERS.Text
     }
-    return await fetchWrapper('fetch_orders', options);
+    return await fetchWrapper(`image?key=${key}&size=${size}`, options);
+}
+
+export async function fetch_images(keys, size) {
+    let options = {
+        method: 'get',
+        headers: HEADERS.Text
+    }
+    return await fetchWrapper(`images?keys=${keys.filter(k => k !== null).join(',')}&size=${size}`, options);
 }
