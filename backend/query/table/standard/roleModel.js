@@ -1,5 +1,7 @@
 import { TABLES } from '../tables';
 
+
+
 // Traits are separate from the Plant table to reduce duplication,
 // and to ease the process and speed of finding unique values for traits
 export const createTable = `

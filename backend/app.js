@@ -8,6 +8,13 @@ const port = 5000;
 const VERSION = 'v1';
 const PREFIX = `/api/${VERSION}`;
 
+// Override sendstatus to allow for json
+app.response.sendStatus = function (jsonStatus) {
+    return this.contentType('application/json')
+      .status(jsonStatus.code)
+      .send(jsonStatus);
+  }
+
 // For parsing application/json
 app.use(express.json());
 // For parsing application/xwww-

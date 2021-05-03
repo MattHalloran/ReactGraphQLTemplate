@@ -1,32 +1,32 @@
 import express from 'express';
-import argon2 from 'argon2';
 import CODES from '../public/codes.json';
 import * as auth from '../auth';
+import Model from '../query/Model';
+import { TABLES } from '../query/table/tables';
 
 const router = express.Router();
 
 router.post('/register', (req, res) => {
-    //TODO if req.body.emails[0].email_address in database,
-    //let err = CODES.EMAIL_IN_USE
-    //return res.status(err.code).send(code.msg);
-    //if req.body.phones[0].whatever in database,
-    //let err = CODES.PHONE_IN_USE
-    //return res.status(err.code).send(code.msg);
+    let email = req.body.emails[0];
+    if ((new Model(TABLES.Email)).any('email_address', email.email_address)) {
+        return res.sendStatus(CODES.EMAIL_IN_USE);
+    }
+    let phone = req.body.phones[0];
+    // TODO check should be more robust
+    if ((new Model(TABLES.Phone)).any('unformatted_Number', phone.unformatted_number)) {
+        return res.sendStatus(CODES.PHONE_IN_USE);
+    }
     //create user with req.body
     //generate token
     //enqueue email (customer_notify_admin, req.body.first_name req.body.last_name)
     //enqueue verification email (send_verification_link, req.body.email, UserHandler.tag_from_email(email))
-    argon2.generateSalt().then(salt => {
-        argon2.hash(req.body.password, salt).then(hash => {
-          console.log('Successfully created Argon2 hash:', hash);
-          // res.cookie('session', somesessiontoken);
-          // TODO: store the hash and session token in the user database
-        //   return {
-        //     "session": UserHandler.pack_session(user, token),
-        //     "user": UserHandler.to_dict(user)
-        //   }
-        });
-      });
+    await auth.generateHash(req.body.password);
+    // res.cookie('session', somesessiontoken);
+    // TODO: store the hash and session token in the user database
+    //   return {
+    //     "session": UserHandler.pack_session(user, token),
+    //     "user": UserHandler.to_dict(user)
+    //   }
 })
 
 router.put('/login', (req, res) => {
@@ -34,12 +34,7 @@ router.put('/login', (req, res) => {
     // if isinstance(req.body.verificationCode, str) and len(req.body.verificationCode) > 0:
     //     UserHandler.verify_email(req.body.email, req.body.verificationCode)
     // user = UserHandler.get_user_from_credentials(req.body.email, req.body.password)
-    argon2.verify('previously-created-argon-hash-here', req.body.password).then(() => { 
-        console.log('Successful password supplied!');
-        // TODO: log the user in
-      }).catch(() => {
-        console.log('Invalid password supplied!');
-      });
+    let verified = auth.verifyPhrase('previously-created-argon-hash-here', req.body.password);
     //   if user:
     //     if user.tag == "nenew":
     //         user.tag = salt(32)
