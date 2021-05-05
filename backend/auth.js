@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import CODES from './public/codes.json';
 import Model from './query/Model';
 import { TABLES } from './query/table/tables';
+import User from './db/models/user';
 
 // Salts and hashes a string
 export async function generateHash(phrase) {
@@ -24,17 +25,17 @@ export async function verifyPhrase(hash, phrase) {
 }
 
 // Generates a JSON Web Token (JWT)
-export function generateToken(user_tag) {
-    return jwt.sign(user_tag, process.env.COOKIE_SECRET, { expiresIn: '30 days' })
+export function generateToken(uuid) {
+    return jwt.sign(uuid, process.env.COOKIE_SECRET, { expiresIn: '30 days' })
 }
 
 // Middleware that requires a valid token
 export function requireToken(req, res, next) {
     const { cookies } = req;
     if (!('session' in cookies)) return res.sendStatus(CODES.UNAUTHORIZED);
-    jwt.verify(cookies.session, process.env.COOKIE_SECRET, (error, user_tag) => {
+    jwt.verify(cookies.session, process.env.COOKIE_SECRET, (error, uuid) => {
         if (error) return res.sendStatus(CODES.UNAUTHORIZED);
-        req.token = { tag: user_tag }
+        req.token = { uuid: uuid }
         next();
     })
 }
@@ -42,7 +43,7 @@ export function requireToken(req, res, next) {
 // Middleware that restricts access to customers (or admins)
 export function requireCustomer(req, res, next) {
     requireToken(req, res, function () {
-        let user = (new Model(TABLES.User)).fromValue('tag', req.token.tag);
+        const user = User.query().findById(req.token.uuid);
         let user_roles = (new Model(TABLES.Role)).select(['title'], `WHERE user_id = ${user.id}`);
         if (!user_roles?.includes('customer' || 'admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();
@@ -52,7 +53,7 @@ export function requireCustomer(req, res, next) {
 // Middle ware that restricts access to admins
 export function requireAdmin(req, res, next) {
     requireToken(req, res, function () {
-        let user = (new Model(TABLES.User)).fromValue('tag', req.token.tag);
+        const user = User.query().findById(req.token.uuid);
         let user_roles = (new Model(TABLES.Role)).select(['title'], `WHERE user_id = ${user.id}`);
         if (!user_roles?.includes('admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();

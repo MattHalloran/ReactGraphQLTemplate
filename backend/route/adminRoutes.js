@@ -1,8 +1,10 @@
 import express from 'express';
+import { uploadAvailability } from '../worker/uploadAvailability/queue';
+import * as auth from '../auth';
 
 const router = express.Router();
 
-router.post('/modify_sku', (req, res) => {
+router.post('/modify_sku', auth.requireAdmin, (req, res) => {
     // (sku, operation, sku_data) = getData('sku', 'operation', 'data')
     // if not verify_admin():
     //     return StatusCodes['UNAUTHORIZED']
@@ -114,7 +116,7 @@ router.post('/availability', (req, res) => {
     // toread = io.BytesIO()
     // toread.write(decoded)
     // toread.seek(0)  # resets pointer
-    // job = q.enqueue(upload_availability, toread)
+    // await uploadAvailability(toread)
     // return {
     //     **StatusCodes['SUCCESS'],
     //     "job_id": job.id

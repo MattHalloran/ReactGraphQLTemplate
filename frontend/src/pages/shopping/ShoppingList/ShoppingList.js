@@ -187,7 +187,7 @@ function ShoppingList({
     }
 
     const setInCart = (name, sku, operation, quantity) => {
-        if (!session?.tag || !session?.token) return;
+        if (!session?.uuid || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
             alert(`Error: Cannot add more than ${max_quantity}!`);
@@ -195,7 +195,7 @@ function ShoppingList({
         }
         let cart_copy = JSON.parse(JSON.stringify(cart));
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
-        updateCart(session?.tag, cart_copy)
+        updateCart(session?.uuid, cart_copy)
             .then(() => {
                 if (operation === 'ADD') {
                     PubSub.publish(PUBS.Snack, { 

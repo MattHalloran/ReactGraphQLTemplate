@@ -283,7 +283,7 @@
                         "$ref": "#/components/parameters/Session"
                     },
                     {
-                        "$ref": "#/components/parameters/Tag"
+                        "$ref": "#/components/parameters/UserId"
                     }
                 ],
                 "responses": {
@@ -310,7 +310,7 @@
                         "$ref": "#/components/parameters/Session"
                     },
                     {
-                        "$ref": "#/components/parameters/Tag"
+                        "$ref": "#/components/parameters/UserId"
                     },
                     {
                         "$ref": "#/components/parameters/Customer"
@@ -787,10 +787,10 @@
                     ]
                 }
             },
-            "Tag": {
-                "name": "tag",
+            "UserId": {
+                "name": "userId",
                 "in": "header",
-                "description": "a user's tag. Used by admins to retrieve data of customers",
+                "description": "a user's uuid. Used by admins to retrieve data of customers",
                 "required": true,
                 "schema": {
                     "type": "string"

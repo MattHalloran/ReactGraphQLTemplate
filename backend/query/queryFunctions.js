@@ -1,8 +1,8 @@
 import { pool } from './pool';
-import * as AllTypes from './type';
-import * as AllTables from './type';
+import * as AllTypes from '../db/type';
+import * as AllTables from '../db/type';
 import { TABLES } from './models/tables';
-import { ACCOUNT_STATUS } from './type/accountStatusType';
+import { ACCOUNT_STATUS } from '../db/type/accountStatusType';
 
 export const executeQueryArray = async arr => new Promise(resolve => {
   const stop = arr.length;
@@ -13,14 +13,16 @@ export const executeQueryArray = async arr => new Promise(resolve => {
 });
 
 export const createTypes = () => executeQueryArray(Object.keys(AllTypes).map(t => AllTypes[t].createType));
-export const dropTables = () => executeQueryArray(Object.entries(TABLES).map(e => `DROP TYPE ${e[1]}`));
+export const dropTypes = () => executeQueryArray(Object.entries(TABLES).map(e => `DROP TYPE ${e[1]}`));
 
 export const createTables = () => executeQueryArray(Object.keys(AllTables).map(t => AllTables[t].createTable));
 export const dropTables = () => executeQueryArray(Object.entries(TABLES).map(e => `DROP TABLE ${e[1]}`));
 
 export const initializeDatabase = () => new Promise(resolve => {
     await dropTables();
+    await dropTypes();
     await createTables();
+    await createTypes();
     await pool.query(`
         INSERT INTO ${TABLES.Role}(title, description) VALUES 
         ('Customer', 'This role allows a user to order products'),

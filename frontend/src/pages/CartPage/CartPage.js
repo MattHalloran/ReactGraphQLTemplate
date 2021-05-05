@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CartPage({
-    user_tag,
+    user_id,
     cart,
 }) {
     let history = useHistory();
@@ -67,11 +67,11 @@ function CartPage({
     }
 
     const updateOrder = () => {
-        if (!user_tag) {
+        if (!user_id) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
-        updateCart(user_tag, changedCart);
+        updateCart(user_id, changedCart);
     }
 
     function requestQuote() {
@@ -96,7 +96,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, user_tag]);
+    }, [cart, changedCart, user_id]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
@@ -141,7 +141,7 @@ function CartPage({
 }
 
 CartPage.propTypes = {
-    user_tag: PropTypes.string,
+    user_id: PropTypes.string,
     cart: PropTypes.object,
 }
 

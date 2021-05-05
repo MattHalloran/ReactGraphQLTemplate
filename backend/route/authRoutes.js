@@ -3,8 +3,13 @@ import CODES from '../public/codes.json';
 import * as auth from '../auth';
 import Model from '../query/Model';
 import { TABLES } from '../query/table/tables';
+import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
 
 const router = express.Router();
+
+const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
+const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
+const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 
 router.post('/register', (req, res) => {
     let email = req.body.emails[0];
@@ -18,8 +23,8 @@ router.post('/register', (req, res) => {
     }
     //create user with req.body
     //generate token
-    //enqueue email (customer_notify_admin, req.body.first_name req.body.last_name)
-    //enqueue verification email (send_verification_link, req.body.email, UserHandler.tag_from_email(email))
+    //await customerNotifyAdmin(`${req.body.first_name} ${req.body.last_name}`)
+    //await sendVerificationLink(req.body.email, UserHandler.tag_from_email(email));
     await auth.generateHash(req.body.password);
     // res.cookie('session', somesessiontoken);
     // TODO: store the hash and session token in the user database
@@ -55,7 +60,7 @@ router.put('/login', (req, res) => {
     //     status = StatusCodes['BAD_CREDENTIALS']
     //     if account_status == AccountStatus.WAITING_EMAIL_VERIFICATION.value:
     //         status = StatusCodes['EMAIL_NOT_VERIFIED']
-    //         q.enqueue(send_verification_link, email, UserHandler.tag_from_email(email))
+    //         await sendVerificationLink(req.body.email, UserHandler.tag_from_email(email));
     //     elif account_status == AccountStatus.DELETED.value:
     //         status = StatusCodes['NO_USER']
     //     elif account_status == AccountStatus.SOFT_LOCK.value:
@@ -67,7 +72,7 @@ router.put('/login', (req, res) => {
 
 router.get('/reset-password', (req, res) => {
     // email = getData('email')
-    // q.enqueue(reset_password_link, email, UserHandler.tag_from_email(email))
+    // await sendResetPasswordLink(req.body.email, UserHandler.tag_from_email(email));
     // return StatusCodes['SUCCESS']
 })
 

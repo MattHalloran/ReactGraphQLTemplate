@@ -1,4 +1,6 @@
 import express from 'express';
+import { orderNotifyAdmin } from '../worker/email/queue';
+import * as auth from '../auth';
 
 const router = express.Router();
 
@@ -42,7 +44,7 @@ router.put('/submit_order', (req, res) => {
     // db.session.add(new_cart)
     // user.orders.append(new_cart)
     // db.session.commit()
-    // q.enqueue(order_notify_admin)
+    await orderNotifyAdmin()
     // return {
     //     **StatusCodes['SUCCESS'],
     //     "cart": OrderHandler.to_dict(cart_obj)
@@ -51,13 +53,13 @@ router.put('/submit_order', (req, res) => {
 
 router.route('/profile')
     .get((req, res) => {
-        // (tag) = getJson('tag')
+        // (id) = getJson('id')
         // # Only admins can view information for other profiles
-        // if tag != request.headers['session']['tag'] and not verify_admin():
+        // if id != request.headers['session']['id'] and not verify_admin():
         //     return StatusCodes['UNAUTHORIZED']
         // if not verify_customer():
         //     return StatusCodes['UNAUTHORIZED']
-        // user_data = UserHandler.get_profile_data(tag)
+        // user_data = UserHandler.get_profile_data(id)
         // if user_data is None:
         //     print('FAILEDDDD')
         //     return StatusCodes['ERROR_UNKNOWN']
@@ -67,9 +69,9 @@ router.route('/profile')
         //     "user": user_data
         // }
     }).post((req, res) => {
-        // (tag, data) = getData('tag', 'data')
+        // (id, data) = getData('id', 'data')
         // # Only admins can view information for other profiles
-        // if tag != request.headers['session']['tag'] and not verify_admin():
+        // if id != request.headers['session']['id'] and not verify_admin():
         //     return StatusCodes['UNAUTHORIZED']
         // if not verify_customer():
         //     return StatusCodes['UNAUTHORIZED']
@@ -81,7 +83,7 @@ router.route('/profile')
         // if UserHandler.update(user, data):
         //     return {
         //         **StatusCodes['SUCCESS'],
-        //         "profile": UserHandler.get_profile_data(tag)
+        //         "profile": UserHandler.get_profile_data(id)
         //     }
         // return StatusCodes['ERROR_UNKNOWN']
     })

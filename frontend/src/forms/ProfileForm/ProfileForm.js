@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ProfileForm({
-    user_tag
+    user_id
 }) {
     const classes = useStyles();
     const [editing, setEditing] = useState(false);
@@ -58,7 +58,7 @@ function ProfileForm({
 
     useGet({
         path: "profile",
-        queryParams: { tag: user_tag },
+        queryParams: { id: user_id },
         resolve: (response) => {
             let user = response.user;
             fetched_profile.current = user;
@@ -338,7 +338,7 @@ function ProfileForm({
 }
 
 ProfileForm.propTypes = {
-    user_tag: PropTypes.string.isRequired,
+    user_id: PropTypes.string.isRequired,
 }
 
 export default ProfileForm;

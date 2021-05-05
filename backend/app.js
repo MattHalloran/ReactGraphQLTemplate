@@ -4,7 +4,6 @@ import path from 'path';
 import * as auth from './auth';
 
 const app = express();
-const port = 5000;
 const VERSION = 'v1';
 const PREFIX = `/api/${VERSION}`;
 
@@ -30,8 +29,9 @@ app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, 'priv
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Routes
+app.use(PREFIX, require('./route/adminRoutes'));
 app.use(PREFIX, require('./route/authRoutes'));
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+app.use(PREFIX, require('./route/customerRoutes'));
+app.use(PREFIX, require('./route/imageRoutes'));
+app.use(PREFIX, require('./route/inventoryRoutes'));
+app.use(PREFIX, require('./route/otherRoutes'));
