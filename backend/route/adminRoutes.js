@@ -1,14 +1,15 @@
 import express from 'express';
+import CODES from '../public/codes.json';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import * as auth from '../auth';
+import { ACCOUNT_STATUS, SKU_STATUS, TYPES } from '../db/types';
+import { Order, User, Plant, Sku, Email, Phone } from '../db/models';
 
 const router = express.Router();
 
 router.post('/modify_sku', auth.requireAdmin, (req, res) => {
     // (sku, operation, sku_data) = getData('sku', 'operation', 'data')
-    // if not verify_admin():
-    //     return StatusCodes['UNAUTHORIZED']
-    // sku_obj = SkuHandler.from_sku(sku)
+    const sku = Sku.query().where('sku', req.body.sku);
     // if sku_obj is None:
     //     return StatusCodes['ERROR_UNKNOWN']
     // operation_to_status = {
@@ -34,38 +35,26 @@ router.post('/modify_sku', auth.requireAdmin, (req, res) => {
     // return StatusCodes['ERROR_UNKNOWN']
 })
 
-router.post('/modify_plant', (req, res) => {
+router.post('/modify_plant', auth.requireAdmin, (req, res) => {
     // (operation, plant_data) = getData('operation', 'data')
-    // if not verify_admin():
-    //     return StatusCodes['UNAUTHORIZED']
-    // plant_obj = PlantHandler.from_id(plant_data['id'])
-    // if plant_obj is None and operation != 'ADD':
-    //     return StatusCodes['ERROR_UNKNOWN']
-    // operation_to_status = {
-    //     'HIDE': SkuStatus.INACTIVE.value,
-    //     'UNHIDE': SkuStatus.ACTIVE.value,
-    //     'DELETE': SkuStatus.DELETED.value
-    // }
-    // if operation in operation_to_status:
-    //     plant_obj.status = operation_to_status[operation]
-    //     db.session.commit()
-    //     return StatusCodes['SUCCESS']
-    // if operation == 'ADD' or operation == 'UPDATE':
-    //     # Create plant if doesn't exist
-    //     if plant_obj is None:
-    //         plant_obj = PlantHandler.create(plant_data)
-    //         db.session.add(plant_obj)
-    //     # Set display image
-    //     if plant_data['display_image'] is not None:
-    //         image = ImageHandler.create_from_scratch(plant_data['display_image']['data'],
-    //                                                  'TODO',
-    //                                                  Config.PLANT_FOLDER,
-    //                                                  ImageUses.DISPLAY)
-    //         if image is not None:
-    //             PlantHandler.set_display_image(plant_obj, image)
-    //             db.session.commit()
-
-    //     # Update plant fields
+    const operation = req.body.operation;
+    let plant = await Plant.query().findById(req.body.plant.id);
+    if (plant === null && operation !== 'ADD') return res.sendStatus(CODES.ERROR_UNKNOWN);
+    // These are operations which only change the SKU's status
+    const OPERATION_TO_STATUS = {
+        'HIDE': SKU_STATUS.Inactive,
+        'UNHIDE': SKU_STATUS.Active,
+        'DELETE': SKU_STATUS.Deleted
+    }
+    if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
+        plant.patch({[TYPES.SkuStatus]: OPERATION_TO_STATUS[operation]});
+        return res.sendStatus(CODES.SUCCESS);
+    } 
+    if (operation === 'ADD') {
+        plant = Plant.query().insert(req.body.plant);
+    } else if (operation === 'UPDATE') {
+        plant = Plant.query().patch(req.body.plant);
+            //     # Update plant fields
     //     def update_trait(option: PlantTraitOptions, value: str):
     //         if isinstance(value, list):
     //             return [update_trait(option, v) for v in value]
@@ -87,6 +76,20 @@ router.post('/modify_plant', (req, res) => {
     //     plant_obj.growth_rate = update_trait(PlantTraitOptions.GROWTH_RATE, plant_data['growth_rate'])
     //     plant_obj.optimal_light = update_trait(PlantTraitOptions.OPTIMAL_LIGHT, plant_data['optimal_light'])
     //     plant_obj.salt_tolerance = update_trait(PlantTraitOptions.SALT_TOLERANCE, plant_data['salt_tolerance'])
+    }
+    else {
+        return res.sendStatus(CODES.ERROR_UNKNOWN);
+    }
+    // Handle finding/creating the display image
+    if (req.body.plant.display_image) {
+        //         image = ImageHandler.create_from_scratch(plant_data['display_image']['data'],
+        //                                                  'TODO',
+        //                                                  Config.PLANT_FOLDER,
+        //                                                  ImageUses.DISPLAY)
+        //         if image is not None:
+        //             PlantHandler.set_display_image(plant_obj, image)
+        //             db.session.commit()
+    }
     //     # Hide existing SKUs (if they are still active, this will be updated later)
     //     for sku in plant_obj.skus:
     //         sku.status = SkuStatus.INACTIVE.value
@@ -105,11 +108,9 @@ router.post('/modify_plant', (req, res) => {
     //             plant_obj.skus.append(sku)
     //     db.session.commit()
     //     return StatusCodes['SUCCESS']
-    // return StatusCodes['ERROR_UNKNOWN']
 })
 
-router.post('/availability', (req, res) => {
-    // # Check to make sure requestor is an admin TODO
+router.post('/availability', auth.requireAdmin, (req, res) => {
     // (data) = getForm('data')
     // b64 = data[0].split('base64,')[1]
     // decoded = b64decode(b64)
@@ -123,74 +124,47 @@ router.post('/availability', (req, res) => {
     // }
 })
 
-router.post('/orders', (req, res) => {
-    // '''Fetch orders that match the provided state'''
-    // if not verify_admin():
-    //     return StatusCodes['UNAUTHORIZED']
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     "orders": [OrderHandler.to_dict(order) for order in OrderHandler.from_status(req.body.status)]
-    // }
+router.get('/orders', auth.requireAdmin, (req, res) => {
+    const orders = await Order.query().withGraphFetched('address, user, items.[sku.[plant, discounts]]').where(TYPES.OrderStatus, req.body.status);
+    res.json(orders);
 })
 
-router.post('/customers', (req, res) => {
-    // if not verify_admin():
-    //     return StatusCodes['UNAUTHORIZED']
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     "customers": UserHandler.all_customers()
-    // }
+router.get('/customers', auth.requireAdmin, (req, res) => {
+    //TODO don't show admins?
+    const customers = User.query();
+    res.json(customers);
 })
 
-router.post('/order_status', (req, res) => {
-    // ''Sets the order status for an order'''
-    // (id, status) = getData('id', 'status')
-    // if not verify_admin():
-    //     return StatusCodes['UNAUTHORIZED']
-    // order_obj = OrderHandler.from_id(id)
-    // if order_obj is None:
-    //     return StatusCodes['ERROR_UNKNOWN']
-    // order_obj.status = status
-    // db.session.commit()
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     'order': OrderHandler.to_dict(order_obj)
-    // }
+router.post('/order_status', auth.requireAdmin, (req, res) => {
+    const order = await Order.query().patchAndFetchById(req.body.id, {
+        [TYPES.OrderStatus]: req.body.status
+    });
+    res.json(order);
 })
 
-router.post('/modify_user', (req, res) => {
-    // admin = verify_admin()
-    // if not admin:
-    //     return StatusCodes['UNAUTHORIZED']
-    // user = UserHandler.from_id(req.body.id)
-    // if user is None:
-    //     print('USER NOT FOUND')
-    //     return StatusCodes['ERROR_UNKNOWN']
-    // # Cannot delete yourself
-    // if user.id == admin.id:
-    //     return StatusCodes['CANNOT_DELETE_YOURSELF']
-    // operation_to_status = {
-    //     'LOCK': AccountStatus.HARD_LOCK.value,
-    //     'UNLOCK': AccountStatus.UNLOCKED.value,
-    //     'APPROVE': AccountStatus.UNLOCKED.value,
-    //     'DELETE': AccountStatus.DELETED.value
-    // }
-    // if req.body.operation in operation_to_status:
-    //     user.account_status = operation_to_status[req.body.operation]
-    //     if req.body.operation == 'DELETE':
-    //         for email in user.personal_email:
-    //             user.personal_email.remove(email)
-    //             db.session.delete(email)
-    //         for phone in user.personal_phone:
-    //             user.personal_phone.remove(phone)
-    //             db.session.delete(phone)
-    //     db.session.commit()
-    //     return {
-    //         **StatusCodes['SUCCESS'],
-    //         "customers": UserHandler.all_customers()
-    //     }
-    // print(f'OPERATION NOT IN OPERATIONS: {req.body.operation}')
-    // return StatusCodes['ERROR_UNKNOWN']
+router.post('/modify_user', auth.requireAdmin, (req, res) => {
+    if (req.token.user_id === req.body.id) return res.sendStatus(CODES.CANNOT_DELETE_YOURSELF);
+    const operation = req.body.operation;
+    let user = await User.query().findById(req.body.id);
+    const OPERATION_TO_STATUS = {
+        'LOCK': ACCOUNT_STATUS.HardLock,
+        'UNLOCK': ACCOUNT_STATUS.Unlocked,
+        'APPROVE': ACCOUNT_STATUS.Unlocked,
+        'DELETE': ACCOUNT_STATUS.Deleted
+    }
+    if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
+        user.patch({[TYPES.AccountStatus]: OPERATION_TO_STATUS[operation]});
+        if (operation === 'DELETE') {
+            // Make sure emails and phones get deleted
+            await Email.query().where('userId', user.id).del();
+            await Phone.query().where('userId', user.id).del();
+            user.del();
+        }
+        //TODO don't show admin?
+        res.json(User.query());
+        return res.sendStatus(CODES.SUCCESS);
+    }
+    return res.sendStatus(CODES.ERROR_UNKNOWN);
 })
 
 module.exports = router;

@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import CODES from './public/codes.json';
-import Model from './query/Model';
 import { TABLES } from './query/table/tables';
-import User from './db/models/user';
+import { User } from './db/models';
 
 // Salts and hashes a string
 export async function generateHash(phrase) {
@@ -14,28 +13,25 @@ export async function generateHash(phrase) {
 // Returns true if the phrase matches the hash
 export async function verifyPhrase(hash, phrase) {
     try {
-        if (await argon2.verify(hash, phrase)) {
-            return true;
-        } else {
-            return false;
-        }
+        success = await argon2.verify(hash, phrase);
+        return success;
     } catch {
         return false;
     }
 }
 
 // Generates a JSON Web Token (JWT)
-export function generateToken(uuid) {
-    return jwt.sign(uuid, process.env.COOKIE_SECRET, { expiresIn: '30 days' })
+export function generateToken(user_id) {
+    return jwt.sign(user_id, process.env.COOKIE_SECRET, { expiresIn: '30 days' })
 }
 
 // Middleware that requires a valid token
 export function requireToken(req, res, next) {
     const { cookies } = req;
     if (!('session' in cookies)) return res.sendStatus(CODES.UNAUTHORIZED);
-    jwt.verify(cookies.session, process.env.COOKIE_SECRET, (error, uuid) => {
+    jwt.verify(cookies.session, process.env.COOKIE_SECRET, (error, user_id) => {
         if (error) return res.sendStatus(CODES.UNAUTHORIZED);
-        req.token = { uuid: uuid }
+        req.token = { user_id: user_id }
         next();
     })
 }
@@ -43,9 +39,8 @@ export function requireToken(req, res, next) {
 // Middleware that restricts access to customers (or admins)
 export function requireCustomer(req, res, next) {
     requireToken(req, res, function () {
-        const user = User.query().findById(req.token.uuid);
-        let user_roles = (new Model(TABLES.Role)).select(['title'], `WHERE user_id = ${user.id}`);
-        if (!user_roles?.includes('customer' || 'admin')) return res.sendStatus(CODES.UNAUTHORIZED);
+        const roles = User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
+        if (!roles?.includes('customer' || 'admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();
     });
 }
@@ -53,9 +48,8 @@ export function requireCustomer(req, res, next) {
 // Middle ware that restricts access to admins
 export function requireAdmin(req, res, next) {
     requireToken(req, res, function () {
-        const user = User.query().findById(req.token.uuid);
-        let user_roles = (new Model(TABLES.Role)).select(['title'], `WHERE user_id = ${user.id}`);
-        if (!user_roles?.includes('admin')) return res.sendStatus(CODES.UNAUTHORIZED);
+        const roles = User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
+        if (!roles?.includes('admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();
     });
 }

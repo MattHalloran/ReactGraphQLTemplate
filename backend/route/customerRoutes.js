@@ -1,10 +1,11 @@
 import express from 'express';
+import CODES from '../public/codes.json';
 import { orderNotifyAdmin } from '../worker/email/queue';
 import * as auth from '../auth';
 
 const router = express.Router();
 
-router.put('/cart', (req, res) => {
+router.put('/cart', auth.requireCustomer, (req, res) => {
     // ''Updates the cart for the specified user.
     // Only admins can update other carts.
     // Returns the updated cart data, so the frontend can verify update'''
@@ -29,7 +30,7 @@ router.put('/cart', (req, res) => {
     // }
 })
 
-router.put('/submit_order', (req, res) => {
+router.put('/submit_order', auth.requireCustomer, (req, res) => {
     // let cart = req.body.cart;
     // # If changing a cart that doesn't belong to them, verify admin
     // user = verify_customer()
@@ -52,7 +53,7 @@ router.put('/submit_order', (req, res) => {
 })
 
 router.route('/profile')
-    .get((req, res) => {
+    .get(auth.requireCustomer, (req, res) => {
         // (id) = getJson('id')
         // # Only admins can view information for other profiles
         // if id != request.headers['session']['id'] and not verify_admin():
@@ -68,7 +69,7 @@ router.route('/profile')
         //     **StatusCodes['SUCCESS'],
         //     "user": user_data
         // }
-    }).post((req, res) => {
+    }).post(auth.requireCustomer, (req, res) => {
         // (id, data) = getData('id', 'data')
         // # Only admins can view information for other profiles
         // if id != request.headers['session']['id'] and not verify_admin():

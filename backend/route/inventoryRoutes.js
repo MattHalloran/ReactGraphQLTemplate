@@ -1,4 +1,5 @@
 import express from 'express';
+import CODES from '../public/codes.json';
 import * as auth from '../auth';
 
 const router = express.Router();
@@ -60,7 +61,7 @@ router.get('/inventory', (req, res) => {
     // }
 })
 
-router.get('/unused_plants', (req, res) => {
+router.get('/unused_plants', auth.requireAdmin, (req, res) => {
     // (sorter) = getData('sorter')
     // # Grab plant ids
     // all_plant_ids = PlantHandler.all_ids()

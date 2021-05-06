@@ -1037,61 +1037,13 @@ class UserHandler(Handler):
         return any([num == formatted_phone for num in numbers])
 
     @staticmethod
-    def verify_email(email: str, code: str) -> bool:
-        # TODO create more robust verification
-        user = UserHandler.from_email(email)
-        if not user:
-            return False
-        if code != user.tag:
-            return False
-        user.account_status = AccountStatus.UNLOCKED.value
-        db.session.commit()
-        return True
-
-    @staticmethod
     def is_customer(user: User) -> bool:
         print(RoleHandler.all_dicts(user.roles))
         return any(r.title == 'Customer' for r in user.roles)
 
     @staticmethod
-    def is_admin(user: User) -> bool:
-        print('in is_admin')
-        print(user.roles)
-        return any(r.title == 'Admin' for r in user.roles)
-
-    @staticmethod
     def is_password_valid(user: User, password: str) -> bool:
         return bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
-
-    @staticmethod
-    def get_user_from_credentials(email: str, password: str):
-        # If user not found, or account not verified
-        if not (user := UserHandler.from_email(email)) or user.account_status == AccountStatus.WAITING_EMAIL_VERIFICATION.value:
-            return None
-        # Reset login attempts after 15 minutes
-        if user.account_status != AccountStatus.HARD_LOCK.value and (time.time() - user.last_login_attempt) > User.SOFT_LOCKOUT_DURATION_SECONDS:
-            user.login_attempts = 0
-            db.session.commit()
-        # Return user if password is valid and account is unlocked
-        if user.account_status == AccountStatus.UNLOCKED.value and UserHandler.is_password_valid(user, password):
-            return user
-        # Update login attempt metadata
-        user.last_login_attempt = time.time()
-        user.login_attempts += 1
-        db.session.commit()
-        # If too many login attemps have been made
-        if user.account_status == AccountStatus.UNLOCKED.value and user.login_attempts > User.LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT:
-            user.account_status = AccountStatus.SOFT_LOCK.value
-            db.session.commit()
-        if user.account_status == AccountStatus.SOFT_LOCK.value and user.login_attempts > User.LOGIN_ATTEMPTS_TO_HARD_LOCKOUT:
-            user.account_status = AccountStatus.HARD_LOCK.value
-            db.session.commit()
-
-    @staticmethod
-    def set_token(model: User, token: str) -> NoReturn:
-        '''Sets session token, which is used to validate
-        near-term authenticated requests'''
-        model.session_token = token
 
     @staticmethod
     def pack_session(user: User, token: str):
@@ -1104,22 +1056,6 @@ class UserHandler(Handler):
             'roles': RoleHandler.all_dicts(user.roles),
             'orders': OrderHandler.all_dicts(user.orders)
         }
-
-    @staticmethod
-    def is_valid_session(session, app):
-        '''Determines if the provided email and token combination
-        makes a valid user session
-        Returns a session with theme and user data if True'''
-        token = session.get('token', None) if session is not None else None
-        tag = session.get('tag', None) if session is not None else None
-        # First, try to find the user associated with the tag
-        user = UserHandler.from_tag(tag)
-        if not user:
-            return False
-        # Check if supplied token is equal to the user's token
-        if not token == user.session_token or not verify_token(app, user.session_token):
-            return False
-        return UserHandler.pack_session(user, token)
 
     @staticmethod
     def get_profile_data(tag: str):

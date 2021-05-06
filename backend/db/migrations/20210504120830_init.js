@@ -27,6 +27,7 @@ export async function up (knex) {
         table.timestamp('lastLoginAttempt').defaultTo(knex.fn.now()).notNullable();
         table.string('sessionToken', 256);
         table.boolean('accountApproved').defaultTo(false).notNullable();
+        table.boolean('emailVerified').defaultTo(false).notNullable();
         table.enu(TYPES.AccountStatus, Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
         table.integer('businessId').references('id').inTable(TABLES.Business);
     });

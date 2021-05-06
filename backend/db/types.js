@@ -11,7 +11,6 @@ export const TYPES = {
 
 export const ACCOUNT_STATUS = {
     Deleted: 'Deleted',
-    WaitingEmailVerification: 'Waiting email verification',
     Unlocked: 'Unlocked',
     SoftLock: 'Soft Lock',
     HardLock: 'Hard Lock'

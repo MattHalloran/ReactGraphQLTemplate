@@ -1,4 +1,5 @@
 import express from 'express';
+import CODES from '../public/codes.json';
 import * as auth from '../auth';
 
 const router = express.Router();
@@ -9,10 +10,8 @@ router.route('/gallery')
         //     **StatusCodes['SUCCESS'],
         //     'data': [ImageHandler.to_dict(img) for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
         // }
-    }).put((req, res) => {
+    }).put(auth.requireAdmin, (req, res) => {
         // (data) = getData('data')
-        // if not verify_admin():
-        //     return StatusCodes['UNAUTHORIZED']
         // success = True
         // # Grab all gallery images
         // curr_images = [img.id for img in ImageHandler.from_used_for(ImageUses.GALLERY)]
@@ -30,7 +29,7 @@ router.route('/gallery')
         //         db.session.delete(image_model)
         // db.session.commit()
         // return StatusCodes['SUCCESS'] if success else StatusCodes['ERROR_UNKNOWN']
-    }).post((req, res) => {
+    }).post(auth.requireAdmin, (req, res) => {
         // (names, extensions, images) = getForm('name', 'extension', 'image')
         // status = StatusCodes['SUCCESS']
         // passed_indexes = []
