@@ -1,10 +1,8 @@
 import express from 'express';
 import CODES from '../public/codes.json';
 import * as auth from '../auth';
-import Model from '../query/Model';
-import { TABLES } from '../query/table/tables';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
-import { Email, User } from '../db/models';
+import { Email, Phone, User } from '../db/models';
 import { ACCOUNT_STATUS, TYPES } from '../db/types';
 
 const router = express.Router();
@@ -14,33 +12,51 @@ const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
 const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 
 router.post('/register', (req, res) => {
-    let email = req.body.emails[0];
-    if ((new Model(TABLES.Email)).any('email_address', email.email_address)) {
+    // Check if email is in use
+    let emails = await Email.query().where('emailAddress', req.body.emails[0].email_address);
+    if (emails.length > 0) {
         return res.sendStatus(CODES.EMAIL_IN_USE);
     }
-    let phone = req.body.phones[0];
-    // TODO check should be more robust
-    if ((new Model(TABLES.Phone)).any('unformatted_Number', phone.unformatted_number)) {
+    // Check if phone is in use
+    let phones = await Phone.query().where('unformattedNumber', req.body.phones[0].unformatted_number);
+    if (phones.length > 0) {
         return res.sendStatus(CODES.PHONE_IN_USE);
     }
-    //create user with req.body
-    //generate token
-    //await customerNotifyAdmin(`${req.body.first_name} ${req.body.last_name}`)
-    //await sendVerificationLink(req.body.email, UserHandler.tag_from_email(email));
-    await auth.generateHash(req.body.password);
-    // res.cookie('session', somesessiontoken);
-    // TODO: store the hash and session token in the user database
-    //   return {
-    //     "session": UserHandler.pack_session(user, token),
-    //     "user": UserHandler.to_dict(user)
-    //   }
+    // Create a new user
+    let user = await User.query().insert({
+        ...req.body,
+        password: auth.generateHash(req.body.password)
+    })
+    // Associate email with user
+    await Email.query().insert({
+        ...req.body.emails[0],
+        userId: user.id
+    })
+    // Associate phone with user
+    await Phone.query().insert({
+        ...req.body.phones[0],
+        userId: user.id
+    })
+    // Generate session token
+    const session = auth.generateToken(user.id);
+    let user = await User.query().patch({
+        sessionToken: session
+    });
+    res.cookie('session', session);
+    customerNotifyAdmin(user.fullName())
+    sendVerificationLink(req.body.emails[0].email_address, user.id);
+    return res.json({
+        //TODO
+        //"session": UserHandler.pack_session(user, token),
+        user: user
+    })
 })
 
 router.put('/login', (req, res) => {
     // Handle email verification
     if (req.body.verification_code !== null) {
-        let users = User.query().where('id', req.body.verification_code);
-        let emails = Email.query().where('email_address', req.body.email);
+        let users = await User.query().where('id', req.body.verification_code);
+        let emails = await Email.query().where('email_address', req.body.email);
         if (users.length === 1 && emails.length === 1) {
             users[0].patch({ 
                 [TYPES.AccountStatus]: ACCOUNT_STATUS.Unlocked ,
@@ -51,11 +67,11 @@ router.put('/login', (req, res) => {
         }
     }
     // Validate email address
-    let email_ids = Email.query().where('email_address', req.body.email).select('id', 'userId');
+    let email_ids = await Email.query().where('email_address', req.body.email).select('id', 'userId');
     if (email_ids.length === 0) {
         return res.sendStatus(CODES.BAD_CREDENTIALS);
     }
-    let user = User.query().findById(email_ids[0].userId);
+    let user = await User.query().findById(email_ids[0].userId);
     // Reset login attempts after 15 minutes
     if (user[TYPES.AccountStatus] !== ACCOUNT_STATUS.HardLock && 
         user[TYPES.AccountStatus] !== ACCOUNT_STATUS.Deleted && 
@@ -104,7 +120,7 @@ router.put('/login', (req, res) => {
 })
 
 router.get('/reset-password', (req, res) => {
-    const user_ids = Email.relatedQuery('user').where('email_address', req.body.email).select('id');
+    const user_ids = await Email.relatedQuery('user').where('email_address', req.body.email).select('id');
     if (user_ids.length === 0) return res.sendStatus(CODES.ERROR_UNKNOWN);
     sendResetPasswordLink(req.body.email, user_ids[0]);
 })

@@ -56,7 +56,7 @@ export const IMAGE_USE = {
 // SCHEDULED            | Order has been scheduled for delivery
 // IN_TRANSIT           | Order is currently being delivered
 // DELIVERED            | Order has been delivered
-const ORDER_STATUS = {
+export const ORDER_STATUS = {
     CanceledByAdmin: 'Canceled By Admin',
     CanceledByUser: 'Canceled By User',
     PendingCancel: 'Pending Cancel',

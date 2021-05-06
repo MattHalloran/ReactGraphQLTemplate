@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post('/modify_sku', auth.requireAdmin, (req, res) => {
     // (sku, operation, sku_data) = getData('sku', 'operation', 'data')
-    const sku = Sku.query().where('sku', req.body.sku);
+    const sku = await Sku.query().where('sku', req.body.sku);
     // if sku_obj is None:
     //     return StatusCodes['ERROR_UNKNOWN']
     // operation_to_status = {
@@ -51,9 +51,9 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
         return res.sendStatus(CODES.SUCCESS);
     } 
     if (operation === 'ADD') {
-        plant = Plant.query().insert(req.body.plant);
+        plant = await Plant.query().insert(req.body.plant);
     } else if (operation === 'UPDATE') {
-        plant = Plant.query().patch(req.body.plant);
+        plant = await Plant.query().patch(req.body.plant);
             //     # Update plant fields
     //     def update_trait(option: PlantTraitOptions, value: str):
     //         if isinstance(value, list):
@@ -131,7 +131,7 @@ router.get('/orders', auth.requireAdmin, (req, res) => {
 
 router.get('/customers', auth.requireAdmin, (req, res) => {
     //TODO don't show admins?
-    const customers = User.query();
+    const customers = await User.query();
     res.json(customers);
 })
 
@@ -161,7 +161,8 @@ router.post('/modify_user', auth.requireAdmin, (req, res) => {
             user.del();
         }
         //TODO don't show admin?
-        res.json(User.query());
+        const customers = await User.query();
+        res.json(customers);
         return res.sendStatus(CODES.SUCCESS);
     }
     return res.sendStatus(CODES.ERROR_UNKNOWN);

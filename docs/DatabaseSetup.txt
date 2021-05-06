@@ -9,11 +9,13 @@ To delete the database:
 
 To populate database:
 1) Open a terminal in the backend directory
-2) npx knex seed:run --knexfile ./db/knexfile.js
+2) npm run seed-run
 
 To perform a databse migration:
 **Note: If you are adding a new Column to an existing table, and it has a default value, note that the "default"
 argument is only interpreted by the python class instance. Please also add a "server_default" argument with a SQL expression
 1) Open a terminal in the backend directory
 1.5) If migrations folder doesn't exist (i.e. first migration), run 'npx knex migrate:make init'
-2) knex migrate:latest --knexfile ./db/knexfile.js
+3) To create a new migration file, enter 'npm run migrate-create <some_name_here>'
+4) Alter the tables as needed in the newly-created migration file
+5) To run the migration, enter 'npm run migrate-latest'

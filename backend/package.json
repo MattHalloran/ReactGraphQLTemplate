@@ -8,7 +8,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec babel-node app"
+    "start": "nodemon --exec babel-node app",
+    "migrate-create": "babel-node node_modules/.bin/knex migrate:make --knexfile ./db/knexfile.js",
+    "seed-make": "babel-node node_modules/.bin/knex seed:make --knexfile ./db/knexfile.js",
+    "seed-run": "babel-node node_modules/.bin/knex seed:run --knexfile ./db/knexfile.js",
+    "migrate-latest": "babel-node node_modules/.bin/knex migrate:latest --knexfile ./db/knexfile.js",
+    "migrate-rollback": "babel-node node_modules/.bin/knex migrate:rollback --knexfile ./db/knexfile.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +22,6 @@
     "bull": "^3.22.4",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
-    "g": "^2.0.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.19",
     "nodemailer": "^6.6.0",

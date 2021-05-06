@@ -1,49 +1,52 @@
-import { ACCOUNT_STATUS } from "../type/accountStatusType";
-import { TABLES } from "../tables";
+import { ACCOUNT_STATUS, TYPES } from '../types';
+import { TABLES } from '../tables';
 import { v4 as uuidv4 } from 'uuid';
+import * as auth from '../../auth';
 
 
 export async function seed(knex) {
     // Truncate existing tables
-    TABLES.forEach(t => {
+    await Object.values(TABLES).forEach(async t => {
         await knex.raw(`TRUNCATE TABLE "${t}" CASCADE`);
     });
 
     // Insert roles
+    const role_customer_id = uuidv4();
+    const role_admin_id = uuidv4();
     await knex(TABLES.Role).insert([
-        { id: 1, title: 'Customer', description: 'This role allows a user to order products' },
-        { id: 2, title: 'Admin', description: 'This role grants administrative access. This comes with the ability to \
+        { id: role_customer_id, title: 'Customer', description: 'This role allows a user to order products' },
+        { id: role_admin_id, title: 'Admin', description: 'This role grants administrative access. This comes with the ability to \
         approve new customers, change customer information, modify inventory and \
         contact hours, and more.' }
     ]);
 
     // Insert admin
-    const admin_id = uuidv4();
+    const user_admin_id = uuidv4();
     await knex(TABLES.User).insert([
         { 
-            id: admin_id,
-            first_name: 'admin', 
-            last_name: 'account', 
-            password: generateHash(process.env.ADMIN_PASSWORD), 
-            account_approved: true,
-            account_status: ACCOUNT_STATUS.Unlocked
+            id: user_admin_id,
+            firstName: 'admin', 
+            lastName: 'account', 
+            password: auth.generateHash(process.env.ADMIN_PASSWORD), 
+            accountApproved: true,
+            [TYPES.AccountStatus]: ACCOUNT_STATUS.Unlocked
         }
     ]);
 
     // Insert admin email
     await knex(TABLES.Email).insert([
         {
-            email_address: process.env.ADMIN_EMAIL,
-            receives_delivery_updates: false,
-            user_id: admin_id
+            emailAddress: process.env.ADMIN_EMAIL,
+            receivesDeliveryUpdates: false,
+            userId: user_admin_id
         }
     ])
 
     // Associate the admin account with an admin role
-    await knex(TABLES.Role).insert([
+    await knex(TABLES.UserRoles).insert([
         {
-            user_id: admin_id,
-            role_id: 2
+            userId: user_admin_id,
+            roleId: role_admin_id
         }
     ])
 }

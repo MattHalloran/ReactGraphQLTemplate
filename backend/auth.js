@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import CODES from './public/codes.json';
-import { TABLES } from './query/table/tables';
+import { TABLES } from './db/tables';
 import { User } from './db/models';
 
 // Salts and hashes a string
@@ -26,7 +26,7 @@ export function generateToken(user_id) {
 }
 
 // Middleware that requires a valid token
-export function requireToken(req, res, next) {
+export async function requireToken(req, res, next) {
     const { cookies } = req;
     if (!('session' in cookies)) return res.sendStatus(CODES.UNAUTHORIZED);
     jwt.verify(cookies.session, process.env.COOKIE_SECRET, (error, user_id) => {
@@ -37,18 +37,18 @@ export function requireToken(req, res, next) {
 }
 
 // Middleware that restricts access to customers (or admins)
-export function requireCustomer(req, res, next) {
-    requireToken(req, res, function () {
-        const roles = User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
+export async function requireCustomer(req, res, next) {
+    requireToken(req, res, async function () {
+        const roles = await User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
         if (!roles?.includes('customer' || 'admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();
     });
 }
 
 // Middle ware that restricts access to admins
-export function requireAdmin(req, res, next) {
-    requireToken(req, res, function () {
-        const roles = User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
+export async function requireAdmin(req, res, next) {
+    requireToken(req, res, async function () {
+        const roles = await User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
         if (!roles?.includes('admin')) return res.sendStatus(CODES.UNAUTHORIZED);
         next();
     });
