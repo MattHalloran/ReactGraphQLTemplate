@@ -31,12 +31,12 @@ export function orderNotifyAdmin() {
     });
 }
 
-export function sendResetPasswordLink(email, user_id) {
+export function sendResetPasswordLink(email, code) {
     emailQueue.add({
         to: [email],
         subject: "New Life Nursery Password Reset",
-        text: `A password reset was requested for your New Life Nursery account. If you sent this request, please click this link (https://newlifenurseryinc.com/forgot-password/${user_id}) to continue. If you did not send this request, please ignore this email.`,
-        html: `<p>A password reset was requested for your New Life Nursery account.</p><p>If you sent this request, please click this link (<a href=\"https://newlifenurseryinc.com/forgot-password/${user_id}\">https://newlifenurseryinc.com/verify/${user_id}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
+        text: `A password reset was requested for your New Life Nursery account. If you sent this request, please click this link (https://newlifenurseryinc.com/forgot-password/${code}) to continue. If you did not send this request, please ignore this email.`,
+        html: `<p>A password reset was requested for your New Life Nursery account.</p><p>If you sent this request, please click this link (<a href=\"https://newlifenurseryinc.com/forgot-password/${code}\">https://newlifenurseryinc.com/verify/${code}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
     });
 }
 

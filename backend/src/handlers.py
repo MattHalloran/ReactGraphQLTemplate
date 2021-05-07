@@ -7,9 +7,7 @@ from src.api import db
 from src.config import Config
 from src.utils import resize_image, priceStringToDecimal
 from base64 import b64encode
-from src.auth import verify_token
 from sqlalchemy import func
-import time
 import bcrypt
 import os
 import traceback
@@ -195,43 +193,6 @@ class Handler(ABC):
                 db.session.delete(old_model)
                 relationship.remove(old_model)
 
-
-class AddressHandler(Handler):
-    ModelType = Address
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['tag', 'name', 'country', 'administrative_area',
-                'locality', 'postal_code', 'throughfare', 'premise',
-                'delivery_instructions']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['country', 'locality', 'postal_code', 'throughfare']
-
-    @classmethod
-    def to_dict(cls, model: Address) -> dict:
-        model = cls.convert_to_model(model)
-        return AddressHandler.simple_fields_to_dict(model, AddressHandler.all_fields())
-
-
-class BusinessDiscountHandler(Handler):
-    ModelType = BusinessDiscount
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['discount', 'title', 'comment', 'terms']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['discount', 'title']
-
-    @classmethod
-    def to_dict(cls, model: BusinessDiscount) -> dict:
-        model = cls.convert_to_model(model)
-        return BusinessDiscountHandler.simple_fields_to_dict(model, BusinessDiscountHandler.all_fields())
-
-
 class BusinessHandler(Handler):
     ModelType = Business
 
@@ -266,63 +227,6 @@ class BusinessHandler(Handler):
             model.employees.append(employee)
             return True
         return False
-
-
-class ContactInfoHandler(Handler):
-    ModelType = ContactInfo
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['name', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return []
-
-    @classmethod
-    def to_dict(cls, model: ContactInfo) -> dict:
-        model = cls.convert_to_model(model)
-        return ContactInfoHandler.simple_fields_to_dict(model, ContactInfoHandler.all_fields())
-
-
-class EmailHandler(Handler):
-    ModelType = Email
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['email_address', 'receives_delivery_updates']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['email_address', 'receives_delivery_updates']
-
-    @classmethod
-    def to_dict(cls, model: Email) -> dict:
-        model = cls.convert_to_model(model)
-        as_dict = EmailHandler.simple_fields_to_dict(model, EmailHandler.all_fields())
-        as_dict['id'] = model.id
-        return as_dict
-
-    @staticmethod
-    def from_email_address(email: str):
-        return db.session.query(Email).filter_by(func.lower(Email.email_address) == func.lower(email)).one_or_none()
-
-
-class FeedbackHandler(Handler):
-    ModelType = Feedback
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['text']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['text']
-
-    @classmethod
-    def to_dict(cls, model: Feedback) -> dict:
-        model = cls.convert_to_model(model)
-        return FeedbackHandler.simple_fields_to_dict(model, FeedbackHandler.all_fields())
 
 
 class ImageHandler(Handler):
@@ -595,23 +499,6 @@ class OrderHandler(Handler):
             return False
 
 
-class PhoneHandler(Handler):
-    ModelType = Phone
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['unformatted_number', 'country_code', 'extension', 'is_mobile', 'receives_delivery_updates']
-
-    @classmethod
-    def to_dict(cls, model: Phone) -> dict:
-        model = cls.convert_to_model(model)
-        as_dict = PhoneHandler.simple_fields_to_dict(model, PhoneHandler.all_fields())
-        as_dict['id'] = model.id
-        return as_dict
 
 
 class PlantTraitHandler(Handler):
@@ -701,16 +588,6 @@ class PlantHandler(Handler):
         data = cls.basic_dict(model)
         data['skus'] = [SkuHandler.to_dict(sku) for sku in PlantHandler.skus(model) if sku.status == SkuStatus.ACTIVE.value]
         return data
-
-    @staticmethod
-    def from_latin(latin: str):
-        return db.session.query(Plant).filter_by(latin_name=latin).one_or_none()
-
-    @classmethod
-    def has_sku(cls, model) -> bool:
-        '''Returns True if there are any SKUs associated with this plant'''
-        model = cls.convert_to_model(model)
-        return db.session.query(Sku).filter_by(plant_id=model.id).count() > 0
 
     @classmethod
     def has_available_sku(cls, model) -> bool:
@@ -812,23 +689,6 @@ class RoleHandler(Handler):
     @staticmethod
     def get_admin_role():
         return Role.query.filter_by(title='Admin').first()
-
-
-class SkuDiscountHandler(Handler):
-    ModelType = SkuDiscount
-
-    @staticmethod
-    def all_fields() -> List[str]:
-        return ['discount', 'title', 'comment', 'terms']
-
-    @staticmethod
-    def required_fields() -> List[str]:
-        return ['discount', 'title']
-
-    @classmethod
-    def to_dict(cls, model: SkuDiscount) -> dict:
-        model = cls.convert_to_model(model)
-        return SkuDiscountHandler.simple_fields_to_dict(model, SkuDiscountHandler.all_fields())
 
 
 class SkuHandler(Handler):
@@ -1078,17 +938,6 @@ class UserHandler(Handler):
         }
 
     @staticmethod
-    def get_user_lock_status(email: str) -> int:
-        '''Returns -1 if account doesn't exist,
-        account status otherwise'''
-        try:
-            user = UserHandler.from_email(email)
-            return user.account_status
-        except Exception:
-            print(f'Could not find account status for {email}')
-            return -1
-
-    @staticmethod
     def get_cart(user: User):
         '''Returns the user's cart, or None'''
         if user is None or not UserHandler.is_customer(user):
@@ -1102,32 +951,3 @@ class UserHandler(Handler):
         else:
             cart = user.orders[-1]
         return cart
-
-    @staticmethod
-    def update_order(user: User, is_delivery: bool, requested_date: float, notes: str) -> bool:
-        cart = UserHandler.get_cart(user)
-        if cart:
-            cart.is_delivery = True
-            cart.desired_delivery_date = requested_date
-            cart.special_instructions = notes
-            db.session.commit()
-            return True
-        return False
-
-    @staticmethod
-    def submit_order(user: User) -> bool:
-        '''Submits the user's cart. Returns true if successful'''
-        # Get cart
-        cart = UserHandler.get_cart(user)
-        # If cart is empty, don't submit
-        if len(cart.items) <= 0:
-            return False
-        cart.status = OrderStatus['PENDING']
-        # Add a new, empty order to serve as the user's next cart
-        cart = OrderHandler.create(user.id)
-        db.session.add(cart)
-        user.orders.append(cart)
-        db.session.commit()
-        print('Order submitted')
-        print(user.orders)
-        return True

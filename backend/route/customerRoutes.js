@@ -1,92 +1,65 @@
-import express from 'express';
+import express, { json } from 'express';
 import CODES from '../public/codes.json';
 import { orderNotifyAdmin } from '../worker/email/queue';
 import * as auth from '../auth';
+import { Order, User } from '../db/models';
+import { ORDER_STATUS, TYPES } from '../db/types';
 
 const router = express.Router();
 
 router.put('/cart', auth.requireCustomer, (req, res) => {
-    // ''Updates the cart for the specified user.
-    // Only admins can update other carts.
-    // Returns the updated cart data, so the frontend can verify update'''
-    // (cart) = getData('cart')
-    // # If changing a cart that doesn't belong to them, verify admin
-    // user_id = cart['customer']['id']
-    // if verify_admin():
-    //     user = UserHandler.from_id(user_id)
-    // else:
-    //     user = verify_session()
-    // if not user:
-    //     return StatusCodes['UNAUTHORIZED']
-    // cart_obj = OrderHandler.from_id(cart['id'])
-    // if cart_obj is None:
-    //     print('Error: Could not find cart')
-    //     return StatusCodes['ERROR_UNKNOWN']
-    // OrderHandler.update_from_dict(cart_obj, cart)
-    // db.session.commit()
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     "cart": OrderHandler.to_dict(cart_obj)
-    // }
+    const cart_data = req.body.cart;
+    let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
+    const user_id = cart.user.id;
+    // Only admins can submit another user's cart
+    if (req.token.user_id !== user_id && req.role !== 'admin') {
+        return res.sendStatus(CODES.UNAUTHORIZED);
+    }
+    // Update cart object
+    cart = cart.patchAndFetchById(cart.id, cart_data);
+    return res.json(cart);
 })
 
 router.put('/submit_order', auth.requireCustomer, (req, res) => {
-    // let cart = req.body.cart;
-    // # If changing a cart that doesn't belong to them, verify admin
-    // user = verify_customer()
-    // if not user:
-    //     return StatusCodes['UNAUTHORIZED']
-    // cart_obj = OrderHandler.from_id(cart['id'])
-    // if cart_obj is None:
-    //     return StatusCodes['ERROR_UNKNOWN']
-    // OrderHandler.update_from_dict(cart_obj, cart)
-    // OrderHandler.set_status(cart_obj, OrderStatus['PENDING'])
-    // new_cart = OrderHandler.create(user.id)
-    // db.session.add(new_cart)
-    // user.orders.append(new_cart)
-    // db.session.commit()
-    await orderNotifyAdmin()
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     "cart": OrderHandler.to_dict(cart_obj)
-    // }
+    const cart_data = req.body.cart;
+    let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
+    const user_id = cart.user.id;
+    // Only admins can submit another user's cart
+    if (req.token.user_id !== user_id && req.role !== 'admin') {
+        return res.sendStatus(CODES.UNAUTHORIZED);
+    }
+    // Update cart object, and set status to pending
+    cart = cart.patchAndFetchById(cart.id, {
+        ...cart_data,
+        [TYPES.OrderStatus]: ORDER_STATUS.Pending
+    });
+    // Assign a new, empty cart to the user
+    const new_cart = await Order.query().insertAndFetch({ userId: user_id });
+    // Send a new order email to the main admin
+    orderNotifyAdmin()
 })
 
 router.route('/profile')
     .get(auth.requireCustomer, (req, res) => {
-        // (id) = getJson('id')
-        // # Only admins can view information for other profiles
-        // if id != request.headers['session']['id'] and not verify_admin():
-        //     return StatusCodes['UNAUTHORIZED']
-        // if not verify_customer():
-        //     return StatusCodes['UNAUTHORIZED']
-        // user_data = UserHandler.get_profile_data(id)
-        // if user_data is None:
-        //     print('FAILEDDDD')
-        //     return StatusCodes['ERROR_UNKNOWN']
-        // print('SUCESS BABYYYYY')
-        // return {
-        //     **StatusCodes['SUCCESS'],
-        //     "user": user_data
-        // }
+        const profile_id = req.body.id;
+        // Only admins can view information for other profiles
+        if (req.token.user_id !== profile_id && req.role !== 'admin') {
+            return res.sendStatus(CODES.UNAUTHORIZED);
+        }
+        let user = await User.query().findById(profile_id);
+        return res.json(user);
     }).post(auth.requireCustomer, (req, res) => {
-        // (id, data) = getData('id', 'data')
-        // # Only admins can view information for other profiles
-        // if id != request.headers['session']['id'] and not verify_admin():
-        //     return StatusCodes['UNAUTHORIZED']
-        // if not verify_customer():
-        //     return StatusCodes['UNAUTHORIZED']
-        // user = verify_session()
-        // if not user:
-        //     return StatusCodes['NOT_VERIFIED']
-        // if not UserHandler.is_password_valid(user, data['currentPassword']):
-        //     return StatusCodes['BAD_CREDENTIALS']
-        // if UserHandler.update(user, data):
-        //     return {
-        //         **StatusCodes['SUCCESS'],
-        //         "profile": UserHandler.get_profile_data(id)
-        //     }
-        // return StatusCodes['ERROR_UNKNOWN']
+        const profile_id = req.body.id;
+        // Only admins can edit information for other profiles
+        if (req.token.user_id !== profile_id && req.role !== 'admin') {
+            return res.sendStatus(CODES.UNAUTHORIZED);
+        }
+        // If currentPassword is valid, set data's password to newPassword
+        let user_data = req.body.data;
+        const passwordValid = await User.verifyPassword(req.body.currentPassword);
+        if (passwordValid) req.body.password = req.body.newPassword;
+        let user = await User.query().patchAndFetchById(profile_id, user_data);
+        return res.json(user);
     })
 
 module.exports = router;

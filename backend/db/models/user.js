@@ -1,7 +1,8 @@
 import { Model } from 'objection';
+import { Password } from './password';
 import { TABLES } from '../tables';
 
-export default class User extends Model {
+export default class User extends Password {
     static tableName = TABLES.User;
 
     fullName() {

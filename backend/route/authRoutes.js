@@ -1,9 +1,11 @@
 import express from 'express';
 import CODES from '../public/codes.json';
 import * as auth from '../auth';
+import bcrypt from 'bcrypt';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
 import { Email, Phone, User } from '../db/models';
 import { ACCOUNT_STATUS, TYPES } from '../db/types';
+import { isPasswordValid } from '../db/models/password';
 
 const router = express.Router();
 
@@ -12,6 +14,10 @@ const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
 const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 
 router.post('/register', (req, res) => {
+    // Check if password is valid
+    if (!isPasswordValid(req.body.password)) {
+        return res.sendStatus(CODES.INVALID_ARGS);
+    }
     // Check if email is in use
     let emails = await Email.query().where('emailAddress', req.body.emails[0].email_address);
     if (emails.length > 0) {
@@ -23,10 +29,7 @@ router.post('/register', (req, res) => {
         return res.sendStatus(CODES.PHONE_IN_USE);
     }
     // Create a new user
-    let user = await User.query().insert({
-        ...req.body,
-        password: auth.generateHash(req.body.password)
-    })
+    let user = await User.query().insert(req.body);
     // Associate email with user
     await Email.query().insert({
         ...req.body.emails[0],
@@ -90,12 +93,14 @@ router.put('/login', (req, res) => {
         return res.sendStatus(CODES.HARD_LOCKOUT);
     }
     // Now we can validate the password
-    if (auth.verifyPhrase(user.password, req.body.password)) {
+    const passwordValid = await User.verifyPassword(req.body.password);
+    if (passwordValid) {
         const token = auth.generateToken(user.id);
         user = user.patchAndFetch({ 
             sessionToken: token,
             loginAttempts: 0,
-            lastLoginAttempt: Date.now()
+            lastLoginAttempt: Date.now(),
+            resetPasswordCode: null
         });
         return res.json({
             //TODO
@@ -119,10 +124,29 @@ router.put('/login', (req, res) => {
     }
 })
 
-router.get('/reset-password', (req, res) => {
+router.route('/reset-password').get((req, res) => {
     const user_ids = await Email.relatedQuery('user').where('email_address', req.body.email).select('id');
     if (user_ids.length === 0) return res.sendStatus(CODES.ERROR_UNKNOWN);
-    sendResetPasswordLink(req.body.email, user_ids[0]);
+    // Generate unique code for resetting password
+    const code = bcrypt.genSaltSync();
+    await User.query().findById(user_ids[0]).patch({ resetPasswordCode: code });
+    sendResetPasswordLink(req.body.email, code);
+}).post((req, res) => {
+    // Check if valid link was clicked
+    const user = await User.query().where('resetPasswordCode', req.body.code).limit(1);
+    if (!user) return res.sendStatus(CODES.INVALID_ARGS);
+    // Check if new password is valid
+    if (!isPasswordValid(req.body.newPassword)) {
+        return res.sendStatus(CODES.INVALID_ARGS);
+    }
+    // Check if old password is correct
+    const passwordValid = User.verifyPassword(req.body.oldPassword);
+    if (!passwordValid) return res.sendStatus(CODES.BAD_CREDENTIALS);
+    // Now update the password
+    await user.query().patch({ 
+        resetPasswordCode: null,
+        password: req.body.newPassword 
+    });
 })
 
 // Middleware handles validation, so this is actually supposed to be empty

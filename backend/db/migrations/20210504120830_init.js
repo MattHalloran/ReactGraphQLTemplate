@@ -26,6 +26,7 @@ export async function up (knex) {
         table.integer('loginAttempts').defaultTo(0).notNullable();
         table.timestamp('lastLoginAttempt').defaultTo(knex.fn.now()).notNullable();
         table.string('sessionToken', 256);
+        table.string('resetPasswordCode', 256);
         table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();
         table.enu(TYPES.AccountStatus, Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
@@ -147,7 +148,7 @@ export async function up (knex) {
         table.timestamp('expectedDeliveryDate');
         table.boolean('isDelivery').defaultTo(true).notNullable();
         table.integer('addressId').references('id').inTable(TABLES.Address);
-        table.uuid('userId').references('id').inTable(TABLES.User);
+        table.uuid('userId').references('id').inTable(TABLES.User).notNullable();
     });
     await knex.schema.createTable(TABLES.OrderItem, (table) => {
         table.increments();

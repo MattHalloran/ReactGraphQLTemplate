@@ -1,8 +1,8 @@
 import { ACCOUNT_STATUS, TYPES } from '../types';
 import { TABLES } from '../tables';
 import { v4 as uuidv4 } from 'uuid';
-import * as auth from '../../auth';
-
+import bcrypt from 'bcrypt';
+import { HASHING_ROUNDS } from '../models/password';
 
 export async function seed(knex) {
     // Truncate existing tables
@@ -20,14 +20,15 @@ export async function seed(knex) {
         contact hours, and more.' }
     ]);
 
-    // Insert admin
+    // Insert admin. Since we're using knex, the User's password must
+    // be hashed manually
     const user_admin_id = uuidv4();
     await knex(TABLES.User).insert([
         { 
             id: user_admin_id,
             firstName: 'admin', 
             lastName: 'account', 
-            password: auth.generateHash(process.env.ADMIN_PASSWORD), 
+            password: bcrypt.hash(process.env.ADMIN_PASSWORD, HASHING_ROUNDS), 
             accountApproved: true,
             [TYPES.AccountStatus]: ACCOUNT_STATUS.Unlocked
         }
