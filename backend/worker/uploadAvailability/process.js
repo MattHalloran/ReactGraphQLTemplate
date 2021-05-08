@@ -1,5 +1,5 @@
 import { Plant, Sku } from "../../db/models";
-import { SKU_STATUS, TYPES } from "../../db/types";
+import { SKU_STATUS } from "../../db/types";
 
 // Reads an .xls availability file into the database.
 // SKUs of plants not in the availability file will be hidden
@@ -18,7 +18,7 @@ async function uploadAvailabilityProcess() {
         quantity: header.indexOf('Quantity')
     }
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
-    await Sku.query().patch({ [TYPES.SkuStatus]: SKU_STATUS.Inactive });
+    await Sku.query().patch({ status: SKU_STATUS.Inactive });
     content.forEach(row => {
         // Insert or update plant based on row data
         const plant_data = {
@@ -40,7 +40,7 @@ async function uploadAvailabilityProcess() {
             note: row[index.note],
             quantity: row[index.quantity] ?? 'N/A',
             plantId: plant.id,
-            [TYPES.SkuStatus]: SKU_STATUS.Active
+            status: SKU_STATUS.Active
         }
         const matching_skus = await Sku.query().where('sku', row[index.sku]).select('id');
         const sku = null;

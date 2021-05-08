@@ -1,76 +1,76 @@
 {
     "version": 1.0,
-    "SUCCESS": {
+    "Success": {
         "code": 200,
         "ok": true,
         "msg": ""
     },
-    "NO_RESULTS": {
+    "NoResults": {
         "code": 485,
         "ok": true,
         "msg": "Warning: Called successfully, but got no results"
     },
-    "SOME_IMAGES_ALREADY_UPLOADED": {
+    "SomeImagesAlreadyUploaded": {
         "code": 489,
         "ok": true,
         "msg": "Warning: Some images were already uploaded"
     },
-    "ERROR_UNKNOWN": {
+    "ErrorUnknown": {
         "code": 435,
         "ok": false,
         "msg": "Unknown error occurred"
     },
-    "INVALID_ARGS": {
+    "InvalidArgs": {
         "code": 423,
         "ok": false,
         "msg": "Error: Invalid arguments supplied"
     },
-    "PHONE_IN_USE": {
+    "PhoneInUser": {
         "code": 452,
         "ok": false,
         "msg": "Error: Account with that phone number already exists"
     },
-    "EMAIL_IN_USE": {
+    "EmailInUse": {
         "code": 469,
         "ok": false,
         "msg": "Error: Account with that email already exists"
     },
-    "EMAIL_NOT_VERIFIED": {
+    "EmailNotVerified": {
         "code": 457,
         "ok": false,
         "msg": "Error: Email has not been verified yet. Sending new verification email"
     },
-    "NO_USER": {
+    "NoUser": {
         "code": 468,
         "ok": false,
         "msg": "Error: No user with that email"
     },
-    "BAD_CREDENTIALS": {
+    "BadCredentials": {
         "code": 475,
         "ok": false,
         "msg": "Error: Email or password incorrect"
     },
-    "SOFT_LOCKOUT": {
+    "SoftLockout": {
         "code": 410,
         "ok": false,
         "msg": "Error: Too many login attempts. Try again in 15 minutes"
     },
-    "HARD_LOCKOUT": {
+    "HardLockout": {
         "code": 412,
         "ok": false,
         "msg": "Error: Account locked. Contact us for assistance"
     },
-    "NOT_VERIFIED": {
+    "NotVerified": {
         "code": 424,
         "ok": false,
         "msg": "Error: Session token could not be verified. Please log back in"
     },
-    "UNAUTHORIZED": {
+    "Unauthorized": {
         "code": 425,
         "ok": false,
         "msg": "Error: Not authorized to perform this action"
     },
-    "CANNOT_DELETE_YOURSELF": {
+    "CannotDeleteYourself": {
         "code": 426,
         "ok": false,
         "msg": "Error: What are you doing trying to delete your own account? I am disappointed :("

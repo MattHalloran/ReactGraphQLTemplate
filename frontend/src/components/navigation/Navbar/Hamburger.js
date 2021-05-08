@@ -4,6 +4,7 @@ import {
     ContactInfo,
     Copyright
 } from 'components';
+import { SOCIAL } from 'shared';
 import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import {
@@ -152,13 +153,13 @@ function Hamburger({
                         {socialOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={socialOpen} timeout="auto" unmountOnExit>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab("https://www.facebook.com/newlifenurseryinc/")}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Facebook)}>
                             <ListItemIcon>
                                 <FacebookIcon className={classes.facebook} />
                             </ListItemIcon>
                             <ListItemText primary="Facebook" />
                         </ListItem>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab("https://www.instagram.com/newlifenurseryinc/")}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Instagram)}>
                             <ListItemIcon>
                                 <InstagramIcon className={classes.instagram} />
                             </ListItemIcon>

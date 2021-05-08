@@ -21,9 +21,9 @@ import { CartTable as Cart } from 'components';
 import { useMutate } from "restful-react";
 import { setOrderStatus } from 'query/http_promises';
 import { findWithAttr } from 'utils/arrayTools';
+import { ORDER_STATUS } from '@local/shared';
 import { 
     ORDER_STATES, 
-    ORDER_STATUS, 
     PUBS 
 } from 'utils/consts';
 import _ from 'underscore';
@@ -89,7 +89,7 @@ function OrderDialog({
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.APPROVED)
+        setOrderStatus(order?.id, ORDER_STATUS.Approved)
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
@@ -99,7 +99,7 @@ function OrderDialog({
     }, [order])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.REJECTED)
+        setOrderStatus(order?.id, ORDER_STATUS.Rejected)
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {

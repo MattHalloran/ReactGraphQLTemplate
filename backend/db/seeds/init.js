@@ -1,4 +1,4 @@
-import { ACCOUNT_STATUS, TYPES } from '../types';
+import { ACCOUNT_STATUS } from '../types';
 import { TABLES } from '../tables';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
@@ -30,7 +30,7 @@ export async function seed(knex) {
             lastName: 'account', 
             password: bcrypt.hash(process.env.ADMIN_PASSWORD, HASHING_ROUNDS), 
             accountApproved: true,
-            [TYPES.AccountStatus]: ACCOUNT_STATUS.Unlocked
+            status: ACCOUNT_STATUS.Unlocked
         }
     ]);
 

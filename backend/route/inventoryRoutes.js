@@ -1,5 +1,5 @@
 import express from 'express';
-import CODES from '../public/codes.json';
+import { CODE } from '@local/shared';
 import * as auth from '../auth';
 
 const router = express.Router();

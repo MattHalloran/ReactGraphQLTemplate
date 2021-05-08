@@ -1,4 +1,4 @@
-import { TYPES, THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, IMAGE_USE, ORDER_STATUS, TASK_STATUS } from '../types';
+import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, IMAGE_USE, ORDER_STATUS, TASK_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 
 export async function up (knex) {
@@ -6,7 +6,7 @@ export async function up (knex) {
         table.increments();
         table.integer('taskId').notNullable();
         table.string('name', 256).notNullable();
-        table.enu(TYPES.TaskStatus, Object.values(TASK_STATUS)).defaultTo(TASK_STATUS.Active).notNullable();
+        table.enu('status', Object.values(TASK_STATUS)).defaultTo(TASK_STATUS.Active).notNullable();
         table.string('description', 1024);
         table.string('result', 8192);
         table.integer('resultCode');
@@ -29,7 +29,7 @@ export async function up (knex) {
         table.string('resetPasswordCode', 256);
         table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();
-        table.enu(TYPES.AccountStatus, Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
+        table.enu('status', Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
         table.uuid('businessId').references('id').inTable(TABLES.Business);
     });
     await knex.schema.createTable(TABLES.Discount, (table) => {
@@ -98,17 +98,17 @@ export async function up (knex) {
         table.uuid('id').primary();
         table.string('folder', 256).notNullable();
         table.string('fileName', 256).notNullable();
-        table.enu(TYPES.ImageExtension, Object.values(IMAGE_EXTENSION)).notNullable();
+        table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
         table.string('hash', 128).notNullable();
-        table.enu(TYPES.ImageUse, Object.values(IMAGE_USE)).notNullable();
+        table.enu('usedFor', Object.values(IMAGE_USE)).notNullable();
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });
     await knex.schema.createTable(TABLES.Trait, (table) => {
         //TODO UNIQUE (trait, value)
         table.increments();
-        table.enu(TYPES.TraitName, Object.values(TRAIT_NAME)).notNullable();
+        table.enu('name', Object.values(TRAIT_NAME)).notNullable();
         table.string('value', 512).notNullable();
     });
     await knex.schema.createTable(TABLES.Plant, (table) => {
@@ -136,13 +136,13 @@ export async function up (knex) {
         table.string('note', 2048);
         table.integer('availability').defaultTo(0).notNullable();
         table.string('price', 16).defaultTo('N/A').notNullable();
-        table.enu(TYPES.SkuStatus, Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
+        table.enu('status', Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
         table.uuid('plantId').references('id').inTable(TABLES.Plant);
         table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.Order, (table) => {
         table.uuid('id').primary();
-        table.enu(TYPES.OrderStatus, Object.values(ORDER_STATUS)).defaultTo(ORDER_STATUS.Draft).notNullable();
+        table.enu('status', Object.values(ORDER_STATUS)).defaultTo(ORDER_STATUS.Draft).notNullable();
         table.string('specialInstructions', 1024);
         table.timestamp('desiredDeliveryDate');
         table.timestamp('expectedDeliveryDate');

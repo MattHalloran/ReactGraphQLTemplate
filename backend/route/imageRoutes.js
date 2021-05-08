@@ -1,14 +1,14 @@
 import express from 'express';
-import CODES from '../public/codes.json';
+import { CODE } from '@local/shared';
 import * as auth from '../auth';
 import { Image } from '../db/models';
-import { IMAGE_USE, TYPES } from '../db/types';
+import { IMAGE_USE } from '../db/types';
 
 const router = express.Router();
 
 router.route('/gallery')
     .get((req, res) => {
-        const gallery_images = await Image.query().where([TYPES.ImageUse], IMAGE_USE.Gallery);
+        const gallery_images = await Image.query().where('usedFor', IMAGE_USE.Gallery);
         return gallery_images;
     }).put(auth.requireAdmin, (req, res) => {
         // (data) = getData('data')

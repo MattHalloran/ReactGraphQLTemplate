@@ -1,8 +1,8 @@
 import express from 'express';
-import CODES from '../public/codes.json';
+import { CODE } from '@local/shared';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import * as auth from '../auth';
-import { ACCOUNT_STATUS, SKU_STATUS, TYPES } from '../db/types';
+import { ACCOUNT_STATUS, SKU_STATUS } from '../db/types';
 import { Order, User, Plant, Sku, Email, Phone } from '../db/models';
 
 const router = express.Router();
@@ -39,7 +39,7 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
     // (operation, plant_data) = getData('operation', 'data')
     const operation = req.body.operation;
     let plant = await Plant.query().findById(req.body.plant.id);
-    if (plant === null && operation !== 'ADD') return res.sendStatus(CODES.ERROR_UNKNOWN);
+    if (plant === null && operation !== 'ADD') return res.sendStatus(CODE.ErrorUnknown);
     // These are operations which only change the SKU's status
     const OPERATION_TO_STATUS = {
         'HIDE': SKU_STATUS.Inactive,
@@ -47,8 +47,8 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
         'DELETE': SKU_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        plant.patch({[TYPES.SkuStatus]: OPERATION_TO_STATUS[operation]});
-        return res.sendStatus(CODES.SUCCESS);
+        plant.patch({ status: OPERATION_TO_STATUS[operation] });
+        return res.sendStatus(CODE.SUCCESS);
     } 
     if (operation === 'ADD') {
         plant = await Plant.query().insert(req.body.plant);
@@ -78,7 +78,7 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
     //     plant_obj.salt_tolerance = update_trait(PlantTraitOptions.SALT_TOLERANCE, plant_data['salt_tolerance'])
     }
     else {
-        return res.sendStatus(CODES.ERROR_UNKNOWN);
+        return res.sendStatus(CODE.ErrorUnknown);
     }
     // Handle finding/creating the display image
     if (req.body.plant.display_image) {
@@ -125,7 +125,7 @@ router.post('/availability', auth.requireAdmin, (req, res) => {
 })
 
 router.get('/orders', auth.requireAdmin, (req, res) => {
-    const orders = await Order.query().withGraphFetched('address, user, items.[sku.[plant, discounts]]').where(TYPES.OrderStatus, req.body.status);
+    const orders = await Order.query().withGraphFetched('address, user, items.[sku.[plant, discounts]]').where('status', req.body.status);
     res.json(orders);
 })
 
@@ -137,13 +137,13 @@ router.get('/customers', auth.requireAdmin, (req, res) => {
 
 router.post('/order_status', auth.requireAdmin, (req, res) => {
     const order = await Order.query().patchAndFetchById(req.body.id, {
-        [TYPES.OrderStatus]: req.body.status
+        status: req.body.status
     });
     res.json(order);
 })
 
 router.post('/modify_user', auth.requireAdmin, (req, res) => {
-    if (req.token.user_id === req.body.id) return res.sendStatus(CODES.CANNOT_DELETE_YOURSELF);
+    if (req.token.user_id === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
     const operation = req.body.operation;
     let user = await User.query().findById(req.body.id);
     const OPERATION_TO_STATUS = {
@@ -153,7 +153,7 @@ router.post('/modify_user', auth.requireAdmin, (req, res) => {
         'DELETE': ACCOUNT_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        user.patch({[TYPES.AccountStatus]: OPERATION_TO_STATUS[operation]});
+        user.patch({ status: OPERATION_TO_STATUS[operation] });
         if (operation === 'DELETE') {
             // Make sure emails and phones get deleted
             await Email.query().where('userId', user.id).del();
@@ -163,9 +163,9 @@ router.post('/modify_user', auth.requireAdmin, (req, res) => {
         //TODO don't show admin?
         const customers = await User.query();
         res.json(customers);
-        return res.sendStatus(CODES.SUCCESS);
+        return res.sendStatus(CODE.Success);
     }
-    return res.sendStatus(CODES.ERROR_UNKNOWN);
+    return res.sendStatus(CODE.ErrorUnknown);
 })
 
 module.exports = router;

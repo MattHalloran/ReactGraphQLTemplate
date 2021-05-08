@@ -1,9 +1,9 @@
 import express, { json } from 'express';
-import CODES from '../public/codes.json';
+import { CODE } from '@local/shared';
 import { orderNotifyAdmin } from '../worker/email/queue';
 import * as auth from '../auth';
 import { Order, User } from '../db/models';
-import { ORDER_STATUS, TYPES } from '../db/types';
+import { ORDER_STATUS } from '../db/types';
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.put('/cart', auth.requireCustomer, (req, res) => {
     const user_id = cart.user.id;
     // Only admins can submit another user's cart
     if (req.token.user_id !== user_id && req.role !== 'admin') {
-        return res.sendStatus(CODES.UNAUTHORIZED);
+        return res.sendStatus(CODE.Unauthorized);
     }
     // Update cart object
     cart = cart.patchAndFetchById(cart.id, cart_data);
@@ -26,12 +26,12 @@ router.put('/submit_order', auth.requireCustomer, (req, res) => {
     const user_id = cart.user.id;
     // Only admins can submit another user's cart
     if (req.token.user_id !== user_id && req.role !== 'admin') {
-        return res.sendStatus(CODES.UNAUTHORIZED);
+        return res.sendStatus(CODE.Unauthorized);
     }
     // Update cart object, and set status to pending
     cart = cart.patchAndFetchById(cart.id, {
         ...cart_data,
-        [TYPES.OrderStatus]: ORDER_STATUS.Pending
+        status: ORDER_STATUS.Pending
     });
     // Assign a new, empty cart to the user
     const new_cart = await Order.query().insertAndFetch({ userId: user_id });
@@ -44,7 +44,7 @@ router.route('/profile')
         const profile_id = req.body.id;
         // Only admins can view information for other profiles
         if (req.token.user_id !== profile_id && req.role !== 'admin') {
-            return res.sendStatus(CODES.UNAUTHORIZED);
+            return res.sendStatus(CODE.Unauthorized);
         }
         let user = await User.query().findById(profile_id);
         return res.json(user);
@@ -52,7 +52,7 @@ router.route('/profile')
         const profile_id = req.body.id;
         // Only admins can edit information for other profiles
         if (req.token.user_id !== profile_id && req.role !== 'admin') {
-            return res.sendStatus(CODES.UNAUTHORIZED);
+            return res.sendStatus(CODE.Unauthorized);
         }
         // If currentPassword is valid, set data's password to newPassword
         let user_data = req.body.data;

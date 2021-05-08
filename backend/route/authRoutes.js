@@ -1,10 +1,10 @@
 import express from 'express';
-import CODES from '../public/codes.json';
+import { CODE } from '@local/shared';
 import * as auth from '../auth';
 import bcrypt from 'bcrypt';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
 import { Email, Phone, User } from '../db/models';
-import { ACCOUNT_STATUS, TYPES } from '../db/types';
+import { ACCOUNT_STATUS } from '../db/types';
 import { isPasswordValid } from '../db/models/password';
 
 const router = express.Router();
@@ -16,17 +16,17 @@ const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 router.post('/register', (req, res) => {
     // Check if password is valid
     if (!isPasswordValid(req.body.password)) {
-        return res.sendStatus(CODES.INVALID_ARGS);
+        return res.sendStatus(CODE.InvalidArgs);
     }
     // Check if email is in use
     let emails = await Email.query().where('emailAddress', req.body.emails[0].email_address);
     if (emails.length > 0) {
-        return res.sendStatus(CODES.EMAIL_IN_USE);
+        return res.sendStatus(CODE.EmailInUse);
     }
     // Check if phone is in use
     let phones = await Phone.query().where('unformattedNumber', req.body.phones[0].unformatted_number);
     if (phones.length > 0) {
-        return res.sendStatus(CODES.PHONE_IN_USE);
+        return res.sendStatus(CODE.PhoneInUse);
     }
     // Create a new user
     let user = await User.query().insert(req.body);
@@ -62,35 +62,35 @@ router.put('/login', (req, res) => {
         let emails = await Email.query().where('email_address', req.body.email);
         if (users.length === 1 && emails.length === 1) {
             users[0].patch({ 
-                [TYPES.AccountStatus]: ACCOUNT_STATUS.Unlocked ,
+                status: ACCOUNT_STATUS.Unlocked ,
                 emailVerified: true
             });
         } else {
-            return res.sendStatus(CODES.ERROR_UNKNOWN);
+            return res.sendStatus(CODE.ErrorUnknown);
         }
     }
     // Validate email address
     let email_ids = await Email.query().where('email_address', req.body.email).select('id', 'userId');
     if (email_ids.length === 0) {
-        return res.sendStatus(CODES.BAD_CREDENTIALS);
+        return res.sendStatus(CODE.BadCredentials);
     }
     let user = await User.query().findById(email_ids[0].userId);
     // Reset login attempts after 15 minutes
-    if (user[TYPES.AccountStatus] !== ACCOUNT_STATUS.HardLock && 
-        user[TYPES.AccountStatus] !== ACCOUNT_STATUS.Deleted && 
+    if (user.status !== ACCOUNT_STATUS.HardLock && 
+        user.status !== ACCOUNT_STATUS.Deleted && 
         Date.now() - user.lastLoginAttempt > SOFT_LOCKOUT_DURATION_SECONDS) {
         user = user.patchAndFetch({
             loginAttempts: 0
         })
     }
     // Before validating password, let's check to make sure the account is unlocked
-    const status = user[TYPES.AccountStatus];
+    const status = user.status;
     if (status === ACCOUNT_STATUS.Deleted) {
-        return res.sendStatus(CODES.NO_USER);
+        return res.sendStatus(CODE.NoUser);
     } else if (status === ACCOUNT_STATUS.SoftLock) {
-        return res.sendStatus(CODES.SOFT_LOCKOUT);
+        return res.sendStatus(CODE.SoftLockout);
     } else if (status === ACCOUNT_STATUS.HardLock) {
-        return res.sendStatus(CODES.HARD_LOCKOUT);
+        return res.sendStatus(CODE.HardLockout);
     }
     // Now we can validate the password
     const passwordValid = await User.verifyPassword(req.body.password);
@@ -116,17 +116,17 @@ router.put('/login', (req, res) => {
             new_status = ACCOUNT_STATUS.HardLock;
         }
         user.patch({
-            [TYPES.AccountStatus]: new_status,
+            status: new_status,
             loginAttempts: login_attempts,
             lastLoginAttempt: Date.now()
         })
-        return res.sendStatus(CODES.BAD_CREDENTIALS);
+        return res.sendStatus(CODE.BadCredentials);
     }
 })
 
 router.route('/reset-password').get((req, res) => {
     const user_ids = await Email.relatedQuery('user').where('email_address', req.body.email).select('id');
-    if (user_ids.length === 0) return res.sendStatus(CODES.ERROR_UNKNOWN);
+    if (user_ids.length === 0) return res.sendStatus(CODE.ErrorUnknown);
     // Generate unique code for resetting password
     const code = bcrypt.genSaltSync();
     await User.query().findById(user_ids[0]).patch({ resetPasswordCode: code });
@@ -134,14 +134,14 @@ router.route('/reset-password').get((req, res) => {
 }).post((req, res) => {
     // Check if valid link was clicked
     const user = await User.query().where('resetPasswordCode', req.body.code).limit(1);
-    if (!user) return res.sendStatus(CODES.INVALID_ARGS);
+    if (!user) return res.sendStatus(CODE.InvalidArgs);
     // Check if new password is valid
     if (!isPasswordValid(req.body.newPassword)) {
-        return res.sendStatus(CODES.INVALID_ARGS);
+        return res.sendStatus(CODE.InvalidArgs);
     }
     // Check if old password is correct
     const passwordValid = User.verifyPassword(req.body.oldPassword);
-    if (!passwordValid) return res.sendStatus(CODES.BAD_CREDENTIALS);
+    if (!passwordValid) return res.sendStatus(CODE.BadCredentials);
     // Now update the password
     await user.query().patch({ 
         resetPasswordCode: null,

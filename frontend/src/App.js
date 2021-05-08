@@ -83,7 +83,7 @@ function App() {
     }, [session])
 
     useGet({
-        path: `${URL_BASE}validate_session`,
+        path: `${URL_BASE}/validate_session`,
         lazy: sessionFailed,
         queryParams: { session: { tag: session?.tag, token: session?.token } },
         resolve: (response) => {
@@ -112,7 +112,7 @@ function App() {
 
     return (
         <RestfulProvider 
-            base={URL_BASE} 
+            base={`${URL_BASE}/`} 
             requestOptions={() => ({ headers: { session: { tag: session?.tag, token: session?.token } } })}>
             <StyledEngineProvider injectFirst>
                 <div id="App">

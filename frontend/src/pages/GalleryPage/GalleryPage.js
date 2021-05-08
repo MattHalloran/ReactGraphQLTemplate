@@ -91,8 +91,8 @@ function GalleryPage() {
             for (let i = 0; i < imageKeys.length; i++) {
                 let new_data = {
                     "id": imageKeys[i],
-                    "src": `${URL_BASE}image?key=${imageKeys[i]}&size=l`,
-                    "thumbnail": `${URL_BASE}image?key=${imageKeys[i]}&size=s`,
+                    "src": `${URL_BASE}/image?key=${imageKeys[i]}&size=l`,
+                    "thumbnail": `${URL_BASE}/image?key=${imageKeys[i]}&size=s`,
                 };
                 combined_data.push(new_data);
             }

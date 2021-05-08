@@ -5,7 +5,8 @@ import * as validation from 'utils/validations';
 import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { LINKS, DEFAULT_PRONOUNS, STATUS_CODES, PUBS } from 'utils/consts';
+import { CODE } from '@local/shared';
+import { LINKS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
 import { useMutate } from "restful-react";
 import PubSub from 'utils/pubsub';
 
@@ -70,7 +71,7 @@ function SignUpForm({
             }
             else {
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-                if (response.code === STATUS_CODES.FAILURE_EMAIL_EXISTS.code) {
+                if (response.code === CODE.EmailInUse.code) {
                     if (window.confirm(`${response.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
                         history.push(LINKS.ForgotPassword);
                     }

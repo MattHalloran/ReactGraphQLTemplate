@@ -1,14 +1,3 @@
-export const TYPES = {
-    AccountStatus: 'accountStatus',
-    ImageExtension: 'imgExtension',
-    ImageUse: 'imgUse',
-    OrderStatus: 'orderStatus',
-    SkuStatus: 'skuStatus',
-    TaskStatus: 'taskStatus',
-    Theme: 'siteTheme',
-    TraitName: 'traitName',
-}
-
 export const ACCOUNT_STATUS = {
     Deleted: 'Deleted',
     Unlocked: 'Unlocked',
