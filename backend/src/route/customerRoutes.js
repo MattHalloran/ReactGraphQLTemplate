@@ -3,11 +3,11 @@ import { CODE } from '@local/shared';
 import { orderNotifyAdmin } from '../worker/email/queue';
 import * as auth from '../auth';
 import { Order, User } from '../db/models';
-import { ORDER_STATUS } from '../db/types';
+import { ORDER_STATUS } from '../src/db/types';
 
 const router = express.Router();
 
-router.put('/cart', auth.requireCustomer, (req, res) => {
+router.put('/cart', auth.requireCustomer, async (req, res) => {
     const cart_data = req.body.cart;
     let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
     const user_id = cart.user.id;
@@ -20,7 +20,7 @@ router.put('/cart', auth.requireCustomer, (req, res) => {
     return res.json(cart);
 })
 
-router.put('/submit_order', auth.requireCustomer, (req, res) => {
+router.put('/submit_order', auth.requireCustomer, async (req, res) => {
     const cart_data = req.body.cart;
     let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
     const user_id = cart.user.id;
@@ -40,7 +40,7 @@ router.put('/submit_order', auth.requireCustomer, (req, res) => {
 })
 
 router.route('/profile')
-    .get(auth.requireCustomer, (req, res) => {
+    .get(auth.requireCustomer, async (req, res) => {
         const profile_id = req.body.id;
         // Only admins can view information for other profiles
         if (req.token.user_id !== profile_id && req.role !== 'admin') {
@@ -48,7 +48,7 @@ router.route('/profile')
         }
         let user = await User.query().findById(profile_id);
         return res.json(user);
-    }).post(auth.requireCustomer, (req, res) => {
+    }).post(auth.requireCustomer, async (req, res) => {
         const profile_id = req.body.id;
         // Only admins can edit information for other profiles
         if (req.token.user_id !== profile_id && req.role !== 'admin') {

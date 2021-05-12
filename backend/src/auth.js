@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { CODE } from '@local/shared';
 import { TABLES } from './db/tables';
 import { User } from './db/models';
-import { SESSION_DAYS } from 'shared'
+import { SESSION_DAYS } from '@local/shared';
 
 // Generates a JSON Web Token (JWT)
 export function generateToken(user_id) {
@@ -24,8 +24,9 @@ export async function requireToken(req, res, next) {
 export async function requireCustomer(req, res, next) {
     requireToken(req, res, async function () {
         const roles = await User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
-        if (!roles?.includes('customer' || 'admin')) return res.sendStatus(CODE.Unauthorized);
-        req.role = roles.includes('admin') ? 'admin' : 'customer';
+        const titles = roles.map(r => r.title);
+        if (!titles.includes('customer' || 'admin')) return res.sendStatus(CODE.Unauthorized);
+        req.role = titles.includes('admin') ? 'admin' : 'customer';
         next();
     });
 }
@@ -34,7 +35,8 @@ export async function requireCustomer(req, res, next) {
 export async function requireAdmin(req, res, next) {
     requireToken(req, res, async function () {
         const roles = await User.relatedQuery(TABLES.Role).for(req.token.user_id).select('title');
-        if (!roles?.includes('admin')) return res.sendStatus(CODE.Unauthorized);
+        const titles = roles.map(r => r.title);
+        if (!titles.includes('admin')) return res.sendStatus(CODE.Unauthorized);
         next();
     });
 }

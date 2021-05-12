@@ -153,28 +153,28 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.OrderItem, (table) => {
         table.increments();
         table.integer('quantity').defaultTo(1).notNullable();
-        table.uuid('orderId').references('id').inTable(TABLES.Order);
-        table.uuid('skuId').references('id').inTable(TABLES.Sku);
+        table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable();
+        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
         table.increments();
-        table.uuid('businessId').references('id').inTable(TABLES.Business);
-        table.uuid('discountId').references('id').inTable(TABLES.Discount);
+        table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable();
+        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable();
     });
     await knex.schema.createTable(TABLES.PlantTraits, (table) => {
         table.increments();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant);
-        table.integer('TraitId').references('id').inTable(TABLES.Trait);
+        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable();
+        table.integer('TraitId').references('id').inTable(TABLES.Trait).notNullable();
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.increments();
-        table.uuid('skuId').references('id').inTable(TABLES.Sku);
-        table.uuid('discountId').references('id').inTable(TABLES.Discount);
+        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable();
+        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable();
     });
     await knex.schema.createTable(TABLES.UserRoles, (table) => {
         table.increments();
-        table.uuid('userId').references('id').inTable(TABLES.User);
-        table.uuid('roleId').references('id').inTable(TABLES.Role);
+        table.uuid('userId').references('id').inTable(TABLES.User).notNullable();
+        table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable();
     });
 }
 

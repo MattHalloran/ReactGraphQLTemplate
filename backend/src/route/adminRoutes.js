@@ -2,12 +2,13 @@ import express from 'express';
 import { CODE } from '@local/shared';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import * as auth from '../auth';
-import { ACCOUNT_STATUS, SKU_STATUS } from '../db/types';
+import { ACCOUNT_STATUS, SKU_STATUS } from '@local/shared';
 import { Order, User, Plant, Sku, Email, Phone } from '../db/models';
+import fs from 'fs';
 
 const router = express.Router();
 
-router.post('/modify_sku', auth.requireAdmin, (req, res) => {
+router.post('/modify_sku', auth.requireAdmin, async (req, res) => {
     // (sku, operation, sku_data) = getData('sku', 'operation', 'data')
     const sku = await Sku.query().where('sku', req.body.sku);
     // if sku_obj is None:
@@ -35,7 +36,7 @@ router.post('/modify_sku', auth.requireAdmin, (req, res) => {
     // return StatusCodes['ERROR_UNKNOWN']
 })
 
-router.post('/modify_plant', auth.requireAdmin, (req, res) => {
+router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
     // (operation, plant_data) = getData('operation', 'data')
     const operation = req.body.operation;
     let plant = await Plant.query().findById(req.body.plant.id);
@@ -47,13 +48,13 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
         'DELETE': SKU_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        plant.patch({ status: OPERATION_TO_STATUS[operation] });
+        let plant = await Plant.query().patchAndFetchById(plant.id, { status: OPERATION_TO_STATUS[operation] });
         return res.sendStatus(CODE.SUCCESS);
     } 
     if (operation === 'ADD') {
         plant = await Plant.query().insert(req.body.plant);
     } else if (operation === 'UPDATE') {
-        plant = await Plant.query().patch(req.body.plant);
+        plant = await Plant.query().patchAndFetchById(plant.id, req.body.plant);
             //     # Update plant fields
     //     def update_trait(option: PlantTraitOptions, value: str):
     //         if isinstance(value, list):
@@ -110,39 +111,30 @@ router.post('/modify_plant', auth.requireAdmin, (req, res) => {
     //     return StatusCodes['SUCCESS']
 })
 
-router.post('/availability', auth.requireAdmin, (req, res) => {
-    // (data) = getForm('data')
-    // b64 = data[0].split('base64,')[1]
-    // decoded = b64decode(b64)
-    // toread = io.BytesIO()
-    // toread.write(decoded)
-    // toread.seek(0)  # resets pointer
-    // await uploadAvailability(toread)
-    // return {
-    //     **StatusCodes['SUCCESS'],
-    //     "job_id": job.id
-    // }
+router.post('/availability', auth.requireAdmin, async (req, res) => {
+    const file_data = await fs.readFile(req.file);
+    uploadAvailability(file_data);
 })
 
-router.get('/orders', auth.requireAdmin, (req, res) => {
+router.get('/orders', auth.requireAdmin, async (req, res) => {
     const orders = await Order.query().withGraphFetched('address, user, items.[sku.[plant, discounts]]').where('status', req.body.status);
     res.json(orders);
 })
 
-router.get('/customers', auth.requireAdmin, (req, res) => {
+router.get('/customers', auth.requireAdmin, async (req, res) => {
     //TODO don't show admins?
     const customers = await User.query();
     res.json(customers);
 })
 
-router.post('/order_status', auth.requireAdmin, (req, res) => {
+router.post('/order_status', auth.requireAdmin, async (req, res) => {
     const order = await Order.query().patchAndFetchById(req.body.id, {
         status: req.body.status
     });
     res.json(order);
 })
 
-router.post('/modify_user', auth.requireAdmin, (req, res) => {
+router.post('/modify_user', auth.requireAdmin, async (req, res) => {
     if (req.token.user_id === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
     const operation = req.body.operation;
     let user = await User.query().findById(req.body.id);

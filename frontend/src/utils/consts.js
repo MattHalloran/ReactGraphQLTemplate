@@ -37,15 +37,6 @@ export const ORDER_STATES = [
     },
 ]
 
-export const PLANT_ATTRIBUTES = [
-    'Drought Tolerance',
-    'Grown Height',
-    'Grown Spread',
-    'Growth Rate',
-    'Optimal Light',
-    'Salt Tolerance',
-]
-
 export const SORT_OPTIONS = [
     {
         label: 'A-Z',

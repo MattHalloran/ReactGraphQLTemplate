@@ -32,7 +32,6 @@ import {
 } from 'utils/displayPrice';
 import makeID from 'utils/makeID';
 import { 
-    PLANT_ATTRIBUTES, 
     PUBS 
 } from 'utils/consts';
 import { DropzoneAreaBase } from 'material-ui-dropzone';
@@ -42,6 +41,15 @@ import {
     deleteArrayIndex, 
     updateArray 
 } from 'utils/arrayTools';
+
+const PLANT_ATTRIBUTES = [
+    'Drought Tolerance',
+    'Grown Height',
+    'Grown Spread',
+    'Growth Rate',
+    'Optimal Light',
+    'Salt Tolerance',
+]
 
 const useStyles = makeStyles((theme) => ({
     appBar: {

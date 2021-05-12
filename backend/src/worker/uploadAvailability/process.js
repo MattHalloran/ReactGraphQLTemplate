@@ -1,5 +1,5 @@
 import { Plant, Sku } from "../../db/models";
-import { SKU_STATUS } from "../../db/types";
+import { SKU_STATUS } from "../../src/db/types";
 
 // Reads an .xls availability file into the database.
 // SKUs of plants not in the availability file will be hidden
