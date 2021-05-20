@@ -1,21 +1,19 @@
-import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql';
-import { db } from '../db';
-import { TraitNameType } from '../enums/traitName';
-import { TABLES } from '../tables';
-import { PlantType } from './plant';
+import { gql } from 'apollo-server-express';
 
-export const TraitType = new GraphQLObjectType({
-    name: 'Trait',
-    description: 'A plant attribute',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        name: { type: GraphQLNonNull(TraitNameType) },
-        value: { type: GraphQLNonNull(GraphQLString) },
-        plants: {
-            type: GraphQLList(PlantType),
-            resolve: (trait) => {
-                return db().select().from(TABLES.PlantTraits).where('traitId', trait.id);
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    type Trait {
+        id: ID!
+        name: String!
+        value: String!
+        plants: [Plant!]!
+    }
+
+    extend type Query {
+        traitNames: [String!]!
+        traitValues(name: String!): [String!]!
+    }
+`
+
+export const resolvers = {
+    
+}

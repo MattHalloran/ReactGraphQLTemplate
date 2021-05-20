@@ -1,40 +1,54 @@
-import { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLList } from 'graphql';
-import { db } from '../db';
-import { OrderStatusType } from '../enums/orderStatus';
-import { TABLES } from '../tables';
-import { AddressType } from './address';
-import { OrderItemType } from './orderItem';
-import { UserType } from './user';
+import { ORDER_STATUS } from '@local/shared';
+import { gql } from 'apollo-server-express';
 
-export const OrderType = new GraphQLObjectType({
-    name: 'Order',
-    description: 'A customer order',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLString) },
-        status: { type: GraphQLNonNull(OrderStatusType) },
-        specialInstructions: { type: GraphQLString },
-        desiredDeliveryDate: { type: GraphQLInt },
-        expectedDeliveryDate: { type: GraphQLInt },
-        isDelivery: { type: GraphQLBoolean },
-        addressId: { type: GraphQLInt },
-        userId: { type: GraphQLNonNull(GraphQLString) },
-        address: {
-            type: AddressType,
-            resolve: (order) => {
-                return db().select().from(TABLES.Address).where('id', order.addressId).first();
-            }
-        },
-        user: {
-            type: UserType,
-            resolve: (order) => {
-                return db().select().from(TABLES.User).where('id', order.userId).first();
-            }
-        },
-        items: {
-            type: GraphQLList(OrderItemType),
-            resolve: (order) => {
-                return db().select().from(TABLES.OrderItem).where('orderId', order.id);
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    enum OrderStatus {
+        CanceledByAdmin
+        CanceledByUser
+        PendingCancel
+        Rejected
+        Draft
+        Pending
+        Approved
+        Scheduled
+        InTransit
+        Delivered
+    }
+
+    type Order {
+        id: ID!
+        status: OrderStatus!
+        specialInstructions: String
+        desiredDeliveryDate: Date
+        expectedDeliveryDate: Date
+        isDelivery: Boolean
+        address: Address
+        business: Business!
+        items: [OrderItem!]!
+    }
+
+    extend type Query {
+        order(id: ID!): Order
+        orders(businessId: ID, status: OrderStatus): [Order!]!
+    }
+
+    extend type Mutation {
+        updateOrder(
+            id: ID!
+            specialInstructions: String
+            desiredDeliveryDate: Date
+            isDelivery: Boolean
+            addressId: ID
+        ): Order
+        submitOrder(
+            id: ID!
+        ): Response
+        cancelOrder(
+            id: ID!
+        ): Response
+    }
+`
+
+export const resolvers = {
+    OrderStatus: ORDER_STATUS
+}

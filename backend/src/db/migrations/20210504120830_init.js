@@ -93,7 +93,6 @@ export async function up (knex) {
         table.uuid('businessId').references('id').inTable(TABLES.Business);
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
-        //TODO UNIQUE (hash, used_for),
         //TODO UNIQUE (foler, file_name, extension)
         table.uuid('id').primary();
         table.string('folder', 256).notNullable();
@@ -101,7 +100,7 @@ export async function up (knex) {
         table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
         table.string('hash', 128).notNullable();
-        table.enu('usedFor', Object.values(IMAGE_USE)).notNullable();
+        table.string('label', 64).notNullable();
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });
@@ -114,19 +113,8 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Plant, (table) => {
         table.uuid('id').primary();
         table.string('latinName', 256).notNullable().unique();
-        table.string('commonName', 256);
-        table.string('plantnetUrl', 2048);
-        table.string('yardsUrl', 2048);
-        table.string('description', 4096);
-        table.boolean('jerseyNative');
-        table.integer('deerResistanceId').references('id').inTable(TABLES.Trait);
-        table.integer('droughtToleranceId').references('id').inTable(TABLES.Trait);
-        table.integer('grownHeightId').references('id').inTable(TABLES.Trait);
-        table.integer('grownSpreadId').references('id').inTable(TABLES.Trait);
-        table.integer('growthRateId').references('id').inTable(TABLES.Trait);
-        table.integer('optimalLightId').references('id').inTable(TABLES.Trait);
-        table.integer('saltToleranceId').references('id').inTable(TABLES.Trait);
-        table.uuid('displayImageId').references('id').inTable(TABLES.Image);
+        table.string('textData', 32768).defaultTo('{}').notNullable();
+        table.string('imageData', 4096).defaultTo('{}').notNullable();
     });
     await knex.schema.createTable(TABLES.Sku, (table) => {
         table.uuid('id').primary();
@@ -155,6 +143,11 @@ export async function up (knex) {
         table.integer('quantity').defaultTo(1).notNullable();
         table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable();
         table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable();
+    });
+    await knex.schema.createTable(TABLES.ImageLabels, (table) => {
+        table.increments();
+        table.integer('imageId').references('id').inTable(TABLES.Image).notNullable();
+        table.string('label').notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
         table.increments();

@@ -226,6 +226,15 @@ class BusinessHandler(Handler):
         return False
 
 
+# Possible image sizes stored, and their max size
+class ImageSizes(Enum):
+    XS = (64, 64)
+    S = (128, 128)
+    M = (256, 256)
+    ML = (512, 512)
+    L = (1024, 1024)
+
+
 class ImageHandler(Handler):
     ModelType = Image
 

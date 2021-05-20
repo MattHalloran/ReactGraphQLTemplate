@@ -1,16 +1,29 @@
-import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql';
-import { TaskStatusType } from '../enums/taskStatus';
+import { TASK_STATUS } from '@local/shared';
+import { gql } from 'apollo-server-express';
 
-export const TaskType = new GraphQLObjectType({
-    name: 'Task',
-    description: 'A task corresponding to a background process, such as an emailer',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLString) },
-        taskId: { type: GraphQLNonNull(GraphQLInt) },
-        name: { type: GraphQLNonNull(GraphQLString) },
-        status: { type: GraphQLNonNull(TaskStatusType)},
-        description: { type: GraphQLString },
-        result: { type: GraphQLString },
-        resultCode: { type: GraphQLInt },
-    })
-})
+export const typeDef = gql`
+    enum TaskStatus {
+        Unknown
+        Failed
+        Active
+        Completed
+    }
+
+    type Task {
+        id: ID!
+        taskId: Int!
+        name: String!
+        status: TaskStatus!
+        description: String
+        result: String
+        resultCode: Int
+    }
+
+    extend type Query {
+        tasks(ids: [ID!], status: TaskStatus): [Task!]!
+    }
+`
+
+export const resolvers = {
+    TaskStatus: TASK_STATUS
+}

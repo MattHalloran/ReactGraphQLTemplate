@@ -1,63 +1,85 @@
-import { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLList } from 'graphql';
-import { db } from '../db';
-import { TABLES } from '../tables';
-import { BusinessType } from './business';
-import { UserStatusType } from '../enums/userStatus';
-import { FeedbackType } from './feedback';
-import { EmailType } from './email';
-import { OrderType } from './order';
-import { RoleType } from './role';
-import { PhoneType } from './phone';
+import { ACCOUNT_STATUS } from '@local/shared';
+import { gql } from 'apollo-server-express';
 
-export const UserType = new GraphQLObjectType({
-    name: 'User',
-    description: 'A user associated with an account',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        firstName: { type: GraphQLNonNull(GraphQLString) },
-        lastName: { type: GraphQLNonNull(GraphQLString) },
-        pronouns: { type: GraphQLString },
-        theme: { type: GraphQLString },
-        password: { type: GraphQLNonNull(GraphQLString) },
-        accountApproved: { type: GraphQLNonNull(GraphQLBoolean) },
-        emailVerified: { type: GraphQLNonNull(GraphQLBoolean) },
-        status: { type: GraphQLNonNull(UserStatusType) },
-        businessId: { type: GraphQLNonNull(GraphQLInt) },
-        business: {
-            type: BusinessType,
-            resolve: (user) => {
-                return db().select().from(TABLES.Business).where('id', user.businessId).first();
-            }
-        },
-        phones: {
-            type: GraphQLList(PhoneType),
-            resolve: (user) => {
-                return db().select().from(TABLES.Phone).where('userId', user.id);
-            }
-        },
-        emails: {
-            type: GraphQLList(EmailType),
-            resolve: (user) => {
-                return db().select().from(TABLES.Email).where('userId', user.id);
-            }
-        },
-        orders: {
-            type: GraphQLList(OrderType),
-            resolve: (user) => {
-                return db().select().from(TABLES.Order).where('userId', user.id);
-            }
-        },
-        roles: {
-            type: GraphQLList(RoleType),
-            resolve: (user) => {
-                return db().select().from(TABLES.UserRoles).where('userId', user.id);
-            }
-        },
-        feedbacks: {
-            type: GraphQLList(FeedbackType),
-            resolve: (user) => {
-                return db().select().from(TABLES.Feedback).where('userId', user.id);
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    enum AccountStatus {
+        Deleted
+        Unlocked
+        SoftLock
+        HardLock
+    }
+
+    type User {
+        id: ID!
+        firstName: String!
+        lastName: String!
+        pronouns: String!
+        emails: [Email!]!
+        phones: [Phone!]!
+        business: Business!
+        theme: String!
+        accountApproved: Boolean!
+        emailVerified: Boolean!
+        status: AccountStatus!
+        orders: [Order!]!
+        roles: [Role!]!
+        feedback: [Feedback!]!
+    }
+
+    extend type Query {
+        users(ids: [ID!]): [User!]!
+    }
+
+    extend type Mutation {
+        login(
+            email: String!
+            password: String!
+        ): User!
+        # Creates a business, then creates a user belonging to that business
+        registerUser(
+            firstName: String!
+            lastName: String!
+            pronouns: String
+            businessName: String!
+            email: String!
+            phone: String!
+            existingCustomer: Boolean!
+            password: String!
+        ): User!
+        updateUser(
+            firstName: String
+            lastName: String
+            pronouns: String!
+            theme: String!
+            accountApproved: Boolean!
+            emailVerified: Boolean!
+            status: AccountStatus!
+            password: String!
+            confirmPassword: String!
+        ): User!
+        deleteUser(
+            id: ID!
+            password: String
+            confirmPassword: String
+        ): Response
+        sendPasswordResetEmail(
+            id: ID
+        ): Response
+        changeUserStatus(
+            id: ID!
+            status: AccountStatus!
+        ): Response
+        addUserRole(
+            id: ID!
+            roleId: ID!
+        ): Response
+        removeUserRole(
+            id: ID!
+            roleId: ID!
+        ): Response
+    }
+`
+
+export const resolvers = {
+    AccountStatus: ACCOUNT_STATUS
+}

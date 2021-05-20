@@ -1,27 +1,29 @@
-import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql';
-import { db } from '../db';
-import { TABLES } from '../tables';
-import { OrderType } from './order';
+import { gql } from 'apollo-server-express';
 
-export const OrderItemType = new GraphQLObjectType({
-    name: 'Order Item',
-    description: 'One item (with quantity) in an order',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        quantity: { type: GraphQLInt },
-        orderId: { type: GraphQLNonNull(GraphQLString) },
-        skuId: { type: GraphQLNonNull(GraphQLString) },
-        order: {
-            type: OrderType,
-            resolve: (orderItem) => {
-                return db().select().from(TABLES.Order).where('id', orderItem.orderId).first();
-            }
-        },
-        sku: {
-            type: SkuType,
-            resolve: (orderItem) => {
-                return db().select().from(TABLES.Sku).where('id', orderItem.skuId).first();
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    type OrderItem {
+        id: ID!
+        quantity: Int!
+        order: Order!
+        sku: Sku!
+    }
+
+    extend type Mutation {
+        addOrderItem(
+            quantity: Int!
+            orderId: ID!
+            skuId: ID!
+        ): OrderItem
+        updateOrderItem(
+            id: ID!
+            quantity: Int
+        ): OrderItem
+        deleteOrderItem(
+            id: ID!
+        ): Response
+    }
+`
+
+export const resolvers = {
+    
+}

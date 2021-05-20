@@ -1,20 +1,28 @@
-import { GraphQLObjectType, GraphQLString } from 'graphql';
-import { db } from '../db';
-import { TABLES } from '../tables';
-import { UserType } from './user';
+import { gql } from 'apollo-server-express';
 
-export const FeedbackType = new GraphQLObjectType({
-    name: 'Feedback',
-    description: 'User-submitted feedback',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLString) },
-        test: { type: GraphQLNonNull(GraphQLString) },
-        userId: { type: GraphQLString },
-        user: {
-            type: UserType,
-            resolve: (feedback) => {
-                return db().select().from(TABLES.User).where('id', feedback.userId).first();
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    type Feedback {
+        id: ID!
+        text: String!
+        user: User
+    }
+
+    extend type Query {
+        feedbacks(ids: [ID!]): [Feedback!]!
+    }
+
+    extend type Mutation {
+        addFeedback(
+            id: ID!
+            text: String!
+            userId: ID
+        ): Feedback!
+        deleteFeedback(
+            id: ID!
+        ): Response
+    }
+`
+
+export const resolvers = {
+    
+}

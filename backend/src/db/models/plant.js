@@ -1,81 +1,43 @@
-import { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLList } from 'graphql';
-import { db } from '../db';
-import { TABLES } from '../tables';
-import { SkuType } from './sku';
-import { TraitType } from './trait';
+import { gql } from 'apollo-server-express';
 
-export const PlantType = new GraphQLObjectType({
-    name: 'Plant',
-    description: 'Plant information',
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLString) },
-        latinName: { type: GraphQLNonNull(GraphQLString) },
-        commonName: { type: GraphQLString },
-        plantnetUrl: { type: GraphQLString },
-        yardsUrl: { type: GraphQLString },
-        description: { type: GraphQLString },
-        jerseyNative: { type: GraphQLBoolean },
-        deerResistance: { type: GraphQLInt },
-        droughtToleranceId: { type: GraphQLInt },
-        grownHeightId: { type: GraphQLInt },
-        grownSpreadId: { type: GraphQLInt },
-        growthRateId: { type: GraphQLInt },
-        optimalLightId: { type: GraphQLInt },
-        saltToleranceId: { type: GraphQLInt },
-        displayImageId: { type: GraphQLInt },
-        deerResistance: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.deerResistanceId).first();
-            }
-        },
-        droughtTolerance: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.droughtToleranceId).first();
-            }
-        },
-        grownHeight: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.grownHeightId).first();
-            }
-        },
-        grownSpread: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.grownSpreadId).first();
-            }
-        },
-        growthRate: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.grownRateId).first();
-            }
-        },
-        optimalLight: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.optimalLightId).first();
-            }
-        },
-        saltTolerance: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Trait).where('id', plant.saltToleranceId).first();
-            }
-        },
-        displayImage: {
-            type: TraitType,
-            resolve: (plant) => {
-                return db().select().from(TABLES.Image).where('id', plant.displayImageId).first();
-            }
-        },
-        skus: {
-            type: GraphQLList(SkuType),
-            resolve: (plant) => {
-                return db().select().from(TABLES.Sku).where('plantId', plant.id);
-            }
-        }
-    })
-})
+export const typeDef = gql`
+    type Plant {
+        id: ID!
+        latinName: String!
+        # Text data stored as JSON. 
+        # Unique fields are added to Trait table. 
+        # Field values are added to association table
+        # This allows new attributes to be added without updating the database, and the ability to easily filter
+        textData: String!
+        # Associated image labels and IDs stored as JSON
+        imageData: String!
+        skus: [Sku!]
+    }
+
+    extend type Query {
+        plants(ids: [ID!]): [Plant!]!
+        activePlants: [Plant!]!
+        inactivePlants: [Plant!]!
+    }
+
+    extend type Mutation {
+        addPlant(
+            latinName: String!
+            textData: String
+            imageData: String
+        ): Plant!
+        updatePlant(
+            id: ID!
+            latinName: String
+            textData: String
+            imageData: String
+        ): Plant!
+        deletePlant(
+            id: ID!
+        ): Response
+    }
+`
+
+export const resolvers = {
+    
+}
