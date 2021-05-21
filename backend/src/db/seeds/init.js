@@ -1,8 +1,8 @@
-import { ACCOUNT_STATUS } from '../types';
+import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
-import { HASHING_ROUNDS } from '../models/password';
+import { HASHING_ROUNDS } from '../models/user';
 
 export async function seed(knex) {
     // Truncate existing tables

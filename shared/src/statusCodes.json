@@ -74,5 +74,10 @@
         "code": 426,
         "ok": false,
         "msg": "Error: What are you doing trying to delete your own account? I am disappointed :("
+    },
+    "NotImplemented": {
+        "code": 427,
+        "ok": false,
+        "msg": "Error: This has not been implemented yet. Please be patient :)"
     }
 }

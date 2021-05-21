@@ -41,7 +41,7 @@ router.post('/register', async (req, res) => {
         userId: user.id
     })
     // Generate session token
-    const session = auth.generateToken(user.id);
+    const session = auth.generateToken(user.id, user.businessId);
     let user = await User.query().patch({
         sessionToken: session
     });
@@ -95,7 +95,7 @@ router.put('/login', async (req, res) => {
     // Now we can validate the password
     const passwordValid = await User.verifyPassword(req.body.password);
     if (passwordValid) {
-        const token = auth.generateToken(user.id);
+        const token = auth.generateToken(user.id, user.businessId);
         user = user.patchAndFetch({ 
             sessionToken: token,
             loginAttempts: 0,

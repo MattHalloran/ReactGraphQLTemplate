@@ -32,7 +32,8 @@ app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, 'priv
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Set up GraphQL using Apollo
-const apollo_options = new ApolloServer({ typeDefs, resolvers });
+// Context trickery allows request and response to be included in the context
+const apollo_options = new ApolloServer({ typeDefs, resolvers, context: ({ req, res }) => ({ req, res }) });
 apollo_options.applyMiddleware({ app, path: PREFIX });
 
 // Start Express server

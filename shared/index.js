@@ -9,5 +9,5 @@ module.exports = {
     ...business,
     ...model,
     ...validation,
-    status
+    CODE: status
 }

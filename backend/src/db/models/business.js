@@ -1,4 +1,8 @@
 import { gql } from 'apollo-server-express';
+import { db } from '../db';
+import { TABLES } from '../tables';
+import pathExists from './pathExists';
+import { CODE } from '@local/shared';
 
 export const typeDef = gql`
     type Business {
@@ -25,8 +29,8 @@ export const typeDef = gql`
             name: String
             subscribedToNewsletters: Boolean
         ): Business!
-        deleteBusiness(
-            id: ID!
+        deleteBusinesses(
+            ids: [ID!]!
         ): Response
         setBusinessDiscounts(
             ids: [ID!]!
@@ -65,6 +69,47 @@ export const resolvers = {
 
             const results = await qb;
             return results.map(r => hydrate(r));
+        }
+    },
+    Mutation: {
+        addBusiness: async(_, args, context) => {
+            // Only admins can directly add businesses
+            //if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
+
+            const added = await db(TABLES.Business).returning('*').insert({
+                name: args.name,
+                subscribedToNewsletters: args.subscribedToNewsletters ?? false
+            })
+
+            return added;
+        },
+        updateBusiness: async(_, args, context) => {
+            // Only admins can update other businesses
+            if(!context.req.isAdmin || (context.token.businessId !== args.id)) return context.res.sendStatus(CODE.Unauthorized);
+
+            const curr = await db(TABLES.Business).findById(args.id);
+            const updated = await db(TABLES.Business).patchAndFetchById(args.id, {
+                name: args.name ?? curr.name,
+                subscribedToNewsletters: args.subscribedToNewsletters ?? curr.subscribedToNewsletters
+            })
+
+            return updated;
+        },
+        deleteBusinesses: async(_, args, context) => {
+            // Only admins can delete other businesses
+            if(!context.req.isAdmin || args.ids.length > 1 || context.token.businessId !== args.ids[0]) return context.res.sendStatus(CODE.Unauthorized); 
+
+            const numDeleted = await db(TABLES.Address).delete().whereIn('id', args.ids);
+
+            return context.res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
+        },
+        setBusinessDiscounts: async(_, args, context) => {
+            // TODO
+            return context.res.sendStatus(CODE.NotImplemented);
+        },
+        setBusinessEmployees: async(_, args, context) => {
+            // TODO
+            return context.res.sendStatus(CODE.NotImplemented);
         }
     }
 }

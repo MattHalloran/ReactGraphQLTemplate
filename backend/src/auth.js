@@ -17,13 +17,13 @@ export async function authenticate(req, _, next) {
         return;
     }
     // Second, verify that the session cookie is valid
-    jwt.verify(cookies.session, process.env.COOKIE_SECRET, async (error, user_id) => {
+    jwt.verify(cookies.session, process.env.COOKIE_SECRET, async (error, token) => {
         if (error) {
             next();
             return;
         }
         // Now, set token and role variables for other middleware to use
-        req.token = { user_id: user_id };
+        req.token = token;
         // Query user's roles
         const user_roles = await db(TABLES.User)
                                 .select(`${TABLES.Role}.title`)
@@ -39,8 +39,11 @@ export async function authenticate(req, _, next) {
 }
 
 // Generates a JSON Web Token (JWT)
-export function generateToken(user_id) {
-    return jwt.sign(user_id, process.env.COOKIE_SECRET, { expiresIn: SESSION_DAYS*86400 })
+export function generateToken(userId, businessId) {
+    return jwt.sign({ 
+        userId: userId, 
+        businessId: businessId 
+    }, process.env.COOKIE_SECRET, { expiresIn: SESSION_DAYS*86400 })
 }
 
 // Middleware that requires a valid token

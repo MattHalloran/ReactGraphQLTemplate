@@ -146,7 +146,7 @@ export async function up (knex) {
     });
     await knex.schema.createTable(TABLES.ImageLabels, (table) => {
         table.increments();
-        table.integer('imageId').references('id').inTable(TABLES.Image).notNullable();
+        table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable();
         table.string('label').notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
