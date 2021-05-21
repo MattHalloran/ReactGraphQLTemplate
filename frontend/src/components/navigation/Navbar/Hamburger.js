@@ -4,7 +4,7 @@ import {
     ContactInfo,
     Copyright
 } from 'components';
-import { SOCIAL } from 'shared';
+import { SOCIAL } from '@local/shared';
 import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import {

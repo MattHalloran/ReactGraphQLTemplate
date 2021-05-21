@@ -4,15 +4,47 @@ const { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } = require('./modelConsts');
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 50;
 
-const businessSchema = yup.object().shape({
-    name: yup.string().max(128).required()
-});
-
-const userSchema = yup.object().shape({
+// Schema for creating a new account
+const signUpSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
+    businessName: yup.string().max(128).required(),
     email: yup.string().email().required(),
+    phone: yup.string().phone().required(),
+    existingCustomer: yup.boolean().required(),
+    password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
+});
+
+// Schema for updating a user profile
+const profileSchema = yup.object().shape({
+    firstName: yup.string().max(128).required(),
+    lastName: yup.string().max(128).required(),
+    pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
+    businessName: yup.string().max(128).required(),
+    email: yup.string().email().required(),
+    phone: yup.string().phone().required(),
+    existingCustomer: yup.boolean().required(),
+    currentPassword: yup.string().max(128).required(),
+    newPassword: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).optional()
+});
+
+// Schema for logging in
+const logInSchema = yup.object().shape({
+    email: yup.string().email().required(),
+    password: yup.string().max(128).required()
+})
+
+// Schema for sending a password reset request
+const forgotPasswordSchema = yup.object().shape({
+    email: yup.string().email().required()
+})
+
+// Schema for adding an employee to a business
+const employeeSchema = yup.object().shape({
+    firstName: yup.string().max(128).required(),
+    lastName: yup.string().max(128).required(),
+    pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
 });
 
@@ -98,8 +130,11 @@ const orderSchema = yup.object().shape({
 module.exports = {
     MIN_PASSWORD_LENGTH: MIN_PASSWORD_LENGTH,
     MAX_PASSWORD_LENGTH: MAX_PASSWORD_LENGTH,
-    businessSchema: businessSchema,
-    userSchema: userSchema,
+    signUpSchema: signUpSchema,
+    profileSchema: profileSchema,
+    logInSchema: logInSchema,
+    forgotPasswordSchema: forgotPasswordSchema,
+    employeeSchema: employeeSchema,
     discountSchema: discountSchema,
     feedbackSchema: feedbackSchema,
     roleSchema: roleSchema,

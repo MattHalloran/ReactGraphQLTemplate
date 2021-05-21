@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-import { BUSINESS_NAME, PUBS, SORT_OPTIONS } from 'utils/consts';
+import { BUSINESS_NAME } from '@local/shared';
+import { PUBS, SORT_OPTIONS } from 'utils/consts';
 import { displayPrice } from 'utils/displayPrice';
 import { getInventory } from "query/http_promises";
 import PubSub from "./pubsub";

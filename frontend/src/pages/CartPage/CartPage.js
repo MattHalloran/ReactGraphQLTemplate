@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
-import { BUSINESS_NAME, PUBS, LINKS } from 'utils/consts';
+import { BUSINESS_NAME } from '@local/shared';
+import { PUBS, LINKS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { Button } from '@material-ui/core';
 import { useMutate } from "restful-react";

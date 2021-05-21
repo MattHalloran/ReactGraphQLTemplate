@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import * as validation from 'utils/validations';
+import { signUpSchema } from '@local/shared';
 import { Button, TextField, Checkbox, Link } from '@material-ui/core';
 import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { CODE } from '@local/shared';
-import { LINKS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
+import { CODE, DEFAULT_PRONOUNS } from '@local/shared';
+import { LINKS, PUBS } from 'utils/consts';
 import { useMutate } from "restful-react";
 import PubSub from 'utils/pubsub';
 
@@ -36,17 +36,16 @@ function SignUpForm({
     const [confirmPassword, setConfirmPassword] = useState("");
     const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
 
-    let firstNameError = validation.firstNameValidation(firstName);
-    let lastNameError = validation.lastNameValidation(lastName);
-    let pronounsError = validation.pronounValidation(pronouns);
-    let businessError = validation.businessValidation(business);
-    let emailError = validation.emailValidation(email);
-    let phoneError = validation.phoneNumberValidation(phone);
-    let passwordError = validation.passwordValidation(password);
-    let confirmPasswordError = validation.confirmPasswordValidation(password, confirmPassword);
-    let existingCustomerError = '';
-    let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
-        emailError, phoneError, passwordError, confirmPasswordError, existingCustomerError);
+    let firstNameError = signUpSchema.validateSyncAt('firstName', firstName);
+    let lastNameError = signUpSchema.validateSyncAt('lastName', lastName);
+    let pronounsError = signUpSchema.validateSyncAt('pronouns', pronouns);
+    let businessError = signUpSchema.validateSyncAt('businessName', business);
+    let emailError = signUpSchema.validateSyncAt('email', email);
+    let phoneError = signUpSchema.validateSyncAt('phone', phone);
+    let passwordError = signUpSchema.validateSyncAt('password', password);
+    let confirmPasswordError = password === confirmPassword ? null : 'Passwords do not match';
+    let formValid = (firstNameError || lastNameError || pronounsError || businessError || 
+                     emailError || phoneError || passwordError || confirmPasswordError) === null;
 
     const handleCheckbox = (event) => {
         console.log('TODO')
@@ -81,29 +80,17 @@ function SignUpForm({
     });
 
     const register = (event) => {
-        let form = new FormData(event.target);
-        form.set('emails', [{ "email_address": email, "receives_delivery_updates": true }]);
-        form.set('phones', [{
-            "unformatted_number": phone,
-            "country_code": '+1',
-            "extension": '',
-            "is_mobile": true,
-            "receives_delivery_updates": false
-        }]);
-        registerUser(form);
-    }
-
-    const submit = (event) => {
         event.preventDefault();
-        if (anyErrors) {
+        const form = new FormData(event.target);
+        if (!signUpSchema.isValidSync(form)) {
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
-        register();
+        registerUser(form);
     }
 
     return (
-        <FormControl className={classes.form} error={anyErrors}>
+        <FormControl className={classes.form} error={!formValid}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                     <TextField
@@ -225,7 +212,6 @@ function SignUpForm({
                             <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
                             <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
                         </RadioGroup>
-                        <FormHelperText>{existingCustomerError}</FormHelperText>
                     </FormControl>
                 </Grid>
                 <Grid item xs={12}>
@@ -240,7 +226,7 @@ function SignUpForm({
                 fullWidth
                 color="secondary"
                 className={classes.submit}
-                onClick={submit}
+                onClick={register}
             >
                 Sign Up
             </Button>

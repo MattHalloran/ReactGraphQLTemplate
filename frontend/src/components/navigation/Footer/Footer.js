@@ -2,7 +2,7 @@ import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import PropTypes from 'prop-types';
-import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, LINKS, URL_BASE } from 'utils/consts';
+import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, LINKS, URL_BASE } from '@local/shared';
 import { printAvailability } from 'utils/printAvailability';
 import { makeStyles } from '@material-ui/core/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';

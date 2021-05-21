@@ -2,11 +2,8 @@ import {
     Link,
     Typography
 } from '@material-ui/core';
-import { 
-    BUSINESS_NAME,
-    LINKS,
-    WEBSITE_URL
-} from 'utils/consts';
+import { BUSINESS_NAME, WEBSITE_URL } from '@local/shared';
+import { LINKS } from 'utils/consts';
 
 function Copyright({
     ...props

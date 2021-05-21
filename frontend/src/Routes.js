@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import { LINKS, USER_ROLES, BUSINESS_NAME } from 'utils/consts';
+import { LINKS, USER_ROLES, BUSINESS_NAME } from '@local/shared';
 import Sitemap from 'Sitemap';
 import {
     AboutPage,

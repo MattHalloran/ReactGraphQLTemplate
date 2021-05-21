@@ -1,4 +1,4 @@
-import { URL_BASE } from 'utils/consts';
+import { URL_BASE } from '@local/shared';
 // Headers used by fetch calls
 export const HEADERS = {
     ApplicatonJsonAccept: {

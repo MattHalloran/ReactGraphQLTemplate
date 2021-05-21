@@ -68,11 +68,6 @@ export const SORT_OPTIONS = [
     }
 ]
 
-export const USER_ROLES = {
-    Customer: "Customer",
-    Admin: "Admin",
-}
-
 export const COOKIE = {
     User: "user",
     Likes: "likes",
@@ -110,12 +105,4 @@ export const LINKS = {
     Register: "/register",
     Shopping: "/shopping",
     Terms: "/terms-and-conditions",
-}
-
-export const ACCOUNT_STATUS = {
-    Deleted: -1,
-    Unlocked: 1,
-    WaitingApproval: 2,
-    SoftLock: 3,
-    HardLock: 4,
 }

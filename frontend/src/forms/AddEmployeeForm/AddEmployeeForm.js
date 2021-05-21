@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import * as validation from 'utils/validations';
-import { Button, TextField, Checkbox, Link } from '@material-ui/core';
-import { FormControl, FormControlLabel, FormHelperText, Grid, RadioGroup, Radio } from '@material-ui/core';
+import { employeeSchema } from '@local/shared';
+import { Button, TextField, Link } from '@material-ui/core';
+import { FormControl, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { CODE } from '@local/shared';
-import { LINKS, DEFAULT_PRONOUNS, PUBS } from 'utils/consts';
+import { CODE, DEFAULT_PRONOUNS } from '@local/shared';
+import { LINKS, PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
@@ -27,48 +27,23 @@ function AddEmployeeForm() {
     const [firstName, setFirstName] = useHistoryState("ae_first_name", "");
     const [lastName, setLastName] = useHistoryState("ae_last_name", "");
     const [pronouns, setPronouns] = useHistoryState("ae_pronoun", DEFAULT_PRONOUNS[3]);
-    const [business, setBusiness] = useHistoryState("ae_bizz", null);
-    const [email, setEmail] = useHistoryState("ae_email", "");
-    const [phone, setPhone] = useHistoryState("ae_phone", "");
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [existingCustomer, setExistingCustomer] = useHistoryState("ae_existing", null);
 
-    let firstNameError = validation.firstNameValidation(firstName);
-    let lastNameError = validation.lastNameValidation(lastName);
-    let pronounsError = validation.pronounValidation(pronouns);
-    let businessError = validation.businessValidation(business);
-    let emailError = validation.emailValidation(email);
-    let phoneError = validation.phoneNumberValidation(phone);
-    let passwordError = validation.passwordValidation(password);
-    let confirmPasswordError = validation.confirmPasswordValidation(password, confirmPassword);
-    let existingCustomerError = '';
-    let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
-        emailError, phoneError, passwordError, confirmPasswordError, existingCustomerError);
-
-    const handleCheckbox = (event) => {
-        console.log('TODO')
-    }
-
-    const handleRadioSelect = (event) => {
-        setExistingCustomer(event.target.value);
-    }
+    let firstNameError = employeeSchema.validateSyncAt('firstName', firstName);
+    let lastNameError = employeeSchema.validateSyncAt('lastName', lastName);
+    let pronounsError = employeeSchema.validateSyncAt('pronouns', pronouns);
+    let passwordError = employeeSchema.validateSyncAt('password', password);
+    let confirmPasswordError = password === confirmPassword ? null : 'Passwords do not match';
+    let formValid = (firstNameError || lastNameError || pronounsError || passwordError || confirmPasswordError) === null;
 
     const addEmployee = (event) => {
         event.preventDefault();
-        if (anyErrors) {
+        const form = new FormData(event.target);
+        if (!employeeSchema.isValidSync(form)) {
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
-        const form = new FormData(event.target);
-        form.set('emails', [{ "email_address": email, "receives_delivery_updates": true }])
-        form.set('phones', [{
-            "unformatted_number": phone,
-            "country_code": '+1',
-            "extension": '',
-            "is_mobile": true,
-            "receives_delivery_updates": false
-        }])
         // registerUser(data).then(() => {
         //     if (existingCustomer) {
         //         alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
@@ -89,7 +64,7 @@ function AddEmployeeForm() {
     }
 
     return (
-        <FormControl className={classes.form} error={anyErrors}>
+        <FormControl className={classes.form} error={!formValid}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                     <TextField
@@ -139,48 +114,6 @@ function AddEmployeeForm() {
                     <TextField
                         required
                         fullWidth
-                        id="business"
-                        label="Business"
-                        name="business"
-                        autoComplete="business"
-                        value={business}
-                        onChange={e => setBusiness(e.target.value)}
-                        error={businessError !== null}
-                        helperText={businessError}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        error={emailError !== null}
-                        helperText={emailError}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        required
-                        fullWidth
-                        id="phone"
-                        label="Phone Number"
-                        name="phone"
-                        autoComplete="phone"
-                        value={phone}
-                        onChange={e => setPhone(e.target.value)}
-                        error={phoneError !== null}
-                        helperText={phoneError}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        required
-                        fullWidth
                         name="password"
                         label="Password"
                         type="password"
@@ -203,21 +136,6 @@ function AddEmployeeForm() {
                         autoComplete="current-password"
                         value={confirmPassword}
                         onChange={e => setConfirmPassword(e.target.value)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <FormControl component="fieldset">
-                        <RadioGroup aria-label="existing-customer-check" name="existing-customer-check" value={existingCustomer} onChange={handleRadioSelect}>
-                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-                        </RadioGroup>
-                        <FormHelperText>{existingCustomerError}</FormHelperText>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormControlLabel
-                        control={<Checkbox value="allowExtraEmails" color="primary" onChange={handleCheckbox} />}
-                        label="I want to receive marketing promotions and updates via email."
                     />
                 </Grid>
             </Grid>

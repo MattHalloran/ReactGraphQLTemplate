@@ -5,7 +5,8 @@ import {
     Shop as ShopIcon,
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
-import { LINKS, USER_ROLES } from 'utils/consts';
+import { USER_ROLES } from '@local/shared';
+import { LINKS } from 'utils/consts';
 
 // Returns user actions, in a list of this format:
 //  [

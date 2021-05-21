@@ -1,4 +1,4 @@
-import { BUSINESS_NAME, PHONE } from 'utils/consts';
+import { BUSINESS_NAME, PHONE } from '@local/shared';
 import { InformationalBreadcrumbs } from 'components';
 
 function AboutPage() {

@@ -1,6 +1,6 @@
 import { useParams, useHistory } from 'react-router-dom';
 import { useHistoryState } from 'utils/useHistoryState';
-import * as validation from 'utils/validations';
+import { logInSchema } from '@local/shared';
 import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -48,23 +48,23 @@ function LogInForm({
         }
     });
 
-    let emailError = validation.emailValidation(email);
-    let passwordError = validation.defaultStringValidation('password', password);
-    let anyErrors = !validation.passedValidation(emailError, passwordError);
+    let emailError = logInSchema.validateSyncAt('email', email);
+    let passwordError = logInSchema.validateSyncAt('password', password);
+    let formValid = (emailError || passwordError) === null;
 
     const login = (event) => {
         event.preventDefault();
-        if (anyErrors) {
+        const form = new FormData(event.target);
+        form.set('verificationCode', urlParams.code);
+        if (!logInSchema.isValidSync(form)) {
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields', severity: 'error'});
             return;
         }
-        const form = new FormData(event.target);
-        form.set('verificationCode', urlParams.code);
-        loginUser(formData);
+        loginUser(form);
     }
 
     return (
-        <FormControl className={classes.form} error={anyErrors}>
+        <FormControl className={classes.form} error={!formValid}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <TextField

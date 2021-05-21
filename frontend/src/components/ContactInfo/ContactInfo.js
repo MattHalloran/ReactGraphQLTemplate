@@ -22,7 +22,7 @@ import {
     ADDRESS, 
     EMAIL,
     PHONE 
-} from 'utils/consts';
+} from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {

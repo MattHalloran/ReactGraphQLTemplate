@@ -95,5 +95,9 @@ module.exports = {
         SoilPh: 'Soil PH',
         SoilType: 'Soil Type',
         LightRange: 'Light range'
+    },
+    USER_ROLES: {
+        Customer: "Customer",
+        Admin: "Admin",
     }
 }

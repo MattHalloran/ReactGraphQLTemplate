@@ -7,7 +7,7 @@ import {
     Snack
 } from 'components';
 import PubSub from 'utils/pubsub';
-import { PUBS, COOKIE, SESSION_DAYS, URL_BASE } from 'utils/consts';
+import { PUBS, COOKIE, SESSION_DAYS, URL_BASE } from '@local/shared';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';

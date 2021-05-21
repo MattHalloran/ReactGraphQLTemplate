@@ -17,6 +17,8 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
+import PubSub from 'utils/pubsub';
+import { PUBS } from '@local/shared';
 import { useGet } from "restful-react";
 import { 
     BeeIcon,
@@ -42,6 +44,7 @@ import {
     AddShoppingCart as AddShoppingCartIcon,
     Close as CloseIcon
 } from '@material-ui/icons';
+import Cookies from 'js-cookie';
 import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({
@@ -120,7 +123,7 @@ function PlantDialog({
                     alt: response.alt
                 }
                 setImage(image_data);
-                Cookies.set(`nln-img-${id}`, JSON.stringify(image_data));
+                Cookies.set(`nln-img-${plant.display_key}`, JSON.stringify(image_data));
             }
             else
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });

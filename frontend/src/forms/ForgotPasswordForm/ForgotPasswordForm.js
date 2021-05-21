@@ -2,8 +2,10 @@ import { useHistoryState } from 'utils/useHistoryState';
 import { Button, TextField, Link, Typography } from '@material-ui/core';
 import { FormControl, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import PubSub from 'utils/pubsub';
+import { PUBS } from '@local/shared';
 import { LINKS } from 'utils/consts';
-import * as validation from 'utils/validations';
+import { forgotPasswordSchema } from '@local/shared';
 import { useMutate } from 'restful-react';
 
 const useStyles = makeStyles((theme) => ({
@@ -21,7 +23,7 @@ function ForgotPasswordForm({
 }) {
     const classes = useStyles();
     const [email, setEmail] = useHistoryState("li_email", "");
-    let emailError = validation.emailValidation(email);
+    let emailError = forgotPasswordSchema.validateSyncAt('email', email);
 
     const { mutate: resetPassword } = useMutate({
         verb: 'PUT',
@@ -38,8 +40,9 @@ function ForgotPasswordForm({
 
     const submit = (event) => {
         event.preventDefault();
-        if (!emailError) {
-            resetPassword(email);
+        const form = new FormData(event.target);
+        if (forgotPasswordSchema.isValidSync(form)) {
+            resetPassword(form);
         }
     }
 

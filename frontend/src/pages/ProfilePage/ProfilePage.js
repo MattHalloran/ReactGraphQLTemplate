@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react';
-import { BUSINESS_NAME } from 'utils/consts';
+import { BUSINESS_NAME } from '@local/shared';
 
 function ProfilePage() {
 

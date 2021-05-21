@@ -11,7 +11,8 @@ import {
     StyledModal as Modal,
 } from 'components';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { PUBS, LINKS, URL_BASE } from 'utils/consts';
+import { URL_BASE } from '@local/shared';
+import { PUBS, LINKS } from 'utils/consts';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { getImage, getImages } from 'query/http_promises';

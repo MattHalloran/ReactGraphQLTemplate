@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { BUSINESS_NAME, LINKS } from 'utils/consts';
+import { BUSINESS_NAME } from '@local/shared';
+import { LINKS } from 'utils/consts';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Hamburger from './Hamburger';

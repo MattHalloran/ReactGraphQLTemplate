@@ -1,13 +1,13 @@
 import { useState, useRef, useLayoutEffect, useCallback } from 'react'
 import { useHistoryState } from 'utils/useHistoryState';
 import PropTypes from 'prop-types';
-import * as validation from 'utils/validations';
+import { profileSchema } from '@local/shared';
 import { useGet, useMutate } from "restful-react";
-import { BUSINESS_NAME, PUBS, DEFAULT_PRONOUNS } from 'utils/consts';
+import { BUSINESS_NAME, DEFAULT_PRONOUNS } from '@local/shared';
+import { PUBS } from 'utils/consts';
 import { PubSub } from 'utils/pubsub';
 import { Button, Container, FormLabel, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/core/styles';
@@ -44,17 +44,17 @@ function ProfileForm({
     const [existingCustomer, setExistingCustomer] = useHistoryState("su_existing", null);
     const [extraEmails, setExtraEmails] = useHistoryState("su_extra_email", null);
 
-    let firstNameError = validation.firstNameValidation(firstName);
-    let lastNameError = validation.lastNameValidation(lastName);
-    let pronounsError = validation.pronounValidation(pronouns);
-    let businessError = validation.businessValidation(business);
-    let emailError = validation.emailValidation(email);
-    let phoneError = validation.phoneNumberValidation(phone);
-    let newPasswordError = validation.passwordValidation(newPassword);
-    let confirmPasswordError = validation.confirmPasswordValidation(newPassword, confirmPassword);
-    let existingCustomerError = '';
-    let anyErrors = !validation.passedValidation(firstNameError, lastNameError, pronounsError, businessError,
-        emailError, phoneError, newPasswordError, confirmPasswordError, existingCustomerError);
+    let firstNameError = profileSchema.validateSyncAt('firstName', firstName);
+    let lastNameError = profileSchema.validateSyncAt('lastName', lastName);
+    let pronounsError = profileSchema.validateSyncAt('pronouns', pronouns);
+    let businessError = profileSchema.validateSyncAt('businessName', business);
+    let emailError = profileSchema.validateSyncAt('email', email);
+    let phoneError = profileSchema.validateSyncAt('phone', phone);
+    let currentPasswordError = profileSchema.validateSyncAt('currentPassword', currentPassword);
+    let newPasswordError = profileSchema.validateSyncAt('newPassword', newPassword);
+    let confirmPasswordError = newPassword === confirmPassword ? null : 'Passwords do not match';
+    let formValid = (firstNameError || lastNameError || pronounsError || businessError || 
+                     emailError || phoneError || currentPasswordError || newPasswordError || confirmPasswordError) === null;
 
     useGet({
         path: "profile",
@@ -104,39 +104,11 @@ function ProfileForm({
 
     const submit = useCallback((event) => {
         event.preventDefault();
-        // If the user did not enter their current password, they cannot change anything
-        if (currentPassword.length === 0) {
-            PubSub.publish(PUBS.Snack, { message: 'Please enter your current password.', severity: 'error' });
+        let form = FormData(event.target);
+        if (!profileSchema.isValidSync(form)) {
+            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
-        // If the user is trying to update their password
-        if (newPassword.length > 0 || confirmPassword.length > 0) {
-            if (newPassword !== confirmPassword) {
-                PubSub.publish(PUBS.Snack, { message: 'Confirm passwod does not match.', severity: 'error' });
-                return;
-            }
-        }
-        // If the user is trying to update their profile information TODO add checks for emails and phones
-        if (firstName !== fetched_profile.firstName || lastName !== fetched_profile.lastName) {
-            if (!validation.passedValidation(firstNameError, lastNameError, pronounsError, emailError, phoneError)) {
-                PubSub.publish(PUBS.Snack, { message: 'Validation failed. Please check fields.', severity: 'error' });
-                return;
-            }
-
-        }
-        let form = FormData(event.target);
-        form.set('emails', [{ "id": email_id.current, "email_address": email, "receives_delivery_updates": true }]);
-        // form.set('phones', [{
-        //     "id": phone_ids.current[0],
-        //     "unformatted_number": phones[0] ?? 'N/A',
-        //      "country_code": '+1',
-        //      "extension": '',
-        //      "is_mobile": true,
-        //      "receives_delivery_updates": false
-        // }]);
-        // Now that all checks have passed, we can send post a profile update
-        if (newPassword !== '')
-            form.set('password', newPassword);
         updateProfile(form);
     }, [fetched_profile, newPassword, confirmPassword, currentPassword, firstName, lastName, pronouns, email, phone, existingCustomer])
 
@@ -154,7 +126,7 @@ function ProfileForm({
     }
 
     return (
-        <FormControl className={classes.form} error={anyErrors}>
+        <FormControl className={classes.form} error={!formValid}>
             <Container>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
@@ -265,7 +237,6 @@ function ProfileForm({
                                 }
                                 label="I have ordered from New Life Nursery before"
                             />
-                            <FormHelperText>{existingCustomerError}</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
@@ -282,11 +253,11 @@ function ProfileForm({
                         <TextField
                             required
                             fullWidth
-                            name="current-password"
+                            name="currentPassword"
                             label="Current Password"
                             type="password"
-                            id="current-password"
-                            autoComplete="current-password"
+                            id="currentPassword"
+                            autoComplete="password"
                             value={currentPassword}
                             onChange={e => setCurrentPassword(e.target.value)}
                         />
@@ -295,11 +266,10 @@ function ProfileForm({
                         <TextField
                             required
                             fullWidth
-                            name="new-password"
+                            name="newPassword"
                             label="New Password"
                             type="password"
-                            id="new-password"
-                            autoComplete="current-password"
+                            id="newPassword"
                             value={newPassword}
                             onChange={e => setNewPassword(e.target.value)}
                             error={newPasswordError !== null}
@@ -313,8 +283,7 @@ function ProfileForm({
                             name="confirmPassword"
                             label="Confirm Password"
                             type="password"
-                            id="confirm-password"
-                            autoComplete="current-password"
+                            id="confirmPassword"
                             value={confirmPassword}
                             onChange={e => setConfirmPassword(e.target.value)}
                         />
