@@ -3,6 +3,7 @@ const { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } = require('./modelConsts');
 
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 50;
+const PHONE_REGEX = '^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$';
 
 // Schema for creating a new account
 const signUpSchema = yup.object().shape({
@@ -11,7 +12,7 @@ const signUpSchema = yup.object().shape({
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     businessName: yup.string().max(128).required(),
     email: yup.string().email().required(),
-    phone: yup.string().phone().required(),
+    phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),
     password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
 });
@@ -23,7 +24,7 @@ const profileSchema = yup.object().shape({
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     businessName: yup.string().max(128).required(),
     email: yup.string().email().required(),
-    phone: yup.string().phone().required(),
+    phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),
     currentPassword: yup.string().max(128).required(),
     newPassword: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).optional()

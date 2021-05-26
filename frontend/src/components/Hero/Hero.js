@@ -74,13 +74,13 @@ function Hero({
             <div className={classes.contentWrapper}>
                 <Typography variant='h2' component='h1' className={classes.title + ' ' + classes.textPop}>{text}</Typography>
                 <Typography variant='h4' component='h2' className={classes.subtitle + ' ' + classes.textPop}>{subtext}</Typography>
-                <Button 
+                <Button
                     type="submit"
                     color="primary"
                     className={classes.mainButton}
                     onClick={() => history.push(LINKS.Shopping)}
                 >
-                        Request Quote
+                    Request Quote
                 </Button>
             </div>
         </div>

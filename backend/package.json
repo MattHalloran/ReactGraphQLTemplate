@@ -23,6 +23,7 @@
     "bcrypt": "^5.0.1",
     "bull": "^3.22.4",
     "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
     "dayjs": "^1.10.4",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",

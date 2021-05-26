@@ -1,5 +1,5 @@
 import express from 'express';
-import { CODE } from '@local/shared';
+import { CODE, SESSION_MILLI } from '@local/shared';
 import * as auth from '../auth';
 import bcrypt from 'bcrypt';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
@@ -45,14 +45,14 @@ router.post('/register', async (req, res) => {
     let user = await User.query().patch({
         sessionToken: session
     });
-    res.cookie('session', session);
+    const cookie = {user: user};
+    res.cookie('session', cookie, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: SESSION_MILLI
+    })
     customerNotifyAdmin(user.fullName())
     sendVerificationLink(req.body.emails[0].email_address, user.id);
-    return res.json({
-        //TODO
-        //"session": UserHandler.pack_session(user, token),
-        user: user
-    })
 })
 
 router.put('/login', async (req, res) => {
@@ -102,10 +102,11 @@ router.put('/login', async (req, res) => {
             lastLoginAttempt: Date.now(),
             resetPasswordCode: null
         });
-        return res.json({
-            //TODO
-            //  "session": UserHandler.pack_session(user, token),
-            user: user,
+        const cookie = {user: user};
+        return res.cookie('session', cookie, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: SESSION_MILLI
         })
     } else {
         let new_status = ACCOUNT_STATUS.Unlocked;

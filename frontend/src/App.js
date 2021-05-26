@@ -6,8 +6,17 @@ import {
     Navbar,
     Snack
 } from 'components';
+import {
+    ApolloClient,
+    InMemoryCache,
+    ApolloProvider,
+    HttpLink,
+    from
+} from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
+import { COOKIE, SESSION_DAYS, URL_BASE } from '@local/shared';
+import { PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
-import { PUBS, COOKIE, SESSION_DAYS, URL_BASE } from '@local/shared';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import Routes from 'Routes';
@@ -19,6 +28,26 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import { useHistory } from 'react-router';
+
+// GraphQL Setup
+const errorLink = onError(({ graphqlErrors, networkError }) => {
+    if (graphqlErrors) {
+        graphqlErrors.map(({ message, location, path }) => {
+            alert(`GraphQL error: ${message}`);
+        });
+    }
+})
+const link = from([
+    errorLink,
+    new HttpLink({
+        uri: URL_BASE,
+        credentials: 'include'
+    })
+])
+const client = new ApolloClient({
+    cache: InMemoryCache,
+    link:link
+})
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -111,9 +140,7 @@ function App() {
     const redirect = (link) => history.push(link);
 
     return (
-        <RestfulProvider 
-            base={`${URL_BASE}/`} 
-            requestOptions={() => ({ headers: { session: { tag: session?.tag, token: session?.token } } })}>
+        <ApolloProvider client={client}>
             <StyledEngineProvider injectFirst>
                 <div id="App">
                     <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
@@ -151,7 +178,7 @@ function App() {
                     </ThemeProvider>
                 </div>
             </StyledEngineProvider>
-        </RestfulProvider>
+        </ApolloProvider>
     );
 }
 

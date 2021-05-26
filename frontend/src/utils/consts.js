@@ -1,3 +1,5 @@
+import { COOKIE } from '@local/shared';
+
 export const ORDER_STATES = [
     {
         label: 'Canceled by Admin',
@@ -67,15 +69,6 @@ export const SORT_OPTIONS = [
         value: 'old',
     }
 ]
-
-export const COOKIE = {
-    User: "user",
-    Likes: "likes",
-    Cart: "cart",
-    Theme: "theme",
-    Session: "session-f234y7fdiafhdja2",
-    Roles: "roles",
-}
 
 export const PUBS = {
     ...COOKIE,

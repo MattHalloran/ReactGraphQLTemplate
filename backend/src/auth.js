@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { CODE } from '@local/shared';
 import { TABLES } from './db/tables';
-import { SESSION_DAYS } from '@local/shared';
+import { SESSION_MILLI } from '@local/shared';
 import { db } from './db/db';
 
 // Sets the following request variables:
@@ -43,7 +43,7 @@ export function generateToken(userId, businessId) {
     return jwt.sign({ 
         userId: userId, 
         businessId: businessId 
-    }, process.env.COOKIE_SECRET, { expiresIn: SESSION_DAYS*86400 })
+    }, process.env.COOKIE_SECRET, { expiresIn: SESSION_MILLI })
 }
 
 // Middleware that requires a valid token

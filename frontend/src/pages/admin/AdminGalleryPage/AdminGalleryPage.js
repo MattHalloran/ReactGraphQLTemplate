@@ -34,32 +34,32 @@ function AdminGalleryPage({
                     //Grab all thumbnail images
                     let image_keys = response_meta.map(meta => meta.hash);
                     let data = [];
-                    useGet({
-                        path: "images",
-                        queryParams: { keys: image_keys, size: 'm' },
-                        resolve: (response) => {
-                            if (response.ok) {
-                                //Combine metadata with thumbnail images
-                                for (let i = 0; i < ids.length; i++) {
-                                    let meta = response_meta[i];
-                                    if (!meta) {
-                                        console.log('META IS EMPTY', response_meta, i);
-                                        continue;
-                                    }
-                                    let img = response.images[i];
-                                    data.push({
-                                        'key': meta.hash,
-                                        'src': `data:image/jpeg;base64,${img}`,
-                                        'alt': meta.alt,
-                                        'description': 'TODO',
-                                    });
-                                }
-                                setData(data);
-                            }
-                            else
-                                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-                        }
-                    })
+                    // useGet({
+                    //     path: "images",
+                    //     queryParams: { keys: image_keys, size: 'm' },
+                    //     resolve: (response) => {
+                    //         if (response.ok) {
+                    //             //Combine metadata with thumbnail images
+                    //             for (let i = 0; i < ids.length; i++) {
+                    //                 let meta = response_meta[i];
+                    //                 if (!meta) {
+                    //                     console.log('META IS EMPTY', response_meta, i);
+                    //                     continue;
+                    //                 }
+                    //                 let img = response.images[i];
+                    //                 data.push({
+                    //                     'key': meta.hash,
+                    //                     'src': `data:image/jpeg;base64,${img}`,
+                    //                     'alt': meta.alt,
+                    //                     'description': 'TODO',
+                    //                 });
+                    //             }
+                    //             setData(data);
+                    //         }
+                    //         else
+                    //             PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                    //     }
+                    // })
                 } else {
                     setData([]);
                 }
