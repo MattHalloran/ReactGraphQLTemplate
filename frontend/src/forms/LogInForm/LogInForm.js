@@ -11,8 +11,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { LINKS, PUBS } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { LINKS, PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -29,18 +28,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function LogInForm({
+    onSessionUpdate,
     onRedirect
 }) {
     const urlParams = useParams();
     const classes = useStyles();
-
     const [login] = useMutation(loginMutation);
 
     const formik = useFormik({
-        initialValues: {
-            email: '',
-            password: '',
-        },
+        initialValues: {},
         validationSchema: logInSchema,
         onSubmit: (values) => {
             PubSub.publish(PUBS.loading, true);
@@ -51,8 +47,11 @@ function LogInForm({
                 }
             }).then((response) => {
                 PubSub.publish(PUBS.loading, false);
-                if (response.emailVerified) PubSub.publish(PUBS.Snack, { message: 'Email verified.' });
-                onRedirect(LINKS.Shopping);
+                if (response.ok) {
+                    onSessionUpdate(response.session)
+                    if (response.emailVerified) PubSub.publish(PUBS.Snack, { message: 'Email verified.' });
+                    onRedirect(LINKS.Shopping);
+                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             }).catch((response) => {
                 PubSub.publish(PUBS.loading, false);
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
@@ -68,6 +67,7 @@ function LogInForm({
                         fullWidth
                         id="email"
                         name="email"
+                        autoComplete="email"
                         label="Email Address"
                         value={formik.values.email}
                         onChange={formik.handleChange}
@@ -81,6 +81,7 @@ function LogInForm({
                         id="password"
                         name="password"
                         type="password"
+                        autoComplete="current-password"
                         label="Password"
                         value={formik.values.password}
                         onChange={formik.handleChange}
@@ -90,8 +91,8 @@ function LogInForm({
                 </Grid>
             </Grid>
             <Button
-                type="submit"
                 fullWidth
+                type="submit"
                 color="secondary"
                 className={classes.submit}
             >

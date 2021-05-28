@@ -6,7 +6,6 @@ module.exports = {
         HardLock: 'Hard Lock'
     },
     DEFAULT_PRONOUNS: [
-        "Custom",
         "he/him/his",
         "she/her/hers",
         "they/them/theirs",

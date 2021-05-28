@@ -17,8 +17,7 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
-import PubSub from 'utils/pubsub';
-import { PUBS } from '@local/shared';
+import { displayPrice, PUBS, PubSub } from 'utils';
 import { useGet } from "restful-react";
 import { 
     BeeIcon,
@@ -39,7 +38,6 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { displayPrice } from 'utils/displayPrice';
 import {
     AddShoppingCart as AddShoppingCartIcon,
     Close as CloseIcon

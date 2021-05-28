@@ -7,8 +7,7 @@ import {
     DialogContentText,
     DialogTitle,
 } from '@material-ui/core';
-import PubSub from 'utils/pubsub';
-import { PUBS } from 'utils/consts';
+import { PUBS, PubSub } from 'utils';
 
 function AlertDialog() {
     const default_state = {

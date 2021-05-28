@@ -15,12 +15,10 @@ import {
 } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { COOKIE, SESSION_DAYS, URL_BASE } from '@local/shared';
-import { PUBS } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { PUBS, PubSub, lightTheme, darkTheme } from 'utils';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
-import { lightTheme, darkTheme } from 'utils/theme';
 import { useGet } from "restful-react";
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';

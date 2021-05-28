@@ -4,7 +4,6 @@ import { HotKeys } from "react-hotkeys";
 import PropTypes from 'prop-types';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
-import PubSub from 'utils/pubsub';
 import { useGet } from "restful-react";
 import {
     InformationalBreadcrumbs,
@@ -12,7 +11,7 @@ import {
 } from 'components';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
 import { URL_BASE } from '@local/shared';
-import { PUBS, LINKS } from 'utils/consts';
+import { LINKS, PUBS, PubSub } from 'utils';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { getImage, getImages } from 'query/http_promises';

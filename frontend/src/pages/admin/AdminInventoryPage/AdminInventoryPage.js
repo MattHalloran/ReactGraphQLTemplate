@@ -7,8 +7,7 @@ import { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
-import { SORT_OPTIONS, PUBS } from 'utils/consts';
-import { PubSub } from 'utils/pubsub';
+import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
     EditPlantDialog,

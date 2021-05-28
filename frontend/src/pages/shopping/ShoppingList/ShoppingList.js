@@ -3,8 +3,7 @@ import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useGet, useMutate } from "restful-react";
 import { getInventory, getInventoryPage } from "query/http_promises";
-import PubSub from 'utils/pubsub';
-import { LINKS, PUBS, SORT_OPTIONS } from "utils/consts";
+import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog

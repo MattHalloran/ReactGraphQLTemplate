@@ -1,10 +1,8 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { BUSINESS_NAME } from '@local/shared';
-import { PUBS, SORT_OPTIONS } from 'utils/consts';
-import { displayPrice } from 'utils/displayPrice';
+import { displayPrice, PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import { getInventory } from "query/http_promises";
-import PubSub from "./pubsub";
 
 const TITLE_FONT_SIZE = 30;
 const LIST_FONT_SIZE = 24;

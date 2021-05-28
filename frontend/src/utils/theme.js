@@ -1,6 +1,6 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 
-const commonTheme = createMuiTheme({
+const commonTheme = createTheme({
     components: {
         // Style sheet name ⚛️
         MuiButton: {
@@ -17,7 +17,7 @@ const commonTheme = createMuiTheme({
     },
 });
 
-export const lightTheme = createMuiTheme({
+export const lightTheme = createTheme({
     ...commonTheme,
     palette: {
         type: 'light',
@@ -38,7 +38,7 @@ export const lightTheme = createMuiTheme({
     }
 })
 
-export const darkTheme = createMuiTheme({
+export const darkTheme = createTheme({
     ...commonTheme,
     palette: {
         type: 'dark',

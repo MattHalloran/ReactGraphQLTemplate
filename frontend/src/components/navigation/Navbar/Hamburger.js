@@ -5,8 +5,7 @@ import {
     Copyright
 } from 'components';
 import { SOCIAL } from '@local/shared';
-import { LINKS, PUBS } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
@@ -23,7 +22,6 @@ import {
 } from '@material-ui/icons';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import getUserActions from 'utils/userActions';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {

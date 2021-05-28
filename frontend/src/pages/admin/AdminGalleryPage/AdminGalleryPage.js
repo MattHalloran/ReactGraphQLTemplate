@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useGet, useMutate } from "restful-react";
 import { Button, Typography } from '@material-ui/core';
-import { PubSub } from 'utils/pubsub';
-import { PUBS } from 'utils/consts';
+import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     AdminBreadcrumbs,

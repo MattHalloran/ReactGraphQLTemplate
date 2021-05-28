@@ -1,12 +1,16 @@
-import { useHistoryState } from 'utils/useHistoryState';
-import { Button, TextField, Link, Typography } from '@material-ui/core';
-import { FormControl, Grid } from '@material-ui/core';
+import { requestPasswordChangeMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
+import { requestPasswordChangeSchema } from '@local/shared';
+import { useFormik } from 'formik';
+import {
+    Button,
+    Grid,
+    Link,
+    TextField,
+    Typography
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import PubSub from 'utils/pubsub';
-import { PUBS } from '@local/shared';
-import { LINKS } from 'utils/consts';
-import { forgotPasswordSchema } from '@local/shared';
-import { useMutate } from 'restful-react';
+import { LINKS, PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -22,54 +26,53 @@ function ForgotPasswordForm({
     onRedirect
 }) {
     const classes = useStyles();
-    const [email, setEmail] = useHistoryState("li_email", "");
-    let emailError = forgotPasswordSchema.validateSyncAt('email', email);
+    const [requestPasswordChange] = useMutation(requestPasswordChangeMutation);
 
-    const { mutate: resetPassword } = useMutate({
-        verb: 'PUT',
-        path: 'reset-password',
-        resolve: (response) => {
-            if (response.ok) {
-                onRedirect(LINKS.Home);
-            }
-            else {
+    const formik = useFormik({
+        initialValues: {
+            email: ''
+        },
+        validationSchema: requestPasswordChangeSchema,
+        onSubmit: (values) => {
+            PubSub.publish(PUBS.loading, true);
+            requestPasswordChange({
+                variables: values
+            }).then((response) => {
+                PubSub.publish(PUBS.loading, false);
+                if (response.ok) {
+                    PubSub.publish(PUBS.Snack, { message: 'Request sent. Please check email.' });
+                    onRedirect(LINKS.Home);
+                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+            }).catch((response) => {
+                PubSub.publish(PUBS.loading, false);
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-            }
-        }
+            })
+        },
     });
 
-    const submit = (event) => {
-        event.preventDefault();
-        const form = new FormData(event.target);
-        if (forgotPasswordSchema.isValidSync(form)) {
-            resetPassword(form);
-        }
-    }
-
     return (
-        <FormControl className={classes.form} error={emailError}>
+        <form className={classes.form} onSubmit={formik.handleSubmit}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <TextField
-                        required
                         fullWidth
+                        autoFocus
                         id="email"
-                        label="Email Address"
                         name="email"
                         autoComplete="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        error={emailError !== null}
-                        helperText={emailError}
+                        label="Email Address"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        error={formik.touched.email && Boolean(formik.errors.email)}
+                        helperText={formik.touched.email && formik.errors.email}
                     />
                 </Grid>
             </Grid>
             <Button
-                type="submit"
                 fullWidth
+                type="submit"
                 color="secondary"
                 className={classes.submit}
-                onClick={submit}
             >
                 Submit
             </Button>
@@ -82,7 +85,7 @@ function ForgotPasswordForm({
                     </Link>
                 </Grid>
             </Grid>
-        </FormControl>
+        </form>
     );
 }
 

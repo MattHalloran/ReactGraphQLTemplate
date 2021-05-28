@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/img/nln-logo-colorized.png';
 import { BUSINESS_NAME } from '@local/shared';
-import { LINKS } from 'utils/consts';
+import { hexToRGB, LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Hamburger } from './Hamburger';
 import { NavList } from './NavList';
 import { useHistory } from 'react-router';
-import { hexToRGB } from 'utils/opacityHex';
 
 const SHOW_HAMBURGER_AT = 960;
 

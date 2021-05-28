@@ -3,8 +3,7 @@ import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import PropTypes from 'prop-types';
 import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, URL_BASE } from '@local/shared';
-import { LINKS } from 'utils/consts';
-import { printAvailability } from 'utils/printAvailability';
+import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/core/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
 import {

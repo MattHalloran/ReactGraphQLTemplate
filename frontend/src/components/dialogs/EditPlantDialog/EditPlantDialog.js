@@ -27,20 +27,16 @@ import { modifyPlant } from 'query/http_promises';
 import { NoImageIcon } from 'assets/img';
 import { Selector } from 'components';
 import { 
+    deleteArrayIndex,
     displayPrice, 
-    displayPriceToDatabase 
-} from 'utils/displayPrice';
-import makeID from 'utils/makeID';
-import { 
-    PUBS 
-} from 'utils/consts';
+    displayPriceToDatabase,
+    makeID,
+    PUBS,
+    PubSub,
+    updateArray
+} from 'utils';
 import { DropzoneAreaBase } from 'material-ui-dropzone';
-import PubSub from 'utils/pubsub';
 import _ from 'underscore';
-import { 
-    deleteArrayIndex, 
-    updateArray 
-} from 'utils/arrayTools';
 
 const PLANT_ATTRIBUTES = [
     'Drought Tolerance',

@@ -10,7 +10,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { displayPrice } from 'utils/displayPrice';
+import { displayPrice } from 'utils';
 import { NoImageIcon } from 'assets/img';
 
 const useStyles = makeStyles((theme) => ({

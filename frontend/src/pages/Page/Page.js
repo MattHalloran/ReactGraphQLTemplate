@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { LINKS } from 'utils/consts';
+import { LINKS } from 'utils';
 
 const Page = ({
     title,

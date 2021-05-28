@@ -6,7 +6,7 @@ import {
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
 import { USER_ROLES } from '@local/shared';
-import { LINKS } from 'utils/consts';
+import { LINKS } from 'utils';
 
 // Returns user actions, in a list of this format:
 //  [
@@ -17,7 +17,7 @@ import { LINKS } from 'utils/consts';
 //      icon: Material-UI Icon,
 //      number of notifications: int,
 //  ]
-export default function getUserActions(session, roles, cart) {
+export function getUserActions(session, roles, cart) {
     let actions = [];
 
     // If someone is not logged in, display sign up/log in links

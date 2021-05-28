@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { BottomNavigation, BottomNavigationAction, Badge } from '@material-ui/core';
-import getUserActions from 'utils/userActions';
+import { getUserActions } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {

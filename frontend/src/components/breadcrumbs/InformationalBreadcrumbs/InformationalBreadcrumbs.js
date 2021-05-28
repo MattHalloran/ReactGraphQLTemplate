@@ -2,7 +2,7 @@ import {
     Breadcrumbs, 
     Link 
 } from '@material-ui/core';
-import { LINKS } from 'utils/consts';
+import { LINKS } from 'utils';
 
 function InformationalBreadcrumbs({...props}) {
     return (

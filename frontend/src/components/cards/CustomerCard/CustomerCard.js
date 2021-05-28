@@ -14,8 +14,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { modifyUser } from 'query/http_promises';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
-import { PUBS } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {

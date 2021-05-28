@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useGet } from "restful-react";
-import { PUBS } from 'utils/consts';
-import { PubSub } from 'utils/pubsub';
+import { PUBS, PubSub } from 'utils';
 import {
     AdminBreadcrumbs,
     CustomerCard

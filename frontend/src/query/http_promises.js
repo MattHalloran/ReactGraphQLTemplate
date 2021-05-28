@@ -1,7 +1,6 @@
 // Wraps functions from http_functions in Promises
 import { useHistory } from 'react-router-dom';
-import { LINKS, PUBS, COOKIE, URL_BASE } from 'utils/consts';
-import PubSub from 'utils/pubsub';
+import { LINKS, PUBS, PubSub, COOKIE, URL_BASE } from 'utils';
 import * as http from './http_functions';
 import Localbase from 'localbase';
 

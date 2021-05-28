@@ -3,7 +3,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { BUSINESS_NAME, WEBSITE_URL } from '@local/shared';
-import { LINKS } from 'utils/consts';
+import { LINKS } from 'utils';
 
 function Copyright({
     ...props

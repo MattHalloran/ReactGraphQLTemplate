@@ -3,7 +3,7 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { LINKS } from 'utils/consts';
+import { getUserActions, LINKS, updateArray } from 'utils';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import {
     Info as InfoIcon,
@@ -11,8 +11,6 @@ import {
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
-import getUserActions from 'utils/userActions';
-import { updateArray } from 'utils/arrayTools';
 
 const useStyles = makeStyles((theme) => ({
     root: {

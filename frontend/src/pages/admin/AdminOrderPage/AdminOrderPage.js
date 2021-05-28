@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGet } from "restful-react";
-import { ORDER_STATES, PUBS } from 'utils/consts';
+import { ORDER_STATES, PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     AdminBreadcrumbs,
@@ -8,7 +8,6 @@ import {
     OrderDialog,
     Selector
 } from 'components';
-import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
     cardFlex: {

@@ -5,10 +5,9 @@ import {
     SearchBar,
     Selector
 } from 'components';
-import ShoppingList from '../ShoppingList/ShoppingList';
-import { SORT_OPTIONS, LINKS, PUBS } from 'utils/consts';
+import { ShoppingList } from '../ShoppingList/ShoppingList';
+import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
 import { getInventoryFilters } from "query/http_promises";
-import PubSub from 'utils/pubsub';
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import {
     Close as CloseIcon,
@@ -16,7 +15,7 @@ import {
     Print as PrintIcon,
     Restore as RestoreIcon
 } from '@material-ui/icons';
-import { printAvailability } from 'utils/printAvailability';
+import { printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({

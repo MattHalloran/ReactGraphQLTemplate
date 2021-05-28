@@ -51,6 +51,7 @@ export const typeDef = gql`
             email: String!
             phone: String!
             existingCustomer: Boolean!
+            marketingEmails: Boolean!
             password: String!
         ): User!
         updateUser(
@@ -69,7 +70,7 @@ export const typeDef = gql`
             password: String
             confirmPassword: String
         ): Response
-        sendPasswordResetEmail(
+        requestPasswordChange(
             id: ID
         ): Response
         changeUserStatus(

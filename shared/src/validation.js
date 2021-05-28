@@ -14,7 +14,9 @@ const signUpSchema = yup.object().shape({
     email: yup.string().email().required(),
     phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),
-    password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
+    marketingEmails: yup.boolean().required(),
+    password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required(),
+    passwordConfirmation: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match')
 });
 
 // Schema for updating a user profile
@@ -37,7 +39,7 @@ const logInSchema = yup.object().shape({
 })
 
 // Schema for sending a password reset request
-const forgotPasswordSchema = yup.object().shape({
+const requestPasswordChangeSchema = yup.object().shape({
     email: yup.string().email().required()
 })
 
@@ -134,7 +136,7 @@ module.exports = {
     signUpSchema: signUpSchema,
     profileSchema: profileSchema,
     logInSchema: logInSchema,
-    forgotPasswordSchema: forgotPasswordSchema,
+    requestPasswordChangeSchema: requestPasswordChangeSchema,
     employeeSchema: employeeSchema,
     discountSchema: discountSchema,
     feedbackSchema: feedbackSchema,
