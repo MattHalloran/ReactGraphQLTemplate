@@ -12,4 +12,4 @@ FeaturedPlants.propTypes = {
     
 }
 
-export default FeaturedPlants;
+export { FeaturedPlants };

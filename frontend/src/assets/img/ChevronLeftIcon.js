@@ -22,4 +22,4 @@ ChevronLeftIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default ChevronLeftIcon;
+export { ChevronLeftIcon };

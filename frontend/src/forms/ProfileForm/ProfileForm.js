@@ -310,4 +310,4 @@ ProfileForm.propTypes = {
     user_id: PropTypes.string.isRequired,
 }
 
-export default ProfileForm;
+export { ProfileForm };

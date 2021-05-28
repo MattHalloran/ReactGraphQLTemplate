@@ -1,11 +1,17 @@
-import { useParams, useHistory } from 'react-router-dom';
-import { useHistoryState } from 'utils/useHistoryState';
+import { useParams } from 'react-router-dom';
+import { loginMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { logInSchema } from '@local/shared';
-import { Button, TextField, Link } from '@material-ui/core';
-import { FormControl, Grid, Typography } from '@material-ui/core';
+import { useFormik } from 'formik';
+import {
+    Button,
+    Grid,
+    Link,
+    TextField,
+    Typography
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS, PUBS } from 'utils/consts';
-import { useMutate } from "restful-react";
 import PubSub from 'utils/pubsub';
 
 const useStyles = makeStyles((theme) => ({
@@ -23,76 +29,63 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function LogInForm({
-    onSessionUpdate,
     onRedirect
 }) {
-    let history = useHistory();
     const urlParams = useParams();
     const classes = useStyles();
-    const [email, setEmail] = useHistoryState("li_email", "");
-    const [password, setPassword] = useHistoryState("li_password", "");
 
-    const { mutate: loginUser, loading } = useMutate({
-        verb: 'PUT',
-        path: 'login',
-        resolve: (response) => {
-            if (response.ok) {
-                onSessionUpdate(response.session);
-                if (response.emailVerified) PubSub.publish(PUBS.Snack, {message: 'Email verified.'});
+    const [login] = useMutation(loginMutation);
+
+    const formik = useFormik({
+        initialValues: {
+            email: '',
+            password: '',
+        },
+        validationSchema: logInSchema,
+        onSubmit: (values) => {
+            PubSub.publish(PUBS.loading, true);
+            login({
+                variables: {
+                    ...values,
+                    verificationCode: urlParams.code
+                }
+            }).then((response) => {
+                PubSub.publish(PUBS.loading, false);
+                if (response.emailVerified) PubSub.publish(PUBS.Snack, { message: 'Email verified.' });
                 onRedirect(LINKS.Shopping);
-            }
-            else {
-                PubSub.publish(PUBS.Session, null);
+            }).catch((response) => {
+                PubSub.publish(PUBS.loading, false);
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-            }
-        }
+            })
+        },
     });
 
-    let emailError = logInSchema.validateSyncAt('email', email);
-    let passwordError = logInSchema.validateSyncAt('password', password);
-    let formValid = (emailError || passwordError) === null;
-
-    const login = (event) => {
-        event.preventDefault();
-        const form = new FormData(event.target);
-        form.set('verificationCode', urlParams.code);
-        if (!logInSchema.isValidSync(form)) {
-            PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields', severity: 'error'});
-            return;
-        }
-        loginUser(form);
-    }
-
     return (
-        <FormControl className={classes.form} error={!formValid}>
+        <form className={classes.form} onSubmit={formik.handleSubmit}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <TextField
-                        required
                         fullWidth
                         id="email"
-                        label="Email Address"
                         name="email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        error={emailError !== null}
-                        helperText={emailError}
+                        label="Email Address"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        error={formik.touched.email && Boolean(formik.errors.email)}
+                        helperText={formik.touched.email && formik.errors.email}
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
-                        required
                         fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
                         id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        error={passwordError !== null}
-                        helperText={passwordError}
+                        name="password"
+                        type="password"
+                        label="Password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        error={formik.touched.password && Boolean(formik.errors.password)}
+                        helperText={formik.touched.password && formik.errors.password}
                     />
                 </Grid>
             </Grid>
@@ -101,28 +94,27 @@ function LogInForm({
                 fullWidth
                 color="secondary"
                 className={classes.submit}
-                onClick={login}
             >
                 Log In
-            </Button>
+                    </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
                     <Link href={LINKS.ForgotPassword} variant="body2">
-                        <Typography component="body2">
+                        <Typography variant="body2">
                             Forgot Password?
                         </Typography>
                     </Link>
                 </Grid>
                 <Grid item xs={6}>
                     <Link href={LINKS.Register} variant="body2">
-                        <Typography component="body2" className={classes.linkRight}>
+                        <Typography variant="body2" className={classes.linkRight}>
                             Don't have an account? Sign up
                         </Typography>
                     </Link>
                 </Grid>
             </Grid>
-        </FormControl>
+        </form>
     );
 }
 
-export default LogInForm;
+export { LogInForm };

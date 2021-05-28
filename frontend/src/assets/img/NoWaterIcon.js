@@ -28,4 +28,4 @@ NoWaterIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default NoWaterIcon;
+export { NoWaterIcon };

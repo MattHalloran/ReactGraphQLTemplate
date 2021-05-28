@@ -33,4 +33,4 @@ ChronometerIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default ChronometerIcon;
+export { ChronometerIcon };

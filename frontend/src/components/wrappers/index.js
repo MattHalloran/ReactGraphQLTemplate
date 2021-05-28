@@ -1,2 +1,2 @@
-export { default as Collapsible } from './Collapsible/Collapsible';
-export { default as StyledModal } from './StyledModal/StyledModal';
+export * from './Collapsible/Collapsible';
+export * from './StyledModal/StyledModal';

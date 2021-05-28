@@ -133,4 +133,4 @@ Footer.propTypes = {
     session: PropTypes.object,
 }
 
-export default Footer;
+export { Footer };

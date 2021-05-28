@@ -24,4 +24,4 @@ const SliderContent = ({
     )
 }
 
-export default SliderContent
+export { SliderContent }

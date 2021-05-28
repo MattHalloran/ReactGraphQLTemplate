@@ -186,4 +186,4 @@ Hamburger.propTypes = {
     cart: PropTypes.object,
 }
 
-export default Hamburger;
+export { Hamburger };

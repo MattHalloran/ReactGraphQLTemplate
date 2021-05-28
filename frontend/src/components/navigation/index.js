@@ -1,3 +1,3 @@
-export { default as Footer } from './Footer/Footer';
-export { default as IconNav } from './IconNav/IconNav';
-export { default as Navbar } from './Navbar/Navbar';
+export * from './Footer/Footer';
+export * from './IconNav/IconNav';
+export * from './Navbar/Navbar';

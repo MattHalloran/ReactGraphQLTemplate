@@ -6,7 +6,7 @@ try {
     console.error(err);
 }
 
-async function smsProcess() {
+export async function smsProcess() {
     if(texting_client === null) {
         console.error('Cannot send SMS. Texting client not initialized');
         return false;
@@ -20,5 +20,3 @@ async function smsProcess() {
     })
     return true;
 }
-
-export default smsProcess;

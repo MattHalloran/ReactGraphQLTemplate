@@ -67,4 +67,4 @@ function AdminOrderPage({
 AdminOrderPage.propTypes = {
 }
 
-export default AdminOrderPage;
+export { AdminOrderPage };

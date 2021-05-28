@@ -25,4 +25,4 @@ HideIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default HideIcon;
+export { HideIcon} ;

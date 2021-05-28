@@ -33,4 +33,4 @@ RangeIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default RangeIcon;
+export { RangeIcon };

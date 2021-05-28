@@ -1,5 +1,5 @@
 import Bull from 'bull';
-import uploadAvailabilityProcess from './process';
+import { uploadAvailabilityProcess } from './process';
 import xlsx from 'node-xlsx';
 
 const uploadAvailabilityQueue = new Bull('uploadAvailability');

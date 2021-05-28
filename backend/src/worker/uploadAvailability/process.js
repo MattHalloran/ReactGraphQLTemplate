@@ -3,7 +3,7 @@ import { SKU_STATUS } from "../../src/db/types";
 
 // Reads an .xls availability file into the database.
 // SKUs of plants not in the availability file will be hidden
-async function uploadAvailabilityProcess() {
+export async function uploadAvailabilityProcess() {
     const rows = job.data.rows;
     const header = rows[0];
     const content = rows.slice(1, rows.length);
@@ -51,5 +51,3 @@ async function uploadAvailabilityProcess() {
         }
     })
 }
-
-export default uploadAvailabilityProcess;

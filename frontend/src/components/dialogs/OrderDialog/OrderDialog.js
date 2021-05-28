@@ -175,4 +175,4 @@ OrderDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export default OrderDialog;
+export { OrderDialog };

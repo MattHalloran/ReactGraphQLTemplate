@@ -32,4 +32,4 @@ PHIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default PHIcon;
+export { PHIcon };

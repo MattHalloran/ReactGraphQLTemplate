@@ -113,4 +113,4 @@ Selector.propTypes = {
     label: PropTypes.string,
 }
 
-export default Selector;
+export { Selector };

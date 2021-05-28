@@ -269,4 +269,4 @@ PlantDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export default PlantDialog;
+export { PlantDialog };

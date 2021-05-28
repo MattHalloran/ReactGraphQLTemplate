@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-function HeartIcon(props) {
+function HeartFilledIcon(props) {
 	return (
         <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16" 
@@ -15,7 +15,7 @@ function HeartIcon(props) {
 	)
 }
 
-HeartIcon.propTypes = {
+HeartFilledIcon.propTypes = {
 	iconTitle: PropTypes.string,
     className: PropTypes.string,
     onClick: PropTypes.func,
@@ -23,4 +23,4 @@ HeartIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default HeartIcon;
+export { HeartFilledIcon };

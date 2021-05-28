@@ -58,4 +58,4 @@ FormPage.propTypes = {
     maxWidth: PropTypes.string,
 }
 
-export default FormPage;
+export { FormPage };

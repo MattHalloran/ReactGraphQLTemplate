@@ -116,4 +116,4 @@ OrderCard.propTypes = {
     onClick: PropTypes.func,
 }
 
-export default OrderCard;
+export { OrderCard };

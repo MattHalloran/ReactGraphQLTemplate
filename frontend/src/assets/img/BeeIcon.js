@@ -27,4 +27,4 @@ BeeIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default BeeIcon;
+export { BeeIcon };

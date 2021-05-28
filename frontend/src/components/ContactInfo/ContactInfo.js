@@ -117,4 +117,4 @@ function ContactInfo({
     );
 }
 
-export default ContactInfo;
+export { ContactInfo };

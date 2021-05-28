@@ -5,8 +5,8 @@ import { BUSINESS_NAME } from '@local/shared';
 import { LINKS } from 'utils/consts';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Hamburger from './Hamburger';
-import NavList from './NavList';
+import { Hamburger } from './Hamburger';
+import { NavList } from './NavList';
 import { useHistory } from 'react-router';
 import { hexToRGB } from 'utils/opacityHex';
 
@@ -137,4 +137,4 @@ Navbar.propTypes = {
     cart: PropTypes.object,
 }
 
-export default Navbar;
+export { Navbar };

@@ -23,4 +23,4 @@ TermsPage.propTypes = {
 
 }
 
-export default TermsPage;
+export { TermsPage };

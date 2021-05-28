@@ -38,4 +38,4 @@ ColorWheelIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default ColorWheelIcon;
+export { ColorWheelIcon };

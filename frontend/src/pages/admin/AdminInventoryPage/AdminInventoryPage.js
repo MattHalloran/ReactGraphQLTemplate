@@ -255,4 +255,4 @@ function AdminInventoryPage({
 AdminInventoryPage.propTypes = {
 }
 
-export default AdminInventoryPage;
+export { AdminInventoryPage };

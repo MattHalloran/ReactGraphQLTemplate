@@ -76,7 +76,7 @@ function ForgotPasswordForm({
             <Grid container justifyContent="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
-                        <Typography component="body2">
+                        <Typography variant="body2">
                             Remember? Back to Log In
                         </Typography>
                     </Link>
@@ -86,4 +86,4 @@ function ForgotPasswordForm({
     );
 }
 
-export default ForgotPasswordForm;
+export { ForgotPasswordForm };

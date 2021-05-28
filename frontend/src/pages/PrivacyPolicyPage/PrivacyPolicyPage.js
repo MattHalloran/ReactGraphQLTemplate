@@ -23,4 +23,4 @@ PrivacyPolicyPage.propTypes = {
     
 }
 
-export default PrivacyPolicyPage;
+export { PrivacyPolicyPage };

@@ -26,4 +26,4 @@ SunIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default SunIcon;
+export { SunIcon };

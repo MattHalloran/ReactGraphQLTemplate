@@ -26,4 +26,4 @@ NoImageIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default NoImageIcon;
+export { NoImageIcon };

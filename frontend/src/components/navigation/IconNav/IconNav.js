@@ -58,4 +58,4 @@ IconNav.propTypes = {
     cart: PropTypes.object,
 }
 
-export default IconNav;
+export { IconNav };

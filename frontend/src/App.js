@@ -19,10 +19,9 @@ import { PUBS } from 'utils/consts';
 import PubSub from 'utils/pubsub';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
-import Routes from 'Routes';
+import { Routes } from 'Routes';
 import { lightTheme, darkTheme } from 'utils/theme';
 import { useGet } from "restful-react";
-import { RestfulProvider } from "restful-react";
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -45,7 +44,7 @@ const link = from([
     })
 ])
 const client = new ApolloClient({
-    cache: InMemoryCache,
+    cache: new InMemoryCache(),
     link:link
 })
 
@@ -83,7 +82,7 @@ const keyMap = {
     CLOSE_MENU_OR_POPUP: ["escape", "backspace"]
 };
 
-function App() {
+export function App() {
     const classes = useStyles();
     const [session, setSession] = useState(() => {
         try {
@@ -181,5 +180,3 @@ function App() {
         </ApolloProvider>
     );
 }
-
-export default App;

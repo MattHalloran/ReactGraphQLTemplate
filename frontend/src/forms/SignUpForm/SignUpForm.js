@@ -55,7 +55,7 @@ function SignUpForm({
         setExistingCustomer(event.target.value);
     }
 
-    const { mutate: registerUser } = useMutate({
+    const { mutate: signIn } = useMutate({
         verb: 'POST',
         path: 'register',
         resolve: (response) => {
@@ -86,7 +86,7 @@ function SignUpForm({
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
-        registerUser(form);
+        signIn(form);
     }
 
     return (
@@ -233,7 +233,7 @@ function SignUpForm({
             <Grid container justifyContent="flex-end">
                 <Grid item>
                     <Link href={LINKS.LogIn} variant="body2">
-                        <Typography component="body2">
+                        <Typography variant="body2">
                             Already have an account? Sign in
                         </Typography>
                     </Link>
@@ -243,4 +243,4 @@ function SignUpForm({
     );
 }
 
-export default SignUpForm;
+export { SignUpForm };

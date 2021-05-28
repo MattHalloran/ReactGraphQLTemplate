@@ -133,4 +133,4 @@ NavList.propTypes = {
     cart: PropTypes.object,
 }
 
-export default NavList;
+export { NavList };

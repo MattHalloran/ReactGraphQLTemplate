@@ -76,4 +76,4 @@ StyledModal.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export default StyledModal;
+export { StyledModal };

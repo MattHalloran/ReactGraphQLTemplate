@@ -422,4 +422,4 @@ EditPlantDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export default EditPlantDialog;
+export { EditPlantDialog };

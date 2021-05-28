@@ -16,4 +16,4 @@ ContactPage.propTypes = {
 }
 
 
-export default ContactPage;
+export { ContactPage };

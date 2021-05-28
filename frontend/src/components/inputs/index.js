@@ -1,3 +1,3 @@
-export { default as QuantityBox } from './QuantityBox/QuantityBox';
-export { default as SearchBar } from './SearchBar/SearchBar';
-export { default as Selector } from './Selector/Selector';
+export * from './QuantityBox/QuantityBox';
+export * from './SearchBar/SearchBar';
+export * from './Selector/Selector';

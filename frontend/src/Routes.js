@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { USER_ROLES, BUSINESS_NAME } from '@local/shared';
 import { LINKS } from 'utils/consts';
-import Sitemap from 'Sitemap';
+import { Sitemap } from 'Sitemap';
 import {
     AboutPage,
     AdminContactPage,
@@ -243,4 +243,4 @@ Routes.propTypes = {
     onRedirect: PropTypes.func.isRequired,
 }
 
-export default Routes;
+export { Routes };

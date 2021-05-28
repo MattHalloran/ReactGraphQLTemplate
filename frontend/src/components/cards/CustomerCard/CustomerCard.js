@@ -211,4 +211,4 @@ CustomerCard.propTypes = {
     onUpdate: PropTypes.func.isRequired,
 }
 
-export default CustomerCard;
+export { CustomerCard };

@@ -1,5 +1,5 @@
 import Bull from 'bull';
-import emailProcess from './process';
+import { emailProcess } from './process';
 import { BUSINESS_NAME, WEBSITE_URL } from 'shared';
 
 const emailQueue = new Bull('email');

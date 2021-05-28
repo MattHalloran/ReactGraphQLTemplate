@@ -1,3 +1,3 @@
-export { default as CustomerCard } from './CustomerCard/CustomerCard';
-export { default as OrderCard } from './OrderCard/OrderCard';
-export { default as PlantCard } from './PlantCard/PlantCard'
+export * from './CustomerCard/CustomerCard';
+export * from './OrderCard/OrderCard';
+export * from './PlantCard/PlantCard'

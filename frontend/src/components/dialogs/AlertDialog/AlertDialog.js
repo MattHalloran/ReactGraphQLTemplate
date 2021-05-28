@@ -54,4 +54,4 @@ function AlertDialog() {
     );
 }
 
-export default AlertDialog;
+export { AlertDialog };

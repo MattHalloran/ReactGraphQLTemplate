@@ -11,4 +11,4 @@ function AdminContactPage() {
 AdminContactPage.propTypes = {
 }
 
-export default AdminContactPage;
+export { AdminContactPage };

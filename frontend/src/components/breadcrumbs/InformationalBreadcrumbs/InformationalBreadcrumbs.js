@@ -4,7 +4,7 @@ import {
 } from '@material-ui/core';
 import { LINKS } from 'utils/consts';
 
-function AdminBreadcrumbs({...props}) {
+function InformationalBreadcrumbs({...props}) {
     return (
         <Breadcrumbs separator="|" aria-label="About us breadcrumb" {...props}>
             <Link href={LINKS.About}>About Us</Link>
@@ -13,7 +13,7 @@ function AdminBreadcrumbs({...props}) {
     );
 }
 
-AdminBreadcrumbs.propTypes = {
+InformationalBreadcrumbs.propTypes = {
 }
 
-export default AdminBreadcrumbs;
+export { InformationalBreadcrumbs };

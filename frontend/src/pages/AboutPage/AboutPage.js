@@ -23,4 +23,4 @@ function AboutPage() {
 AboutPage.propTypes = {
 }
 
-export default AboutPage;
+export { AboutPage };

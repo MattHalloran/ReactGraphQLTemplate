@@ -1,5 +1,5 @@
 import Bull from 'bull';
-import smsProcess from './process';
+import { smsProcess } from './process';
 
 const smsQueue = new Bull('sms');
 smsQueue.process(smsProcess);

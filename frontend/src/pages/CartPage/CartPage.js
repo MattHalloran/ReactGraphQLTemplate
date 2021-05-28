@@ -7,7 +7,7 @@ import { PubSub } from 'utils/pubsub';
 import { Button } from '@material-ui/core';
 import { useMutate } from "restful-react";
 import { submitOrder } from 'query/http_promises';
-import { CartTable as Cart } from 'components';
+import { CartTable } from 'components';
 import {
     ArrowBack as ArrowBackIcon,
     ArrowForward as ArrowForwardIcon,
@@ -135,7 +135,7 @@ function CartPage({
                 <Typography variant="h3" component="h1">Cart</Typography>
             </div>
             { options}
-            <Cart className={classes.padTop} cart={cart} onUpdate={cartUpdate} />
+            <CartTable className={classes.padTop} cart={cart} onUpdate={cartUpdate} />
             { options}
         </div>
     );
@@ -146,4 +146,4 @@ CartPage.propTypes = {
     cart: PropTypes.object,
 }
 
-export default CartPage;
+export { CartPage };

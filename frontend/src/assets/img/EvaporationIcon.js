@@ -46,4 +46,4 @@ EvaporationIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default EvaporationIcon;
+export { EvaporationIcon };

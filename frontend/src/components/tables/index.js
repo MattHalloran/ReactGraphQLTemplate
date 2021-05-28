@@ -1,4 +1,4 @@
-export { default as CartTable } from './CartTable/CartTable';
-export { default as EnhancedTableHead } from './EnhancedTableHead/EnhancedTableHead';
-export { default as EnhancedTableToolbar } from './EnhancedTableToolbar/EnhancedTableToolbar';
-export { default as GalleryTable } from './GalleryTable/GalleryTable';
+export * from './CartTable/CartTable';
+export * from './EnhancedTableHead/EnhancedTableHead';
+export * from './EnhancedTableToolbar/EnhancedTableToolbar';
+export * from './GalleryTable/GalleryTable';

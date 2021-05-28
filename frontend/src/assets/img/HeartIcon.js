@@ -23,4 +23,4 @@ HeartIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default HeartIcon;
+export { HeartIcon };

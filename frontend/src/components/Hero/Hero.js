@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { LINKS } from 'utils/consts';
-import Slider from './Slider.js'
+import { Slider } from './Slider.js'
 import Hero1 from 'assets/img/hero-chicks.jpg';
 import Hero2 from 'assets/img/hero-rainbow.jpg';
 import Hero3 from 'assets/img/hero-plants.jpg';
@@ -92,4 +92,4 @@ Hero.propTypes = {
     subtext: PropTypes.string.isRequired,
 }
 
-export default Hero;
+export { Hero };

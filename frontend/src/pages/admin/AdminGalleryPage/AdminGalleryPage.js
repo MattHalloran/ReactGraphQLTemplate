@@ -170,4 +170,4 @@ function AdminGalleryPage({
 AdminGalleryPage.propTypes = {
 }
 
-export default AdminGalleryPage;
+export { AdminGalleryPage };

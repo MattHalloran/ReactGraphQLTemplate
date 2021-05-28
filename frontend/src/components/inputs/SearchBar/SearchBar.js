@@ -34,4 +34,4 @@ SearchBar.propTypes = {
     onChange: PropTypes.func.isRequired,
 }
 
-export default SearchBar;
+export { SearchBar };

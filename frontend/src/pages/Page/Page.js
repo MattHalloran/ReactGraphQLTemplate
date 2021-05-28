@@ -40,4 +40,4 @@ Page.propTypes = {
     children: PropTypes.object.isRequired,
 }
 
-export default Page;
+export { Page };

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-function BeeIcon(props) {
+function CalendarIcon(props) {
 	return (
             <svg viewBox="0 0 299.1 299.1" 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -39,7 +39,7 @@ function BeeIcon(props) {
 	)
 }
 
-BeeIcon.propTypes = {
+CalendarIcon.propTypes = {
       iconTitle: PropTypes.string,
       className: PropTypes.string,
       onClick: PropTypes.func,
@@ -47,5 +47,5 @@ BeeIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default BeeIcon;
+export { CalendarIcon };
 

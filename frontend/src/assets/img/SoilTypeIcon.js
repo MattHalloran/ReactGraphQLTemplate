@@ -30,4 +30,4 @@ SoilTypeIcon.propTypes = {
     height: PropTypes.string,
 }
 
-export default SoilTypeIcon;
+export { SoilTypeIcon };

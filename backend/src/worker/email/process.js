@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-async function emailProcess() {
+export async function emailProcess() {
     transporter.sendMail({
         from : `"${process.env.AFA_EMAIL_FROM}" <${process.env.AFA_EMAIL_USERNAME}>`,
         to: job.data.to.join(', '),
@@ -30,5 +30,3 @@ async function emailProcess() {
         }
     });
 }
-
-export default emailProcess;

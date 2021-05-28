@@ -19,4 +19,4 @@ function AdminBreadcrumbs({...props}) {
 AdminBreadcrumbs.propTypes = {
 }
 
-export default AdminBreadcrumbs;
+export { AdminBreadcrumbs };

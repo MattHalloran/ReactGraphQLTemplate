@@ -64,4 +64,4 @@ function AdminMainPage() {
 AdminMainPage.propTypes = {
 }
 
-export default AdminMainPage;
+export { AdminMainPage };

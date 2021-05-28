@@ -131,4 +131,4 @@ function GalleryPage() {
 GalleryPage.propTypes = {
 }
 
-export default GalleryPage;
+export { GalleryPage };

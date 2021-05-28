@@ -66,4 +66,4 @@ EnhancedTableToolbar.propTypes = {
     onDelete: PropTypes.func.isRequired,
 };
 
-export default EnhancedTableToolbar;
+export { EnhancedTableToolbar };

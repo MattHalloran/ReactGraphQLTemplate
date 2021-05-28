@@ -76,4 +76,4 @@ function Snack() {
     );
 }
 
-export default Snack;
+export { Snack };

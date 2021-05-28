@@ -51,7 +51,7 @@ const DELIVERY_OPTIONS = [
     },
 ]
 
-function Cart({
+function CartTable({
     cart,
     onUpdate,
     ...props
@@ -152,7 +152,7 @@ function Cart({
                 </TableCell>
                 <TableCell className={classes.tableCol} component="th" scope="row">
                     {display_image}
-                    <Typography component="body2">{data.sku?.plant?.latin_name}</Typography>
+                    <Typography variant="body2">{data.sku?.plant?.latin_name}</Typography>
                 </TableCell>
                 <TableCell className={classes.tableCol} align="right">{display_price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
@@ -235,9 +235,9 @@ function Cart({
     );
 }
 
-Cart.propTypes = {
+CartTable.propTypes = {
     cart: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
 }
 
-export default Cart;
+export { CartTable };

@@ -18,4 +18,4 @@ ProfilePage.propTypes = {
     
 }
 
-export default ProfilePage;
+export { ProfilePage };

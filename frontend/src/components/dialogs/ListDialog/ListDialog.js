@@ -47,4 +47,4 @@ function ListDialog({
     );
 }
 
-export default ListDialog;
+export { ListDialog };

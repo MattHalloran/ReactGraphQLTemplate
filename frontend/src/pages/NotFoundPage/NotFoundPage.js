@@ -38,4 +38,4 @@ NotFoundPage.propTypes = {
     
 }
 
-export default NotFoundPage;
+export { NotFoundPage };

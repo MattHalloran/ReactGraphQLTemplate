@@ -26,4 +26,4 @@ SaltIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default SaltIcon;
+export { SaltIcon };

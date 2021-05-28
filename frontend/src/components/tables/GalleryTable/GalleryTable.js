@@ -196,4 +196,4 @@ GalleryTable.propTypes = {
     onApply: PropTypes.func.isRequired,
 }
 
-export default GalleryTable;
+export { GalleryTable };

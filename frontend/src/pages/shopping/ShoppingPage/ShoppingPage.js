@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import {
@@ -219,4 +219,4 @@ ShoppingPage.propTypes = {
     cart: PropTypes.object,
 }
 
-export default memo(ShoppingPage);
+export { ShoppingPage };

@@ -23,4 +23,4 @@ FullscreenIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default FullscreenIcon;
+export { FullscreenIcon };

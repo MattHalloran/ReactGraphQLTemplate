@@ -134,4 +134,4 @@ QuantityBox.propTypes = {
     validateFunc: PropTypes.func,
 }
 
-export default QuantityBox;
+export { QuantityBox };

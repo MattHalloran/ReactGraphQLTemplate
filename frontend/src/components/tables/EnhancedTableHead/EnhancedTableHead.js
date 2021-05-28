@@ -76,4 +76,4 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-export default EnhancedTableHead;
+export { EnhancedTableHead };

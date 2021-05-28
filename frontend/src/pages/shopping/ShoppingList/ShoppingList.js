@@ -253,4 +253,4 @@ ShoppingList.propTypes = {
     searchString: PropTypes.string,
 };
 
-export default ShoppingList;
+export { ShoppingList };

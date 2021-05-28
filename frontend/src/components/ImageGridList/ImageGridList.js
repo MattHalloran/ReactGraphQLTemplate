@@ -57,4 +57,4 @@ ImageGridList.propTypes = {
     onClick: PropTypes.func
 }
 
-export default ImageGridList;
+export { ImageGridList };

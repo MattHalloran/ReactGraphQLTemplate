@@ -36,4 +36,4 @@ Collapsible.propTypes = {
     children: PropTypes.any,
 }
 
-export default Collapsible;
+export { Collapsible };

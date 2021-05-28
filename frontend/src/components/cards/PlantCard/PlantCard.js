@@ -113,4 +113,4 @@ PlantCard.propTypes = {
     thumbnail: PropTypes.object,
 }
 
-export default PlantCard;
+export { PlantCard };

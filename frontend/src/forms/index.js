@@ -1,5 +1,5 @@
-export { default as AddEmployeeForm } from './AddEmployeeForm/AddEmployeeForm';
-export { default as ForgotPasswordForm } from './ForgotPasswordForm/ForgotPasswordForm';
-export { default as LogInForm } from './LogInForm/LogInForm';
-export { default as ProfileForm } from './ProfileForm/ProfileForm';
-export { default as SignUpForm } from './SignUpForm/SignUpForm';
+export * from './AddEmployeeForm/AddEmployeeForm';
+export * from './ForgotPasswordForm/ForgotPasswordForm';
+export * from './LogInForm/LogInForm';
+export * from './ProfileForm/ProfileForm';
+export * from './SignUpForm/SignUpForm';

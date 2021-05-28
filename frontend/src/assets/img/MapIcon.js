@@ -32,4 +32,4 @@ MapIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default MapIcon;
+export { MapIcon };

@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function PopupMenu({
+export function PopupMenu({
     text = 'Menu',
     children,
     ...props

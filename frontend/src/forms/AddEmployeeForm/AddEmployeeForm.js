@@ -44,7 +44,7 @@ function AddEmployeeForm() {
             PubSub.publish(PUBS.Snack, {message: 'Please fill in required fields.', severity: 'error'});
             return;
         }
-        // registerUser(data).then(() => {
+        // signIn(data).then(() => {
         //     if (existingCustomer) {
         //         alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
         //     } else {
@@ -159,4 +159,4 @@ function AddEmployeeForm() {
     );
 }
 
-export default AddEmployeeForm;
+export { AddEmployeeForm };

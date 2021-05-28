@@ -63,4 +63,4 @@ function AdminCustomerPage({
 AdminCustomerPage.propTypes = {
 }
 
-export default AdminCustomerPage;
+export { AdminCustomerPage };

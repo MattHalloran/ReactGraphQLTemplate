@@ -1,7 +1,7 @@
-import Routes from "Routes";
+import { Routes } from "Routes";
 import DynamicSitemap from "react-dynamic-sitemap";
 
-export default function Sitemap(props) {
+export function Sitemap(props) {
 	return (
 		<DynamicSitemap routes={Routes} prettify={true} {...props}/>
 	);

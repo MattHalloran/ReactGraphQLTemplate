@@ -50,7 +50,7 @@
         "/register": {
             "put": {
                 "summary": "Create a new account",
-                "operationId": "registerUser",
+                "operationId": "signUp",
                 "tags": [
                     "auth"
                 ],

@@ -4,7 +4,7 @@
 // path: an array of length 2, where the first index is
 // a string of an object, and the second is a string of
 // the field belonging to that object
-export default function pathExists(nodes, path) {
+export function pathExists(nodes, path) {
     if (!nodes) return false;
     const node = nodes.find(x => x.name.value === path[0]);
     if (!node) return false;

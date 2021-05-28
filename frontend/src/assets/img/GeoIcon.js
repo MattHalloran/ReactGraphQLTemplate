@@ -24,4 +24,4 @@ GeoIcon.propTypes = {
 	height: PropTypes.string,
 }
 
-export default GeoIcon;
+export { GeoIcon };

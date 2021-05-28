@@ -143,4 +143,4 @@ NewLifeLogo.propTypes = {
     height: PropTypes.string,
 }
 
-export default NewLifeLogo;
+export { NewLifeLogo };

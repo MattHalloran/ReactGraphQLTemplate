@@ -28,7 +28,7 @@ export async function seed(knex) {
             id: user_admin_id,
             firstName: 'admin', 
             lastName: 'account', 
-            password: bcrypt.hash(process.env.ADMIN_PASSWORD, HASHING_ROUNDS), 
+            password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS), 
             accountApproved: true,
             status: ACCOUNT_STATUS.Unlocked
         }

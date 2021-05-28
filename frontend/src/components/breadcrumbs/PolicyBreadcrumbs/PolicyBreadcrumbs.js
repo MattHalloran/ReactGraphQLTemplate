@@ -16,4 +16,4 @@ function PolicyBreadcrumbs({...props}) {
 PolicyBreadcrumbs.propTypes = {
 }
 
-export default PolicyBreadcrumbs;
+export { PolicyBreadcrumbs };
