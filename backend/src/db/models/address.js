@@ -109,10 +109,10 @@ export const resolvers = {
         updateAddress: async (_, args, context) => {
             // Only admins can update addresses for other businesses
             if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
-            const curr = await db(TABLES.Address).findById(args.id);
+            const curr = await db(TABLES.Address).where('id', args.id).first();
             if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);
 
-            const updated = await db(TABLES.Address).patchAndFetchById(args.id, {
+            const updated = await db(TABLES.Address).where('id', args.id).update({
                 tag: args.tag ?? curr.tag,
                 name: args.name ?? curr.name,
                 country: args.country ?? curr.country,
@@ -122,14 +122,14 @@ export const resolvers = {
                 postalCode: args.postalCode ?? curr.postalCode,
                 throughfare: args.throughfare ?? curr.throughfare,
                 premise: args.premise ?? curr.premise
-            })
+            }).returning('*');
 
             return updated;
         },
         deleteAddresses: async (_, args, context) => {
             // Only admins can delete addresses for other businesses
             if(!context.req.isAdmin || args.ids.length > 1) return context.res.sendStatus(CODE.Unauthorized);
-            const curr = await db(TABLES.Address).findById(args.ids[0]);
+            const curr = await db(TABLES.Address).where('id', args.ids[0]).first();
             if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);   
 
             const numDeleted = await db(TABLES.Address).delete().whereIn('id', args.ids);

@@ -1,83 +1,63 @@
 {
     "version": 1.0,
-    "Success": {
-        "code": 200,
-        "ok": true,
-        "msg": ""
-    },
     "NoResults": {
         "code": 485,
-        "ok": true,
         "msg": "Warning: Called successfully, but got no results"
     },
     "SomeImagesAlreadyUploaded": {
         "code": 489,
-        "ok": true,
         "msg": "Warning: Some images were already uploaded"
     },
     "ErrorUnknown": {
         "code": 435,
-        "ok": false,
         "msg": "Unknown error occurred"
     },
     "InvalidArgs": {
         "code": 423,
-        "ok": false,
         "msg": "Error: Invalid arguments supplied"
     },
     "PhoneInUser": {
         "code": 452,
-        "ok": false,
         "msg": "Error: Account with that phone number already exists"
     },
     "EmailInUse": {
         "code": 469,
-        "ok": false,
         "msg": "Error: Account with that email already exists"
     },
     "EmailNotVerified": {
         "code": 457,
-        "ok": false,
         "msg": "Error: Email has not been verified yet. Sending new verification email"
     },
     "NoUser": {
         "code": 468,
-        "ok": false,
         "msg": "Error: No user with that email"
     },
     "BadCredentials": {
         "code": 475,
-        "ok": false,
         "msg": "Error: Email or password incorrect"
     },
     "SoftLockout": {
         "code": 410,
-        "ok": false,
         "msg": "Error: Too many login attempts. Try again in 15 minutes"
     },
     "HardLockout": {
         "code": 412,
-        "ok": false,
         "msg": "Error: Account locked. Contact us for assistance"
     },
     "NotVerified": {
         "code": 424,
-        "ok": false,
         "msg": "Error: Session token could not be verified. Please log back in"
     },
     "Unauthorized": {
         "code": 425,
-        "ok": false,
         "msg": "Error: Not authorized to perform this action"
     },
     "CannotDeleteYourself": {
         "code": 426,
-        "ok": false,
         "msg": "Error: What are you doing trying to delete your own account? I am disappointed :("
     },
     "NotImplemented": {
         "code": 427,
-        "ok": false,
         "msg": "Error: This has not been implemented yet. Please be patient :)"
     }
 }

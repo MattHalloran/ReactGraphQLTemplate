@@ -1,4 +1,5 @@
-const SERVER_IP = 'http://192.168.0.8:5000'; //https://newlifenurseryinc.com';
+const CLIENT_IP = 'http://localhost:3000'; //https://newlifenurseryinc.com';
+const SERVER_IP = 'http://localhost:5000'; //https://newlifenurseryinc.com';
 const API_PREFIX = 'api';
 const API_VERSION = 'v1';
 const WEBSITE_URL = 'https://www.newlifenurseryinc.com';
@@ -10,6 +11,7 @@ const COOKIE = {
 }
 
 module.exports = {
+    CLIENT_IP: CLIENT_IP,
     SERVER_IP: SERVER_IP,
     API_PREFIX: API_PREFIX,
     API_VERSION: API_VERSION,

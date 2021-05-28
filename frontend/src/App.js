@@ -38,7 +38,7 @@ const link = from([
     errorLink,
     new HttpLink({
         uri: URL_BASE,
-        credentials: 'include'
+        credentials: 'include',
     })
 ])
 const client = new ApolloClient({
@@ -95,6 +95,10 @@ export function App() {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
     let history = useHistory();
+
+    useEffect(() => {
+        console.log('LOADING UPDATED', loading)
+    }, [loading])
 
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!')

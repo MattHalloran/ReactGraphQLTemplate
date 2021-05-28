@@ -34,7 +34,7 @@ function SignUpForm({
     onRedirect
 }) {
     const classes = useStyles();
-    const [signUp] = useMutation(signUpMutation);
+    const [signUp, {loading}] = useMutation(signUpMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -43,11 +43,11 @@ function SignUpForm({
         },
         validationSchema: signUpSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.loading, true);
+            PubSub.publish(PUBS.Loading, true);
             signUp({
                 variables: values
             }).then((response) => {
-                PubSub.publish(PUBS.loading, false);
+                PubSub.publish(PUBS.Loading, false);
                 if (response.ok) {
                     onSessionUpdate(response.session)
                     if (values.existingCustomer) {
@@ -58,7 +58,7 @@ function SignUpForm({
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             }).catch((response) => {
-                PubSub.publish(PUBS.loading, false);
+                PubSub.publish(PUBS.Loading, false);
                 if (response.code === CODE.EmailInUse.code) {
                     if (window.confirm(`${response.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
                         onRedirect(LINKS.ForgotPassword);
@@ -216,6 +216,7 @@ function SignUpForm({
             </Grid>
             <Button
                 fullWidth
+                disabled={loading}
                 type="submit"
                 color="secondary"
                 className={classes.submit}

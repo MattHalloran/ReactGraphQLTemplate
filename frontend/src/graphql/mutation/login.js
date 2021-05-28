@@ -11,7 +11,9 @@ export const loginMutation = gql`
     ) {
         id
         theme
-        roles
+        roles {
+            title
+        }
     }
 }
 `

@@ -4,9 +4,16 @@ import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
-import { ACCOUNT_STATUS } from '@local/shared';
+import { ACCOUNT_STATUS, SESSION_MILLI } from '@local/shared';
+import { CustomError } from '../error';
+import { generateToken } from '../../auth';
+import moment from 'moment';
 
 export const HASHING_ROUNDS = 8;
+const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
+const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
+const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
+const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export const typeDef = gql`
     enum AccountStatus {
@@ -93,27 +100,30 @@ export const resolvers = {
     Mutation: {
         login: async (_, args, context) => {
             // Validate email address
-            const email = await db(TABLES.Email).select('emailAddress, userId').where('emailAddress', req.body.email).whereNotNull('userId').first();
-            if (email === null) {
-                return context.res.sendStatus(CODE.BadCredentials);
+            const email = await db(TABLES.Email).select('emailAddress',  'userId').where('emailAddress', args.email).whereNotNull('userId').first();
+            if (email === undefined) {
+                return new CustomError(CODE.BadCredentials);
             }
             // Find user
-            let user = await db(TABLES.User).findById(email.userId);
-            if (user === null) return context.res.sendStatus(CODE.ErrorUnknown);
+            let user = await db(TABLES.User).where('id', email.userId).first();
+            if (user === undefined) return new CustomError(CODE.ErrorUnknown);
             // Validate verification code, if supplied
-            if (context.req.verification_code !== null && user.emailVerified === false) {
-                user = await db(TABLES.User).patchAndFetchById(user.id, {
+            if (args.verification_code === user.id && user.emailVerified === false) {
+                user = await db(TABLES.User).where('id', user.id).update({
                     status: ACCOUNT_STATUS.Unlocked,
                     emailVerified: true
-                })
+                }).returning('*')[0];
             }
             // Reset login attempts after 15 minutes
             const unable_to_reset = [ACCOUNT_STATUS.HardLock, ACCOUNT_STATUS.Deleted];
-            if (!unable_to_reset.includes(user.status) && 
-                Date.now() - user.lastLoginAttempt > SOFT_LOCKOUT_DURATION_SECONDS) {
-                user = await db(TABLES.User).patchAndFetchById(user.id, {
+            const last_login = moment(user.lastLoginAttempt, DATE_FORMAT).valueOf();
+            console.log('LAST LOGIN', user.lastLoginAttempt, last_login);
+            if (!unable_to_reset.includes(user.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
+                console.log('nnnnn', user)
+                user = await db(TABLES.User).where('id', user.id).update({
                     loginAttempts: 0
-                })
+                }).returning('*').then(rows => rows[0]);
+                console.log('oooo', user)
             }
             // Before validating password, let's check to make sure the account is unlocked
             const status_to_code = {
@@ -121,23 +131,25 @@ export const resolvers = {
                 [ACCOUNT_STATUS.SoftLock]: CODE.SoftLockout,
                 [ACCOUNT_STATUS.HardLock]: CODE.HardLockout
             }
-            if (user.status in status_to_code) return context.res.sendStatus(status_to_code[user.status]);
+            if (user.status in status_to_code) return new CustomError(status_to_code[user.status]);
             // Now we can validate the password
-            const validPassword = bcrypt.compareSync(context.req.password, user.password);
+            console.log('eee', args.password, user, user.password)
+            const validPassword = bcrypt.compareSync(args.password, user.password);
             if (validPassword) {
-                const token = auth.generateToken(user.id, user.businessId);
-                user = await db(TABLES.User).patchAndFetchById(user.id, { 
+                const token = generateToken(user.id, user.businessId);
+                user = await db(TABLES.User).where('id', user.id).update({ 
                     sessionToken: token,
                     loginAttempts: 0,
-                    lastLoginAttempt: Date.now(),
+                    lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
-                });
+                }).returning('*').then(rows => rows[0]);
                 const cookie = {user: user};
-                return context.res.cookie('session', cookie, {
+                context.res.cookie('session', cookie, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: SESSION_MILLI
-                })
+                });
+                return user;
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = user.loginAttempts + 1;
@@ -146,12 +158,12 @@ export const resolvers = {
                 } else if (login_attempts > LOGIN_ATTEMPTS_TO_HARD_LOCKOUT) {
                     new_status = ACCOUNT_STATUS.HardLock;
                 }
-                await db(TABLES.User).patchById(user.id, {
+                await db(TABLES.User).where('id', user.id).update({
                     status: new_status,
                     loginAttempts: login_attempts,
-                    lastLoginAttempt: Date.now()
+                    lastLoginAttempt: moment().format(DATE_FORMAT)
                 })
-                return context.res.sendStatus(CODE.BadCredentials);
+                return new CustomError(CODE.BadCredentials);
             }
         }
     }

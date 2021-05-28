@@ -26,7 +26,7 @@ function ForgotPasswordForm({
     onRedirect
 }) {
     const classes = useStyles();
-    const [requestPasswordChange] = useMutation(requestPasswordChangeMutation);
+    const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -34,17 +34,20 @@ function ForgotPasswordForm({
         },
         validationSchema: requestPasswordChangeSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.loading, true);
+            PubSub.publish(PUBS.Loading, true);
+            console.log('in onsubmit', values)
             requestPasswordChange({
                 variables: values
             }).then((response) => {
-                PubSub.publish(PUBS.loading, false);
+                console.log('yee', response)
+                PubSub.publish(PUBS.Loading, false);
                 if (response.ok) {
                     PubSub.publish(PUBS.Snack, { message: 'Request sent. Please check email.' });
                     onRedirect(LINKS.Home);
                 } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             }).catch((response) => {
-                PubSub.publish(PUBS.loading, false);
+                console.log('oh no', response)
+                PubSub.publish(PUBS.Loading, false);
                 PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             })
         },
@@ -70,6 +73,7 @@ function ForgotPasswordForm({
             </Grid>
             <Button
                 fullWidth
+                disabled={loading}
                 type="submit"
                 color="secondary"
                 className={classes.submit}

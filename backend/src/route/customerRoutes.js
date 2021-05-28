@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.put('/cart', auth.requireCustomer, async (req, res) => {
     const cart_data = req.body.cart;
-    let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
+    let cart = await Order.query().withGraphFetched('user').where('id', cart_data.id).first();
     const user_id = cart.user.id;
     // Only admins can submit another user's cart
     if (req.token.user_id !== user_id && req.role !== 'admin') {
@@ -22,7 +22,7 @@ router.put('/cart', auth.requireCustomer, async (req, res) => {
 
 router.put('/submit_order', auth.requireCustomer, async (req, res) => {
     const cart_data = req.body.cart;
-    let cart = await Order.query().withGraphFetched('user').findById(cart_data.id)[0];
+    let cart = await Order.query().withGraphFetched('user').where('id', cart_data.id).first();
     const user_id = cart.user.id;
     // Only admins can submit another user's cart
     if (req.token.user_id !== user_id && req.role !== 'admin') {
@@ -46,7 +46,7 @@ router.route('/profile')
         if (req.token.user_id !== profile_id && req.role !== 'admin') {
             return res.sendStatus(CODE.Unauthorized);
         }
-        let user = await User.query().findById(profile_id);
+        let user = await User.query().where('id', profile_id).first();
         return res.json(user);
     }).post(auth.requireCustomer, async (req, res) => {
         const profile_id = req.body.id;

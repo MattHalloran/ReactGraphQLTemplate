@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
         return res.sendStatus(CODE.PhoneInUse);
     }
     // Create a new user
-    let user = await User.query().insert(req.body);
+    let user = await db(TABLES.User).insert(req.body).returning('*')[0];
     // Associate email with user
     await Email.query().insert({
         ...req.body.emails[0],
@@ -42,9 +42,9 @@ router.post('/register', async (req, res) => {
     })
     // Generate session token
     const session = auth.generateToken(user.id, user.businessId);
-    let user = await User.query().patch({
+    user = await db(TABLES.User).where('id', user.id).update({
         sessionToken: session
-    });
+    }).returning('*');
     const cookie = {user: user};
     res.cookie('session', cookie, {
         httpOnly: true,
@@ -74,7 +74,7 @@ router.put('/login', async (req, res) => {
     if (email_ids.length === 0) {
         return res.sendStatus(CODE.BadCredentials);
     }
-    let user = await User.query().findById(email_ids[0].userId);
+    let user = await User.query().where('id', email_ids[0].userId).first();
     // Reset login attempts after 15 minutes
     if (user.status !== ACCOUNT_STATUS.HardLock && 
         user.status !== ACCOUNT_STATUS.Deleted && 
@@ -130,7 +130,7 @@ router.route('/reset-password').get(async (req, res) => {
     if (user_ids.length === 0) return res.sendStatus(CODE.ErrorUnknown);
     // Generate unique code for resetting password
     const code = bcrypt.genSaltSync();
-    await User.query().findById(user_ids[0]).patch({ resetPasswordCode: code });
+    await User.query().where('id', user_ids[0]).first().patch({ resetPasswordCode: code });
     sendResetPasswordLink(req.body.email, code);
 }).post(async (req, res) => {
     // Check if valid link was clicked

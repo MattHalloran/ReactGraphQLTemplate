@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.route('/gallery')
     .get(async (req, res) => {
-        const gallery_images = await Image.query().where('usedFor', IMAGE_USE.Gallery);
+        const gallery_images = await Image.query().where('label', IMAGE_USE.Gallery);
         return gallery_images;
     }).put(auth.requireAdmin, (req, res) => {
         // (data) = getData('data')

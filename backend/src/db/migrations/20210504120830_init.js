@@ -1,4 +1,4 @@
-import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, IMAGE_USE, ORDER_STATUS, TASK_STATUS } from '@local/shared';
+import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, ORDER_STATUS, TASK_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 
 export async function up (knex) {
@@ -176,6 +176,7 @@ export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.SkuDiscounts);
     await knex.schema.dropTableIfExists(TABLES.PlantTraits);
     await knex.schema.dropTableIfExists(TABLES.BusinessDiscounts);
+    await knex.schema.dropTableIfExists(TABLES.ImageLabels);
     await knex.schema.dropTableIfExists(TABLES.OrderItem);
     await knex.schema.dropTableIfExists(TABLES.Order);
     await knex.schema.dropTableIfExists(TABLES.Sku);

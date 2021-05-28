@@ -33,28 +33,29 @@ function LogInForm({
 }) {
     const urlParams = useParams();
     const classes = useStyles();
-    const [login] = useMutation(loginMutation);
+    const [login, {loading}] = useMutation(loginMutation);
 
     const formik = useFormik({
         initialValues: {},
         validationSchema: logInSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.loading, true);
+            PubSub.publish(PUBS.Loading, true);
             login({
                 variables: {
                     ...values,
                     verificationCode: urlParams.code
                 }
             }).then((response) => {
-                PubSub.publish(PUBS.loading, false);
+                PubSub.publish(PUBS.Loading, false);
                 if (response.ok) {
                     onSessionUpdate(response.session)
                     if (response.emailVerified) PubSub.publish(PUBS.Snack, { message: 'Email verified.' });
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
             }).catch((response) => {
-                PubSub.publish(PUBS.loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                console.error(response)
+                PubSub.publish(PUBS.Loading, false);
+                PubSub.publish(PUBS.Snack, { message: response.msg ?? 'Unknown error occurred', severity: 'error' });
             })
         },
     });
@@ -92,6 +93,7 @@ function LogInForm({
             </Grid>
             <Button
                 fullWidth
+                disabled={loading}
                 type="submit"
                 color="secondary"
                 className={classes.submit}

@@ -30,6 +30,7 @@ export async function seed(knex) {
             lastName: 'account', 
             password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS), 
             accountApproved: true,
+            emailVerified: true,
             status: ACCOUNT_STATUS.Unlocked
         }
     ]);

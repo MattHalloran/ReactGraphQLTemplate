@@ -87,11 +87,11 @@ export const resolvers = {
             // Only admins can update other businesses
             if(!context.req.isAdmin || (context.token.businessId !== args.id)) return context.res.sendStatus(CODE.Unauthorized);
 
-            const curr = await db(TABLES.Business).findById(args.id);
-            const updated = await db(TABLES.Business).patchAndFetchById(args.id, {
+            const curr = await db(TABLES.Business).where('id', args.id).first();
+            const updated = await db(TABLES.Business).where('id', args.id).update({
                 name: args.name ?? curr.name,
                 subscribedToNewsletters: args.subscribedToNewsletters ?? curr.subscribedToNewsletters
-            })
+            }).returning('*');
 
             return updated;
         },

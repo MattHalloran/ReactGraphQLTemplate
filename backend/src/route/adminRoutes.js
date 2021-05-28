@@ -39,7 +39,7 @@ router.post('/modify_sku', auth.requireAdmin, async (req, res) => {
 router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
     // (operation, plant_data) = getData('operation', 'data')
     const operation = req.body.operation;
-    let plant = await Plant.query().findById(req.body.plant.id);
+    let plant = await Plant.query().where('id', req.body.plant.id).first();
     if (plant === null && operation !== 'ADD') return res.sendStatus(CODE.ErrorUnknown);
     // These are operations which only change the SKU's status
     const OPERATION_TO_STATUS = {
@@ -48,13 +48,13 @@ router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
         'DELETE': SKU_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        let plant = await Plant.query().patchAndFetchById(plant.id, { status: OPERATION_TO_STATUS[operation] });
+        let plant = await Plant.query().where('id', plant.id).update({ status: OPERATION_TO_STATUS[operation] }).returning('*');
         return res.sendStatus(CODE.SUCCESS);
     } 
     if (operation === 'ADD') {
         plant = await Plant.query().insert(req.body.plant);
     } else if (operation === 'UPDATE') {
-        plant = await Plant.query().patchAndFetchById(plant.id, req.body.plant);
+        plant = await Plant.query().where('id', plant.id).update(req.body.plant).returning('*');
             //     # Update plant fields
     //     def update_trait(option: PlantTraitOptions, value: str):
     //         if isinstance(value, list):
@@ -128,16 +128,16 @@ router.get('/customers', auth.requireAdmin, async (req, res) => {
 })
 
 router.post('/order_status', auth.requireAdmin, async (req, res) => {
-    const order = await Order.query().patchAndFetchById(req.body.id, {
+    const order = await Order.query().where('id', req.body.id).update({
         status: req.body.status
-    });
+    }).returning('*');
     res.json(order);
 })
 
 router.post('/modify_user', auth.requireAdmin, async (req, res) => {
     if (req.token.user_id === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
     const operation = req.body.operation;
-    let user = await User.query().findById(req.body.id);
+    const validId = (await db(TABLES.User).where('id', req.body.id).count()) > 0;
     const OPERATION_TO_STATUS = {
         'LOCK': ACCOUNT_STATUS.HardLock,
         'UNLOCK': ACCOUNT_STATUS.Unlocked,
@@ -145,15 +145,15 @@ router.post('/modify_user', auth.requireAdmin, async (req, res) => {
         'DELETE': ACCOUNT_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        user.patch({ status: OPERATION_TO_STATUS[operation] });
+        db(TABLES.User).where('id', req.body.id).update({ status: OPERATION_TO_STATUS[operation] });
         if (operation === 'DELETE') {
             // Make sure emails and phones get deleted
-            await Email.query().where('userId', user.id).del();
-            await Phone.query().where('userId', user.id).del();
-            user.del();
+            await db(TABLES.Email).where('userId', req.body.id).del();
+            await db(TABLES.Phone).where('userId', req.body.id).del();
+            await db(TABLES.User).where('id', req.body.id).del();
         }
         //TODO don't show admin?
-        const customers = await User.query();
+        const customers = await db(TABLES.User).select('*');
         res.json(customers);
         return res.sendStatus(CODE.Success);
     }

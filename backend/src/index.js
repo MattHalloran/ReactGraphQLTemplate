@@ -5,7 +5,7 @@ import * as auth from './auth';
 import * as cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './db/models';
-import { SERVER_IP } from '@local/shared';
+import { CLIENT_IP } from '@local/shared';
 
 const app = express();
 const VERSION = 'v1';
@@ -28,10 +28,16 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // For authentication
 app.use(auth.authenticate);
 
+// For CORS
 const corsOptions = {
-    credentials: 'include',
-    origin: SERVER_IP
+    credentials: true,
+    origin: CLIENT_IP
 }
+// app.use((_, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// })
 
 // Set static folders
 app.use(express.static(path.join(__dirname, 'public')));

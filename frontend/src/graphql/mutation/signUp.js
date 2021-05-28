@@ -23,7 +23,9 @@ export const signUpMutation = gql`
     ) {
         id
         theme
-        roles
+        roles {
+            title
+        }
     }
 }
 `
