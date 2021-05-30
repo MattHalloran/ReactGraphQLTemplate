@@ -5,6 +5,18 @@ import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { ORDER_STATUS } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const ORDER_FIELDS = [
+    'id',
+    'status',
+    'specialInstructions',
+    'desiredDeliveryDate',
+    'expectedDeliveryDate',
+    'isDelivery',
+    'addressId',
+    'userId'
+];
+
 export const typeDef = gql`
     enum OrderStatus {
         CanceledByAdmin

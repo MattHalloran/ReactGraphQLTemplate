@@ -4,6 +4,20 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const ADDRESS_FIELDS = [
+    'id',
+    'tag',
+    'name',
+    'country',
+    'administrativeArea',
+    'subAdministrativeArea',
+    'locality',
+    'postalCode',
+    'premise',
+    'business_id'
+];
+
 export const typeDef = gql`
     type Address {
         id: ID!

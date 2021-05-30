@@ -5,6 +5,19 @@ import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { SKU_STATUS } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const SKU_FIELDS = [
+    'id',
+    'sku',
+    'isDiscountable',
+    'size',
+    'note',
+    'availability',
+    'price',
+    'status',
+    'plantId'
+];
+
 export const typeDef = gql`
     enum SkuStatus {
         Deleted

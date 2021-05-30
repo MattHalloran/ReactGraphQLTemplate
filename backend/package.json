@@ -27,6 +27,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "graphql": "^15.5.0",
+    "graphql-list-fields": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.19",
     "lodash": "^4.17.21",

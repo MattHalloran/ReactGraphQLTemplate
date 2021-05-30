@@ -4,6 +4,13 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const TRAIT_FIELDS = [
+    'id',
+    'name',
+    'value'
+];
+
 export const typeDef = gql`
     type Trait {
         id: ID!

@@ -2,18 +2,48 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { ACCOUNT_STATUS, SESSION_MILLI } from '@local/shared';
 import { CustomError } from '../error';
 import { generateToken } from '../../auth';
 import moment from 'moment';
+import { BUSINESS_FIELDS } from './business';
+import { EMAIL_FIELDS } from './email';
+import { PHONE_FIELDS } from './phone';
+import { ORDER_FIELDS } from './order';
+import { ROLE_FIELDS } from './role';
+import { FEEDBACK_FIELDS } from './feedback';
+import { fullSelectQuery } from '../query';
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
-const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
+const SOFT_LOCKOUT_DURATION_SECONDS = 15 * 60;
 const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+
+// Fields that can be exposed in a query
+export const USER_FIELDS = [
+    'id',
+    'firstName',
+    'lastName',
+    'pronouns',
+    'theme',
+    'lastLoginAttempt',
+    'sessionToken',
+    'accountApproved',
+    'emailVerified',
+    'status',
+    'businessId'
+]
+
+const relationships = [
+    ['one', 'business', TABLES.Business, BUSINESS_FIELDS, 'businessId'],
+    ['many', 'emails', TABLES.Email, EMAIL_FIELDS, 'userId'],
+    ['many', 'phones', TABLES.Phone, PHONE_FIELDS, 'userId'],
+    ['many', 'orders', TABLES.Order, ORDER_FIELDS, 'userId'],
+    ['many-many', 'roles', TABLES.Role, TABLES.UserRoles, ROLE_FIELDS, 'userId', 'roleId'],
+    ['many', 'feedback', TABLES.Feedback, FEEDBACK_FIELDS, 'userId']
+];
 
 export const typeDef = gql`
     enum AccountStatus {
@@ -30,7 +60,7 @@ export const typeDef = gql`
         pronouns: String!
         emails: [Email!]!
         phones: [Phone!]!
-        business: Business!
+        business: Business
         theme: String!
         accountApproved: Boolean!
         emailVerified: Boolean!
@@ -97,10 +127,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
+    Query: {
+        users: async (_, args, context, info) => {
+            // Only admins can query addresses
+            //if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+
+            return fullSelectQuery(info, args.ids, TABLES.User, relationships);
+        }
+    },
     Mutation: {
-        login: async (_, args, context) => {
+        login: async (_, args, context, info) => {
+            console.log('yeeettt', info)
             // Validate email address
-            const email = await db(TABLES.Email).select('emailAddress',  'userId').where('emailAddress', args.email).whereNotNull('userId').first();
+            const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
             if (email === undefined) {
                 return new CustomError(CODE.BadCredentials);
             }
@@ -137,19 +176,19 @@ export const resolvers = {
             const validPassword = bcrypt.compareSync(args.password, user.password);
             if (validPassword) {
                 const token = generateToken(user.id, user.businessId);
-                user = await db(TABLES.User).where('id', user.id).update({ 
+                await db(TABLES.User).where('id', user.id).update({
                     sessionToken: token,
                     loginAttempts: 0,
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                const cookie = {user: user};
+                const cookie = { user: user };
                 context.res.cookie('session', cookie, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: SESSION_MILLI
                 });
-                return user;
+                return (await fullSelectQuery(info, [user.id], TABLES.User, relationships))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = user.loginAttempts + 1;

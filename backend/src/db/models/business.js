@@ -4,6 +4,13 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const BUSINESS_FIELDS = [
+    'id',
+    'name',
+    'subscribedToNewsletters'
+];
+
 export const typeDef = gql`
     type Business {
         id: ID!

@@ -5,6 +5,17 @@ import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { TASK_STATUS } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const TASK_FIELDS = [
+    'id',
+    'taskId',
+    'name',
+    'status',
+    'description',
+    'result',
+    'resultCode'
+];
+
 export const typeDef = gql`
     enum TaskStatus {
         Unknown

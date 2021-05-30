@@ -4,6 +4,15 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const EMAIL_FIELDS = [
+    'id',
+    'emailAddress',
+    'receivesDeliveryUpdates',
+    'userId',
+    'businessId'
+];
+
 export const typeDef = gql`
     type Email {
         id: ID!

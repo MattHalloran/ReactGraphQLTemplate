@@ -69,7 +69,6 @@ export async function up (knex) {
         table.string('postalCode', 16).notNullable();
         table.string('throughfare', 256).notNullable();
         table.string('premise', 64);
-        table.string('deliveryInstructions', 1024);
         table.uuid('businessId').references('id').inTable(TABLES.Business);
     });
     await knex.schema.createTable(TABLES.Email, (table) => {

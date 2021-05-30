@@ -4,6 +4,14 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const PLANT_FIELDS = [
+    'id',
+    'latinName',
+    'textData',
+    'imageData'
+];
+
 export const typeDef = gql`
     type Plant {
         id: ID!

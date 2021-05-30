@@ -4,6 +4,17 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const PHONE_FIELDS = [
+    'id',
+    'number',
+    'countryCode',
+    'extension',
+    'receivesDeliveryUpdates',
+    'userId',
+    'businessId'
+];
+
 export const typeDef = gql`
     type Phone {
         id: ID!

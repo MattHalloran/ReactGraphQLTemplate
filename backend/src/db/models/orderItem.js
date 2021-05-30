@@ -4,6 +4,14 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const ORDER_ITEM_FIELDS = [
+    'id',
+    'quantity',
+    'orderId',
+    'skuId'
+];
+
 export const typeDef = gql`
     type OrderItem {
         id: ID!

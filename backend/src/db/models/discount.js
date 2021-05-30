@@ -4,6 +4,15 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const DISCOUNT_FIELDS = [
+    'id',
+    'discount',
+    'title',
+    'comment',
+    'terms'
+];
+
 export const typeDef = gql`
     type Discount {
         id: ID!

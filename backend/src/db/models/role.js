@@ -4,6 +4,13 @@ import { TABLES } from '../tables';
 import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 
+// Fields that can be exposed in a query
+export const ROLE_FIELDS = [
+    'id',
+    'title',
+    'description'
+];
+
 export const typeDef = gql`
     type Role {
         id: ID!

@@ -53,3 +53,20 @@ export const resolvers = merge(
     TraitResolvers,
     UserResolvers
 )
+
+// export * from './root';
+// export * from './address';
+// export * from './business';
+// export * from './discount';
+// export * from './email';
+// export * from './feedback';
+// export * from './image';
+// export * from './order';
+// export * from './orderItem';
+// export * from './phone';
+// export * from './plant';
+// export * from './role';
+// export * from './sku';
+// export * from './task';
+// export * from './trait';
+// export * from './user';
