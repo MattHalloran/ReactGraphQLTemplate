@@ -19,34 +19,6 @@
     ],
     "paths": {
         "/session": {
-            "get": {
-                "summary": "Details about the current user session",
-                "operationId": "validateSession",
-                "tags": [
-                    "auth"
-                ],
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/Session"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Details about the current user session",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Session"
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "$ref": "#/components/responses/UnexpectedError"
-                    }
-                }
-            }
-        },
         "/register": {
             "put": {
                 "summary": "Create a new account",

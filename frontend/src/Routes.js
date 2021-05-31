@@ -31,14 +31,12 @@ import {
 function Routes({
     session,
     onSessionUpdate,
-    sessionFailed,
     roles,
     cart,
     onRedirect
 }) {
 
     const common = {
-        sessionFailed: sessionFailed,
         onSessionUpdate: onSessionUpdate,
         onRedirect: onRedirect,
         roles: roles,
@@ -237,7 +235,6 @@ function Routes({
 Routes.propTypes = {
     session: PropTypes.object,
     onSessionUpdate: PropTypes.func.isRequired,
-    sessionFailed: PropTypes.bool.isRequired,
     roles: PropTypes.array,
     cart: PropTypes.object,
     onRedirect: PropTypes.func.isRequired,

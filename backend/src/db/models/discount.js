@@ -1,8 +1,11 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { BUSINESS_FIELDS } from './business';
+import { SKU_FIELDS } from './sku';
 
 // Fields that can be exposed in a query
 export const DISCOUNT_FIELDS = [
@@ -11,6 +14,11 @@ export const DISCOUNT_FIELDS = [
     'title',
     'comment',
     'terms'
+];
+
+const relationships = [
+    ['many-many', 'businesses', TABLES.Business, TABLES.BusinessDiscounts, BUSINESS_FIELDS, 'discountId', 'businessId'],
+    ['many-many', 'skus', TABLES.Sku, TABLES.SkuDiscounts, SKU_FIELDS, 'discountId', 'skuId']
 ];
 
 export const typeDef = gql`
@@ -51,34 +59,12 @@ export const typeDef = gql`
     }
 `
 
-const hydrate = (object) => ({
-    ...object,
-    // business: {
-
-    // },
-    // orders: {
-        
-    // }
-})
-
 export const resolvers = {
     Query: {
         discounts: async (_, args, context, info) => {
-            if (!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
-            
-            const qb = args.ids ? 
-                    db(TABLES.Discount).select().whereIn('id', args.ids) :
-                    db(TABLES.Discount).select();
-
-            // if (pathExists(info.fieldNodes, [TABLES.Address, 'business'])) {
-            //     qb.leftJoin(TABLES.Business, `${TABLES.Business}.id`, `${TABLES.Address}.businessId`).first();
-            // }
-            // if (pathExists(info.fieldNodes, [TABLES.Address, 'orders'])) {
-            //     qb.leftJoin(TABLES.Order, `${TABLES.Order}.addressId`, `${TABLES.Address}.id`);
-            // }
-
-            const results = await qb;
-            return results.map(r => hydrate(r));
+            // Only admins can query addresses
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return fullSelectQuery(info, args.ids, TABLES.User, relationships);
         }
     }
 }

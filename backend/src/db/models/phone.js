@@ -1,8 +1,11 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { USER_FIELDS } from './user';
+import { BUSINESS_FIELDS } from './business';
 
 // Fields that can be exposed in a query
 export const PHONE_FIELDS = [
@@ -13,6 +16,11 @@ export const PHONE_FIELDS = [
     'receivesDeliveryUpdates',
     'userId',
     'businessId'
+];
+
+const relationships = [
+    ['one', 'user', TABLES.User, USER_FIELDS, 'userId'],
+    ['one', 'business', TABLES.Business, BUSINESS_FIELDS, 'businessId']
 ];
 
 export const typeDef = gql`

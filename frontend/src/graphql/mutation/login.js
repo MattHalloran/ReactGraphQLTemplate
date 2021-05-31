@@ -10,6 +10,7 @@ export const loginMutation = gql`
         password: $password
     ) {
         id
+        emailVerified
         theme
         roles {
             title

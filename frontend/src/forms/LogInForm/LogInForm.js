@@ -36,7 +36,10 @@ function LogInForm({
     const [login, {loading}] = useMutation(loginMutation);
 
     const formik = useFormik({
-        initialValues: {},
+        initialValues: {
+            email: '',
+            password: ''
+        },
         validationSchema: logInSchema,
         onSubmit: (values) => {
             PubSub.publish(PUBS.Loading, true);
@@ -46,16 +49,16 @@ function LogInForm({
                     verificationCode: urlParams.code
                 }
             }).then((response) => {
+                const data = response.data.login;
                 PubSub.publish(PUBS.Loading, false);
-                if (response.ok) {
-                    onSessionUpdate(response.session)
-                    if (response.emailVerified) PubSub.publish(PUBS.Snack, { message: 'Email verified.' });
+                if (data !== null) {
+                    onSessionUpdate(data);
                     onRedirect(LINKS.Shopping);
-                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
             }).catch((response) => {
                 console.error(response)
                 PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.msg ?? 'Unknown error occurred', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
             })
         },
     });

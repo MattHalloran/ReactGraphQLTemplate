@@ -1,8 +1,10 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { SKU_FIELDS } from './sku';
 
 // Fields that can be exposed in a query
 export const PLANT_FIELDS = [
@@ -10,6 +12,10 @@ export const PLANT_FIELDS = [
     'latinName',
     'textData',
     'imageData'
+];
+
+const relationships = [
+    ['one', 'sku', TABLES.Sku, SKU_FIELDS, 'skuId']
 ];
 
 export const typeDef = gql`
@@ -51,5 +57,9 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    
+    Query: {
+        plants: async (_, args, context, info) => {
+            return fullSelectQuery(info, args.ids, TABLES.Plant, relationships);
+        }
+    },
 }

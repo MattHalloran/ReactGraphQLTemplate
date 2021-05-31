@@ -1,9 +1,20 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { IMAGE_SIZE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+
+// Fields that can be exposed in a query
+export const IMAGE_FIELDS = [
+    'id',
+    'extension',
+    'alt',
+    'hash',
+    'width',
+    'height'
+];
 
 export const typeDef = gql`
     enum ImageSize {

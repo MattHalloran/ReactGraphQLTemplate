@@ -1,8 +1,11 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { BUSINESS_FIELDS } from './business';
+import { ORDER_FIELDS } from './order';
 
 // Fields that can be exposed in a query
 export const ADDRESS_FIELDS = [
@@ -16,6 +19,11 @@ export const ADDRESS_FIELDS = [
     'postalCode',
     'premise',
     'business_id'
+];
+
+const relationships = [
+    ['one', 'business', TABLES.Business, BUSINESS_FIELDS, 'businessId'],
+    ['many', 'orders', TABLES.Order, ORDER_FIELDS, 'addressId']
 ];
 
 export const typeDef = gql`
@@ -69,35 +77,12 @@ export const typeDef = gql`
     }
 `
 
-const hydrate = (object) => ({
-    ...object,
-    // business: {
-
-    // },
-    // orders: {
-        
-    // }
-})
-
 export const resolvers = {
     Query: {
         addresses: async (_, args, context, info) => {
             // Only admins can query addresses
-            if (!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
-            
-            const qb = args.ids ? 
-                    db(TABLES.Address).select().whereIn('id', args.ids) :
-                    db(TABLES.Address).select();
-
-            if (pathExists(info.fieldNodes, [TABLES.Address, 'business'])) {
-                qb.leftJoin(TABLES.Business, `${TABLES.Business}.id`, `${TABLES.Address}.businessId`).first();
-            }
-            if (pathExists(info.fieldNodes, [TABLES.Address, 'orders'])) {
-                qb.leftJoin(TABLES.Order, `${TABLES.Order}.addressId`, `${TABLES.Address}.id`);
-            }
-
-            const results = await qb;
-            return results.map(r => hydrate(r));
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return fullSelectQuery(info, args.ids, TABLES.Address, relationships);
         }
     },
     Mutation: {

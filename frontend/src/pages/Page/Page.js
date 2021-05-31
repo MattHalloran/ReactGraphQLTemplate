@@ -4,7 +4,6 @@ import { LINKS } from 'utils';
 
 const Page = ({
     title,
-    sessionFailed = false,
     redirect = LINKS.Home,
     onRedirect,
     roles,
@@ -13,7 +12,6 @@ const Page = ({
 }) => {
 
     console.log('RENDERING PAGE')
-    console.log(sessionFailed, roles, authRole)
 
     useEffect(() => {
         document.title = title || "";
@@ -23,7 +21,7 @@ const Page = ({
     if (authRole !== null) {
         let role_titles = roles?.map(r => r.title);
         const valid_role = (role_titles?.indexOf(authRole) >= 0);
-        if (!valid_role && sessionFailed) onRedirect(redirect);
+        if (!valid_role) onRedirect(redirect);
         return valid_role ? children : null;
     }
 
@@ -32,7 +30,6 @@ const Page = ({
 
 Page.propTypes = {
     title: PropTypes.string,
-    sessionFailed: PropTypes.bool,
     redirect: PropTypes.string,
     roles: PropTypes.array,
     authRole: PropTypes.string,

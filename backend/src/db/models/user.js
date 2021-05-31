@@ -8,12 +8,12 @@ import { CustomError } from '../error';
 import { generateToken } from '../../auth';
 import moment from 'moment';
 import { BUSINESS_FIELDS } from './business';
+import { fullSelectQuery } from '../query';
 import { EMAIL_FIELDS } from './email';
 import { PHONE_FIELDS } from './phone';
 import { ORDER_FIELDS } from './order';
 import { ROLE_FIELDS } from './role';
 import { FEEDBACK_FIELDS } from './feedback';
-import { fullSelectQuery } from '../query';
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -130,14 +130,12 @@ export const resolvers = {
     Query: {
         users: async (_, args, context, info) => {
             // Only admins can query addresses
-            //if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQuery(info, args.ids, TABLES.User, relationships);
         }
     },
     Mutation: {
         login: async (_, args, context, info) => {
-            console.log('yeeettt', info)
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
             if (email === undefined) {
@@ -158,11 +156,9 @@ export const resolvers = {
             const last_login = moment(user.lastLoginAttempt, DATE_FORMAT).valueOf();
             console.log('LAST LOGIN', user.lastLoginAttempt, last_login);
             if (!unable_to_reset.includes(user.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
-                console.log('nnnnn', user)
                 user = await db(TABLES.User).where('id', user.id).update({
                     loginAttempts: 0
                 }).returning('*').then(rows => rows[0]);
-                console.log('oooo', user)
             }
             // Before validating password, let's check to make sure the account is unlocked
             const status_to_code = {
@@ -172,7 +168,6 @@ export const resolvers = {
             }
             if (user.status in status_to_code) return new CustomError(status_to_code[user.status]);
             // Now we can validate the password
-            console.log('eee', args.password, user, user.password)
             const validPassword = bcrypt.compareSync(args.password, user.password);
             if (validPassword) {
                 const token = generateToken(user.id, user.businessId);

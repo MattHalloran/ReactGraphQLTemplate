@@ -1,14 +1,28 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { ADDRESS_FIELDS } from './address';
+import { PHONE_FIELDS } from './phone';
+import { EMAIL_FIELDS } from './email';
+import { USER_FIELDS } from './user';
+import { DISCOUNT_FIELDS } from './discount';
 
 // Fields that can be exposed in a query
 export const BUSINESS_FIELDS = [
     'id',
     'name',
     'subscribedToNewsletters'
+];
+
+const relationships = [
+    ['many', 'addresses', TABLES.Address, ADDRESS_FIELDS, 'businessId'],
+    ['many', 'phones', TABLES.Phone, PHONE_FIELDS, 'businessId'],
+    ['many', 'emails', TABLES.Email, EMAIL_FIELDS, 'businessId'],
+    ['many', 'employees', TABLES.User, USER_FIELDS, 'businessId'],
+    ['many-many', 'discounts', TABLES.Discount, TABLES.BusinessDiscounts, DISCOUNT_FIELDS, 'businessId', 'discountId']
 ];
 
 export const typeDef = gql`
@@ -48,34 +62,12 @@ export const typeDef = gql`
     }
 `
 
-const hydrate = (object) => ({
-    ...object,
-    // business: {
-
-    // },
-    // orders: {
-        
-    // }
-})
-
 export const resolvers = {
     Query: {
         businesses: async (_, args, context, info) => {
-            if (!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
-            
-            const qb = args.ids ? 
-                    db(TABLES.Business).select().whereIn('id', args.ids) :
-                    db(TABLES.Business).select();
-
-            // if (pathExists(info.fieldNodes, [TABLES.Business, 'addresses'])) {
-            //     qb.leftJoin(TABLES.Address, `${TABLES.Address}.id`, `${TABLES.Business}.id`);
-            // }
-            // if (pathExists(info.fieldNodes, [TABLES.Address, 'orders'])) {
-            //     qb.leftJoin(TABLES.Order, `${TABLES.Order}.id`, `${TABLES.Address}.id`);
-            // }
-
-            const results = await qb;
-            return results.map(r => hydrate(r));
+            // Only admins can query addresses
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return fullSelectQuery(info, args.ids, TABLES.Business, relationships);
         }
     },
     Mutation: {

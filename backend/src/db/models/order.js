@@ -1,9 +1,12 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
 import { ORDER_STATUS } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { ADDRESS_FIELDS } from './address';
+import { USER_FIELDS } from './user';
 
 // Fields that can be exposed in a query
 export const ORDER_FIELDS = [
@@ -15,6 +18,11 @@ export const ORDER_FIELDS = [
     'isDelivery',
     'addressId',
     'userId'
+];
+
+const relationships = [
+    ['one', 'address', TABLES.Address, ADDRESS_FIELDS, 'addressId'],
+    ['one', 'user', TABLES.User, USER_FIELDS, 'userId']
 ];
 
 export const typeDef = gql`
@@ -39,13 +47,12 @@ export const typeDef = gql`
         expectedDeliveryDate: Date
         isDelivery: Boolean
         address: Address
-        business: Business!
+        user: User!
         items: [OrderItem!]!
     }
 
     extend type Query {
-        order(id: ID!): Order
-        orders(businessId: ID, status: OrderStatus): [Order!]!
+        orders(ids: [ID!], userIds: [ID!], status: OrderStatus): [Order!]!
     }
 
     extend type Mutation {

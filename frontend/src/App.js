@@ -19,7 +19,6 @@ import { PUBS, PubSub, lightTheme, darkTheme } from 'utils';
 import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
-import { useGet } from "restful-react";
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -82,6 +81,8 @@ const keyMap = {
 
 export function App() {
     const classes = useStyles();
+    // Session cookie should automatically expire in time determined by backend,
+    // so no need to validate session on first load
     const [session, setSession] = useState(() => {
         try {
             return JSON.parse(Cookies.get(COOKIE.Session));
@@ -90,15 +91,10 @@ export function App() {
             return null;
         }
     });
-    const [sessionFailed, setSessionFailed] = useState(session === null);
     const [theme, setTheme] = useState(lightTheme);
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
     let history = useHistory();
-
-    useEffect(() => {
-        console.log('LOADING UPDATED', loading)
-    }, [loading])
 
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!')
@@ -111,16 +107,6 @@ export function App() {
             Cookies.set(COOKIE.Session, null);
         }
     }, [session])
-
-    useGet({
-        path: `${URL_BASE}/validate_session`,
-        lazy: sessionFailed,
-        queryParams: { session: { tag: session?.tag, token: session?.token } },
-        resolve: (response) => {
-            setSession(response.session);
-            setSessionFailed(!response.ok);
-        }
-    }, [])
 
     const handlers = {
         OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
@@ -167,7 +153,6 @@ export function App() {
                                 <Routes 
                                     session={session} 
                                     onSessionUpdate={setSession} 
-                                    sessionFailed={sessionFailed} 
                                     roles={session?.roles} 
                                     cart={cart} 
                                     onRedirect={redirect}

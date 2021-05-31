@@ -1,14 +1,20 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { pathExists } from './pathExists';
 import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { fullSelectQuery } from '../query';
+import { USER_FIELDS } from './user';
 
 // Fields that can be exposed in a query
 export const ROLE_FIELDS = [
     'id',
     'title',
     'description'
+];
+
+const relationships = [
+    ['many-many', 'users', TABLES.User, TABLES.UserRoles, USER_FIELDS, 'roleId', 'userId']
 ];
 
 export const typeDef = gql`
