@@ -4,18 +4,6 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
-import { ROLE_FIELDS } from './role';
-
-// Fields that can be exposed in a query
-export const TRAIT_FIELDS = [
-    'id',
-    'name',
-    'value'
-];
-
-const relationships = [
-    ['many-many', 'plants', TABLES.Plant, TABLES.PlantTraits, ROLE_FIELDS, 'plantId', 'traitId']
-];
 
 export const typeDef = gql`
     type Trait {

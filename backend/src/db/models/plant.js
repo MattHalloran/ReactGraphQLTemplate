@@ -5,18 +5,7 @@ import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
 import { SKU_FIELDS } from './sku';
-
-// Fields that can be exposed in a query
-export const PLANT_FIELDS = [
-    'id',
-    'latinName',
-    'textData',
-    'imageData'
-];
-
-const relationships = [
-    ['one', 'sku', TABLES.Sku, SKU_FIELDS, 'skuId']
-];
+import { PLANT_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
     type Plant {
@@ -59,7 +48,20 @@ export const typeDef = gql`
 export const resolvers = {
     Query: {
         plants: async (_, args, context, info) => {
-            return fullSelectQuery(info, args.ids, TABLES.Plant, relationships);
+            // Only admins can query plants directly (customers query SKUs)
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return fullSelectQuery(info, args.ids, TABLES.Plant, PLANT_RELATIONSHIPS);
         }
     },
+    Mutation: {
+        addPlant: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        updatePlant: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        deletePlant: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+    }
 }

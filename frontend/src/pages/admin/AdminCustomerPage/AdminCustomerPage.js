@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useGet } from "restful-react";
+import { useEffect, useState } from 'react';
+import { customersQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
 import { PUBS, PubSub } from 'utils';
 import {
     AdminBreadcrumbs,
@@ -23,21 +24,22 @@ function AdminCustomerPage({
 }) {
     const classes = useStyles();
     const [customers, setCustomers] = useState(null);
-    useGet({
-        path: "customers",
-        resolve: (response) => {
-            if (response.ok)
-                setCustomers(response.customers);
-            else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-        }
-    })
+    const { loading, error, data } = useQuery(customersQuery);
+    if (error) { 
+        console.error(error);
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
+    }
+    useEffect(() => {
+        setCustomers(data?.users);
+    }, [data])
 
     const new_user = () => {
         alert('Coming soon!');
         return;
         //TODO
     }
+
+    console.log('CUSTOMERS', customers, data)
 
     const onCustomersUpdate = (customers) => {
         setCustomers(customers);
@@ -51,9 +53,11 @@ function AdminCustomerPage({
             </div>
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>
-                <CustomerCard key={index}
+                <CustomerCard 
+                    key={index}
                     onUpdate={onCustomersUpdate}
-                    {...c} />)}
+                    {...c} 
+                />)}
             </div>
         </div >
     );

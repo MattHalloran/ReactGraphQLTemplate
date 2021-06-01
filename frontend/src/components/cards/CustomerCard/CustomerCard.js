@@ -39,32 +39,23 @@ const useStyles = makeStyles((theme) => ({
 
 function CustomerCard({
     id,
-    first_name,
-    last_name,
+    firstName,
+    lastName,
     business,
     pronouns = DEFAULT_PRONOUNS[3],
-    account_status = ACCOUNT_STATUS.Deleted,
+    status = ACCOUNT_STATUS.Deleted,
     emails = null,
     phones = null,
     onUpdate,
 }) {
     const classes = useStyles();
 
-    const status_map = (status) => {
-        switch (status) {
-            case ACCOUNT_STATUS.Deleted:
-                return ['Deleted', 'grey'];
-            case ACCOUNT_STATUS.Unlocked:
-                return ['Unlocked', 'green'];
-            case ACCOUNT_STATUS.WaitingApproval:
-                return ['Waiting Approval', 'yellow'];
-            case ACCOUNT_STATUS.SoftLock:
-                return ['Soft Locked', 'pink'];
-            case ACCOUNT_STATUS.HardLock:
-                return ['Hard Locked', 'red'];
-            default:
-                return ['Unknown', 'red'];
-        }
+    const status_map = {
+        [ACCOUNT_STATUS.Deleted]: ['Deleted', 'grey'],
+        [ACCOUNT_STATUS.Unlocked]: ['Unlocked', 'green'],
+        [ACCOUNT_STATUS.WaitingApproval]: ['Waiting Approval', 'yellow'],
+        [ACCOUNT_STATUS.SoftLock]: ['Soft Locked', 'pink'],
+        [ACCOUNT_STATUS.HardLock]: ['Hard Locked', 'red']
     }
 
     const view_orders = () => {
@@ -111,7 +102,7 @@ function CustomerCard({
     }
 
     const delete_user = () => {
-        if (!window.confirm(`Are you sure you want to delete the account for ${first_name} ${last_name}?`)) return;
+        if (!window.confirm(`Are you sure you want to delete the account for ${firstName} ${lastName}?`)) return;
         modifyUser(id, 'DELETE')
             .then(response => {
                 onUpdate(response.customers);
@@ -130,7 +121,7 @@ function CustomerCard({
     let delete_action = [delete_user, 'Delete'];
 
     let actions = [orders_action, edit_action];
-    switch (account_status) {
+    switch (status) {
         case ACCOUNT_STATUS.Unlocked:
             actions.push(lock_action);
             break;
@@ -151,12 +142,13 @@ function CustomerCard({
         window.location.href = tel;
     }
 
-    let phoneChips = phones?.map(p => (
+    let phoneChips = phones?.map((p, index) => (
         <Chip
+            key={index}
             className={classes.chip}
-            onClick={() => callPhone(`${p.country_code}${p.unformatted_number}`)}
+            onClick={() => callPhone(`${p.countryCode}${p.unformattedNumber}`)}
             icon={<PhoneIcon />}
-            label={p.unformatted_number}
+            label={p.unformattedNumber}
             color="secondary" />
     ));
 
@@ -165,23 +157,24 @@ function CustomerCard({
         window.location.href = mailto;
     }
 
-    let emailChips = emails?.map(e => (
+    let emailChips = emails?.map((e, index) => (
         <Chip
+            key={index}
             className={classes.chip}
-            onClick={() => sendEmail(e.email_address)}
+            onClick={() => sendEmail(e.emailAddress)}
             icon={<EmailIcon />}
-            label={e.email_address}
+            label={e.emailAddress}
             color="secondary" />
     ));
 
     return (
-        <Card className={classes.root} style={{ border: `2px solid ${status_map(account_status)[1]}` }}>
+        <Card className={classes.root} style={{ border: `2px solid ${status_map[status][1]}` }}>
             <CardContent className={classes.content}>
                 <Typography gutterBottom variant="h6" component="h2">
-                    {first_name} {last_name}
+                    {firstName} {lastName}
                 </Typography>
-                <p>Status: {status_map(account_status)[0]}</p>
-                <p>Business: {business.name}</p>
+                <p>Status: {status_map[status][0]}</p>
+                <p>Business: {business?.name}</p>
                 <p>Pronouns: {pronouns}</p>
                 {phoneChips}
                 {emailChips}
@@ -200,11 +193,11 @@ function CustomerCard({
 
 CustomerCard.propTypes = {
     id: PropTypes.number.isRequired,
-    first_name: PropTypes.string.isRequired,
-    last_name: PropTypes.string.isRequired,
+    firstName: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired,
     business: PropTypes.object.isRequired,
     pronouns: PropTypes.string,
-    account_status: PropTypes.number.isRequired,
+    status: PropTypes.string.isRequired,
     emails: PropTypes.array,
     phones: PropTypes.array,
     onUpdate: PropTypes.func.isRequired,

@@ -6,17 +6,6 @@ import { TASK_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
 
-// Fields that can be exposed in a query
-export const TASK_FIELDS = [
-    'id',
-    'taskId',
-    'name',
-    'status',
-    'description',
-    'result',
-    'resultCode'
-];
-
 export const typeDef = gql`
     enum TaskStatus {
         Unknown
@@ -41,5 +30,19 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    TaskStatus: TASK_STATUS
+    TaskStatus: TASK_STATUS,
+    Query: {
+        tasks: async (_, context, args, info) => {
+            // Only admins can query tasks
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            let ids = args.ids;
+            if (args.status !== null) {
+                const ids_query = await db(TABLES.Task)
+                    .select('id')
+                    .where('status', args.status);
+                ids = ids_query.filter(q => q.id);
+            }
+            return fullSelectQuery(info, ids, TABLES.Task, []);
+        }
+    }
 }

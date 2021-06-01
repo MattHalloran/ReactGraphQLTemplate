@@ -11,26 +11,30 @@ import { db } from './db/db';
 // isAdmin: if the user has an admin role
 export async function authenticate(req, _, next) {
     const { cookies } = req;
-    // First, check is there is a session cookie
-    if (!('session' in cookies)) {
+    // First, check if a session cookie was supplied
+    const session = cookies.session;
+    if (session === null || session === undefined) {
         next();
         return;
     }
-    // Second, verify that the session cookie is valid
-    jwt.verify(cookies.session, process.env.COOKIE_SECRET, async (error, token) => {
+    // Second, verify that the session token is valid
+    const user_id = session.user?.id;
+    const token = session.user?.sessionToken;
+    jwt.verify(token, process.env.COOKIE_SECRET, async (error, token) => {
         if (error) {
             next();
             return;
         }
         // Now, set token and role variables for other middleware to use
         req.token = token;
-        // Query user's roles
-        const user_roles = await db(TABLES.User)
+        // Query user's roles. Will return titles in an array (ex: [{'customer'}, {'admin'}] )
+        const roles_query = await db(TABLES.User)
                                 .select(`${TABLES.Role}.title`)
                                 .leftJoin(TABLES.UserRoles, `${TABLES.UserRoles}.userId`, `${TABLES.User}.id`)
                                 .leftJoin(TABLES.Role, `${TABLES.Role}.id`, `${TABLES.UserRoles}.roleId`)
                                 .where(`${TABLES.User}.id`, user_id);
-        console.log('USER ROLES:', user_roles);
+        // Format query to an array of lowercase role titles
+        const user_roles = roles_query.map(r => r.title.toLowerCase());
         req.roles = user_roles;
         req.isCustomer = user_roles.includes('customer' || 'admin');
         req.isAdmin = user_roles.includes('admin');

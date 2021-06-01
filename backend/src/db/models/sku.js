@@ -5,26 +5,7 @@ import { CODE } from '@local/shared';
 import { SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
-import { PLANT_FIELDS } from './plant';
-import { DISCOUNT_FIELDS } from './discount';
-
-// Fields that can be exposed in a query
-export const SKU_FIELDS = [
-    'id',
-    'sku',
-    'isDiscountable',
-    'size',
-    'note',
-    'availability',
-    'price',
-    'status',
-    'plantId'
-];
-
-const relationships = [
-    ['one', 'plant', TABLES.Plant, PLANT_FIELDS, 'plantId'],
-    ['many-many', 'discounts', TABLES.Discount, TABLES.SkuDiscounts, DISCOUNT_FIELDS, 'skuId', 'discountId']
-];
+import { SKU_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
     enum SkuStatus {
@@ -73,5 +54,21 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    SkuStatus: SKU_STATUS
+    SkuStatus: SKU_STATUS,
+    Query: {
+        skus: async (_, args, context, info) => {
+            return fullSelectQuery(info, args.ids, TABLES.Sku, SKU_RELATIONSHIPS);
+        }
+    },
+    Mutation: {
+        addSku: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        updateSku: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        deleteSku: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        }
+    }
 }

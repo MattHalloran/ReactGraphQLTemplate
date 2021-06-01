@@ -4,26 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
-import { ADDRESS_FIELDS } from './address';
-import { PHONE_FIELDS } from './phone';
-import { EMAIL_FIELDS } from './email';
-import { USER_FIELDS } from './user';
-import { DISCOUNT_FIELDS } from './discount';
-
-// Fields that can be exposed in a query
-export const BUSINESS_FIELDS = [
-    'id',
-    'name',
-    'subscribedToNewsletters'
-];
-
-const relationships = [
-    ['many', 'addresses', TABLES.Address, ADDRESS_FIELDS, 'businessId'],
-    ['many', 'phones', TABLES.Phone, PHONE_FIELDS, 'businessId'],
-    ['many', 'emails', TABLES.Email, EMAIL_FIELDS, 'businessId'],
-    ['many', 'employees', TABLES.User, USER_FIELDS, 'businessId'],
-    ['many-many', 'discounts', TABLES.Discount, TABLES.BusinessDiscounts, DISCOUNT_FIELDS, 'businessId', 'discountId']
-];
+import { BUSINESS_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
     type Business {
@@ -67,7 +48,7 @@ export const resolvers = {
         businesses: async (_, args, context, info) => {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQuery(info, args.ids, TABLES.Business, relationships);
+            return fullSelectQuery(info, args.ids, TABLES.Business, BUSINESS_RELATIONSHIPS);
         }
     },
     Mutation: {

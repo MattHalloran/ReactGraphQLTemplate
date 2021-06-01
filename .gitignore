@@ -152,7 +152,7 @@ build/
 backend/postgres/
 
 #Assets
-backend/assets/
+backend/images/
 backend/plant_info/yards/yards*.json
 
 .eslintcache

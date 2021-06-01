@@ -52,12 +52,14 @@ export const isNull = (object) => {
 
 // Creates a string representation of a map of the fields in a class
 export const fieldsToString = (classLabel, fields) => {
+    console.log('in fields to string', fields)
     return fields.map(f => `'${f}', "${classLabel}"."${f}"`).join(', ')
 }
 
 // Creates a string for an array_agg call (i.e. one-to-many relationship)
 // ex: ('class', 'c', ['id', 'name']) => `array_agg(json_build_object('id', c.id, 'name', c.name)) as class`
 export const createArrayAgg = (relName, classLabel, fields) => {
+    console.log('in array agg')
     return ` array_agg(json_build_object(
         ${fieldsToString(classLabel, fields)}
     )) as ${relName}`;
@@ -66,6 +68,7 @@ export const createArrayAgg = (relName, classLabel, fields) => {
 // Creates a string for a json_build_object call (i.e. one-to-one relationship)
 // ex: ('class', 'c', ['id', 'name']) => `json_build_object('id', c.id, 'name', c.name) as class`
 export const createJsonBuildObject = (relName, classLabel, fields) => {
+    console.log('in json build')
     return ` json_build_object(
         ${fieldsToString(classLabel, fields)}
     ) as ${relName}`;
@@ -73,6 +76,7 @@ export const createJsonBuildObject = (relName, classLabel, fields) => {
 
 // Returns both the array_agg and left join required for querying a one-to-one relationship
 export const oneToOneStrings = (relName, rightClass, rightFields, rightForeign, rightLabel, leftLabel) => {
+    console.log('one to one', relName, rightFields)
     return [
         createJsonBuildObject(relName, rightLabel, rightFields), 
         ` left join "${rightClass}" "${rightLabel}" on "${leftLabel}"."${rightForeign}" = "${rightLabel}"."id"`
@@ -81,6 +85,7 @@ export const oneToOneStrings = (relName, rightClass, rightFields, rightForeign, 
 
 // Returns both the array_agg and left join required for querying a one-to-many relationship
 export const oneToManyStrings = (relName, rightClass, rightFields, rightForeign, rightLabel, leftLabel) => {
+    console.log('one to many', relName)
     return [
         createArrayAgg(relName, rightLabel, rightFields), 
         ` left join "${rightClass}" "${rightLabel}" on "${rightLabel}"."${rightForeign}" = "${leftLabel}"."id"`
@@ -89,6 +94,7 @@ export const oneToManyStrings = (relName, rightClass, rightFields, rightForeign,
 
 // Returns both the array_agg and left joins required for querying a many-to-many relationship
 export const manyToManyStrings = (relName, rightClass, joinClass, rightFields, leftJoinForeign, rightJoinForeign, rightLabel, leftLabel, joinLabel) => {
+    console.log('many to many', relName)
     return [
         createArrayAgg(relName, rightLabel, rightFields), 
         ` left join "${joinClass}" "${joinLabel}" on "${joinLabel}"."${leftJoinForeign}" = "${leftLabel}"."id"
@@ -103,7 +109,9 @@ export const fullSelectQuery = async (info, ids, className, relTuples) => {
     const joinLabels = 'mnopqrstuvwxyz'
     // Filter out relationships that weren't requested
     const requested_fields = getFieldNames(info);
+    console.log('rel tuples: ', relTuples)
     const reqTuples = relTuples.filter(t => inFields(t[1], requested_fields));
+    console.log('req tuples: ', reqTuples)
     // Start the query
     let query = `select "${leftLabel}".*`;
     // Grab all substrings for relationships
@@ -115,6 +123,7 @@ export const fullSelectQuery = async (info, ids, className, relTuples) => {
         let rightLabel = rightLabels[i];
         let args = [...curr, rightLabel, leftLabel];
         if (type === 'one') {
+            console.log('pushing one to one string', ...args)
             reqStrings.push(oneToOneStrings(...args));
             groupBys.push(rightLabel);
         } else if (type === 'many') {
@@ -135,7 +144,9 @@ export const fullSelectQuery = async (info, ids, className, relTuples) => {
     }
     // Append where, if specific ids were selected
     if (ids !== null && ids !== undefined) {
+        console.log('we made it this far')
         const id_string = ids.map(i => `'${i}'`).join(', ')
+        console.log('we made it even further')
         query += ` where "${leftLabel}"."id" in (${id_string})`
     }
     // Append group bys

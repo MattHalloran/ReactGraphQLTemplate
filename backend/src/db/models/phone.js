@@ -4,24 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
-import { USER_FIELDS } from './user';
-import { BUSINESS_FIELDS } from './business';
-
-// Fields that can be exposed in a query
-export const PHONE_FIELDS = [
-    'id',
-    'number',
-    'countryCode',
-    'extension',
-    'receivesDeliveryUpdates',
-    'userId',
-    'businessId'
-];
-
-const relationships = [
-    ['one', 'user', TABLES.User, USER_FIELDS, 'userId'],
-    ['one', 'business', TABLES.Business, BUSINESS_FIELDS, 'businessId']
-];
+import { PHONE_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
     type Phone {
@@ -63,5 +46,22 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    
+    Query: {
+        phones: async (_, args, context, info) => {
+            // Only admins can query phones
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return fullSelectQuery(info, args.ids, TABLES.Phone, PHONE_RELATIONSHIPS);
+        }
+    },
+    Mutation: {
+        addPhone: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        updatePhone: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        deletePhone: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+    }
 }

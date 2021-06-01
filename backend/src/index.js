@@ -4,6 +4,7 @@ import path from 'path';
 import * as auth from './auth';
 import * as cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
+import { depthLimit } from './depthLimit';
 import { typeDefs, resolvers } from './db/models';
 import { CLIENT_IP } from '@local/shared';
 
@@ -42,11 +43,16 @@ const corsOptions = {
 // Set static folders
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, 'private')));
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
-const apollo_options = new ApolloServer({ typeDefs, resolvers, context: ({ req, res }) => ({ req, res }) });
+const apollo_options = new ApolloServer({ 
+    typeDefs, 
+    resolvers, 
+    context: ({ req, res }) => ({ req, res }),
+    validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
+ });
 apollo_options.applyMiddleware({ app, path: PREFIX, cors: corsOptions });
 
 // Start Express server

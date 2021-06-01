@@ -5,25 +5,7 @@ import { CODE } from '@local/shared';
 import { ORDER_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
-import { ADDRESS_FIELDS } from './address';
-import { USER_FIELDS } from './user';
-
-// Fields that can be exposed in a query
-export const ORDER_FIELDS = [
-    'id',
-    'status',
-    'specialInstructions',
-    'desiredDeliveryDate',
-    'expectedDeliveryDate',
-    'isDelivery',
-    'addressId',
-    'userId'
-];
-
-const relationships = [
-    ['one', 'address', TABLES.Address, ADDRESS_FIELDS, 'addressId'],
-    ['one', 'user', TABLES.User, USER_FIELDS, 'userId']
-];
+import { ORDER_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
     enum OrderStatus {
@@ -73,5 +55,35 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    OrderStatus: ORDER_STATUS
+    OrderStatus: ORDER_STATUS,
+    Query: {
+        orders: async (_, args, context, info) => {
+            // Only admins can query orders directly
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            let ids = args.ids;
+            if (args.userIds !== null) {
+                const ids_query = await db(TABLES.Order)
+                    .select('id')
+                    .whereIn('userId', args.userIds);
+                ids = ids_query.filter(q => q.id);
+            } else if (args.status !== null) {
+                const ids_query = await db(TABLES.Order)
+                    .select('id')
+                    .where('status', args.status);
+                ids = ids_query.filter(q => q.id);
+            }
+            return fullSelectQuery(info, ids, TABLES.Order, ORDER_RELATIONSHIPS);
+        }
+    },
+    Mutation: {
+        updateOrder: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        submitOrder: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        cancelOrder: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+    }
 }

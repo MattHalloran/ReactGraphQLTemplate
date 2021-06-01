@@ -6,16 +6,6 @@ import { IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQuery } from '../query';
 
-// Fields that can be exposed in a query
-export const IMAGE_FIELDS = [
-    'id',
-    'extension',
-    'alt',
-    'hash',
-    'width',
-    'height'
-];
-
 export const typeDef = gql`
     enum ImageSize {
         XS
@@ -57,5 +47,35 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    ImageSize: IMAGE_SIZE
+    ImageSize: IMAGE_SIZE,
+    Query: {
+        image: async (_, args, context, info) => {
+            // Locate image in database
+            const image = await db(TABLES.Image).select('*').where('id', args.id).first();
+            if (image === undefined) return CustomError(CODE.ErrorUnknown);
+            // If size not specified, default to medium
+            const size = args.size ?? IMAGE_SIZE.M;
+            const image_regex = `../../../images/${image.folder}/${image.fileName}-*.${image.extension}`;
+            return CustomError(CODE.NotImplemented);
+        },
+        images: async (_, args, context, info) => {
+            // Locate images in database
+            const images = await db(TABLES.Image).select('*').where('label', args.label);
+            if (images === undefined || images.length === 0) return CustomError(CODE.ErrorUnknown);
+            // If size not specified, default to medium
+            const size = args.size ?? IMAGE_SIZE.M;
+            return CustomError(CODE.NotImplemented);
+        }
+    },
+    Mutation: {
+        addImage: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        deleteImagesById: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+        deleteImagesByLabel: async (_, args, context, info) => {
+            return CustomError(CODE.NotImplemented);
+        },
+    }
 }
