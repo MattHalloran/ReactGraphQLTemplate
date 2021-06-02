@@ -4,7 +4,6 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
 
 export const typeDef = gql`
     enum ImageSize {

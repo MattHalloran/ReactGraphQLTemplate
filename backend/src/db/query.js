@@ -103,15 +103,14 @@ export const manyToManyStrings = (relName, rightClass, joinClass, rightFields, l
 }
 
 // Creates a string to select an object and its relationships
-export const fullSelectQuery = async (info, ids, className, relTuples) => {
+// className - which table to query
+// ids - which ids to query data for
+// reqTuples - 2D array describing the table's requested relationships
+export const fullSelectQuery = async (className, ids, reqTuples) => {
+    console.log('full select query', className, ids, reqTuples)
     const leftLabel = 'main';
     const rightLabels = 'abcdefghijkl';
     const joinLabels = 'mnopqrstuvwxyz'
-    // Filter out relationships that weren't requested
-    const requested_fields = getFieldNames(info);
-    console.log('rel tuples: ', relTuples)
-    const reqTuples = relTuples.filter(t => inFields(t[1], requested_fields));
-    console.log('req tuples: ', reqTuples)
     // Start the query
     let query = `select "${leftLabel}".*`;
     // Grab all substrings for relationships
@@ -163,12 +162,11 @@ export const fullSelectQuery = async (info, ids, className, relTuples) => {
     // If null one-to-one relationships were added (i.e. {'prop1': null, 'prop2': null}), 
     // convert them to null
     // If one-to-many relationships are missing, make them an empty array
-    for (let i = 0; i < relTuples.length; i++) {
-        let rel_type = relTuples[i][0];
-        let rel_field = relTuples[i][1];
+    for (let i = 0; i < reqTuples.length; i++) {
+        let rel_type = reqTuples[i][0];
+        let rel_field = reqTuples[i][1];
         for (let j = 0; j < rows.length; j++) {
             let row = rows[j];
-            console.log('yee', rel_field, isNull(row[rel_field]))
             if (isNull(row[rel_field])) {
                 if (rel_type === 'one') delete row[rel_field];
                 else row[rel_field] = [];
@@ -177,4 +175,12 @@ export const fullSelectQuery = async (info, ids, className, relTuples) => {
     }
     console.log('QUERY RESULTS: ', rows)
     return rows;
+}
+
+// Helps generate a full select query, using the GraphQL info object
+export const fullSelectQueryHelper = async (info, className, ids, relTuples) => {
+    // Filter out relationships that weren't requested
+    const requested_fields = info ? getFieldNames(info) : [];
+    const reqTuples = relTuples.filter(t => inFields(t[1], requested_fields));
+    return fullSelectQuery(className, ids, reqTuples);
 }

@@ -56,7 +56,7 @@ function Routes({
                 priority={1.0}
                 changefreq="monthly"
                 render={() => (
-                    <Page title={`Home | ${BUSINESS_NAME.Short}`}>
+                    <Page title={`Home | ${BUSINESS_NAME.Short}`} {...common}>
                         <HomePage />
                     </Page>
                 )}

@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { ORDER_STATUS } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { ORDER_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
@@ -72,7 +72,7 @@ export const resolvers = {
                     .where('status', args.status);
                 ids = ids_query.filter(q => q.id);
             }
-            return fullSelectQuery(info, ids, TABLES.Order, ORDER_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.Order, ids, ORDER_RELATIONSHIPS);
         }
     },
     Mutation: {

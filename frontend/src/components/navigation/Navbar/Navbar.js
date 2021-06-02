@@ -7,7 +7,8 @@ import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-
 import { makeStyles } from '@material-ui/core/styles';
 import { Hamburger } from './Hamburger';
 import { NavList } from './NavList';
-import { useHistory } from 'react-router';
+import { logoutMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 
 const SHOW_HAMBURGER_AT = 960;
 
@@ -91,16 +92,25 @@ function Navbar({
     cart,
     onRedirect
 }) {
-    let history = useHistory();
-    let props = { 
+    const classes = useStyles();
+    const [show_hamburger, setShowHamburger] = useState(false);
+    const [logout] = useMutation(logoutMutation);
+
+    const logoutUser = () => {
+        logout().then(() => {
+            onSessionUpdate(null);
+            onRedirect(LINKS.Home);
+        }).catch(() => {})
+    }
+
+    let child_props = { 
         session: session, 
         onSessionUpdate: onSessionUpdate,
+        logout: logoutUser,
         roles: roles, 
         cart: cart,
         onRedirect: onRedirect
     }
-    const classes = useStyles();
-    const [show_hamburger, setShowHamburger] = useState(false);
 
     useEffect(() => {
         updateWindowDimensions();
@@ -115,14 +125,14 @@ function Navbar({
         <HideOnScroll>
             <AppBar>
                 <Toolbar>
-                    <div className={classes.navLogoContainer} onClick={() => history.push(LINKS.Home)}>
+                    <div className={classes.navLogoContainer} onClick={() => onRedirect(LINKS.Home)}>
                         <div className={classes.navLogoDiv}>
                             <img src={Logo} alt={`${BUSINESS_NAME.Short} Logo`} className={classes.navLogo} />
                         </div>
                         <Typography className={classes.navName} variant="h6" noWrap>{BUSINESS_NAME.Short}</Typography>
                     </div>
                     <div className={classes.toRight}>
-                        {show_hamburger ? <Hamburger {...props} /> : <NavList {...props} />}
+                        {show_hamburger ? <Hamburger {...child_props} /> : <NavList {...child_props} />}
                     </div>
                 </Toolbar>
             </AppBar>

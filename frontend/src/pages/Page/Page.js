@@ -1,17 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { LINKS } from 'utils';
+import { loginMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 
 const Page = ({
     title,
+    onSessionUpdate,
     redirect = LINKS.Home,
     onRedirect,
     roles,
     authRole = null,
     children
 }) => {
+    const [sessionChecked, setSessionChecked] = useState(false);
+    const [login] = useMutation(loginMutation);
 
-    console.log('RENDERING PAGE')
+    useEffect(() => {
+        login().then((response) => {
+            onSessionUpdate(response.data.login);
+            setSessionChecked(true);
+        }).catch((response) => {console.error(response); setSessionChecked(true)})
+    }, [])
 
     useEffect(() => {
         document.title = title || "";
@@ -21,7 +31,7 @@ const Page = ({
     if (authRole !== null) {
         let role_titles = roles?.map(r => r.title);
         const valid_role = (role_titles?.indexOf(authRole) >= 0);
-        if (!valid_role) onRedirect(redirect);
+        if (!valid_role && sessionChecked) onRedirect(redirect);
         return valid_role ? children : null;
     }
 
@@ -30,6 +40,7 @@ const Page = ({
 
 Page.propTypes = {
     title: PropTypes.string,
+    onSessionUpdate: PropTypes.func.isRequired,
     redirect: PropTypes.string,
     roles: PropTypes.array,
     authRole: PropTypes.string,

@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 function NavList({
     session,
-    onSessionUpdate,
+    logout,
     roles,
     cart,
     onRedirect
@@ -58,7 +58,7 @@ function NavList({
         let cart_index = nav_options.length - 1;
         let cart_option = nav_options[cart_index];
         // Replace cart option with log out option
-        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, () => onSessionUpdate(null)]);
+        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, logout]);
         cart_button = (
             <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => onRedirect(LINKS.Cart)}>
                 <Badge badgeContent={cart_option[5]} color="error">
@@ -127,6 +127,7 @@ function NavList({
 
 NavList.propTypes = {
     session: PropTypes.object,
+    logout: PropTypes.func.isRequired,
     roles: PropTypes.array,
     cart: PropTypes.object,
 }

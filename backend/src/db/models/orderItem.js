@@ -3,7 +3,6 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
 
 export const typeDef = gql`
     type OrderItem {

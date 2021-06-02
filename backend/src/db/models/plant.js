@@ -3,7 +3,7 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { SKU_FIELDS } from './sku';
 import { PLANT_RELATIONSHIPS } from '../relationships';
 
@@ -50,7 +50,7 @@ export const resolvers = {
         plants: async (_, args, context, info) => {
             // Only admins can query plants directly (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQuery(info, args.ids, TABLES.Plant, PLANT_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.Plant, args.ids, PLANT_RELATIONSHIPS);
         }
     },
     Mutation: {

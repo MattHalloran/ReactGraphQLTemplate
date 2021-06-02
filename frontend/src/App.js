@@ -6,17 +6,7 @@ import {
     Navbar,
     Snack
 } from 'components';
-import {
-    ApolloClient,
-    InMemoryCache,
-    ApolloProvider,
-    HttpLink,
-    from
-} from '@apollo/client';
-import { onError } from '@apollo/client/link/error';
-import { COOKIE, SESSION_DAYS, URL_BASE } from '@local/shared';
 import { PUBS, PubSub, lightTheme, darkTheme } from 'utils';
-import Cookies from 'js-cookie';
 import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
@@ -24,26 +14,6 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import { useHistory } from 'react-router';
-
-// GraphQL Setup
-const errorLink = onError(({ graphqlErrors, networkError }) => {
-    if (graphqlErrors) {
-        graphqlErrors.map(({ message, location, path }) => {
-            alert(`GraphQL error: ${message}`);
-        });
-    }
-})
-const link = from([
-    errorLink,
-    new HttpLink({
-        uri: URL_BASE,
-        credentials: 'include',
-    })
-])
-const client = new ApolloClient({
-    cache: new InMemoryCache(),
-    link:link
-})
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
@@ -83,29 +53,16 @@ export function App() {
     const classes = useStyles();
     // Session cookie should automatically expire in time determined by backend,
     // so no need to validate session on first load
-    const [session, setSession] = useState(() => {
-        try {
-            return JSON.parse(Cookies.get(COOKIE.Session));
-        } catch {
-            Cookies.set(COOKIE.Session, null);
-            return null;
-        }
-    });
+    const [session, setSession] = useState(null);
     const [theme, setTheme] = useState(lightTheme);
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
-        console.log('SESSION UPDATED!!!!!!!')
-        console.log(session);
-        if (session !== null) {
-            Cookies.set(COOKIE.Session, JSON.stringify(session), { expires: SESSION_DAYS })
-            setTheme(session?.theme === 'dark' ? darkTheme : lightTheme);
-            setCart(session?.orders?.length > 0 ? session.orders[session.orders.length-1] : null);
-        } else {
-            Cookies.set(COOKIE.Session, null);
-        }
+        console.log('SESSION UPDATED!!!!!!!', session);
+        setTheme(session?.theme === 'dark' ? darkTheme : lightTheme);
+        setCart(session?.orders?.length > 0 ? session.orders[session.orders.length - 1] : null);
     }, [session])
 
     const handlers = {
@@ -127,43 +84,41 @@ export function App() {
     const redirect = (link) => history.push(link);
 
     return (
-        <ApolloProvider client={client}>
-            <StyledEngineProvider injectFirst>
-                <div id="App">
-                    <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                    <CssBaseline />
-                    {/* Other theming (default TextField variants, button text styling, etc) */}
-                    <ThemeProvider theme={theme}>
-                        <main id="page-container" className={classes.pageContainer}>
-                            <div id="content-wrap" className={classes.contentWrap}>
-                                <Navbar 
-                                    session={session} 
-                                    onSessionUpdate={setSession} 
-                                    roles={session?.roles} 
-                                    cart={cart} 
-                                    onRedirect={redirect}
-                                />
-                                {loading ?
-                                    <div className={classes.spinner}>
-                                        <CircularProgress size={100} />
-                                    </div>
-                                    : null}
-                                <AlertDialog />
-                                <Snack />
-                                <Routes 
-                                    session={session} 
-                                    onSessionUpdate={setSession} 
-                                    roles={session?.roles} 
-                                    cart={cart} 
-                                    onRedirect={redirect}
-                                />
-                            </div>
-                            <IconNav session={session} roles={session?.roles} cart={cart} />
-                            <Footer session={session} />
-                        </main>
-                    </ThemeProvider>
-                </div>
-            </StyledEngineProvider>
-        </ApolloProvider>
+        <StyledEngineProvider injectFirst>
+            <div id="App">
+                <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+                <CssBaseline />
+                {/* Other theming (default TextField variants, button text styling, etc) */}
+                <ThemeProvider theme={theme}>
+                    <main id="page-container" className={classes.pageContainer}>
+                        <div id="content-wrap" className={classes.contentWrap}>
+                            <Navbar
+                                session={session}
+                                onSessionUpdate={setSession}
+                                roles={session?.roles}
+                                cart={cart}
+                                onRedirect={redirect}
+                            />
+                            {loading ?
+                                <div className={classes.spinner}>
+                                    <CircularProgress size={100} />
+                                </div>
+                                : null}
+                            <AlertDialog />
+                            <Snack />
+                            <Routes
+                                session={session}
+                                onSessionUpdate={setSession}
+                                roles={session?.roles}
+                                cart={cart}
+                                onRedirect={redirect}
+                            />
+                        </div>
+                        <IconNav session={session} roles={session?.roles} cart={cart} />
+                        <Footer session={session} />
+                    </main>
+                </ThemeProvider>
+            </div>
+        </StyledEngineProvider>
     );
 }

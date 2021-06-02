@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { TASK_STATUS } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 
 export const typeDef = gql`
     enum TaskStatus {
@@ -42,7 +42,7 @@ export const resolvers = {
                     .where('status', args.status);
                 ids = ids_query.filter(q => q.id);
             }
-            return fullSelectQuery(info, ids, TABLES.Task, []);
+            return fullSelectQueryHelper(null, TABLES.Task, ids, []);
         }
     }
 }

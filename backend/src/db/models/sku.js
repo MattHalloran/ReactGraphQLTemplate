@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { SKU_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
@@ -57,7 +57,7 @@ export const resolvers = {
     SkuStatus: SKU_STATUS,
     Query: {
         skus: async (_, args, context, info) => {
-            return fullSelectQuery(info, args.ids, TABLES.Sku, SKU_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.Sku, args.ids, SKU_RELATIONSHIPS);
         }
     },
     Mutation: {

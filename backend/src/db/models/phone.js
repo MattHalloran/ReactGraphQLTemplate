@@ -3,7 +3,7 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { PHONE_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
@@ -50,7 +50,7 @@ export const resolvers = {
         phones: async (_, args, context, info) => {
             // Only admins can query phones
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQuery(info, args.ids, TABLES.Phone, PHONE_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.Phone, args.ids, PHONE_RELATIONSHIPS);
         }
     },
     Mutation: {

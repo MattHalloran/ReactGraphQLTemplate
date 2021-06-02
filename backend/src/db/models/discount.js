@@ -3,7 +3,7 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { DISCOUNT_RELATIONSHIPS } from '../relationships';
 
 export const typeDef = gql`
@@ -49,7 +49,7 @@ export const resolvers = {
         discounts: async (_, args, context, info) => {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQuery(info, args.ids, TABLES.Discount, DISCOUNT_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.Discount, args.ids, DISCOUNT_RELATIONSHIPS);
         }
     },
     Mutation: {

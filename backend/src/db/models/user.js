@@ -2,12 +2,12 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
-import { CODE } from '@local/shared';
+import { CODE, COOKIE } from '@local/shared';
 import { ACCOUNT_STATUS, SESSION_MILLI } from '@local/shared';
 import { CustomError } from '../error';
-import { generateToken } from '../../auth';
+import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
-import { fullSelectQuery } from '../query';
+import { fullSelectQueryHelper } from '../query';
 import { BUSINESS_FIELDS } from './business';
 import { USER_RELATIONSHIPS } from '../relationships';
 
@@ -48,9 +48,11 @@ export const typeDef = gql`
 
     extend type Mutation {
         login(
-            email: String!
-            password: String!
+            email: String
+            password: String,
+            verificationCode: String
         ): User!
+        logout: Boolean
         # Creates a business, then creates a user belonging to that business
         signUp(
             firstName: String!
@@ -104,11 +106,16 @@ export const resolvers = {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             console.log('in users query', BUSINESS_FIELDS)
-            return fullSelectQuery(info, args.ids, TABLES.User, USER_RELATIONSHIPS);
+            return fullSelectQueryHelper(info, TABLES.User, args.ids, USER_RELATIONSHIPS);
         }
     },
     Mutation: {
         login: async (_, args, context, info) => {
+            // If username and password wasn't passed, then use the session cookie data to validate
+            if (args.username === undefined && args.password === undefined) {
+                if (context.req.roles.length > 0) return (await fullSelectQueryHelper(info, TABLES.User, [context.req.userId], USER_RELATIONSHIPS))[0];
+                return new CustomError(CODE.BadCredentials);
+            }
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
             if (email === undefined) return new CustomError(CODE.BadCredentials);
@@ -148,13 +155,8 @@ export const resolvers = {
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                const cookie = { user: user };
-                context.res.cookie('session', cookie, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    maxAge: SESSION_MILLI
-                });
-                return (await fullSelectQuery(info, [user.id], TABLES.User, USER_RELATIONSHIPS))[0];
+                await setCookie(context.res, user.id, token);
+                return (await fullSelectQueryHelper(info, TABLES.User, [user.id], USER_RELATIONSHIPS))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = user.loginAttempts + 1;
@@ -170,6 +172,12 @@ export const resolvers = {
                 })
                 return new CustomError(CODE.BadCredentials);
             }
+        },
+        logout: async (_, args, context, info) => {
+            context.res.clearCookie(COOKIE.Session);
+            await db(TABLES.User).where('id', context.req.userId).update({
+                sessionToken: null
+            })
         },
         signUp: async (_, args, context, info) => {
             return CustomError(CODE.NotImplemented);

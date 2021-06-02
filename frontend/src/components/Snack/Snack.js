@@ -4,6 +4,18 @@ import { Close as CloseIcon } from '@material-ui/icons';
 import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/core/styles';
 
+const DEFAULT_STATE = {
+    message: null,
+    severity: 'default',
+    buttonText: null,
+    buttonClicked: null,
+    autoHideDuration: 5000,
+    anchorOrigin: {
+        vertical: 'bottom',
+        horizontal: 'left',
+    },
+};
+
 const useStyles = makeStyles((theme) => ({
     default: {
         background: theme.palette.primary.light,
@@ -24,18 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Snack() {
     const classes = useStyles();
-    const default_state = {
-        message: null,
-        severity: 'default',
-        buttonText: null,
-        buttonClicked: null,
-        autoHideDuration: 5000,
-        anchorOrigin: {
-            vertical: 'bottom',
-            horizontal: 'left',
-        },
-    };
-    const [state, setState] = useState(default_state)
+    const [state, setState] = useState(DEFAULT_STATE)
 
     function getSnackClass(severity) {
         if (severity === 'error') return classes.error;
@@ -45,9 +46,9 @@ function Snack() {
     let open = state.message !== null;
 
     useEffect(() => {
-        let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...default_state, ...o }));
+        let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...DEFAULT_STATE, ...o }));
         return () => PubSub.unsubscribe(snackSub);
-    }, [default_state])
+    }, [])
 
     return (
         <Snackbar
@@ -59,14 +60,14 @@ function Snack() {
             anchorOrigin={state.anchorOrigin}
             open={open}
             autoHideDuration={state.autoHideDuration}
-            onClose={() => setState(default_state)}
+            onClose={() => setState(DEFAULT_STATE)}
             message={state.message}
             action={
                 <React.Fragment>
                     {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>
                         {state.buttonText}
                     </Button> : null}
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(default_state)}>
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(DEFAULT_STATE)}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
                 </React.Fragment>

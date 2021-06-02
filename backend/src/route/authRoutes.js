@@ -41,17 +41,14 @@ router.post('/register', async (req, res) => {
         userId: user.id
     })
     // Generate session token
-    const session = auth.generateToken(user.id, user.businessId);
+    const token = auth.generateToken(user.id, user.businessId);
     user = await db(TABLES.User).where('id', user.id).update({
-        sessionToken: session
+        sessionToken: token
     }).returning('*');
-    const cookie = {user: user};
-    res.cookie('session', cookie, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: SESSION_MILLI
-    })
-    customerNotifyAdmin(user.fullName())
+    await auth.setCookie(res, user.id, token);
+    // Notify admin of new customer via email
+    customerNotifyAdmin(`${user.firstName} ${user.lastName}`);
+    // Send email to new customer, so they can verify their email address
     sendVerificationLink(req.body.emails[0].email_address, user.id);
 })
 

@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Hamburger({
     session,
-    onSessionUpdate,
+    logout,
     roles,
     cart,
     onRedirect
@@ -122,7 +122,7 @@ function Hamburger({
 
     let user_actions = getUserActions(session, roles, cart);
     if (session !== null) {
-        user_actions.push(['Log Out', 'logout', LINKS.Home, () => onSessionUpdate(null), ExitToAppIcon]);
+        user_actions.push(['Log Out', 'logout', LINKS.Home, logout, ExitToAppIcon]);
     }
 
     return (
@@ -180,6 +180,7 @@ function Hamburger({
 
 Hamburger.propTypes = {
     session: PropTypes.object,
+    logout: PropTypes.func.isRequired,
     roles: PropTypes.array,
     cart: PropTypes.object,
 }
