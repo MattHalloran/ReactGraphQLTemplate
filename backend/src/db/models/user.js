@@ -1,15 +1,15 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
 import { CODE, COOKIE } from '@local/shared';
-import { ACCOUNT_STATUS, SESSION_MILLI } from '@local/shared';
+import { ACCOUNT_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
 import { fullSelectQueryHelper } from '../query';
 import { BUSINESS_FIELDS } from './business';
-import { USER_RELATIONSHIPS } from '../relationships';
+import { UserModel as Model } from '../relationships';
+import { TABLES } from '../tables';
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -106,25 +106,25 @@ export const resolvers = {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             console.log('in users query', BUSINESS_FIELDS)
-            return fullSelectQueryHelper(info, TABLES.User, args.ids, USER_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
         login: async (_, args, context, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (context.req.roles.length > 0) return (await fullSelectQueryHelper(info, TABLES.User, [context.req.userId], USER_RELATIONSHIPS))[0];
+                if (context.req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [context.req.userId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
             if (email === undefined) return new CustomError(CODE.BadCredentials);
             // Find user
-            let user = await db(TABLES.User).where('id', email.userId).first();
+            let user = await db(Model.name).where('id', email.userId).first();
             if (user === undefined) return new CustomError(CODE.ErrorUnknown);
             // Validate verification code, if supplied
             if (args.verification_code === user.id && user.emailVerified === false) {
-                user = await db(TABLES.User).where('id', user.id).update({
+                user = await db(Model.name).where('id', user.id).update({
                     status: ACCOUNT_STATUS.Unlocked,
                     emailVerified: true
                 }).returning('*')[0];
@@ -134,7 +134,7 @@ export const resolvers = {
             const last_login = moment(user.lastLoginAttempt, DATE_FORMAT).valueOf();
             console.log('LAST LOGIN', user.lastLoginAttempt, last_login);
             if (!unable_to_reset.includes(user.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
-                user = await db(TABLES.User).where('id', user.id).update({
+                user = await db(Model.name).where('id', user.id).update({
                     loginAttempts: 0
                 }).returning('*').then(rows => rows[0]);
             }
@@ -149,14 +149,14 @@ export const resolvers = {
             const validPassword = bcrypt.compareSync(args.password, user.password);
             if (validPassword) {
                 const token = generateToken(user.id, user.businessId);
-                await db(TABLES.User).where('id', user.id).update({
+                await db(Model.name).where('id', user.id).update({
                     sessionToken: token,
                     loginAttempts: 0,
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
                 await setCookie(context.res, user.id, token);
-                return (await fullSelectQueryHelper(info, TABLES.User, [user.id], USER_RELATIONSHIPS))[0];
+                return (await fullSelectQueryHelper(Model, info, [user.id]))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = user.loginAttempts + 1;
@@ -165,7 +165,7 @@ export const resolvers = {
                 } else if (login_attempts > LOGIN_ATTEMPTS_TO_HARD_LOCKOUT) {
                     new_status = ACCOUNT_STATUS.HardLock;
                 }
-                await db(TABLES.User).where('id', user.id).update({
+                await db(Model.name).where('id', user.id).update({
                     status: new_status,
                     loginAttempts: login_attempts,
                     lastLoginAttempt: moment().format(DATE_FORMAT)
@@ -175,7 +175,7 @@ export const resolvers = {
         },
         logout: async (_, args, context, info) => {
             context.res.clearCookie(COOKIE.Session);
-            await db(TABLES.User).where('id', context.req.userId).update({
+            await db(Model.name).where('id', context.req.userId).update({
                 sessionToken: null
             })
         },

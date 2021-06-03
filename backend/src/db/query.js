@@ -38,6 +38,14 @@
 import getFieldNames from 'graphql-list-fields';
 import { db } from './db';
 
+export class Label {
+    constructor(right, join, left) {
+        this.right = right;
+        this.join = join;
+        this.left = left;
+    }
+}
+
 // Returns true if the specified relationship was requested
 export const inFields = (field, requested_fields) => requested_fields.some(f => f.includes(`${field}.`));
 
@@ -51,54 +59,61 @@ export const isNull = (object) => {
 }
 
 // Creates a string representation of a map of the fields in a class
-export const fieldsToString = (classLabel, fields) => {
-    console.log('in fields to string', fields)
-    return fields.map(f => `'${f}', "${classLabel}"."${f}"`).join(', ')
+export const fieldsToString = (label, fields) => {
+    console.log('fields tos tring', fields)
+    return fields.map(f => `'${f}', "${label}"."${f}"`).join(', ')
 }
 
 // Creates a string for an array_agg call (i.e. one-to-many relationship)
-// ex: ('class', 'c', ['id', 'name']) => `array_agg(json_build_object('id', c.id, 'name', c.name)) as class`
-export const createArrayAgg = (relName, classLabel, fields) => {
-    console.log('in array agg')
+// ex: `array_agg(json_build_object('id', c.id, 'name', c.name)) as class`
+export const createArrayAgg = (rel, label) => {
+    console.log('in array agg', rel.name, rel.exposedFields())
     return ` array_agg(json_build_object(
-        ${fieldsToString(classLabel, fields)}
-    )) as ${relName}`;
+        ${fieldsToString(label, rel.exposedFields())}
+    )) as ${rel.name}`;
 }
 
 // Creates a string for a json_build_object call (i.e. one-to-one relationship)
-// ex: ('class', 'c', ['id', 'name']) => `json_build_object('id', c.id, 'name', c.name) as class`
-export const createJsonBuildObject = (relName, classLabel, fields) => {
-    console.log('in json build')
+// ex: `json_build_object('id', c.id, 'name', c.name) as class`
+export const createJsonBuildObject = (rel, label) => {
     return ` json_build_object(
-        ${fieldsToString(classLabel, fields)}
-    ) as ${relName}`;
+        ${fieldsToString(label, rel.exposedFields())}
+    ) as ${rel.name}`;
 }
 
 // Returns both the array_agg and left join required for querying a one-to-one relationship
-export const oneToOneStrings = (relName, rightClass, rightFields, rightForeign, rightLabel, leftLabel) => {
-    console.log('one to one', relName, rightFields)
+// rel - The relationship object
+// className - The relationship's class name
+// labels - [relationship's class label, main class label]
+export const oneToOneStrings = (rel, labels) => {
     return [
-        createJsonBuildObject(relName, rightLabel, rightFields), 
-        ` left join "${rightClass}" "${rightLabel}" on "${leftLabel}"."${rightForeign}" = "${rightLabel}"."id"`
+        createJsonBuildObject(rel, labels.right), 
+        ` left join "${rel.classNames[0]}" "${labels.right}" on "${labels.left}"."${rel.ids[0]}" = "${labels.right}"."id"`
     ];
 }
 
 // Returns both the array_agg and left join required for querying a one-to-many relationship
-export const oneToManyStrings = (relName, rightClass, rightFields, rightForeign, rightLabel, leftLabel) => {
-    console.log('one to many', relName)
+// rel - The relationship object
+// className - The relationship's class name
+// labels - [relationship's class label, main class label]
+export const oneToManyStrings = (rel, labels) => {
+    console.log('one to many', rel.name, rel.exposedFields())
     return [
-        createArrayAgg(relName, rightLabel, rightFields), 
-        ` left join "${rightClass}" "${rightLabel}" on "${rightLabel}"."${rightForeign}" = "${leftLabel}"."id"`
+        createArrayAgg(rel, labels.right), 
+        ` left join "${rel.classNames[0]}" "${labels.right}" on "${labels.right}"."${rel.ids[0]}" = "${labels.left}"."id"`
     ];
 }
 
 // Returns both the array_agg and left joins required for querying a many-to-many relationship
-export const manyToManyStrings = (relName, rightClass, joinClass, rightFields, leftJoinForeign, rightJoinForeign, rightLabel, leftLabel, joinLabel) => {
-    console.log('many to many', relName)
+// rel - The relationship object
+// classNames - [relationship's class name, joining class name]
+// labels - [relationship's class label, joining class label, main class label]
+export const manyToManyStrings = (rel, labels) => {
+    console.log('many to many', rel.name)
     return [
-        createArrayAgg(relName, rightLabel, rightFields), 
-        ` left join "${joinClass}" "${joinLabel}" on "${joinLabel}"."${leftJoinForeign}" = "${leftLabel}"."id"
-          left join "${rightClass}" "${rightLabel}" on "${joinLabel}"."${rightJoinForeign}" = "${rightLabel}"."id"`
+        createArrayAgg(rel, labels.right), 
+        ` left join "${rel.classNames[1]}" "${labels.join}" on "${labels.join}"."${rel.ids[0]}" = "${labels.left}"."id"
+          left join "${rel.classNames[0]}" "${labels.right}" on "${labels.join}"."${rel.ids[1]}" = "${labels.right}"."id"`
     ];
 }
 
@@ -106,47 +121,45 @@ export const manyToManyStrings = (relName, rightClass, joinClass, rightFields, l
 // className - which table to query
 // ids - which ids to query data for
 // reqTuples - 2D array describing the table's requested relationships
-export const fullSelectQuery = async (className, ids, reqTuples) => {
-    console.log('full select query', className, ids, reqTuples)
+export const fullSelectQuery = async (model, reqFields, ids) => {
+    console.log('full select query', model);
     const leftLabel = 'main';
     const rightLabels = 'abcdefghijkl';
-    const joinLabels = 'mnopqrstuvwxyz'
+    const joinLabels = 'mnopqrstuvwxyz';
+    const reqRels = model.relationships.filter(r => inFields(r.name, reqFields));
     // Start the query
     let query = `select "${leftLabel}".*`;
     // Grab all substrings for relationships
     let reqStrings = [];
     let groupBys = [];
-    for(let i = 0; i < reqTuples.length; i++) {
-        let curr = [...reqTuples[i]];
-        let type = curr.shift();
-        let rightLabel = rightLabels[i];
-        let args = [...curr, rightLabel, leftLabel];
-        if (type === 'one') {
-            console.log('pushing one to one string', ...args)
+    for(let i = 0; i < reqRels.length; i++) {
+        let curr =reqRels[i];
+        let args = [curr, new Label(rightLabels[i], joinLabels[i], leftLabel)]
+        if (curr.type === 'one') {
             reqStrings.push(oneToOneStrings(...args));
-            groupBys.push(rightLabel);
-        } else if (type === 'many') {
+            groupBys.push(rightLabels[i]);
+        } else if (curr.type === 'many') {
             reqStrings.push(oneToManyStrings(...args));
-            groupBys.push(rightLabel);
-        } else if (type === 'many-many') {
-            reqStrings.push(manyToManyStrings(...args, joinLabels[i]))
+            groupBys.push(rightLabels[i]);
+        } else if (curr.type === 'many-many') {
+            reqStrings.push(manyToManyStrings(...args))
         } else throw Error('Invalid type passed into query builder. Expected, one, many, or many-many');
     }
     // Append arrays and jsons to query
     for (let i = 0; i < reqStrings.length; i++) {
         query += `,  ${reqStrings[i][0]}`;
     }
-    query += ` from "${className}" "${leftLabel}"`;
+    query += ` from "${model.name}" "${leftLabel}"`;
     // Append joins to query
     for (let i = 0; i < reqStrings.length; i++) {
         query += reqStrings[i][1];
     }
     // Append where, if specific ids were selected
     if (ids !== null && ids !== undefined) {
-        console.log('we made it this far')
-        const id_string = ids.map(i => `'${i}'`).join(', ')
-        console.log('we made it even further')
-        query += ` where "${leftLabel}"."id" in (${id_string})`
+        console.log('yee', ids)
+        const id_string = ids.map(i => `'${i}'`).join(', ');
+        console.log('yye', id_string)
+        query += ` where "${leftLabel}"."id" in (${id_string})`;
     }
     // Append group bys
     // Note: the only columns in group by should be the parent id, and all array_agg ids
@@ -162,14 +175,13 @@ export const fullSelectQuery = async (className, ids, reqTuples) => {
     // If null one-to-one relationships were added (i.e. {'prop1': null, 'prop2': null}), 
     // convert them to null
     // If one-to-many relationships are missing, make them an empty array
-    for (let i = 0; i < reqTuples.length; i++) {
-        let rel_type = reqTuples[i][0];
-        let rel_field = reqTuples[i][1];
+    for (let i = 0; i < reqRels.length; i++) {
+        let curr = reqRels[i];
         for (let j = 0; j < rows.length; j++) {
             let row = rows[j];
-            if (isNull(row[rel_field])) {
-                if (rel_type === 'one') delete row[rel_field];
-                else row[rel_field] = [];
+            if (isNull(row[curr.name])) {
+                if (curr.type === 'one') delete row[curr.name];
+                else row[curr.name] = [];
             }
         }
     }
@@ -178,9 +190,7 @@ export const fullSelectQuery = async (className, ids, reqTuples) => {
 }
 
 // Helps generate a full select query, using the GraphQL info object
-export const fullSelectQueryHelper = async (info, className, ids, relTuples) => {
-    // Filter out relationships that weren't requested
+export const fullSelectQueryHelper = async (model, info, ids) => {
     const requested_fields = info ? getFieldNames(info) : [];
-    const reqTuples = relTuples.filter(t => inFields(t[1], requested_fields));
-    return fullSelectQuery(className, ids, reqTuples);
+    return fullSelectQuery(model, requested_fields, ids);
 }

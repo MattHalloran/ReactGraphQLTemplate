@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { PHONE_RELATIONSHIPS } from '../relationships';
+import { PhoneModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Phone {
@@ -50,7 +50,7 @@ export const resolvers = {
         phones: async (_, args, context, info) => {
             // Only admins can query phones
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Phone, args.ids, PHONE_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

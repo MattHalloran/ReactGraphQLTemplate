@@ -1,11 +1,10 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { SKU_RELATIONSHIPS } from '../relationships';
+import { SkuModel as Model } from '../relationships';
 
 export const typeDef = gql`
     enum SkuStatus {
@@ -57,7 +56,7 @@ export const resolvers = {
     SkuStatus: SKU_STATUS,
     Query: {
         skus: async (_, args, context, info) => {
-            return fullSelectQueryHelper(info, TABLES.Sku, args.ids, SKU_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

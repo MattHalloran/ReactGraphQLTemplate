@@ -1,134 +1,123 @@
+import { TABLES } from "./tables";
+
 // Fields that can be exposed in a query
-
-export const ADDRESS_FIELDS = [
-    'id',
-    'tag',
-    'name',
-    'country',
-    'administrativeArea',
-    'subAdministrativeArea',
-    'locality',
-    'postalCode',
-    'premise',
-    'business_id'
-];
-
-export const BUSINESS_FIELDS = [
-    'id',
-    'name',
-    'subscribedToNewsletters'
-];
-
-export const DISCOUNT_FIELDS = [
-    'id',
-    'discount',
-    'title',
-    'comment',
-    'terms'
-];
-
-export const EMAIL_FIELDS = [
-    'id',
-    'emailAddress',
-    'receivesDeliveryUpdates',
-    'userId',
-    'businessId'
-];
-
-export const FEEDBACK_FIELDS = [
-    'id',
-    'text',
-    'userId'
-];
-
-export const IMAGE_FIELDS = [
-    'id',
-    'extension',
-    'alt',
-    'hash',
-    'width',
-    'height'
-];
-
-export const ORDER_FIELDS = [
-    'id',
-    'status',
-    'specialInstructions',
-    'desiredDeliveryDate',
-    'expectedDeliveryDate',
-    'isDelivery',
-    'addressId',
-    'userId'
-];
-
-export const ORDER_ITEM_FIELDS = [
-    'id',
-    'quantity',
-    'orderId',
-    'skuId'
-];
-
-export const PHONE_FIELDS = [
-    'id',
-    'number',
-    'countryCode',
-    'extension',
-    'receivesDeliveryUpdates',
-    'userId',
-    'businessId'
-];
-
-export const PLANT_FIELDS = [
-    'id',
-    'latinName',
-    'textData',
-    'imageData'
-];
-
-export const ROLE_FIELDS = [
-    'id',
-    'title',
-    'description'
-];
-
-export const SKU_FIELDS = [
-    'id',
-    'sku',
-    'isDiscountable',
-    'size',
-    'note',
-    'availability',
-    'price',
-    'status',
-    'plantId'
-];
-
-export const TASK_FIELDS = [
-    'id',
-    'taskId',
-    'name',
-    'status',
-    'description',
-    'result',
-    'resultCode'
-];
-
-export const TRAIT_FIELDS = [
-    'id',
-    'name',
-    'value'
-];
-
-export const USER_FIELDS = [
-    'id',
-    'firstName',
-    'lastName',
-    'pronouns',
-    'theme',
-    'lastLoginAttempt',
-    'sessionToken',
-    'accountApproved',
-    'emailVerified',
-    'status',
-    'businessId'
-]
+export const FIELDS = {
+    [TABLES.Address]: [
+        'id',
+        'tag',
+        'name',
+        'country',
+        'administrativeArea',
+        'subAdministrativeArea',
+        'locality',
+        'postalCode',
+        'premise',
+        'business_id'
+    ],
+    [TABLES.Business]: [
+        'id',
+        'name',
+        'subscribedToNewsletters'
+    ],
+    [TABLES.Discount]: [
+        'id',
+        'discount',
+        'title',
+        'comment',
+        'terms'
+    ],
+    [TABLES.Email]: [
+        'id',
+        'emailAddress',
+        'receivesDeliveryUpdates',
+        'userId',
+        'businessId'
+    ],
+    [TABLES.Feedback]: [
+        'id',
+        'text',
+        'userId'
+    ],
+    [TABLES.Image]: [
+        'id',
+        'extension',
+        'alt',
+        'hash',
+        'width',
+        'height'
+    ],
+    [TABLES.Order]: [
+        'id',
+        'status',
+        'specialInstructions',
+        'desiredDeliveryDate',
+        'expectedDeliveryDate',
+        'isDelivery',
+        'addressId',
+        'userId'
+    ],
+    [TABLES.OrderItem]: [
+        'id',
+        'quantity',
+        'orderId',
+        'skuId'
+    ],
+    [TABLES.Phone]: [
+        'id',
+        'number',
+        'countryCode',
+        'extension',
+        'receivesDeliveryUpdates',
+        'userId',
+        'businessId'
+    ],
+    [TABLES.Plant]: [
+        'id',
+        'latinName',
+        'textData',
+        'imageData'
+    ],
+    [TABLES.Role]: [
+        'id',
+        'title',
+        'description'
+    ],
+    [TABLES.Sku]: [
+        'id',
+        'sku',
+        'isDiscountable',
+        'size',
+        'note',
+        'availability',
+        'price',
+        'status',
+        'plantId'
+    ],
+    [TABLES.Task]: [
+        'id',
+        'taskId',
+        'name',
+        'status',
+        'description',
+        'result',
+        'resultCode'
+    ],
+    [TABLES.Trait]: [
+        'id',
+        'name',
+        'value'
+    ],
+    [TABLES.User]: [
+        'id',
+        'firstName',
+        'lastName',
+        'pronouns',
+        'theme',
+        'lastLoginAttempt',
+        'sessionToken',
+        'accountApproved',
+        'emailVerified',
+        'status',
+        'businessId'
+    ]
+}

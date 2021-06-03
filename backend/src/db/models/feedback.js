@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { FEEDBACK_RELATIONSHIPS } from '../relationships';
+import { FeedbackModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Feedback {
@@ -34,7 +33,7 @@ export const resolvers = {
         feedbacks: async (_, args, context, info) => {
             // Only admins can query feedbacks
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Feedback, args.ids, FEEDBACK_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

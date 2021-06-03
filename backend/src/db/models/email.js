@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { EMAIL_RELATIONSHIPS } from '../relationships';
+import { EmailModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Email {
@@ -40,7 +39,7 @@ export const resolvers = {
         emails: async (_, args, context, info) => {
             // Only admins can query emails
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Email, args.ids, EMAIL_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

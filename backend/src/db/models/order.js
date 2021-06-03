@@ -5,7 +5,7 @@ import { CODE } from '@local/shared';
 import { ORDER_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { ORDER_RELATIONSHIPS } from '../relationships';
+import { OrderModel as Model } from '../relationships';
 
 export const typeDef = gql`
     enum OrderStatus {
@@ -72,7 +72,7 @@ export const resolvers = {
                     .where('status', args.status);
                 ids = ids_query.filter(q => q.id);
             }
-            return fullSelectQueryHelper(info, TABLES.Order, ids, ORDER_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, ids);
         }
     },
     Mutation: {

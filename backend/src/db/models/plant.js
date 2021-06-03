@@ -1,11 +1,10 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
 import { SKU_FIELDS } from './sku';
-import { PLANT_RELATIONSHIPS } from '../relationships';
+import { PlantModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Plant {
@@ -50,7 +49,7 @@ export const resolvers = {
         plants: async (_, args, context, info) => {
             // Only admins can query plants directly (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Plant, args.ids, PLANT_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

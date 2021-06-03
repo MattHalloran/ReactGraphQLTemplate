@@ -3,7 +3,7 @@ import { CODE, COOKIE } from '@local/shared';
 import { TABLES } from './db/tables';
 import { SESSION_MILLI } from '@local/shared';
 import { db } from './db/db';
-import { USER_RELATIONSHIPS } from './db/relationships';
+import { UserModel } from './db/relationships';
 import { fullSelectQuery } from './db/query';
 
 // Return array of user roles (ex: ['admin', 'customer'])
@@ -62,8 +62,7 @@ export function generateToken(userId, businessId) {
 // Sets a session cookie
 export async function setCookie(res, user_id, token) {
     // Request roles and orders when querying for user
-    const relationships = [USER_RELATIONSHIPS[3], USER_RELATIONSHIPS[4]];
-    const user = (await fullSelectQuery(TABLES.User, [user_id], relationships))[0];
+    const user = (await fullSelectQuery(UserModel, ['roles', 'orders'], [user_id]))[0];
     const cookie = {
         id: user_id,
         token: token,

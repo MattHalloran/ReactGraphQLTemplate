@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { ADDRESS_RELATIONSHIPS } from '../relationships';
+import { AddressModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Address {
@@ -62,7 +61,7 @@ export const resolvers = {
         addresses: async (_, args, context, info) => {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Address, args.ids, ADDRESS_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
@@ -70,7 +69,7 @@ export const resolvers = {
             // Only admins can add addresses for other businesses
             if(!context.req.isAdmin || (context.token.businessId !== args.businessId)) return context.res.sendStatus(CODE.Unauthorized);
 
-            const added = await db(TABLES.Address).insertAndFetch({
+            const added = await db(Model.name).insertAndFetch({
                 tag: args.tag,
                 name: args.name,
                 country: args.country,
@@ -88,10 +87,10 @@ export const resolvers = {
         updateAddress: async (_, args, context) => {
             // Only admins can update addresses for other businesses
             if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
-            const curr = await db(TABLES.Address).where('id', args.id).first();
+            const curr = await db(Model.name).where('id', args.id).first();
             if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);
 
-            const updated = await db(TABLES.Address).where('id', args.id).update({
+            const updated = await db(Model.name).where('id', args.id).update({
                 tag: args.tag ?? curr.tag,
                 name: args.name ?? curr.name,
                 country: args.country ?? curr.country,
@@ -108,10 +107,10 @@ export const resolvers = {
         deleteAddresses: async (_, args, context) => {
             // Only admins can delete addresses for other businesses
             if(!context.req.isAdmin || args.ids.length > 1) return context.res.sendStatus(CODE.Unauthorized);
-            const curr = await db(TABLES.Address).where('id', args.ids[0]).first();
+            const curr = await db(Model.name).where('id', args.ids[0]).first();
             if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);   
 
-            const numDeleted = await db(TABLES.Address).delete().whereIn('id', args.ids);
+            const numDeleted = await db(Model.name).delete().whereIn('id', args.ids);
 
             return context.res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
         }

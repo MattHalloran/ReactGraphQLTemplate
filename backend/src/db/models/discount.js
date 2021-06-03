@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { DISCOUNT_RELATIONSHIPS } from '../relationships';
+import { DiscountModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Discount {
@@ -49,7 +48,7 @@ export const resolvers = {
         discounts: async (_, args, context, info) => {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, TABLES.Discount, args.ids, DISCOUNT_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

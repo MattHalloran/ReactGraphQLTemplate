@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { BUSINESS_RELATIONSHIPS } from '../relationships';
+import { BusinessModel as Model } from '../relationships';
 
 export const typeDef = gql`
     type Business {
@@ -48,7 +47,7 @@ export const resolvers = {
         businesses: async (_, args, context, info) => {
             // Only admins can query addresses
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(info, args.ids, TABLES.Business, BUSINESS_RELATIONSHIPS);
+            return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
@@ -56,7 +55,7 @@ export const resolvers = {
             // Only admins can directly add businesses
             //if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
 
-            const added = await db(TABLES.Business).returning('*').insert({
+            const added = await db(Model.name).returning('*').insert({
                 name: args.name,
                 subscribedToNewsletters: args.subscribedToNewsletters ?? false
             })
@@ -67,8 +66,8 @@ export const resolvers = {
             // Only admins can update other businesses
             if(!context.req.isAdmin || (context.token.businessId !== args.id)) return context.res.sendStatus(CODE.Unauthorized);
 
-            const curr = await db(TABLES.Business).where('id', args.id).first();
-            const updated = await db(TABLES.Business).where('id', args.id).update({
+            const curr = await db(Model.name).where('id', args.id).first();
+            const updated = await db(Model.name).where('id', args.id).update({
                 name: args.name ?? curr.name,
                 subscribedToNewsletters: args.subscribedToNewsletters ?? curr.subscribedToNewsletters
             }).returning('*');
@@ -79,7 +78,7 @@ export const resolvers = {
             // Only admins can delete other businesses
             if(!context.req.isAdmin || args.ids.length > 1 || context.token.businessId !== args.ids[0]) return context.res.sendStatus(CODE.Unauthorized); 
 
-            const numDeleted = await db(TABLES.Address).delete().whereIn('id', args.ids);
+            const numDeleted = await db(Model.name).delete().whereIn('id', args.ids);
 
             return context.res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
         },
