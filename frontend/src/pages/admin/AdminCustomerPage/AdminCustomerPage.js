@@ -6,7 +6,7 @@ import {
     AdminBreadcrumbs,
     CustomerCard
 } from 'components';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { Button } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({

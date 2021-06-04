@@ -5,15 +5,19 @@ import {
     ListItem,
     ListItemText
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
+import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        background: theme.palette.background.paper,
+        //background: theme.palette.background.paper,
+        background: lightTheme.palette.background.paper,
     },
     title: {
-        background: theme.palette.primary.dark,
-        color: theme.palette.primary.contrastText,
+        //background: theme.palette.primary.dark,
+        background: lightTheme.palette.primary.dark,
+        //color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
 }));
 

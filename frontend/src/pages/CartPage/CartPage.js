@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { BUSINESS_NAME } from '@local/shared';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { lightTheme, LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
 import { useMutate } from "restful-react";
 import { submitOrder } from 'query/http_promises';
@@ -13,7 +13,7 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { Typography, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({
@@ -21,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     padTop: {
-        paddingTop: theme.spacing(2),
+        // paddingTop: theme.spacing(2),
+        paddingTop: lightTheme.spacing(2),
     },
     gridItem: {
         display: 'flex',
@@ -30,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
         width: 'fit-content',
         justifyContent: 'center',
         '& > *': {
-            margin: theme.spacing(1),
+            // margin: theme.spacing(1),
+            margin: lightTheme.spacing(1),
         },
     },
 }));

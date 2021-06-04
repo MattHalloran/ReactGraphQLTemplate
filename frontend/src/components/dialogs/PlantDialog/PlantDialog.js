@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { 
     AppBar,
     Avatar,
@@ -17,7 +17,7 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
-import { displayPrice, PUBS, PubSub } from 'utils';
+import { displayPrice, lightTheme, PUBS, PubSub } from 'utils';
 import { useGet } from "restful-react";
 import { 
     BeeIcon,
@@ -59,7 +59,8 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     container: {
-        padding: theme.spacing(1),
+        // padding: theme.spacing(1),
+        padding: lightTheme.spacing(1),
     },
     left: {
         width: '50%',
@@ -82,7 +83,8 @@ const useStyles = makeStyles((theme) => ({
         background: 'transparent',
     },
     optionsContainer: {
-        marginBottom: theme.spacing(1),
+        // marginBottom: theme.spacing(1),
+        marginBottom: lightTheme.spacing(1),
     },
 }));
 

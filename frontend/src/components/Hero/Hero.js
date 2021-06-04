@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { LINKS } from 'utils';
 import { Slider } from './Slider.js'
 import Hero1 from 'assets/img/hero-chicks.jpg';

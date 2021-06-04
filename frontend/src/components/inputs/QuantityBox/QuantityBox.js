@@ -5,14 +5,16 @@ import {
     Add as AddIcon,
     Remove as RemoveIcon
 } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
+import { lightTheme } from "utils";
 
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
     },
     main: {
-        background: theme.palette.primary.contrastText,
+        //background: theme.palette.primary.contrastText,
+        background: lightTheme.palette.primary.contrastText,
         width: '60%',
         "& input::-webkit-clear-button, & input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
             display: "none",
@@ -21,9 +23,11 @@ const useStyles = makeStyles((theme) => ({
     button: {
         minWidth: 30,
         width: '20%',
-        background: theme.palette.secondary.main,
+        //background: theme.palette.secondary.main,
+        background: lightTheme.palette.secondary.main,
         '&:hover': {
-            background: theme.palette.secondary.dark,
+            //background: theme.palette.secondary.dark,
+            background: lightTheme.palette.secondary.dark,
         }
     },
     minus: {

@@ -3,14 +3,14 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { getUserActions, LINKS, updateArray } from 'utils';
+import { getUserActions, lightTheme, LINKS, updateArray } from 'utils';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import {
     Info as InfoIcon,
     PhotoLibrary as PhotoLibraryIcon,
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,16 +21,20 @@ const useStyles = makeStyles((theme) => ({
         padding: '0px',
     },
     navItem: {
-        background: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
+        // background: theme.palette.primary.main,
+        background: lightTheme.palette.primary.main,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
         textTransform: 'none',
         verticalAlign: 'text-top',
     },
     menuItem: {
-        color: theme.palette.primary.contrastText,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
     menuIcon: {
-        fill: theme.palette.primary.contrastText,
+        // fill: theme.palette.primary.contrastText,
+        fill: lightTheme.palette.primary.contrastText,
     },
     contact: {
         width: '300px',

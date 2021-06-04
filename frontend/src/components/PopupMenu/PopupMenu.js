@@ -1,11 +1,13 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import Popover from '@material-ui/core/Popover';
 import { Button } from '@material-ui/core';
+import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
-        background: theme.palette.primary.light,
+        // background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
     },
 }));
 

@@ -6,7 +6,7 @@ import {
     Selector
 } from 'components';
 import { ShoppingList } from '../ShoppingList/ShoppingList';
-import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
+import { SORT_OPTIONS, PUBS, PubSub, lightTheme } from 'utils';
 import { getInventoryFilters } from "query/http_promises";
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import {
@@ -16,24 +16,30 @@ import {
     Restore as RestoreIcon
 } from '@material-ui/icons';
 import { printAvailability } from 'utils';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
-        borderRight: `2px solid ${theme.palette.text.primary}`,
-        padding: theme.spacing(1),
+        // background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
+        // borderRight: `2px solid ${theme.palette.text.primary}`,
+        borderRight: `2px solid ${lightTheme.palette.text.primary}`,
+        // padding: theme.spacing(1),
+        padding: lightTheme.spacing(1),
     },
     formControl: {
         display: 'flex',
         justifyContent: 'center',
         '& > *': {
-            margin: theme.spacing(1),
+            // margin: theme.spacing(1),
+            margin: lightTheme.spacing(1),
         },
     },
     padBottom: {
-        marginBottom: theme.spacing(2),
+        // marginBottom: theme.spacing(2),
+        marginBottom: lightTheme.spacing(2),
     },
 }));
 

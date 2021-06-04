@@ -6,8 +6,9 @@ import {
     EnhancedTableHead,
     EnhancedTableToolbar
 } from 'components';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { updateArray } from "utils/arrayTools";
+import { lightTheme } from "utils";
 
 const useStyles = makeStyles((theme) => ({
     image: {
@@ -16,7 +17,8 @@ const useStyles = makeStyles((theme) => ({
         objectFit: 'cover',
     },
     padBottom: {
-        marginBottom: theme.spacing(2),
+        // marginBottom: theme.spacing(2),
+        marginBottom: lightTheme.spacing(2),
     },
     gridItem: {
         display: 'flex',

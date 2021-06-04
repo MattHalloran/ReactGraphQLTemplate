@@ -4,6 +4,9 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
+import sizeOf from 'image-size';
+import path from 'path';
+import fs from 'fs';
 
 export const typeDef = gql`
     enum ImageSize {
@@ -12,6 +15,10 @@ export const typeDef = gql`
         M
         ML
         L
+    }
+
+    type ImageResponse {
+        fileName: String!
     }
 
     type Image {
@@ -31,7 +38,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addImage(
-            base64: String!
+            file: Upload!
             alt: String
             labels: [String!]!
         ): Response!
@@ -68,12 +75,24 @@ export const resolvers = {
     },
     Mutation: {
         addImage: async (_, args, context, info) => {
-            return CustomError(CODE.NotImplemented);
+            // Only admins can add images
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            const { createReadStream, fileName, mimeType, encoding } = await args.file;
+            const stream = createReadStream();
+            const tempName = 'aaaaaaaaaaaaboopfdasfdasf';
+            //sizeOf()
+            const fileDirectory = path.join(__dirname, `../../../${tempName}`);
+            await stream.pipe(fs.createWriteStream(pathName))
+            return { fileName: tempName }
         },
         deleteImagesById: async (_, args, context, info) => {
+            // Only admins can delete images
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
         deleteImagesByLabel: async (_, args, context, info) => {
+            // Only admins can delete images
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
     }

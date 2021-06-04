@@ -4,12 +4,12 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub } from 'utils';
+import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, lightTheme } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton, Typography } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
@@ -18,19 +18,23 @@ import { useGet } from 'restful-react';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
-        background: theme.palette.background.paper,
+        // background: theme.palette.background.paper,
+        background: lightTheme.palette.background.paper,
     },
     tableIcon: {
-        color: theme.palette.primary.contrastText,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
     tableHead: {
-        background: theme.palette.primary.main,
+        // background: theme.palette.primary.main,
+        background: lightTheme.palette.primary.main,
     },
     tableCol: {
         verticalAlign: 'middle',
         '& > *': {
             height: 'fit-content',
-            color: theme.palette.primary.contrastText
+            // color: theme.palette.primary.contrastText
+            color: lightTheme.palette.primary.contrastText
         }
     }
 }));

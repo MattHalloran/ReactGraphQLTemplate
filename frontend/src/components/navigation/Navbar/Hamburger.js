@@ -5,7 +5,7 @@ import {
     Copyright
 } from 'components';
 import { SOCIAL } from '@local/shared';
-import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
+import { getUserActions, lightTheme, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
@@ -21,26 +21,33 @@ import {
     Share as ShareIcon,
 } from '@material-ui/icons';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
-        background: theme.palette.primary.light,
-        borderLeft: `2px solid ${theme.palette.text.primary}`
+        //background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
+        //borderLeft: `2px solid ${theme.palette.text.primary}`,
+        borderLeft: `2px solid ${lightTheme.palette.text.primary}`,
     },
     menuItem: {
-        color: theme.palette.primary.contrastText,
-        borderBottom: `1px solid ${theme.palette.primary.dark}`,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
+        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
+        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
     },
     close: {
-        color: theme.palette.primary.contrastText,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
         borderRadius: 0,
-        borderBottom: `1px solid ${theme.palette.primary.dark}`,
+        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
+        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
         justifyContent: 'end',
         direction: 'rtl',
     },
     menuIcon: {
-        color: theme.palette.primary.contrastText,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
     facebook: {
         fill: '#43609C', // UCLA blue
@@ -49,7 +56,8 @@ const useStyles = makeStyles((theme) => ({
         fill: '#F77737',
     },
     copyright: {
-        color: theme.palette.primary.contrastText,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
         maxWidth: 300,
         padding: 5,
     },

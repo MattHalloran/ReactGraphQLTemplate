@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useGet, useMutate } from "restful-react";
 import { Button, Typography } from '@material-ui/core';
-import { PUBS, PubSub } from 'utils';
-import { makeStyles } from '@material-ui/core/styles';
+import { lightTheme, PUBS, PubSub } from 'utils';
+import { makeStyles } from '@material-ui/styles';
 import {
     AdminBreadcrumbs,
     GalleryTable
@@ -14,7 +14,8 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     padTop: {
-        marginTop: theme.spacing(2),
+        // marginTop: theme.spacing(2),
+        marginTop: lightTheme.spacing(2),
     },
 }));
 

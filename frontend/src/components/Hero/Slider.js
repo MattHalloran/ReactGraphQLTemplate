@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { SliderContent } from './SliderContent';
 import { Slide } from './Slide';
 import { Dots } from './Dots';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const DEFAULT_DELAY = 3000;
 const DEFAULT_DURATION = 1000;

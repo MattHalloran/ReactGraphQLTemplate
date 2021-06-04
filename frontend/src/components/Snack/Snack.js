@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { IconButton, Button, Snackbar } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
-import { PUBS, PubSub } from 'utils';
-import { makeStyles } from '@material-ui/core/styles';
+import { lightTheme, PUBS, PubSub } from 'utils';
+import { makeStyles } from '@material-ui/styles';
 
 const DEFAULT_STATE = {
     message: null,
@@ -18,19 +18,26 @@ const DEFAULT_STATE = {
 
 const useStyles = makeStyles((theme) => ({
     default: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
+        // background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
     warning: {
-        background: theme.palette.warning.main,
-        color: theme.palette.warning.contrastText,
+        // background: theme.palette.warning.main,
+        background: lightTheme.palette.warning.main,
+        // color: theme.palette.warning.contrastText,
+        color: lightTheme.palette.warning.contrastText,
     },
     error: {
-        background: theme.palette.error.dark,
-        color: theme.palette.error.contrastText,
+        // background: theme.palette.error.dark,
+        background: lightTheme.palette.error.dark,
+        // color: theme.palette.error.contrastText,
+        color: lightTheme.palette.error.contrastText,
     },
     button: {
-        color: theme.palette.secondary.light,
+        // color: theme.palette.secondary.light,
+        color: lightTheme.palette.secondary.light,
     },
 }));
 

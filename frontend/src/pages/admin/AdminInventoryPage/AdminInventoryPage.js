@@ -7,7 +7,7 @@ import { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
-import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
+import { lightTheme, PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
     EditPlantDialog,
@@ -17,12 +17,14 @@ import {
 } from 'components';
 import { Tabs, Tab, AppBar } from '@material-ui/core';
 import { DropzoneArea } from 'material-ui-dropzone';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     toggleBar: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
+        // background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
+        // color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
     cardFlex: {
         display: 'grid',

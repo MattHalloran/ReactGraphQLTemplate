@@ -2,20 +2,22 @@
 
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { LINKS, PUBS, PubSub, useHistoryState } from 'utils';
+import { lightTheme, LINKS, PUBS, PubSub, useHistoryState } from 'utils';
 import { employeeSchema } from '@local/shared';
 import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { CODE, DEFAULT_PRONOUNS } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        marginTop: theme.spacing(3),
+        // marginTop: theme.spacing(3),
+        marginTop: lightTheme.spacing(3),
     },
     submit: {
-        margin: theme.spacing(3, 0, 2),
+        // margin: theme.spacing(3, 0, 2),
+        margin: lightTheme.spacing(3, 0, 2),
     },
 }));
 

@@ -3,21 +3,24 @@ import PropTypes from 'prop-types';
 import { profileSchema } from '@local/shared';
 import { useGet, useMutate } from "restful-react";
 import { BUSINESS_NAME, DEFAULT_PRONOUNS } from '@local/shared';
-import { PUBS, PubSub, useHistoryState } from 'utils';
+import { lightTheme, PUBS, PubSub, useHistoryState } from 'utils';
 import { Button, Container, FormLabel, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        marginTop: theme.spacing(3),
+        // marginTop: theme.spacing(3),
+        marginTop: lightTheme.spacing(3),
     },
     buttons: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        // paddingTop: theme.spacing(2),
+        paddingTop: lightTheme.spacing(2),
+        // paddingBottom: theme.spacing(2),
+        paddingBottom: lightTheme.spacing(2),
     },
 }));
 

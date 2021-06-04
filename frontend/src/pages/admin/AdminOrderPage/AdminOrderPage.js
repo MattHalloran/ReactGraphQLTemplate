@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGet } from "restful-react";
-import { ORDER_STATES, PUBS, PubSub } from 'utils';
-import { makeStyles } from '@material-ui/core/styles';
+import { lightTheme, ORDER_STATES, PUBS, PubSub } from 'utils';
+import { makeStyles } from '@material-ui/styles';
 import {
     AdminBreadcrumbs,
     OrderCard,
@@ -16,7 +16,8 @@ const useStyles = makeStyles((theme) => ({
         gridGap: '20px',
     },
     padBottom: {
-        marginBottom: theme.spacing(2),
+        // marginBottom: theme.spacing(2),
+        marginBottom: lightTheme.spacing(2),
     },
 }));
 

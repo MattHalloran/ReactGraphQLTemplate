@@ -9,14 +9,16 @@ import {
     Chip,
     Typography
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { displayPrice } from 'utils';
+import { makeStyles } from '@material-ui/styles';
+import { displayPrice, lightTheme } from 'utils';
 import { NoImageIcon } from 'assets/img';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        background: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
+        //background: theme.palette.primary.main,
+        background: lightTheme.palette.primary.main,
+        //color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
         borderRadius: 15,
         margin: 3,
         cursor: 'pointer',
@@ -41,10 +43,12 @@ const useStyles = makeStyles((theme) => ({
         border: '2px solid grey',
     },
     active: {
-        border: `2px solid ${theme.palette.secondary.dark}`,
+        //border: `2px solid ${theme.palette.secondary.dark}`,
+        border: `2px solid ${lightTheme.palette.secondary.dark}`,
     },
     actionButton: {
-        color: theme.palette.primary.contrastText,
+        //color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
 }));
 

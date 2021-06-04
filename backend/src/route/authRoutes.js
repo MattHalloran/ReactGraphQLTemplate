@@ -1,17 +1,12 @@
 import express from 'express';
-import { CODE, SESSION_MILLI } from '@local/shared';
+import { CODE } from '@local/shared';
 import * as auth from '../auth';
 import bcrypt from 'bcrypt';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
 import { Email, Phone, User } from '../db/models';
-import { ACCOUNT_STATUS } from '../src/db/types';
 import { isPasswordValid } from '../db/models/password';
 
 const router = express.Router();
-
-const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
-const SOFT_LOCKOUT_DURATION_SECONDS = 15*60;
-const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 
 router.post('/register', async (req, res) => {
     // Check if password is valid

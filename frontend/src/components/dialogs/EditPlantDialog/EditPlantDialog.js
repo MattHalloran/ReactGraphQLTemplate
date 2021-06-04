@@ -22,7 +22,7 @@ import {
     Restore as RestoreIcon,
     Update as UpdateIcon
 } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { modifyPlant } from 'query/http_promises';
 import { NoImageIcon } from 'assets/img';
 import { Selector } from 'components';
@@ -30,6 +30,7 @@ import {
     deleteArrayIndex,
     displayPrice, 
     displayPriceToDatabase,
+    lightTheme,
     makeID,
     PUBS,
     PubSub,
@@ -52,16 +53,19 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     container: {
-        padding: theme.spacing(1),
+        // padding: theme.spacing(1),
+        padding: lightTheme.spacing(1),
     },
     sideNav: {
         width: '25%',
         height: '100%',
         float: 'left',
-        borderRight: `2px solid ${theme.palette.primary.contrastText}`,
+        //borderRight: `2px solid ${theme.palette.primary.contrastText}`,
+        borderRight: `2px solid ${lightTheme.palette.primary.contrastText}`,
     },
     optionsContainer: {
-        padding: theme.spacing(2),
+        // padding: theme.spacing(2),
+        padding: lightTheme.spacing(2),
     },
     displayImage: {
         border: '1px solid black',
@@ -78,8 +82,10 @@ const useStyles = makeStyles((theme) => ({
         minHeight: '100px',
     },
     selected: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
+        //background: theme.palette.primary.light,
+        background: lightTheme.palette.primary.light,
+        //color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
     },
 }));
 

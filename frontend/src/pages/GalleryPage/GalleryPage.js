@@ -10,10 +10,10 @@ import {
     StyledModal as Modal,
 } from 'components';
 import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { URL_BASE } from '@local/shared';
+import { API_ADDRESS } from '@local/shared';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { ImageList, ImageListItem } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { getImage, getImages } from 'query/http_promises';
 import SwipeableViews from 'react-swipeable-views';
 import { NoImageIcon } from 'assets/img';
@@ -91,8 +91,8 @@ function GalleryPage() {
             for (let i = 0; i < imageKeys.length; i++) {
                 let new_data = {
                     "id": imageKeys[i],
-                    "src": `${URL_BASE}/image?key=${imageKeys[i]}&size=l`,
-                    "thumbnail": `${URL_BASE}/image?key=${imageKeys[i]}&size=s`,
+                    "src": `${API_ADDRESS}/image?key=${imageKeys[i]}&size=l`,
+                    "thumbnail": `${API_ADDRESS}/image?key=${imageKeys[i]}&size=s`,
                 };
                 combined_data.push(new_data);
             }

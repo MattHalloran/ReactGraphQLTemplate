@@ -1,4 +1,4 @@
-import express, { json } from 'express';
+import express from 'express';
 import { CODE } from '@local/shared';
 import { orderNotifyAdmin } from '../worker/email/queue';
 import * as auth from '../auth';

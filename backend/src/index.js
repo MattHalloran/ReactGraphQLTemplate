@@ -2,16 +2,12 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import * as auth from './auth';
-import * as cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
 import { typeDefs, resolvers } from './db/models';
-import { CLIENT_IP } from '@local/shared';
+import { API_PREFIX, API_VERSION, CLIENT_ADDRESS, SERVER_PORT } from '@local/shared';
 
 const app = express();
-const VERSION = 'v1';
-const PREFIX = `/api/${VERSION}`;
-const PORT = 5000;
 
 // Override sendstatus to allow for json
 app.response.sendStatus = function (jsonStatus) {
@@ -32,7 +28,7 @@ app.use(auth.authenticate);
 // For CORS
 const corsOptions = {
     credentials: true,
-    origin: CLIENT_IP
+    origin: CLIENT_ADDRESS
 }
 // app.use((_, res, next) => {
 //     res.header("Access-Control-Allow-Origin", "*");
@@ -50,10 +46,15 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 const apollo_options = new ApolloServer({ 
     typeDefs, 
     resolvers, 
+    uploads: false, // Disables old version of graphql-upload
     context: ({ req, res }) => ({ req, res }),
     validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
  });
-apollo_options.applyMiddleware({ app, path: PREFIX, cors: corsOptions });
+apollo_options.applyMiddleware({ 
+    app, 
+    path: `/${API_PREFIX}/${API_VERSION}`, 
+    cors: corsOptions 
+});
 
 // Start Express server
-app.listen(PORT);
+app.listen(SERVER_PORT);

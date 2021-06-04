@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
-import { URL_BASE } from '@local/shared';
+import { API_ADDRESS } from '@local/shared';
 import {
     ApolloClient,
     InMemoryCache,
@@ -12,7 +12,7 @@ import {
 // GraphQL Setup
 const client = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: URL_BASE,
+    uri: API_ADDRESS,
     credentials: 'include',
     onError: ({ networkError, graphQLErrors }) => {
         // Only developers should see these error messages

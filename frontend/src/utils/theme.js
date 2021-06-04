@@ -20,7 +20,7 @@ const commonTheme = createTheme({
 export const lightTheme = createTheme({
     ...commonTheme,
     palette: {
-        type: 'light',
+        mode: 'light',
         primary: {
             light: '#4c8c4a',
             main: '#1b5e20',
@@ -41,7 +41,7 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
     ...commonTheme,
     palette: {
-        type: 'dark',
+        mode: 'dark',
         primary: {
             light: '#358461',
             main: '#1c2d25',

@@ -12,24 +12,30 @@ import {
     Email as EmailIcon,
     Phone as PhoneIcon
  } from "@material-ui/icons";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { ListDialog } from 'components';
+import { lightTheme } from 'utils';
 
 const cardStyles = makeStyles((theme) => ({
     root: {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        margin: theme.spacing(1),
+        //backgroundColor: theme.palette.primary.main,
+        backgroundColor: lightTheme.palette.primary.main,
+        //color: theme.palette.primary.contrastText,
+        color: lightTheme.palette.primary.contrastText,
+        // margin: theme.spacing(1),
+        margin: lightTheme.spacing(1),
         padding: 10,
         minWidth: 150,
         minHeight: 50,
         cursor: 'pointer',
     },
     button: {
-        color: theme.palette.secondary.light,
+        //color: theme.palette.secondary.light,
+        color: lightTheme.palette.secondary.light,
     },
     icon: {
-        fill: theme.palette.secondary.light,
+        //fill: theme.palette.secondary.light,
+        fill: lightTheme.palette.secondary.light,
     },
 }));
 
