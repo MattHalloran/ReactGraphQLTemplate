@@ -5,6 +5,7 @@ import * as auth from './auth';
 import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
 import { typeDefs, resolvers } from './db/models';
+import { graphqlUploadExpress } from 'graphql-upload'
 import { API_PREFIX, API_VERSION, CLIENT_ADDRESS, SERVER_PORT } from '@local/shared';
 
 const app = express();
@@ -16,10 +17,10 @@ app.response.sendStatus = function (jsonStatus) {
         .send(jsonStatus);
 }
 
-// For parsing application/json
-app.use(express.json());
-// For parsing application/xwww-
-app.use(express.urlencoded({ extended: false }));
+// // For parsing application/json
+// app.use(express.json());
+// // For parsing application/xwww-
+// app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // For authentication
@@ -40,6 +41,11 @@ const corsOptions = {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, 'private')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Set up image uploading
+app.use(`/${API_PREFIX}/${API_VERSION}`,
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
+  )
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context

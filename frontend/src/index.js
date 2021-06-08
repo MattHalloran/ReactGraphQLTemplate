@@ -8,12 +8,15 @@ import {
     InMemoryCache,
     ApolloProvider,
 } from '@apollo/client';
+import { createUploadLink } from 'apollo-upload-client';
 
 // GraphQL Setup
 const client = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: API_ADDRESS,
-    credentials: 'include',
+    link: createUploadLink({
+        uri: API_ADDRESS,
+        credentials: 'include'
+    }),
     onError: ({ networkError, graphQLErrors }) => {
         // Only developers should see these error messages
         if (process.env.NODE_ENV === 'production') return;

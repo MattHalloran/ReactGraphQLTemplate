@@ -122,7 +122,7 @@ export const manyToManyStrings = (rel, labels) => {
 // ids - which ids to query data for
 // reqTuples - 2D array describing the table's requested relationships
 export const fullSelectQuery = async (model, reqFields, ids) => {
-    console.log('full select query', model);
+    console.log('full select query');
     const leftLabel = 'main';
     const rightLabels = 'abcdefghijkl';
     const joinLabels = 'mnopqrstuvwxyz';
@@ -185,7 +185,7 @@ export const fullSelectQuery = async (model, reqFields, ids) => {
             }
         }
     }
-    console.log('QUERY RESULTS: ', rows)
+    //console.log('QUERY RESULTS: ', rows)
     return rows;
 }
 

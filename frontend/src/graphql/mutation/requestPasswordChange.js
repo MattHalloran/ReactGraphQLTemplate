@@ -4,7 +4,7 @@ export const requestPasswordChangeMutation = gql`
     mutation requestPasswordChange(
         $email: String!
     ) {
-    login(
+    requestPasswordChange(
         email: $email
     )
 }

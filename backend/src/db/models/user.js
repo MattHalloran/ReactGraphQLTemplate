@@ -174,6 +174,7 @@ export const resolvers = {
             }
         },
         logout: async (_, args, context, info) => {
+            console.log('LOGOUT CALLEDDDDDDD')
             context.res.clearCookie(COOKIE.Session);
             await db(Model.name).where('id', context.req.userId).update({
                 sessionToken: null

@@ -8,6 +8,9 @@ import {
     GalleryTable
 } from 'components';
 import { DropzoneArea } from 'material-ui-dropzone';
+import { useDropzone } from 'react-dropzone';
+import { addImageMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -24,6 +27,7 @@ function AdminGalleryPage({
     const classes = useStyles();
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [data, setData] = useState([]);
+    const [addImage, { loadingAddImage }] = useMutation(addImageMutation);
 
     useGet({
         path: "gallery",
@@ -83,11 +87,6 @@ function AdminGalleryPage({
         }
     });
 
-    const { mutate: uploadGalleryImages } = useMutate({
-        verb: 'POST',
-        path: 'gallery',
-    });
-
     const fileSelectedHandler = (files) => {
         setSelectedFiles([]);
         for (let i = 0; i < files.length; i++) {
@@ -110,24 +109,43 @@ function AdminGalleryPage({
         reader.readAsDataURL(file);
     }
 
-    const uploadImages = useCallback(() => {
-        if (selectedFiles.length <= 0) {
-            PubSub.publish(PUBS.Snack, { message: 'No images selected.', severity: 'error' });
-            return;
+    const uploadImages = () => {
+
+    }
+
+    const {
+        acceptedFiles,
+        fileRejections,
+        getRootProps,
+        getInputProps
+    } = useDropzone({
+        accept: 'image/jpeg, image/png',
+        onDrop: (acceptedFiles) => {
+            if (acceptedFiles.length <= 0) {
+                PubSub.publish(PUBS.Snack, { message: 'No images selected.', severity: 'error' });
+                return;
+            }
+            PubSub.publish(PUBS.Loading, true);
+            console.log('about to add image', acceptedFiles[0])
+            addImage({
+                variables: {
+                    files: acceptedFiles,
+                    alts: ['TODO'],
+                    labels: ['gallery']
+                }
+            })
+                .then((response) => {
+                    console.log('GOT ADD IAMGE RESPONSE', response);
+                    PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)` });
+                    PubSub.publish(PUBS.Loading, false);
+                })
+                .catch((response) => {
+                    PubSub.publish(PUBS.Loading, false);
+                    console.error(response);
+                    PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+                })
         }
-        let form = new FormData();
-        selectedFiles.forEach(img => {
-            form.append('name', img.name);
-            form.append('extension', img.extension);
-            form.append('image', img.data);
-        });
-        uploadGalleryImages(form).then(response => {
-            PubSub.publish(PUBS.Snack, { message: `Uploaded ${response.passed_indexes?.length} images.` });
-        }).catch(error => {
-            console.error(error);
-            PubSub.publish(PUBS.Snack, { message: 'Failed to upload images.', severity: 'error' });
-        });
-    }, [selectedFiles])
+    });
 
     const applyChanges = useCallback((changed_data) => {
         let gallery_data = changed_data.map(d => ({
@@ -148,6 +166,10 @@ function AdminGalleryPage({
             <AdminBreadcrumbs />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Gallery Edit</Typography>
+            </div>
+            <div {...getRootProps({ className: 'dropzone' })}>
+                <input {...getInputProps()} />
+                <p>Drag 'n' drop some files here, or click to select files</p>
             </div>
             <h2>Upload new images</h2>
             <DropzoneArea

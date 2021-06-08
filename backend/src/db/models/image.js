@@ -7,8 +7,12 @@ import { CustomError } from '../error';
 import sizeOf from 'image-size';
 import path from 'path';
 import fs from 'fs';
+import { GraphQLUpload } from 'graphql-upload';
+import { saveFile } from '../../utils';
 
 export const typeDef = gql`
+    scalar Upload
+
     enum ImageSize {
         XS
         S
@@ -18,7 +22,8 @@ export const typeDef = gql`
     }
 
     type ImageResponse {
-        fileName: String!
+        successfulFileNames: [String!]!
+        failedFileNames: [String!]!
     }
 
     type Image {
@@ -38,10 +43,10 @@ export const typeDef = gql`
 
     extend type Mutation {
         addImage(
-            file: Upload!
-            alt: String
+            files: [Upload!]!
+            alts: [String]
             labels: [String!]!
-        ): Response!
+        ): ImageResponse!
         deleteImagesById(
             ids: [ID!]!
         ): Response
@@ -53,6 +58,7 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
+    Upload: GraphQLUpload,
     ImageSize: IMAGE_SIZE,
     Query: {
         image: async (_, args, context, info) => {
@@ -77,13 +83,25 @@ export const resolvers = {
         addImage: async (_, args, context, info) => {
             // Only admins can add images
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const { createReadStream, fileName, mimeType, encoding } = await args.file;
-            const stream = createReadStream();
-            const tempName = 'aaaaaaaaaaaaboopfdasfdasf';
-            //sizeOf()
-            const fileDirectory = path.join(__dirname, `../../../${tempName}`);
-            await stream.pipe(fs.createWriteStream(pathName))
-            return { fileName: tempName }
+            let successfulFileNames = [];
+            let failedFileNames = [];
+            // Loop through every image passed in
+            for (let i = 0; i < args.files.length; i++) {
+                // Destructure data. Each file is a promise
+                const { createReadStream, filename, mimetype } = await args.files[0];
+                // Make sure that the file is actually an image
+                if (!mimetype.startsWith('image/')) return CustomError(CODE.InvalidArgs);
+                // Create a read stream
+                const stream = createReadStream();
+                const { success, finalFilename } = saveFile(stream, filename, 'images')
+                if (success) successfulFileNames.push(finalFilename);
+                else failedFileNames.push(finalFilename);
+                // TODO add to database
+            }
+            return {
+                successfulFileNames,
+                failedFileNames
+            };
         },
         deleteImagesById: async (_, args, context, info) => {
             // Only admins can delete images
