@@ -57,9 +57,9 @@ export const typeDef = gql`
 export const resolvers = {
     OrderStatus: ORDER_STATUS,
     Query: {
-        orders: async (_, args, context, info) => {
+        orders: async (_, args, {req, res}, info) => {
             // Only admins can query orders directly
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             let ids = args.ids;
             if (args.userIds !== null) {
                 const ids_query = await db(TABLES.Order)

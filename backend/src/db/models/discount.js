@@ -45,31 +45,31 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        discounts: async (_, args, context, info) => {
+        discounts: async (_, args, {req, res}, info) => {
             // Only admins can query addresses
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        addDiscount: async (_, args, context, info) => {
+        addDiscount: async (_, args, {req, res}, info) => {
             // Only admins can add discounts
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
-        updateDiscount: async (_, args, context, info) => {
+        updateDiscount: async (_, args, {req, res}, info) => {
             // Only admins can add discounts
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
-        deleteDiscount: async (_, args, context, info) => {
+        deleteDiscount: async (_, args, {req, res}, info) => {
             // Only admins can add discounts
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
-        setDiscountAssociations: async (_, args, context, info) => {
+        setDiscountAssociations: async (_, args, {req, res}, info) => {
             // Only admins can add discounts
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         }
     }

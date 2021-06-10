@@ -58,16 +58,16 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        addresses: async (_, args, context, info) => {
+        addresses: async (_, args, {req}, info) => {
             // Only admins can query addresses
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        addAddress: async (_, args, context) => {
+        addAddress: async (_, args, {req, res}) => {
             // Only admins can add addresses for other businesses
-            if(!context.req.isAdmin || (context.token.businessId !== args.businessId)) return context.res.sendStatus(CODE.Unauthorized);
+            if(!req.isAdmin || (req.token.businessId !== args.businessId)) return new CustomError(CODE.Unauthorized);
 
             const added = await db(Model.name).insertAndFetch({
                 tag: args.tag,
@@ -84,11 +84,11 @@ export const resolvers = {
 
             return added;
         },
-        updateAddress: async (_, args, context) => {
+        updateAddress: async (_, args, {req, res}) => {
             // Only admins can update addresses for other businesses
-            if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
+            if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
             const curr = await db(Model.name).where('id', args.id).first();
-            if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);
+            if (req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
 
             const updated = await db(Model.name).where('id', args.id).update({
                 tag: args.tag ?? curr.tag,
@@ -104,15 +104,15 @@ export const resolvers = {
 
             return updated;
         },
-        deleteAddresses: async (_, args, context) => {
+        deleteAddresses: async (_, args, {req, res}) => {
             // Only admins can delete addresses for other businesses
-            if(!context.req.isAdmin || args.ids.length > 1) return context.res.sendStatus(CODE.Unauthorized);
+            if(!req.isAdmin || args.ids.length > 1) return new CustomError(CODE.Unauthorized);
             const curr = await db(Model.name).where('id', args.ids[0]).first();
-            if (context.token.businessId !== curr.businessId) return context.res.sendStatus(CODE.Unauthorized);   
+            if (req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);   
 
             const numDeleted = await db(Model.name).delete().whereIn('id', args.ids);
 
-            return context.res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
+            return res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
         }
     }
 }

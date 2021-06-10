@@ -44,16 +44,16 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        businesses: async (_, args, context, info) => {
+        businesses: async (_, args, {req, res}, info) => {
             // Only admins can query addresses
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        addBusiness: async(_, args, context) => {
+        addBusiness: async(_, args, {req, res}) => {
             // Only admins can directly add businesses
-            //if(!context.req.isAdmin) return context.res.sendStatus(CODE.Unauthorized);
+            if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
 
             const added = await db(Model.name).returning('*').insert({
                 name: args.name,
@@ -62,9 +62,9 @@ export const resolvers = {
 
             return added;
         },
-        updateBusiness: async(_, args, context) => {
+        updateBusiness: async(_, args, {req, res}) => {
             // Only admins can update other businesses
-            if(!context.req.isAdmin || (context.token.businessId !== args.id)) return context.res.sendStatus(CODE.Unauthorized);
+            if(!req.isAdmin || (req.token.businessId !== args.id)) return new CustomError(CODE.Unauthorized);
 
             const curr = await db(Model.name).where('id', args.id).first();
             const updated = await db(Model.name).where('id', args.id).update({
@@ -74,21 +74,21 @@ export const resolvers = {
 
             return updated;
         },
-        deleteBusinesses: async(_, args, context) => {
+        deleteBusinesses: async(_, args, {req, res}) => {
             // Only admins can delete other businesses
-            if(!context.req.isAdmin || args.ids.length > 1 || context.token.businessId !== args.ids[0]) return context.res.sendStatus(CODE.Unauthorized); 
+            if(!req.isAdmin || args.ids.length > 1 || req.token.businessId !== args.ids[0]) return new CustomError(CODE.Unauthorized); 
 
             const numDeleted = await db(Model.name).delete().whereIn('id', args.ids);
 
-            return context.res.sendStatus(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
+            return new CustomError(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
         },
-        setBusinessDiscounts: async(_, args, context) => {
+        setBusinessDiscounts: async(_, args, {req, res}) => {
             // TODO
-            return context.res.sendStatus(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         },
-        setBusinessEmployees: async(_, args, context) => {
+        setBusinessEmployees: async(_, args, {req, res}) => {
             // TODO
-            return context.res.sendStatus(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         }
     }
 }

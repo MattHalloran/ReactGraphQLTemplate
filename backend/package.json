@@ -32,6 +32,7 @@
     "graphql-list-fields": "^2.0.2",
     "graphql-upload": "^12.0.0",
     "image-size": "^1.0.0",
+    "imghash": "^0.0.9",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.19",
     "lodash": "^4.17.21",
@@ -40,6 +41,7 @@
     "nodemailer": "^6.6.0",
     "objection": "^2.2.15",
     "pg": "^8.6.0",
+    "sharp": "^0.28.3",
     "twilio": "^3.61.0",
     "typescript": "^4.2.4",
     "uuid": "^8.3.2"

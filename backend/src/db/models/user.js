@@ -102,18 +102,18 @@ export const typeDef = gql`
 export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
     Query: {
-        users: async (_, args, context, info) => {
+        users: async (_, args, {req}, info) => {
             // Only admins can query addresses
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             console.log('in users query', BUSINESS_FIELDS)
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        login: async (_, args, context, info) => {
+        login: async (_, args, {req, res}, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (context.req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [context.req.userId]))[0];
+                if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate email address
@@ -155,7 +155,7 @@ export const resolvers = {
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                await setCookie(context.res, user.id, token);
+                await setCookie(res, user.id, token);
                 return (await fullSelectQueryHelper(Model, info, [user.id]))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
@@ -173,10 +173,10 @@ export const resolvers = {
                 return new CustomError(CODE.BadCredentials);
             }
         },
-        logout: async (_, args, context, info) => {
+        logout: async (_, _args, {req, res}, _info) => {
             console.log('LOGOUT CALLEDDDDDDD')
-            context.res.clearCookie(COOKIE.Session);
-            await db(Model.name).where('id', context.req.userId).update({
+            res.clearCookie(COOKIE.Session);
+            await db(Model.name).where('id', req.userId).update({
                 sessionToken: null
             })
         },

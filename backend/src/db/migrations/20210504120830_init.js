@@ -93,13 +93,12 @@ export async function up (knex) {
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
         //TODO UNIQUE (foler, file_name, extension)
-        table.uuid('id').primary();
+        table.increments();
+        table.string('hash', 128).notNullable().unique();
         table.string('folder', 256).notNullable();
         table.string('fileName', 256).notNullable();
         table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
-        table.string('hash', 128).notNullable();
-        table.string('label', 64).notNullable();
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });
@@ -145,7 +144,7 @@ export async function up (knex) {
     });
     await knex.schema.createTable(TABLES.ImageLabels, (table) => {
         table.increments();
-        table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable();
+        table.string('hash').references('hash').inTable(TABLES.Image).notNullable();
         table.string('label').notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {

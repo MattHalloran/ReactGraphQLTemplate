@@ -5,6 +5,7 @@ import { SESSION_MILLI } from '@local/shared';
 import { db } from './db/db';
 import { UserModel } from './db/relationships';
 import { fullSelectQuery } from './db/query';
+import { CustomError } from './db/error';
 
 // Return array of user roles (ex: ['admin', 'customer'])
 async function findUserRoles(user_id) {
@@ -81,18 +82,18 @@ export async function setCookie(res, user_id, token) {
 
 // Middleware that requires a valid token
 export async function requireToken(req, res, next) {
-    if (req.token === null || req.token === undefined) return res.sendStatus(CODE.Unauthorized);
+    if (req.token === null || req.token === undefined) return new CustomError(CODE.Unauthorized);
     next();
 }
 
 // Middleware that restricts access to customers (or admins)
 export async function requireCustomer(req, res, next) {
-    if (!req.isCustomer) return res.sendStatus(CODE.Unauthorized);
+    if (!req.isCustomer) return new CustomError(CODE.Unauthorized);
     next();
 }
 
 // Middle ware that restricts access to admins
 export async function requireAdmin(req, res, next) {
-    if (!req.isAdmin) return res.sendStatus(CODE.Unauthorized);
+    if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
     next();
 }

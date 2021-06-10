@@ -1,14 +1,15 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { TABLES } from '../tables';
-import { CODE } from '@local/shared';
+import { CODE, IMAGE_EXTENSION } from '@local/shared';
 import { IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import sizeOf from 'image-size';
 import path from 'path';
 import fs from 'fs';
 import { GraphQLUpload } from 'graphql-upload';
-import { saveFile } from '../../utils';
+import { saveImage } from '../../utils';
+import { ImageModel as Model } from '../relationships';
 
 export const typeDef = gql`
     scalar Upload
@@ -80,9 +81,12 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addImage: async (_, args, context, info) => {
+        addImage: async (_, args, {req, res}, info) => {
             // Only admins can add images
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Check for valid arguments
+            // If alts provided, must match length of files
+            if (args.alts && args.alts.length !== args.files.length) return new CustomError(CODE.InvalidArgs);
             let successfulFileNames = [];
             let failedFileNames = [];
             // Loop through every image passed in
@@ -91,26 +95,54 @@ export const resolvers = {
                 const { createReadStream, filename, mimetype } = await args.files[0];
                 // Make sure that the file is actually an image
                 if (!mimetype.startsWith('image/')) return CustomError(CODE.InvalidArgs);
+                // Make sure image type is supported
+                let { ext: extCheck } = path.parse(filename);
+                if (Object.values(IMAGE_EXTENSION).indexOf(extCheck.replace('.', '')) <= 0) return CustomError(CODE.InvalidArgs);
                 // Create a read stream
                 const stream = createReadStream();
-                const { success, finalFilename } = saveFile(stream, filename, 'images')
-                if (success) successfulFileNames.push(finalFilename);
-                else failedFileNames.push(finalFilename);
-                // TODO add to database
+                const { success, filename: finalFilename, dimensions, hash } = await saveImage(stream, filename, 'images')
+                if (success) {
+                    successfulFileNames.push(finalFilename);
+                    // Add image metadata to database
+                    const { name, ext } = path.parse(finalFilename);
+                    await db(Model.name).insert({
+                        hash: hash,
+                        folder: 'images',
+                        fileName: name,
+                        extension: ext.replace('.', ''),
+                        alt: args.alts ? args.alts[i] : '',
+                        width: dimensions.width,
+                        height: dimensions.height
+                    });
+                    for (let j = 0; j < args.labels.length; j++) {
+                        await db(TABLES.ImageLabels).insert({
+                            hash: hash,
+                            label: args.labels[j]
+                        });
+                    }
+                } else {
+                    console.log('NOT SUCCESSFUL', dimensions, hash)
+                    failedFileNames.push(filename);
+                }
             }
+            console.log('aaaaaaaaaaaaaaaaaaaaaaaaaa')
+            console.log({
+                successfulFileNames,
+                failedFileNames
+            })
             return {
                 successfulFileNames,
                 failedFileNames
             };
         },
-        deleteImagesById: async (_, args, context, info) => {
+        deleteImagesById: async (_, args, {req, res}, info) => {
             // Only admins can delete images
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
-        deleteImagesByLabel: async (_, args, context, info) => {
+        deleteImagesByLabel: async (_, args, {req, res}, info) => {
             // Only admins can delete images
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },
     }

@@ -32,9 +32,9 @@ export const typeDef = gql`
 export const resolvers = {
     TaskStatus: TASK_STATUS,
     Query: {
-        tasks: async (_, context, args, info) => {
+        tasks: async (_, context, {req, res}, info) => {
             // Only admins can query tasks
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             let ids = args.ids;
             if (args.status !== null) {
                 const ids_query = await db(TABLES.Task)

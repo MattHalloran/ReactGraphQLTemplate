@@ -53,6 +53,10 @@ export const FeedbackModel = createModel(TABLES.Feedback, [
     ['one', 'user', [TABLES.User], ['userId']]
 ]);
 
+export const ImageModel = createModel(TABLES.Image, [
+    ['many-many', 'labels', [TABLES.Label, TABLES.ImageLabels], ['hash', 'label']]
+]);
+
 export const OrderModel = createModel(TABLES.Order, [
     ['one', 'address', [TABLES.Address], ['addressId']],
     ['one', 'user', [TABLES.User], ['userId']],

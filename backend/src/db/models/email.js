@@ -36,9 +36,9 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        emails: async (_, args, context, info) => {
+        emails: async (_, args, {req, res}, info) => {
             // Only admins can query emails
-            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
