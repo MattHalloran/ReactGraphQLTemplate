@@ -60,10 +60,14 @@ const Slider = ({
     }, [autoPlay, wait])
 
     useEffect(() => {
-        let copy = [...images, images[0]];
-        setSlides(copy.map((s, i) => (
-            <Slide width={width} key={s + i} content={s} />
-        )))
+        if (images === null || images.length === 0) {
+            setSlides(null);
+        } else {
+            let copy = [...images, images[0]];
+            setSlides(copy.map((s, i) => (
+                <Slide width={width} key={s + i} content={s} />
+            )))
+        }
     }, [width, images])
 
     return (

@@ -8,7 +8,7 @@ import sizeOf from 'image-size';
 import path from 'path';
 import fs from 'fs';
 import { GraphQLUpload } from 'graphql-upload';
-import { saveImage } from '../../utils';
+import { findImage, saveImage } from '../../utils';
 import { ImageModel as Model } from '../relationships';
 
 export const typeDef = gql`
@@ -27,19 +27,9 @@ export const typeDef = gql`
         failedFileNames: [String!]!
     }
 
-    type Image {
-        id: ID!
-        extension: String!
-        alt: String
-        hash: String!
-        width: Int!
-        height: Int!
-        labels: [String!]!
-    }
-
     extend type Query {
-        image(id: ID!, size: ImageSize): Image
-        images(label: String!, size: ImageSize): [Image!]!
+        imagesByName(fileNames: [String!]!, size: ImageSize): [String]!
+        imagesByLabel(label: String!, size: ImageSize): [String]!
     }
 
     extend type Mutation {
@@ -62,22 +52,33 @@ export const resolvers = {
     Upload: GraphQLUpload,
     ImageSize: IMAGE_SIZE,
     Query: {
-        image: async (_, args, context, info) => {
-            // Locate image in database
-            const image = await db(TABLES.Image).select('*').where('id', args.id).first();
-            if (image === undefined) return CustomError(CODE.ErrorUnknown);
-            // If size not specified, default to medium
-            const size = args.size ?? IMAGE_SIZE.M;
-            const image_regex = `../../../images/${image.folder}/${image.fileName}-*.${image.extension}`;
-            return CustomError(CODE.NotImplemented);
+        imagesByName: async (_, args, {req, res}, info) => {
+            console.log('IN IMAGES BY NAMEEEE', args)
+            // Loop through each fileName
+            const paths = [];
+            for (let i = 0; i < args.fileNames.length; i++) {
+                // Try returning the image in the requested size, or any available size
+                const filePath = await findImage(args.fileNames[i], args.size);
+                paths.push(filePath);
+            }
+            return paths;
         },
-        images: async (_, args, context, info) => {
+        imagesByLabel: async (_, args, context, info) => {
             // Locate images in database
-            const images = await db(TABLES.Image).select('*').where('label', args.label);
-            if (images === undefined || images.length === 0) return CustomError(CODE.ErrorUnknown);
-            // If size not specified, default to medium
-            const size = args.size ?? IMAGE_SIZE.M;
-            return CustomError(CODE.NotImplemented);
+            const images = await db(TABLES.Image)
+                .select('*')
+                .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
+                .where(`${TABLES.ImageLabels}.label`, args.label);
+            console.log('GOT IMAGESSSSSSS', images)
+            if (images === undefined || images.length === 0) return CustomError(CODE.NoResults);
+            // Loop through each image
+            const paths = [];
+            for (let i = 0; i < images.length; i++) {
+                // Try returning the image in the requested size, or any available size
+                const filePath = await findImage(`${images[i].fileName}.${images[i].extension}`, args.size);
+                paths.push(filePath);
+            }
+            return paths;
         }
     },
     Mutation: {
@@ -92,7 +93,7 @@ export const resolvers = {
             // Loop through every image passed in
             for (let i = 0; i < args.files.length; i++) {
                 // Destructure data. Each file is a promise
-                const { createReadStream, filename, mimetype } = await args.files[0];
+                const { createReadStream, filename, mimetype } = await args.files[i];
                 // Make sure that the file is actually an image
                 if (!mimetype.startsWith('image/')) return CustomError(CODE.InvalidArgs);
                 // Make sure image type is supported
@@ -100,7 +101,7 @@ export const resolvers = {
                 if (Object.values(IMAGE_EXTENSION).indexOf(extCheck.replace('.', '')) <= 0) return CustomError(CODE.InvalidArgs);
                 // Create a read stream
                 const stream = createReadStream();
-                const { success, filename: finalFilename, dimensions, hash } = await saveImage(stream, filename, 'images')
+                const { success, filename: finalFilename, dimensions, hash } = await saveImage(stream, filename)
                 if (success) {
                     successfulFileNames.push(finalFilename);
                     // Add image metadata to database

@@ -3,7 +3,7 @@ import { gql } from 'graphql-tag';
 export const customersQuery = gql`
     query {
         users {
-            id
+            fileName
             firstName
             lastName
             business {

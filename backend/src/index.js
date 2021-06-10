@@ -38,9 +38,9 @@ const corsOptions = {
 // })
 
 // Set static folders
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, 'private')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/private', auth.requireAdmin, express.static(path.join(__dirname, '../private')));
+app.use('/images', express.static(path.join(__dirname, '../images')));
 
 // Set up image uploading
 app.use(`/${API_PREFIX}/${API_VERSION}`,

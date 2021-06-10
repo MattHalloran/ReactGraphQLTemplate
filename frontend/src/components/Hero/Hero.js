@@ -4,10 +4,9 @@ import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { LINKS } from 'utils';
 import { Slider } from './Slider.js'
-import Hero1 from 'assets/img/hero-chicks.jpg';
-import Hero2 from 'assets/img/hero-rainbow.jpg';
-import Hero3 from 'assets/img/hero-plants.jpg';
-import Hero4 from 'assets/img/hero-butterfly.jpg';
+import { imagesByLabelQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
+import { useEffect, useState } from 'react';
 
 const useStyles = makeStyles(() => ({
     hero: {
@@ -54,23 +53,21 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-const images = [
-    Hero1,
-    Hero2,
-    Hero3,
-    Hero4,
-]
-
 function Hero({
     text,
     subtext,
 }) {
     let history = useHistory();
     const classes = useStyles();
+    const [imagePaths, setImagePaths] = useState(null);
+    const { loading, error, data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
+    useEffect(() => {
+        setImagePaths(data?.imagesByLabel);
+    }, [data])
 
     return (
         <div className={classes.hero}>
-            <Slider images={images} autoPlay={true} />
+            <Slider images={imagePaths} autoPlay={true} />
             <div className={classes.contentWrapper}>
                 <Typography variant='h2' component='h1' className={classes.title + ' ' + classes.textPop}>{text}</Typography>
                 <Typography variant='h4' component='h2' className={classes.subtitle + ' ' + classes.textPop}>{subtext}</Typography>

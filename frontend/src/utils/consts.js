@@ -85,6 +85,7 @@ export const LINKS = {
     AdminContactInfo: "/admin/contact-info",
     AdminCustomers: "/admin/customers",
     AdminGallery: "/admin/gallery",
+    AdminHero: "/admin/hero",
     AdminInventory: "/admin/inventory",
     AdminOrders: "/admin/orders",
     Cart: "/cart",

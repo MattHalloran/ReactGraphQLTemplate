@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs';
-import { IMAGE_SIZE } from '@local/shared';
+import { IMAGE_SIZE, SERVER_ADDRESS } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';
+import { db } from '../db/db';
+import { TABLES } from '../db/tables';
 
 // How many times a file name should be checked before giving up
 // ex: if 'billy.png' is taken, tries 'billy-1.png', 'billy-2.png', etc.
@@ -56,6 +58,25 @@ function resizeOptions(width, height) {
     return sizes;
 }
 
+// Returns the filepath of the requested image at the closest available size
+export async function findImage(filename, size) {
+    console.log('IN FIND IMAGE', filename, size)
+    const filepath = path.join(__dirname, `../../images`);
+    // If size not specified, attempts to return original
+    if (size === null || size === undefined) {
+        if(fs.existsSync(`${filepath}/${filename}`)) return `${SERVER_ADDRESS}/images/${filename}`;
+    }
+    // Search largest to smallest size
+    const { name, ext } = path.parse(filename);
+    const sizes = resizeOptions(size ?? IMAGE_SIZE.L, size ?? IMAGE_SIZE.L);
+    const keys = Object.keys(sizes).reverse();
+    for (let i = 0; i < keys.length; i++) {
+        let curr = `${name}-${keys[i]}${ext}`;
+        if(fs.existsSync(`${filepath}/${curr}`)) return `${SERVER_ADDRESS}/images/${curr}`;
+    }
+    return null;
+}
+
 // Saves a file in the specified folder at the backend root directory
 // Returns an object containing a success boolean and the file name
 // Arguments:
@@ -94,8 +115,9 @@ export async function saveFile(stream, filename, folder) {
 // stream - data stream of file
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in backend directory (ex: 'images')
-export async function saveImage(stream, filename, folder) {
+export async function saveImage(stream, filename) {
     try {
+        const folder = 'images';
         let filepath = path.join(__dirname, `../../${folder}`);
         // Find a valid file name to save data to
         let validName = await findFileName(filename, filepath);
@@ -108,8 +130,11 @@ export async function saveImage(stream, filename, folder) {
         // Determine image hash
         const hash = await imghash.hash(image_buffer);
         console.log('HERE IS HASH', hash)
+        // Check if hash already exists (image previously uploaded)
+        const previously_uploaded = (await db(TABLES.Image).select('id').where('hash', hash)).length > 0;
+        if (previously_uploaded) throw Error('File has already been uploaded')
         // Download the original image
-        //await stream.pipe(fs.createWriteStream(`${filepath}/${validName}`));
+        await sharp(image_buffer).toFile(`${filepath}/${validName}`);
         console.log('STREAMED TO', `${filepath}/${validName}`)
         // Find resize options
         const sizes = resizeOptions(dims.width, dims.height);

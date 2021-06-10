@@ -8,6 +8,7 @@ import {
     AdminContactPage,
     AdminCustomerPage,
     AdminGalleryPage,
+    AdminHeroPage,
     AdminMainPage,
     AdminInventoryPage,
     AdminOrderPage,
@@ -207,6 +208,11 @@ function Routes({
             <Route exact path={LINKS.AdminGallery} render={() => (
                 <Page title={"Edit Gallery"} {...common} authRole={USER_ROLES.Admin}>
                     <AdminGalleryPage />
+                </Page>
+            )} />
+            <Route exact path={LINKS.AdminHero} render={() => (
+                <Page title={"Edit Hero"} {...common} authRole={USER_ROLES.Admin}>
+                    <AdminHeroPage />
                 </Page>
             )} />
             <Route exact path={LINKS.AdminInventory} render={() => (

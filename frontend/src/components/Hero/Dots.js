@@ -36,7 +36,7 @@ const Dots = ({
     const classes = useStyles();
     return (
         <div className={classes.dotContainer}>
-            {slides.map((slide, i) => (
+            {slides?.map((slide, i) => (
                 <div key={slide} className={`${classes.dot} ${activeSlide === i ? classes.active : classes.inactive}`} />
             ))}
         </div>

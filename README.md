@@ -14,8 +14,11 @@ Before developing a website from this template, you will need to install:
 2. [PostgreSQL](https://www.postgresql.org/download/)
 3. The template repository (git clone https://github.com/MattHalloran/NLN)
 
-Once NPM is installed, you will also need to install Yarn. This makes it easy to share code and packages between the backend and frontend.  
-* npm install -g yarn
+Once NPM is installed, you must install a few global NPM packages. This allows for CLI support  
+1. Yarn - Allows code and package sharing between frontend and backend  
+    - npm install -g yarn
+2. Babel - Allows ES6 Javascript to run on the backend, since Express does not currently support it  
+    - npm install -g babel-cli
 
 
 ## Project setup
