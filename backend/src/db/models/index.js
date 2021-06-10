@@ -1,4 +1,5 @@
-import { merge } from 'lodash';
+import pkg from 'lodash';
+const { merge } = pkg;
 import { typeDef as Root, resolvers as RootResolvers } from './root';
 import { typeDef as Address, resolvers as AddressResolvers } from './address';
 import { typeDef as Business, resolvers as BusinessResolvers } from './business';

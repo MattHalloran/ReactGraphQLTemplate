@@ -6,7 +6,7 @@ import { IMAGE_SIZE } from "@local/shared";
 
 // Deletes image database rows for images that no longer exist
 export async function cleanImageRows() {
-    let filepath = path.join(__dirname, `../../images`);
+    let filepath = path.join(path.resolve(), `./images`);
     const sizes = Object.keys(IMAGE_SIZE);
     const image_data = await db(TABLES.Image).select('*');
     // Loop through all image rows

@@ -1,12 +1,12 @@
-const yup = require('yup');
-const { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } = require('./modelConsts');
+import * as yup from 'yup';
+import { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './modelConsts';
 
-const MIN_PASSWORD_LENGTH = 8;
-const MAX_PASSWORD_LENGTH = 50;
-const PHONE_REGEX = '^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$';
+export const MIN_PASSWORD_LENGTH = 8;
+export const MAX_PASSWORD_LENGTH = 50;
+export const PHONE_REGEX = '^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$';
 
 // Schema for creating a new account
-const signUpSchema = yup.object().shape({
+export const signUpSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
@@ -20,7 +20,7 @@ const signUpSchema = yup.object().shape({
 });
 
 // Schema for updating a user profile
-const profileSchema = yup.object().shape({
+export const profileSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
@@ -33,32 +33,32 @@ const profileSchema = yup.object().shape({
 });
 
 // Schema for logging in
-const logInSchema = yup.object().shape({
+export const logInSchema = yup.object().shape({
     email: yup.string().email().required(),
     password: yup.string().max(128).required()
 })
 
 // Schema for sending a password reset request
-const requestPasswordChangeSchema = yup.object().shape({
+export const requestPasswordChangeSchema = yup.object().shape({
     email: yup.string().email().required()
 })
 
 // Schema for adding an employee to a business
-const employeeSchema = yup.object().shape({
+export const employeeSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
 });
 
-const discountSchema = yup.object().shape({
+export const discountSchema = yup.object().shape({
     discount: yup.number().min(0).max(1).required(),
     title: yup.string().max(128).required(),
     comment: yup.string().max(1024).nullable(),
     terms: yup.string().max(4096).nullable()
 });
 
-const feedbackSchema = yup.object().shape({
+export const feedbackSchema = yup.object().shape({
     text: yup.string().max(4096).required()
 });
 
@@ -67,7 +67,7 @@ const roleSchema = yup.object().shape({
     description: yup.string().max(2048).nullable()
 });
 
-const addressSchema = yup.object().shape({
+export const addressSchema = yup.object().shape({
     tag: yup.string().max(128).nullable(),
     name: yup.string().max(128).nullable(),
     country: yup.string().max(2).default('US').required(),
@@ -80,19 +80,19 @@ const addressSchema = yup.object().shape({
     deliveryInstructions: yup.string().max(1024).nullable()
 });
 
-const emailSchema = yup.object().shape({
+export const emailSchema = yup.object().shape({
     emailAddress: yup.string().max(128).required(),
     receivesDeliveryUpdates: yup.bool().default(true).required(),
 });
 
-const phoneSchema = yup.object().shape({
+export const phoneSchema = yup.object().shape({
     number: yup.string().max(10).required(),
     countryCode: yup.string().max(8).default('1').required(),
     extension: yup.string().max(8).optional(),
     receivesDeliveryUpdates: yup.bool().default(true).required(),
 });
 
-const plantSchema = yup.object().shape({
+export const plantSchema = yup.object().shape({
     latinName: yup.string().max(256).required(),
     commonName: yup.string().max(256).optional(),
     description: yup.string().max(4096).optional(),
@@ -107,7 +107,7 @@ const plantSchema = yup.object().shape({
     displayImage: yup.string().optional()
 });
 
-const skuSchema = yup.object().shape({
+export const skuSchema = yup.object().shape({
     sku: yup.string().max(32).required(),
     isDiscountable: yup.bool().default(true).required(),
     size: yup.string().max(32).default('N/A').required(),
@@ -117,35 +117,15 @@ const skuSchema = yup.object().shape({
     status: yup.mixed().oneOf(Object.values(SKU_STATUS)).default(SKU_STATUS.Active).required()
 });
 
-const orderItemSchema = yup.object().shape({
+export const orderItemSchema = yup.object().shape({
     quantity: yup.number().integer().default(1).required(),
     skuId: yup.number().integer().required()
 });
 
-const orderSchema = yup.object().shape({
+export const orderSchema = yup.object().shape({
     status: yup.mixed().oneOf(Object.values(ORDER_STATUS)).default(ORDER_STATUS.Draft).required(),
     specialInstructions: yup.string().max(1024).optional(),
     desiredDeliveryDate: yup.date().optional(),
     isDelivery: yup.bool().default(true).required(),
     items: yup.array().of(orderItemSchema)
 });
-
-module.exports = {
-    MIN_PASSWORD_LENGTH: MIN_PASSWORD_LENGTH,
-    MAX_PASSWORD_LENGTH: MAX_PASSWORD_LENGTH,
-    signUpSchema: signUpSchema,
-    profileSchema: profileSchema,
-    logInSchema: logInSchema,
-    requestPasswordChangeSchema: requestPasswordChangeSchema,
-    employeeSchema: employeeSchema,
-    discountSchema: discountSchema,
-    feedbackSchema: feedbackSchema,
-    roleSchema: roleSchema,
-    addressSchema: addressSchema,
-    emailSchema: emailSchema,
-    phoneSchema: phoneSchema,
-    plantSchema: plantSchema,
-    skuSchema: skuSchema,
-    orderItemSchema: orderItemSchema,
-    orderSchema: orderSchema
-}

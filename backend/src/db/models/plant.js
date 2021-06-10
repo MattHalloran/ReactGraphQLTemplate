@@ -3,7 +3,6 @@ import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
-import { SKU_FIELDS } from './sku';
 import { PlantModel as Model } from '../relationships';
 
 export const typeDef = gql`

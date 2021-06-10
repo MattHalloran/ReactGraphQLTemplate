@@ -17,8 +17,8 @@ Before developing a website from this template, you will need to install:
 Once NPM is installed, you must install a few global NPM packages. This allows for CLI support  
 1. Yarn - Allows code and package sharing between frontend and backend  
     - npm install -g yarn
-2. Babel - Allows ES6 Javascript to run on the backend, since Express does not currently support it  
-    - npm install -g babel-cli
+2. Nodemon - Listens for changes and automatically restarts server  
+    - npm install -g nodemon
 
 
 ## Project setup

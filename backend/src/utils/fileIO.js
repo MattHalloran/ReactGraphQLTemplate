@@ -61,7 +61,7 @@ function resizeOptions(width, height) {
 // Returns the filepath of the requested image at the closest available size
 export async function findImage(filename, size) {
     console.log('IN FIND IMAGE', filename, size)
-    const filepath = path.join(__dirname, `../../images`);
+    const filepath = path.join(path.resolve(), `./images`);
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
         if(fs.existsSync(`${filepath}/${filename}`)) return `${SERVER_ADDRESS}/images/${filename}`;
@@ -85,7 +85,7 @@ export async function findImage(filename, size) {
 // folder - folder in backend directory (ex: 'images')
 export async function saveFile(stream, filename, folder) {
     try {
-        let filepath = path.join(__dirname, `../../${folder}`);
+        let filepath = path.join(path.resolve(), `./${folder}`);
         // Find a valid file name to save data to
         let name = await findFileName(filename, filepath);
         if (name === null) throw Error('Could not create a valid file name');
@@ -118,7 +118,7 @@ export async function saveFile(stream, filename, folder) {
 export async function saveImage(stream, filename) {
     try {
         const folder = 'images';
-        let filepath = path.join(__dirname, `../../${folder}`);
+        let filepath = path.join(path.resolve(), `./${folder}`);
         // Find a valid file name to save data to
         let validName = await findFileName(filename, filepath);
         if (validName === null) throw Error('Could not create a valid file name');
@@ -180,7 +180,7 @@ export async function saveImage(stream, filename) {
 // folder - folder in backend directory (ex: 'images')
 export async function deleteFile(filename, folder) {
     try {
-        let filepath = path.join(__dirname, `../../${folder}`);
+        let filepath = path.join(path.resolve(), `./${folder}`);
         let fullname = `${filepath}/${filename}`;
         if (!fs.existsSync(fullname)) return false;
         fs.unlinkSync(fullname);

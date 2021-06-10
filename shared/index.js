@@ -1,13 +1,5 @@
-const api = require('./src/apiConsts');
-const business = require('./src/businessConsts');
-const model = require('./src/modelConsts');
-const validation = require('./src/validation');
-const status = require('./src/statusCodes.json');
-
-module.exports = {
-    ...api,
-    ...business,
-    ...model,
-    ...validation,
-    CODE: status
-}
+export * from './src/apiConsts';
+export * from './src/businessConsts';
+export * from './src/modelConsts';
+export * from './src/validation';
+export * as CODE from './src/statusCodes.json';

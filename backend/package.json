@@ -3,29 +3,26 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "type": "module",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec  babel-node ./src/index.js",
-    "migrate-create": "babel-node node_modules/.bin/knex migrate:make --knexfile ./src/db/knexfile.js",
-    "seed-make": "babel-node node_modules/.bin/knex seed:make --knexfile ./src/db/knexfile.js",
-    "seed-run": "babel-node node_modules/.bin/knex seed:run --knexfile ./src/db/knexfile.js",
-    "migrate-latest": "babel-node node_modules/.bin/knex migrate:latest --knexfile ./src/db/knexfile.js",
-    "migrate-rollback": "babel-node node_modules/.bin/knex migrate:rollback --knexfile ./src/db/knexfile.js"
+    "start": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
+    "migrate-create": "knex migrate:make --knexfile ./src/db/knexfile.js",
+    "seed-make": "knex seed:make --knexfile ./src/db/knexfile.js",
+    "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js",
+    "migrate-latest": "knex migrate:latest --knexfile ./src/db/knexfile.js",
+    "migrate-rollback": "knex migrate:rollback --knexfile ./src/db/knexfile.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@babel/cli": "^7.14.5",
-    "@babel/core": "^7.14.5",
     "@local/shared": "1.0.0",
     "@types/express": "^4.17.11",
     "@types/node": "^15.0.2",
     "apollo-server-express": "^2.25.0",
-    "babel": "^6.23.0",
-    "babel-cli": "^7.0.0-beta.3",
     "bcrypt": "^5.0.1",
     "bull": "^3.22.4",
     "cookie-parser": "^1.4.5",
@@ -51,9 +48,6 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.16",
-    "@babel/node": "^7.13.13",
-    "@babel/preset-env": "^7.13.15",
     "nodemon": "^2.0.7"
   }
 }

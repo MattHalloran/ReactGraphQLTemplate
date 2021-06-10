@@ -7,7 +7,6 @@ import { CustomError } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
 import { fullSelectQueryHelper } from '../query';
-import { BUSINESS_FIELDS } from './business';
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 
@@ -105,7 +104,6 @@ export const resolvers = {
         users: async (_, args, {req}, info) => {
             // Only admins can query addresses
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            console.log('in users query', BUSINESS_FIELDS)
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
