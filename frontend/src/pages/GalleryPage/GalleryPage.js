@@ -1,22 +1,14 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { HotKeys } from "react-hotkeys";
-import PropTypes from 'prop-types';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
-import { useGet } from "restful-react";
 import {
     InformationalBreadcrumbs,
     StyledModal as Modal,
 } from 'components';
-import { ChevronLeftIcon, ChevronRightIcon } from 'assets/img';
-import { API_ADDRESS } from '@local/shared';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { PUBS, PubSub } from 'utils';
 import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { getImage, getImages } from 'query/http_promises';
-import SwipeableViews from 'react-swipeable-views';
-import { NoImageIcon } from 'assets/img';
+import { imagesByLabelQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
 
 const useStyles = makeStyles((theme) => ({
     imageList: {
@@ -45,75 +37,11 @@ const useStyles = makeStyles((theme) => ({
 
 //TODO add gallery modal part if url match (/gallery/:img)
 
-/**
- * Data must be structured as follows:
- *
- * data = [
- *   {
- *     img: image,
- *     title: 'Image',
- *     author: 'author',
- *     cols: 2,
- *   },
- *   {
- *     [etc...]
- *   },
- * ];
- */
-function ImageGridList({
-    data,
-    onClick,
-    ...props
-}) {
-    const classes = useStyles();
-    return (
-        <ImageList rowHeight={300} className={classes.imageList} cols={Math.round(window.innerWidth / 300)} spacing={1} {...props}>
-            {data.map((tile) => (
-                <ImageListItem key={tile.id} cols={tile.cols || 1} onClick={() => onClick(tile)}>
-                    <img className={classes.tileImg} src={tile.src} alt={tile.alt} />
-                </ImageListItem>
-            ))}
-        </ImageList>
-    );
-}
-
 function GalleryPage() {
     const classes = useStyles();
-    const [imageKeys, setImageKeys] = useState([]);
-    const [imageData, setImageData] = useState([]);
+    const { data: images, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'L' } });
 
-    useEffect(() => {
-        if (imageKeys.length === 0)
-            setImageData([]);
-        else {
-            let combined_data = [];
-            //Combine metadata with thumbnail images
-            for (let i = 0; i < imageKeys.length; i++) {
-                let new_data = {
-                    "id": imageKeys[i],
-                    "src": `${API_ADDRESS}/image?key=${imageKeys[i]}&size=l`,
-                    "thumbnail": `${API_ADDRESS}/image?key=${imageKeys[i]}&size=s`,
-                };
-                combined_data.push(new_data);
-            }
-            setImageData(combined_data);
-            // let images = [900, 800, 700, 600, 500].map((size) => ({
-            //     src: `https://placedog.net/${size}/${size}`
-            //   }));
-            // setImageData(images);
-        }
-    }, [imageKeys])
-
-    useGet({
-        path: "gallery",
-        resolve: (response) => {
-            if (response.ok) {
-                setImageKeys(response.data ?? []);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
-        }
-    })
+    if (error) PubSub.publish(PUBS.Snack, { message: error.message ?? 'Unknown error occurred', severity: 'error' });
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => navigate(-1));
@@ -122,7 +50,7 @@ function GalleryPage() {
     return (
         <div id='page'>
             <InformationalBreadcrumbs />
-            <Carousel className={classes.carousel} canAutoPlay={false} images={imageData} />
+            <Carousel className={classes.carousel} canAutoPlay={false} images={images?.imagesByLabel ?? []} />
         </div>
     );
 }

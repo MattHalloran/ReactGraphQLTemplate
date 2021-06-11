@@ -10,6 +10,7 @@ function AdminBreadcrumbs({...props}) {
                 <Link href={LINKS.AdminOrders}>Orders</Link>
                 <Link href={LINKS.AdminCustomers}>Customers</Link>
                 <Link href={LINKS.AdminInventory}>Inventory</Link>
+                <Link href={LINKS.AdminHero}>Hero</Link>
                 <Link href={LINKS.AdminGallery}>Gallery</Link>
                 <Link href={LINKS.AdminContactInfo}>Contact Info</Link>
             </Breadcrumbs>

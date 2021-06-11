@@ -8,6 +8,10 @@ export const imagesByLabelQuery = gql`
     imagesByLabel(
         label: $label
         size: $size
-    )
+    ) {
+        src
+        alt
+        description
+    }
   }
 `

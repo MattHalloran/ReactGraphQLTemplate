@@ -22,14 +22,20 @@ export const typeDef = gql`
         L
     }
 
-    type ImageResponse {
+    type ImageLabelResponse {
+        src: String!
+        alt: String
+        description: String
+    }
+
+    type AddImageResponse {
         successfulFileNames: [String!]!
         failedFileNames: [String!]!
     }
 
     extend type Query {
         imagesByName(fileNames: [String!]!, size: ImageSize): [String]!
-        imagesByLabel(label: String!, size: ImageSize): [String]!
+        imagesByLabel(label: String!, size: ImageSize): [ImageLabelResponse!]!
     }
 
     extend type Mutation {
@@ -37,7 +43,7 @@ export const typeDef = gql`
             files: [Upload!]!
             alts: [String]
             labels: [String!]!
-        ): ImageResponse!
+        ): AddImageResponse!
         deleteImagesById(
             ids: [ID!]!
         ): Response
@@ -72,13 +78,17 @@ export const resolvers = {
             console.log('GOT IMAGESSSSSSS', images)
             if (images === undefined || images.length === 0) return CustomError(CODE.NoResults);
             // Loop through each image
-            const paths = [];
+            const image_data = [];
             for (let i = 0; i < images.length; i++) {
                 // Try returning the image in the requested size, or any available size
                 const filePath = await findImage(`${images[i].fileName}.${images[i].extension}`, args.size);
-                paths.push(filePath);
+                image_data.push({
+                    src: filePath,
+                    alt: images[i].alt,
+                    description: images[i].description
+                });
             }
-            return paths;
+            return image_data;
         }
     },
     Mutation: {

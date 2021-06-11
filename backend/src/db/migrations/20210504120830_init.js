@@ -99,6 +99,7 @@ export async function up (knex) {
         table.string('fileName', 256).notNullable();
         table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
+        table.string('description', 1024);
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });

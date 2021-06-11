@@ -44,7 +44,7 @@ app.use('/images', express.static(path.join(path.resolve(), './images')));
 
 // Set up image uploading
 app.use(`/${API_PREFIX}/${API_VERSION}`,
-    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),
   )
 
 // Set up GraphQL using Apollo

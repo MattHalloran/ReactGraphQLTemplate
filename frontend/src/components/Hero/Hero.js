@@ -60,9 +60,9 @@ function Hero({
     let history = useHistory();
     const classes = useStyles();
     const [imagePaths, setImagePaths] = useState(null);
-    const { loading, error, data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
+    const { loading, error, data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'L' } });
     useEffect(() => {
-        setImagePaths(data?.imagesByLabel);
+        setImagePaths(data?.imagesByLabel.map(d => d.src));
     }, [data])
 
     return (
