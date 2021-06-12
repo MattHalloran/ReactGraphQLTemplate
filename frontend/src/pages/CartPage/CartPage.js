@@ -57,8 +57,8 @@ function CartPage({
                 PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
             }
             else {
-                console.error(response.msg);
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                console.error(response.message);
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }
         }
     });

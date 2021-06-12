@@ -29,7 +29,8 @@ export const profileSchema = yup.object().shape({
     phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),
     currentPassword: yup.string().max(128).required(),
-    newPassword: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).optional()
+    newPassword: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).optional(),
+    newPasswordConfirmation: yup.string().oneOf([yup.ref('newPassword'), null], 'Passwords must match')
 });
 
 // Schema for logging in

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { LINKS } from 'utils';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
+import { USER_ROLES, BUSINESS_NAME } from '@local/shared';
 
 const Page = ({
     title,
@@ -17,6 +18,7 @@ const Page = ({
     const [login] = useMutation(loginMutation);
 
     useEffect(() => {
+        console.log('LOGGING INNNNN.......')
         login().then((response) => {
             onSessionUpdate(response.data.login);
             setSessionChecked(true);
@@ -30,7 +32,8 @@ const Page = ({
     // If this page has restricted access
     if (authRole !== null) {
         let role_titles = roles?.map(r => r.title);
-        const valid_role = (role_titles?.indexOf(authRole) >= 0);
+        const valid_role = (role_titles?.indexOf(authRole) >= 0) || 
+                           (role_titles?.indexOf(USER_ROLES.Admin) >= 0);
         if (!valid_role && sessionChecked) onRedirect(redirect);
         return valid_role ? children : null;
     }

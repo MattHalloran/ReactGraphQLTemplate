@@ -155,7 +155,7 @@ function Routes({
                 render={() => (
                     <Page title={`Profile | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Customer}>
                         <FormPage title="Profile">
-                            <ProfileForm user_id={session?.user_id} />
+                            <ProfileForm {...common} />
                         </FormPage>
                     </Page>
                 )}

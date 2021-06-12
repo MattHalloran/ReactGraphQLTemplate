@@ -34,7 +34,7 @@ function AdminOrderPage({
         queryParams: { filter: filter },
         resolve: (response) => {
             if (!response.ok)
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
         }
     })
 

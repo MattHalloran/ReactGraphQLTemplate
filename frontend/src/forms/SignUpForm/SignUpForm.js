@@ -58,14 +58,14 @@ function SignUpForm({
                         alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
                     }
                     onRedirect(LINKS.Shopping);
-                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
                 PubSub.publish(PUBS.Loading, false);
                 if (response.code === CODE.EmailInUse.code) {
-                    if (window.confirm(`${response.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
+                    if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form`)) {
                         onRedirect(LINKS.ForgotPassword);
                     }
-                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             })
         },
     });

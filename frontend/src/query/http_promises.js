@@ -101,6 +101,6 @@ export async function getImages(keys, size) {
     return {
         ok: false,
         data: images,
-        msg: 'Failed to load some images'
+        message: 'Failed to load some images'
     }
 }

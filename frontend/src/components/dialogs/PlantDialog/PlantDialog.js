@@ -126,7 +126,7 @@ function PlantDialog({
                 Cookies.set(`nln-img-${plant.display_key}`, JSON.stringify(image_data));
             }
             else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
         }
     })
 

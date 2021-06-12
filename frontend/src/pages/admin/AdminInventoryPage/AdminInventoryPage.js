@@ -64,7 +64,7 @@ function AdminInventoryPage({
                 setExistingThumbnails(response.images);
             }
             else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
         }
     })
 
@@ -76,7 +76,7 @@ function AdminInventoryPage({
                 setAllThumbnails(response.images);
             }
             else
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
         }
     })
 
@@ -88,8 +88,8 @@ function AdminInventoryPage({
                 alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
             }
             else {
-                console.error(response.msg);
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                console.error(response.message);
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }
         }
     });

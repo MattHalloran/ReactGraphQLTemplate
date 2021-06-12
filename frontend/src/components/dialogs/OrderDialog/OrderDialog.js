@@ -69,8 +69,8 @@ function OrderDialog({
                 PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
             }
             else {
-                console.error(response.msg, order);
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                console.error(response.message, order);
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }
         }
     });

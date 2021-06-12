@@ -1,16 +1,18 @@
 import { gql } from 'graphql-tag';
 
-export const signUpMutation = gql`
-    mutation signUp(
+export const editProfileMutation = gql`
+    mutation editProfile(
         $firstName: String!
         $lastName: String!
         $pronouns: String
         $businessName: String!
         $email: String!
         $phone: String!
+        $theme: String!
         $existingCustomer: Boolean!
         $marketingEmails: Boolean!
-        $password: String!
+        $currentPassword: String!
+        $newPassword: String
     ) {
     signUp(
         firstName: $firstName
@@ -19,9 +21,11 @@ export const signUpMutation = gql`
         businessName: $businessName
         email: $email
         phone: $phone
+        theme: $theme
         existingCustomer: $existingCustomer
         marketingEmails: $marketingEmails
-        password: $password
+        currentPassword: $currentPassword
+        newPassword: $newPassword
     ) {
         id
         theme

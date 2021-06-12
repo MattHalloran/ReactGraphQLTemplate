@@ -43,6 +43,7 @@ export const typeDef = gql`
 
     extend type Query {
         users(ids: [ID!]): [User!]!
+        profile: User!
     }
 
     extend type Mutation {
@@ -69,11 +70,10 @@ export const typeDef = gql`
             lastName: String
             pronouns: String!
             theme: String!
-            accountApproved: Boolean!
-            emailVerified: Boolean!
-            status: AccountStatus!
-            password: String!
-            confirmPassword: String!
+            status: AccountStatus
+            marketingEmails: Boolean!
+            currentPassword: String!
+            newPassword: String!
         ): User!
         deleteUser(
             id: ID!
@@ -105,6 +105,13 @@ export const resolvers = {
             // Only admins can query addresses
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
+        },
+        profile: async (_, args, {req}, info) => {
+            // Can only query your own profile
+            const userId = req.token.userId;
+            if (userId === null || userId === undefined) return new CustomError(CODE.Unauthorized);
+            const results = await fullSelectQueryHelper(Model, info, [userId]);
+            return results[0];
         }
     },
     Mutation: {

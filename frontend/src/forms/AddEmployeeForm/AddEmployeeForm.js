@@ -54,11 +54,11 @@ function AddEmployeeForm() {
         // }).catch(err => {
         //     console.error(err);
         //     if (err.code === CODE.EmailInUse.code) {
-        //         if (window.confirm(`${err.msg}. Press OK if you would like to be redirected to the forgot password form`)) {
+        //         if (window.confirm(`${err.message}. Press OK if you would like to be redirected to the forgot password form`)) {
         //             history.push(LINKS.ForgotPassword);
         //         }
         //     } else {
-        //         PubSub.publish(PUBS.Snack, {message: err.msg, severity: 'error'});
+        //         PubSub.publish(PUBS.Snack, {message: err.message, severity: 'error'});
         //     }
         // })
     }

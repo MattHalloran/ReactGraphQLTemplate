@@ -46,11 +46,11 @@ function ForgotPasswordForm({
                 if (response.ok) {
                     PubSub.publish(PUBS.Snack, { message: 'Request sent. Please check email.' });
                     onRedirect(LINKS.Home);
-                } else PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
                 console.log('oh no', response)
                 PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.msg, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             })
         },
     });
