@@ -2,14 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Typography } from '@material-ui/core';
 import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
-import {
-    AdminBreadcrumbs,
-    ImageTable
-} from 'components';
+import { AdminBreadcrumbs } from 'components';
 import { imagesByLabelQuery } from 'graphql/query';
 import { addImageMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
 import Dropzone from 'components/Dropzone/Dropzone';
+import { ImageList } from 'components/lists/ImageList/ImageList';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -21,7 +19,7 @@ function AdminGalleryPage({
 }) {
     console.log('GALLERY PAGE RENDER...')
     const classes = useStyles();
-    const [tableData, setTableData] = useState([]);
+    const [imageData, setImageData] = useState([]);
     const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'M' } });
     const [addImage] = useMutation(addImageMutation);
 
@@ -47,26 +45,16 @@ function AdminGalleryPage({
 
     useEffect(() => {
         // Table data must be extensible, and needs position
-        setTableData(currImages?.imagesByLabel?.map((d, index) => ({
+        setImageData(currImages?.imagesByLabel?.map((d, index) => ({
             ...d,
             pos: index
         })));
     }, [currImages])
 
-    const updateData = (data) => {
-        console.log('updating image table', data)
-        setTableData(data);
-    }
-
-    const applyChanges = useCallback(() => {
-        let data = tableData.map(d => ({
-            'id': d.key,
-            'alt': d.alt,
-            'description': d.description,
-        }));
+    const applyChanges = useCallback((changed) => {
         // TODO
-        // updateGallery(data);
-    }, [tableData])
+        // updateGallery(changed);
+    }, [imageData])
 
     return (
         <div id='page' className={classes.root}>
@@ -81,11 +69,7 @@ function AdminGalleryPage({
                 cancelText='Cancel Upload'
             />
             <h2>Reorder and delete images</h2>
-            <ImageTable
-                title="Gallery Images"
-                data={tableData}
-                onUpdate={updateData}
-                onApply={applyChanges} />
+            <ImageList data={imageData} onApply={applyChanges}/>
         </div>
     );
 }

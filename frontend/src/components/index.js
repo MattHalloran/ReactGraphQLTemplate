@@ -5,7 +5,6 @@ export * from './Copyright/Copyright';
 export * from './dialogs';
 export * from './FeaturedPlants/FeaturedPlants';
 export * from './Hero/Hero';
-export * from './ImageGridList/ImageGridList';
 export * from './inputs';
 export * from './navigation';
 export * from './PopupMenu/PopupMenu';

@@ -14,6 +14,8 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import { useHistory } from 'react-router';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 
 const useStyles = makeStyles((theme) => {
     console.log(Object.keys(theme)); return ({
@@ -90,36 +92,38 @@ export function App() {
         <StyledEngineProvider injectFirst>
             <CssBaseline />
             <ThemeProvider theme={theme}>
-                <div id="App">
-                    <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                    <main id="page-container" className={classes.pageContainer}>
-                        <div id="content-wrap" className={classes.contentWrap}>
-                            <Navbar
-                                session={session}
-                                onSessionUpdate={setSession}
-                                roles={session?.roles}
-                                cart={cart}
-                                onRedirect={redirect}
-                            />
-                            {loading ?
-                                <div className={classes.spinner}>
-                                    <CircularProgress size={100} />
-                                </div>
-                                : null}
-                            <AlertDialog />
-                            <Snack />
-                            <Routes
-                                session={session}
-                                onSessionUpdate={setSession}
-                                roles={session?.roles}
-                                cart={cart}
-                                onRedirect={redirect}
-                            />
-                        </div>
-                        <IconNav session={session} roles={session?.roles} cart={cart} />
-                        <Footer session={session} />
-                    </main>
-                </div>
+                <DndProvider backend={HTML5Backend}>
+                    <div id="App">
+                        <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+                        <main id="page-container" className={classes.pageContainer}>
+                            <div id="content-wrap" className={classes.contentWrap}>
+                                <Navbar
+                                    session={session}
+                                    onSessionUpdate={setSession}
+                                    roles={session?.roles}
+                                    cart={cart}
+                                    onRedirect={redirect}
+                                />
+                                {loading ?
+                                    <div className={classes.spinner}>
+                                        <CircularProgress size={100} />
+                                    </div>
+                                    : null}
+                                <AlertDialog />
+                                <Snack />
+                                <Routes
+                                    session={session}
+                                    onSessionUpdate={setSession}
+                                    roles={session?.roles}
+                                    cart={cart}
+                                    onRedirect={redirect}
+                                />
+                            </div>
+                            <IconNav session={session} roles={session?.roles} cart={cart} />
+                            <Footer session={session} />
+                        </main>
+                    </div>
+                </DndProvider>
             </ThemeProvider>
         </StyledEngineProvider>
     );
