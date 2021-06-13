@@ -2,9 +2,8 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteHelper, fullSelectQueryHelper, insertJoinRowsHelper, updateHelper } from '../query';
+import { deleteHelper, fullSelectQueryHelper, insertJoinRowsHelper, updateHelper, updateJoinRowsHelper } from '../query';
 import { DiscountModel as Model } from '../relationships';
-import { TABLES } from '../tables';
 
 export const typeDef = gql`
     type Discount {
@@ -41,21 +40,21 @@ export const typeDef = gql`
         ): Response
         deleteDiscounts(
             ids: [ID!]!
-        ): Response
+        ): Boolean
     }
 `
 
 export const resolvers = {
     Query: {
         discounts: async (_, args, { req }, info) => {
-            // Only admins can query
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
         addDiscount: async (_, args, { req }, info) => {
-            // Only admins can add
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             
             const added = await db(Model.name).insertAndFetch({
@@ -68,21 +67,17 @@ export const resolvers = {
             await insertJoinRowsHelper(Model, 'skus', added.id, args.skuIds);
             return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
-        updateDiscount: async (_, args, { req, res }) => {
-            // Only admins can update
+        updateDiscount: async (_, args, { req }, info) => {
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
 
-            const updated = await updateHelper(Model, args, curr);
-            if (args.businessIds) {
-                return new CustomError(CODE.NotImplemented);
-            }
-            if (args.skuIds) {
-                return new CustomError(CODE.NotImplemented);
-            }
-            return (await fullSelectQueryHelper(Model, info, [updated.id]))[0];
+            await updateHelper(Model, args, curr);
+            await updateJoinRowsHelper(Model, 'businesses', args.id, args.businessIds);
+            await updateJoinRowsHelper(Model, 'skus', args.id, args.skuIds);
+            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
         },
-        deleteDiscounts: async (_, args, { req, res }) => {
-            // Only admins can delete
+        deleteDiscounts: async (_, args, { req }) => {
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await deleteHelper(Model.name, args.ids);
         }

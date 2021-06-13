@@ -1,12 +1,12 @@
 import { gql } from 'graphql-tag';
 
-export const addImageMutation = gql`
-    mutation addImage(
+export const addImagesMutation = gql`
+    mutation addImages(
         $files: [Upload!]!
         $alts: [String]
         $labels: [String!]!
     ) {
-    addImage(
+    addImages(
         files: $files
         alts: $alts
         labels: $labels

@@ -234,6 +234,7 @@ export const updateHelper = async (model, args, curr, id, excluded = []) => {
 // main_id - id of main relationship object
 // foreign_ids - array of foreign ids to be added
 export const insertJoinRowsHelper = async (model, rel_name, main_id, foreign_ids) => {
+    // If no foreign_ids, cancel
     if (!Array.isArray(foreign_ids) || !foreign_ids.length) return;
     const relationship = model.getRelationship(rel_name);
     const rowData = foreign_ids.map(row_id => 
@@ -244,12 +245,106 @@ export const insertJoinRowsHelper = async (model, rel_name, main_id, foreign_ids
     await db(relationship.classNames[1]).insert(rowData);
 }
 
+// Deletes joining table (many-to-many) rows
+// **NOTE** - Only associates objects (i.e. only deletes from the joining table)
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// main_id - id of main relationship object
+// foreign_ids - array of foreign ids to be removed
+export const deleteJoinRowsHelper = async (model, rel_name, main_id, foreign_ids) => {
+    // If no foreign_ids, cancel
+    if (!Array.isArray(foreign_ids) || !foreign_ids.length) return;
+    const relationship = model.getRelationship(rel_name);
+    await db(relationship.classNames[1])
+        .where(relationship.ids[0], main_id)
+        .andWhere(relationship.ids[1], foreign_ids)
+        .del();
+}
+
+// Updates joining table (many-to-many) rows
+// **NOTE** - Only associates objects (i.e. only adds/deletes from the joining table)
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// main_id - id of main relationship object
+// foreign_ids - array of foreign ids to be associated with the model
+//               ids that are added and deleted are determined in this function
+export const updateJoinRowsHelper = async (model, rel_name, main_id, foreign_ids) => {
+    // Unlike add and delete, an empty array is fine
+    if (!Array.isArray(foreign_ids)) return;
+    const relationship = model.getRelationship(rel_name);
+    // Determine existing ids in join table
+    const existing_ids = await db(relationship.classNames[1])
+                    .select(relationship.ids[1])
+                    .where(relationship.ids[0], main_id);
+    // Determine and add new rows
+    const new_ids = foreign_ids.filter(id => !existing_ids.includes(id));
+    await insertJoinRowsHelper(model, rel_name, main_id, new_ids);
+    // Determine and delete old rows
+    const old_ids = existing_ids.filter(id => !foreign_ids.includes(id));
+    await deleteJoinRowsHelper(model, rel_name, main_id, old_ids);
+}
+
+// Adds children's foreign id in one-to-many relationship
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// parent_id - id of main relationship object
+// child_ids - array of child ids
+export const addChildRelationshipsHelper = async (model, rel_name, parent_id, child_ids) => {
+    // If no foreign_ids, cancel
+    if (!Array.isArray(child_ids) || !child_ids.length) return;
+    const relationship = model.getRelationship(rel_name);
+    await db(relationship.classNames[0])
+        .whereIn(relationship.ids[0], child_ids)
+        .update({ [relationship.ids[0]]: parent_id });
+}
+
+// Removes children's foreign id in one-to-many relationship
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// parent_id - id of main relationship object
+// child_ids - array of child ids
+export const removeChildRelationshipsHelper = async (model, rel_name, child_ids) => {
+    // If no foreign_ids, cancel
+    if (!Array.isArray(child_ids) || !child_ids.length) return;
+    const relationship = model.getRelationship(rel_name);
+    await db(relationship.classNames[0])
+        .whereIn(relationship.ids[0], child_ids)
+        .update({ [relationship.ids[0]]: null });
+}
+
+// Updates children's foreign id in one-to-many relationship
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// parent_id - id of main relationship object
+// child_ids - array of child ids
+export const updateChildRelationshipsHelper = async (model, rel_name, parent_id, child_ids) => {
+    // Unlike add and delete, an empty array is fine
+    if (!Array.isArray(child_ids)) return;
+    const relationship = model.getRelationship(rel_name);
+    // Determine existing child ids associated with parent
+    const existing_ids = await db(relationship.classNames[0])
+                    .select(relationship.ids[0])
+                    .where(relationship.ids[0], parent_id);
+    // Determine and add new relationships
+    const new_ids = child_ids.filter(id => !existing_ids.includes(id));
+    await addChildRelationshipsHelper(model, rel_name, parent_id, new_ids);
+    // Determine and remove old relationships
+    const old_ids = existing_ids.filter(id => !child_ids.includes(id));
+    await removeChildRelationshipsHelper(model, rel_name, old_ids);
+}
+
 // Deletes a list of rows from a table
 // Returns a success or error message
 // Arguments:
 // table - a string of the table's name
 // ids - an array of ids of the rows being deleted
-export const deleteHelper = async (table, ids, column = 'id') => {
+export const deleteHelper = async (table, ids, column = 'id', ignoreDeleteCount = false) => {
     const numDeleted = await db(table).delete().whereIn(column, ids);
-    return new CustomError(numDeleted === ids.length ? CODE.Success : CODE.ErrorUnknown);
+    return (ignoreDeleteCount || numDeleted === ids.length) ? 
+        true : new CustomError(CODE.ErrorUnknown);
 }

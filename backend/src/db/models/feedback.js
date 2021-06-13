@@ -23,14 +23,14 @@ export const typeDef = gql`
         ): Feedback!
         deleteFeedbacks(
             ids: [ID!]!
-        ): Response
+        ): Boolean
     }
 `
 
 export const resolvers = {
     Query: {
         feedbacks: async (_, args, { req }, info) => {
-            // Only admins can query
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
@@ -44,7 +44,11 @@ export const resolvers = {
             return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
         deleteFeedbacks: async (_, args, { req }) => {
-            if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Must be admin, or deleting your own
+            let user_ids = await db(Model.name).select('userId').whereIn('id', args.ids);
+            user_ids = [...new Set(user_ids)];
+            if (!req.isAdmin && (user_ids.length > 1 || req.token.user_id !== user_ids[0])) return new CustomError(CODE.Unauthorized);
+
             return await deleteHelper(Model.name, args.ids);
         }
     }

@@ -40,26 +40,26 @@ export const typeDef = gql`
         ): Plant!
         deletePlants(
             ids: [ID!]!
-        ): Response
+        ): Boolean
     }
 `
 
 export const resolvers = {
     Query: {
         plants: async (_, args, { req }, info) => {
-            // Only admins can query (customers query SKUs)
+            // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         },
         activePlants: async (_, _a, { req }, info) => {
-            // Only admins can query (customers query SKUs)
+            // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Active plants are referenced by a SKU
             const active_ids = await db(TABLES.Sku).select('plantId');
             return fullSelectQueryHelper(Model, info, active_ids);
         },
         inactivePlants: async (_, _a, { req }, info) => {
-            // Only admins can query (customers query SKUs)
+            // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Active plants are referenced by no SKUs
             const all_ids = await db(Model.name).select('id');
@@ -69,14 +69,14 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addPlant: async (_, args, { req, res }) => {
-            return CustomError(CODE.NotImplemented);
+        addPlant: async (_, args, { req, res }, info) => {
+            return new CustomError(CODE.NotImplemented);
         },
-        updatePlant: async (_, args, { req, res }) => {
-            return CustomError(CODE.NotImplemented);
+        updatePlant: async (_, args, { req, res }, info) => {
+            return new CustomError(CODE.NotImplemented);
         },
         deletePlants: async (_, args, { req }) => {
-            // Only admins can delete
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await deleteHelper(Model.name, args.ids);
         },

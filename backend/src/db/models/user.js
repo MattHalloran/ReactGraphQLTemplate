@@ -6,7 +6,7 @@ import { ACCOUNT_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
-import { fullSelectQueryHelper } from '../query';
+import { deleteJoinRowsHelper, fullSelectQueryHelper, insertJoinRowsHelper } from '../query';
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 
@@ -79,22 +79,22 @@ export const typeDef = gql`
             id: ID!
             password: String
             confirmPassword: String
-        ): Response
+        ): Boolean
         requestPasswordChange(
             id: ID
         ): Response
         changeUserStatus(
             id: ID!
             status: AccountStatus!
-        ): Response
+        ): Boolean
         addUserRole(
             id: ID!
             roleId: ID!
-        ): Response
+        ): Boolean
         removeUserRole(
             id: ID!
             roleId: ID!
-        ): Response
+        ): Boolean
     }
 `
 
@@ -102,7 +102,7 @@ export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
     Query: {
         users: async (_, args, { req }, info) => {
-            // Only admins can query
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         },
@@ -186,25 +186,31 @@ export const resolvers = {
             })
         },
         signUp: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         },
         updateUser: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         },
         deleteUser: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         },
         requestPasswordChange: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+            return new CustomError(CODE.NotImplemented);
         },
         changeUserStatus: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            await db(Model.name).where('id', args.id).update({ status: args.status });
         },
-        addUserRole: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+        addUserRole: async (_, args, { req }) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await insertJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);
         },
-        removeUserRole: async (_, args, { req, res }, info) => {
-            return CustomError(CODE.NotImplemented);
+        removeUserRole: async (_, args, { req }) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await deleteJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);
         },
     }
 }

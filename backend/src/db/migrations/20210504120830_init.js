@@ -30,7 +30,7 @@ export async function up (knex) {
         table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();
         table.enu('status', Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
-        table.uuid('businessId').references('id').inTable(TABLES.Business);
+        table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE');
     });
     await knex.schema.createTable(TABLES.Discount, (table) => {
         table.uuid('id').primary();
@@ -42,7 +42,7 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Feedback, (table) => {
         table.uuid('id').primary();
         table.string('text', 4096).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User);
+        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Role, (table) => {
         table.uuid('id').primary();
@@ -69,15 +69,15 @@ export async function up (knex) {
         table.string('postalCode', 16).notNullable();
         table.string('throughfare', 256).notNullable();
         table.string('premise', 64);
-        table.uuid('businessId').references('id').inTable(TABLES.Business);
+        table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Email, (table) => {
         //TODO CONSTRAINT chk_keys check (user_id is not null or business_id is not null)
         table.increments();
         table.string('emailAddress', 128).notNullable().unique();
         table.boolean('receivesDeliveryUpdates').defaultTo(true).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User);
-        table.uuid('businessId').references('id').inTable(TABLES.Business);
+        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Phone, (table) => {
         // Numbers should be stored without formatting
@@ -88,8 +88,8 @@ export async function up (knex) {
         table.string('countryCode', 8).defaultTo('1').notNullable();
         table.string('extension', 8);
         table.boolean('receivesDeliveryUpdates').defaultTo(true).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User);
-        table.uuid('businessId').references('id').inTable(TABLES.Business);
+        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
         //TODO UNIQUE (foler, file_name, extension)
@@ -124,7 +124,7 @@ export async function up (knex) {
         table.integer('availability').defaultTo(0).notNullable();
         table.string('price', 16).defaultTo('N/A').notNullable();
         table.enu('status', Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant);
+        table.uuid('plantId').references('id').inTable(TABLES.Plant).onUpdate('CASCADE').onDelete('CASCADE');
         table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.Order, (table) => {
@@ -134,39 +134,39 @@ export async function up (knex) {
         table.timestamp('desiredDeliveryDate');
         table.timestamp('expectedDeliveryDate');
         table.boolean('isDelivery').defaultTo(true).notNullable();
-        table.integer('addressId').references('id').inTable(TABLES.Address);
-        table.uuid('userId').references('id').inTable(TABLES.User).notNullable();
+        table.integer('addressId').references('id').inTable(TABLES.Address).onUpdate('CASCADE');
+        table.uuid('userId').references('id').inTable(TABLES.User).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.OrderItem, (table) => {
         table.increments();
         table.integer('quantity').defaultTo(1).notNullable();
-        table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable();
-        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable();
+        table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.ImageLabels, (table) => {
         table.increments();
-        table.string('hash').references('hash').inTable(TABLES.Image).notNullable();
+        table.string('hash').references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('label').notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
         table.increments();
-        table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable();
-        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable();
+        table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.PlantTraits, (table) => {
         table.increments();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable();
-        table.integer('TraitId').references('id').inTable(TABLES.Trait).notNullable();
+        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.integer('TraitId').references('id').inTable(TABLES.Trait).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.increments();
-        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable();
-        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable();
+        table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.UserRoles, (table) => {
         table.increments();
-        table.uuid('userId').references('id').inTable(TABLES.User).notNullable();
-        table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable();
+        table.uuid('userId').references('id').inTable(TABLES.User).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
 }
 

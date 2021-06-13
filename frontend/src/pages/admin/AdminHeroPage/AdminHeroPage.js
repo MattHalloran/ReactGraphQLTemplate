@@ -6,7 +6,7 @@ import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { AdminBreadcrumbs } from 'components';
 import { imagesByLabelQuery } from 'graphql/query';
-import { addImageMutation } from 'graphql/mutation';
+import { addImagesMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
 import Dropzone from 'components/Dropzone/Dropzone';
 import { ImageList } from 'components/lists/ImageList/ImageList';
@@ -22,11 +22,11 @@ function AdminHeroPage({
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
     const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
-    const [addImage] = useMutation(addImageMutation);
+    const [addImages] = useMutation(addImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
         PubSub.publish(PUBS.Loading, true);
-        addImage({
+        addImages({
             variables: {
                 files: acceptedFiles,
                 labels: ['hero']

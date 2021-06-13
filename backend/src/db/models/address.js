@@ -52,22 +52,22 @@ export const typeDef = gql`
         ): Response
         deleteAddresses(
             ids: [ID!]!
-        ): Response
+        ): Boolean
     }
 `
 
 export const resolvers = {
     Query: {
         addresses: async (_, args, { req }, info) => {
-            // Only admins can query
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
         addAddress: async (_, args, { req }, info) => {
-            // Only admins can add for other businesses
-            if(!req.isAdmin || (req.token.businessId !== args.businessId)) return new CustomError(CODE.Unauthorized);
+            // Must be admin, or adding to your own
+            if(!req.isAdmin && (req.token.businessId !== args.businessId)) return new CustomError(CODE.Unauthorized);
 
             const added = await db(Model.name).insertAndFetch({
                 tag: args.tag,
@@ -84,19 +84,19 @@ export const resolvers = {
             return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
         updateAddress: async (_, args, { req }, info) => {
-            // Only admins can update for other businesses
-            if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Must be admin, or updating your own
             const curr = await db(Model.name).where('id', args.id).first();
-            if (req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin && req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
 
-            const updated = await updateHelper(Model, args, curr);
-            return (await fullSelectQueryHelper(Model, info, [updated.id]))[0];
+            await updateHelper(Model, args, curr);
+            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
         },
         deleteAddresses: async (_, args, { req }) => {
-            // Only admins can delete for other businesses
-            if(!req.isAdmin || args.ids.length > 1) return new CustomError(CODE.Unauthorized);
-            const curr = await db(Model.name).where('id', args.ids[0]).first();
-            if (req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);   
+            // Must be admin, or deleting your own
+            let business_ids = await db(Model.name).select('businessId').whereIn('id', args.ids);
+            business_ids = [...new Set(business_ids)];
+            if (!req.isAdmin && (business_ids.length > 1 || req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
+
             return await deleteHelper(Model.name, args.ids);
         }
     }

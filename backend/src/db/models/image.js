@@ -4,12 +4,11 @@ import { TABLES } from '../tables';
 import { CODE, IMAGE_EXTENSION } from '@local/shared';
 import { IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
-import sizeOf from 'image-size';
 import path from 'path';
-import fs from 'fs';
 import { GraphQLUpload } from 'graphql-upload';
 import { findImage, saveImage } from '../../utils';
 import { ImageModel as Model } from '../relationships';
+import { deleteHelper, updateHelper } from '../query';
 
 export const typeDef = gql`
     scalar Upload
@@ -22,7 +21,13 @@ export const typeDef = gql`
         L
     }
 
-    type ImageLabelResponse {
+    input ImageUpdate {
+        src: String!
+        alt: String
+        description: String
+    }
+
+    type ImageData {
         src: String!
         alt: String
         description: String
@@ -35,22 +40,25 @@ export const typeDef = gql`
 
     extend type Query {
         imagesByName(fileNames: [String!]!, size: ImageSize): [String]!
-        imagesByLabel(label: String!, size: ImageSize): [ImageLabelResponse!]!
+        imagesByLabel(label: String!, size: ImageSize): [ImageData!]!
     }
 
     extend type Mutation {
-        addImage(
+        addImages(
             files: [Upload!]!
             alts: [String]
             labels: [String!]!
         ): AddImageResponse!
+        updateImages(
+            data: [ImageUpdate!]!
+        ): Boolean!
         deleteImagesById(
             ids: [ID!]!
-        ): Response
+        ): Boolean
         # Images with labels that are not in this request will be saved
         deleteImagesByLabel(
             labels: [String!]!
-        ): Response
+        ): Boolean
     }
 `
 
@@ -58,7 +66,7 @@ export const resolvers = {
     Upload: GraphQLUpload,
     ImageSize: IMAGE_SIZE,
     Query: {
-        imagesByName: async (_, args, { req, res }, info) => {
+        imagesByName: async (_, args) => {
             console.log('IN IMAGES BY NAMEEEE', args)
             // Loop through each fileName
             const paths = [];
@@ -69,14 +77,14 @@ export const resolvers = {
             }
             return paths;
         },
-        imagesByLabel: async (_, args, { req, res }, info) => {
+        imagesByLabel: async (_, args) => {
             // Locate images in database
-            const images = await db(TABLES.Image)
+            const images = await db(Model.name)
                 .select('*')
                 .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
                 .where(`${TABLES.ImageLabels}.label`, args.label);
             console.log('GOT IMAGESSSSSSS', images)
-            if (images === undefined || images.length === 0) return CustomError(CODE.NoResults);
+            if (images === undefined || images.length === 0) return new CustomError(CODE.NoResults);
             // Loop through each image
             const image_data = [];
             for (let i = 0; i < images.length; i++) {
@@ -92,8 +100,8 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addImage: async (_, args, { req, res }) => {
-            // Only admins can add
+        addImages: async (_, args, { req }) => {
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
             // If alts provided, must match length of files
@@ -146,15 +154,29 @@ export const resolvers = {
                 failedFileNames
             };
         },
+        updateImages: async (_, args, { req }) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Loop through data passed in
+            for (let i = 0; i < args.data.length; i++) {
+                // Parse fileName and folder from src path. This gives a unique row
+                let fileName = path.basename(args.data[i].src);
+                let folder = path.basename(path.dirname(args.data[i].src));
+                // Update the row with the new information
+                let curr = await db(Model.name).where('fileName', fileName).andWhere('folder', folder).first();
+                await updateHelper(Model, args.data[i], curr);
+            }
+            return true;
+        },
         deleteImagesById: async (_, args, { req, res }) => {
-            // Only admins can delete
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await deleteHelper(Model.name, args.ids);
         },
         deleteImagesByLabel: async (_, args, { req, res }) => {
-            // Only admins can delete
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return CustomError(CODE.NotImplemented);
+            await deleteHelper(Model.name, args.labels, 'label', true);
         },
     }
 }

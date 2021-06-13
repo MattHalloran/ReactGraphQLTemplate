@@ -10,11 +10,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
-    "migrate-create": "knex migrate:make --knexfile ./src/db/knexfile.js",
-    "seed-make": "knex seed:make --knexfile ./src/db/knexfile.js",
-    "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js",
-    "migrate-latest": "knex migrate:latest --knexfile ./src/db/knexfile.js",
-    "migrate-rollback": "knex migrate:rollback --knexfile ./src/db/knexfile.js"
+    "migrate-create": "node --experimental-modules --experimental-specifier-resolution=node /node_modules/.bin/knex migrate:make --knexfile ./src/db/knexfile.js",
+    "seed-make": "node --experimental-modules --experimental-specifier-resolution=node ./node_modules/.bin/knex seed:make --knexfile ./src/db/knexfile.js",
+    "seed-run": "node --experimental-modules --experimental-specifier-resolution=node ./node_modules/.bin/knex seed:run --knexfile ./src/db/knexfile.js",
+    "migrate-latest": "node --experimental-modules --experimental-specifier-resolution=node ./node_modules/.bin/knex migrate:latest --knexfile ./src/db/knexfile.js",
+    "migrate-rollback": "node --experimental-modules --experimental-specifier-resolution=node ./node_modules/.bin/knex migrate:rollback --knexfile ./src/db/knexfile.js"
   },
   "author": "",
   "license": "MIT",

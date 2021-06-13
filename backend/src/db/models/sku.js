@@ -33,6 +33,14 @@ export const typeDef = gql`
     extend type Mutation {
         addSku(
             sku: String!
+            isDiscountable: Boolean
+            size: String
+            note: String
+            availability: Int
+            price: String
+            status: SkuStatus
+            plantId: ID
+            discountIds: [ID!]
         ): Sku!
         updateSku(
             id: ID!
@@ -44,11 +52,11 @@ export const typeDef = gql`
             price: String
             status: SkuStatus
             plantId: ID
-            discounts: [ID!]
+            discountIds: [ID!]
         ): Sku!
         deleteSkus(
             ids: [ID!]!
-        ): Response
+        ): Boolean
     }
 `
 
@@ -60,14 +68,32 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addSku: async (_, args, { req, res }) => {
-            return CustomError(CODE.NotImplemented);
+        addSku: async (_, args, { req }, info) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+
+            const added = await db(Model.name).insertAndFetch({
+                sku: args.sku,
+                isDiscountable: args.isDiscountable ?? false,
+                size: args.size ?? 'N/A',
+                note: args.note ?? null,
+                availability: args.availability ?? 0,
+                price: args.price ?? 'N/A',
+                status: args.status ?? SKU_STATUS.Active,
+                plantId: args.plantId ?? null,
+            });
+            await insertJoinRowsHelper(Model, 'discounts', added.id, args.discountIds);
+            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
-        updateSku: async (_, args, { req, res }) => {
-            return CustomError(CODE.NotImplemented);
+        updateSku: async (_, args, { req }, info) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            await updateHelper(Model, args);
+            await updateJoinRowsHelper(Model, 'discounts', args.id, args.discountIds);
+            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
         },
         deleteSkus: async (_, args, { req }) => {
-            // Only admins can delete
+            // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await deleteHelper(Model.name, args.ids);
         }

@@ -1,4 +1,4 @@
-export * from './addImage';
+export * from './addImages';
 export * from './editProfile';
 export * from './login';
 export * from './logout';
