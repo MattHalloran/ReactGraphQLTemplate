@@ -30,13 +30,13 @@ export const typeDef = gql`
 
 export const resolvers = {
     Mutation: {
-        addOrderItem: async (_, args, context, info) => {
+        addOrderItem: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        updateOrderItem: async (_, args, context, info) => {
+        updateOrderItem: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        deleteOrderItem: async (_, args, context, info) => {
+        deleteOrderItem: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
     }

@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQueryHelper } from '../query';
+import { deleteHelper, fullSelectQueryHelper } from '../query';
 import { FeedbackModel as Model } from '../relationships';
 
 export const typeDef = gql`
@@ -18,30 +18,34 @@ export const typeDef = gql`
 
     extend type Mutation {
         addFeedback(
-            id: ID!
             text: String!
             userId: ID
         ): Feedback!
-        deleteFeedback(
-            id: ID!
+        deleteFeedbacks(
+            ids: [ID!]!
         ): Response
     }
 `
 
 export const resolvers = {
     Query: {
-        feedbacks: async (_, args, {req, res}, info) => {
-            // Only admins can query feedbacks
+        feedbacks: async (_, args, { req }, info) => {
+            // Only admins can query
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        addFeedback: async (_, args, context, info) => {
-            return CustomError(CODE.NotImplemented);
+        addFeedback: async (_, args, _c, info) => {
+            const added = await db(Model.name).insertAndFetch({
+                text: args.text,
+                userId: args.userId
+            });
+            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
-        deleteFeedback: async (_, args, context, info) => {
-            return CustomError(CODE.NotImplemented);
+        deleteFeedbacks: async (_, args, { req }) => {
+            if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await deleteHelper(Model.name, args.ids);
         }
     }
 }

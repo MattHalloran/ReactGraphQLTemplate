@@ -17,6 +17,10 @@ export class Model {
         this.name = name;
         this.relationships = relationships;
     }
+
+    exposedFields() { return FIELDS[this.name] }
+
+    getRelationship(name) { return this.relationships.find(r => r.name === name); }
 }
 
 const createModel = (name, data) => {

@@ -57,8 +57,8 @@ export const typeDef = gql`
 export const resolvers = {
     OrderStatus: ORDER_STATUS,
     Query: {
-        orders: async (_, args, {req, res}, info) => {
-            // Only admins can query orders directly
+        orders: async (_, args, { req, res }, info) => {
+            // Only admins can query
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             let ids = args.ids;
             if (args.userIds !== null) {
@@ -76,13 +76,13 @@ export const resolvers = {
         }
     },
     Mutation: {
-        updateOrder: async (_, args, context, info) => {
+        updateOrder: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        submitOrder: async (_, args, context, info) => {
+        submitOrder: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        cancelOrder: async (_, args, context, info) => {
+        cancelOrder: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
     }

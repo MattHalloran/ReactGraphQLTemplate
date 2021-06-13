@@ -10,13 +10,6 @@ import { API_PREFIX, API_VERSION, CLIENT_ADDRESS, SERVER_PORT } from '@local/sha
 
 const app = express();
 
-// Override sendstatus to allow for json
-app.response.sendStatus = function (jsonStatus) {
-    return this.contentType('application/json')
-        .status(jsonStatus.code)
-        .send(jsonStatus);
-}
-
 // // For parsing application/json
 // app.use(express.json());
 // // For parsing application/xwww-

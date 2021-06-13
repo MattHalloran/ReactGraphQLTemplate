@@ -58,7 +58,7 @@ export const resolvers = {
     Upload: GraphQLUpload,
     ImageSize: IMAGE_SIZE,
     Query: {
-        imagesByName: async (_, args, {req, res}, info) => {
+        imagesByName: async (_, args, { req, res }, info) => {
             console.log('IN IMAGES BY NAMEEEE', args)
             // Loop through each fileName
             const paths = [];
@@ -69,7 +69,7 @@ export const resolvers = {
             }
             return paths;
         },
-        imagesByLabel: async (_, args, context, info) => {
+        imagesByLabel: async (_, args, { req, res }, info) => {
             // Locate images in database
             const images = await db(TABLES.Image)
                 .select('*')
@@ -92,8 +92,8 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addImage: async (_, args, {req, res}, info) => {
-            // Only admins can add images
+        addImage: async (_, args, { req, res }) => {
+            // Only admins can add
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
             // If alts provided, must match length of files
@@ -146,13 +146,13 @@ export const resolvers = {
                 failedFileNames
             };
         },
-        deleteImagesById: async (_, args, {req, res}, info) => {
-            // Only admins can delete images
+        deleteImagesById: async (_, args, { req, res }) => {
+            // Only admins can delete
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return CustomError(CODE.NotImplemented);
+            return await deleteHelper(Model.name, args.ids);
         },
-        deleteImagesByLabel: async (_, args, {req, res}, info) => {
-            // Only admins can delete images
+        deleteImagesByLabel: async (_, args, { req, res }) => {
+            // Only admins can delete
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return CustomError(CODE.NotImplemented);
         },

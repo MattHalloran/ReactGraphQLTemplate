@@ -35,8 +35,10 @@
 // left join child c on j.child_id = c.id 
 // group by p.id;
 
+import { CODE } from '@local/shared';
 import getFieldNames from 'graphql-list-fields';
 import { db } from './db';
+import { CustomError } from './error';
 
 export class Label {
     constructor(right, join, left) {
@@ -193,4 +195,61 @@ export const fullSelectQuery = async (model, reqFields, ids) => {
 export const fullSelectQueryHelper = async (model, info, ids) => {
     const requested_fields = info ? getFieldNames(info) : [];
     return fullSelectQuery(model, requested_fields, ids);
+}
+
+// Updates a model's exposed fields, except for those explicity excluded
+// If the field is not in args, defaults to curr's field value
+// If the model's id is not passed in, grabs from args
+// If curr is not passed in, uses the id to query for it
+// Returns the updated object
+// Arguments:
+// model - the model object
+// args - GraphQL arguments
+// curr - an object containing the value's current data, or null
+// id - the id of the row being updated
+// excluded - an array of strings of each exposed field you'd like to exclude
+export const updateHelper = async (model, args, curr, id, excluded = []) => {
+    // Find the updating row's id
+    if (id === undefined || id === null) id = args.id;
+    // Find model's current data
+    if (curr === undefined || curr === null) curr = await db(table).where('id', id).first();
+    // Create array of updatable fields
+    const fields = model.exposedFields().filter(f => !excluded.includes(f) );
+    // Create update object
+    let update_data = {};
+    for (let i = 0; i < fields.length; i++) {
+        if (!curr.hasOwnProperty(fields[i])) continue;
+        update_data[fields[i]] = args.hasOwnProperty(fields[i]) ? 
+            args[fields[i]] : curr[fields[i]];
+    }
+    // Perform the update
+    return await db(model.name).where('id', id).update(update_data).returning('*');
+}
+
+// Inserts joining table (many-to-many) rows
+// **NOTE** - Only associates objects (i.e. only adds to the joining table)
+// Arguments:
+// model - the model object
+// rel_name - the relationship's name
+// main_id - id of main relationship object
+// foreign_ids - array of foreign ids to be added
+export const insertJoinRowsHelper = async (model, rel_name, main_id, foreign_ids) => {
+    if (!Array.isArray(foreign_ids) || !foreign_ids.length) return;
+    const relationship = model.getRelationship(rel_name);
+    const rowData = foreign_ids.map(row_id => 
+        ({ 
+            [relationship.ids[0]]: main_id, 
+            [relationship.ids[1]]: row_id 
+        })); 
+    await db(relationship.classNames[1]).insert(rowData);
+}
+
+// Deletes a list of rows from a table
+// Returns a success or error message
+// Arguments:
+// table - a string of the table's name
+// ids - an array of ids of the rows being deleted
+export const deleteHelper = async (table, ids, column = 'id') => {
+    const numDeleted = await db(table).delete().whereIn(column, ids);
+    return new CustomError(numDeleted === ids.length ? CODE.Success : CODE.ErrorUnknown);
 }

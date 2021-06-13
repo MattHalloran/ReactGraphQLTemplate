@@ -4,6 +4,7 @@ import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { fullSelectQueryHelper } from '../query';
 import { PlantModel as Model } from '../relationships';
+import { TABLES } from '../tables';
 
 export const typeDef = gql`
     type Plant {
@@ -37,29 +38,47 @@ export const typeDef = gql`
             textData: String
             imageData: String
         ): Plant!
-        deletePlant(
-            id: ID!
+        deletePlants(
+            ids: [ID!]!
         ): Response
     }
 `
 
 export const resolvers = {
     Query: {
-        plants: async (_, args, {req, res}, info) => {
-            // Only admins can query plants directly (customers query SKUs)
+        plants: async (_, args, { req }, info) => {
+            // Only admins can query (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
+        },
+        activePlants: async (_, _a, { req }, info) => {
+            // Only admins can query (customers query SKUs)
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Active plants are referenced by a SKU
+            const active_ids = await db(TABLES.Sku).select('plantId');
+            return fullSelectQueryHelper(Model, info, active_ids);
+        },
+        inactivePlants: async (_, _a, { req }, info) => {
+            // Only admins can query (customers query SKUs)
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // Active plants are referenced by no SKUs
+            const all_ids = await db(Model.name).select('id');
+            const active_ids = await db(TABLES.Sku).select('plantId');
+            const inactive_ids = all_ids.filter(id => !active_ids.includes(id));
+            return fullSelectQueryHelper(Model, info, inactive_ids);
         }
     },
     Mutation: {
-        addPlant: async (_, args, context, info) => {
+        addPlant: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        updatePlant: async (_, args, context, info) => {
+        updatePlant: async (_, args, { req, res }) => {
             return CustomError(CODE.NotImplemented);
         },
-        deletePlant: async (_, args, context, info) => {
-            return CustomError(CODE.NotImplemented);
+        deletePlants: async (_, args, { req }) => {
+            // Only admins can delete
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await deleteHelper(Model.name, args.ids);
         },
     }
 }

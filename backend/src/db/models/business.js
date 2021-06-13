@@ -2,8 +2,9 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQueryHelper } from '../query';
+import { deleteHelper, fullSelectQueryHelper, insertJoinRowsHelper, updateHelper } from '../query';
 import { BusinessModel as Model } from '../relationships';
+import { TABLES } from '../tables';
 
 export const typeDef = gql`
     type Business {
@@ -25,18 +26,16 @@ export const typeDef = gql`
         addBusiness(
             name: String!
             subscribedToNewsletters: Boolean
+            discountIds: [ID!]
+            employeeIds: [ID!]
         ): Business!
         updateBusiness(
             name: String
             subscribedToNewsletters: Boolean
+            discountIds: [ID!]
+            employeeIds: [ID!]
         ): Business!
         deleteBusinesses(
-            ids: [ID!]!
-        ): Response
-        setBusinessDiscounts(
-            ids: [ID!]!
-        ): Response
-        setBusinessEmployees(
             ids: [ID!]!
         ): Response
     }
@@ -44,51 +43,50 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        businesses: async (_, args, {req, res}, info) => {
-            // Only admins can query addresses
+        businesses: async (_, args, { req, res }, info) => {
+            // Only admins can query
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {
-        addBusiness: async(_, args, {req, res}) => {
-            // Only admins can directly add businesses
+        addBusiness: async(_, args, { req }, info) => {
+            // Only admins can add
             if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
 
             const added = await db(Model.name).returning('*').insert({
                 name: args.name,
                 subscribedToNewsletters: args.subscribedToNewsletters ?? false
-            })
-
-            return added;
+            });
+            await insertJoinRowsHelper(Model, 'discounts', added.id, args.discountIds);
+            // TODO employeeIds is a many relationship, so join rows helper will not work
+            if (args.employeeIds?.length > 0) {
+                return new CustomError(CODE.NotImplemented);
+            }
+            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
         },
-        updateBusiness: async(_, args, {req, res}) => {
-            // Only admins can update other businesses
+        updateBusiness: async(_, args, { req }, info) => {
+            // Only admins can update
             if(!req.isAdmin || (req.token.businessId !== args.id)) return new CustomError(CODE.Unauthorized);
 
-            const curr = await db(Model.name).where('id', args.id).first();
-            const updated = await db(Model.name).where('id', args.id).update({
-                name: args.name ?? curr.name,
-                subscribedToNewsletters: args.subscribedToNewsletters ?? curr.subscribedToNewsletters
-            }).returning('*');
-
-            return updated;
+            const updated = await updateHelper(Model, args, curr);
+            if (args.discountIds) {
+                const existing_discounts = await db(TABLES.BusinessDiscounts)
+                    .select('businessId')
+                    .where('businessId', args.id);
+                // Add the new associations
+                // Remove the old associations
+                return new CustomError(CODE.NotImplemented);
+            }
+            if (args.employeeIds?.length > 0) {
+                return new CustomError(CODE.NotImplemented);
+            }
+            return (await fullSelectQueryHelper(Model, info, [updated.id]))[0];
         },
-        deleteBusinesses: async(_, args, {req, res}) => {
-            // Only admins can delete other businesses
+        deleteBusinesses: async(_, args, { req }) => {
+            // Only admins can delete
             if(!req.isAdmin || args.ids.length > 1 || req.token.businessId !== args.ids[0]) return new CustomError(CODE.Unauthorized); 
-
-            const numDeleted = await db(Model.name).delete().whereIn('id', args.ids);
-
-            return new CustomError(numDeleted > 0 ? CODE.Success : CODE.ErrorUnknown);
+            return await deleteHelper(Model.name, args.ids);
         },
-        setBusinessDiscounts: async(_, args, {req, res}) => {
-            // TODO
-            return new CustomError(CODE.NotImplemented);
-        },
-        setBusinessEmployees: async(_, args, {req, res}) => {
-            // TODO
-            return new CustomError(CODE.NotImplemented);
-        }
     }
 }

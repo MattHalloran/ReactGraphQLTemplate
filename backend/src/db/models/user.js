@@ -101,12 +101,12 @@ export const typeDef = gql`
 export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
     Query: {
-        users: async (_, args, {req}, info) => {
-            // Only admins can query addresses
+        users: async (_, args, { req }, info) => {
+            // Only admins can query
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         },
-        profile: async (_, args, {req}, info) => {
+        profile: async (_, _a, { req }, info) => {
             // Can only query your own profile
             const userId = req.token.userId;
             if (userId === null || userId === undefined) return new CustomError(CODE.Unauthorized);
@@ -115,7 +115,7 @@ export const resolvers = {
         }
     },
     Mutation: {
-        login: async (_, args, {req, res}, info) => {
+        login: async (_, args, { req, res }, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];
@@ -178,32 +178,32 @@ export const resolvers = {
                 return new CustomError(CODE.BadCredentials);
             }
         },
-        logout: async (_, _args, {req, res}, _info) => {
+        logout: async (_, _args, { req, res }, _info) => {
             console.log('LOGOUT CALLEDDDDDDD')
             res.clearCookie(COOKIE.Session);
             await db(Model.name).where('id', req.userId).update({
                 sessionToken: null
             })
         },
-        signUp: async (_, args, context, info) => {
+        signUp: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        updateUser: async (_, args, context, info) => {
+        updateUser: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        deleteUser: async (_, args, context, info) => {
+        deleteUser: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        requestPasswordChange: async (_, args, context, info) => {
+        requestPasswordChange: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        changeUserStatus: async (_, args, context, info) => {
+        changeUserStatus: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        addUserRole: async (_, args, context, info) => {
+        addUserRole: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
-        removeUserRole: async (_, args, context, info) => {
+        removeUserRole: async (_, args, { req, res }, info) => {
             return CustomError(CODE.NotImplemented);
         },
     }
