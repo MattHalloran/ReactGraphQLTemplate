@@ -42,6 +42,7 @@ export const FIELDS = {
         'id',
         'extension',
         'alt',
+        'description',
         'hash',
         'width',
         'height'

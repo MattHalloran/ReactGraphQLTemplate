@@ -3,4 +3,5 @@ export * from './editProfile';
 export * from './login';
 export * from './logout';
 export * from './signUp';
-export * from './requestPasswordChange'
+export * from './requestPasswordChange';
+export * from './updateImages';

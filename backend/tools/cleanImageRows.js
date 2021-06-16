@@ -9,6 +9,7 @@ let filepath = path.join(path.resolve(), `./images`);
 console.info(`Checking for images in: ${filepath}`)
 const sizes = Object.keys(IMAGE_SIZE);
 const image_data = await db(TABLES.Image).select('*');
+
 if (image_data === undefined || image_data.length === 0) console.warn('No image data found')
 // Loop through all image rows
 for (let i = 0; i < image_data.length; i++) {
@@ -27,4 +28,6 @@ for (let i = 0; i < image_data.length; i++) {
         await db(TABLES.Image).where('hash', curr.hash).del();
     }
 }
+
+console.info('exiting...')
 process.exit(0)

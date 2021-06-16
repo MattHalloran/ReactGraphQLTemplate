@@ -13,6 +13,25 @@ const MAX_FILE_NAME_ATTEMPTS = 100;
 // Max size of a file buffer (how large of a file are you willing to download?)
 const MAX_BUFFER_SIZE = 1000000000;
 
+// From a src string, return the filename stored in the database
+// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop')
+export function plainImageName(src) {
+    // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
+    let fileName = path.basename(src);
+    // 'boop-xl.png' -> { 'boop-xl' }
+    // If file passed in without extension, add a fake one so parse doesn't break
+    let { name } = path.parse(fileName.includes('.') ? fileName : `${fileName}.txt`);
+    // 'boop-xl' -> 'boop'
+    const sizeEndings = Object.keys(IMAGE_SIZE).map(s => `-${s}`);
+    for (let i = 0; i < sizeEndings.length; i++) {
+        if (name.endsWith(sizeEndings[i])) {
+            name = name.slice(0, -sizeEndings[i].length);
+            break;
+        }
+    }
+    return name;
+}
+
 // Returns a filename that can be used at the specified path
 export async function findFileName(filename, filepath) {
     console.log('IN findfilename', filename, filepath)
@@ -21,6 +40,25 @@ export async function findFileName(filename, filepath) {
     name = name.replace(/([^a-z0-9 ]+)/gi, "-").replace(" ", "_");
     console.log('NAME IS', name, ext)
     console.log(fs.existsSync(`${filepath}/${name}${ext}`))
+    // If file name is available, no need to append a number
+    if (!fs.existsSync(`${filepath}/${name}${ext}`)) return `${name}${ext}`;
+    // If file name was not available, start appending a number until one works
+    let curr = 0;
+    while (curr < MAX_FILE_NAME_ATTEMPTS) {
+        if(!fs.existsSync(`${filepath}/${name}-${curr}${ext}`)) return `${name}${ext}`;
+        curr++;
+    }
+    // If no valid name found after max tries, return null
+    return null;
+}
+
+// Returns and image filename that can be used at the specified path
+export async function findImageName(filename, filepath = 'images') {
+    // Replace any invalid characters from the file name
+    let { name, ext } = path.parse(filename);
+    name = name.replace(/([^a-z0-9 ]+)/gi, "-").replace(" ", "_");
+    // Replace any file name endings that would conflict with the sizing schema
+    name = plainImageName(name);
     // If file name is available, no need to append a number
     if (!fs.existsSync(`${filepath}/${name}${ext}`)) return `${name}${ext}`;
     // If file name was not available, start appending a number until one works
@@ -115,9 +153,8 @@ export async function saveFile(stream, filename, folder) {
 // stream - data stream of file
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in backend directory (ex: 'images')
-export async function saveImage(stream, filename) {
+export async function saveImage(stream, filename, folder = 'images') {
     try {
-        const folder = 'images';
         let filepath = path.join(path.resolve(), `./${folder}`);
         // Find a valid file name to save data to
         let validName = await findFileName(filename, filepath);
@@ -189,4 +226,20 @@ export async function deleteFile(filename, folder) {
         console.error(error);
         return false;
     }
+}
+
+// Deletes an image and all resizes
+// Arguments:
+// filename - name of the full image
+// folder - name of the folder
+export async function deleteImage(filename, folder = 'images') {
+    let files = [filename];
+    let { name, ext } = path.parse(filename);
+    name = plainImageName(name);
+    Object.keys(IMAGE_SIZE).forEach(key => files.push(`${name}-${key}${ext}`));
+    let success = true;
+    for (let i = 0; i < files.length; i++) {
+        if (!await deleteFile(files[i], folder)) success = false;
+    }
+    return success;
 }
