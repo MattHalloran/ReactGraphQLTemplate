@@ -20,10 +20,13 @@ Once NPM is installed, you must install a few global NPM packages. This allows f
 2. Nodemon - Listens for changes and automatically restarts server  
     - npm install -g nodemon
 
-
 ## Project setup
 ### Environment variables
 This project uses many environment variables. Some are required for the next steps. A full list of the environment variables used and their explanations can be found [here](https://github.com/MattHalloran/WebServerScripts/blob/main/variables.sh).
+### Docker
+1. To build docker, run "docker build -t <custom_container_name> ." in the project's root directory.  
+    - ex: docker build -t nln-website .
+
 ### Dependencies
 Using Yarn, you can install all project dependencies using:  
 * yarn install
