@@ -149,11 +149,11 @@ build/
 *.db
 
 #Postgres
-backend/postgres/
+*/server/postgres/
 
 #Assets
-backend/images/
-backend/plant_info/yards/yards*.json
+*/server/images/
+*/server/plant_info/yards/yards*.json
 
 .eslintcache
 package-lock.json
