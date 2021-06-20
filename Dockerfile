@@ -1,6 +1,3 @@
-# ======================================
-# Stage 1 - Set up ui and server monorepo
-# ======================================
 FROM node:14.17-alpine
 EXPOSE 3000 5000
 
@@ -43,10 +40,6 @@ COPY --chown=node:node ${ui}/tsconfig.json ${ui}/tsconfig.json
 COPY --chown=node:node ${server}/src ${server}/src
 COPY --chown=node:node ${server}/tools ${server}/tools
 COPY --chown=node:node ./start.sh ./start.sh
-
-# ======================================
-# Stage 2 - Set up nginx and certificates
-# ======================================
 
 # Start server and ui
 RUN chmod +x ./start.sh
