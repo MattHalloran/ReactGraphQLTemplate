@@ -57,3 +57,5 @@ apollo_options.applyMiddleware({
 
 // Start Express server
 app.listen(SERVER_PORT);
+
+console.log(`LISTENING ON PORT ${SERVER_PORT}`)

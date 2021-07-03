@@ -115,6 +115,10 @@ export const resolvers = {
     },
     Mutation: {
         login: async (_, args, { req, res }, info) => {
+            let boop = await db.raw('SELECT * FROM pg_catalog.pg_tables');
+            console.log('MEEBOOP')
+            console.log(boop)
+            console.log('OOO TONGUE TWISTER')
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];

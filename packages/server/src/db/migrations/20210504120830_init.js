@@ -2,6 +2,7 @@ import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, ORDER_S
 import { TABLES } from '../tables';
 
 export async function up (knex) {
+    console.log('IN MIGRATION FILEEEEEEEEEEEEE')
     await knex.schema.createTable(TABLES.Task, (table) => {
         table.increments();
         table.integer('taskId').notNullable();

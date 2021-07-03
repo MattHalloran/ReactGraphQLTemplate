@@ -9,13 +9,13 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-dev": "npm run migrate-latest && npm run seed-run && /node_modules/.bin/nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
+    "start-dev": "npm run migrate-latest && npm run seed-run && nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
     "start-prod": "npm run migrate-latest && npm run seed-run && node --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
-    "migrate-create": "/node_modules/.bin/knex migrate:make --knexfile ./src/db/knexfile.js --esm",
-    "seed-make": "/node_modules/.bin/knex seed:make --knexfile ./src/db/knexfile.js --esm",
-    "seed-run": "/node_modules/.bin/knex seed:run --knexfile ./src/db/knexfile.js --esm",
-    "migrate-latest": "/node_modules/.bin/knex migrate:latest --knexfile ./src/db/knexfile.js --esm",
-    "migrate-rollback": "/node_modules/.bin/knex migrate:rollback --knexfile ./src/db/knexfile.js --esm"
+    "migrate-create": "knex migrate:make --knexfile ./src/db/knexfile.js --esm",
+    "seed-make": "knex seed:make --knexfile ./src/db/knexfile.js --esm",
+    "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm",
+    "migrate-latest": "knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm",
+    "migrate-rollback": "knex migrate:rollback --knexfile ./src/db/knexfile.js --esm"
   },
   "author": "",
   "license": "MIT",
