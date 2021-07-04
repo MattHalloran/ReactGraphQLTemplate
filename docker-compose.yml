@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+    main:
+        build: .
+        container_name: main
+        environment: 
+            NODE_ENV: "${NODE_ENV}"
+            JWT_SECRET: "${JWT_SECRET}"
+            PROJECT_DIR: "${PROJECT_DIR}"
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_NAME: "${DB_NAME}"
+            DB_USER: "${DB_USER}"
+            DB_PASSWORD: "${DB_PASSWORD}"
+            ADMIN_EMAIL: "${ADMIN_EMAIL}"
+            ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+        ports:
+            - 3000:3000
+            - 5000:5000
+        volumes:
+            - ./packages:/srv/app/packages
+            - ./assets:/srv/app/assets
+            - ./scripts:/srv/app/scripts
+        depends_on: 
+                - redis
+                - db
+    db:
+        image: postgres:13
+        restart: always
+        environment: 
+            POSTGRES_DB: "${DB_NAME}"
+            POSTGRES_USER: "${DB_USER}"
+            POSTGRES_PASSWORD: "${DB_PASSWORD}"
+        ports:
+                - 5432:5432
+        volumes:
+            - ./data/postgres:/var/lib/postgresql/data
+    adminer:
+        image: adminer
+        restart: always
+        depends_on: 
+            - db
+        ports: 
+            - 8080:8080
+    redis:
+        image: redis
+        container_name: redis
+        ports:
+            - 6379:6379
+    # nginx:
+    #     image: jonasal/nginx-certbot:latest
+    #     restart: unless-stopped
+    #     environment:
+    #         - CERTBOT_EMAIL
+    #         - STAGING
+    #         - DHPARAM_SIZE
+    #         - RSA_KEY_SIZE
+    #         - ELLIPTIC_CURVE
+    #         - USE_ECDSA
+    #         - RENEWAL_INTERVAL
+    #         - DEBUG
+    #     env_file:
+    #         - ./nginx-certbot.env
+    #     ports:
+    #         - 80:80
+    #         - 443:443
+    #     volumes:
+    #         - nginx_secrets:/etc/letsencrypt
+    #         - ./user_conf.d:/etc/nginx/user_conf.d
+
+volumes:
+    nginx_secrets:

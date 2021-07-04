@@ -9,10 +9,10 @@ To set up the emailing service with your gmail account, you first need to create
 https://myaccount.google.com/apppasswords
 To generate the password, select Other and set the name to something memorable (ex: Website Backend)
 
-Then, you will need to set the following environment variables on the server that the backend will be running on:
-AFA_EMAIL_USERNAME - What you login as (ex: personalaccount@gmail.ccom)
-AFA_EMAIL_FROM - Who the recipient thinks the email is from (ex: newlifeofficial@newlifenurseryinc.com)
-AFA_EMAIL_PASSWORD - The app password generated in the previous step
+Then, you will need to set the following environment variables on the server:
+SITE_EMAIL_USERNAME - What you login as (ex: personalaccount@gmail.ccom)
+SITE_EMAIL_FROM - Who the recipient thinks the email is from (ex: newlifeofficial@newlifenurseryinc.com)
+SITE_EMAIL_PASSWORD - The app password generated in the previous step
 TWILIO_ACCOUNT_SID - Can be found at twilio.com/console
 TWILIO_AUTH_TOKEN - Can be found at twilio.com/console
 
@@ -28,5 +28,5 @@ For Mac/Linux, the environment variables can be set this way:
     If bash, open .bash_profile in an editor of your choice (ex: atom .bash_profile)
     If zsh, open .zshenv in an editor of your choice (ex: atom .zshenv)
     If you are unsure, it is okay to make this change to both files
-4) Anywhere in the file, but preferrably at the top, add each environment variable and its value (ex: export AFA_EMAIL_USERNAME="personalaccount@gmail.com")
+4) Anywhere in the file, but preferrably at the top, add each environment variable and its value (ex: export SITE_EMAIL_USERNAME="personalaccount@gmail.com")
 5) Restart the server/device to make sure the change takes effect
