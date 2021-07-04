@@ -14,7 +14,7 @@ const app = express();
 // app.use(express.json());
 // // For parsing application/xwww-
 // app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.JWT_SECRET));
 
 // For authentication
 app.use(auth.authenticate);
@@ -31,9 +31,9 @@ const corsOptions = {
 // })
 
 // Set static folders
-app.use(express.static(path.join(path.resolve(), './public')));
-app.use('/private', auth.requireAdmin, express.static(path.join(path.resolve(), './private')));
-app.use('/images', express.static(path.join(path.resolve(), './images')));
+app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
+app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
+app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
 app.use(`/${API_PREFIX}/${API_VERSION}`,

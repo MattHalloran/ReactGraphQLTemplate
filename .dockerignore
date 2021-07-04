@@ -1,8 +1,2 @@
 .git
 dist
-node_modules
-**node_modules
-**build
-**/server/images
-**/server/private
-**/server/public

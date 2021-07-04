@@ -1,11 +1,10 @@
 // Deletes image database rows for images that no longer exist
 import { db } from "../src/db/db";
 import { TABLES } from "../src/db/tables";
-import path from 'path';
 import fs from 'fs';
 import { IMAGE_SIZE } from "@local/shared";
 
-let filepath = path.join(path.resolve(), `./images`);
+let filepath = `${process.env.PROJECT_DIR}/assets/images`;
 console.info(`Checking for images in: ${filepath}`)
 const sizes = Object.keys(IMAGE_SIZE);
 const image_data = await db(TABLES.Image).select('*');

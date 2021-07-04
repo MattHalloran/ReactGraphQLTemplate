@@ -37,7 +37,7 @@ export async function authenticate(req, _, next) {
     // Second, verify that the session token is valid
     const user_id = session.id;
     const token = session.token;
-    jwt.verify(token, process.env.COOKIE_SECRET, async (error, token) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (error, token) => {
         if (error) {
             next();
             return;
@@ -58,7 +58,7 @@ export function generateToken(userId, businessId) {
     return jwt.sign({
         userId: userId,
         businessId: businessId
-    }, process.env.COOKIE_SECRET, { expiresIn: SESSION_MILLI })
+    }, process.env.JWT_SECRET, { expiresIn: SESSION_MILLI })
 }
 
 // Sets a session cookie

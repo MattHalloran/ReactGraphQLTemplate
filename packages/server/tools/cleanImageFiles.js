@@ -1,11 +1,10 @@
 // Deletes images no longer associated with image data in the database
 import { db } from "../src/db/db";
 import { TABLES } from "../src/db/tables";
-import path from 'path';
 import fs from 'fs';
 import { deleteFile, plainImageName } from "../src/utils";
 
-let filepath = path.join(path.resolve(), `./images`);
+let filepath = `${process.env.PROJECT_DIR}/assets/images`;
 console.info(`Checking for images in: ${filepath}`)
 const keep_files = (await db(TABLES.Image).select('fileName')).map(d => d.fileName);
 

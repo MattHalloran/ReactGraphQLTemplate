@@ -15,6 +15,9 @@ RUN mkdir ${main} ${node} &&\
 # Let the script know where node_modules is located (see .yarnrc)
 RUN PATH=$PATH:${node}/.bin
 
+# Create .yarnrc
+RUN echo "--modules-folder ${node}" > ${main}/.yarnrc
+
 # Install global packages (must be done as the root user)
 RUN yarn global add knex nodemon react-scripts
 
@@ -31,7 +34,7 @@ COPY --chown=node:node ${ui}/package.json ${ui}/package.json
 COPY --chown=node:node ${server}/package.json ${server}/package.json
 
 # Install packages
-RUN yarn install --modules-folder ${node}
+RUN yarn install
 
 # Copy rest of repo over
 COPY --chown=node:node ${shared}/index.js ${shared}/index.js
@@ -44,5 +47,5 @@ COPY --chown=node:node ${server}/tools ${server}/tools
 COPY --chown=node:node ./scripts/start.sh ./scripts/start.sh
 
 # # Start server and ui
-# RUN chmod +x ./scripts/start.sh
-# CMD ./scripts/start.sh
+RUN chmod +x ./scripts/*
+CMD ./scripts/start.sh

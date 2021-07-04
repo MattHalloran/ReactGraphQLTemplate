@@ -5,7 +5,8 @@ services:
         container_name: main
         environment: 
             NODE_ENV: "${NODE_ENV}"
-            COOKIE_SECRET: "${COOKIE_SECRET}"
+            JWT_SECRET: "${JWT_SECRET}"
+            PROJECT_DIR: "${PROJECT_DIR}"
             DB_HOST: "db"
             DB_PORT: "5432"
             DB_NAME: "${DB_NAME}"
@@ -17,14 +18,12 @@ services:
             - 3000:3000
             - 5000:5000
         volumes:
-            - ./:/srv/app
-            - ./packages/server/public:/srv/app/packages/server/public
-            - /srv/app/packages/server/private
-            - /srv/app/packages/server/images
+            - ./packages:/srv/app/packages
+            - ./assets:/srv/app/assets
+            - ./scripts:/srv/app/scripts
         depends_on: 
                 - redis
                 - db
-        command: /bin/sh -c "chmod +x ./scripts/wait-for.sh && ./scripts/wait-for.sh db:5432 -- echo 'Database is up. Starting monorepo' && chmod +x ./scripts/start.sh && ./scripts/start.sh"
     db:
         image: postgres:13
         restart: always
@@ -70,6 +69,4 @@ services:
     #         - ./user_conf.d:/etc/nginx/user_conf.d
 
 volumes:
-    pgdata:
     nginx_secrets:
-    boop:

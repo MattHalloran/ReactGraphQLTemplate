@@ -3,7 +3,7 @@ Last update: 2020/09/28
 auth.py is an important script for the website's security. By using a secret key, it can verify that a message has not been tampered
 
 To set up the key, you will need to set the following environment variables on the server:
-COOKIE_SECRET
+JWT_SECRET
 
 For windows, the environment variables can be set this way:
 1) Control Panel -> System and Security -> System -> Advanced System Settings -> Environment variables
