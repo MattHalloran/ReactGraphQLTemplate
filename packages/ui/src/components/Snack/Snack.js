@@ -68,7 +68,7 @@ function Snack() {
             open={open}
             autoHideDuration={state.autoHideDuration}
             onClose={() => setState(DEFAULT_STATE)}
-            message={state.message}
+            message={Array.isArray(state.message) && state.message.length > 0 ? state.message[0] : state.message}
             action={
                 <React.Fragment>
                     {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>

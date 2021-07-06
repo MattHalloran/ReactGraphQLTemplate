@@ -3,14 +3,14 @@ import { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './modelConsts';
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;
-export const PHONE_REGEX = '^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$';
+export const PHONE_REGEX = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
 // Schema for creating a new account
 export const signUpSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
-    businessName: yup.string().max(128).required(),
+    business: yup.string().max(128).required(),
     email: yup.string().email().required(),
     phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),
@@ -24,7 +24,7 @@ export const profileSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
-    businessName: yup.string().max(128).required(),
+    business: yup.string().max(128).required(),
     email: yup.string().email().required(),
     phone: yup.string().matches(PHONE_REGEX).required(),
     existingCustomer: yup.boolean().required(),

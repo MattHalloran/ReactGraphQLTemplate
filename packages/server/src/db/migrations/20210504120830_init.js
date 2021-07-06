@@ -26,7 +26,7 @@ export async function up (knex) {
         table.string('password', 256).notNullable();
         table.integer('loginAttempts').defaultTo(0).notNullable();
         table.timestamp('lastLoginAttempt').defaultTo(knex.fn.now()).notNullable();
-        table.string('sessionToken', 256);
+        table.string('sessionToken', 1024);
         table.string('resetPasswordCode', 256);
         table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();

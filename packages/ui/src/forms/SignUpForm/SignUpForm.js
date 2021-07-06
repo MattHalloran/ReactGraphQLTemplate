@@ -41,7 +41,15 @@ function SignUpForm({
     const formik = useFormik({
         initialValues: {
             existingCustomer: true,
-            marketingEmails: true
+            marketingEmails: true,
+            firstName: '',
+            lastName: '',
+            pronouns: '',
+            business: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: ''
         },
         validationSchema: signUpSchema,
         onSubmit: (values) => {
@@ -60,6 +68,7 @@ function SignUpForm({
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
+                console.error(response);
                 PubSub.publish(PUBS.Loading, false);
                 if (response.code === CODE.EmailInUse.code) {
                     if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form`)) {
@@ -177,6 +186,7 @@ function SignUpForm({
                         fullWidth
                         id="confirmPassword"
                         name="confirmPassword"
+                        type="password"
                         autoComplete="new-password"
                         label="Confirm Password"
                         value={formik.values.confirmPassword}
@@ -194,8 +204,8 @@ function SignUpForm({
                             value={formik.values.existingCustomer}
                             onChange={formik.handleChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                            <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
+                            <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
                         </RadioGroup>
                         <FormHelperText>{formik.touched.existingCustomer && formik.errors.existingCustomer}</FormHelperText>
                     </FormControl>
