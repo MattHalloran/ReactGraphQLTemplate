@@ -11,11 +11,15 @@ import { deleteHelper, updateHelper } from '../query';
 
 // Query image data from a src path (ex: 'https://thewebsite.com/api/images/boop.png')
 async function imageFromSrc(src) {
-    // Parse fileName and folder from src path. This gives a unique row
-    let fileName = plainImageName(src);
+    // Parse name, extension, and folder from src path. This gives a unique row
+    let { name, ext } = plainImageName(src);
     let folder = path.basename(path.dirname(src));
     // Update the row with the new information
-    return await db(Model.name).where('fileName', fileName).andWhere('folder', folder).first();
+    return await db(Model.name)
+        .where('fileName', name)
+        .andWhere('extension', ext)
+        .andWhere('folder', folder)
+        .first();
 }
 
 export const typeDef = gql`
@@ -98,7 +102,7 @@ export const resolvers = {
             const image_data = [];
             for (let i = 0; i < images.length; i++) {
                 // Try returning the image in the requested size, or any available size
-                const filePath = await findImage(`${images[i].fileName}.${images[i].extension}`, args.size);
+                const filePath = await findImage(`${images[i].fileName}${images[i].extension}`, args.size);
                 image_data.push({
                     src: filePath,
                     alt: images[i].alt,
@@ -122,10 +126,10 @@ export const resolvers = {
                 // Destructure data. Each file is a promise
                 const { createReadStream, filename, mimetype } = await args.files[i];
                 // Make sure that the file is actually an image
-                if (!mimetype.startsWith('image/')) return CustomError(CODE.InvalidArgs);
+                if (!mimetype.startsWith('image/')) return new CustomError(CODE.InvalidArgs);
                 // Make sure image type is supported
                 let { ext: extCheck } = path.parse(filename);
-                if (Object.values(IMAGE_EXTENSION).indexOf(extCheck.replace('.', '')) <= 0) return CustomError(CODE.InvalidArgs);
+                if (Object.values(IMAGE_EXTENSION).indexOf(extCheck) <= 0) return new CustomError(CODE.InvalidArgs);
                 // Create a read stream
                 const stream = createReadStream();
                 const { success, filename: finalFilename, dimensions, hash } = await saveImage(stream, filename)
@@ -137,7 +141,7 @@ export const resolvers = {
                         hash: hash,
                         folder: 'images',
                         fileName: name,
-                        extension: ext.replace('.', ''),
+                        extension: ext,
                         alt: args.alts ? args.alts[i] : '',
                         width: dimensions.width,
                         height: dimensions.height
@@ -177,7 +181,7 @@ export const resolvers = {
             for (let i = 0; i < args.deleting.length; i++) {
                 let image = await imageFromSrc(args.deleting[i]);
                 console.log('deleting...', image);
-                await deleteImage(`${image.fileName}.${image.extension}`);
+                await deleteImage(`${image.fileName}${image.extension}`);
                 await deleteHelper(Model.name, [image.id]);
             }
             return true;
@@ -189,7 +193,7 @@ export const resolvers = {
             const filenames = await db(Model.name).select('folder', 'filename', 'extension').whereIn('id', args.ids);
             for (let i = 0; i < filenames.length; i++) {
                 let curr = filenames[i];
-                await deleteImage(`${curr.fileName}.${curr.extension}`, curr.folder);
+                await deleteImage(`${curr.fileName}${curr.extension}`, curr.folder);
             }
             // Delete the database rows
             return await deleteHelper(Model.name, args.ids);
@@ -201,7 +205,7 @@ export const resolvers = {
             const filenames = await db(Model.name).select('folder', 'filename', 'extension').whereIn('label', args.labels);
             for (let i = 0; i < filenames.length; i++) {
                 let curr = filenames[i];
-                await deleteImage(`${curr.fileName}.${curr.extension}`, curr.folder);
+                await deleteImage(`${curr.fileName}${curr.extension}`, curr.folder);
             }
             // Delete the database rows
             await deleteHelper(Model.name, args.labels, 'label', true);

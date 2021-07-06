@@ -16,7 +16,7 @@
     "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm",
     "migrate-latest": "knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm",
     "migrate-rollback": "knex migrate:rollback --knexfile ./src/db/knexfile.js --esm",
-    "clean-images": "node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageFiles.js && node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageRows.js"
+    "clean": "node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageData.js"
   },
   "author": "",
   "license": "MIT",

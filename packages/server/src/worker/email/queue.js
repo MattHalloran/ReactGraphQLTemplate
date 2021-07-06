@@ -2,10 +2,11 @@ import Bull from 'bull';
 import { emailProcess } from './process';
 import { BUSINESS_NAME, WEBSITE_URL } from '@local/shared';
 
-const emailQueue = new Bull('email');
+const emailQueue = new Bull('email', { redis: process.env.REDIS_CONN });
 emailQueue.process(emailProcess);
 
 export function sendMail(to=[], subject='', text='', html='') {
+    console.log('in send mail.....')
     emailQueue.add({
         to: to,
         subject: subject,

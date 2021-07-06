@@ -10,7 +10,7 @@ if [ "${NODE_ENV}" == "development" ] ; then
     knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
     knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
     # knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
-    npm run clean-images
+    npm run clean
     (cd ${PROJECT_DIR}/packages/server && npm run start-dev) & (cd ${PROJECT_DIR}/packages/ui && npm run start-dev)
 else
     (cd ${PROJECT_DIR}/packages/server && npm run start-prod) & (cd ${PROJECT_DIR}/packages/ui && npm run start-prod)

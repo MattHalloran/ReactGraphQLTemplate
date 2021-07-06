@@ -19,8 +19,8 @@ const ASSET_DIR = `${process.env.PROJECT_DIR || '/srv/app'}/assets`;
 // Args:
 // file: ex: 'boop.png'
 // folder: ex: 'images'
-function clean(file, folder) {
-    const cleanName = (name) => name ? name.replace(/([^a-z0-9 ]+)/gi, "-").replace(" ", "_") : null;
+export function clean(file, folder) {
+    const cleanName = (name) => name ? name.replace(/([^a-z0-9 ]+)/gi, "-") : null;
     folder = cleanName(folder);
     if (file && file.includes('.')) {
         let { name, ext } = path.parse(file);
@@ -31,13 +31,12 @@ function clean(file, folder) {
 }
 
 // From a src string, return the filename stored in the database
-// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop')
+// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> { name: 'boop', ext: 'png')
 export function plainImageName(src) {
     // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
     let fileName = path.basename(src);
-    // 'boop-xl.png' -> { 'boop-xl' }
-    // If file passed in without extension, add a fake one so parse doesn't break
-    let { name } = clean(fileName);
+    // 'boop-xl.png' -> { name: 'boop-xl', ext: 'png' }
+    let { name, ext } = clean(fileName);
     // 'boop-xl' -> 'boop'
     const sizeEndings = Object.keys(IMAGE_SIZE).map(s => `-${s}`);
     for (let i = 0; i < sizeEndings.length; i++) {
@@ -46,7 +45,7 @@ export function plainImageName(src) {
             break;
         }
     }
-    return name;
+    return { name: name, ext: ext };
 }
 
 // Returns a filename that can be used at the specified path
@@ -68,11 +67,11 @@ export async function findFileName(filename, foldername) {
     return null;
 }
 
-// Returns and image filename that can be used at the specified path
+// Returns an image filename that can be used at the specified path
 export async function findImageName(filename, foldername = 'images') {
     let { name, ext, folder } = clean(filename, foldername);
     // Replace any file name endings that would conflict with the sizing schema
-    name = plainImageName(name);
+    name = plainImageName(name).name;
     // If file name is available, no need to append a number
     if (!fs.existsSync(`${ASSET_DIR}/${folder}/${name}${ext}`)) return `${name}${ext}`;
     // If file name was not available, start appending a number until one works
@@ -247,7 +246,7 @@ export async function deleteFile(filename, foldername) {
 // folder - name of the folder
 export async function deleteImage(filename, foldername = 'images') {
     let { name, ext, folder } = clean(filename, foldername);
-    name = plainImageName(`${name}${ext}`);
+    name = plainImageName(name).name;
     let files = [name];
     Object.keys(IMAGE_SIZE).forEach(key => files.push(`${name}-${key}${ext}`));
     let success = true;

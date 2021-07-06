@@ -12,8 +12,12 @@ services:
             DB_NAME: "${DB_NAME}"
             DB_USER: "${DB_USER}"
             DB_PASSWORD: "${DB_PASSWORD}"
+            REDIS_CONN: "${REDIS_CONN}"
             ADMIN_EMAIL: "${ADMIN_EMAIL}"
             ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+            SITE_EMAIL_FROM: "${SITE_EMAIL_FROM}"
+            SITE_EMAIL_USERNAME: "${SITE_EMAIL_USERNAME}"
+            SITE_EMAIL_PASSWORD: "${SITE_EMAIL_PASSWORD}"
         ports:
             - 3000:3000
             - 5000:5000

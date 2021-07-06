@@ -8,6 +8,7 @@ import moment from 'moment';
 import { deleteJoinRowsHelper, fullSelectQueryHelper, insertJoinRowsHelper } from '../query';
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
+import { sendMail } from '../../worker/email/queue';
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -115,10 +116,6 @@ export const resolvers = {
     },
     Mutation: {
         login: async (_, args, { req, res }, info) => {
-            let boop = await db.raw('SELECT * FROM pg_catalog.pg_tables');
-            console.log('MEEBOOP')
-            console.log(boop)
-            console.log('OOO TONGUE TWISTER')
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];
