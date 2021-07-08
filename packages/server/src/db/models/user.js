@@ -5,10 +5,15 @@ import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, signUpSchema, requestPasswor
 import { CustomError, validateArgs } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
-import { deleteJoinRowsHelper, fullSelectQueryHelper, insertJoinRowsHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
-import { sendVerificationLink } from '../../worker/email/queue';
+import { customerNotifyAdmin, sendVerificationLink } from '../../worker/email/queue';
 import { v4 as uuidv4 } from 'uuid';
 
 export const HASHING_ROUNDS = 8;
@@ -127,6 +132,11 @@ export const resolvers = {
             if (validateError) return validateError;
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
+            const test = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).first();
+            const test2 = await db(TABLES.Email).select('emailAddress', 'userId');
+            console.log("GOT EMAIL", email)
+            console.log("GOT TEST", test)
+            console.log("GOT TEST 2", test2)
             if (email === undefined) return new CustomError(CODE.BadCredentials);
             // Find user
             let user = await db(Model.name).where('id', email.userId).first();
@@ -239,6 +249,8 @@ export const resolvers = {
             ]);
             // Send verification email
             sendVerificationLink(args.email, user_id);
+            // Send email to business owner
+            customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
             return (await fullSelectQueryHelper(Model, info, [user_id]))[0];
         },
         updateUser: async (_, args, { req, res }, info) => {

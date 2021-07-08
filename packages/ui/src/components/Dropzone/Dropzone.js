@@ -1,22 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import PropTypes from 'prop-types';
-import { lightTheme, PUBS, PubSub } from 'utils';
+import { PUBS, PubSub } from 'utils';
 import { Button, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     gridPad: {
-        // paddingLeft: theme.spacing(1),
-        paddingLeft: lightTheme.spacing(1),
-        // paddingRight: theme.spacing(1),
-        paddingRight: lightTheme.spacing(1),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
     },
     itemPad: {
-        // marginTop: theme.spacing(1),
-        marginTop: lightTheme.spacing(1),
-        // marginBottom: theme.spacing(1),
-        marginBottom: lightTheme.spacing(1),
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
 }));
 

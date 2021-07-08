@@ -2,11 +2,28 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQueryHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { PlantModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 
 export const typeDef = gql`
+    input PlantImage {
+        files: [Upload!]!
+        alts: [String]
+        labels: [String!]!
+    }
+
+    input PlantInput {
+        latinName: String!
+        textData: String
+        imageData: String
+    }
+
     type Plant {
         id: ID!
         latinName: String!
@@ -27,20 +44,9 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addPlant(
-            latinName: String!
-            textData: String
-            imageData: String
-        ): Plant!
-        updatePlant(
-            id: ID!
-            latinName: String
-            textData: String
-            imageData: String
-        ): Plant!
-        deletePlants(
-            ids: [ID!]!
-        ): Boolean
+        addPlant(input: PlantInput!): Plant!
+        updatePlant(id: ID!, input: PlantInput!): Plant!
+        deletePlants(ids: [ID!]!): Boolean
     }
 `
 
@@ -70,9 +76,13 @@ export const resolvers = {
     },
     Mutation: {
         addPlant: async (_, args, { req, res }, info) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return new CustomError(CODE.NotImplemented);
         },
         updatePlant: async (_, args, { req, res }, info) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return new CustomError(CODE.NotImplemented);
         },
         deletePlants: async (_, args, { req }) => {

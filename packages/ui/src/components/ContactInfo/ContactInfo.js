@@ -23,24 +23,19 @@ import {
     EMAIL,
     PHONE 
 } from '@local/shared';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        // background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
+        background: theme.palette.primary.light,
     },
     tableHead: {
-        //background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
+        background: theme.palette.primary.main,
     },
     tableHeadCell: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     tableRow: {
-        //background: theme.palette.background.paper,
-        background: lightTheme.palette.background.paper,
+        background: theme.palette.background.paper,
     },
     nav: {
         background: 'transparent',
@@ -48,15 +43,12 @@ const useStyles = makeStyles((theme) => ({
     },
     navAction: {
         alignItems: 'baseline',
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
         overflowWrap: 'anywhere',
     },
     iconButton: {
-        //background: theme.palette.secondary.main,
-        background: lightTheme.palette.secondary.main,
-        //fill: theme.palette.secondary.contrastText,
-        fill: lightTheme.palette.secondary.contrastText,
+        background: theme.palette.secondary.main,
+        fill: theme.palette.secondary.contrastText,
     },
 }));
 

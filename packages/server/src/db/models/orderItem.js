@@ -4,7 +4,12 @@ import { TABLES } from '../tables';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { OrderItemModel as Model } from '../relationships';
-import { deleteHelper, fullSelectQueryHelper, updateHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 
 export const typeDef = gql`
     type OrderItem {
@@ -37,13 +42,7 @@ export const resolvers = {
             if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
             const user_id = await db(TABLES.Order).select('userId').where('id', args.orderId).first();
             if (req.token.userId !== user_id) return new CustomError(CODE.Unauthorized);
-
-            const added = await db(Model.name).insertAndFetch({
-                quantity: args.quantity,
-                orderId: args.orderId,
-                skuId: args.skuId
-            });
-            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
+            return await insertHelper({ model: Model, info: info, input: args });
         },
         updateOrderItem: async (_, args, { req }, info) => {
             // Must be admin, or adding to your own
@@ -53,9 +52,7 @@ export const resolvers = {
                 .where(`${TABLES.OrderItem}.id`, args.id)
                 .first();
             if (!req.isAdmin && req.token.userId !== user_id) return new CustomError(CODE.Unauthorized);
-
-            await updateHelper(Model, args);
-            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
+            return await updateHelper({ model: Model, info: info, id: args.id, input: { quantity: args.quantity } });
         },
         deleteOrderItems: async (_, args, { req }) => {
             // Must be admin, or deleting your own
@@ -65,7 +62,6 @@ export const resolvers = {
                 .whereIn(`${TABLES.OrderItem}.id`, args.ids);
             user_ids = [...new Set(user_ids)];
             if (!req.isAdmin && (user_ids.length > 1 || req.token.userId !== user_ids[0])) return new CustomError(CODE.Unauthorized);
-
             await deleteHelper(Model.name, args.ids);
         },
     }

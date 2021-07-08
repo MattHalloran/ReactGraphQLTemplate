@@ -2,12 +2,10 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        // background: theme.palette.background.paper,
-        background: lightTheme.palette.background.paper,
+        background: theme.palette.background.paper,
     },
 }));
 

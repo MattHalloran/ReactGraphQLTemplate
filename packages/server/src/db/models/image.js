@@ -4,7 +4,6 @@ import { TABLES } from '../tables';
 import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
-import { GraphQLUpload } from 'graphql-upload';
 import { deleteImage, findImage, plainImageName, saveImage } from '../../utils';
 import { ImageModel as Model } from '../relationships';
 import { deleteHelper, updateHelper } from '../query';
@@ -23,8 +22,6 @@ async function imageFromSrc(src) {
 }
 
 export const typeDef = gql`
-    scalar Upload
-
     enum ImageSize {
         XS
         S
@@ -76,7 +73,6 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    Upload: GraphQLUpload,
     ImageSize: IMAGE_SIZE,
     Query: {
         imagesByName: async (_, args) => {
@@ -96,7 +92,6 @@ export const resolvers = {
                 .select('*')
                 .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
                 .where(`${TABLES.ImageLabels}.label`, args.label);
-            console.log('GOT IMAGESSSSSSS', images)
             if (images === undefined || images.length === 0) return new CustomError(CODE.NoResults);
             // Loop through each image
             const image_data = [];
@@ -173,7 +168,7 @@ export const resolvers = {
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
                 let image = await imageFromSrc(args.data[i].src);
-                await updateHelper(Model, args.data[i], image, image.id);
+                await updateHelper({ model: Model, id: image.id, input: args.data[i] });
             }
             if (!args.deleting) return true;
             // Loop through delete data passed in

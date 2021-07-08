@@ -6,7 +6,7 @@ import {
     Navbar,
     Snack
 } from 'components';
-import { PUBS, PubSub, lightTheme, darkTheme } from 'utils';
+import { PUBS, PubSub, themes } from 'utils';
 import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
@@ -17,8 +17,7 @@ import { useHistory } from 'react-router';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 
-const useStyles = makeStyles((theme) => {
-    console.log(Object.keys(theme)); return ({
+const useStyles = makeStyles(() => ({
         "@global": {
             body: {
                 backgroundColor: 'black',
@@ -30,10 +29,6 @@ const useStyles = makeStyles((theme) => {
                 paddingTop: 'calc(14vh + 20px)',
             }
         },
-        pageContainer: {
-            //background: theme.palette.background.default,
-            background: lightTheme.palette.background.default
-        },
         contentWrap: {
             minHeight: '100vh',
         },
@@ -44,8 +39,7 @@ const useStyles = makeStyles((theme) => {
             transform: 'translate(-50%, -50%)',
             zIndex: '100000',
         },
-    })
-});
+}));
 
 const keyMap = {
     OPEN_MENU: "left",
@@ -59,14 +53,14 @@ export function App() {
     // Session cookie should automatically expire in time determined by server,
     // so no need to validate session on first load
     const [session, setSession] = useState(null);
-    const [theme, setTheme] = useState(lightTheme);
+    const [theme, setTheme] = useState(themes.light);
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
     let history = useHistory();
 
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!', session);
-        setTheme(session?.theme === 'dark' ? darkTheme : lightTheme);
+        setTheme(session?.theme in themes ? themes[session?.theme] : themes.light);
         setCart(session?.orders?.length > 0 ? session.orders[session.orders.length - 1] : null);
     }, [session])
 
@@ -80,6 +74,8 @@ export function App() {
     };
 
     useEffect(() => {
+        // Check for browser dark mode TODO set back to dark when ready
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
         return (() => {
             PubSub.unsubscribe(loadingSub);
@@ -95,7 +91,7 @@ export function App() {
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
                         <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                        <main id="page-container" className={classes.pageContainer}>
+                        <main id="page-container" style={{ background: theme.palette.background.default }}>
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
                                     session={session}

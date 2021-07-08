@@ -20,11 +20,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminCustomerPage({
-}) {
+function AdminCustomerPage() {
     const classes = useStyles();
     const [customers, setCustomers] = useState(null);
-    const { loading, error, data } = useQuery(customersQuery);
+    const { error, data } = useQuery(customersQuery);
     if (error) { 
         console.error(error);
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });

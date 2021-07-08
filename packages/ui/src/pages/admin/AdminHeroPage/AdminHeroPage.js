@@ -17,8 +17,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminHeroPage({
-}) {
+function AdminHeroPage() {
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
     const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });

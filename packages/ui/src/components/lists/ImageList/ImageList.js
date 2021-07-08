@@ -5,7 +5,6 @@ import { ImageCard } from 'components/cards/ImageCard/ImageCard';
 import { useCallback, useEffect, useState } from 'react';
 import { EditImageDialog } from 'components/dialogs/EditImageDialog/EditImageDialog';
 import { Button, Grid } from '@material-ui/core';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     flexed: {
@@ -14,9 +13,8 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'stretch',
     },
     pad: {
-        // marginBottom: theme.spacing(2),
-        marginBottom: lightTheme.spacing(2),
-        marginTop: lightTheme.spacing(2)
+        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(2)
     },
     gridItem: {
         display: 'flex',

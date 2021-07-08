@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { DEFAULT_PRONOUNS, profileSchema } from '@local/shared';
 import { useMutation, useQuery } from '@apollo/client';
 import { editProfileMutation } from 'graphql/mutation';
 import { profileQuery } from 'graphql/query';
 import { useFormik } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
-import { lightTheme, PUBS, PubSub } from 'utils';
+import { PUBS, PubSub } from 'utils';
 import { Button, Container, FormHelperText, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
@@ -15,14 +15,11 @@ import { makeStyles } from '@material-ui/styles';
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        // marginTop: theme.spacing(3),
-        marginTop: lightTheme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     buttons: {
-        // paddingTop: theme.spacing(2),
-        paddingTop: lightTheme.spacing(2),
-        // paddingBottom: theme.spacing(2),
-        paddingBottom: lightTheme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
 }));
 

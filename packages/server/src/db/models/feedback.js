@@ -2,10 +2,19 @@ import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteHelper, fullSelectQueryHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper
+} from '../query';
 import { FeedbackModel as Model } from '../relationships';
 
 export const typeDef = gql`
+    input FeedbackInput {
+        text: String!
+        userId: ID
+    }
+
     type Feedback {
         id: ID!
         text: String!
@@ -17,13 +26,8 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addFeedback(
-            text: String!
-            userId: ID
-        ): Feedback!
-        deleteFeedbacks(
-            ids: [ID!]!
-        ): Boolean
+        addFeedback(input: FeedbackInput!): Feedback!
+        deleteFeedbacks(ids: [ID!]!): Boolean
     }
 `
 
@@ -37,18 +41,13 @@ export const resolvers = {
     },
     Mutation: {
         addFeedback: async (_, args, _c, info) => {
-            const added = await db(Model.name).insertAndFetch({
-                text: args.text,
-                userId: args.userId
-            });
-            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
+            return await insertHelper({ model: Model, info: info, input: args.input });
         },
         deleteFeedbacks: async (_, args, { req }) => {
             // Must be admin, or deleting your own
             let user_ids = await db(Model.name).select('userId').whereIn('id', args.ids);
             user_ids = [...new Set(user_ids)];
             if (!req.isAdmin && (user_ids.length > 1 || req.token.user_id !== user_ids[0])) return new CustomError(CODE.Unauthorized);
-
             return await deleteHelper(Model.name, args.ids);
         }
     }

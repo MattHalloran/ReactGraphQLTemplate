@@ -3,7 +3,7 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { getUserActions, lightTheme, LINKS, updateArray } from 'utils';
+import { getUserActions, LINKS, updateArray } from 'utils';
 import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import {
     Info as InfoIcon,
@@ -21,20 +21,16 @@ const useStyles = makeStyles((theme) => ({
         padding: '0px',
     },
     navItem: {
-        // background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
         textTransform: 'none',
         verticalAlign: 'text-top',
     },
     menuItem: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     menuIcon: {
-        // fill: theme.palette.primary.contrastText,
-        fill: lightTheme.palette.primary.contrastText,
+        fill: theme.palette.primary.contrastText,
     },
     contact: {
         width: '300px',

@@ -38,7 +38,10 @@
 import { CODE } from '@local/shared';
 import getFieldNames from 'graphql-list-fields';
 import { db } from './db';
-import { CustomError } from './error';
+import { CustomError, validateArgs } from './error';
+import _ from 'lodash';
+import { MODELS, REL_TYPE } from './relationships';
+import pluralize from 'pluralize';
 
 export class Label {
     constructor(right, join, left) {
@@ -62,7 +65,7 @@ export const isNull = (object) => {
 
 // Creates a string representation of a map of the fields in a class
 export const fieldsToString = (label, fields) => {
-    console.log('fields tos tring', fields)
+    console.log('fields to string', fields)
     return fields.map(f => `'${f}', "${label}"."${f}"`).join(', ')
 }
 
@@ -119,7 +122,7 @@ export const manyToManyStrings = (rel, labels) => {
     ];
 }
 
-// Creates a string to select an object and its relationships
+// Creates a string to select an object and its direct relationships
 // className - which table to query
 // ids - which ids to query data for
 // reqTuples - 2D array describing the table's requested relationships
@@ -137,13 +140,13 @@ export const fullSelectQuery = async (model, reqFields, ids) => {
     for(let i = 0; i < reqRels.length; i++) {
         let curr =reqRels[i];
         let args = [curr, new Label(rightLabels[i], joinLabels[i], leftLabel)]
-        if (curr.type === 'one') {
+        if (curr.type === REL_TYPE.One) {
             reqStrings.push(oneToOneStrings(...args));
             groupBys.push(rightLabels[i]);
-        } else if (curr.type === 'many') {
+        } else if (curr.type === REL_TYPE.Many) {
             reqStrings.push(oneToManyStrings(...args));
             groupBys.push(rightLabels[i]);
-        } else if (curr.type === 'many-many') {
+        } else if (curr.type === REL_TYPE.ManyMany) {
             reqStrings.push(manyToManyStrings(...args))
         } else throw Error('Invalid type passed into query builder. Expected, one, many, or many-many');
     }
@@ -191,39 +194,11 @@ export const fullSelectQuery = async (model, reqFields, ids) => {
     return rows;
 }
 
-// Helps generate a full select query, using the GraphQL info object
+// Selects all requested data, including nested children, using the GraphQL info object
+// Since a full select query only goes one child deep, we must combine the results
 export const fullSelectQueryHelper = async (model, info, ids) => {
     const requested_fields = info ? getFieldNames(info) : [];
     return fullSelectQuery(model, requested_fields, ids);
-}
-
-// Updates a model's exposed fields, except for those explicity excluded
-// If the field is not in args, defaults to curr's field value
-// If the model's id is not passed in, grabs from args
-// If curr is not passed in, uses the id to query for it
-// Returns the updated object
-// Arguments:
-// model - the model object
-// args - GraphQL arguments
-// curr - an object containing the value's current data, or null
-// id - the id of the row being updated
-// excluded - an array of strings of each exposed field you'd like to exclude
-export const updateHelper = async (model, args, curr, id, excluded = []) => {
-    // Find the updating row's id
-    if (id === undefined || id === null) id = args.id;
-    // Find model's current data
-    if (curr === undefined || curr === null) curr = await db(table).where('id', id).first();
-    // Create array of updatable fields
-    const fields = model.exposedFields().filter(f => !excluded.includes(f) );
-    // Create update object
-    let update_data = {};
-    for (let i = 0; i < fields.length; i++) {
-        if (!curr.hasOwnProperty(fields[i])) continue;
-        update_data[fields[i]] = args.hasOwnProperty(fields[i]) ? 
-            args[fields[i]] : curr[fields[i]];
-    }
-    // Perform the update
-    return await db(model.name).where('id', id).update(update_data).returning('*');
 }
 
 // Inserts joining table (many-to-many) rows
@@ -336,6 +311,153 @@ export const updateChildRelationshipsHelper = async (model, rel_name, parent_id,
     // Determine and remove old relationships
     const old_ids = existing_ids.filter(id => !child_ids.includes(id));
     await removeChildRelationshipsHelper(model, rel_name, old_ids);
+}
+
+// Inserts a model into the database,
+// while also handling its relationships
+// Arguments:
+// model - the model object
+// info - GraphQL info
+// input - the data being inserted into the model
+//        can include relationship data
+//          ex: {
+//              name: 'boop',
+//              age: 111
+//              thingIds: [1, 2, 3],
+//              otherThings: {
+//                  name: 'nice'
+//                  child: {
+//                      bleep: 'blorp'    
+//                  }
+//              }
+//          }
+// defaults - default values for specified fields
+//              ex: {
+//                  name: 'default'
+//                  otherThings.child.name: 'hello world'
+//              }
+export const insertHelper = async (args) => {
+    // Validate input format
+    if (args.model.validationSchema) {
+        const validateError = await validateArgs(args.model.validationSchema, args.input);
+        if (validateError) return validateError;
+    }
+    // Find exposed fields of the main model being inserted (not any possible children)
+    const base_fields = args.model.exposedFields().filter(f => !(f in args.input));
+    // Find defaults for the main model
+    const base_defaults = args.defaults ? args.defaults.filter(f => !f.includes('.')) : {};
+    // Combine data for exposed fields with defaults
+    const base_data = _.merge(_.pick(args.input, base_fields), base_defaults);
+    // Create base model 
+    const base_id = await db(args.model.name).returning('id').insert(base_data);
+
+    // Handle model relationships
+    // There are 3 scenarios:
+    // 1: relationship is not included in data, so it is skipped
+    // 2: relationship is a list of ids, which assigns each relationship id to an existing object
+    //    (one-to-one ids are not included here, since they are part of the exposed fields)
+    // 3: relationship is an object or lists of objects, which inserts each relationship object
+    for (const relationship in args.model.relationships) {
+        const id_name = `${pluralize.singular(relationship.name)}Ids`;
+        const rel_defaults = args.defaults ? args.defaults.filter(f => f.includes(`.${relationship.name}`)).map(f => f.substring(f.indexOf('.')+1)) : {};
+        const rel_model = MODELS.find(m => m.name === relationship.name);
+
+        // Option 3
+        if (relationship.name in args.input) {
+            const rel_data = args.input[relationship.name];
+            if (Array.isArray(rel_data)) {
+                for (const curr_data in rel_data) {
+                    await insertHelper({ model: rel_model, data: curr_data, defaults: rel_defaults })
+                }
+            } else {
+                await insertHelper({ model: rel_model, data: rel_data, defaults: rel_defaults })
+            }
+            continue;
+        }
+
+        // Option 2
+        if (id_name in args.input && relationship.type === REL_TYPE.Many) {
+            await addChildRelationshipsHelper(rel_model, relationship.name, base_id, args.input[id_name]);
+        } else if (id_name in args.input && relationship.type === REL_TYPE.ManyMany) {
+            await insertJoinRowsHelper(rel_model, relationship.name, base_id, args.input[id_name]);
+        }
+    }
+
+    // Return select query
+    if (args.info) return (await fullSelectQueryHelper(args.model, args.info, base_id))[0];
+}
+
+// Updates a model's exposed fields, except for those explicity excluded
+// If the field is not in args, defaults to curr's field value
+// If the model's id is not passed in, grabs from args
+// If curr is not passed in, uses the id to query for it
+// Returns the updated object
+// Arguments:
+// model - the model object
+// info - GraphQL info
+// validationSchema - format that data must be in
+// input - the data being updated
+// curr - an object containing the value's current data, or null
+// id - the id of the row being updated
+export const updateHelper = async (args) => {
+    // Validate input format
+    if (args.model.validationSchema) {
+        const validateError = await validateArgs(args.model.validationSchema, args.input);
+        if (validateError) return validateError;
+    }
+    // Find base id and current data
+    if (!args.id) {
+        console.error('ID must be passed into update helper, either explicitly or in data');
+        return new CustomError(CODE.InvalidArgs);
+    }
+    const curr = args.curr || await db(args.model.name).where('id', args.id).first()
+    console.log('IN UPDATE HELPER: CURR')
+    console.log(curr);
+    // Find exposed fields of the main model being inserted (not any possible children)
+    const base_fields = args.model.exposedFields().filter(f => f !== 'id' && !(f in args.input));
+    // Combine curr data with updating data
+    const base_data = _.merge(curr, _.pick(args.input, base_fields));
+    // Perform the base update
+    await db(args.model.name).where('id', args.id).update(base_data);
+
+    // Handle model relationships
+    // There are 3 scenarios:
+    // 1: relationship is not included in data, so it is skipped
+    // 2: relationship is a list of ids, which assigns each relationship id to an existing object
+    //    (one-to-one ids are not included here, since they are part of the exposed fields)
+    // 3: relationship is an object or lists of objects, which updates each relationship object
+    for (const relationship in args.model.relationships) {
+        const id_name = `${pluralize.singular(relationship.name)}Ids`;
+        const rel_model = MODELS.find(m => m.name === relationship.name);
+
+        // Option 3
+        if (relationship.name in args.input) {
+            const rel_data = args.input[relationship.name];
+            if (Array.isArray(rel_data)) {
+                for (let curr_data in rel_data) {
+                    const curr_id = curr_data.id;
+                    delete curr_data.id;
+                    await updateHelper({ model: rel_model, id: curr_id, input: curr_data })
+                }
+            } else {
+                const curr_id = rel_data.id;
+                delete rel_data.id;
+                await updateHelper({ model: rel_model, id: curr_id, input: rel_data })
+            }
+            continue;
+        }
+
+        // Option 2
+        if (id_name in args.input && relationship.type === REL_TYPE.Many) {
+            await updateChildRelationshipsHelper(rel_model, relationship.name, args.id, args.input[id_name]);
+        } else if (id_name in args.input && relationship.type === REL_TYPE.ManyMany) {
+            await updateJoinRowsHelper(rel_model, relationship.name, args.id, args.input[id_name]);
+        }
+    }
+
+
+    // Return select query
+    if (args.info) return (await fullSelectQueryHelper(args.model, args.info, args.id))[0];
 }
 
 // Deletes a list of rows from a table

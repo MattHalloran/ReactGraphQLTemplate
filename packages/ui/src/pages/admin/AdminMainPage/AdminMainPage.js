@@ -1,5 +1,5 @@
 import { useHistory } from 'react-router-dom';
-import { lightTheme, LINKS } from 'utils';
+import { LINKS } from 'utils';
 import { Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
@@ -8,10 +8,8 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     card: {
-        // background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
         cursor: 'pointer',
     },
     flexed: {
@@ -21,8 +19,7 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'stretch',
     },
     button: {
-        // color: theme.palette.secondary.light,
-        color: lightTheme.palette.secondary.light,
+        color: theme.palette.secondary.light,
     },
 }));
 

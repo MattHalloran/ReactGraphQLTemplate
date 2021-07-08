@@ -70,6 +70,7 @@ export async function up (knex) {
         table.string('postalCode', 16).notNullable();
         table.string('throughfare', 256).notNullable();
         table.string('premise', 64);
+        table.string('deliveryInstructions', 2048);
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Email, (table) => {
@@ -119,7 +120,7 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Sku, (table) => {
         table.uuid('id').primary();
         table.string('sku', 32).notNullable();
-        table.boolean('isDiscountable').defaultTo(true).notNullable();
+        table.boolean('isDiscountable').defaultTo(false).notNullable();
         table.string('size', 32).defaultTo('N/A').notNullable();
         table.string('note', 2048);
         table.integer('availability').defaultTo(0).notNullable();
@@ -131,7 +132,7 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Order, (table) => {
         table.uuid('id').primary();
         table.enu('status', Object.values(ORDER_STATUS)).defaultTo(ORDER_STATUS.Draft).notNullable();
-        table.string('specialInstructions', 1024);
+        table.string('specialInstructions', 2048);
         table.timestamp('desiredDeliveryDate');
         table.timestamp('expectedDeliveryDate');
         table.boolean('isDelivery').defaultTo(true).notNullable();

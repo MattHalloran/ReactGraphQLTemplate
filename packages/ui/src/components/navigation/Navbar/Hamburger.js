@@ -5,7 +5,7 @@ import {
     Copyright
 } from 'components';
 import { SOCIAL } from '@local/shared';
-import { getUserActions, lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
@@ -25,29 +25,22 @@ import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
-        //background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-        //borderLeft: `2px solid ${theme.palette.text.primary}`,
-        borderLeft: `2px solid ${lightTheme.palette.text.primary}`,
+        background: theme.palette.primary.light,
+        borderLeft: `2px solid ${theme.palette.text.primary}`,
     },
     menuItem: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
-        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
+        color: theme.palette.primary.contrastText,
+        borderBottom: `1px solid ${theme.palette.primary.dark}`,
     },
     close: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
         borderRadius: 0,
-        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
-        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
+        borderBottom: `1px solid ${theme.palette.primary.dark}`,
         justifyContent: 'end',
         direction: 'rtl',
     },
     menuIcon: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     facebook: {
         fill: '#43609C', // UCLA blue
@@ -56,8 +49,7 @@ const useStyles = makeStyles((theme) => ({
         fill: '#F77737',
     },
     copyright: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
         maxWidth: 300,
         padding: 5,
     },

@@ -6,31 +6,23 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        // paddingLeft: theme.spacing(2),
-        paddingLeft: lightTheme.spacing(2),
-        // paddingRight: theme.spacing(1),
-        paddingRight: lightTheme.spacing(1),
-        // backgroundColor: theme.palette.primary.main,
-        backgroundColor: lightTheme.palette.primary.main,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
     },
     highlight: {
-        // backgroundColor: theme.palette.primary.dark,
-        backgroundColor: lightTheme.palette.primary.dark,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        backgroundColor: theme.palette.primary.dark,
+        color: theme.palette.primary.contrastText,
     },
     title: {
         flex: '1 1 100%',
     },
     icon: {
-        // fill: theme.palette.primary.contrastText,
-        fill: lightTheme.palette.primary.contrastText,
+        fill: theme.palette.primary.contrastText,
     },
 }));
 

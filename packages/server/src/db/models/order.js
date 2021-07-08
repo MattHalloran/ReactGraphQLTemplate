@@ -3,7 +3,11 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 import { CODE, ORDER_STATUS } from '@local/shared';
 import { CustomError } from '../error';
-import { fullSelectQueryHelper } from '../query';
+import { 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { OrderModel as Model } from '../relationships';
 
 export const typeDef = gql`
@@ -18,6 +22,13 @@ export const typeDef = gql`
         Scheduled
         InTransit
         Delivered
+    }
+
+    input OrderInput {
+        status: OrderStatus
+        specialInstructions: String
+        desiredDeliveryDate: Date
+        isDelivery: Boolean
     }
 
     type Order {
@@ -37,19 +48,10 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        updateOrder(
-            id: ID!
-            specialInstructions: String
-            desiredDeliveryDate: Date
-            isDelivery: Boolean
-            addressId: ID
-        ): Order
-        submitOrder(
-            id: ID!
-        ): Response
-        cancelOrder(
-            id: ID!
-        ): Response
+        updateOrder(id: ID!, input: OrderInput): Order!
+        submitOrder(id: ID!): Boolean
+        cancelOrder(id: ID!): OrderStatus
+        deleteOrders(ids: [ID!]!): Boolean
     }
 `
 
@@ -80,17 +82,43 @@ export const resolvers = {
             // Must be admin, or updating your own
             const curr = await db(Model.name).where('id', args.id).first();
             if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
-            
-            await updateHelper(Model, args, curr);
-            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
+            if (!req.isAdmin) {
+                // Customers can only update their own orders in certain states
+                const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
+                if (!(curr.status in editable_order_statuses)) return new CustomError(CODE.Unauthorized);
+                // Customers cannot edit order status
+                delete args.input.status;
+            }
+            return await updateHelper({ model: Model, info: info, id: curr.id, input: args.input });
         },
-        submitOrder: async (_, args, { req, res }, info) => {
+        submitOrder: async (_, args, { req }) => {
             // Must be admin, or submitting your own
-            return new CustomError(CODE.NotImplemented);
+            const curr = await db(Model.name).where('id', args.id).first();
+            if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
+            // Only orders in the draft state can be submitted
+            if (curr.status !== ORDER_STATUS.Draft) return new CustomError(CODE.ErrorUnknown);
+            await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.Pending);
+            return true;
         },
-        cancelOrder: async (_, args, { req, res }, info) => {
-            // Must be admin, or cancelling your own
-            return new CustomError(CODE.NotImplemented);
+        cancelOrder: async (_, args, { req }) => {
+            // Must be admin, or canceling your own
+            const curr = await db(Model.name).where('id', args.id).first();
+            if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
+            // Only pending orders in certain states
+            if (curr.status === ORDER_STATUS.Pending) {
+                await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.CanceledByUser);
+                return ORDER_STATUS.CanceledByUser;
+            }
+            const pending_order_statuses = [ORDER_STATUS.Approved, ORDER_STATUS.Scheduled];
+            if (curr.status in pending_order_statuses) {
+                await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.PendingCancel);
+                return ORDER_STATUS.PendingCancel;
+            }
         },
+        deleteOrders: async (_, args, { req }) => {
+            // Must be admin
+            if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await deleteHelper(Model.name, args.ids);
+        }
     }
 }

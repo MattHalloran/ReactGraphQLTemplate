@@ -1,6 +1,6 @@
 import { signUpMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { CODE, DEFAULT_PRONOUNS, signUpSchema } from '@local/shared';
+import { CODE, DEFAULT_PRONOUNS, signUpSchema, BUSINESS_NAME } from '@local/shared';
 import { useFormik } from 'formik';
 import {
     Button,
@@ -17,17 +17,15 @@ import {
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        // marginTop: theme.spacing(3),
-        marginTop: lightTheme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     submit: {
-        // margin: theme.spacing(3, 0, 2),
-        margin: lightTheme.spacing(3, 0, 2),
+        margin: theme.spacing(3, 0, 2),
     },
 }));
 
@@ -61,9 +59,15 @@ function SignUpForm({
                 if (response.ok) {
                     onSessionUpdate(response.session)
                     if (values.existingCustomer) {
-                        alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: `Welcome to ${BUSINESS_NAME.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
+                            firstButtonText: 'OK',
+                        });
                     } else {
-                        alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: `Welcome to ${BUSINESS_NAME.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page`,
+                            firstButtonText: 'OK',
+                        });
                     }
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });

@@ -15,8 +15,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function AdminGalleryPage({
-}) {
+function AdminGalleryPage() {
     console.log('GALLERY PAGE RENDER...')
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
@@ -81,7 +80,7 @@ function AdminGalleryPage({
             PubSub.publish(PUBS.Loading, false);
             PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
         })
-    }, [imageData])
+    }, [imageData, updateImages])
 
     return (
         <div id='page' className={classes.root}>

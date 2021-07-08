@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { LINKS } from 'utils';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { USER_ROLES, BUSINESS_NAME } from '@local/shared';
+import { USER_ROLES } from '@local/shared';
 
 const Page = ({
     title,
@@ -23,7 +23,7 @@ const Page = ({
             onSessionUpdate(response.data.login);
             setSessionChecked(true);
         }).catch((response) => {console.error(response); setSessionChecked(true)})
-    }, [])
+    }, [login, onSessionUpdate])
 
     useEffect(() => {
         document.title = title || "";

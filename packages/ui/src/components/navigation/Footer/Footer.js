@@ -3,7 +3,7 @@ import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import PropTypes from 'prop-types';
 import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, API_ADDRESS } from '@local/shared';
-import { lightTheme, LINKS, printAvailability } from 'utils';
+import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
 import {
@@ -18,12 +18,9 @@ const useStyles = makeStyles((theme) => ({
     root: {
         width: 'fit-content',
         overflow: 'hidden',
-        //backgroundColor: theme.palette.primary.dark,
-        backgroundColor: lightTheme.palette.primary.dark,
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        //borderTop: `2px solid ${theme.palette.text.primary}`,
-        borderTop: `2px solid ${lightTheme.palette.text.primary}`,
+        backgroundColor: theme.palette.primary.dark,
+        color: theme.palette.primary.contrastText,
+        borderTop: `2px solid ${theme.palette.text.primary}`,
         position: 'relative',
         paddingBottom: '7vh',
     },
@@ -37,16 +34,13 @@ const useStyles = makeStyles((theme) => ({
     image: {
         maxWidth: '100%',
         maxHeight: 200,
-        //background: theme.palette.primary.contrastText,
-        background: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.contrastText,
     },
     icon: {
-        //fill: theme.palette.primary.contrastText,
-        fill: lightTheme.palette.primary.contrastText,
+        fill: theme.palette.primary.contrastText,
     },
     copyright: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
 }));
 

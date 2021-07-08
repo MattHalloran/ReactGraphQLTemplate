@@ -7,7 +7,7 @@ import { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
-import { lightTheme, PUBS, PubSub, SORT_OPTIONS } from 'utils';
+import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
     EditPlantDialog,
@@ -21,10 +21,8 @@ import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     toggleBar: {
-        // background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
     },
     cardFlex: {
         display: 'grid',
@@ -36,8 +34,7 @@ const useStyles = makeStyles((theme) => ({
 let copy = SORT_OPTIONS.slice();
 const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
-function AdminInventoryPage({
-}) {
+function AdminInventoryPage() {
     const classes = useStyles();
     const [currTab, setCurrTab] = useState(0);
     // Holds the selected availability file, if uploading one

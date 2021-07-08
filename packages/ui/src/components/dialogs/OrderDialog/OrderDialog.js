@@ -20,7 +20,7 @@ import { makeStyles } from '@material-ui/styles';
 import { CartTable as Cart } from 'components';
 import { useMutate } from "restful-react";
 import { setOrderStatus } from 'query/http_promises';
-import { findWithAttr, lightTheme, ORDER_STATES, PUBS, PubSub } from 'utils';
+import { findWithAttr, ORDER_STATES, PUBS, PubSub } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
 import _ from 'underscore';
 
@@ -29,21 +29,17 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     title: {
-        // marginLeft: theme.spacing(2),
-        marginLeft: lightTheme.spacing(2),
+        marginLeft: theme.spacing(2),
         flex: 1,
     },
     container: {
-        // padding: theme.spacing(1),
-        padding: lightTheme.spacing(1),
+        padding: theme.spacing(1),
     },
     topOption: {
         width: 'max(9em, 40%)',
         align: 'right',
-        // paddingTop: theme.spacing(1),
-        paddingTop: lightTheme.spacing(1),
-        // paddingBottom: theme.spacing(1),
-        paddingBottom: lightTheme.spacing(1),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
 }));
 
@@ -60,7 +56,7 @@ function OrderDialog({
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);
 
-    const { mutate: updateCart, loading } = useMutate({
+    const { mutate: updateCart } = useMutate({
         verb: 'PUT',
         path: 'cart',
         resolve: (response) => {

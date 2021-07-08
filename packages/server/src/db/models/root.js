@@ -2,11 +2,14 @@ import { gql } from 'apollo-server-express';
 import { GraphQLScalarType } from "graphql";
 import { Kind } from "graphql/language";
 import moment from 'moment';
+import { GraphQLUpload } from 'graphql-upload';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export const typeDef = gql`
     scalar Date
+    scalar Upload
+
     type Response {
         code: Int
         message: String!
@@ -20,6 +23,7 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
+    Upload: GraphQLUpload,
     Date: new GraphQLScalarType({
         name: "Date",
         description: "Custom description for the date scalar",

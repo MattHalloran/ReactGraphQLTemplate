@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGet } from "restful-react";
-import { lightTheme, ORDER_STATES, PUBS, PubSub } from 'utils';
+import { ORDER_STATES, PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import {
     AdminBreadcrumbs,
@@ -16,13 +16,11 @@ const useStyles = makeStyles((theme) => ({
         gridGap: '20px',
     },
     padBottom: {
-        // marginBottom: theme.spacing(2),
-        marginBottom: lightTheme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
 }));
 
-function AdminOrderPage({
-}) {
+function AdminOrderPage() {
     const classes = useStyles();
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     // Selected order data. Used for popup
@@ -40,7 +38,7 @@ function AdminOrderPage({
 
     useEffect(() => {
         getOrders();
-    }, [filter])
+    }, [filter, getOrders])
 
     return (
         <div id="page">

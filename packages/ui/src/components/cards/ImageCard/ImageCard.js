@@ -11,16 +11,13 @@ import {
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme } from 'utils';
-import { useEffect, useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        //background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
         borderRadius: 15,
         margin: 3,
         cursor: 'pointer',
@@ -37,8 +34,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'inherit',
     },
     actionButton: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
 }));
 

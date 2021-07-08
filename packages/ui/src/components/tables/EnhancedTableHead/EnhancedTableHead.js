@@ -1,22 +1,17 @@
 import PropTypes from 'prop-types';
 import { TableCell, TableHead, TableRow, Checkbox } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        // background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
     },
     check: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     cell: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     visuallyHidden: {
         border: 0,
