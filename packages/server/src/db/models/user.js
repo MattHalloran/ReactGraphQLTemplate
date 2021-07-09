@@ -132,11 +132,6 @@ export const resolvers = {
             if (validateError) return validateError;
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
-            const test = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).first();
-            const test2 = await db(TABLES.Email).select('emailAddress', 'userId');
-            console.log("GOT EMAIL", email)
-            console.log("GOT TEST", test)
-            console.log("GOT TEST 2", test2)
             if (email === undefined) return new CustomError(CODE.BadCredentials);
             // Find user
             let user = await db(Model.name).where('id', email.userId).first();
