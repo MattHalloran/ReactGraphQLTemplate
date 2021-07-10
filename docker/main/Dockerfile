@@ -2,21 +2,21 @@ FROM node:14.17-alpine
 EXPOSE 3000 5000
 
 # Set variables
-ARG main=/srv/app
+ARG PROJECT_DIR
 ARG ui=packages/ui
 ARG server=packages/server
 ARG shared=packages/shared
 ARG node=/node_modules
 
 # Create directories with correct permissions
-RUN mkdir ${main} ${node} &&\ 
-    chown -R node:node ${main} &&\ 
+RUN mkdir ${PROJECT_DIR} ${node} &&\ 
+    chown -R node:node ${PROJECT_DIR} &&\ 
     chown -R node:node ${node}
 # Let the script know where node_modules is located (see .yarnrc)
 RUN PATH=$PATH:${node}/.bin
 
 # Create .yarnrc
-RUN echo "--modules-folder ${node}" > ${main}/.yarnrc
+RUN echo "--modules-folder ${node}" > ${PROJECT_DIR}/.yarnrc
 
 # Install global packages (must be done as the root user)
 RUN yarn global add knex nodemon react-scripts
@@ -25,7 +25,7 @@ RUN yarn global add knex nodemon react-scripts
 USER node
 
 # Set working directory
-WORKDIR ${main}
+WORKDIR ${PROJECT_DIR}
 
 # Copy packages over first. This helps with caching
 COPY --chown=node:node package.json ./

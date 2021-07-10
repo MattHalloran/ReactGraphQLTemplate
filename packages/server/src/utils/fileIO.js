@@ -13,7 +13,7 @@ const MAX_FILE_NAME_ATTEMPTS = 100;
 // Max size of a file buffer (how large of a file are you willing to download?)
 const MAX_BUFFER_SIZE = 1000000000;
 // Location of assets directory
-const ASSET_DIR = `${process.env.PROJECT_DIR || '/srv/app'}/assets`;
+const ASSET_DIR = `${process.env.PROJECT_DIR}/assets`;
 
 // Replace any invalid characters from the file and folder names
 // Args:

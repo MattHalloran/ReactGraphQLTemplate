@@ -1,12 +1,13 @@
+export const SITE_IP = 'http://localhost'; //https://newlifenurseryinc.com';
 // Client setup
-export const CLIENT_ADDRESS = 'http://localhost:3000'; //https://newlifenurseryinc.com';
+export const CLIENT_PORT = '3000';
+export const CLIENT_ADDRESS = `${SITE_IP}:${CLIENT_PORT}`;
 // Server setup
-export const SERVER_IP = 'http://localhost'; //https://newlifenurseryinc.com';
 export const SERVER_PORT = '5000';
-export const SERVER_ADDRESS = `${SERVER_IP}:${SERVER_PORT}`;
+export const SERVER_ADDRESS = `${SITE_IP}:${SERVER_PORT}`;
 export const API_PREFIX = 'api';
 export const API_VERSION = 'v1';
-export const API_ADDRESS = `${SERVER_IP}:${SERVER_PORT}/${API_PREFIX}/${API_VERSION}`;
+export const API_ADDRESS = `${SITE_IP}:${SERVER_PORT}/${API_PREFIX}/${API_VERSION}`;
 
 export const WEBSITE_URL = 'https://www.newlifenurseryinc.com';
 
