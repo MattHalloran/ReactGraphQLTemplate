@@ -9,7 +9,7 @@ ARG shared=packages/shared
 ARG node=/node_modules
 
 # Create directories with correct permissions
-RUN mkdir ${PROJECT_DIR} ${node} &&\ 
+RUN mkdir -p ${PROJECT_DIR} ${node} ${PROJECT_DIR}/assets/images ${PROJECT_DIR}/assets/public ${PROJECT_DIR}/assets/private &&\ 
     chown -R node:node ${PROJECT_DIR} &&\ 
     chown -R node:node ${node}
 # Let the script know where node_modules is located (see .yarnrc)
