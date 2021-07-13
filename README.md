@@ -29,5 +29,8 @@ Currently, the cheapest way to deploy a web project seems to be through VPS host
 Once you are connected to your VPS, do the following:
 1. git clone <your_projects_url>
 2. Edit .env variables
-3. If using Digital Ocean, run ./droplet-setup.sh. Other VPS services may require a similar setup step, but I have not tried them.
+3. If using Digital Ocean:  
+    a. ./droplet-setup.sh  
+    b. sudo reboot  
+    Note: Other VPS services may require a similar setup step, but I have not tried them.
 3. nohup docker-compose up &

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Sets up general droplet settings
 
 HERE=`dirname $0`
@@ -16,4 +16,5 @@ MSG="Running upgrade"
 checker sudo apt-get -y upgrade
 info "Updating max listeners, since npm uses a lot. Not sure exactly what they do, but the default max amount is not enough"
 echo fs.inotify.max_user_watches=20000 | sudo tee -a /etc/sysctl.conf
+echo vm.overcommit_memory=1 | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p

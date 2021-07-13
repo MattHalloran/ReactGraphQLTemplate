@@ -14,7 +14,7 @@ import {
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 import { customerNotifyAdmin, sendVerificationLink } from '../../worker/email/queue';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 const { v4: uuidv4 } = uuid;
 
 export const HASHING_ROUNDS = 8;

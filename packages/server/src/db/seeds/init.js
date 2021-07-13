@@ -1,6 +1,7 @@
 import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
-import { v4 as uuidv4 } from 'uuid';
+import * as uuid from 'uuid';
+const { v4: uuidv4 } = uuid;
 import bcrypt from 'bcrypt';
 import { HASHING_ROUNDS } from '../models/user';
 import { db } from '../db';
