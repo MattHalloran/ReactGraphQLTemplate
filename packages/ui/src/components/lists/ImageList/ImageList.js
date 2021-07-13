@@ -52,7 +52,7 @@ function ImageList({
         };
         setChanged(updated);
         setSelected(-1);
-    }, [selected])
+    }, [selected, changed])
 
     const deleteImage = (index) => {
         let updated = [...changed];

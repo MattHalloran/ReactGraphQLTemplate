@@ -1,12 +1,10 @@
 import PropTypes from 'prop-types';
 import {
-    Button,
     Card,
     CardActions,
     CardContent,
     CardMedia,
-    IconButton,
-    TextField
+    IconButton
 } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';

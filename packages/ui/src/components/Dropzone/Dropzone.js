@@ -95,6 +95,7 @@ function Dropzone({
                 <img
                     src={file.preview}
                     style={img}
+                    alt="Dropzone preview"
                 />
             </div>
         </div>

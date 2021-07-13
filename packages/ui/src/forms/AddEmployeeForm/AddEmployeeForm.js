@@ -1,9 +1,8 @@
 //TODO not used yet. Currently same as signup form
 
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { LINKS, PUBS, PubSub, useHistoryState } from 'utils';
-import { CODE, DEFAULT_PRONOUNS, employeeSchema } from '@local/shared';
+import { DEFAULT_PRONOUNS, employeeSchema } from '@local/shared';
 import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';

@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
-import { useMutation } from '@apollo/client';
 import { BUSINESS_NAME } from '@local/shared';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
@@ -67,7 +66,7 @@ function CartPage({
         console.log('CART UPDATE', data);
         if (currCart === null && data !== null) setcurrCart(data);
         setChangedCart(data);
-    }, [currCart, changedCart])
+    }, [currCart])
 
     const updateOrder = () => {
         if (!user_id) {
@@ -105,7 +104,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, user_id]);
+    }, [cart, changedCart, currCart, requestQuote, user_id]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (

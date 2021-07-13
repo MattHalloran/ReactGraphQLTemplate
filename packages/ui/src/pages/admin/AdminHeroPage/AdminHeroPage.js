@@ -81,7 +81,7 @@ function AdminHeroPage() {
             PubSub.publish(PUBS.Loading, false);
             PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
         })
-    }, [imageData])
+    }, [imageData, updateImages])
 
     return (
         <div id='page' className={classes.root}>
