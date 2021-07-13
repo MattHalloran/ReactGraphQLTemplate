@@ -10,6 +10,7 @@ ARG node=/node_modules
 
 # Create directories with correct permissions
 RUN mkdir -p ${node} ${PROJECT_DIR}/assets/images ${PROJECT_DIR}/assets/public ${PROJECT_DIR}/assets/private &&\ 
+    mkdir -p ${PROJECT_DIR}/${ui}/node_modules/.cache ${PROJECT_DIR}/${server}/node_modules/.cache ${PROJECT_DIR}/${shared}/node_modules/.cache &&\
     chown -R node:node ${PROJECT_DIR} &&\ 
     chown -R node:node ${node}
 # Let the script know where node_modules is located (see .yarnrc)
