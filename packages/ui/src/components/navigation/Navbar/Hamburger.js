@@ -50,8 +50,10 @@ const useStyles = makeStyles((theme) => ({
     },
     copyright: {
         color: theme.palette.primary.contrastText,
-        maxWidth: 300,
         padding: 5,
+        display: 'block',
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
 }));
 

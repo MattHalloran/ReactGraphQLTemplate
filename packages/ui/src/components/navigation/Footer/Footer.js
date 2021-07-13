@@ -16,7 +16,6 @@ import { Copyright } from 'components';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: 'fit-content',
         overflow: 'hidden',
         backgroundColor: theme.palette.primary.dark,
         color: theme.palette.primary.contrastText,

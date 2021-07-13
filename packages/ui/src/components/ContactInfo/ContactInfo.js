@@ -25,9 +25,6 @@ import {
 } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        background: theme.palette.primary.light,
-    },
     tableHead: {
         background: theme.palette.primary.main,
     },
@@ -38,11 +35,12 @@ const useStyles = makeStyles((theme) => ({
         background: theme.palette.background.paper,
     },
     nav: {
+        alignItems: 'baseline',
         background: 'transparent',
         height: 'fit-content',
     },
     navAction: {
-        alignItems: 'baseline',
+        alignItems: 'center',
         color: theme.palette.primary.contrastText,
         overflowWrap: 'anywhere',
     },
@@ -75,7 +73,7 @@ function ContactInfo({
     ]
 
     return (
-        <div className={classes.root} {...props}>
+        <div style={{ minWidth: 'fit-content', height: 'fit-content'}} {...props}>
             <TableContainer>
                 <Table aria-label="contact-hours-table" size="small">
                     <TableHead className={classes.tableHead}>

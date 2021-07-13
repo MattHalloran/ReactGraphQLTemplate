@@ -3,6 +3,9 @@
 # Before monorepo can start, it must first wait for the database to finish initializing
 ${PROJECT_DIR}/scripts/wait-for.sh db:5432 -t 1000 -- echo 'Database is up. Starting monorepo'
 
+echo 'scrooge mcduck'
+cat /srv/app/.yarnrc
+
 if [ "${NODE_ENV}" == "development" ] ; then
     #(cd packages/server && npm run start-dev) & (cd packages/ui && npm run start-dev)
     # For some reason, knex will not run if using npm run commands. So we must call them manually :(
