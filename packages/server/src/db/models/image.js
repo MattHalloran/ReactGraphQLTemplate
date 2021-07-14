@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
-import { deleteImage, findImage, plainImageName, saveImage } from '../../utils';
+import { deleteImage, findImageUrl, plainImageName, saveImage } from '../../utils';
 import { ImageModel as Model } from '../relationships';
 import { deleteHelper, updateHelper } from '../query';
 
@@ -12,7 +12,7 @@ import { deleteHelper, updateHelper } from '../query';
 async function imageFromSrc(src) {
     // Parse name, extension, and folder from src path. This gives a unique row
     let { name, ext } = plainImageName(src);
-    let folder = path.basename(path.dirname(src));
+    const { folder } = clean(src);
     // Update the row with the new information
     return await db(Model.name)
         .where('fileName', name)
@@ -81,7 +81,7 @@ export const resolvers = {
             const paths = [];
             for (let i = 0; i < args.fileNames.length; i++) {
                 // Try returning the image in the requested size, or any available size
-                const filePath = await findImage(args.fileNames[i], args.size);
+                const filePath = await findImageUrl(args.fileNames[i], args.size);
                 paths.push(filePath);
             }
             return paths;
@@ -97,7 +97,7 @@ export const resolvers = {
             const image_data = [];
             for (let i = 0; i < images.length; i++) {
                 // Try returning the image in the requested size, or any available size
-                const filePath = await findImage(`${images[i].fileName}${images[i].extension}`, args.size);
+                const filePath = await findImageUrl(`${images[i].folder}/${images[i].fileName}${images[i].extension}`, args.size);
                 image_data.push({
                     src: filePath,
                     alt: images[i].alt,
@@ -188,7 +188,7 @@ export const resolvers = {
             const filenames = await db(Model.name).select('folder', 'filename', 'extension').whereIn('id', args.ids);
             for (let i = 0; i < filenames.length; i++) {
                 let curr = filenames[i];
-                await deleteImage(`${curr.fileName}${curr.extension}`, curr.folder);
+                await deleteImage(`${curr.folder}/${curr.fileName}${curr.extension}`);
             }
             // Delete the database rows
             return await deleteHelper(Model.name, args.ids);
@@ -200,7 +200,7 @@ export const resolvers = {
             const filenames = await db(Model.name).select('folder', 'filename', 'extension').whereIn('label', args.labels);
             for (let i = 0; i < filenames.length; i++) {
                 let curr = filenames[i];
-                await deleteImage(`${curr.fileName}${curr.extension}`, curr.folder);
+                await deleteImage(`${curr.folder}/${curr.fileName}${curr.extension}`);
             }
             // Delete the database rows
             await deleteHelper(Model.name, args.labels, 'label', true);
