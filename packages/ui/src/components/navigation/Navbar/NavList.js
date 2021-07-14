@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 function NavList({
     session,
+    business,
     logout,
     roles,
     cart,
@@ -107,7 +108,7 @@ function NavList({
                 size="large"
                 className={classes.navItem}
             >
-                <ContactInfo className={classes.contact} />
+                <ContactInfo className={classes.contact} business={business} />
             </PopupMenu>
             <PopupMenu
                 text="About"

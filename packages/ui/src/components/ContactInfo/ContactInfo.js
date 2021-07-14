@@ -18,11 +18,6 @@ import {
     Room as RoomIcon
 } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
-import { 
-    ADDRESS, 
-    EMAIL,
-    PHONE 
-} from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     tableHead: {
@@ -51,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ContactInfo({
+    business,
     ...props
 }) {
     const classes = useStyles();
@@ -67,9 +63,9 @@ function ContactInfo({
     ]
 
     const contactInfo = [
-        ['Open in Google Maps', ADDRESS.Label, ADDRESS.Link, RoomIcon],
-        ['Call Us', PHONE.Label, PHONE.Link, PhoneIcon],
-        ['Email Us', EMAIL.Label, EMAIL.Link, EmailIcon]
+        ['Open in Google Maps', business?.ADDRESS?.Label, business?.ADDRESS?.Link, RoomIcon],
+        ['Call Us', business?.PHONE?.Label, business?.PHONE?.Link, PhoneIcon],
+        ['Email Us', business?.EMAIL?.Label, business?.EMAIL?.Link, EmailIcon]
     ]
 
     return (

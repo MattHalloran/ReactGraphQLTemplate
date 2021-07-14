@@ -1,6 +1,6 @@
 import { signUpMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { CODE, DEFAULT_PRONOUNS, signUpSchema, BUSINESS_NAME } from '@local/shared';
+import { CODE, DEFAULT_PRONOUNS, signUpSchema } from '@local/shared';
 import { useFormik } from 'formik';
 import {
     Button,
@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function SignUpForm({ 
+    business,
     onSessionUpdate,
     onRedirect
 }) {
@@ -60,12 +61,12 @@ function SignUpForm({
                     onSessionUpdate(response.session)
                     if (values.existingCustomer) {
                         PubSub.publish(PUBS.AlertDialog, {
-                            message: `Welcome to ${BUSINESS_NAME.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
+                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
                             firstButtonText: 'OK',
                         });
                     } else {
                         PubSub.publish(PUBS.AlertDialog, {
-                            message: `Welcome to ${BUSINESS_NAME.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page`,
+                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page`,
                             firstButtonText: 'OK',
                         });
                     }

@@ -38,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
 
 function ShoppingPage({
     session,
+    business,
     cart,
 }) {
     const classes = useStyles();
@@ -196,7 +197,7 @@ function ShoppingPage({
                 <Button
                     color="secondary"
                     startIcon={<PrintIcon />}
-                    onClick={() => printAvailability(session)}
+                    onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)}
                 >Print</Button>
             </div>
             <ShoppingList

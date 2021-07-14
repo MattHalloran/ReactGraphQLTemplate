@@ -1,6 +1,8 @@
 import Bull from 'bull';
 import { emailProcess } from './process';
-import { BUSINESS_NAME, WEBSITE_URL } from '@local/shared';
+import fs from 'fs';
+import { BUSINESS_JSON } from '../../consts';
+const { BUSINESS_NAME, WEBSITE_URL } = JSON.parse(fs.readFileSync(BUSINESS_JSON, 'utf8'));
 
 const emailQueue = new Bull('email', { redis: process.env.REDIS_CONN });
 emailQueue.process(emailProcess);

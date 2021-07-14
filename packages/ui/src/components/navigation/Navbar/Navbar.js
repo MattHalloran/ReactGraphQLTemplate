@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/img/nln-logo-colorized.png';
-import { BUSINESS_NAME } from '@local/shared';
 import { hexToRGB, LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -87,6 +86,7 @@ HideOnScroll.propTypes = {
 
 function Navbar({
     session,
+    business,
     onSessionUpdate,
     roles,
     cart,
@@ -105,6 +105,7 @@ function Navbar({
 
     let child_props = { 
         session: session, 
+        business: business,
         onSessionUpdate: onSessionUpdate,
         logout: logoutUser,
         roles: roles, 
@@ -127,9 +128,9 @@ function Navbar({
                 <Toolbar>
                     <div className={classes.navLogoContainer} onClick={() => onRedirect(LINKS.Home)}>
                         <div className={classes.navLogoDiv}>
-                            <img src={Logo} alt={`${BUSINESS_NAME.Short} Logo`} className={classes.navLogo} />
+                            <img src={Logo} alt={`${business?.BUSINESS_NAME?.Short} Logo`} className={classes.navLogo} />
                         </div>
-                        <Typography className={classes.navName} variant="h6" noWrap>{BUSINESS_NAME.Short}</Typography>
+                        <Typography className={classes.navName} variant="h6" noWrap>{business?.BUSINESS_NAME?.Short}</Typography>
                     </div>
                     <div className={classes.toRight}>
                         {show_hamburger ? <Hamburger {...child_props} /> : <NavList {...child_props} />}

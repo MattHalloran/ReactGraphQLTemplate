@@ -12,7 +12,6 @@ import {
     TextField,
     Typography
 } from '@material-ui/core';
-import { fetch_asset } from 'query/http_functions';
 import PubSub from 'utils/pubsub';
 import { PUBS } from 'utils';
 import { readAssetsQuery } from 'graphql/query/readAssets';
@@ -39,17 +38,16 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminContactPage() {
+function AdminContactPage({
+    business
+}) {
     const classes = useStyles();
-    const { data: currHours } = useQuery(readAssetsQuery, { variables: { files: ['hours.md'] } });
     const [hours, setHours] = useState('');
-    // const { data: contactInfo } = useQuery(contactQuery);
-    // const [updateContactInfo] = useMutation(contactMutation);
 
     useEffect(() => {
-        console.log('SETTING HOURS FROM CURR HOURS', currHours)
-        setHours(currHours.readAssets[0]);
-    }, [currHours])
+        console.log('SETTING BUSINESS', business, business.hours)
+        setHours(business.hours);
+    }, [business])
 
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
@@ -85,7 +83,7 @@ function AdminContactPage() {
                 </Grid>
                 <Grid item sm={12} md={6}>
                     <ReactMarkdown plugins={[gfm]} className={classes.hoursPreview}>
-                        {hours}
+                        {business.hours}
                         {/* {contactInfo?.hours} */}
                     </ReactMarkdown>
                 </Grid>

@@ -27,7 +27,7 @@ export function clean(file, defaultFolder) {
     const pathRegex = /([^a-z0-9 \.\/]+)/gi;
     // First, remove any invalid characters
     const cleanPath = file.replace(pathRegex, '');
-    const folder = path.dirname(cleanPath).replace('.', '') || defaultFolder.replace(pathRegex, '').replace('.', '');
+    const folder = path.dirname(cleanPath)?.replace('.', '') || defaultFolder?.replace(pathRegex, '')?.replace('.', '');
     if (!cleanPath || cleanPath.length === 0) return { name: null, ext: null, folder: null };
     // If a directory was passed in, instead of a file
     if (!cleanPath.includes('.')) return { name: null, ext: null, folder };

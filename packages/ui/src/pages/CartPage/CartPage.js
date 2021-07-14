@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
-import { BUSINESS_NAME } from '@local/shared';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
 import { useMutate } from "restful-react";
@@ -36,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CartPage({
+    business,
     user_id,
     cart,
 }) {
@@ -83,7 +83,7 @@ function CartPage({
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
+                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'});
             })
     }
 
@@ -99,7 +99,7 @@ function CartPage({
             return;
         }
         PubSub.publish(PUBS.AlertDialog, {
-            message: `This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`,
+            message: `This will submit the order to ${business?.BUSINESS_NAME?.Short}. We will contact you for further information. Are you sure you want to continue?`,
             firstButtonText: 'Yes',
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',

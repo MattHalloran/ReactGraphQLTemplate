@@ -4,7 +4,6 @@ import {
     ContactInfo,
     Copyright
 } from 'components';
-import { SOCIAL } from '@local/shared';
 import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
@@ -59,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Hamburger({
     session,
+    business,
     logout,
     roles,
     cart,
@@ -144,7 +144,7 @@ function Hamburger({
                         {contactOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={contactOpen} timeout="auto" unmountOnExit>
-                        <ContactInfo />
+                        <ContactInfo business={business} />
                     </Collapse>
                     {/* Collapsible social media links */}
                     <ListItem className={classes.menuItem} button onClick={handleSocialClick}>
@@ -153,13 +153,13 @@ function Hamburger({
                         {socialOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={socialOpen} timeout="auto" unmountOnExit>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Facebook)}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Facebook)}>
                             <ListItemIcon>
                                 <FacebookIcon className={classes.facebook} />
                             </ListItemIcon>
                             <ListItemText primary="Facebook" />
                         </ListItem>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Instagram)}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Instagram)}>
                             <ListItemIcon>
                                 <InstagramIcon className={classes.instagram} />
                             </ListItemIcon>
@@ -174,7 +174,7 @@ function Hamburger({
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>*/}
-                <Copyright className={classes.copyright} />
+                <Copyright className={classes.copyright} business={business} />
             </SwipeableDrawer>
         </React.Fragment>
     );

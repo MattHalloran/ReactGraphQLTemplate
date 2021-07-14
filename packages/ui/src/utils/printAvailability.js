@@ -35,7 +35,7 @@ const data_to_table = (data, showPrice) => {
     return result;
 }
 
-export const printAvailability = (session) => {
+export const printAvailability = (session, title) => {
     let windowReference = window.open();
     console.log(windowReference);
     getInventory(SORT_OPTIONS[0].value, 0, false)
@@ -45,7 +45,7 @@ export const printAvailability = (session) => {
             // Default export is a4 paper, portrait, using millimeters for units
             const doc = new jsPDF();
             doc.setFontSize(TITLE_FONT_SIZE);
-            centeredText(BUSINESS_NAME.Long, doc, 10);
+            centeredText(title, doc, 10);
             let date = new Date();
             centeredText(`Availability: ${date.toDateString()}`, doc, 20);
             doc.setFontSize(LIST_FONT_SIZE);

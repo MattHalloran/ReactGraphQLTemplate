@@ -16,6 +16,8 @@ import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import { useHistory } from 'react-router';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
+import { useQuery } from '@apollo/client';
+import { readAssetsQuery } from 'graphql/query/readAssets';
 
 const useStyles = makeStyles(() => ({
         "@global": {
@@ -56,7 +58,23 @@ export function App() {
     const [theme, setTheme] = useState(themes.light);
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [business, setBusiness] =  useState(null)
+    const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     let history = useHistory();
+
+    useEffect(() => {
+        console.log("BUSINESS UPDATED", business)
+    }, [business])
+
+    useEffect(() => {
+        console.log('GOT BUSINESS DATA', businessData);
+        if (businessData === undefined) return;
+        let data = businessData.readAssets[1] ? JSON.parse(businessData.readAssets[1]) : {};
+        let hoursRaw = businessData.readAssets[0];
+        data.hours = hoursRaw;
+        console.log("SETTING BUSINESS DATA", data)
+        setBusiness(data);
+    }, [businessData])
 
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!', session);
@@ -77,8 +95,10 @@ export function App() {
         // Check for browser dark mode TODO set back to dark when ready
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
+        let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));
         return (() => {
             PubSub.unsubscribe(loadingSub);
+            PubSub.unsubscribe(businessSub);
         })
     }, [])
 
@@ -95,6 +115,7 @@ export function App() {
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
                                     session={session}
+                                    business={business}
                                     onSessionUpdate={setSession}
                                     roles={session?.roles}
                                     cart={cart}
@@ -110,13 +131,14 @@ export function App() {
                                 <Routes
                                     session={session}
                                     onSessionUpdate={setSession}
+                                    business={business}
                                     roles={session?.roles}
                                     cart={cart}
                                     onRedirect={redirect}
                                 />
                             </div>
                             <IconNav session={session} roles={session?.roles} cart={cart} />
-                            <Footer session={session} />
+                            <Footer session={session} business={business} />
                         </main>
                     </div>
                 </DndProvider>
