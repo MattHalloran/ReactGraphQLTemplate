@@ -1,5 +1,6 @@
 server {
   listen 80;
+  server_name www.<SITE_NAME> <SITE_NAME>
   location <SERVER_ROUTE> {
     proxy_pass         http://localhost:<SERVER_PORT>;
     proxy_redirect     off;
