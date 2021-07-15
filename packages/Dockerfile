@@ -42,11 +42,11 @@ RUN yarn install
 COPY --chown=node:node ${shared}/index.js ${shared}/src ${shared}/
 COPY --chown=node:node ${ui}/src ${ui}/public ${ui}/tsconfig.json ${ui}/
 COPY --chown=node:node ${server}/src ${server}/tools ${server}/
-COPY --chown=node:node ./scripts/start.sh ./scripts/start.sh
+COPY --chown=node:node ./scripts/start-main.sh ./scripts/start-main.sh
 
 # Won't work on Droplet without this. Temporary fix
 USER root
 
 # # Start server and ui
 RUN chmod +x ./scripts/*
-CMD ./scripts/start.sh
+CMD ./scripts/start-main.sh

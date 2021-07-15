@@ -22,7 +22,10 @@ services:
             SITE_EMAIL_FROM: "${SITE_EMAIL_FROM}"
             SITE_EMAIL_USERNAME: "${SITE_EMAIL_USERNAME}"
             SITE_EMAIL_PASSWORD: "${SITE_EMAIL_PASSWORD}"
-            GENERATE_SOURCEMAP: "false"
+            REACT_APP_SITE_NAME: "${SITE_NAME}"
+            REACT_APP_SERVER_ROUTE: "${REACT_APP_SERVER_ROUTE}"
+            UI_PORT: "${UI_PORT}"
+            SERVER_PORT: "${SERVER_PORT}"
         ports:
             - 3000:3000
             - 5000:5000

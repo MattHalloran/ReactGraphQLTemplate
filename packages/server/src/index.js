@@ -1,12 +1,11 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 import * as auth from './auth';
 import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
 import { typeDefs, resolvers } from './db/models';
 import { graphqlUploadExpress } from 'graphql-upload';
-import { API_PREFIX, API_VERSION, CLIENT_ADDRESS, SERVER_PORT } from '@local/shared';
+import { API_VERSION, CLIENT_ADDRESS, SERVER_PORT } from '@local/shared';
 
 const app = express();
 
@@ -36,7 +35,7 @@ app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR
 app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
-app.use(`/${API_PREFIX}/${API_VERSION}`,
+app.use(`${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`,
     graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),
   )
 
@@ -51,7 +50,7 @@ const apollo_options = new ApolloServer({
  });
 apollo_options.applyMiddleware({ 
     app, 
-    path: `/${API_PREFIX}/${API_VERSION}`, 
+    path: `${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, 
     cors: corsOptions 
 });
 
