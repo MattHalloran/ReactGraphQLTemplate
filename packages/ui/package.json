@@ -55,7 +55,7 @@
     "scripts": {
         "start-dev": "react-scripts start",
         "start-prod": "npm run build && serve -s -l 3000",
-        "build": "react-scripts build",
+        "build": "react-scripts build --max-old-space-size=8192 --optimize_for_size --max_executable_size=4096 --stack_size=4096",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "storybook": "start-storybook -p 6006 -s public",

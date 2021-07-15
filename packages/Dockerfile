@@ -11,7 +11,7 @@ ARG node=/node_modules
 # Create directories with correct permissions
 RUN mkdir -p ${node} ${PROJECT_DIR}/assets/images ${PROJECT_DIR}/assets/public ${PROJECT_DIR}/assets/private &&\ 
     mkdir -p ${PROJECT_DIR}/${ui}/node_modules/.cache ${PROJECT_DIR}/${server}/node_modules/.cache ${PROJECT_DIR}/${shared}/node_modules/.cache &&\
-    mkdir -p ${PROJECT_DIR}/${ui}/node_modules/build &&\
+    mkdir -p ${PROJECT_DIR}/${ui}/build &&\
     chown -R node:node ${PROJECT_DIR} &&\ 
     chown -R node:node ${node}
 # Let the script know where node_modules is located (see .yarnrc)
@@ -21,7 +21,7 @@ RUN PATH=$PATH:${node}/.bin
 RUN echo -e "--modules-folder ${node}\n--cache-folder ${node}" > ${PROJECT_DIR}/.yarnrc
 
 # Install global packages (must be done as the root user)
-RUN yarn global add knex nodemon react-scripts
+RUN yarn global add knex nodemon react-scripts serve
 
 # Switch to a user with less permissions
 USER node
@@ -43,6 +43,9 @@ COPY --chown=node:node ${shared}/index.js ${shared}/src ${shared}/
 COPY --chown=node:node ${ui}/src ${ui}/public ${ui}/tsconfig.json ${ui}/
 COPY --chown=node:node ${server}/src ${server}/tools ${server}/
 COPY --chown=node:node ./scripts/start.sh ./scripts/start.sh
+
+# Won't work on Droplet without this. Temporary fix
+USER root
 
 # # Start server and ui
 RUN chmod +x ./scripts/*

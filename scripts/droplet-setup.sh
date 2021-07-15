@@ -14,6 +14,13 @@ MSG="Checking for package updates"
 checker sudo apt-get update
 MSG="Running upgrade"
 checker sudo apt-get -y upgrade
+MSG="Setting up Nginx"
+checker sudo apt install nginx
+MSG="Setting up firewall"
+# Enable firewall
+checker sudo ufw enable
+# Add nginx to firewall whitelist
+checker sudo ufw allow 'Nginx Full'
 info "Updating max listeners, since npm uses a lot. Not sure exactly what they do, but the default max amount is not enough"
 echo fs.inotify.max_user_watches=20000 | sudo tee -a /etc/sysctl.conf
 echo vm.overcommit_memory=1 | sudo tee -a /etc/sysctl.conf

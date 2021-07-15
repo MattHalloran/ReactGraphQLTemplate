@@ -3,7 +3,7 @@ services:
     main:
         build:
             context: .
-            dockerfile: ./docker/main/Dockerfile
+            dockerfile: ./packages/Dockerfile
             args:
                 PROJECT_DIR: "${PROJECT_DIR}"
         container_name: main
@@ -22,6 +22,7 @@ services:
             SITE_EMAIL_FROM: "${SITE_EMAIL_FROM}"
             SITE_EMAIL_USERNAME: "${SITE_EMAIL_USERNAME}"
             SITE_EMAIL_PASSWORD: "${SITE_EMAIL_PASSWORD}"
+            GENERATE_SOURCEMAP: "false"
         ports:
             - 3000:3000
             - 5000:5000
@@ -43,68 +44,15 @@ services:
                 - 5432:5432
         volumes:
             - ./data/postgres:/var/lib/postgresql/data
-    adminer:
-        image: adminer
-        restart: always
-        depends_on: 
-            - db
-        ports: 
-            - 8080:8080
+    # adminer:
+    #     image: adminer
+    #     restart: always
+    #     depends_on: 
+    #         - db
+    #     ports: 
+    #         - 8080:8080
     redis:
         image: redis
         container_name: redis
         ports:
             - 6379:6379
-    # nginx:
-    #     build:
-    #         context: .
-    #         dockerfile: ./docker/nginx/Dockerfile
-    #         args:
-    #             PROJECT_DIR: "${PROJECT_DIR}"
-    #     environment: 
-    #         SITE_NAME: "${SITE_NAME}"
-    #         SITE_IP: "${SITE_IP}"
-    #         SERVER_PORT: "${SERVER_PORT}"
-    #         SERVER_ROUTE: "${SERVER_ROUTE}"
-    #         UI_PORT: "${UI_PORT}"
-    #         UI_ROUTE: "${UI_ROUTE}"
-    #     restart: unless-stopped
-    #     volumes:
-    #       - ./scripts:${PROJECT_DIR}/scripts
-    #     ports:
-    #       - "8675:80"
-    #       - "4433:443"
-    #     depends_on: 
-    #         - certbot
-    # certbot:
-    #     image: certbot/certbot
-    #     restart: unless-stopped
-    #     volumes:
-    #         - ./data/certbot/conf:/etc/letsencrypt
-    #         - ./data/certbot/www:/var/www/certbot
-    #         - ./scripts:${PROJECT_DIR}/scripts
-    #     entrypoint: /bin/sh -c "chmod +x ${PROJECT_DIR}/scripts/* && ${PROJECT_DIR}/scripts/certbot.sh"
-    #     depends_on: 
-    #         - main
-    nginx:
-        build:
-            context: .
-            dockerfile: ./docker/nginx/Dockerfile
-            args:
-                PROJECT_DIR: "${PROJECT_DIR}"
-        restart: unless-stopped
-        environment:
-            CERTBOT_EMAIL: "${CERTBOT_EMAIL}"
-            SITE_NAME: "${SITE_NAME}"
-            SITE_IP: "${SITE_IP}"
-            SERVER_PORT: "${SERVER_PORT}"
-            SERVER_ROUTE: "${SERVER_ROUTE}"
-            UI_PORT: "${UI_PORT}"
-            UI_ROUTE: "${UI_ROUTE}"
-        ports:
-          - 8675:80
-          - 4433:443
-        volumes:
-          - nginx_secrets:/etc/letsencrypt
-volumes:
-    nginx_secrets:
