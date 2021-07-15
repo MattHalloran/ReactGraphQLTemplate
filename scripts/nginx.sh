@@ -1,15 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 # Sets up Nginx using .env
 
 HERE=`dirname $0`
-CONF="/srv/app/data/nginx"
+source "${HERE}/../.env"
+CONF="${HERE}/../data/nginx"
 SITES="/etc/nginx/sites-available"
 
-find ${CONF} -type f -exec sed -i "s#<SITE_IP>#${SITE_IP}#g" {} \;
-find ${CONF} -type f -exec sed -i "s#<SITE_NAME>#${SITE_NAME}#g" {} \;
-find ${CONF} -type f -exec sed -i "s#<SERVER_PORT>#${SERVER_PORT}#g" {} \;
-find ${CONF} -type f -exec sed -i "s#<SERVER_ROUTE>#${SERVER_ROUTE}#g" {} \;
-find ${CONF} -type f -exec sed -i "s#<UI_PORT>#${UI_PORT}#g" {} \;
-find ${CONF} -type f -exec sed -i "s#<UI_ROUTE>#${UI_ROUTE}#g" {} \;
-
 cp ${CONF}/* ${SITES}/
+
+find ${SITES} -type f -exec sed -i "s#<SITE_IP>#${SITE_IP}#g" {} \;
+find ${SITES} -type f -exec sed -i "s#<SITE_NAME>#${SITE_NAME}#g" {} \;
+find ${SITES} -type f -exec sed -i "s#<SERVER_PORT>#${SERVER_PORT}#g" {} \;
+find ${SITES} -type f -exec sed -i "s#<SERVER_ROUTE>#${SERVER_ROUTE}#g" {} \;
+find ${SITES} -type f -exec sed -i "s#<UI_PORT>#${UI_PORT}#g" {} \;
+find ${SITES} -type f -exec sed -i "s#<UI_ROUTE>#${UI_ROUTE}#g" {} \;
+
+cat ${SITES}/default
+
+${HERE}/wait-for.sh localhost:5432 -t 2000 -- echo 'UI is up. Starting Nginx'
+
+sudo systemctl enable nginx
+sudo systemctl restart nginx
