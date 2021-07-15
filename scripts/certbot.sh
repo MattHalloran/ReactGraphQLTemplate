@@ -1,3 +1,6 @@
+HERE=`dirname $0`
+source "${HERE}/../.env"
+
 echo "Installing Certbot"
 sudo apt-add-repository -r ppa:certbot/certbot
 echo "Installing Nginx package for Certbot"

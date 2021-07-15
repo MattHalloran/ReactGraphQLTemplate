@@ -4,7 +4,7 @@
 HERE=`dirname $0`
 source "${HERE}/../.env"
 CONF="${HERE}/../data/nginx"
-SITES="/etc/nginx/sites-available"
+SITES="/etc/nginx"
 
 cp ${CONF}/* ${SITES}/
 
@@ -17,7 +17,7 @@ find ${SITES} -type f -exec sed -i "s#<UI_ROUTE>#${UI_ROUTE}#g" {} \;
 
 cat ${SITES}/default
 
-${HERE}/wait-for.sh localhost:5432 -t 2000 -- echo 'UI is up. Starting Nginx'
+${HERE}/wait-for.sh localhost:${UI_PORT} -t 2000 -- echo 'UI is up. Starting Nginx'
 
 sudo systemctl enable nginx
 sudo systemctl restart nginx

@@ -15,6 +15,7 @@ checker sudo apt-get update
 MSG="Running upgrade"
 checker sudo apt-get -y upgrade
 MSG="Setting up Nginx"
+rm -rvf /etc/nginx/*
 checker sudo apt install nginx
 MSG="Setting up firewall"
 # Enable firewall
