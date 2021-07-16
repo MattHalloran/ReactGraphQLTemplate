@@ -5,11 +5,11 @@ source "${BASE_DIR}/.env"
 
 # Remove old data
 echo "Deleting certificates"
-rm -rf "${PROJECT_DIR}/data/certbot"
+rm -rf "${BASE_DIR}/data/certbot"
 echo "Deleting images"
-rm -rf "${PROJECT_DIR}/assets/images"
+rm -rf "${BASE_DIR}/assets/images"
 echo "Deleting database"
-rm -rf "${PROJECT_DIR}/data/postgres"
+rm -rf "${BASE_DIR}/data/postgres"
 
 ${HERE}/dropletSetup.sh
 
