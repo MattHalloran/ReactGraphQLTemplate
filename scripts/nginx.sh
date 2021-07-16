@@ -15,10 +15,7 @@ find ${SITES} -type f -exec sed -i "s#<SERVER_ROUTE>#${SERVER_ROUTE}#g" {} \;
 find ${SITES} -type f -exec sed -i "s#<UI_PORT>#${UI_PORT}#g" {} \;
 find ${SITES} -type f -exec sed -i "s#<UI_ROUTE>#${UI_ROUTE}#g" {} \;
 
-cat ${SITES}/default
-
 ${HERE}/wait-for.sh localhost:${UI_PORT} -t 2000 -- echo 'UI is up. Starting Nginx'
 
 sudo systemctl enable nginx
 sudo systemctl restart nginx
-

@@ -15,7 +15,8 @@ checker sudo apt-get update
 MSG="Running upgrade"
 checker sudo apt-get -y upgrade
 MSG="Setting up Nginx"
-rm -rvf /etc/nginx/*
+NGINX_LOGS="/usr/share/nginx/logs"
+mkdir -p "${NGINX_LOGS}" && touch "${NGINX_LOGS}/error.log" "${NGINX_LOGS}/nginx.pid"
 checker sudo apt install nginx
 MSG="Setting up firewall"
 # Enable firewall
