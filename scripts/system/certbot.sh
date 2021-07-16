@@ -1,5 +1,5 @@
 HERE=`dirname $0`
-source "${HERE}/../.env"
+source "${HERE}/../../.env"
 
 echo "Installing Certbot"
 sudo apt-add-repository -r ppa:certbot/certbot
