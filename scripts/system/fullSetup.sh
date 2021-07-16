@@ -19,6 +19,5 @@ ${HERE}/nginxSetup.sh
 # Create SSL encryption
 ${HERE}/init-letsencrypt.sh
 
-# Start docker
 cd "${BASE_DIR}"
-docker-compose down && docker system prune --all --volumes -f && docker-compose up &
+docker-compose down && docker system prune --all --volumes -f

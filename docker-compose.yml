@@ -23,7 +23,7 @@ services:
             SITE_EMAIL_USERNAME: "${SITE_EMAIL_USERNAME}"
             SITE_EMAIL_PASSWORD: "${SITE_EMAIL_PASSWORD}"
             REACT_APP_SITE_NAME: "${SITE_NAME}"
-            REACT_APP_SERVER_ROUTE: "${REACT_APP_SERVER_ROUTE}"
+            REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             UI_PORT: "${UI_PORT}"
             SERVER_PORT: "${SERVER_PORT}"
         ports:

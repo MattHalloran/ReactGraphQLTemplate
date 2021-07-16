@@ -33,11 +33,8 @@ Once you buy a domain, you must set up the correct DNS records. This can be done
 
 Once you are connected to your VPS, do the following:
 1. git clone <your_projects_url>
-2. Edit .env variables
-3. If using Digital Ocean:  
-    a. ./scripts/droplet-setup.sh  
-    b. sudo reboot  
-    Note: Other VPS services may require a similar setup step, but I have not tried them.
-3. nohup docker-compose up &
-4. If production build:
-    a. ./scripts/nginx.sh
+2. cd into project
+3. Edit .env variables
+4. chmod +x ./scripts/system/*
+5. If starting for first time, ./scripts/system/cleanSetup.sh
+6. docker-compose up &
