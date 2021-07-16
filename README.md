@@ -7,12 +7,16 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 * Apollo (for GraphQL)
 * ExpressJS
 * PostgreSQL
+* Nginx
 
 ## Prerequisites
 Before developing a website from this template, you will need to install:   
 1. [Docker](https://www.docker.com/)
 2. [VSCode](https://code.visualstudio.com/)
 3. The template repository (git clone https://github.com/MattHalloran/NLN)
+
+## Project structure  
+The first directories you'll notice in this repository are
 
 ## Project setup
 ### Environment variables
@@ -30,6 +34,9 @@ Currently, the cheapest way to deploy a web project seems to be through VPS host
 The site can be accessed by the VPS's IP address, but in most cases you'll want to associate the server with a domain name. There are many places to buy domains, but I use [Google Domains](https://domains.google)
 
 Once you buy a domain, you must set up the correct DNS records. This can be done through the site that you bought the domain from, or the site that you bought the VPS from. [Here](https://www.youtube.com/watch?v=wYDDYahCg60) is a good example. **Note**: DNS changes may take several hours to take effect
+
+### Setting up VPS
+The VPS you'll be running this website on must be configured to handle website traffic. This is done through Nginx https://olex.biz/2019/09/hosting-with-docker-nginx-reverse-proxy-letsencrypt/
 
 Once you are connected to your VPS, do the following:
 1. git clone <your_projects_url>

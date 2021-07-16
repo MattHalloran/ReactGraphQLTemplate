@@ -26,9 +26,13 @@ services:
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             UI_PORT: "${UI_PORT}"
             SERVER_PORT: "${SERVER_PORT}"
+            VIRTUAL_HOST: "${SITE_NAME}"
+            VIRTUAL_PORT: "${UI_PORT},${SERVER_PORT}"
+            LETSENCRYPT_HOST: "${SITE_NAME}"
+            LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
-            - 3000:3000
-            - 5000:5000
+            - 3000
+            - 5000
         volumes:
             - ./packages:${PROJECT_DIR}/packages
             - ./assets:${PROJECT_DIR}/assets

@@ -11,8 +11,8 @@ fi
 domains=(${SITE_NAME} www.${SITE_NAME})
 rsa_key_size=4096
 data_path="${BASE_DIR}/data/certbot"
-email=${CERTBOT_EMAIL} # Adding a valid address is strongly recommended
-staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
+email=${LETSENCRYPT_EMAIL} # Adding a valid address is strongly recommended
+staging=1 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
@@ -30,19 +30,20 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
   echo
 fi
 
+cd ${BASE_DIR}
+
 echo "### Creating dummy certificate for $domains ..."
 path="/etc/letsencrypt/live/$domains"
 mkdir -p "$data_path/conf/live/$domains"
-(cd ${BASE_DIR} && docker-compose run --rm --entrypoint "\
+${BASE_DIR} && docker-compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
-    -subj '/CN=localhost'" certbot)
+    -subj '/CN=localhost'" certbot
 echo
 
 
 echo "### Starting nginx ..."
-cd ${BASE_DIR}
 docker-compose up --force-recreate -d nginx
 echo
 

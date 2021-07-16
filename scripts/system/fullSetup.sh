@@ -4,12 +4,8 @@ BASE_DIR="${HERE}/../../"
 source "${BASE_DIR}/.env"
 
 # Remove old data
-echo "Deleting certificates"
-rm -rf "${BASE_DIR}/data/certbot"
-echo "Deleting images"
-rm -rf "${BASE_DIR}/assets/images"
-echo "Deleting database"
-rm -rf "${BASE_DIR}/data/postgres"
+echo "Deleting all data, including database, images, and certificates"
+rm -rf "${BASE_DIR}/data"
 
 ${HERE}/dropletSetup.sh
 
