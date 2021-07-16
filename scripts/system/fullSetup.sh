@@ -1,6 +1,7 @@
 # A full setup of the website, deleting any old data and configurations
 HERE=`dirname $0`
-source "${HERE}/../../.env"
+BASE_DIR="${HERE}/../../"
+source "${BASE_DIR}/.env"
 
 # Remove old data
 echo "Deleting certificates"
@@ -19,4 +20,5 @@ ${HERE}/nginxSetup.sh
 ${HERE}/init-letsencrypt.sh
 
 # Start docker
-(cd ${PROJECT_DIR} && docker-compose up &)
+cd "${BASE_DIR}"
+docker-compose down && docker system prune --all --volumes -f && docker-compose up &

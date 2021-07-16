@@ -1,6 +1,7 @@
 #!/bin/bash
 HERE=`dirname $0`
-source "${HERE}/../../.env"
+BASE_DIR="${HERE}/../../"
+source "${BASE_DIR}/.env"
 
 if ! [ -x "$(command -v docker-compose)" ]; then
   echo 'Error: docker-compose is not installed.' >&2
@@ -9,7 +10,7 @@ fi
 
 domains=(${SITE_NAME} www.${SITE_NAME})
 rsa_key_size=4096
-data_path="${PROJECT_DIR}/data/certbot"
+data_path="${BASE_DIR}/data/certbot"
 email=${CERTBOT_EMAIL} # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
@@ -32,7 +33,7 @@ fi
 echo "### Creating dummy certificate for $domains ..."
 path="/etc/letsencrypt/live/$domains"
 mkdir -p "$data_path/conf/live/$domains"
-(cd ${PROJECT_DIR} && docker-compose run --rm --entrypoint "\
+(cd ${BASE_DIR} && docker-compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
@@ -41,14 +42,15 @@ echo
 
 
 echo "### Starting nginx ..."
-(cd ${PROJECT_DIR} && docker-compose up --force-recreate -d nginx)
+cd ${BASE_DIR}
+docker-compose up --force-recreate -d nginx
 echo
 
 echo "### Deleting dummy certificate for $domains ..."
-(cd ${PROJECT_DIR} && docker-compose run --rm --entrypoint "\
+docker-compose run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/$domains && \
   rm -Rf /etc/letsencrypt/archive/$domains && \
-  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot)
+  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
 echo
 
 
@@ -68,15 +70,15 @@ esac
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
-(cd ${PROJECT_DIR} && docker-compose run --rm --entrypoint "\
+docker-compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     $staging_arg \
     $email_arg \
     $domain_args \
     --rsa-key-size $rsa_key_size \
     --agree-tos \
-    --force-renewal" certbot)
+    --force-renewal" certbot
 echo
 
 echo "### Reloading nginx ..."
-(cd ${PROJECT_DIR} && docker-compose exec nginx nginx -s reload)
+docker-compose exec nginx nginx -s reload

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sets up general droplet settings
 HERE=`dirname $0`
-source "$HERE/../formatting.sh"
+source "$HERE/../utils/formatting.sh"
 
 header "Cleaning up apt library"
 sudo rm -rvf /var/lib/apt/lists/*
@@ -21,7 +21,7 @@ echo vm.overcommit_memory=1 | sudo tee -a /etc/sysctl.conf
 
 header "Setting up firewall"
 # Enable firewall
-sudo ufw enable
+sudo ufw enable -y
 # Only allow 80 and 443
 sudo ufw allow 'Nginx Full'
 sudo sysctl -p
