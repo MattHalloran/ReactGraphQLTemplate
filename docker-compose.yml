@@ -1,12 +1,42 @@
 version: "3.9"
 services:
-    main:
+    ui:
         build:
             context: .
-            dockerfile: ./packages/Dockerfile
+            dockerfile: ./packages/ui/Dockerfile
             args:
                 PROJECT_DIR: "${PROJECT_DIR}"
-        container_name: main
+        container_name: ui
+        environment: 
+            NODE_ENV: "${NODE_ENV}"
+            PROJECT_DIR: "${PROJECT_DIR}"
+            REACT_APP_SITE_NAME: "${SITE_NAME}"
+            REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
+            UI_PORT: "${UI_PORT}"
+            VIRTUAL_HOST: "${SITE_NAME}"
+            VIRTUAL_PORT: "${SERVER_PORT}"
+            LETSENCRYPT_HOST: "${SITE_NAME}"
+            LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
+        ports:
+            - 3000:3000
+        volumes:
+            - ./packages/ui:${PROJECT_DIR}/packages/ui
+            - ./packages/shared:${PROJECT_DIR}/packages/shared
+            - ./scripts:${PROJECT_DIR}/scripts
+        networks:
+            - proxy
+            - app
+        depends_on: 
+                - redis
+                - db
+        command: /bin/sh -c "chmod +x ./scripts/* && ./scripts/ui.sh"
+    server:
+        build:
+            context: .
+            dockerfile: ./packages/server/Dockerfile
+            args:
+                PROJECT_DIR: "${PROJECT_DIR}"
+        container_name: server
         environment: 
             NODE_ENV: "${NODE_ENV}"
             JWT_SECRET: "${JWT_SECRET}"
@@ -27,22 +57,27 @@ services:
             UI_PORT: "${UI_PORT}"
             SERVER_PORT: "${SERVER_PORT}"
             VIRTUAL_HOST: "${SITE_NAME}"
-            VIRTUAL_PORT: "${UI_PORT},${SERVER_PORT}"
+            VIRTUAL_PORT: "${UI_PORT}"
             LETSENCRYPT_HOST: "${SITE_NAME}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
-            - 3000
-            - 5000
+            - 5000:5000
         volumes:
-            - ./packages:${PROJECT_DIR}/packages
+            - ./packages/server:${PROJECT_DIR}/packages/server
+            - ./packages/shared:${PROJECT_DIR}/packages/shared
             - ./assets:${PROJECT_DIR}/assets
             - ./scripts:${PROJECT_DIR}/scripts
+        networks:
+            - proxy
+            - app
         depends_on: 
                 - redis
                 - db
+        command: /bin/sh -c "chmod +x ./scripts/* && ./scripts/server.sh"
     db:
         image: postgres:13
         restart: always
+        container_name: db
         environment: 
             POSTGRES_DB: "${DB_NAME}"
             POSTGRES_USER: "${DB_USER}"
@@ -51,6 +86,8 @@ services:
                 - 5432:5432
         volumes:
             - ./data/postgres:/var/lib/postgresql/data
+        networks:
+            - app
     # adminer:
     #     image: adminer
     #     restart: always
@@ -63,21 +100,10 @@ services:
         container_name: redis
         ports:
             - 6379:6379
-    nginx:
-        image: nginx:1.21-alpine
-        restart: unless-stopped
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - ./data/nginx:/etc/nginx/conf.d
-            - ./data/certbot/conf:/etc/letsencrypt
-            - ./data/certbot/www:/var/www/certbot
-        command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-    certbot:
-        image: certbot/certbot
-        restart: unless-stopped
-        volumes:
-            - ./data/certbot/conf:/etc/letsencrypt
-            - ./data/certbot/www:/var/www/certbot
-        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+        networks:
+            - app
+networks:
+    proxy:
+        external:
+            name: nginx-proxy
+    app:
