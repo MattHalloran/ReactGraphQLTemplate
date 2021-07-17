@@ -7,7 +7,5 @@ export * from './opacityHex';
 export * from './printAvailability';
 export * from './pubsub';
 export * from './theme';
-export * from './typeChecking';
 export * from './useHistoryState';
-export * from './useOutsideClick';
 export * from './userActions';

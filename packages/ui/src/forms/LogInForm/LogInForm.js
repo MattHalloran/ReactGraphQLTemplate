@@ -11,17 +11,15 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        // marginTop: theme.spacing(3),
-        marginTop: lightTheme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     submit: {
-        // margin: theme.spacing(3, 0, 2),
-        margin: lightTheme.spacing(3, 0, 2),
+        margin: theme.spacing(3, 0, 2),
     },
     linkRight: {
         display: 'block',

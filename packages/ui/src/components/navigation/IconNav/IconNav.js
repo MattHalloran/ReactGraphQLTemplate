@@ -2,27 +2,20 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { BottomNavigation, BottomNavigationAction, Badge } from '@material-ui/core';
-import { getUserActions, lightTheme } from 'utils';
+import { getUserActions } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        //background: theme.palette.primary.dark,
-        background: lightTheme.palette.primary.dark,
+        background: theme.palette.primary.dark,
         position: 'fixed',
         zIndex: 5,
         bottom: '0',
         width: '100%',
     },
     icon: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
-    // [theme.breakpoints.up(960)]: {
-    //     root: {
-    //         display: 'none',
-    //     }
-    // },
-    [lightTheme.breakpoints.up(960)]: {
+    [theme.breakpoints.up(960)]: {
         root: {
             display: 'none',
         }

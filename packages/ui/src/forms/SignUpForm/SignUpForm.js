@@ -17,21 +17,20 @@ import {
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        // marginTop: theme.spacing(3),
-        marginTop: lightTheme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     submit: {
-        // margin: theme.spacing(3, 0, 2),
-        margin: lightTheme.spacing(3, 0, 2),
+        margin: theme.spacing(3, 0, 2),
     },
 }));
 
 function SignUpForm({ 
+    business,
     onSessionUpdate,
     onRedirect
 }) {
@@ -41,7 +40,15 @@ function SignUpForm({
     const formik = useFormik({
         initialValues: {
             existingCustomer: true,
-            marketingEmails: true
+            marketingEmails: true,
+            firstName: '',
+            lastName: '',
+            pronouns: '',
+            business: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: ''
         },
         validationSchema: signUpSchema,
         onSubmit: (values) => {
@@ -53,13 +60,20 @@ function SignUpForm({
                 if (response.ok) {
                     onSessionUpdate(response.session)
                     if (values.existingCustomer) {
-                        alert('Welcome to New Life Nursery! You may now begin shopping. Please verify your email within 48 hours.');
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
+                            firstButtonText: 'OK',
+                        });
                     } else {
-                        alert('Welcome to New Life Nursery! Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page');
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page`,
+                            firstButtonText: 'OK',
+                        });
                     }
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
+                console.error(response);
                 PubSub.publish(PUBS.Loading, false);
                 if (response.code === CODE.EmailInUse.code) {
                     if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form`)) {
@@ -177,6 +191,7 @@ function SignUpForm({
                         fullWidth
                         id="confirmPassword"
                         name="confirmPassword"
+                        type="password"
                         autoComplete="new-password"
                         label="Confirm Password"
                         value={formik.values.confirmPassword}
@@ -194,8 +209,8 @@ function SignUpForm({
                             value={formik.values.existingCustomer}
                             onChange={formik.handleChange}
                         >
-                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                            <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
+                            <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
                         </RadioGroup>
                         <FormHelperText>{formik.touched.existingCustomer && formik.errors.existingCustomer}</FormHelperText>
                     </FormControl>

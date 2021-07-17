@@ -18,49 +18,35 @@ import {
     Room as RoomIcon
 } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
-import { 
-    ADDRESS, 
-    EMAIL,
-    PHONE 
-} from '@local/shared';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        // background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-    },
     tableHead: {
-        //background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
+        background: theme.palette.primary.main,
     },
     tableHeadCell: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     tableRow: {
-        //background: theme.palette.background.paper,
-        background: lightTheme.palette.background.paper,
+        background: theme.palette.background.paper,
     },
     nav: {
+        alignItems: 'baseline',
         background: 'transparent',
         height: 'fit-content',
     },
     navAction: {
-        alignItems: 'baseline',
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        alignItems: 'center',
+        color: theme.palette.primary.contrastText,
         overflowWrap: 'anywhere',
     },
     iconButton: {
-        //background: theme.palette.secondary.main,
-        background: lightTheme.palette.secondary.main,
-        //fill: theme.palette.secondary.contrastText,
-        fill: lightTheme.palette.secondary.contrastText,
+        background: theme.palette.secondary.main,
+        fill: theme.palette.secondary.contrastText,
     },
 }));
 
 function ContactInfo({
+    business,
     ...props
 }) {
     const classes = useStyles();
@@ -77,13 +63,13 @@ function ContactInfo({
     ]
 
     const contactInfo = [
-        ['Open in Google Maps', ADDRESS.Label, ADDRESS.Link, RoomIcon],
-        ['Call Us', PHONE.Label, PHONE.Link, PhoneIcon],
-        ['Email Us', EMAIL.Label, EMAIL.Link, EmailIcon]
+        ['Open in Google Maps', business?.ADDRESS?.Label, business?.ADDRESS?.Link, RoomIcon],
+        ['Call Us', business?.PHONE?.Label, business?.PHONE?.Link, PhoneIcon],
+        ['Email Us', business?.EMAIL?.Label, business?.EMAIL?.Link, EmailIcon]
     ]
 
     return (
-        <div className={classes.root} {...props}>
+        <div style={{ minWidth: 'fit-content', height: 'fit-content'}} {...props}>
             <TableContainer>
                 <Table aria-label="contact-hours-table" size="small">
                     <TableHead className={classes.tableHead}>

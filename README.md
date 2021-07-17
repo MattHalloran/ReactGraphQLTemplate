@@ -3,59 +3,56 @@
 This website is designed both as a functional website for New Life Nursery Inc., and as a reference for creating powerful, maintainable websites.
 
 ## Development stack
-* React
-* Apollo (for GraphQL)
-* ExpressJS
-* PostgreSQL
+| Dependency  | Purpose  |  Version  |
+|---|---|---|
+| [ReactJS](https://reactjs.org/)  | UI  |  `^17.0.2` |
+| [MaterialUI](https://material-ui.com/)  | UI Styling  |  `^5.0.0-beta.0`  |
+| [Apollo](https://www.apollographql.com/)  | API |  `^2.25.0` |
+| [ExpressJs](https://expressjs.com/)  |  Backend Server  | `^4.17.1` |
+| [PostgreSQL](https://www.postgresql.org/)  | Database  | `postgres:13` |
+| [Redis](https://redis.io/) | Task Queueing | `redis` |
 
-## Prerequisites
-Before developing a website from this template, you will need to install:   
-1. [Node Package Manager (NPM)](https://www.npmjs.com/get-npm)
-2. [PostgreSQL](https://www.postgresql.org/download/)
-3. The template repository (git clone https://github.com/MattHalloran/NLN)
+## How to start  
+### 1. Prerequisites
+ Before developing a website from this template, make sure you have the following installed:   
+1. [Docker](https://www.docker.com/)
+2. [VSCode](https://code.visualstudio.com/)
+### 2. Download this repository
+`git clone https://github.com/MattHalloran/NLN`
+### 3. Set environment variables  
+1. Edit environment variables in [.env-example](https://github.com/MattHalloran/NLN/blob/master/.env-example)
+2. Rename the file to .env
+### 4. Docker
+By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
 
-Once NPM is installed, you must install a few global NPM packages. This allows for CLI support  
-1. Yarn - Allows code and package sharing between ui and server  
-    - npm install -g yarn
-2. Nodemon - Listens for changes and automatically restarts server  
-    - npm install -g nodemon
 
-## Project setup
-### Environment variables
-This project uses many environment variables. Some are required for the next steps. A full list of the environment variables used and their explanations can be found [here](https://github.com/MattHalloran/WebServerScripts/blob/main/variables.sh).
-### Docker
-1. To build docker, run "docker build -t <custom_container_name> ." in the project's root directory.  
-    - ex: docker build -t nln-website .
+## Common commands
+- Start: `docker-compose up -d`
+- Stop: `docker-compose down`
+- Delete all containers: `docker system prune --all`
+- Delete all containers and volumes: `docker system prune --all --volumes`
+- Full deployment test (except for Nginx, as that's handled by a different container): `docker-compose down && docker-compose up --build --force-recreate`
+- Rebuild with fresh database: `docker-compose down && rm -rf "${PROJECT_DIR}/data/postgres" && docker-compose up --build --force-recreate`
 
-### Dependencies
-Using Yarn, you can install all project dependencies using:  
-* yarn install
-### Database
-1. Allow PostgreSQL to start automatically. If installed with Homebrew, enter "brew services start postgresql".
-2. Set environment variables that the website uses for connecting to the database. These are:  
-    - DB_NAME - An arbitrary name for the database (ex: nlndb)
-    - DB_USER - An arbitrary name for the user connecting to the database
-    - DB_PASSWORD - A secure password for accessing the database. Please store this password somewhere safe
-3. Create the user role. From the terminal, enter the following commands:
-    1. psql postgres
-    2. CREATE ROLE <DB_USER> WITH LOGIN PASSWORD '<DB_PASSWORD>';
-        * Note: Replace <DB_USER> and <DB_PASSWORD> with the environment variables you created in the previous step.
-        * Note: To view users, enter \du
-    3. ALTER ROLE <DB_USER> CREATEDB;
-    4. \q
-4. Log into postgres with the newly-created user, and create the database.
-    1. psql postgres -U <DB_USER>
-    2. CREATE DATABASE <DB_NAME>;
-        * Note: To view databases, enter \l
-        * Note: To connect to database, enter \connect
-    3. \q
+## Non-database storage
+It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
 
 
 ## Deploying project
-Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean.
+Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
 
-Once you are connected to your VPS, you can use existing bash scripts to set up and deploy all parts of the website. This can be done by:  
-1. wget https://github.com/MattHalloran/WebServerScripts/archive/1.0.tar.gz
-2. tar xzf 1.0.tar.gz
-3. chmod 744 WebServerScripts-1.0/*.sh
-4. sudo WebServerScripts-1.0/full-setup.sh
+### 1. Set up DNS
+The site can be accessed by the VPS's IP address, but in most cases you'll want to associate the server with a domain name. There are many places to buy domains, but I use [Google Domains](https://domains.google)
+
+Once you buy a domain, you must set up the correct DNS records. This can be done through the site that you bought the domain from, or the site that you bought the VPS from. [Here](https://www.youtube.com/watch?v=wYDDYahCg60) is a good example. **Note**: DNS changes may take several hours to take effect
+
+### 2. Set up VPS
+The VPS you'll be running this website on must be configured to handle website traffic. This is done through Nginx https://olex.biz/2019/09/hosting-with-docker-nginx-reverse-proxy-letsencrypt/
+
+Once you are connected to your VPS, do the following:
+1. `git clone ${PROJECT_URL}`
+2. `cd ${PROJECT_NAME}`
+3. Edit .env variables
+4. `chmod +x ./scripts/*`
+5. *(If starting for first time)* `./scripts/system/cleanSetup.sh`
+6. `docker-compose up -d`

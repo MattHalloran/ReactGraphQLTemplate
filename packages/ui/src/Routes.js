@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import { USER_ROLES, BUSINESS_NAME } from '@local/shared';
+import { USER_ROLES } from '@local/shared';
 import { LINKS } from 'utils';
 import { Sitemap } from 'Sitemap';
 import {
@@ -32,16 +32,22 @@ import {
 function Routes({
     session,
     onSessionUpdate,
+    business,
     roles,
     cart,
     onRedirect
 }) {
 
+    console.log('RENDERING ROUTES', business)
+
     const common = {
         onSessionUpdate: onSessionUpdate,
         onRedirect: onRedirect,
         roles: roles,
+        business: business
     }
+
+    const title = (page) => `${page} | ${business?.BUSINESS_NAME?.Short}`;
 
     return (
         <Switch>
@@ -57,7 +63,7 @@ function Routes({
                 priority={1.0}
                 changefreq="monthly"
                 render={() => (
-                    <Page title={`Home | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Home')} {...common}>
                         <HomePage />
                     </Page>
                 )}
@@ -68,8 +74,8 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.7}
                 render={() => (
-                    <Page title={`About | ${BUSINESS_NAME.Short}`} {...common}>
-                        <AboutPage />
+                    <Page title={title('About')} {...common}>
+                        <AboutPage {...common} />
                     </Page>
                 )}
             />
@@ -79,7 +85,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.1}
                 render={() => (
-                    <Page title={`Privacy Policy | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Privacy Policy')} {...common}>
                         <PrivacyPolicyPage />
                     </Page>
                 )}
@@ -90,7 +96,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.1}
                 render={() => (
-                    <Page title={`Terms & Conditions | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Terms & Conditions')} {...common}>
                         <TermsPage />
                     </Page>
                 )}
@@ -101,7 +107,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.3}
                 render={() => (
-                    <Page title={`Gallery | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Gallery')} {...common}>
                         <GalleryPage />
                     </Page>
                 )}
@@ -112,7 +118,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.9}
                 render={() => (
-                    <Page title={`Sign Up | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Sign Up')} {...common}>
                         <FormPage title="Sign Up" maxWidth="700px">
                             <SignUpForm {...common} />
                         </FormPage>
@@ -125,7 +131,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.8}
                 render={() => (
-                    <Page title={`Log In | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Log In')} {...common}>
                         <FormPage title="Log In" maxWidth="700px">
                             <LogInForm {...common} />
                         </FormPage>
@@ -138,7 +144,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.1}
                 render={() => (
-                    <Page title={`Forgot Password | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('Forgot Password')} {...common}>
                         <FormPage title="Forgot Password" maxWidth="700px">
                             <ForgotPasswordForm {...common} />
                         </FormPage>
@@ -153,7 +159,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.4}
                 render={() => (
-                    <Page title={`Profile | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Customer}>
+                    <Page title={title('Profile')} {...common} authRole={USER_ROLES.Customer}>
                         <FormPage title="Profile">
                             <ProfileForm {...common} />
                         </FormPage>
@@ -166,8 +172,8 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.9}
                 render={() => (
-                    <Page title={`Shop | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Customer} redirect={LINKS.LogIn}>
-                        <ShoppingPage session={session} cart={cart} />
+                    <Page title={title('Shop')} {...common} authRole={USER_ROLES.Customer} redirect={LINKS.LogIn}>
+                        <ShoppingPage {...common} session={session} cart={cart} />
                     </Page>
                 )}
             />
@@ -175,8 +181,8 @@ function Routes({
                 exact
                 path={LINKS.Cart}
                 render={() => (
-                    <Page title={`Cart | ${BUSINESS_NAME.Short}`} {...common}>
-                        <CartPage user_tag={session?.tag} cart={cart} />
+                    <Page title={title('Cart')} {...common}>
+                        <CartPage {...common} user_tag={session?.tag} cart={cart} />
                     </Page>
                 )}
             />
@@ -186,7 +192,7 @@ function Routes({
                 exact
                 path={LINKS.Admin}
                 render={() => (
-                    <Page title={`Admin Portal | ${BUSINESS_NAME.Short}`} {...common} authRole={USER_ROLES.Admin}>
+                    <Page title={title('Admin Portal')} {...common} authRole={USER_ROLES.Admin}>
                         <AdminMainPage />
                     </Page>
                 )}
@@ -196,7 +202,7 @@ function Routes({
                 path={LINKS.AdminContactInfo}
                 render={() => (
                     <Page title={"Edit Contact Info"} {...common} authRole={USER_ROLES.Admin}>
-                        <AdminContactPage />
+                        <AdminContactPage business={business}/>
                     </Page>
                 )}
             />
@@ -229,7 +235,7 @@ function Routes({
             {/* 404 page */}
             <Route
                 render={() => (
-                    <Page title={`404 | ${BUSINESS_NAME.Short}`} {...common}>
+                    <Page title={title('404')} {...common}>
                         <NotFoundPage />
                     </Page>
                 )}

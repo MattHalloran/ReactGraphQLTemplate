@@ -10,7 +10,7 @@ import {
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -80,7 +80,7 @@ function ShoppingList({
             });
 
         return () => mounted = false;
-    }, [sort]);
+    }, [sort, page_size, session]);
 
     // Determine which skus will be visible to the user (i.e. not filtered out)
     useEffect(() => {
@@ -108,7 +108,7 @@ function ShoppingList({
             }
         }
         //If no filters are set, show all plants
-        if (applied_filters.length == 0) {
+        if (applied_filters.length === 0) {
             setPlants(visible_plants);
             return;
         }
@@ -116,7 +116,6 @@ function ShoppingList({
         let filtered_plants = [];
         for (let i = 0; i < visible_plants?.length ?? 0; i++) {
             let curr_plant = visible_plants[i];
-            filterloop:
             for (let j = 0; j < applied_filters.length; j++) {
                 let trait = applied_filters[j][0];
                 let value = applied_filters[j][1];
@@ -132,11 +131,11 @@ function ShoppingList({
                 if (Array.isArray(data) && data.length > 0) {
                     if (data.some(o => o.value === value)) {
                         filtered_plants.push(curr_plant);
-                        break filterloop;
+                        break;
                     }
                 } else if (data?.value === value) {
                     filtered_plants.push(curr_plant);
-                    break filterloop;
+                    break;
                 }
             }
         }
@@ -150,7 +149,7 @@ function ShoppingList({
         let load_to = Math.min(all_plant_ids.current.length, loaded_plants.length + page_size - 1);
         let clone = all_plant_ids.current.slice();
         let page_ids = clone.splice(loaded_plants.length, load_to);
-        if (page_ids.length == 0) {
+        if (page_ids.length === 0) {
             loading.current = false;
             return;
         }

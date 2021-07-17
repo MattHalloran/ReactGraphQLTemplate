@@ -13,31 +13,35 @@ const MAX_FILE_NAME_ATTEMPTS = 100;
 // Max size of a file buffer (how large of a file are you willing to download?)
 const MAX_BUFFER_SIZE = 1000000000;
 // Location of assets directory
-const ASSET_DIR = `${process.env.PROJECT_DIR || '/srv/app'}/assets`;
+const ASSET_DIR = `${process.env.PROJECT_DIR}/assets`;
 
-// Replace any invalid characters from the file and folder names
+// Replace any invalid characters from a file name
 // Args:
-// file: ex: 'boop.png'
-// folder: ex: 'images'
-function clean(file, folder) {
-    const cleanName = (name) => name ? name.replace(/([^a-z0-9 ]+)/gi, "-").replace(" ", "_") : null;
-    folder = cleanName(folder);
-    if (file && file.includes('.')) {
-        let { name, ext } = path.parse(file);
-        name = cleanName(name);
-        return { name, ext, folder };
-    }
-    return { name: cleanName(file), ext: null, folder };
+// file - exs: 'boop.png', 'images/boop.png'
+// defaultFolder - default for file's location (ex: 'images')
+// Returns:
+// name - name of file, excluding extension and location
+// ext - extension of file
+// folder - path of file
+export function clean(file, defaultFolder) {
+    const pathRegex = /([^a-z0-9 \.\/]+)/gi;
+    // First, remove any invalid characters
+    const cleanPath = file.replace(pathRegex, '');
+    const folder = path.dirname(cleanPath)?.replace('.', '') || defaultFolder?.replace(pathRegex, '')?.replace('.', '');
+    if (!cleanPath || cleanPath.length === 0) return { name: null, ext: null, folder: null };
+    // If a directory was passed in, instead of a file
+    if (!cleanPath.includes('.')) return { name: null, ext: null, folder };
+    const { name, ext } = path.parse(path.basename(cleanPath));
+    return { name, ext, folder };
 }
 
 // From a src string, return the filename stored in the database
-// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop')
+// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> { name: 'boop', ext: 'png')
 export function plainImageName(src) {
     // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
     let fileName = path.basename(src);
-    // 'boop-xl.png' -> { 'boop-xl' }
-    // If file passed in without extension, add a fake one so parse doesn't break
-    let { name } = clean(fileName);
+    // 'boop-xl.png' -> { name: 'boop-xl', ext: 'png' }
+    let { name, ext } = clean(fileName);
     // 'boop-xl' -> 'boop'
     const sizeEndings = Object.keys(IMAGE_SIZE).map(s => `-${s}`);
     for (let i = 0; i < sizeEndings.length; i++) {
@@ -46,35 +50,17 @@ export function plainImageName(src) {
             break;
         }
     }
-    return name;
+    return { name, ext };
 }
 
 // Returns a filename that can be used at the specified path
 // Args:
-// filenname - name of file (ex: 'boop.png')
-// foldername - name of assets directory (ex: 'images')
-export async function findFileName(filename, foldername) {
-    const { name, ext, folder } = clean(filename, foldername);
+// filenname - name of file (ex: 'public/boop.png')
+// defaultFolder - default for file's location (ex: 'images')
+export async function findFileName(file, defaultFolder) {
+    const { name, ext, folder } = clean(file, defaultFolder);
     // If file name is available, no need to append a number
-    if (!fs.existsSync(`${ASSET_DIR}/${folder}/${name}${ext}`)) return `${name}${ext}`;
-    // If file name was not available, start appending a number until one works
-    let curr = 0;
-    while (curr < MAX_FILE_NAME_ATTEMPTS) {
-        let currName = `${name}-${curr}${ext}`;
-        if(!fs.existsSync(`${ASSET_DIR}/${folder}/${currName}`)) return `${currName}`;
-        curr++;
-    }
-    // If no valid name found after max tries, return null
-    return null;
-}
-
-// Returns and image filename that can be used at the specified path
-export async function findImageName(filename, foldername = 'images') {
-    let { name, ext, folder } = clean(filename, foldername);
-    // Replace any file name endings that would conflict with the sizing schema
-    name = plainImageName(name);
-    // If file name is available, no need to append a number
-    if (!fs.existsSync(`${ASSET_DIR}/${folder}/${name}${ext}`)) return `${name}${ext}`;
+    if (!fs.existsSync(`${ASSET_DIR}/${folder}/${name}${ext}`)) return { name, ext, folder };
     // If file name was not available, start appending a number until one works
     let curr = 0;
     while (curr < MAX_FILE_NAME_ATTEMPTS) {
@@ -112,14 +98,14 @@ function resizeOptions(width, height) {
 }
 
 // Returns the filepath of the requested image at the closest available size
-export async function findImage(filename, size, foldername = 'images') {
-    const { name, ext, folder } = clean(filename, foldername);
+export async function findImageUrl(filename, size) {
+    const { name, ext, folder } = clean(filename, 'images');
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
         if(fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_ADDRESS}/${folder}/${filename}`;
     }
     // Search largest to smallest size
-    const sizes = resizeOptions(size ?? IMAGE_SIZE.L, size ?? IMAGE_SIZE.L);
+    const sizes = resizeOptions(size || IMAGE_SIZE.L, size || IMAGE_SIZE.L);
     const keys = Object.keys(sizes).reverse();
     for (let i = 0; i < keys.length; i++) {
         let curr = `${name}-${keys[i]}${ext}`;
@@ -134,14 +120,12 @@ export async function findImage(filename, size, foldername = 'images') {
 // stream - data stream of file
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in server directory (ex: 'images')
-export async function saveFile(stream, filename, foldername) {
+export async function saveFile(stream, filename) {
     try {
-        const { folder } = clean(null, foldername);
-        // Find a valid file name to save data to
-        let name = await findFileName(filename, folder);
+        const { name, ext, folder } = await findFileName(filename);
         if (name === null) throw Error('Could not create a valid file name');
         // Download the file
-        await stream.pipe(fs.createWriteStream(`${ASSET_DIR}/${folder}/${name}`));
+        await stream.pipe(fs.createWriteStream(`${ASSET_DIR}/${folder}/${name}${ext}`));
         return { 
             success: true, 
             filename: name
@@ -166,12 +150,10 @@ export async function saveFile(stream, filename, foldername) {
 // stream - data stream of file
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in server directory (ex: 'images')
-export async function saveImage(stream, filename, foldername = 'images') {
+export async function saveImage(stream, filename) {
     try {
-        const { folder } = clean(null, foldername);
-        // Find a valid file name to save data to
-        let validName = await findFileName(filename, folder);
-        if (validName === null) throw Error('Could not create a valid file name');
+        const { name, ext, folder } = await findFileName(filename, 'images')
+        if (name === null) throw Error('Could not create a valid file name');
         // Determine image dimensions
         const image_buffer = await streamToBuffer(stream);
         console.log('IMAGE BUFFER', image_buffer)
@@ -184,31 +166,29 @@ export async function saveImage(stream, filename, foldername = 'images') {
         const previously_uploaded = (await db(TABLES.Image).select('id').where('hash', hash)).length > 0;
         if (previously_uploaded) throw Error('File has already been uploaded')
         // Download the original image
-        await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${validName}`);
-        console.log('STREAMED TO', `${ASSET_DIR}/${folder}/${validName}`)
+        await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}`);
+        console.log('STREAMED TO', `${ASSET_DIR}/${folder}/${name}`)
         // Find resize options
         const sizes = resizeOptions(dims.width, dims.height);
         console.log('GOT RESIZE OPTIONS', sizes);
         for (const [key, value] of Object.entries(sizes)) {
             console.log('IN SIZES', key, value)
-            // Parse filename to append size before extension
-            let { name, ext } = path.parse(validName);
             // Use largest dimension for resize
             let sizing_dimension = dims.width > dims.height ? 'width' : 'height';
-            console.log('about to sharp',`${ASSET_DIR}/${folder}/${validName}` );
+            console.log('about to sharp',`${ASSET_DIR}/${folder}/${name}-${key}${ext}` );
             await sharp(image_buffer)
                 .resize({[sizing_dimension]: value})
                 .toFile(`${ASSET_DIR}/${folder}/${name}-${key}${ext}`);
         }
         console.log('saveImage success!', { 
             success: true, 
-            filename: validName,
+            filename: name,
             dimensions: dims,
             hash: hash
         })
         return { 
             success: true, 
-            filename: validName,
+            filename: name,
             dimensions: dims,
             hash: hash
         }
@@ -228,9 +208,9 @@ export async function saveImage(stream, filename, foldername = 'images') {
 // Arguments:
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in server directory (ex: 'images')
-export async function deleteFile(filename, foldername) {
+export async function deleteFile(file) {
     try {
-        const { name, ext, folder } = clean(filename, foldername);
+        const { name, ext, folder } = clean(file);
         let fullname = `${ASSET_DIR}/${folder}/${name}${ext}`;
         if (!fs.existsSync(fullname)) return false;
         fs.unlinkSync(fullname);
@@ -245,14 +225,14 @@ export async function deleteFile(filename, foldername) {
 // Arguments:
 // filename - name of the full image
 // folder - name of the folder
-export async function deleteImage(filename, foldername = 'images') {
-    let { name, ext, folder } = clean(filename, foldername);
-    name = plainImageName(`${name}${ext}`);
+export async function deleteImage(file) {
+    const { name, ext } = plainImageName(file);
+    const { folder } = clean(file) || 'images';
     let files = [name];
-    Object.keys(IMAGE_SIZE).forEach(key => files.push(`${name}-${key}${ext}`));
+    Object.keys(IMAGE_SIZE).forEach(key => files.push(`${folder}/${name}-${key}${ext}`));
     let success = true;
     for (let i = 0; i < files.length; i++) {
-        if (!await deleteFile(files[i], folder)) success = false;
+        if (!await deleteFile(files[i])) success = false;
     }
     return success;
 }

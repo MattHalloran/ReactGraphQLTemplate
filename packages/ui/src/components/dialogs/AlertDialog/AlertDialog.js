@@ -9,15 +9,16 @@ import {
 } from '@material-ui/core';
 import { PUBS, PubSub } from 'utils';
 
+const default_state = {
+    title: null,
+    message: null,
+    firstButtonText: 'Ok',
+    firstButtonClicked: null,
+    secondButtonText: null,
+    secondButtonClicked: null,
+};
+
 function AlertDialog() {
-    const default_state = {
-        title: null,
-        message: null,
-        firstButtonText: 'Ok',
-        firstButtonClicked: null,
-        secondButtonText: null,
-        secondButtonClicked: null,
-    };
     const [state, setState] = useState(default_state)
     let open = state.title !== null || state.message !== null;
 

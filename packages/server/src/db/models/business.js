@@ -1,11 +1,22 @@
 import { gql } from 'apollo-server-express';
-import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteHelper, fullSelectQueryHelper, insertJoinRowsHelper, updateChildRelationshipsHelper, updateHelper, updateJoinRowsHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { BusinessModel as Model } from '../relationships';
 
 export const typeDef = gql`
+    input BusinessInput {
+        name: String!
+        subscribedToNewsletters: Boolean
+        discountIds: [ID!]
+        employeeIds: [ID!]
+    }
+
     type Business {
         id: ID!
         name: String!
@@ -22,27 +33,15 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addBusiness(
-            name: String!
-            subscribedToNewsletters: Boolean
-            discountIds: [ID!]
-            employeeIds: [ID!]
-        ): Business!
-        updateBusiness(
-            name: String
-            subscribedToNewsletters: Boolean
-            discountIds: [ID!]
-            employeeIds: [ID!]
-        ): Business!
-        deleteBusinesses(
-            ids: [ID!]!
-        ): Boolean
+        addBusiness(input: BusinessInput!): Business!
+        updateBusiness(id: ID!, input: BusinessInput!): Business!
+        deleteBusinesses(ids: [ID!]!): Boolean
     }
 `
 
 export const resolvers = {
     Query: {
-        businesses: async (_, args, { req, res }, info) => {
+        businesses: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
@@ -52,21 +51,12 @@ export const resolvers = {
         addBusiness: async(_, args, { req }, info) => {
             // Must be admin
             if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const added = await db(Model.name).returning('*').insert({
-                name: args.name,
-                subscribedToNewsletters: args.subscribedToNewsletters ?? false
-            });
-            await insertJoinRowsHelper(Model, 'discounts', added.id, args.discountIds);
-            await addChildRelationshipsHelper(Model, 'employees', added.id, args.employeeIds);
-            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
+            return await insertHelper({ model: Model, info: info, input: args.input });
         },
         updateBusiness: async(_, args, { req }, info) => {
             // Must be admin, or updating your own
             if(!req.isAdmin || (req.token.businessId !== args.id)) return new CustomError(CODE.Unauthorized);
-            await updateHelper(Model, args, curr);
-            await updateJoinRowsHelper(Model, 'discounts', args.id, args.discountIds);
-            await updateChildRelationshipsHelper(Model, 'employees', args.id, args.employeeIds);
-            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
+            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
         },
         deleteBusinesses: async(_, args, { req }) => {
             // Must be admin, or deleting your own

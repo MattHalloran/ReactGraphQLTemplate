@@ -1,13 +1,21 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import bcrypt from 'bcrypt';
-import { ACCOUNT_STATUS, CODE, COOKIE } from '@local/shared';
-import { CustomError } from '../error';
+import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { CustomError, validateArgs } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
-import { deleteJoinRowsHelper, fullSelectQueryHelper, insertJoinRowsHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
+import { customerNotifyAdmin, sendVerificationLink } from '../../worker/email/queue';
+import * as uuid from 'uuid';
+const { v4: uuidv4 } = uuid;
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -57,7 +65,7 @@ export const typeDef = gql`
             firstName: String!
             lastName: String!
             pronouns: String
-            businessName: String!
+            business: String!
             email: String!
             phone: String!
             existingCustomer: Boolean!
@@ -115,15 +123,14 @@ export const resolvers = {
     },
     Mutation: {
         login: async (_, args, { req, res }, info) => {
-            let boop = await db.raw('SELECT * FROM pg_catalog.pg_tables');
-            console.log('MEEBOOP')
-            console.log(boop)
-            console.log('OOO TONGUE TWISTER')
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
+            // Validate input format
+            const validateError = await validateArgs(logInSchema, args);
+            if (validateError) return validateError;
             // Validate email address
             const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
             if (email === undefined) return new CustomError(CODE.BadCredentials);
@@ -189,7 +196,58 @@ export const resolvers = {
             })
         },
         signUp: async (_, args, { req, res }, info) => {
-            return new CustomError(CODE.NotImplemented);
+            // Validate input format
+            const validateError = await validateArgs(signUpSchema, args);
+            if (validateError) return validateError;
+            // Validate unique email address
+            const email = await db(TABLES.Email).select('userId').where('emailAddress', args.email).first();
+            if (email !== undefined) return new CustomError(CODE.EmailInUse);
+            // Validate unique phone number
+            const phone = await db(TABLES.Phone).select('userId').where('number', args.phone).first();
+            if (phone !== undefined) return new CustomError(CODE.PhoneInUse);
+            // Create business
+            const business_id = (await db(TABLES.Business).insert([
+                {
+                    id: uuidv4(),
+                    name: args.business,
+                    subscribedToNewsletters: args.marketingEmails,
+                }
+            ]).returning('id'))[0];
+            // Create user
+            const user_id = uuidv4();
+            await db(TABLES.User).insert([
+                {
+                    id: user_id,
+                    firstName: args.firstName,
+                    lastName: args.lastName,
+                    pronouns: args.pronouns,
+                    password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
+                    status: ACCOUNT_STATUS.Unlocked,
+                    businessId: business_id,
+                    sessionToken: generateToken(user_id, business_id),
+                }
+            ]);
+            // Create email
+            await db(TABLES.Email).insert([
+                {
+                    emailAddress: args.email,
+                    userId: user_id,
+                    businessId: business_id
+                }
+            ]);
+            // Create phone
+            await db(TABLES.Phone).insert([
+                {
+                    number: args.phone,
+                    userId: user_id,
+                    businessId: business_id
+                }
+            ]);
+            // Send verification email
+            sendVerificationLink(args.email, user_id);
+            // Send email to business owner
+            customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
+            return (await fullSelectQueryHelper(Model, info, [user_id]))[0];
         },
         updateUser: async (_, args, { req, res }, info) => {
             return new CustomError(CODE.NotImplemented);
@@ -198,6 +256,9 @@ export const resolvers = {
             return new CustomError(CODE.NotImplemented);
         },
         requestPasswordChange: async (_, args, { req, res }, info) => {
+            // Validate input format
+            const validateError = await validateArgs(requestPasswordChangeSchema, args);
+            if (validateError) return validateError;
             return new CustomError(CODE.NotImplemented);
         },
         changeUserStatus: async (_, args, { req, res }, info) => {

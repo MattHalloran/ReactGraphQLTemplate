@@ -7,3 +7,16 @@ export class CustomError extends ApolloError {
         Object.defineProperty(this, 'name', { value: 'CustomError' });
     }
 }
+
+export async function validateArgs(schema, args) {
+    try {
+        await schema.validate(args, { abortEarly: false });
+    } catch (err) {
+        console.info('Invalid arguments')
+        return new CustomError({
+            code: 'ARGS_VALIDATION_FAILED',
+            message: err.errors
+        })
+    }
+    return null;
+}

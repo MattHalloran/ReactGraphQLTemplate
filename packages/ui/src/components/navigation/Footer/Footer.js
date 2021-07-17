@@ -2,8 +2,8 @@ import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import PropTypes from 'prop-types';
-import { BUSINESS_NAME, ADDRESS, PHONE, FAX, EMAIL, API_ADDRESS } from '@local/shared';
-import { lightTheme, LINKS, printAvailability } from 'utils';
+import { API_ADDRESS } from '@local/shared';
+import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
 import {
@@ -16,14 +16,10 @@ import { Copyright } from 'components';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: 'fit-content',
         overflow: 'hidden',
-        //backgroundColor: theme.palette.primary.dark,
-        backgroundColor: lightTheme.palette.primary.dark,
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        //borderTop: `2px solid ${theme.palette.text.primary}`,
-        borderTop: `2px solid ${lightTheme.palette.text.primary}`,
+        backgroundColor: theme.palette.primary.dark,
+        color: theme.palette.primary.contrastText,
+        borderTop: `2px solid ${theme.palette.text.primary}`,
         position: 'relative',
         paddingBottom: '7vh',
     },
@@ -37,29 +33,27 @@ const useStyles = makeStyles((theme) => ({
     image: {
         maxWidth: '100%',
         maxHeight: 200,
-        //background: theme.palette.primary.contrastText,
-        background: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.contrastText,
     },
     icon: {
-        //fill: theme.palette.primary.contrastText,
-        fill: lightTheme.palette.primary.contrastText,
+        fill: theme.palette.primary.contrastText,
     },
     copyright: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
 }));
 
 function Footer({
-    session
+    session,
+    business
 }) {
     const classes = useStyles();
 
     const contactLinks = [
-        ['address', 'View in Google Maps', ADDRESS.Link, ADDRESS.Label, BusinessIcon],
-        ['contact-phone', 'Call Us', PHONE.Link, PHONE.Label, PhoneIcon],
-        ['contact-fax', 'Fax Us', FAX.Link, FAX.Label, PrintIcon],
-        ['contact-email', 'Email Us', EMAIL.Link, EMAIL.Label, EmailIcon],
+        ['address', 'View in Google Maps', business?.ADDRESS?.Link, business?.ADDRESS?.Label, BusinessIcon],
+        ['contact-phone', 'Call Us', business?.PHONE?.Link, business?.PHONE?.Label, PhoneIcon],
+        ['contact-fax', 'Fax Us', business?.FAX?.Link, business?.FAX?.Label, PrintIcon],
+        ['contact-email', 'Email Us', business?.EMAIL?.Link, business?.EMAI?.Label, EmailIcon],
     ]
 
     const bottomImages = [
@@ -89,7 +83,7 @@ function Footer({
                         >
                             <ListItemText primary="Credit App" />
                         </ListItem>
-                        <ListItem button href={LINKS.About} onClick={() => printAvailability(session)} >
+                        <ListItem button href={LINKS.About} onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
                         <ListItem button component="a" href={LINKS.Gallery} >
@@ -103,7 +97,7 @@ function Footer({
                 <Grid item xs={6}>
                     <List component="nav">
                         <ListItem button component="h5" >
-                            <ListItemText className={classes.upper} primary={BUSINESS_NAME.Long} />
+                            <ListItemText className={classes.upper} primary={business?.BUSINESS_NAME?.Long} />
                         </ListItem>
                         {contactLinks.map(([label, tooltip, src, text, Icon], key) => (
                             <Tooltip key={key} title={tooltip} placement="left">
@@ -129,7 +123,7 @@ function Footer({
                     </Grid>
                 ))}
             </Grid>
-            <Copyright className={classes.copyright} />
+            <Copyright className={classes.copyright} business={business} />
         </div>
     );
 }

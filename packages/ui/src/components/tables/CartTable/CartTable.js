@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, lightTheme } from 'utils';
+import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton, Typography } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -13,28 +13,23 @@ import { makeStyles } from '@material-ui/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
-import _ from 'underscore';
 import { useGet } from 'restful-react';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
-        // background: theme.palette.background.paper,
-        background: lightTheme.palette.background.paper,
+        background: theme.palette.background.paper,
     },
     tableIcon: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     tableHead: {
-        // background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
+        background: theme.palette.primary.main,
     },
     tableCol: {
         verticalAlign: 'middle',
         '& > *': {
             height: 'fit-content',
-            // color: theme.palette.primary.contrastText
-            color: lightTheme.palette.primary.contrastText
+            color: theme.palette.primary.contrastText
         }
     }
 }));
@@ -59,9 +54,9 @@ function CartTable({
     const [cartState, setCartState] = useState({
         ...cart,
         items: cart?.items ?? [],
-        is_delivery: cart?.is_delivery ?? true,
+        isDelivery: cart?.isDelivery ?? true,
         desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
-        special_instructions: cart?.special_instructions,
+        specialInstructions: cart?.specialInstructions,
     })
     // Thumbnail data for every SKU
     const [thumbnails, setThumbnails] = useState([]);
@@ -85,7 +80,7 @@ function CartTable({
     }, [cartState, onUpdate])
 
     const setNotes = useCallback((notes) => {
-        setCartState(c => updateObject(c, 'special_instructions', notes));
+        setCartState(c => updateObject(c, 'specialInstructions', notes));
     }, [])
 
     const setDeliveryDate = useCallback((date) => {
@@ -225,7 +220,7 @@ function CartTable({
                         label="Special Instructions"
                         fullWidth
                         multiline
-                        value={cartState.special_instructions}
+                        value={cartState.specialInstructions}
                         onChange={e => setNotes(e.target.value)}
                     />
                 </Grid>

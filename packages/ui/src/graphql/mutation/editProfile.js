@@ -5,7 +5,7 @@ export const editProfileMutation = gql`
         $firstName: String!
         $lastName: String!
         $pronouns: String
-        $businessName: String!
+        $business: String!
         $email: String!
         $phone: String!
         $theme: String!
@@ -18,7 +18,7 @@ export const editProfileMutation = gql`
         firstName: $firstName
         lastName: $lastName
         pronouns: $pronouns
-        businessName: $businessName
+        business: $business
         email: $email
         phone: $phone
         theme: $theme

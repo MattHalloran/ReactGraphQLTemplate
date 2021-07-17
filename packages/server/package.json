@@ -16,7 +16,7 @@
     "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm",
     "migrate-latest": "knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm",
     "migrate-rollback": "knex migrate:rollback --knexfile ./src/db/knexfile.js --esm",
-    "clean-images": "node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageFiles.js && node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageRows.js"
+    "clean": "node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageData.js"
   },
   "author": "",
   "license": "MIT",
@@ -25,6 +25,7 @@
     "@types/express": "^4.17.11",
     "@types/node": "^15.0.2",
     "apollo-server-express": "^2.25.0",
+    "arrify": "^3.0.0",
     "bcrypt": "^5.0.1",
     "bull": "^3.22.4",
     "cookie-parser": "^1.4.5",
@@ -41,6 +42,7 @@
     "node-xlsx": "^0.16.1",
     "nodemailer": "^6.6.0",
     "pg": "^8.6.0",
+    "pluralize": "^8.0.0",
     "sharp": "^0.28.3",
     "twilio": "^3.61.0",
     "uuid": "^8.3.2"

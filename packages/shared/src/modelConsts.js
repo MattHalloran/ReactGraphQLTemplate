@@ -12,12 +12,12 @@ export const DEFAULT_PRONOUNS = [
     "ze/hir/hirs",
 ]
 export const IMAGE_EXTENSION = {
-    Bmp: 'bmp',
-    Gif: 'gif',
-    Png: 'png',
-    Jpg: 'jpg',
-    Jpeg: 'jpeg',
-    Ico: 'ico'
+    Bmp: '.bmp',
+    Gif: '.gif',
+    Png: '.png',
+    Jpg: '.jpg',
+    Jpeg: '.jpeg',
+    Ico: '.ico'
 }
 // Possible image sizes stored, and their max size
 export const IMAGE_SIZE = {

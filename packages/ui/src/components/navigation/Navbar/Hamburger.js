@@ -4,8 +4,7 @@ import {
     ContactInfo,
     Copyright
 } from 'components';
-import { SOCIAL } from '@local/shared';
-import { getUserActions, lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
@@ -25,29 +24,22 @@ import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
-        //background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-        //borderLeft: `2px solid ${theme.palette.text.primary}`,
-        borderLeft: `2px solid ${lightTheme.palette.text.primary}`,
+        background: theme.palette.primary.light,
+        borderLeft: `2px solid ${theme.palette.text.primary}`,
     },
     menuItem: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
-        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
+        color: theme.palette.primary.contrastText,
+        borderBottom: `1px solid ${theme.palette.primary.dark}`,
     },
     close: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
         borderRadius: 0,
-        // borderBottom: `1px solid ${theme.palette.primary.dark}`,
-        borderBottom: `1px solid ${lightTheme.palette.primary.dark}`,
+        borderBottom: `1px solid ${theme.palette.primary.dark}`,
         justifyContent: 'end',
         direction: 'rtl',
     },
     menuIcon: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
     facebook: {
         fill: '#43609C', // UCLA blue
@@ -56,15 +48,17 @@ const useStyles = makeStyles((theme) => ({
         fill: '#F77737',
     },
     copyright: {
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        maxWidth: 300,
+        color: theme.palette.primary.contrastText,
         padding: 5,
+        display: 'block',
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
 }));
 
 function Hamburger({
     session,
+    business,
     logout,
     roles,
     cart,
@@ -150,7 +144,7 @@ function Hamburger({
                         {contactOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={contactOpen} timeout="auto" unmountOnExit>
-                        <ContactInfo />
+                        <ContactInfo business={business} />
                     </Collapse>
                     {/* Collapsible social media links */}
                     <ListItem className={classes.menuItem} button onClick={handleSocialClick}>
@@ -159,13 +153,13 @@ function Hamburger({
                         {socialOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={socialOpen} timeout="auto" unmountOnExit>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Facebook)}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Facebook)}>
                             <ListItemIcon>
                                 <FacebookIcon className={classes.facebook} />
                             </ListItemIcon>
                             <ListItemText primary="Facebook" />
                         </ListItem>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(SOCIAL.Instagram)}>
+                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Instagram)}>
                             <ListItemIcon>
                                 <InstagramIcon className={classes.instagram} />
                             </ListItemIcon>
@@ -180,7 +174,7 @@ function Hamburger({
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>*/}
-                <Copyright className={classes.copyright} />
+                <Copyright className={classes.copyright} business={business} />
             </SwipeableDrawer>
         </React.Fragment>
     );

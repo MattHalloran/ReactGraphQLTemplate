@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
 import {
     SearchBar,
     Selector
 } from 'components';
 import { ShoppingList } from '../ShoppingList/ShoppingList';
-import { SORT_OPTIONS, PUBS, PubSub, lightTheme } from 'utils';
+import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
 import { getInventoryFilters } from "query/http_promises";
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import {
@@ -20,31 +19,26 @@ import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
-        // background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        // borderRight: `2px solid ${theme.palette.text.primary}`,
-        borderRight: `2px solid ${lightTheme.palette.text.primary}`,
-        // padding: theme.spacing(1),
-        padding: lightTheme.spacing(1),
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+        borderRight: `2px solid ${theme.palette.text.primary}`,
+        padding: theme.spacing(1),
     },
     formControl: {
         display: 'flex',
         justifyContent: 'center',
         '& > *': {
-            // margin: theme.spacing(1),
-            margin: lightTheme.spacing(1),
+            margin: theme.spacing(1),
         },
     },
     padBottom: {
-        // marginBottom: theme.spacing(2),
-        marginBottom: lightTheme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
 }));
 
 function ShoppingPage({
     session,
+    business,
     cart,
 }) {
     const classes = useStyles();
@@ -53,7 +47,6 @@ function ShoppingPage({
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
     const [hideOutOfStock, setHideOutOfStock] = useState(false);
-    let history = useHistory();
 
     useEffect(() => {
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
@@ -70,7 +63,7 @@ function ShoppingPage({
             .then((response) => {
                 if (!mounted) return;
                 // Add checked boolean to each filter
-                for (const [_, value] of Object.entries(response)) {
+                for (const value of Object.values(response)) {
                     for (let i = 0; i < value.length; i++) {
                         value[i] = {
                             label: value[i],
@@ -95,7 +88,7 @@ function ShoppingPage({
 
     const handleHideChange = useCallback((event) => {
         setHideOutOfStock(event.target.checked);
-    }, [filters])
+    }, [])
 
     const filtersToSelector = (field, title, onChange) => {
         if (!filters) return;
@@ -204,7 +197,7 @@ function ShoppingPage({
                 <Button
                     color="secondary"
                     startIcon={<PrintIcon />}
-                    onClick={() => printAvailability(session)}
+                    onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)}
                 >Print</Button>
             </div>
             <ShoppingList

@@ -1,5 +1,4 @@
 import { makeStyles } from '@material-ui/styles';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     dotContainer: {
@@ -20,8 +19,7 @@ const useStyles = makeStyles((theme) => ({
         border: '1px solid black',
     },
     active: {
-        //background: theme.palette.primary.main,
-        background: lightTheme.palette.primary.main,
+        background: theme.palette.primary.main,
         opacity: '0.9',
     },
     inactive: {

@@ -77,6 +77,7 @@ export const PUBS = {
     Snack: "snack",
     BurgerMenuOpen: "burgerMenuOpen",
     ArrowMenuOpen: "arrowMenuOpen",
+    Business: "business",
 }
 
 export const LINKS = {

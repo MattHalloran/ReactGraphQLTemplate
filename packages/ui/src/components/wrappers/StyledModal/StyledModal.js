@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { Modal, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Close as CloseIcon } from '@material-ui/icons';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -14,12 +13,9 @@ const useStyles = makeStyles((theme) => ({
     },
     bodyChildren: {
         borderRadius: '10px',
-        // backgroundColor: theme.palette.primary.light,
-        backgroundColor: lightTheme.palette.primary.light,
-        // color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
-        // border: `3px solid ${theme.palette.primary.contrastText}`,
-        border: `3px solid ${lightTheme.palette.primary.contrastText}`,
+        backgroundColor: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+        border: `3px solid ${theme.palette.primary.contrastText}`,
     },
     xButton: {
         height: 50,
@@ -35,8 +31,7 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     x: {
-        // fill: theme.palette.primary.contrastText,
-        fill: lightTheme.palette.primary.contrastText,
+        fill: theme.palette.primary.contrastText,
     },
     scrollable: {
         overflowY: 'scroll',

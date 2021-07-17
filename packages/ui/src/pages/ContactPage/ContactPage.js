@@ -1,9 +1,10 @@
 import { useLayoutEffect } from 'react';
-import { BUSINESS_NAME } from '@local/shared';
 
-function ContactPage() {
+function ContactPage({
+    business,
+}) {
     useLayoutEffect(() => {
-        document.title = `Contact | ${BUSINESS_NAME.Short}`;
+        document.title = `Contact | ${business?.BUSINESS_NAME?.Short}`;
     })
     return (
         <div id='page'>

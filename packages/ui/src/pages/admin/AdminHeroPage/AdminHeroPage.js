@@ -17,8 +17,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminHeroPage({
-}) {
+function AdminHeroPage() {
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
     const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
@@ -82,13 +81,13 @@ function AdminHeroPage({
             PubSub.publish(PUBS.Loading, false);
             PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
         })
-    }, [imageData])
+    }, [imageData, updateImages])
 
     return (
         <div id='page' className={classes.root}>
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Typography variant="h3" component="h1">Hero Edit</Typography>
+                <Typography variant="h3" component="h1">Edit Hero</Typography>
             </div>
             <Dropzone
                 dropzoneText={'Drag \'n\' drop new images here or click'}

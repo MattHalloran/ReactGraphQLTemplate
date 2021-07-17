@@ -11,7 +11,9 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-export async function emailProcess() {
+export async function emailProcess(job) {
+    console.log('IN EMAIL PROCESS');
+    console.log(job.data);
     transporter.sendMail({
         from : `"${process.env.SITE_EMAIL_FROM}" <${process.env.SITE_EMAIL_USERNAME}>`,
         to: job.data.to.join(', '),

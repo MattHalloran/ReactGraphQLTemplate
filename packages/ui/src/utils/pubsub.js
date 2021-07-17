@@ -6,6 +6,7 @@
  */
 
 (function (root, factory){
+    // eslint-disable-next-line
     'use strict';
 
     var PubSub = {};
@@ -29,6 +30,7 @@
     }
 
 }(( typeof window === 'object' && window ) || this, function (PubSub){
+    // eslint-disable-next-line
     'use strict';
 
     var messages = {},

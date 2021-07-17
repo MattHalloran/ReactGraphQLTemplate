@@ -9,15 +9,14 @@ import {
     DialogTitle,
     TextField
 } from '@material-ui/core';
-import { lightTheme } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     title: {
-        background: lightTheme.palette.primary.main,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
     },
     button: {
-        color: lightTheme.palette.primary.main,
+        color: theme.palette.primary.main,
     }
 }));
 

@@ -1,16 +1,12 @@
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
-import {
-    InformationalBreadcrumbs,
-    StyledModal as Modal,
-} from 'components';
+import { InformationalBreadcrumbs } from 'components';
 import { PUBS, PubSub } from 'utils';
-import { ImageList, ImageListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     imageList: {
         spacing: 0,
     },
@@ -34,8 +30,6 @@ const useStyles = makeStyles((theme) => ({
         height: 'calc(100vw * 0.8)'
     }
 }));
-
-//TODO add gallery modal part if url match (/gallery/:img)
 
 function GalleryPage() {
     const classes = useStyles();

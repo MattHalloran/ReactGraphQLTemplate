@@ -1,9 +1,8 @@
 //TODO not used yet. Currently same as signup form
 
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { lightTheme, LINKS, PUBS, PubSub, useHistoryState } from 'utils';
-import { CODE, DEFAULT_PRONOUNS, employeeSchema } from '@local/shared';
+import { LINKS, PUBS, PubSub, useHistoryState } from 'utils';
+import { DEFAULT_PRONOUNS, employeeSchema } from '@local/shared';
 import { Button, TextField, Link } from '@material-ui/core';
 import { FormControl, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -11,17 +10,14 @@ import { makeStyles } from '@material-ui/styles';
 const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%',
-        // marginTop: theme.spacing(3),
-        marginTop: lightTheme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     submit: {
-        // margin: theme.spacing(3, 0, 2),
-        margin: lightTheme.spacing(3, 0, 2),
+        margin: theme.spacing(3, 0, 2),
     },
 }));
 
 function AddEmployeeForm() {
-    let history = useHistory();
     const classes = useStyles();
     const [firstName, setFirstName] = useHistoryState("ae_first_name", "");
     const [lastName, setLastName] = useHistoryState("ae_last_name", "");

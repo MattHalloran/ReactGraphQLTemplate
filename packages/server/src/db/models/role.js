@@ -1,11 +1,21 @@
 import { gql } from 'apollo-server-express';
-import { db } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteHelper, fullSelectQueryHelper, insertJoinRowsHelper, updateHelper, updateJoinRowsHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { RoleModel as Model } from '../relationships';
 
 export const typeDef = gql`
+    input RoleInput {
+        title: String!
+        description: String
+        userIds: [ID!]
+    }
+
     type Role {
         id: ID!
         title: String!
@@ -18,20 +28,9 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addRole(
-            title: String!
-            description: String
-            userIds: [ID!]
-        ): Role!
-        updateRole(
-            id: ID!
-            title: String
-            description: String
-            userIds: [ID!]
-        ): Role!
-        deleteRoles(
-            ids: [ID!]!
-        ): Boolean
+        addRole(input: RoleInput!): Role!
+        updateRole(id: ID!, input: RoleInput!): Role!
+        deleteRoles(ids: [ID!]!): Boolean
     }
 `
 
@@ -47,20 +46,12 @@ export const resolvers = {
         addRole: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-
-            const added = await db(Model.name).insertAndFetch({
-                title: args.title,
-                description: args.description ?? ''
-            });
-            await insertJoinRowsHelper(Model, 'users', added.id, args.userIds);
-            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
+            return await insertHelper({ model: Model, info: info, input: args.input });
         },
-        updateRole: async (_, args, { req, res }, info) => {
+        updateRole: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            await updateHelper(Model, args);
-            await updateJoinRowsHelper(Model, 'users', args.id, args.userIds);
-            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
+            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
         },
         deleteRoles: async (_, args, { req }) => {
             // Must be admin

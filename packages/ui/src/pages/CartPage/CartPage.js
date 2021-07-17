@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
-import { BUSINESS_NAME } from '@local/shared';
-import { lightTheme, LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
 import { useMutate } from "restful-react";
 import { submitOrder } from 'query/http_promises';
@@ -21,8 +20,7 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     padTop: {
-        // paddingTop: theme.spacing(2),
-        paddingTop: lightTheme.spacing(2),
+        paddingTop: theme.spacing(2),
     },
     gridItem: {
         display: 'flex',
@@ -31,24 +29,25 @@ const useStyles = makeStyles((theme) => ({
         width: 'fit-content',
         justifyContent: 'center',
         '& > *': {
-            // margin: theme.spacing(1),
-            margin: lightTheme.spacing(1),
+            margin: theme.spacing(1),
         },
     },
 }));
 
 function CartPage({
+    business,
     user_id,
     cart,
 }) {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final
-    const [changedCart, setChangedCart] = useState(cart);
+    const [currCart, setcurrCart] = useState(null)
+    const [changedCart, setChangedCart] = useState(null);
 
     console.log('LOADING CART PAGE', cart, changedCart)
 
-    const { mutate: updateCart, loading } = useMutate({
+    const { mutate: updateCart } = useMutate({
         verb: 'PUT',
         path: 'cart',
         resolve: (response) => {
@@ -63,10 +62,11 @@ function CartPage({
         }
     });
 
-    const cartUpdate = (data) => {
-        console.log('CART UPDATE', data)
+    const cartUpdate = useCallback((data) => {
+        console.log('CART UPDATE', data);
+        if (currCart === null && data !== null) setcurrCart(data);
         setChangedCart(data);
-    }
+    }, [currCart])
 
     const updateOrder = () => {
         if (!user_id) {
@@ -83,22 +83,28 @@ function CartPage({
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${BUSINESS_NAME.Short}`, severity: 'error'});
+                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'});
             })
     }
 
     const finalizeOrder = useCallback(() => {
-        if (cart.items.length <= 0) {
+        // Make sure order is updated
+        if (!_.isEqual(currCart, changedCart)) {
+            PubSub.publish(PUBS.Snack, {message: 'Please click "UPDATE ORDER" before submitting.', severity: 'warning'});
+            return;
+        }
+        // Disallow empty orders
+        if (currCart.items.length <= 0) {
             PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
         PubSub.publish(PUBS.AlertDialog, {
-            message: `This will submit the order to ${BUSINESS_NAME.Short}. We will contact you for further information. Are you sure you want to continue?`,
+            message: `This will submit the order to ${business?.BUSINESS_NAME?.Short}. We will contact you for further information. Are you sure you want to continue?`,
             firstButtonText: 'Yes',
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, user_id]);
+    }, [cart, changedCart, currCart, requestQuote, user_id]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
@@ -108,7 +114,7 @@ function CartPage({
                     fullWidth 
                     startIcon={<ArrowBackIcon />} 
                     onClick={() => history.push(LINKS.Shopping)}
-                    disabled={!_.isEqual(cart, changedCart)}
+                    disabled={changedCart !== null && !_.isEqual(cart, changedCart)}
                 >Continue Shopping</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -116,7 +122,7 @@ function CartPage({
                     fullWidth 
                     startIcon={<UpdateIcon />} 
                     onClick={updateOrder}
-                    disabled={_.isEqual(cart, changedCart)}
+                    disabled={changedCart === null || _.isEqual(cart, changedCart)}
                 >Update Order</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -124,7 +130,7 @@ function CartPage({
                     fullWidth 
                     endIcon={<ArrowForwardIcon />} 
                     onClick={finalizeOrder}
-                    disabled={!_.isEqual(cart, changedCart)}
+                    disabled={changedCart !== null && !_.isEqual(cart, changedCart)}
                 >Request Quote</Button>
             </Grid>
         </Grid>

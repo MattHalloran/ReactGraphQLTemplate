@@ -1,8 +1,7 @@
-import { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BUSINESS_NAME } from '@local/shared';
 import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { LINKS } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     center: {
@@ -16,17 +15,13 @@ const useStyles = makeStyles((theme) => ({
 function NotFoundPage() {
     const classes = useStyles();
 
-    useLayoutEffect(() => {
-        document.title = `404 | ${BUSINESS_NAME.Short}`;
-    })
-
     return (
         <div id="page">
             <div className={classes.center}>
                 <h1>Page Not Found</h1>
                 <h3>Looks like you've followed a broken link or entered a URL that doesn't exist on this site</h3>
                 <br />
-                <Link to="/">
+                <Link to={LINKS.Home}>
                     <Button>Go to Home</Button>
                 </Link>
             </div>

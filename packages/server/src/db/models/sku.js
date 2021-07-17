@@ -1,8 +1,12 @@
 import { gql } from 'apollo-server-express';
-import { db } from '../db';
 import { CODE, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteHelper, fullSelectQueryHelper } from '../query';
+import { 
+    insertHelper, 
+    deleteHelper, 
+    fullSelectQueryHelper, 
+    updateHelper
+} from '../query';
 import { SkuModel as Model } from '../relationships';
 
 export const typeDef = gql`
@@ -10,6 +14,18 @@ export const typeDef = gql`
         Deleted
         Inactive
         Active
+    }
+
+    input SkuInput {
+        sku: String!
+        isDiscountable: Boolean
+        size: String
+        note: String
+        availability: Int
+        price: String
+        status: SkuStatus
+        plantId: ID
+        discountIds: [ID!]
     }
 
     type Sku {
@@ -30,32 +46,9 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addSku(
-            sku: String!
-            isDiscountable: Boolean
-            size: String
-            note: String
-            availability: Int
-            price: String
-            status: SkuStatus
-            plantId: ID
-            discountIds: [ID!]
-        ): Sku!
-        updateSku(
-            id: ID!
-            sku: String
-            isDiscountable: Boolean
-            size: String
-            note: String
-            availability: Int
-            price: String
-            status: SkuStatus
-            plantId: ID
-            discountIds: [ID!]
-        ): Sku!
-        deleteSkus(
-            ids: [ID!]!
-        ): Boolean
+        addSku(input: SkuInput!): Sku!
+        updateSku(id: ID!, input: SkuInput!): Sku!
+        deleteSkus(ids: [ID!]!): Boolean
     }
 `
 
@@ -70,26 +63,12 @@ export const resolvers = {
         addSku: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-
-            const added = await db(Model.name).insertAndFetch({
-                sku: args.sku,
-                isDiscountable: args.isDiscountable ?? false,
-                size: args.size ?? 'N/A',
-                note: args.note ?? null,
-                availability: args.availability ?? 0,
-                price: args.price ?? 'N/A',
-                status: args.status ?? SKU_STATUS.Active,
-                plantId: args.plantId ?? null,
-            });
-            await insertJoinRowsHelper(Model, 'discounts', added.id, args.discountIds);
-            return (await fullSelectQueryHelper(Model, info, [added.id]))[0];
+            return await insertHelper({ model: Model, info: info, input: args.input });
         },
         updateSku: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            await updateHelper(Model, args);
-            await updateJoinRowsHelper(Model, 'discounts', args.id, args.discountIds);
-            return (await fullSelectQueryHelper(Model, info, [args.id]))[0];
+            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
         },
         deleteSkus: async (_, args, { req }) => {
             // Must be admin

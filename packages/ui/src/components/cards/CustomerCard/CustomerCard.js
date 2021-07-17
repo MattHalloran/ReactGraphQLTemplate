@@ -14,14 +14,12 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { modifyUser } from 'query/http_promises';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
-import { lightTheme, PUBS, PubSub } from 'utils';
+import { PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        //background: theme.palette.primary.light,
-        background: lightTheme.palette.primary.light,
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
         borderRadius: 15,
         margin: 3,
         cursor: 'pointer',
@@ -35,8 +33,7 @@ const useStyles = makeStyles((theme) => ({
         cursor: 'pointer',
     },
     actionButton: {
-        //color: theme.palette.primary.contrastText,
-        color: lightTheme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
     },
 }));
 

@@ -1,0 +1,1 @@
+export const BUSINESS_JSON = `${process.env.PROJECT_DIR}/assets/public/business.json`;
