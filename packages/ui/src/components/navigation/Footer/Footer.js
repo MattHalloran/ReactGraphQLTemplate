@@ -2,7 +2,7 @@ import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';
 import PropTypes from 'prop-types';
-import { API_ADDRESS } from '@local/shared';
+import { SERVER_URL } from '@local/shared';
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
@@ -76,7 +76,7 @@ function Footer({
                         <ListItem
                             button
                             component="a"
-                            href={`${API_ADDRESS}/Confidential_Commercial_Credit_Application-2010.doc`}
+                            href={`${SERVER_URL}/public/Confidential_Commercial_Credit_Application-2010.doc`}
                             target='_blank'
                             rel="noopener noreferrer"
                             download="Confidential_Commercial_Credit_Application"

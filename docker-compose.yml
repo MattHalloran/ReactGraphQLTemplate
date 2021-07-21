@@ -12,20 +12,19 @@ services:
             PROJECT_DIR: "${PROJECT_DIR}"
             REACT_APP_SITE_NAME: "${SITE_NAME}"
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
-            UI_PORT: "${UI_PORT}"
-            VIRTUAL_HOST: "${SITE_NAME}"
-            VIRTUAL_PORT: "${SERVER_PORT}"
+            REACT_APP_SERVER_PORT: "${SERVER_PORT}"
+            # VIRTUAL_HOST: "${SITE_NAME}"
+            VIRTUAL_HOST: "localhost:3000"
+            VIRTUAL_PORT: "${UI_PORT}"
             LETSENCRYPT_HOST: "${SITE_NAME}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
-            - 3000:3000
+            - "3000:3000"
         volumes:
-            - ./packages/ui:${PROJECT_DIR}/packages/ui
-            - ./packages/shared:${PROJECT_DIR}/packages/shared
-            - ./scripts:${PROJECT_DIR}/scripts
+            - ./packages/ui:${PROJECT_DIR}/packages/ui:z
+            - ./packages/shared:${PROJECT_DIR}/packages/shared:z
         networks:
             - proxy
-            - app
         depends_on: 
                 - redis
                 - db
@@ -55,21 +54,20 @@ services:
             REACT_APP_SITE_NAME: "${SITE_NAME}"
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             UI_PORT: "${UI_PORT}"
-            SERVER_PORT: "${SERVER_PORT}"
-            VIRTUAL_HOST: "${SITE_NAME}"
-            VIRTUAL_PORT: "${UI_PORT}"
+            REACT_APP_SERVER_PORT: "${SERVER_PORT}"
+            # VIRTUAL_HOST: "api.${SITE_NAME}"
+            VIRTUAL_HOST: "localhost:5000"
+            VIRTUAL_PORT: "${SERVER_PORT}"
             LETSENCRYPT_HOST: "${SITE_NAME}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
-        ports:
-            - 5000:5000
+        expose:
+            - "${SERVER_PORT}"
         volumes:
-            - ./packages/server:${PROJECT_DIR}/packages/server
-            - ./packages/shared:${PROJECT_DIR}/packages/shared
-            - ./assets:${PROJECT_DIR}/assets
-            - ./scripts:${PROJECT_DIR}/scripts
+            - ./packages/server:${PROJECT_DIR}/packages/server:z
+            - ./packages/shared:${PROJECT_DIR}/packages/shared:z
+            - ./assets:${PROJECT_DIR}/assets:z
         networks:
             - proxy
-            - app
         depends_on: 
                 - redis
                 - db
@@ -87,7 +85,7 @@ services:
         volumes:
             - ./data/postgres:/var/lib/postgresql/data
         networks:
-            - app
+            - proxy
     # adminer:
     #     image: adminer
     #     restart: always
@@ -101,9 +99,8 @@ services:
         ports:
             - 6379:6379
         networks:
-            - app
+            - proxy
 networks:
     proxy:
         external:
             name: nginx-proxy
-    app:

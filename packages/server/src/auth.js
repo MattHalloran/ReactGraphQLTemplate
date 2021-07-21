@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { CODE, COOKIE } from '@local/shared';
 import { TABLES } from './db/tables';
-import { SESSION_MILLI } from '@local/shared';
 import { db } from './db/db';
 import { UserModel } from './db/relationships';
 import { fullSelectQuery } from './db/query';
 import { CustomError } from './db/error';
+
+const SESSION_MILLI = 30*86400;
 
 // Return array of user roles (ex: ['admin', 'customer'])
 async function findUserRoles(user_id) {
