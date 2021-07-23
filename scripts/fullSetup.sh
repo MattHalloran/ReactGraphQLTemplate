@@ -93,7 +93,7 @@ ${HERE}/init-letsencrypt.sh
 # ========================================================
 header "Setting up firewall"
 # Enable firewall
-sudo ufw enable -y
+sudo ufw enable
 # Only allow 80 and 443
 sudo ufw allow 'Nginx Full'
 sudo sysctl -p

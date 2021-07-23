@@ -3,9 +3,8 @@
 
 HERE=`dirname $0`
 source "${HERE}/../.env"
-DATA_NGINX="${HERE}/../data/nginx"
+DATA_NGINX="/etc/nginx/nginx.conf"
 
-rm ${DATA_NGINX}
 mkdir -p ${DATA_NGINX}
 rm -rf ${DATA_NGINX}/*
 cp ${HERE}/conf.d/* ${DATA_NGINX}
