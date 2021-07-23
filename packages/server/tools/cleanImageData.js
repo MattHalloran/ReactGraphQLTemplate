@@ -20,6 +20,10 @@ const rows = (await db(TABLES.Image).select('*').where('folder', FOLDER)).map(d 
 });
 if (rows === undefined || rows.length === 0) console.warn('No image data found in database')
 
+
+if (!fs.existsSync(PATH)){
+    fs.mkdirSync(PATH);
+}
 // Grab all files in path
 const files = fs.readdirSync(PATH);
 for (const file of files) {

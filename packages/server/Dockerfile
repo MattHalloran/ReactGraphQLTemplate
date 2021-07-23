@@ -34,3 +34,5 @@ RUN yarn install
 COPY --chown=node:node ${shared}/index.js ${shared}/src ${shared}/
 COPY --chown=node:node ${server}/src ${server}/tools ${server}/
 COPY --chown=node:node scripts/server.sh scripts/wait-for.sh ${scripts}/
+
+USER root
