@@ -3,11 +3,10 @@
 
 HERE=`dirname $0`
 source "${HERE}/../.env"
-DATA_NGINX="/etc/nginx/nginx.conf"
+DATA_NGINX="/etc/nginx/sites-available"
 
 mkdir -p ${DATA_NGINX}
-rm -rf ${DATA_NGINX}/*
-cp ${HERE}/conf.d/* ${DATA_NGINX}
+cp ${HERE}/sites-available/* ${DATA_NGINX}
 
 find ${DATA_NGINX} -type f -exec sed -i "s#<SITE_IP>#${SITE_IP}#g" {} \;
 find ${DATA_NGINX} -type f -exec sed -i "s#<SITE_NAME>#${SITE_NAME}#g" {} \;

@@ -79,13 +79,16 @@ header "Installing Nginx"
 sudo apt install nginx
 
 header "Starting Nginx"
-sudo systemctl start nginx
+sudo systemctl enable nginx
 
 # Update NGINX files
 ${HERE}/nginxSetup.sh
 
+header "Restarting Nginx"
+sudo service nginx restart
+
 # Create SSL encryption
-${HERE}/init-letsencrypt.sh
+${HERE}/certbot.sh
 
 
 # ========================================================
