@@ -4,15 +4,15 @@
 #   -Nginx must be set up
 
 HERE=`dirname $0`
-source "$HERE/formatting.sh"
+source "$HERE/prettify.sh"
 source "${HERE}/../.env"
 
 MSG="Installing Certbot"
-checker sudo apt-add-repository -r ppa:certbot/certbot
+sudo apt-add-repository -r ppa:certbot/certbot
 MSG="Installing Nginx package for Certbot"
 sudo apt-get update
-checker sudo apt-get install python3-certbot-nginx
+sudo apt-get install python3-certbot-nginx
 MSG="Creating SSL certificate"
-checker sudo certbot --nginx -d $WEBSITE_NAME -d "www.$WEBSITE_NAME"
+sudo certbot --nginx -d $WEBSITE_NAME -d "www.$WEBSITE_NAME"
 MSG="Testing certificate auto-renewal"
-checker sudo certbot renew --dry-run
+sudo certbot renew --dry-run

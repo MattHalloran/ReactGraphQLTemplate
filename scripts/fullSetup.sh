@@ -68,9 +68,6 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 header "Making Docker Compose executable"
 sudo chmod +x /usr/local/bin/docker-compose
 
-header "Create proxy network"
-sudo docker network create nginx-proxy
-
 
 # --------------------------------------------------------
 # Nginx
