@@ -1,3 +1,4 @@
+import React from 'react';
 import ProvenWinners from 'assets/img/proven-winners.png';
 import AmericanHort from 'assets/img/american-hort.png';
 import NJNLA from 'assets/img/njnla_logo.jpg';

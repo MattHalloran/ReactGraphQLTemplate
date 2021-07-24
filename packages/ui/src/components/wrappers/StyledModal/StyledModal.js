@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';

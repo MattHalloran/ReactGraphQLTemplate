@@ -3,7 +3,7 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
 import { useGet, useMutate } from "restful-react";
 import { Button } from '@material-ui/core';

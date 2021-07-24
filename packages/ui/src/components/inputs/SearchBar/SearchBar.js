@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from "prop-types";
 import { TextField, InputAdornment, IconButton } from '@material-ui/core';
 import { Search as SearchIcon } from '@material-ui/icons';

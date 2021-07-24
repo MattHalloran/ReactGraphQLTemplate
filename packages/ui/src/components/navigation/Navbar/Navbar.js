@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/img/nln-logo-colorized.png';
 import { hexToRGB, LINKS } from 'utils';

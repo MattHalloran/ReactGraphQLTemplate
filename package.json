@@ -6,6 +6,7 @@
     "license": "MIT",
     "devDependencies": {
         "@types/node": "^15.0.2",
+        "eslint": "^7.31.0",
         "patch-package": "^6.4.7",
         "postinstall-postinstall": "^2.1.0",
         "ts-node": "^9.1.1",
