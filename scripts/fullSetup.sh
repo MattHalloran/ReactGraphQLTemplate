@@ -72,6 +72,9 @@ sudo chmod +x /usr/local/bin/docker-compose
 # --------------------------------------------------------
 # Nginx
 # --------------------------------------------------------
+header "Purging any existing Nginx configurations"
+sudo apt-get purge nginx nginx-common
+
 header "Installing Nginx"
 sudo apt install nginx
 

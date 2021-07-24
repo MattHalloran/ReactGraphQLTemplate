@@ -5,6 +5,9 @@ HERE=`dirname $0`
 source "${HERE}/../.env"
 DATA_NGINX="/etc/nginx/sites-available"
 
+rm /etc/nginx/sites-available/*
+rm /etc/nginx/sites-enabled/*
+
 mkdir -p ${DATA_NGINX}
 cp ${HERE}/sites-available/* ${DATA_NGINX}
 
