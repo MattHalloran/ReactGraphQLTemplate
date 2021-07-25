@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-dev": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
-    "start-prod": "node --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
+    "start-development": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
+    "start-production": "node --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
     "migrate-create": "knex migrate:make --knexfile ./src/db/knexfile.js --esm",
     "seed-make": "knex seed:make --knexfile ./src/db/knexfile.js --esm",
     "seed-run": "knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm",
@@ -29,6 +29,7 @@
     "bcrypt": "^5.0.1",
     "bull": "^3.22.4",
     "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
     "graphql-list-fields": "^2.0.2",

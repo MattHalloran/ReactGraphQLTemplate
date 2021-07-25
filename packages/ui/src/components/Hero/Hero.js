@@ -6,7 +6,7 @@ import { LINKS } from 'utils';
 import { Slider } from './Slider.js'
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const useStyles = makeStyles(() => ({
     hero: {

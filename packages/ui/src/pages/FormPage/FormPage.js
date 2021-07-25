@@ -1,3 +1,4 @@
+import React from 'react';
 import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import PropTypes from 'prop-types';

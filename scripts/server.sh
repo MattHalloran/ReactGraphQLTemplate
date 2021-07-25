@@ -13,8 +13,5 @@ knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
 # Clean any unused files
 npm run clean
 
-if [ "${NODE_ENV}" == "development" ] ; then
-    (cd ${PROJECT_DIR}/packages/server && npm run start-dev)
-else
-    (cd ${PROJECT_DIR}/packages/server && npm run start-prod)
-fi
+cd ${PROJECT_DIR}/packages/server
+npm run start-${NODE_ENV}

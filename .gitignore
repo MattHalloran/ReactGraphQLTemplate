@@ -150,6 +150,7 @@ build/
 
 #Postgres
 *data/postgres/
+*data/certbot/
 
 #Assets
 *assets/images/

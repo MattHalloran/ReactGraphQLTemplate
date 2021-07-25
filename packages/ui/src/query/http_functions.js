@@ -1,4 +1,4 @@
-import { API_ADDRESS } from '@local/shared';
+import { SERVER_QUERY_URL } from '@local/shared';
 // Headers used by fetch calls
 export const HEADERS = {
     ApplicatonJsonAccept: {
@@ -19,7 +19,7 @@ export const HEADERS = {
 // httpParams - object containing fetch options
 export async function fetchWrapper(route, httpParams) {
     try {
-        let response = await fetch(`${API_ADDRESS}/${route}`, httpParams);
+        let response = await fetch(`${SERVER_QUERY_URL}/${route}`, httpParams);
         let json = await response.json();
         return json;
     } catch (err) {

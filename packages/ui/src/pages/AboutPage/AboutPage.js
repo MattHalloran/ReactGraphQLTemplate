@@ -1,3 +1,4 @@
+import React from 'react';
 import { InformationalBreadcrumbs } from 'components';
 
 function AboutPage({

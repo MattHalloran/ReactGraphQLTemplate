@@ -1,8 +1,9 @@
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
-import { API_ADDRESS } from '@local/shared';
+import { SERVER_QUERY_URL } from '@local/shared';
 import {
     ApolloClient,
     InMemoryCache,
@@ -14,7 +15,7 @@ import { createUploadLink } from 'apollo-upload-client';
 const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: createUploadLink({
-        uri: API_ADDRESS,
+        uri: SERVER_QUERY_URL,
         credentials: 'include'
     }),
     onError: ({ networkError, graphQLErrors }) => {

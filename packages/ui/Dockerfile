@@ -33,3 +33,5 @@ RUN yarn install
 COPY --chown=node:node ${shared}/index.js ${shared}/src ${shared}/
 COPY --chown=node:node ${ui}/src ${ui}/public ${ui}/tsconfig.json ${ui}/
 COPY --chown=node:node scripts/ui.sh scripts/wait-for.sh ${scripts}/
+
+USER root

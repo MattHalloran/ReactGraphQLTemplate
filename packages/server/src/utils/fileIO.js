@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { IMAGE_SIZE, SERVER_ADDRESS } from '@local/shared';
+import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';
@@ -102,14 +102,14 @@ export async function findImageUrl(filename, size) {
     const { name, ext, folder } = clean(filename, 'images');
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
-        if(fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_ADDRESS}/${folder}/${filename}`;
+        if(fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
     }
     // Search largest to smallest size
     const sizes = resizeOptions(size || IMAGE_SIZE.L, size || IMAGE_SIZE.L);
     const keys = Object.keys(sizes).reverse();
     for (let i = 0; i < keys.length; i++) {
         let curr = `${name}-${keys[i]}${ext}`;
-        if(fs.existsSync(`${ASSET_DIR}/${folder}/${curr}`)) return `${SERVER_ADDRESS}/${folder}/${curr}`;
+        if(fs.existsSync(`${ASSET_DIR}/${folder}/${curr}`)) return `${SERVER_URL}/${folder}/${curr}`;
     }
     return null;
 }

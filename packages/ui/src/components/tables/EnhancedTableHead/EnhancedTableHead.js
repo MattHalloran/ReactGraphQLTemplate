@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import { TableCell, TableHead, TableRow, Checkbox } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';

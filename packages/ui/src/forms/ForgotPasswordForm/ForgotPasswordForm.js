@@ -1,3 +1,4 @@
+import React from 'react';
 import { requestPasswordChangeMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { requestPasswordChangeSchema } from '@local/shared';
