@@ -2,6 +2,14 @@
 # New Life Nursery Website
 This website is designed both as a functional website for New Life Nursery Inc., and as a reference for creating powerful, maintainable websites.
 
+## Website Features
+- Modern design, with automatic dark mode
+- Mobile-friendly
+- Credentials and restricted pages
+- Ability to send emails/texts
+- Ability to upload images/files
+- Search Engine Optimization (SEO) techniques
+
 ## Development stack
 | Dependency  | Purpose  |  Version  |
 |---|---|---|
@@ -33,6 +41,7 @@ By default, the docker containers rely on an external network. This network is u
 - Delete all containers and volumes: `docker system prune --all --volumes`
 - Full deployment test (except for Nginx, as that's handled by a different container): `docker-compose down && docker-compose up --build --force-recreate`
 - Rebuild with fresh database: `docker-compose down && rm -rf "${PROJECT_DIR}/data/postgres" && docker-compose up --build --force-recreate`
+- Check logs for a docker container: `docker logs <container-name>`
 
 ## Linting
 [Linting](https://en.wikipedia.org/wiki/Lint_(software)) is handled by [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react). Follow their README for more information

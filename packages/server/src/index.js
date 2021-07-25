@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import * as auth from './auth';
+import cors from "cors";
 import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
 import { typeDefs, resolvers } from './db/models';
@@ -18,16 +19,13 @@ app.use(cookieParser(process.env.JWT_SECRET));
 // For authentication
 app.use(auth.authenticate);
 
-// For CORS
-const corsOptions = {
+// Cross-Origin access. Accepts requests from localhost and the website
+let origins = [/^http:\/\/localhost(?::[0-9]+)?$/, `http://${process.env.REACT_APP_SITE_NAME}`]
+if (process.env.REACT_APP_SITE_NAME) origins.push(process.env.REACT_APP_SITE_NAME);
+app.use(cors({
     credentials: true,
-    origin: process.env.NODE_ENV === 'development' ? `http://localhost:${process.env.UI_PORT}` :  `http://${process.env.REACT_APP_SITE_NAME}`
-}
-// app.use((_, res, next) => {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// })
+    origin: origins
+}))
 
 // Set static folders
 app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
@@ -48,8 +46,8 @@ const apollo_options = new ApolloServer({
  });
 apollo_options.applyMiddleware({ 
     app, 
-    path: API_VERSION, 
-    cors: corsOptions 
+    path: `/${API_VERSION}`, 
+    cors: false
 });
 
 // Start Express server
