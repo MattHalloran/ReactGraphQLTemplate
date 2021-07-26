@@ -118,17 +118,26 @@ export async function findImageUrl(filename, size) {
 // Returns an object containing a success boolean and the file name
 // Arguments:
 // stream - data stream of file
-// filename - name of file, including extension (ex: 'boop.png')
-// folder - folder in server directory (ex: 'images')
-export async function saveFile(stream, filename) {
+// filename - name of file, including extension and folder (ex: 'public/boop.png')
+// overwrite - boolean indicating if existing files can be overwritten
+// acceptedTypes - a string or array of accepted file types, in mimetype form (ex: 'application/vnd.ms-excel')
+export async function saveFile(stream, filename, mimetype, overwrite, acceptedTypes) {
     try {
-        const { name, ext, folder } = await findFileName(filename);
+        const { name, ext, folder } = await (overwrite ? findFileName(filename) : clean(filename, 'public'));
         if (name === null) throw Error('Could not create a valid file name');
+        if (acceptedTypes) {
+            if (Array.isArray(acceptedTypes) && !acceptedTypes.some(type => mimetype.startsWith(type))) {
+                throw Error('File type not accepted');
+            }
+            if (typeof acceptedTypes === "string" && !mimetype.startsWith(type)) {
+                throw Error('File type not accepted');
+            }
+        }
         // Download the file
         await stream.pipe(fs.createWriteStream(`${ASSET_DIR}/${folder}/${name}${ext}`));
         return { 
             success: true, 
-            filename: name
+            filename: `${folder}/${name}${ext}`
         }
     } catch (error) {
         console.error(error);
@@ -235,4 +244,33 @@ export async function deleteImage(file) {
         if (!await deleteFile(files[i])) success = false;
     }
     return success;
+}
+
+// Reads a list of files
+export async function readFiles(files) {
+    let data = [];
+    for (const file of files) {
+        const { name, ext, folder } = clean(file, 'public');
+        const path = `${process.env.PROJECT_DIR}/assets/${folder}/${name}${ext}`;
+        if (fs.existsSync(path)) {
+            data.push(fs.readFileSync(path, 'utf8'));
+        } else {
+            console.log('DOES NOT EXIST')
+            console.log(path)
+            data.push(null);
+        }
+    }
+    return data;
+}
+
+// Writes a list of files
+export async function saveFiles(files, overwrite = false, acceptedTypes) {
+    let data = [];
+    for (const file of files) {
+        const { createReadStream, filename, mimetype } = await file;
+        const stream = createReadStream();
+        const { success, filename: finalFilename } = await saveFile(stream, filename, mimetype, overwrite, acceptedTypes);
+        data.push(success ? finalFilename : null);
+    }
+    return data;
 }

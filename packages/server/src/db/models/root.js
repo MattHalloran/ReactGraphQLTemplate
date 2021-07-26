@@ -3,8 +3,7 @@ import { GraphQLScalarType } from "graphql";
 import { Kind } from "graphql/language";
 import moment from 'moment';
 import { GraphQLUpload } from 'graphql-upload';
-import fs from 'fs';
-import { clean } from '../../utils';
+import { readFiles, saveFiles } from '../../utils';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -22,6 +21,7 @@ export const typeDef = gql`
     }
     type Mutation {
         _empty: String
+        writeAssets(files: [String!]!, overwrite: Boolean): Boolean
     }
 `
 
@@ -45,19 +45,12 @@ export const resolvers = {
     }),
     Query: {
         readAssets: async (_, args) => {
-            let data = [];
-            for (const file of args.files) {
-                const { name, ext, folder } = clean(file, 'public');
-                const path = `${process.env.PROJECT_DIR}/assets/${folder}/${name}${ext}`;
-                if (fs.existsSync(path)) {
-                    data.push(fs.readFileSync(path, 'utf8'));
-                } else {
-                    console.log('DOES NOT EXIST')
-                    console.log(path)
-                    data.push(null);
-                }
-            }
-            return data;
+            return await readFiles(args.files);
         },
     },
+    Mutation: {
+        writeAssets: async (_, args) => {
+            return await saveFiles(args.files);
+        },
+    }
 }

@@ -1,4 +1,4 @@
-import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, ORDER_STATUS, TASK_STATUS } from '@local/shared';
+import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, IMAGE_USE, ORDER_STATUS, TASK_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 
 export async function up (knex) {
@@ -103,7 +103,7 @@ export async function up (knex) {
         table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
         table.string('description', 1024);
-        table.enu('usedFor', Object.values(IMAGE_USES));
+        table.enu('usedFor', Object.values(IMAGE_USE));
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });

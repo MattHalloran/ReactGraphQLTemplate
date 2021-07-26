@@ -91,7 +91,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function PlantDialog({
     plant,
-    onCart,
+    onAddToCart,
     open = true,
     onClose,
 }) {
@@ -123,6 +123,7 @@ function PlantDialog({
         setSelected(order_options.length > 0 ? order_options[0].value : null);
     }, [plant, order_options])
 
+    let display;
     const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
     if (display_data) {
         display = <img src={`${display_data.folder}/${display_data.fileName}-xl${display_data.extension}`} className={classes.displayImage} alt={display_data.alt} />
@@ -178,7 +179,7 @@ function PlantDialog({
                     fullWidth
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onCart(plant.latin_name ?? plant.common_name ?? 'plant', selected_sku, 'ADD', quantity)}
+                    onClick={() => onAddToCart(plant.latin_name ?? plant.common_name ?? 'plant', selected_sku, quantity)}
                 >Order</Button>
             </Grid>
         </Grid>
@@ -242,7 +243,7 @@ function PlantDialog({
 
 PlantDialog.propTypes = {
     plant: PropTypes.object,
-    onCart: PropTypes.func.isRequired,
+    onAddToCart: PropTypes.func.isRequired,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,
 }

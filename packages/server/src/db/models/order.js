@@ -29,6 +29,7 @@ export const typeDef = gql`
         specialInstructions: String
         desiredDeliveryDate: Date
         isDelivery: Boolean
+        items: [OrderItemInput!]
     }
 
     type Order {

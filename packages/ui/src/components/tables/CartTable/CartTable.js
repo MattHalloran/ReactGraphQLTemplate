@@ -101,7 +101,6 @@ function CartTable({
     const cart_item_to_row = useCallback((data, key) => {
         let quantity = data.quantity;
         let price = parseInt(data.sku.price);
-        let price;
         let total;
         if (isNaN(price)) {
             price = 'TBD';

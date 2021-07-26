@@ -5,18 +5,18 @@
 
 import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
-import { useMutate } from "restful-react";
-import { Button } from '@material-ui/core';
+import { uploadAvailabilityMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
     EditPlantDialog,
+    Dropzone,
     PlantCard,
     Selector,
     TabPanel
 } from 'components';
 import { Tabs, Tab, AppBar } from '@material-ui/core';
-// import { DropzoneArea } from 'material-ui-dropzone';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -37,8 +37,6 @@ const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 function AdminInventoryPage() {
     const classes = useStyles();
     const [currTab, setCurrTab] = useState(0);
-    // Holds the selected availability file, if uploading one
-    const [selected, setSelected] = useState(null);
     // Holds the list of plants with existing SKUs
     const [existing, setExisting] = useState([]);
     // Holds list of all plants
@@ -48,20 +46,27 @@ function AdminInventoryPage() {
     const [trait_options, setTraitOptions] = useState(null);
     const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
     const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+    const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
-    const { mutate: uploadAvailability } = useMutate({
-        verb: 'PUT',
-        path: 'availability',
-        resolve: (response) => {
-            if (response.ok) {
-                alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
+    const availabilityUpload = (acceptedFiles) => {
+        uploadAvailability({
+            variables: {
+                files: acceptedFiles[0]
             }
-            else {
-                console.error(response.message);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }
-        }
-    });
+        })
+            .then((response) => {
+                PubSub.publish(PUBS.AlertDialog, {
+                    message: 'Availability uploaded. This process can take up to 30 seconds. Please manually refresh the page to see results',
+                    firstButtonText: 'OK',
+                });
+                PubSub.publish(PUBS.Loading, false);
+            })
+            .catch((response) => {
+                console.error(response);
+                PubSub.publish(PUBS.Loading, false);
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+            })
+    }
 
     useEffect(() => {
         getInventory(existing_sort_by, 0, true)
@@ -129,30 +134,6 @@ function AdminInventoryPage() {
     //         });
     // }
 
-    const fileSelectedHandler = (files) => {
-        if (files.length > 0) {
-            processFile(files[0]);
-        } else {
-            setSelected(null);
-        }
-    }
-
-    const processFile = (file) => {
-        let reader = new FileReader();
-        reader.onloadend = () => {
-            let fileData = reader.result;
-            setSelected(fileData);
-        }
-        reader.readAsDataURL(file);
-    }
-
-    const sendAvailability = () => {
-        if (!selected) return;
-        let form = new FormData();
-        form.append('data', selected)
-        uploadAvailability(form);
-    }
-
     const handleSort = (value) => {
         if (currTab === 0) {
             setExistingSortBy(value);
@@ -180,14 +161,15 @@ function AdminInventoryPage() {
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
-            {/* <DropzoneArea
-                acceptedFiles={['.xls']}
-                dropzoneText={"Drag and drop availability file here or click"}
-                onChange={fileSelectedHandler}
-                showAlerts={false}
-                filesLimit={1}
-            /> */}
-            <Button onClick={sendAvailability}>Upload Availability</Button>
+            <Dropzone
+                dropzoneText={'Drag \'n\' drop upload availability file here or click'}
+                maxFiles={1}
+                acceptedFileTypes={['application/vnd.ms-excel']}
+                onUpload={availabilityUpload}
+                uploadText='Upload Availability'
+                cancelText='Cancel Upload'
+                disabled={loading}
+            />
             <h2>Sort</h2>
             <Selector
                 fullWidth

@@ -61,7 +61,8 @@ function Dropzone({
     showThumbs = true,
     maxFiles = 100,
     uploadText = 'Upload file(s)',
-    cancelText = 'Cancel upload'
+    cancelText = 'Cancel upload',
+    disabled = false
 }) {
     const classes = useStyles();
     const [files, setFiles] = useState([]);
@@ -118,10 +119,10 @@ function Dropzone({
             </aside>}
             <Grid className={classes.gridPad} container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} fullWidth onClick={upload} disabled={files.length === 0}>{uploadText}</Button>
+                    <Button className={classes.itemPad} disabled={disabled} fullWidth onClick={upload} disabled={files.length === 0}>{uploadText}</Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>
+                    <Button className={classes.itemPad} disabled={disabled} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>
                 </Grid>
             </Grid>
         </section>
@@ -135,7 +136,8 @@ Dropzone.propTypes = {
     showThumbs: PropTypes.bool,
     maxFiles: PropTypes.number,
     uploadText: PropTypes.string,
-    cancelText: PropTypes.string
+    cancelText: PropTypes.string,
+    disabled: PropTypes.bool,
 }
 
-export default Dropzone;
+export { Dropzone };

@@ -1,6 +1,8 @@
 import { gql } from 'graphql-tag';
+import { imageFields } from 'graphql/fragment/imageFields';
 
 export const imagesByLabelQuery = gql`
+    ${imageFields}
     query ImagesByLabel(
         $label: String!
         $size: ImageSize
@@ -9,9 +11,7 @@ export const imagesByLabelQuery = gql`
         label: $label
         size: $size
     ) {
-        src
-        alt
-        description
+        ...imageFields
     }
   }
 `

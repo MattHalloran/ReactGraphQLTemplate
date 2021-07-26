@@ -1,28 +1,13 @@
 import { gql } from 'graphql-tag';
+import { userContactFields, userSessionFields } from 'graphql/fragment';
 
 export const profileQuery = gql`
+    ${userContactFields}
+    ${userSessionFields}
     query {
         profile {
-            firstName
-            lastName
-            pronouns
-            emails {
-                emailAddress
-                receivesDeliveryUpdates
-            }
-            phones {
-                number
-                countryCode
-                extension
-                receivesDeliveryUpdates
-            }
-            business {
-                name
-            }
-            theme
-            accountApproved
-            emailVerified
-            status
+            ...userContactFields
+            ...userSessionFields
         }
     }
 `

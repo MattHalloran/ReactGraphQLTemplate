@@ -1,9 +1,9 @@
 import update from 'immutability-helper';
 import { makeStyles } from '@material-ui/styles';
 import PropTypes from 'prop-types';
-import { ImageCard } from 'components/cards/ImageCard/ImageCard';
+import { ImageCard } from 'components';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EditImageDialog } from 'components/dialogs/EditImageDialog/EditImageDialog';
+import { EditImageDialog } from 'components';
 import { Button, Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({

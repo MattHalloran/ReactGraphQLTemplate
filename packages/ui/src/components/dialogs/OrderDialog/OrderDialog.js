@@ -18,7 +18,8 @@ import {
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { CartTable as Cart } from 'components';
-import { useMutate } from "restful-react";
+import { updateOrderMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { setOrderStatus } from 'query/http_promises';
 import { findWithAttr, ORDER_STATES, PUBS, PubSub } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
@@ -55,32 +56,26 @@ function OrderDialog({
     const classes = useStyles();
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);
-
-    const { mutate: updateCart } = useMutate({
-        verb: 'PUT',
-        path: 'cart',
-        resolve: (response) => {
-            if (response.ok) {
-                setChangedOrder(order);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            }
-            else {
-                console.error(response.message, order);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }
-        }
-    });
-
-    const orderUpdate = (data) => {
-        setChangedOrder(data)
-    }
+    const [updateOrder, {loading}] = useMutation(updateOrderMutation);
 
     useEffect(() => {
         setChangedOrder(order);
     }, [order])
 
-    const updateOrder = () => {
-        updateCart(order);
+    const orderUpdate = () => {
+        PubSub.publish(PUBS.Loading, true);
+        updateOrder({ variables: { ...order } }).then((response) => {
+            const data = response.data.updateOrder;
+            PubSub.publish(PUBS.Loading, false);
+            if (data !== null) {
+                setChangedOrder(data);
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
+            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
+        }).catch((response) => {
+            console.error(response)
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+        })
     }
 
     const approveOrder = useCallback(() => {
@@ -117,8 +112,8 @@ function OrderDialog({
                     <Button
                         fullWidth
                         startIcon={<UpdateIcon />}
-                        onClick={updateOrder}
-                        disabled={_.isEqual(order, changedOrder)}
+                        onClick={orderUpdate}
+                        disabled={loading || _.isEqual(order, changedOrder)}
                     >Update</Button>
                 </Grid>
                 <Grid item xs={12} sm={sm_num} md={4}>
@@ -126,7 +121,7 @@ function OrderDialog({
                         fullWidth
                         startIcon={<ThumbUpIcon />}
                         onClick={approveOrder}
-                        disabled={!_.isEqual(order, changedOrder)}
+                        disabled={loading || !_.isEqual(order, changedOrder)}
                     >Approve</Button>
                 </Grid>
                 <Grid item xs={12} sm={sm_num} md={4}>
@@ -134,7 +129,7 @@ function OrderDialog({
                         fullWidth
                         startIcon={<ThumbDownIcon />}
                         onClick={denyOrder}
-                        disabled={!_.isEqual(order, changedOrder)}
+                        disabled={loading || !_.isEqual(order, changedOrder)}
                     >Deny</Button>
                 </Grid>
             </Grid>
@@ -156,7 +151,7 @@ function OrderDialog({
             </AppBar>
             <div className={classes.container}>
                 <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                <Cart cart={order} onUpdate={orderUpdate} />
+                <Cart cart={order} onUpdate={(data) => setChangedOrder(data)} />
                 <br/>
                 {optionButtons(false)}
             </div>

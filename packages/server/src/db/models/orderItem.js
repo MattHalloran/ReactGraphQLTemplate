@@ -11,6 +11,12 @@ import {
 } from '../query';
 
 export const typeDef = gql`
+
+    input OrderItemInput {
+        id: ID!
+        quantity: Int!
+    }
+
     type OrderItem {
         id: ID!
         quantity: Int!

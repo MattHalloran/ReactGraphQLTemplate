@@ -37,6 +37,7 @@ By default, the docker containers rely on an external network. This network is u
 ## Common commands
 - Start: `docker-compose up -d`
 - Stop: `docker-compose down`
+- Force stop all containers: `docker kill $(docker ps -q)`
 - Delete all containers: `docker system prune --all`
 - Delete all containers and volumes: `docker system prune --all --volumes`
 - Full deployment test (except for Nginx, as that's handled by a different container): `docker-compose down && docker-compose up --build --force-recreate`

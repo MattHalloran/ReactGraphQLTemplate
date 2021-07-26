@@ -1,8 +1,8 @@
 import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useMutate } from "restful-react";
-import { useQuery, useMutation } from '@apollo/client';
+import { updateOrderMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { getInventory, getInventoryPage } from "query/http_promises";
 import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
@@ -21,6 +21,7 @@ const useStyles = makeStyles(() => ({
 
 function ShoppingList({
     session,
+    onSessionUpdate,
     cart,
     page_size,
     sort = SORT_OPTIONS[0].value,
@@ -42,11 +43,7 @@ function ShoppingList({
     // Find the current SKU group index, by any of the group's SKUs
     let curr_index = plants?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
     const loading = useRef(false);
-
-    const { mutate: updateCart } = useMutate({
-        verb: 'PUT',
-        path: 'cart',
-    });
+    const [updateOrder] = useMutation(updateOrderMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -169,7 +166,7 @@ function ShoppingList({
         history.push(LINKS.Cart);
     }
 
-    const setInCart = (name, sku, operation, quantity) => {
+    const addToCart = (name, sku, quantity) => {
         if (!session?.user_id || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
@@ -178,56 +175,45 @@ function ShoppingList({
         }
         let cart_copy = JSON.parse(JSON.stringify(cart));
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
-        updateCart(session?.user_id, cart_copy)
-            .then(() => {
-                if (operation === 'ADD') {
-                    PubSub.publish(PUBS.Snack, { 
-                        message: `${quantity} ${name}(s) added to cart.`, 
-                        buttonText: 'View Cart',
-                        buttonClicked: toCart,
-                    });
-                }
-                else if (operation === 'SET') {
-                    PubSub.publish(PUBS.Snack, { 
-                        message: `${name} quantity updated to ${quantity}.`, 
-                        buttonText: 'View Cart',
-                        buttonClicked: toCart,
-                    });
-                }
-                else if (operation === 'DELETE') {
-                    PubSub.publish(PUBS.Snack, { 
-                        message: `${name} 'removed from' cart.`, 
-                        buttonText: 'View Cart',
-                        buttonClicked: toCart,
-                    });
-                }
-            })
-            .catch(err => {
-                console.error(err, cart_copy);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to add to cart.', severity: 'error'});
-            })
+
+        PubSub.publish(PUBS.Loading, true);
+        updateOrder({ variables: { id: session?.user_id, ...cart_copy } }).then((response) => {
+            const data = response.data.updateOrder;
+            PubSub.publish(PUBS.Loading, false);
+            if (data !== null) {
+                onSessionUpdate({...session, cart: data });
+                PubSub.publish(PUBS.Snack, { 
+                    message: `${quantity} ${name}(s) added to cart.`, 
+                    buttonText: 'View Cart',
+                    buttonClicked: toCart,
+                });
+            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
+        }).catch((response) => {
+            console.error(response)
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+        })
     }
 
     return (
         <div className={classes.root} id={track_scrolling_id}>
             {(curr_index >= 0) ? <PlantDialog
                 plant={curr_index >= 0 ? plants[curr_index] : null}
-                onCart={setInCart}
+                onAddToCart={addToCart}
                 open={curr_index >= 0}
                 onClose={() => history.goBack()} /> : null}
             
             {plants?.map((item, index) =>
                 <PlantCard key={index}
-                    cart={cart}
                     onClick={() => expandSku(item.skus[0].sku)}
-                    plant={item}
-                    onSetInCart={setInCart} />)}
+                    plant={item} />)}
         </div>
     );
 }
 
 ShoppingList.propTypes = {
     session: PropTypes.object,
+    onSessionUpdate: PropTypes.func.isRequired,
     cart: PropTypes.object,
     page_size: PropTypes.number,
     sort: PropTypes.string,

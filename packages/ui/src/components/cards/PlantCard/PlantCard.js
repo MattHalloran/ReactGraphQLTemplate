@@ -13,6 +13,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { displayPrice } from 'utils';
 import { NoImageIcon } from 'assets/img';
+import { IMAGE_USE } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -68,6 +69,7 @@ function PlantCard({
             color="secondary" />
     ));
 
+    let display;
     const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
     if (display_data) {
         display = <CardMedia component="img" src={`${display_data.folder}/${display_data.fileName}-l${display_data.extension}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />

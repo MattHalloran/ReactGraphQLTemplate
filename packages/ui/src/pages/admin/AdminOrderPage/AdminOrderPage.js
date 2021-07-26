@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useGet } from "restful-react";
+import { ordersQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
 import { ORDER_STATES, PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import {
@@ -25,20 +26,19 @@ function AdminOrderPage() {
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
-
-    const { data: orders, refetch: getOrders } = useGet({
-        path: "orders",
-        lazy: true,
-        queryParams: { filter: filter },
-        resolve: (response) => {
-            if (!response.ok)
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
+    const [orders, setOrders] = useState(null);
+    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter } });
+    if (error) { 
+        console.error(error);
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
+    }
+    useEffect(() => {
+        setOrders(data?.orders);
+    }, [data])
 
     useEffect(() => {
-        getOrders();
-    }, [filter, getOrders])
+        refetch();
+    }, [filter, refetch])
 
     return (
         <div id="page">

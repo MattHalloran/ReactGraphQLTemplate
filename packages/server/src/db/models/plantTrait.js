@@ -3,6 +3,12 @@ import { db } from '../db';
 import { TABLES } from '../tables';
 
 export const typeDef = gql`
+    type PlantTrait {
+        id: ID!
+        name: String!
+        value: String!
+    }
+
     extend type Query {
         traitNames: [String!]!
         traitValues(name: String!): [String!]!

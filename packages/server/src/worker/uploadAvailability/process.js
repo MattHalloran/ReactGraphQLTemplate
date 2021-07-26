@@ -1,9 +1,11 @@
-import { Plant, Sku } from "../../db/models";
-import { SKU_STATUS } from "../../src/db/types";
+import { db } from "../../db/db";
+import { TABLES } from "../../db/tables";
+import { SKU_STATUS } from "@local/shared";
 
 // Reads an .xls availability file into the database.
 // SKUs of plants not in the availability file will be hidden
 export async function uploadAvailabilityProcess() {
+    console.log('IN UPLOAD AVAILABILITY PROCESS')
     const rows = job.data.rows;
     const header = rows[0];
     const content = rows.slice(1, rows.length);
@@ -18,36 +20,40 @@ export async function uploadAvailabilityProcess() {
         quantity: header.indexOf('Quantity')
     }
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
-    await Sku.query().patch({ status: SKU_STATUS.Inactive });
-    content.forEach(row => {
-        // Insert or update plant based on row data
+    await db(TABLES.Sku).update({ status: SKU_STATUS.Inactive });
+    for (row in content) {
+        // Insert or update plant data from row
         const plant_data = {
             latinName: row[index.latin],
-            commonName: row[index.common],
+            traits: [{
+                name: "common name",
+                value: row[index.common]
+            }]
         }
-        const matching_plants = await Plant.query().where('latinName', row[index.latin]).select('id');
-        const plant = null;
-        if (matching_plants.length > 0) {
-            plant = matching_plants[0].patchAndFetch(plant_data);
+        const matching_plant_ids = await db(TABLES.Plant).where('latinName', row[index.latin]).select('id');
+        let plant_id;
+        if (matching_plant_ids.length > 0) {
+            plant_id = matching_plant_ids[0];
+            await db(TABLES.PlantTrait).where({ plantId, plant_id, name: plant_data.traits[0].name }).update({ ...plant_data.traits[0].name });
         } else {
-            plant = Plant.query().insertAndFetch(plant_data);
+            plant_id = await db(TABLES.Plant).insert({ latinName: plant_data.latinName }).returning('id');
+            await db(TABLES.PlantTrait).insert({ plantId: plant_id, ...plant_data.traits[0] });
         }
-        // Insert or update SKU based on row data
+        // Insert or update SKU data from row
         const sku_data = {
             sku: row[index.sku] ?? '',
             size: row[index.size] ? parseInt(row[index.size].replace(/\D/g, '')) : 'N/A', //'#3' -> 3
             price: row[index.price] ? parseFloat(row[index.price].replace(/[^\d.-]/g, '')) : 'N/A', //'$23.32' -> 23.32
             note: row[index.note],
             quantity: row[index.quantity] ?? 'N/A',
-            plantId: plant.id,
+            plantId: plant_id,
             status: SKU_STATUS.Active
         }
-        const matching_skus = await Sku.query().where('sku', row[index.sku]).select('id');
-        const sku = null;
-        if (matching_skus.length > 0) {
-            sku = matching_skus[0].patchAndFetch(sku_data);
+        const matching_sku_ids = await db(TABLES.Sku).where('sku', row[index.sku]).select('id');
+        if (matching_sku_ids.length > 0) {
+            await db(TABLES.Sku).where({ id: matching_sku_ids[0].id }).update(sku_data);
         } else {
-            sku = Sku.query().insertAndFetch(sku_data);
+            await db(TABLES.Sku).insert(sku_data);
         }
-    })
+    }
 }

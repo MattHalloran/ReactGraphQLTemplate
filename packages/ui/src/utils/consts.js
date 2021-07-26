@@ -1,41 +1,41 @@
-import { COOKIE } from '@local/shared';
+import { COOKIE, ORDER_STATUS } from '@local/shared';
 
 export const ORDER_STATES = [
     {
         label: 'Canceled by Admin',
-        value: -4,
+        value: ORDER_STATUS.CanceledByAdmin,
     },
     {
         label: 'Canceled by User',
-        value: -3,
+        value: ORDER_STATUS.CanceledByUser,
     },
     {
         label: 'Pending Cancel',
-        value: -2,
+        value: ORDER_STATUS.PendingCancel,
     },
     {
         label: 'Rejected',
-        value: -1,
+        value: ORDER_STATUS.Rejected,
     },
     {
         label: 'Pending',
-        value: 1,
+        value: ORDER_STATUS.Pending,
     },
     {
         label: 'Approved',
-        value: 2,
+        value: ORDER_STATUS.Approved,
     },
     {
         label: 'Scheduled',
-        value: 3,
+        value: ORDER_STATUS.Scheduled,
     },
     {
         label: 'In Transit',
-        value: 4,
+        value: ORDER_STATUS.InTransit,
     },
     {
         label: 'Delivered',
-        value: 5,
+        value: ORDER_STATUS.Delivered,
     },
 ]
 

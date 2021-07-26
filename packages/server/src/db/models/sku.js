@@ -8,6 +8,8 @@ import {
     updateHelper
 } from '../query';
 import { SkuModel as Model } from '../relationships';
+import { saveFile } from '../../utils';
+import { uploadAvailability } from '../../worker/uploadAvailability/queue';
 
 export const typeDef = gql`
     enum SkuStatus {
@@ -46,6 +48,7 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
+        uploadAvailability(file: Upload!): Boolean
         addSku(input: SkuInput!): Sku!
         updateSku(id: ID!, input: SkuInput!): Sku!
         deleteSkus(ids: [ID!]!): Boolean
@@ -60,6 +63,14 @@ export const resolvers = {
         }
     },
     Mutation: {
+        uploadAvailability: async (_, args) => {
+            const { createReadStream, mimetype } = await args.file;
+            const stream = createReadStream();
+            const filename = `private/availability-${Date.now()}.xls`;
+            const { success, filename: finalFileName } = await saveFile(stream, filename, mimetype, false, ['application/vnd.ms-excel']);
+            uploadAvailability(finalFileName);
+            return success;
+        },
         addSku: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);

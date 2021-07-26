@@ -4,12 +4,14 @@ import {
 } from '@material-ui/core';
 import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
-import { AdminBreadcrumbs } from 'components';
 import { imagesByLabelQuery } from 'graphql/query';
 import { addImagesMutation, updateImagesMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import Dropzone from 'components/Dropzone/Dropzone';
-import { ImageList } from 'components/lists/ImageList/ImageList';
+import { 
+    AdminBreadcrumbs, 
+    Dropzone, 
+    ImageList 
+} from 'components';
 
 const useStyles = makeStyles((theme) => ({
     header: {

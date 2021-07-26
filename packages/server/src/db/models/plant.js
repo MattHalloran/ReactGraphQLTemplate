@@ -39,13 +39,8 @@ export const typeDef = gql`
     type Plant {
         id: ID!
         latinName: String!
-        # Text data stored as JSON. 
-        # Unique fields are added to Trait table. 
-        # Field values are added to association table
-        # This allows new attributes to be added without updating the database, and the ability to easily filter
-        traitData: String!
-        # Associated image labels and IDs stored as JSON
-        imageData: String!
+        traits: [PlantTrait!]
+        images: [ImageData!]
         skus: [Sku!]
     }
 
