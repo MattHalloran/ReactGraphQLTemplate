@@ -2,7 +2,8 @@ import { THEME, ACCOUNT_STATUS, TRAIT_NAME, SKU_STATUS, IMAGE_EXTENSION, ORDER_S
 import { TABLES } from '../tables';
 
 export async function up (knex) {
-    console.log('IN MIGRATION FILEEEEEEEEEEEEE')
+    console.info('Starting migration...');
+    await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
     await knex.schema.createTable(TABLES.Task, (table) => {
         table.increments();
         table.integer('taskId').notNullable();
@@ -13,12 +14,12 @@ export async function up (knex) {
         table.integer('resultCode');
     });
     await knex.schema.createTable(TABLES.Business, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('name', 128).notNullable();
         table.boolean('subscribedToNewsletters').defaultTo(true).notNullable();
     });
     await knex.schema.createTable(TABLES.User, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('firstName', 128).notNullable();
         table.string('lastName', 128).notNullable();
         table.string('pronouns', 128).defaultTo('they/them').notNullable();
@@ -34,19 +35,19 @@ export async function up (knex) {
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE');
     });
     await knex.schema.createTable(TABLES.Discount, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.decimal('discount', 4, 4).defaultTo(0).notNullable();
         table.string('title', 128).defaultTo('').notNullable();
         table.string('comment', 1024);
         table.string('terms', 4096);
     });
     await knex.schema.createTable(TABLES.Feedback, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('text', 4096).notNullable();
         table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Role, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('title', 128).notNullable().unique();
         table.string('description', 2048);
     });
@@ -95,30 +96,29 @@ export async function up (knex) {
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
         //TODO UNIQUE (foler, file_name, extension)
-        table.increments();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('hash', 128).notNullable().unique();
         table.string('folder', 256).notNullable();
         table.string('fileName', 256).notNullable();
         table.enu('extension', Object.values(IMAGE_EXTENSION)).notNullable();
         table.string('alt', 256);
         table.string('description', 1024);
+        table.enu('usedFor', Object.values(IMAGE_USES));
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     });
-    await knex.schema.createTable(TABLES.Trait, (table) => {
-        //TODO UNIQUE (trait, value)
+    await knex.schema.createTable(TABLES.Plant, (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        table.string('latinName', 256).notNullable().unique();
+    });
+    await knex.schema.createTable(TABLES.PlantTrait, (table) => {
         table.increments();
+        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.enu('name', Object.values(TRAIT_NAME)).notNullable();
         table.string('value', 512).notNullable();
     });
-    await knex.schema.createTable(TABLES.Plant, (table) => {
-        table.uuid('id').primary();
-        table.string('latinName', 256).notNullable().unique();
-        table.string('textData', 32768).defaultTo('{}').notNullable();
-        table.string('imageData', 4096).defaultTo('{}').notNullable();
-    });
     await knex.schema.createTable(TABLES.Sku, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('sku', 32).notNullable();
         table.boolean('isDiscountable').defaultTo(false).notNullable();
         table.string('size', 32).defaultTo('N/A').notNullable();
@@ -130,7 +130,7 @@ export async function up (knex) {
         table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.Order, (table) => {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.enu('status', Object.values(ORDER_STATUS)).defaultTo(ORDER_STATUS.Draft).notNullable();
         table.string('specialInstructions', 2048);
         table.timestamp('desiredDeliveryDate');
@@ -155,10 +155,10 @@ export async function up (knex) {
         table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
-    await knex.schema.createTable(TABLES.PlantTraits, (table) => {
+    await knex.schema.createTable(TABLES.PlantImages, (table) => {
         table.increments();
         table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
-        table.integer('TraitId').references('id').inTable(TABLES.Trait).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.increments();
@@ -170,19 +170,20 @@ export async function up (knex) {
         table.uuid('userId').references('id').inTable(TABLES.User).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
+    console.info('Migration complete!');
 }
 
 export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.UserRoles);
     await knex.schema.dropTableIfExists(TABLES.SkuDiscounts);
-    await knex.schema.dropTableIfExists(TABLES.PlantTraits);
+    await knex.schema.dropTableIfExists(TABLES.PlantImages);
     await knex.schema.dropTableIfExists(TABLES.BusinessDiscounts);
     await knex.schema.dropTableIfExists(TABLES.ImageLabels);
     await knex.schema.dropTableIfExists(TABLES.OrderItem);
     await knex.schema.dropTableIfExists(TABLES.Order);
     await knex.schema.dropTableIfExists(TABLES.Sku);
+    await knex.schema.dropTableIfExists(TABLES.PlantTrait);
     await knex.schema.dropTableIfExists(TABLES.Plant);
-    await knex.schema.dropTableIfExists(TABLES.Trait);
     await knex.schema.dropTableIfExists(TABLES.Image);
     await knex.schema.dropTableIfExists(TABLES.Phone);
     await knex.schema.dropTableIfExists(TABLES.Email);
@@ -193,4 +194,5 @@ export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.User);
     await knex.schema.dropTableIfExists(TABLES.Business);
     await knex.schema.dropTableIfExists(TABLES.Task);
+    await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 }

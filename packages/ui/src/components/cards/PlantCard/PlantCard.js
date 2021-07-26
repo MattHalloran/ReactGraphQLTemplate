@@ -52,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
 function PlantCard({
     onClick,
     plant,
-    thumbnail
 }) {
     const classes = useStyles();
 
@@ -69,11 +68,11 @@ function PlantCard({
             color="secondary" />
     ));
 
-    let display_image;
-    if (thumbnail) {
-        display_image = <CardMedia component="img" src={`data:image/jpeg;base64,${thumbnail}`} className={classes.displayImage} title={plant.latin_name} />
+    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    if (display_data) {
+        display = <CardMedia component="img" src={`${display_data.folder}/${display_data.fileName}-l${display_data.extension}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
-        display_image = <NoImageIcon className={classes.displayImage} />
+        display = <NoImageIcon className={classes.displayImage} />
     }
 
     let subtitle;
@@ -88,7 +87,7 @@ function PlantCard({
     return (
         <Card className={classes.root} onClick={() => onClick(plant)}>
             <CardActionArea>
-                {display_image}
+                {display}
                 <CardContent className={classes.content}>
                     <Typography gutterBottom variant="h6" component="h2">
                         {plant.latin_name}
@@ -111,7 +110,6 @@ function PlantCard({
 PlantCard.propTypes = {
     onClick: PropTypes.func.isRequired,
     plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.object,
 }
 
 export { PlantCard };

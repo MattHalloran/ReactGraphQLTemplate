@@ -5,7 +5,7 @@
 
 import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
-import { useGet, useMutate } from "restful-react";
+import { useMutate } from "restful-react";
 import { Button } from '@material-ui/core';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
@@ -41,41 +41,13 @@ function AdminInventoryPage() {
     const [selected, setSelected] = useState(null);
     // Holds the list of plants with existing SKUs
     const [existing, setExisting] = useState([]);
-    const [existingThumbnails, setExistingThumbnails] = useState([]);
     // Holds list of all plants
     const [all, setAll] = useState([]);
-    const [allThumbnails, setAllThumbnails] = useState([]);
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
     const [trait_options, setTraitOptions] = useState(null);
     const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
     const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
-    let existing_image_keys = existing?.map(p => p.display_key);
-    let all_image_keys = all?.map(p => p.display_key);
-
-    useGet({
-        path: "images",
-        queryParams: { keys: existing_image_keys, size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setExistingThumbnails(response.images);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
-
-    useGet({
-        path: "images",
-        queryParams: { keys: all_image_keys, size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setAllThumbnails(response.images);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
 
     const { mutate: uploadAvailability } = useMutate({
         verb: 'PUT',
@@ -234,16 +206,14 @@ function AdminInventoryPage() {
                 <div className={classes.cardFlex}>
                     {existing?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onClick={() => setCurrPlant(plant)}
-                        thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
+                        onClick={() => setCurrPlant(plant)} />)}
                 </div>
             </TabPanel>
             <TabPanel value={currTab} index={1}>
                 <div className={classes.cardFlex}>
                     {all?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
-                        onClick={() => setCurrPlant(plant)}
-                        thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
+                        onClick={() => setCurrPlant(plant)} />)}
                 </div>
             </TabPanel>
         </div >

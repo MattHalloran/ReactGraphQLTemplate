@@ -1,7 +1,5 @@
 import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
-import * as uuid from 'uuid';
-const { v4: uuidv4 } = uuid;
 import bcrypt from 'bcrypt';
 import { HASHING_ROUNDS } from '../models/user';
 import { db } from '../db';
@@ -18,12 +16,12 @@ export async function seed() {
     const role_data = [];
     if (!curr_role_titles.includes('Customer')) {
         console.info('Creating customer role')
-        role_data.push({ id: uuidv4(), title: 'Customer', description: 'This role allows a user to order products' });
+        role_data.push({ title: 'Customer', description: 'This role allows a user to order products' });
     }
     if (!curr_role_titles.includes('Admin')) {
         console.info('Creating admin role')
         role_data.push({
-            id: uuidv4(), title: 'Admin', description: 'This role grants administrative access. This comes with the ability to \
+            title: 'Admin', description: 'This role grants administrative access. This comes with the ability to \
         approve new customers, change customer information, modify inventory and \
         contact hours, and more.' });
     }
@@ -40,7 +38,6 @@ export async function seed() {
         // Insert admin
         const user_admin_id = (await db(TABLES.User).insert([
             {
-                id: uuidv4(),
                 firstName: 'admin',
                 lastName: 'account',
                 password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS),

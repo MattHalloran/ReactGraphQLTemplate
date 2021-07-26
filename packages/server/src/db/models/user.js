@@ -14,8 +14,6 @@ import {
 import { UserModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 import { customerNotifyAdmin, sendVerificationLink } from '../../worker/email/queue';
-import * as uuid from 'uuid';
-const { v4: uuidv4 } = uuid;
 
 export const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -208,16 +206,13 @@ export const resolvers = {
             // Create business
             const business_id = (await db(TABLES.Business).insert([
                 {
-                    id: uuidv4(),
                     name: args.business,
                     subscribedToNewsletters: args.marketingEmails,
                 }
             ]).returning('id'))[0];
             // Create user
-            const user_id = uuidv4();
-            await db(TABLES.User).insert([
+            const user_id = (await db(TABLES.User).insert([
                 {
-                    id: user_id,
                     firstName: args.firstName,
                     lastName: args.lastName,
                     pronouns: args.pronouns,
@@ -226,7 +221,7 @@ export const resolvers = {
                     businessId: business_id,
                     sessionToken: generateToken(user_id, business_id),
                 }
-            ]);
+            ]).returning('id'))[0];
             // Create email
             await db(TABLES.Email).insert([
                 {

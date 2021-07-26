@@ -43,6 +43,7 @@ export const FIELDS = {
         'extension',
         'alt',
         'description',
+        'usedFor',
         'hash',
         'width',
         'height'
@@ -75,7 +76,7 @@ export const FIELDS = {
     [TABLES.Plant]: [
         'id',
         'latinName',
-        'textData',
+        'traitData',
         'imageData'
     ],
     [TABLES.Role]: [

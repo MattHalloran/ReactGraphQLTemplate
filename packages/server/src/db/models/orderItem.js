@@ -6,8 +6,7 @@ import { CustomError } from '../error';
 import { OrderItemModel as Model } from '../relationships';
 import { 
     insertHelper, 
-    deleteHelper, 
-    fullSelectQueryHelper, 
+    deleteHelper,
     updateHelper
 } from '../query';
 

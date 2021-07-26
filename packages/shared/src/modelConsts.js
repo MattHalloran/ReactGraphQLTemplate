@@ -27,15 +27,18 @@ export const IMAGE_SIZE = {
     ML: 512,
     L: 1024
 }
-export const IMAGE_USE = {
-    Hero: 'Hero',
-    Gallery: 'Gallery',
+export const PLANT_IMAGE_USE = {
     PlantFlower: 'Plant Flower',
     PlantLeaf: 'Plant Leaf',
     PlantFruit: 'Plant Fruit',
     PlantBark: 'Plant Bark',
     PlantHabit: 'Plant Habit',
-    Display: 'Display'
+    PlantDisplay: 'Display'
+}
+export const IMAGE_USE = {
+    Hero: 'Hero',
+    Gallery: 'Gallery',
+    ...PLANT_IMAGE_USE
 }
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
 // CANCELED_BY_USER     |   1) User canceled order before approval (i.e. no admin approval needed), OR

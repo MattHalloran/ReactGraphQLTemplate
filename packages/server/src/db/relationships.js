@@ -94,7 +94,9 @@ export const PhoneModel = createModel(TABLES.Phone, phoneSchema, [
 ]);
 
 export const PlantModel = createModel(TABLES.Plant, plantSchema, [
-    [REL_TYPE.One, 'sku', [TABLES.Sku], ['skuId']]
+    [REL_TYPE.One, 'sku', [TABLES.Sku], ['skuId']],
+    [REL_TYPE.Many, 'traits', [TABLES.PlantTrait], ['plantId']],
+    [REL_TYPE.ManyMany, 'images', [TABLES.Image, TABLES.PlantImages], ['plantId', 'imageId']]
 ]);
 
 export const RoleModel = createModel(TABLES.Role, roleSchema, [
@@ -106,8 +108,8 @@ export const SkuModel = createModel(TABLES.Sku, skuSchema, [
     [REL_TYPE.ManyMany, 'discounts', [TABLES.Discount, TABLES.SkuDiscounts], ['skuId', 'discountId']]
 ]);
 
-export const TraitModel = createModel(TABLES.Trait, null, [
-    [REL_TYPE.ManyMany, 'plants', [TABLES.Plant, TABLES.PlantTraits], ['plantId', 'traitId']]
+export const PlantTraitModel = createModel(TABLES.Trait, null, [
+    [REL_TYPE.One, 'plant', [TABLES.Plant], ['plantId']]
 ]);
 
 export const UserModel = createModel(TABLES.User, null, [
@@ -132,6 +134,6 @@ export const MODELS = [
     PlantModel,
     RoleModel,
     SkuModel,
-    TraitModel,
+    PlantTraitModel,
     UserModel
 ]

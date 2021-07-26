@@ -1,7 +1,8 @@
 import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useGet, useMutate } from "restful-react";
+import { useMutate } from "restful-react";
+import { useQuery, useMutation } from '@apollo/client';
 import { getInventory, getInventoryPage } from "query/http_promises";
 import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
@@ -34,8 +35,6 @@ function ShoppingList({
     const all_plant_ids = useRef([]);
     // Plant data for all visible plants (i.e. not filtered)
     const [plants, setPlants] = useState([]);
-    // Thumbnail data for every plant
-    const [thumbnails, setThumbnails] = useState([]);
     // Full image data for every sku group
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
@@ -48,19 +47,6 @@ function ShoppingList({
         verb: 'PUT',
         path: 'cart',
     });
-
-    useGet({
-        path: "images",
-        lazy: plants === null,
-        queryParams: { keys: plants?.map(p => p.display_key), size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setThumbnails(response.images);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -145,7 +131,6 @@ function ShoppingList({
     const loadNextPage = useCallback(() => {
         if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
         loading.current = true;
-        //Grab all card thumbnail images
         let load_to = Math.min(all_plant_ids.current.length, loaded_plants.length + page_size - 1);
         let clone = all_plant_ids.current.slice();
         let page_ids = clone.splice(loaded_plants.length, load_to);
@@ -236,7 +221,6 @@ function ShoppingList({
                     cart={cart}
                     onClick={() => expandSku(item.skus[0].sku)}
                     plant={item}
-                    thumbnail={thumbnails?.length >= index ? thumbnails[index] : null}
                     onSetInCart={setInCart} />)}
         </div>
     );

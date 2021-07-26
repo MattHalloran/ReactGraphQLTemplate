@@ -1,7 +1,7 @@
 export const ASSOCIATION_TABLES = {
     BusinessDiscounts: 'business_discounts',
-    PlantTraits: 'plant_traits',
     ImageLabels: 'image_labels',
+    PlantImages: 'plant_images',
     SkuDiscounts: 'sku_discounts',
     SkuSizes: 'sku_sizes',
     UserRoles: 'user_roles',
@@ -20,6 +20,7 @@ export const STANDARD_TABLES = {
     OrderItem: 'order_item',
     Phone: 'phone',
     Plant: 'plant',
+    PlantTrait: 'plant_trait',
     Role: 'role',
     Task: 'queue_task',
     Trait: 'plant_trait',

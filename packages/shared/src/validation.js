@@ -77,12 +77,6 @@ export const phoneSchema = yup.object().shape({
     receivesDeliveryUpdates: yup.bool().default(true).required(),
 });
 
-export const plantSchema = yup.object().shape({
-    latinName: yup.string().max(256).required(),
-    textData: yup.string().max(8192).optional(),
-    imageData: yup.array().of(imageSchema).optional(),
-});
-
 export const roleSchema = yup.object().shape({
     title: yup.string().max(128).required(),
     description: yup.string().max(2048).optional(),
@@ -101,7 +95,16 @@ export const skuSchema = yup.object().shape({
     discountIds: yup.array().of(yup.string().required()).optional(),
 });
 
+export const traitSchema = yup.object().shape({
+    name: yup.string().max(256).required(),
+    value: yup.string().max(2048).required()
+})
 
+export const plantSchema = yup.object().shape({
+    latinName: yup.string().max(256).required(),
+    traits: yup.array().of(traitSchema).required(),
+    images: yup.array().of(imageSchema).required()
+});
 
 // Schema for creating a new account
 export const signUpSchema = yup.object().shape({

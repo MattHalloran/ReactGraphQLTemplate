@@ -18,10 +18,22 @@ export const typeDef = gql`
         labels: [String!]!
     }
 
+    input PlantTraitInput {
+        name: String!
+        value: String!
+    }
+
+    input PlantImageInput {
+        src: String!
+        alt: String
+        description: String
+        labels: [String!]!
+    }
+
     input PlantInput {
         latinName: String!
-        textData: String
-        imageData: String
+        traits: [PlantTraitInput]!
+        images: [PlantImageInput]!
     }
 
     type Plant {
@@ -31,7 +43,7 @@ export const typeDef = gql`
         # Unique fields are added to Trait table. 
         # Field values are added to association table
         # This allows new attributes to be added without updating the database, and the ability to easily filter
-        textData: String!
+        traitData: String!
         # Associated image labels and IDs stored as JSON
         imageData: String!
         skus: [Sku!]
@@ -75,19 +87,24 @@ export const resolvers = {
         }
     },
     Mutation: {
+        // Inserting plants is different than other inserts, because the fields are dynamic.
+        // Because of this, the add must be done manually
         addPlant: async (_, args, { req, res }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return new CustomError(CODE.NotImplemented);
+            // TODO handle images
+            return await insertHelper({ model: Model, info: info, input: args.input });
         },
         updatePlant: async (_, args, { req, res }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return new CustomError(CODE.NotImplemented);
+            // TODO handle images
+            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
         },
         deletePlants: async (_, args, { req }) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
+            // TODO handle images
             return await deleteHelper(Model.name, args.ids);
         },
     }

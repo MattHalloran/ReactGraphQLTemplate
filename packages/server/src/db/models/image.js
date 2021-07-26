@@ -148,7 +148,7 @@ export const resolvers = {
                         });
                     }
                 } else {
-                    console.log('NOT SUCCESSFUL', dimensions, hash)
+                    console.error('NOT SUCCESSFUL', dimensions, hash)
                     failedFileNames.push(filename);
                 }
             }
@@ -172,10 +172,9 @@ export const resolvers = {
             }
             if (!args.deleting) return true;
             // Loop through delete data passed in
-            console.log('boopies', args.data)
             for (let i = 0; i < args.deleting.length; i++) {
                 let image = await imageFromSrc(args.deleting[i]);
-                console.log('deleting...', image);
+                console.info('deleting image...', image);
                 await deleteImage(`${image.fileName}${image.extension}`);
                 await deleteHelper(Model.name, [image.id]);
             }

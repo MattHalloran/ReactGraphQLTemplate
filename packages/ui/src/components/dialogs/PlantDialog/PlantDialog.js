@@ -17,8 +17,7 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
-import { displayPrice, PUBS, PubSub } from 'utils';
-import { useGet } from "restful-react";
+import { displayPrice } from 'utils';
 import { 
     BeeIcon,
     CalendarIcon,
@@ -42,7 +41,7 @@ import {
     AddShoppingCart as AddShoppingCartIcon,
     Close as CloseIcon
 } from '@material-ui/icons';
-import Cookies from 'js-cookie';
+import { IMAGE_USE } from '@local/shared';
 import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({
@@ -104,29 +103,10 @@ function PlantDialog({
     }
     const classes = useStyles();
     const [quantity, setQuantity] = useState(1);
-    const [image, setImage] = useState(JSON.parse(Cookies.get(`nln-img-${plant.display_key}`)));
     const [order_options, setOrderOptions] = useState([]);
     // Stores the id of the selected sku
     const [selected, setSelected] = useState(null);
     let selected_sku = plant.skus.find(s => s.id === selected);
-
-    useGet({
-        path: "image",
-        lazy: image !== null,
-        queryParams: { key: plant.display_key, size: 'l' },
-        resolve: (response) => {
-            if (response.ok) {
-                let image_data = {
-                    src: `data:image/jpeg;base64,${response.image}`,
-                    alt: response.alt
-                }
-                setImage(image_data);
-                Cookies.set(`nln-img-${plant.display_key}`, JSON.stringify(image_data));
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
 
     useEffect(() => {
         let options = plant.skus?.map(s => {
@@ -143,11 +123,11 @@ function PlantDialog({
         setSelected(order_options.length > 0 ? order_options[0].value : null);
     }, [plant, order_options])
 
-    let display_image;
-    if (image) {
-        display_image = <img src={`data:image/jpeg;base64,${image}`} className={classes.displayImage} alt="TODO" />
+    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    if (display_data) {
+        display = <img src={`${display_data.folder}/${display_data.fileName}-xl${display_data.extension}`} className={classes.displayImage} alt={display_data.alt} />
     } else {
-        display_image = <NoImageIcon className={classes.displayImage} />
+        display = <NoImageIcon className={classes.displayImage} />
     }
 
     const traitIconList = (field, Icon, title, alt) => {
@@ -228,7 +208,7 @@ function PlantDialog({
             </AppBar>
             <div className={classes.container}>
                 <div className={classes.left}>
-                    {display_image}
+                    {display}
                 </div>
                 <div className={classes.right}>
                     {plant.description ?
