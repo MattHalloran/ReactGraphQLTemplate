@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag';
-import { plantFields } from '.';
-import { discountFields } from '.';
+import { plantFields } from './plantFields';
+import { discountFields } from './discountFields';
 
 export const skuFields = gql`
     ${plantFields}

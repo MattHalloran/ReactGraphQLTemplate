@@ -1,5 +1,5 @@
 import { gql } from 'graphql-tag';
-import { imageFields } from '.';
+import { imageFields } from './imageFields';
 
 export const plantFields = gql`
     ${imageFields}

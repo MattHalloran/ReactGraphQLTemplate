@@ -8,7 +8,7 @@ export const ordersQuery = gql`
     query Orders(
         $ids: [ID!]
         $userIds: [ID!]
-        status: OrderStatus
+        $status: OrderStatus
     ) {
         orders(
             ids: $ids

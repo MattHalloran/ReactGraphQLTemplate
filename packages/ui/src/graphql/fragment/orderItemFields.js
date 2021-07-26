@@ -1,5 +1,5 @@
 import { gql } from 'graphql-tag';
-import { skuFields } from '.';
+import { skuFields } from './skuFields';
 
 export const orderItemFields = gql`
     ${skuFields}
