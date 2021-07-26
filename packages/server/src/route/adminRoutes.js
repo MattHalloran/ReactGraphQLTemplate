@@ -111,29 +111,6 @@ router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
     //     return StatusCodes['SUCCESS']
 })
 
-router.post('/availability', auth.requireAdmin, async (req, res) => {
-    const file_data = await fs.readFile(req.file);
-    uploadAvailability(file_data);
-})
-
-router.get('/orders', auth.requireAdmin, async (req, res) => {
-    const orders = await Order.query().withGraphFetched('address, user, items.[sku.[plant, discounts]]').where('status', req.body.status);
-    res.json(orders);
-})
-
-router.get('/customers', auth.requireAdmin, async (req, res) => {
-    //TODO don't show admins?
-    const customers = await User.query();
-    res.json(customers);
-})
-
-router.post('/order_status', auth.requireAdmin, async (req, res) => {
-    const order = await Order.query().where('id', req.body.id).update({
-        status: req.body.status
-    }).returning('*');
-    res.json(order);
-})
-
 router.post('/modify_user', auth.requireAdmin, async (req, res) => {
     if (req.token.user_id === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
     const operation = req.body.operation;
