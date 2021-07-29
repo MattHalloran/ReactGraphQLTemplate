@@ -4,8 +4,7 @@ export const ASSOCIATION_TABLES = {
     PlantImages: 'plant_images',
     SkuDiscounts: 'sku_discounts',
     SkuSizes: 'sku_sizes',
-    UserRoles: 'user_roles',
-    UserLikes: 'user_likes'
+    CustomerRoles: 'customer_roles',
 }
 
 export const STANDARD_TABLES = {
@@ -25,7 +24,7 @@ export const STANDARD_TABLES = {
     Task: 'queue_task',
     Trait: 'plant_trait',
     Sku: 'sku',
-    User: 'customer', // User is a reserved word in many databases
+    Customer: 'customer', // User is a reserved word in many databases, so we use customer instead
 }
 
 export const TABLES = {

@@ -11,16 +11,17 @@ import { RoleModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input RoleInput {
+        id: ID
         title: String!
         description: String
-        userIds: [ID!]
+        customerIds: [ID!]
     }
 
     type Role {
         id: ID!
         title: String!
         description: String
-        users: [User!]!
+        customers: [Customer!]!
     }
 
     extend type Query {
@@ -29,7 +30,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addRole(input: RoleInput!): Role!
-        updateRole(id: ID!, input: RoleInput!): Role!
+        updateRole(input: RoleInput!): Role!
         deleteRoles(ids: [ID!]!): Boolean
     }
 `
@@ -51,7 +52,7 @@ export const resolvers = {
         updateRole: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteRoles: async (_, args, { req }) => {
             // Must be admin

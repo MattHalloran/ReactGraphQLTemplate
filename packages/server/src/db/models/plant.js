@@ -31,6 +31,7 @@ export const typeDef = gql`
     }
 
     input PlantInput {
+        id: ID
         latinName: String!
         traits: [PlantTraitInput]!
         images: [PlantImageInput]!
@@ -52,7 +53,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addPlant(input: PlantInput!): Plant!
-        updatePlant(id: ID!, input: PlantInput!): Plant!
+        updatePlant(input: PlantInput!): Plant!
         deletePlants(ids: [ID!]!): Boolean
     }
 `
@@ -94,7 +95,7 @@ export const resolvers = {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deletePlants: async (_, args, { req }) => {
             // Must be admin

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
 import bcrypt from 'bcrypt';
-import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken, setCookie } from '../../auth';
 import moment from 'moment';
@@ -11,7 +11,7 @@ import {
     fullSelectQueryHelper, 
     updateHelper
 } from '../query';
-import { UserModel as Model } from '../relationships';
+import { CustomerModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 import { customerNotifyAdmin, sendVerificationLink } from '../../worker/email/queue';
 
@@ -29,7 +29,20 @@ export const typeDef = gql`
         HardLock
     }
 
-    type User {
+    input CustomerInput {
+        id: ID
+        firstName: String
+        lastName: String
+        pronouns: String
+        emails: [EmailInput!]
+        phones: [PhoneInput!]
+        business: BusinessInput
+        theme: String
+        status: AccountStatus
+        accountApproved: Boolean
+    }
+
+    type Customer {
         id: ID!
         firstName: String!
         lastName: String!
@@ -47,8 +60,8 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        users(ids: [ID!]): [User!]!
-        profile: User!
+        customers(ids: [ID!]): [Customer!]!
+        profile: Customer!
     }
 
     extend type Mutation {
@@ -56,9 +69,9 @@ export const typeDef = gql`
             email: String
             password: String,
             verificationCode: String
-        ): User!
+        ): Customer!
         logout: Boolean
-        # Creates a business, then creates a user belonging to that business
+        # Creates a business, then creates a customer belonging to that business
         signUp(
             firstName: String!
             lastName: String!
@@ -66,21 +79,16 @@ export const typeDef = gql`
             business: String!
             email: String!
             phone: String!
-            existingCustomer: Boolean!
+            accountApproved: Boolean!
             marketingEmails: Boolean!
             password: String!
-        ): User!
-        updateUser(
-            firstName: String
-            lastName: String
-            pronouns: String!
-            theme: String!
-            status: AccountStatus
-            marketingEmails: Boolean!
+        ): Customer!
+        updateCustomer(
+            input: CustomerInput!
             currentPassword: String!
-            newPassword: String!
-        ): User!
-        deleteUser(
+            newPassword: String
+        ): Customer!
+        deleteCustomer(
             id: ID!
             password: String
             confirmPassword: String
@@ -88,15 +96,15 @@ export const typeDef = gql`
         requestPasswordChange(
             id: ID
         ): Response
-        changeUserStatus(
+        changeCustomerStatus(
             id: ID!
             status: AccountStatus!
         ): Boolean
-        addUserRole(
+        addCustomerRole(
             id: ID!
             roleId: ID!
         ): Boolean
-        removeUserRole(
+        removeCustomerRole(
             id: ID!
             roleId: ID!
         ): Boolean
@@ -106,16 +114,16 @@ export const typeDef = gql`
 export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
     Query: {
-        users: async (_, args, { req }, info) => {
+        customers: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return fullSelectQueryHelper(Model, info, args.ids);
         },
         profile: async (_, _a, { req }, info) => {
             // Can only query your own profile
-            const userId = req.token.userId;
-            if (userId === null || userId === undefined) return new CustomError(CODE.Unauthorized);
-            const results = await fullSelectQueryHelper(Model, info, [userId]);
+            const customerId = req.token.customerId;
+            if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
+            const results = await fullSelectQueryHelper(Model, info, [customerId]);
             return results[0];
         }
     },
@@ -123,62 +131,62 @@ export const resolvers = {
         login: async (_, args, { req, res }, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.userId]))[0];
+                if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.customerId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate input format
             const validateError = await validateArgs(logInSchema, args);
             if (validateError) return validateError;
             // Validate email address
-            const email = await db(TABLES.Email).select('emailAddress', 'userId').where('emailAddress', args.email).whereNotNull('userId').first();
+            const email = await db(TABLES.Email).select('emailAddress', 'customerId').where('emailAddress', args.email).whereNotNull('customerId').first();
             if (email === undefined) return new CustomError(CODE.BadCredentials);
-            // Find user
-            let user = await db(Model.name).where('id', email.userId).first();
-            if (user === undefined) return new CustomError(CODE.ErrorUnknown);
+            // Find customer
+            let customer = await db(Model.name).where('id', email.customerId).first();
+            if (customer === undefined) return new CustomError(CODE.ErrorUnknown);
             // Validate verification code, if supplied
-            if (args.verification_code === user.id && user.emailVerified === false) {
-                user = await db(Model.name).where('id', user.id).update({
+            if (args.verification_code === customer.id && customer.emailVerified === false) {
+                customer = await db(Model.name).where('id', customer.id).update({
                     status: ACCOUNT_STATUS.Unlocked,
                     emailVerified: true
                 }).returning('*')[0];
             }
             // Reset login attempts after 15 minutes
             const unable_to_reset = [ACCOUNT_STATUS.HardLock, ACCOUNT_STATUS.Deleted];
-            const last_login = moment(user.lastLoginAttempt, DATE_FORMAT).valueOf();
-            console.log('LAST LOGIN', user.lastLoginAttempt, last_login);
-            if (!unable_to_reset.includes(user.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
-                user = await db(Model.name).where('id', user.id).update({
+            const last_login = moment(customer.lastLoginAttempt, DATE_FORMAT).valueOf();
+            console.log('LAST LOGIN', customer.lastLoginAttempt, last_login);
+            if (!unable_to_reset.includes(customer.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
+                customer = await db(Model.name).where('id', customer.id).update({
                     loginAttempts: 0
                 }).returning('*').then(rows => rows[0]);
             }
             // Before validating password, let's check to make sure the account is unlocked
             const status_to_code = {
-                [ACCOUNT_STATUS.Deleted]: CODE.NoUser,
+                [ACCOUNT_STATUS.Deleted]: CODE.NoCustomer,
                 [ACCOUNT_STATUS.SoftLock]: CODE.SoftLockout,
                 [ACCOUNT_STATUS.HardLock]: CODE.HardLockout
             }
-            if (user.status in status_to_code) return new CustomError(status_to_code[user.status]);
+            if (customer.status in status_to_code) return new CustomError(status_to_code[customer.status]);
             // Now we can validate the password
-            const validPassword = bcrypt.compareSync(args.password, user.password);
+            const validPassword = bcrypt.compareSync(args.password, customer.password);
             if (validPassword) {
-                const token = generateToken(user.id, user.businessId);
-                await db(Model.name).where('id', user.id).update({
+                const token = generateToken(customer.id, customer.businessId);
+                await db(Model.name).where('id', customer.id).update({
                     sessionToken: token,
                     loginAttempts: 0,
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                await setCookie(res, user.id, token);
-                return (await fullSelectQueryHelper(Model, info, [user.id]))[0];
+                await setCookie(res, customer.id, token);
+                return (await fullSelectQueryHelper(Model, info, [customer.id]))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
-                let login_attempts = user.loginAttempts + 1;
+                let login_attempts = customer.loginAttempts + 1;
                 if (login_attempts >= LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT) {
                     new_status = ACCOUNT_STATUS.SoftLock;
                 } else if (login_attempts > LOGIN_ATTEMPTS_TO_HARD_LOCKOUT) {
                     new_status = ACCOUNT_STATUS.HardLock;
                 }
-                await db(Model.name).where('id', user.id).update({
+                await db(Model.name).where('id', customer.id).update({
                     status: new_status,
                     loginAttempts: login_attempts,
                     lastLoginAttempt: moment().format(DATE_FORMAT)
@@ -189,7 +197,7 @@ export const resolvers = {
         logout: async (_, _args, { req, res }, _info) => {
             console.log('LOGOUT CALLEDDDDDDD')
             res.clearCookie(COOKIE.Session);
-            await db(Model.name).where('id', req.userId).update({
+            await db(Model.name).where('id', req.customerId).update({
                 sessionToken: null
             })
         },
@@ -198,10 +206,10 @@ export const resolvers = {
             const validateError = await validateArgs(signUpSchema, args);
             if (validateError) return validateError;
             // Validate unique email address
-            const email = await db(TABLES.Email).select('userId').where('emailAddress', args.email).first();
+            const email = await db(TABLES.Email).select('customerId').where('emailAddress', args.email).first();
             if (email !== undefined) return new CustomError(CODE.EmailInUse);
             // Validate unique phone number
-            const phone = await db(TABLES.Phone).select('userId').where('number', args.phone).first();
+            const phone = await db(TABLES.Phone).select('customerId').where('number', args.phone).first();
             if (phone !== undefined) return new CustomError(CODE.PhoneInUse);
             // Create business
             const business_id = (await db(TABLES.Business).insert([
@@ -210,8 +218,8 @@ export const resolvers = {
                     subscribedToNewsletters: args.marketingEmails,
                 }
             ]).returning('id'))[0];
-            // Create user
-            const user_id = (await db(TABLES.User).insert([
+            // Create customer
+            const customer_id = (await db(TABLES.Customer).insert([
                 {
                     firstName: args.firstName,
                     lastName: args.lastName,
@@ -219,14 +227,14 @@ export const resolvers = {
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     status: ACCOUNT_STATUS.Unlocked,
                     businessId: business_id,
-                    sessionToken: generateToken(user_id, business_id),
+                    sessionToken: generateToken(customer_id, business_id),
                 }
             ]).returning('id'))[0];
             // Create email
             await db(TABLES.Email).insert([
                 {
                     emailAddress: args.email,
-                    userId: user_id,
+                    customerId: customer_id,
                     businessId: business_id
                 }
             ]);
@@ -234,20 +242,36 @@ export const resolvers = {
             await db(TABLES.Phone).insert([
                 {
                     number: args.phone,
-                    userId: user_id,
+                    customerId: customer_id,
                     businessId: business_id
                 }
             ]);
             // Send verification email
-            sendVerificationLink(args.email, user_id);
+            sendVerificationLink(args.email, customer_id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
-            return (await fullSelectQueryHelper(Model, info, [user_id]))[0];
+            return (await fullSelectQueryHelper(Model, info, [customer_id]))[0];
         },
-        updateUser: async (_, args, { req, res }, info) => {
-            return new CustomError(CODE.NotImplemented);
+        updateCustomer: async (_, args, { req, res }, info) => {
+            // Must be admin, or updating your own
+            if(!req.isAdmin && (req.token.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            // Check for correct password
+            const curr_password = (await db(Model.name).select('password').where('id', args.input.id))[0];
+            if(!bcrypt.compareSync(args.currentPassword, curr_password.password)) return new CustomError(CODE.BadCredentials);
+            // Update and query
+            const result = await updateHelper({ model: Model, info: info, input: args.input });
+            // Update password 
+            if (args.newPassword) {
+                // Validate new password
+                const validatePasswordError = await validateArgs(passwordSchema, args.newPassword);
+                if (validatePasswordError) return validatePasswordError;
+                await db(Model.name).where('id', args.input.id).update({
+                    password: bcrypt.hashSync(args.newPassword, HASHING_ROUNDS)
+                })
+            }
+            return result;
         },
-        deleteUser: async (_, args, { req, res }, info) => {
+        deleteCustomer: async (_, args, { req, res }, info) => {
             return new CustomError(CODE.NotImplemented);
         },
         requestPasswordChange: async (_, args, { req, res }, info) => {
@@ -256,17 +280,17 @@ export const resolvers = {
             if (validateError) return validateError;
             return new CustomError(CODE.NotImplemented);
         },
-        changeUserStatus: async (_, args, { req, res }, info) => {
+        changeCustomerStatus: async (_, args, { req, res }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             await db(Model.name).where('id', args.id).update({ status: args.status });
         },
-        addUserRole: async (_, args, { req }) => {
+        addCustomerRole: async (_, args, { req }) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await insertJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);
         },
-        removeUserRole: async (_, args, { req }) => {
+        removeCustomerRole: async (_, args, { req }) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await deleteJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);

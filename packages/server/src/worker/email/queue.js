@@ -44,11 +44,11 @@ export function sendResetPasswordLink(email, code) {
     });
 }
 
-export function sendVerificationLink(email, user_id) {
+export function sendVerificationLink(email, customer_id) {
     emailQueue.add({
         to: [email],
         subject: `Verify ${BUSINESS_NAME.Short} Account`,
-        text: `Welcome to ${BUSINESS_NAME.Long}! Please click this link (${SITE_URL}/login/${user_id}) to verify your account. If you did not create an account with us, please ignore this link.`,
-        html: `<p>Welcome to ${BUSINESS_NAME.Long}!</p><p>Please click this link (<a href=\"${SITE_URL}/login/${user_id}\">${SITE_URL}/login/${user_id}</a>) to verify your account.</p><p>If you did not create an account with us, please ignore this message.</p>`
+        text: `Welcome to ${BUSINESS_NAME.Long}! Please click this link (${SITE_URL}/login/${customer_id}) to verify your account. If you did not create an account with us, please ignore this link.`,
+        html: `<p>Welcome to ${BUSINESS_NAME.Long}!</p><p>Please click this link (<a href=\"${SITE_URL}/login/${customer_id}\">${SITE_URL}/login/${customer_id}</a>) to verify your account.</p><p>If you did not create an account with us, please ignore this message.</p>`
     });
 }

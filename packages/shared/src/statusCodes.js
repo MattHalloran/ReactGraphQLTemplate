@@ -27,8 +27,8 @@ export const CODE = {
         code: 'EMAIL_NOT_VERIFIED',
         message: 'Error: Email has not been verified yet. Sending new verification email'
     },
-    NoUser: {
-        code: 'NO_USER',
+    NoCustomer: {
+        code: 'NO_CUSTOMER',
         message: 'Error: No user with that email'
     },
     BadCredentials: {

@@ -19,6 +19,7 @@ export const typeDef = gql`
     }
 
     input SkuInput {
+        id: ID
         sku: String!
         isDiscountable: Boolean
         size: String
@@ -50,7 +51,7 @@ export const typeDef = gql`
     extend type Mutation {
         uploadAvailability(file: Upload!): Boolean
         addSku(input: SkuInput!): Sku!
-        updateSku(id: ID!, input: SkuInput!): Sku!
+        updateSku(input: SkuInput!): Sku!
         deleteSkus(ids: [ID!]!): Boolean
     }
 `
@@ -79,7 +80,7 @@ export const resolvers = {
         updateSku: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteSkus: async (_, args, { req }) => {
             // Must be admin

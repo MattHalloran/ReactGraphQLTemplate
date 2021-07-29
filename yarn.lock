@@ -4723,6 +4723,11 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
+classnames@^2.2.6:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.1.tgz#dfcfa3891e306ec1dad105d0e88f4417b8535e8e"
+  integrity sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==
+
 clean-css@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-4.2.3.tgz#507b5de7d97b48ee53d84adb0160ff6216380f78"
@@ -9554,6 +9559,11 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
+libphonenumber-js@^1.9.22:
+  version "1.9.22"
+  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.9.22.tgz#b6b460603dedbd58f2d71f15500f216d70850fad"
+  integrity sha512-nE0aF0wrNq09ewF36s9FVqRW73hmpw6cobVDlbexmsu1432LEfuN24BCudNuRx4t2rElSeK/N0JbedzRW/TC4A==
+
 lie@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/lie/-/lie-3.1.1.tgz#9a436b2cc7746ca59de7a41fa469b3efb76bd87e"
@@ -9742,10 +9752,20 @@ lodash.once@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
   integrity sha1-DdOXEhPHxW34gJd9UEyI+0cal6w=
 
+lodash.reduce@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.reduce/-/lodash.reduce-4.6.0.tgz#f1ab6b839299ad48f784abbf476596f03b914d3b"
+  integrity sha1-8atrg5KZrUj3hKu/R2WW8DuRTTs=
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
   integrity sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=
+
+lodash.startswith@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/lodash.startswith/-/lodash.startswith-4.2.1.tgz#c598c4adce188a27e53145731cdc6c0e7177600c"
+  integrity sha1-xZjErc4YiiflMUVzHNxsDnF3YAw=
 
 lodash.template@^4.5.0:
   version "4.5.0"
@@ -12844,6 +12864,18 @@ react-markdown@^6.0.2:
     unified "^9.0.0"
     unist-util-visit "^2.0.0"
     vfile "^4.0.0"
+
+react-phone-input-2@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/react-phone-input-2/-/react-phone-input-2-2.14.0.tgz#75dff7ba503becc7a19e0e8ff5aa3d878265af77"
+  integrity sha512-gOY3jUpwO7ulryXPEdqzH7L6DPqI9RQxKfBxZbgqAwXyALGsmwLWFyi2RQwXlBLWN/EPPT4Nv6I9TESVY2YBcg==
+  dependencies:
+    classnames "^2.2.6"
+    lodash.debounce "^4.0.8"
+    lodash.memoize "^4.1.2"
+    lodash.reduce "^4.6.0"
+    lodash.startswith "^4.2.1"
+    prop-types "^15.7.2"
 
 react-redux@^7.2.0:
   version "7.2.4"

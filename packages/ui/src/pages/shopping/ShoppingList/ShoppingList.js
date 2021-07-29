@@ -65,7 +65,7 @@ function ShoppingList({
         return () => mounted = false;
     }, [sort, page_size, session]);
 
-    // Determine which skus will be visible to the user (i.e. not filtered out)
+    // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
         //First, determine if plants without availability shall be shown
         let visible_plants = loaded_plants;
@@ -82,7 +82,7 @@ function ShoppingList({
         }
         //Find all applied filters
         let applied_filters = [];
-        for (const key in filters) {
+        for (const key of filters) {
             let filter_group = filters[key];
             for (let i = 0; i < filter_group.length; i++) {
                 if (filter_group[i].checked) {
@@ -167,7 +167,7 @@ function ShoppingList({
     }
 
     const addToCart = (name, sku, quantity) => {
-        if (!session?.user_id || !session?.token) return;
+        if (!session?.customer_id || !session?.token) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
             alert(`Error: Cannot add more than ${max_quantity}!`);
@@ -177,7 +177,7 @@ function ShoppingList({
         cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
 
         PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { id: session?.user_id, ...cart_copy } }).then((response) => {
+        updateOrder({ variables: { input: { id: session?.customer_id, ...cart_copy } } }).then((response) => {
             const data = response.data.updateOrder;
             PubSub.publish(PUBS.Loading, false);
             if (data !== null) {

@@ -15,7 +15,7 @@ import { typeDef as Role, resolvers as RoleResolvers } from './role';
 import { typeDef as Sku, resolvers as SkuResolvers } from './sku';
 import { typeDef as Task, resolvers as TaskResolvers } from './task';
 import { typeDef as PlantTrait, resolvers as PlantTraitResolvers } from './plantTrait';
-import { typeDef as User, resolvers as UserResolvers } from './user'
+import { typeDef as Customer, resolvers as CustomerResolvers } from './customer'
 
 export const typeDefs = [
     Root, 
@@ -33,7 +33,7 @@ export const typeDefs = [
     Sku,
     Task,
     PlantTrait,
-    User
+    Customer
 ];
 
 export const resolvers = merge(
@@ -52,5 +52,5 @@ export const resolvers = merge(
     SkuResolvers,
     TaskResolvers,
     PlantTraitResolvers,
-    UserResolvers
+    CustomerResolvers
 )

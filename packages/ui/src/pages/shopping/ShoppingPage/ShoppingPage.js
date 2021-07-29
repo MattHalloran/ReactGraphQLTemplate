@@ -111,7 +111,7 @@ function ShoppingPage({
         setSortBy(SORT_OPTIONS[0].value)
         setSearchString('')
         let copy = { ...filters };
-        for (const key in copy) {
+        for (const key of copy) {
             let filter_group = copy[key];
             for (let i = 0; i < filter_group.length; i++) {
                 filter_group[i].checked = false;

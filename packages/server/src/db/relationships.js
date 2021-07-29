@@ -1,3 +1,4 @@
+// Describes models and their relationships
 import { FIELDS } from './fields';
 import { TABLES } from './tables';
 import {
@@ -11,7 +12,8 @@ import {
     phoneSchema,
     plantSchema,
     roleSchema,
-    skuSchema
+    skuSchema,
+    customerSchema
 } from '@local/shared';
 
 export const REL_TYPE = Object.freeze({ One: 1, Many: 2, ManyMany: 3 });
@@ -23,7 +25,7 @@ export class Relationship {
         this.classNames = classNames;
         this.ids = ids;
     }
-
+    getModel() { return MODELS.find(m => m.name === this.classNames[0]) }
     exposedFields() { return FIELDS[this.classNames[0]] }
 }
 
@@ -33,10 +35,8 @@ export class Model {
         this.validationSchema = validationSchema;
         this.relationships = relationships;
     }
-
-    exposedFields() { return FIELDS[this.name] }
-
     getRelationship(name) { return this.relationships.find(r => r.name === name); }
+    exposedFields() { return FIELDS[this.name] }
 }
 
 const createModel = (name, validationSchema, data) => {
@@ -55,7 +55,7 @@ export const BusinessModel = createModel(TABLES.Business, businessSchema, [
     [REL_TYPE.Many, 'addresses', [TABLES.Address], ['businessId']],
     [REL_TYPE.Many, 'phones', [TABLES.Phone], ['businessId']],
     [REL_TYPE.Many, 'emails', [TABLES.Email], ['businessId']],
-    [REL_TYPE.Many, 'employees', [TABLES.User], ['businessId']],
+    [REL_TYPE.Many, 'employees', [TABLES.Customer], ['businessId']],
     [REL_TYPE.ManyMany, 'discounts', [TABLES.Discount, TABLES.BusinessDiscounts], ['businessId', 'discountId']]
 ]);
 
@@ -65,12 +65,12 @@ export const DiscountModel = createModel(TABLES.Discount, discountSchema, [
 ]);
 
 export const EmailModel = createModel(TABLES.Email, emailSchema, [
-    [REL_TYPE.One, 'user', [TABLES.User], ['userId']],
+    [REL_TYPE.One, 'customer', [TABLES.Customer], ['customerId']],
     [REL_TYPE.One, 'business', [TABLES.Business], ['emailId']]
 ]);
 
 export const FeedbackModel = createModel(TABLES.Feedback, feedbackSchema, [
-    [REL_TYPE.One, 'user', [TABLES.User], ['userId']]
+    [REL_TYPE.One, 'customer', [TABLES.Customer], ['customerId']]
 ]);
 
 export const ImageModel = createModel(TABLES.Image, null, [
@@ -79,7 +79,7 @@ export const ImageModel = createModel(TABLES.Image, null, [
 
 export const OrderModel = createModel(TABLES.Order, orderSchema, [
     [REL_TYPE.One, 'address', [TABLES.Address], ['addressId']],
-    [REL_TYPE.One, 'user', [TABLES.User], ['userId']],
+    [REL_TYPE.One, 'customer', [TABLES.Customer], ['customerId']],
     [REL_TYPE.Many, 'items', [TABLES.OrderItem], ['orderId']]
 ]);
 
@@ -89,7 +89,7 @@ export const OrderItemModel = createModel(TABLES.OrderItem, orderItemSchema, [
 ]);
 
 export const PhoneModel = createModel(TABLES.Phone, phoneSchema, [
-    [REL_TYPE.One, 'user', [TABLES.User], ['userId']],
+    [REL_TYPE.One, 'customer', [TABLES.Customer], ['customerId']],
     [REL_TYPE.One, 'business', [TABLES.Business], ['businessId']]
 ]);
 
@@ -100,7 +100,7 @@ export const PlantModel = createModel(TABLES.Plant, plantSchema, [
 ]);
 
 export const RoleModel = createModel(TABLES.Role, roleSchema, [
-    [REL_TYPE.ManyMany, 'users', [TABLES.User, TABLES.UserRoles], ['roleId', 'userId']]
+    [REL_TYPE.ManyMany, 'customers', [TABLES.Customer, TABLES.CustomerRoles], ['roleId', 'customerId']]
 ]);
 
 export const SkuModel = createModel(TABLES.Sku, skuSchema, [
@@ -112,13 +112,13 @@ export const PlantTraitModel = createModel(TABLES.Trait, null, [
     [REL_TYPE.One, 'plant', [TABLES.Plant], ['plantId']]
 ]);
 
-export const UserModel = createModel(TABLES.User, null, [
+export const CustomerModel = createModel(TABLES.Customer, customerSchema, [
     [REL_TYPE.One, 'business', [TABLES.Business], ['businessId']],
-    [REL_TYPE.Many, 'emails', [TABLES.Email], ['userId']],
-    [REL_TYPE.Many, 'phones', [TABLES.Phone], ['userId']],
-    [REL_TYPE.Many, 'orders', [TABLES.Order], ['userId']],
-    [REL_TYPE.ManyMany, 'roles', [TABLES.Role, TABLES.UserRoles], ['userId', 'roleId']],
-    [REL_TYPE.Many, 'feedback', [TABLES.Feedback], ['userId']]
+    [REL_TYPE.Many, 'emails', [TABLES.Email], ['customerId']],
+    [REL_TYPE.Many, 'phones', [TABLES.Phone], ['customerId']],
+    [REL_TYPE.Many, 'orders', [TABLES.Order], ['customerId']],
+    [REL_TYPE.ManyMany, 'roles', [TABLES.Role, TABLES.CustomerRoles], ['customerId', 'roleId']],
+    [REL_TYPE.Many, 'feedback', [TABLES.Feedback], ['customerId']]
 ]);
 
 export const MODELS = [
@@ -135,5 +135,5 @@ export const MODELS = [
     RoleModel,
     SkuModel,
     PlantTraitModel,
-    UserModel
+    CustomerModel
 ]

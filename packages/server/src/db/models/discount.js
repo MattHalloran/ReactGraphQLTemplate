@@ -11,6 +11,7 @@ import { DiscountModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input DiscountInput {
+        id: ID
         title: String!
         discount: Float!
         comment: String
@@ -35,7 +36,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addDiscount(input: DiscountInput!): Discount!
-        updateDiscount(id: ID!, input: DiscountInput!): Discount!
+        updateDiscount(input: DiscountInput!): Discount!
         deleteDiscounts(ids: [ID!]!): Boolean
     }
 `
@@ -57,7 +58,7 @@ export const resolvers = {
         updateDiscount: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteDiscounts: async (_, args, { req }) => {
             // Must be admin

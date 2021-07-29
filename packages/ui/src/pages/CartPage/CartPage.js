@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 
 function CartPage({
     business,
-    user_id,
+    customer_id,
     cart,
 }) {
     let history = useHistory();
@@ -50,12 +50,12 @@ function CartPage({
     console.log('LOADING CART PAGE', cart, changedCart)
 
     const orderUpdate = () => {
-        if (!user_id) {
+        if (!customer_id) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
             return;
         }
         PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { ...changedCart } }).then((response) => {
+        updateOrder({ variables: { input: changedCart } }).then((response) => {
             const data = response.data.updateOrder;
             PubSub.publish(PUBS.Loading, false);
             if (data !== null) {
@@ -103,7 +103,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, currCart, requestQuote, user_id]);
+    }, [cart, changedCart, currCart, requestQuote, customer_id]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
@@ -148,7 +148,7 @@ function CartPage({
 }
 
 CartPage.propTypes = {
-    user_id: PropTypes.string,
+    customer_id: PropTypes.string,
     cart: PropTypes.object,
 }
 

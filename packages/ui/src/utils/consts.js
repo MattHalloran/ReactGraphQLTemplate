@@ -6,8 +6,8 @@ export const ORDER_STATES = [
         value: ORDER_STATUS.CanceledByAdmin,
     },
     {
-        label: 'Canceled by User',
-        value: ORDER_STATUS.CanceledByUser,
+        label: 'Canceled by Customer',
+        value: ORDER_STATUS.CanceledByCustomer,
     },
     {
         label: 'Pending Cancel',

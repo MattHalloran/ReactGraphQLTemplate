@@ -6,5 +6,5 @@ export * from './orderItemFields';
 export * from './phoneFields';
 export * from './plantFields';
 export * from './skuFields';
-export * from './userContactFields';
-export * from './userSessionFields';
+export * from './customerContactFields';
+export * from './customerSessionFields';

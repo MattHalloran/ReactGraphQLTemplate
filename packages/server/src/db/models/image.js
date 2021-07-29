@@ -4,7 +4,7 @@ import { TABLES } from '../tables';
 import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
-import { deleteImage, findImageUrl, plainImageName, saveImage } from '../../utils';
+import { deleteImage, findFileName, findImageUrl, plainImageName, saveImage } from '../../utils';
 import { ImageModel as Model } from '../relationships';
 import { deleteHelper, updateHelper } from '../query';
 
@@ -88,21 +88,35 @@ export const resolvers = {
         },
         imagesByLabel: async (_, args) => {
             // Locate images in database
+            console.log('AAAAA')
             const images = await db(Model.name)
                 .select('*')
                 .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
                 .where(`${TABLES.ImageLabels}.label`, args.label);
             if (images === undefined || images.length === 0) return new CustomError(CODE.NoResults);
+            console.log('BBBBB')
             // Loop through each image
             const image_data = [];
             for (let i = 0; i < images.length; i++) {
+                console.log('CCCCC')
                 // Try returning the image in the requested size, or any available size
+                console.log('FINDING FILE PATH',`${images[i].folder}/${images[i].fileName}${images[i].extension}`,  args.size)
                 const filePath = await findImageUrl(`${images[i].folder}/${images[i].fileName}${images[i].extension}`, args.size);
-                image_data.push({
-                    src: filePath,
-                    alt: images[i].alt,
-                    description: images[i].description
-                });
+                console.log('FOUND FILE PATH', filePath)
+                if (filePath) {
+                    image_data.push({
+                        src: filePath,
+                        alt: images[i].alt,
+                        description: images[i].description
+                    });
+                } else {
+                    image_data.push({
+                        src: null,
+                        alt: null,
+                        description: null
+                    })
+                }
+                console.log('BBBBBB')
             }
             return image_data;
         }
@@ -127,11 +141,14 @@ export const resolvers = {
                 if (Object.values(IMAGE_EXTENSION).indexOf(extCheck) <= 0) return new CustomError(CODE.InvalidArgs);
                 // Create a read stream
                 const stream = createReadStream();
+                console.log('ABOUT TO CALL SAVE IMAGE', filename)
                 const { success, filename: finalFilename, dimensions, hash } = await saveImage(stream, filename)
                 if (success) {
                     successfulFileNames.push(finalFilename);
                     // Add image metadata to database
+                    console.log('PARSING FILE NAME', finalFilename)
                     const { name, ext } = path.parse(finalFilename);
+                    console.log('INSERTING IMAGE WITH EXTENSION ', ext)
                     await db(Model.name).insert({
                         hash: hash,
                         folder: 'images',
@@ -141,6 +158,7 @@ export const resolvers = {
                         width: dimensions.width,
                         height: dimensions.height
                     });
+                    console.log('INSERTED IMAGE MODEL. NOW INSERTING LABELS', args.labels)
                     for (let j = 0; j < args.labels.length; j++) {
                         await db(TABLES.ImageLabels).insert({
                             hash: hash,
@@ -168,7 +186,7 @@ export const resolvers = {
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
                 let image = await imageFromSrc(args.data[i].src);
-                await updateHelper({ model: Model, id: image.id, input: args.data[i] });
+                await updateHelper({ model: Model, input: { id: image.id, ...args.data[i] } });
             }
             if (!args.deleting) return true;
             // Loop through delete data passed in

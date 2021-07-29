@@ -5,7 +5,7 @@ import {
     Shop as ShopIcon,
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
-import { USER_ROLES } from '@local/shared';
+import { CUSTOMER_ROLES } from '@local/shared';
 import { LINKS } from 'utils';
 
 // Returns user actions, in a list of this format:
@@ -27,7 +27,7 @@ export function getUserActions(session, roles, cart) {
         // If an admin is logged in, display admin links
         if (roles instanceof Array) {
             roles?.forEach(r => {
-                if (r.title === USER_ROLES.Admin) {
+                if (r.title === CUSTOMER_ROLES.Admin) {
                     actions.push(['Admin', 'admin', LINKS.Admin, null, SettingsIcon, 0]);
                 }
             })

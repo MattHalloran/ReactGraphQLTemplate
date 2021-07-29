@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import { USER_ROLES } from '@local/shared';
+import { CUSTOMER_ROLES } from '@local/shared';
 import { LINKS } from 'utils';
 import { Sitemap } from 'Sitemap';
 import {
@@ -160,7 +160,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.4}
                 render={() => (
-                    <Page title={title('Profile')} {...common} authRole={USER_ROLES.Customer}>
+                    <Page title={title('Profile')} {...common} authRole={CUSTOMER_ROLES.Customer}>
                         <FormPage title="Profile">
                             <ProfileForm {...common} />
                         </FormPage>
@@ -173,7 +173,7 @@ function Routes({
                 sitemapIndex={true}
                 priority={0.9}
                 render={() => (
-                    <Page title={title('Shop')} {...common} authRole={USER_ROLES.Customer} redirect={LINKS.LogIn}>
+                    <Page title={title('Shop')} {...common} authRole={CUSTOMER_ROLES.Customer} redirect={LINKS.LogIn}>
                         <ShoppingPage {...common} session={session} cart={cart} />
                     </Page>
                 )}
@@ -183,7 +183,7 @@ function Routes({
                 path={LINKS.Cart}
                 render={() => (
                     <Page title={title('Cart')} {...common}>
-                        <CartPage {...common} user_tag={session?.tag} cart={cart} />
+                        <CartPage {...common} customer_tag={session?.tag} cart={cart} />
                     </Page>
                 )}
             />
@@ -193,7 +193,7 @@ function Routes({
                 exact
                 path={LINKS.Admin}
                 render={() => (
-                    <Page title={title('Admin Portal')} {...common} authRole={USER_ROLES.Admin}>
+                    <Page title={title('Admin Portal')} {...common} authRole={CUSTOMER_ROLES.Admin}>
                         <AdminMainPage />
                     </Page>
                 )}
@@ -202,33 +202,33 @@ function Routes({
                 exact
                 path={LINKS.AdminContactInfo}
                 render={() => (
-                    <Page title={"Edit Contact Info"} {...common} authRole={USER_ROLES.Admin}>
+                    <Page title={"Edit Contact Info"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                         <AdminContactPage business={business}/>
                     </Page>
                 )}
             />
             <Route exact path={LINKS.AdminCustomers} render={() => (
-                <Page title={"Customer Page"} {...common} authRole={USER_ROLES.Admin}>
+                <Page title={"Customer Page"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                     <AdminCustomerPage />
                 </Page>
             )} />
             <Route exact path={LINKS.AdminGallery} render={() => (
-                <Page title={"Edit Gallery"} {...common} authRole={USER_ROLES.Admin}>
+                <Page title={"Edit Gallery"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                     <AdminGalleryPage />
                 </Page>
             )} />
             <Route exact path={LINKS.AdminHero} render={() => (
-                <Page title={"Edit Hero"} {...common} authRole={USER_ROLES.Admin}>
+                <Page title={"Edit Hero"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                     <AdminHeroPage />
                 </Page>
             )} />
             <Route exact path={LINKS.AdminInventory} render={() => (
-                <Page title={"Edit Inventory Info"} {...common} authRole={USER_ROLES.Admin}>
+                <Page title={"Edit Inventory Info"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                     <AdminInventoryPage />
                 </Page>
             )} />
             <Route exact path={LINKS.AdminOrders} render={() => (
-                <Page title={"Order Page"} {...common} authRole={USER_ROLES.Admin}>
+                <Page title={"Order Page"} {...common} authRole={CUSTOMER_ROLES.Admin}>
                     <AdminOrderPage />
                 </Page>
             )} />

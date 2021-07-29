@@ -42,6 +42,7 @@
         "react-gallery-carousel": "^0.1.4",
         "react-hotkeys": "^2.0.0-pre9",
         "react-markdown": "^6.0.2",
+        "react-phone-input-2": "^2.14.0",
         "react-router-dom": "^5.2.0",
         "react-scripts": "^4.0.1",
         "react-sortable-hoc": "^1.11.0",

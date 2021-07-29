@@ -12,6 +12,7 @@ import { AddressModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input AddressInput {
+        id: ID
         tag: String
         name: String
         country: String!
@@ -46,7 +47,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addAddress(input: AddressInput!): Address!
-        updateAddress(id: ID!, input: AddressInput!): Address!
+        updateAddress(input: AddressInput!): Address!
         deleteAddresses(ids: [ID!]!): Boolean
     }
 `
@@ -62,14 +63,14 @@ export const resolvers = {
     Mutation: {
         addAddress: async (_, args, { req }, info) => {
             // Must be admin, or adding to your own
-            if(!req.isAdmin && (req.token.businessId !== args.businessId)) return new CustomError(CODE.Unauthorized);
+            if(!req.isAdmin && (req.token.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
             return await insertHelper({ model: Model, info: info, input: args.input });
         },
         updateAddress: async (_, args, { req }, info) => {
             // Must be admin, or updating your own
-            const curr = await db(Model.name).where('id', args.id).first();
+            const curr = await db(Model.name).where('id', args.input.id).first();
             if (!req.isAdmin && req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteAddresses: async (_, args, { req }) => {
             // Must be admin, or deleting your own

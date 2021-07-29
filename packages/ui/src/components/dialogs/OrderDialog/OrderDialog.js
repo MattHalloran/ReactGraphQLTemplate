@@ -64,7 +64,7 @@ function OrderDialog({
 
     const orderUpdate = () => {
         PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { ...order } }).then((response) => {
+        updateOrder({ variables: { input: order } }).then((response) => {
             const data = response.data.updateOrder;
             PubSub.publish(PUBS.Loading, false);
             if (data !== null) {

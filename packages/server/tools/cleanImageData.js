@@ -30,7 +30,7 @@ for (const file of files) {
     let { name, ext } = plainImageName(file);
     if (!rows.some(r => r.file === `${name}${ext}`)) {
         console.info(`Deleting ${file}`);
-        deleteFile(`${FOLDER}/file`);
+        deleteFile(`${PATH}/file`);
     }
 }
 

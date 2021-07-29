@@ -30,7 +30,9 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 ### 3. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/NLN/blob/master/.env-example)
 2. Rename the file to .env
-### 4. Docker
+### 4. Business data
+In the assets/public folder, there is a file named `business.json`. Edit this file to match your business's data.
+### 5. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
 
 

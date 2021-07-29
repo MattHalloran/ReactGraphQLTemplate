@@ -12,31 +12,27 @@ export const FIELDS = {
         'locality',
         'postalCode',
         'premise',
-        'business_id'
     ],
     [TABLES.Business]: [
         'id',
         'name',
-        'subscribedToNewsletters'
+        'subscribedToNewsletters',
     ],
     [TABLES.Discount]: [
         'id',
         'discount',
         'title',
         'comment',
-        'terms'
+        'terms',
     ],
     [TABLES.Email]: [
         'id',
         'emailAddress',
         'receivesDeliveryUpdates',
-        'userId',
-        'businessId'
     ],
     [TABLES.Feedback]: [
         'id',
         'text',
-        'userId'
     ],
     [TABLES.Image]: [
         'id',
@@ -46,7 +42,7 @@ export const FIELDS = {
         'usedFor',
         'hash',
         'width',
-        'height'
+        'height',
     ],
     [TABLES.Order]: [
         'id',
@@ -55,34 +51,26 @@ export const FIELDS = {
         'desiredDeliveryDate',
         'expectedDeliveryDate',
         'isDelivery',
-        'addressId',
-        'userId'
     ],
     [TABLES.OrderItem]: [
         'id',
         'quantity',
-        'orderId',
-        'skuId'
     ],
     [TABLES.Phone]: [
         'id',
         'number',
-        'countryCode',
-        'extension',
         'receivesDeliveryUpdates',
-        'userId',
-        'businessId'
     ],
     [TABLES.Plant]: [
         'id',
         'latinName',
         'traitData',
-        'imageData'
+        'imageData',
     ],
     [TABLES.Role]: [
         'id',
         'title',
-        'description'
+        'description',
     ],
     [TABLES.Sku]: [
         'id',
@@ -93,7 +81,6 @@ export const FIELDS = {
         'availability',
         'price',
         'status',
-        'plantId'
     ],
     [TABLES.Task]: [
         'id',
@@ -102,14 +89,14 @@ export const FIELDS = {
         'status',
         'description',
         'result',
-        'resultCode'
+        'resultCode',
     ],
     [TABLES.Trait]: [
         'id',
         'name',
-        'value'
+        'value',
     ],
-    [TABLES.User]: [
+    [TABLES.Customer]: [
         'id',
         'firstName',
         'lastName',
@@ -120,6 +107,5 @@ export const FIELDS = {
         'accountApproved',
         'emailVerified',
         'status',
-        'businessId'
     ]
 }

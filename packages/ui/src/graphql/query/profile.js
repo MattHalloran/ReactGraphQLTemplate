@@ -1,13 +1,13 @@
 import { gql } from 'graphql-tag';
-import { userContactFields, userSessionFields } from 'graphql/fragment';
+import { customerContactFields, customerSessionFields } from 'graphql/fragment';
 
 export const profileQuery = gql`
-    ${userContactFields}
-    ${userSessionFields}
+    ${customerContactFields}
+    ${customerSessionFields}
     query {
         profile {
-            ...userContactFields
-            ...userSessionFields
+            ...customerContactFields
+            ...customerSessionFields
         }
     }
 `

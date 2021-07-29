@@ -1,26 +1,26 @@
 import { gql } from 'graphql-tag';
-import { orderFields, orderItemFields, userContactFields } from 'graphql/fragment';
+import { orderFields, orderItemFields, customerContactFields } from 'graphql/fragment';
 
 export const ordersQuery = gql`
     ${orderFields}
     ${orderItemFields}
-    ${userContactFields}
+    ${customerContactFields}
     query Orders(
         $ids: [ID!]
-        $userIds: [ID!]
+        $customerIds: [ID!]
         $status: OrderStatus
     ) {
         orders(
             ids: $ids
-            userIds: $userIds
+            customerIds: $customerIds
             status: $status
         ) {
             ...orderFields
             items {
                 ...orderItemFields
             }
-            user {
-                ...userContactFields
+            customer {
+                ...customerContactFields
             }
         }
     }

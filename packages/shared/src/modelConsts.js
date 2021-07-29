@@ -41,9 +41,9 @@ export const IMAGE_USE = {
     ...PLANT_IMAGE_USE
 }
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
-// CANCELED_BY_USER     |   1) User canceled order before approval (i.e. no admin approval needed), OR
+// CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
 //                          2) PENDING_CANCEL was approved by admin
-// PENDING_CANCEL       | User canceled order after approval (i.e. admin approval needed)
+// PENDING_CANCEL       | Customer canceled order after approval (i.e. admin approval needed)
 // REJECTED             | Order was pending, but admin denied it
 // DRAFT                | Order that hasn't been submitted yet (i.e. cart)
 // PENDING              | Order that has been submitted, but not approved by admin yet
@@ -53,7 +53,7 @@ export const IMAGE_USE = {
 // DELIVERED            | Order has been delivered
 export const ORDER_STATUS = {
     CanceledByAdmin: 'Canceled By Admin',
-    CanceledByUser: 'Canceled By User',
+    CanceledByCustomer: 'Canceled By Customer',
     PendingCancel: 'Pending Cancel',
     Rejected: 'Rejected',
     Draft: 'Draft',
@@ -97,7 +97,7 @@ export const TRAIT_NAME = {
     SoilType: 'Soil Type',
     LightRange: 'Light range'
 }
-export const USER_ROLES = {
+export const CUSTOMER_ROLES = {
     Customer: "Customer",
     Admin: "Admin",
 }

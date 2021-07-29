@@ -14,7 +14,7 @@ export const typeDef = gql`
 
     input OrderItemInput {
         id: ID!
-        quantity: Int!
+        quantity: Int
     }
 
     type OrderItem {
@@ -30,13 +30,8 @@ export const typeDef = gql`
             orderId: ID!
             skuId: ID!
         ): OrderItem
-        updateOrderItem(
-            id: ID!
-            quantity: Int
-        ): OrderItem
-        deleteOrderItems(
-            ids: [ID!]!
-        ): Boolean
+        updateOrderItem(input: OrderItemInput!): OrderItem
+        deleteOrderItems(ids: [ID!]!): Boolean
     }
 `
 
@@ -45,28 +40,28 @@ export const resolvers = {
         addOrderItem: async (_, args, { req }, info) => {
             // Must be admin, or adding to your own
             if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const user_id = await db(TABLES.Order).select('userId').where('id', args.orderId).first();
-            if (req.token.userId !== user_id) return new CustomError(CODE.Unauthorized);
+            const customer_id = await db(TABLES.Order).select('customerId').where('id', args.orderId).first();
+            if (req.token.customerId !== customer_id) return new CustomError(CODE.Unauthorized);
             return await insertHelper({ model: Model, info: info, input: args });
         },
         updateOrderItem: async (_, args, { req }, info) => {
             // Must be admin, or adding to your own
-            const user_id = await db(TABLES.Order)
-                .select(`${TABLES.Order}.userId`)
+            const customer_id = await db(TABLES.Order)
+                .select(`${TABLES.Order}.customerId`)
                 .leftJoin(TABLES.OrderItem, `${TABLES.OrderItemModel}.orderId`, `${TABLES.Order}.id`)
-                .where(`${TABLES.OrderItem}.id`, args.id)
+                .where(`${TABLES.OrderItem}.id`, args.input.id)
                 .first();
-            if (!req.isAdmin && req.token.userId !== user_id) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: { quantity: args.quantity } });
+            if (!req.isAdmin && req.token.customerId !== customer_id) return new CustomError(CODE.Unauthorized);
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteOrderItems: async (_, args, { req }) => {
             // Must be admin, or deleting your own
-            let user_ids = await db(TABLES.Order)
-                .select(`${TABLES.Order}.userId`)
+            let customer_ids = await db(TABLES.Order)
+                .select(`${TABLES.Order}.customerId`)
                 .leftJoin(TABLES.OrderItem, `${TABLES.OrderItemModel}.orderId`, `${TABLES.Order}.id`)
                 .whereIn(`${TABLES.OrderItem}.id`, args.ids);
-            user_ids = [...new Set(user_ids)];
-            if (!req.isAdmin && (user_ids.length > 1 || req.token.userId !== user_ids[0])) return new CustomError(CODE.Unauthorized);
+            customer_ids = [...new Set(customer_ids)];
+            if (!req.isAdmin && (customer_ids.length > 1 || req.token.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
             await deleteHelper(Model.name, args.ids);
         },
     }

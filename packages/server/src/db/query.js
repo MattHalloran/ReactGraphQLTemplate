@@ -41,7 +41,6 @@ import { db } from './db';
 import { CustomError, validateArgs } from './error';
 import _ from 'lodash';
 import { MODELS, REL_TYPE } from './relationships';
-import pluralize from 'pluralize';
 
 export class Label {
     constructor(right, join, left) {
@@ -176,6 +175,7 @@ export const fullSelectQuery = async (model, reqFields, ids) => {
     console.log('BUILT QUERY IS: ', query);
     const results = await db.raw(query);
     const rows = results.rows;
+    console.log('QUERY ROWS', rows);
     // Format relationships
     // If null one-to-one relationships were added (i.e. {'prop1': null, 'prop2': null}), 
     // convert them to null
@@ -291,7 +291,7 @@ export const removeChildRelationshipsHelper = async (model, rel_name, child_ids)
         .update({ [relationship.ids[0]]: null });
 }
 
-// Updates children's foreign id in one-to-many relationship
+// Updates children's foreign id in one-to-one any one-to-many relationships
 // Arguments:
 // model - the model object
 // rel_name - the relationship's name
@@ -337,17 +337,23 @@ export const updateChildRelationshipsHelper = async (model, rel_name, parent_id,
 //                  otherThings.child.name: 'hello world'
 //              }
 export const insertHelper = async (args) => {
+    console.log('IN INSERT HELPER')
+    console.log(args.input);
     // Validate input format
     if (args.model.validationSchema) {
         const validateError = await validateArgs(args.model.validationSchema, args.input);
         if (validateError) return validateError;
     }
     // Find exposed fields of the main model being inserted (not any possible children)
-    const base_fields = args.model.exposedFields().filter(f => !(f in args.input));
+    const base_fields = args.model.exposedFields().filter(f => f !== 'id' && f in args.input);
+    console.log('GOT BASE FIELDS', base_fields)
     // Find defaults for the main model
     const base_defaults = args.defaults ? args.defaults.filter(f => !f.includes('.')) : {};
+    console.log('GOT BASE DEFAULTS', base_defaults)
     // Combine data for exposed fields with defaults
     const base_data = _.merge(_.pick(args.input, base_fields), base_defaults);
+    console.log('ABOT TO INSERT')
+    console.log(base_data)
     // Create base model 
     const base_id = await db(args.model.name).returning('id').insert(base_data);
 
@@ -357,8 +363,8 @@ export const insertHelper = async (args) => {
     // 2: relationship is a list of ids, which assigns each relationship id to an existing object
     //    (one-to-one ids are not included here, since they are part of the exposed fields)
     // 3: relationship is an object or lists of objects, which inserts each relationship object
-    for (const relationship in args.model.relationships) {
-        const id_name = `${pluralize.singular(relationship.name)}Ids`;
+    for (const relationship of args.model.relationships) {
+        const id_name = `${relationship.classNames[0]}Ids`;
         const rel_defaults = args.defaults ? args.defaults.filter(f => f.includes(`.${relationship.name}`)).map(f => f.substring(f.indexOf('.')+1)) : {};
         const rel_model = MODELS.find(m => m.name === relationship.name);
 
@@ -366,7 +372,7 @@ export const insertHelper = async (args) => {
         if (relationship.name in args.input) {
             const rel_data = args.input[relationship.name];
             if (Array.isArray(rel_data)) {
-                for (const curr_data in rel_data) {
+                for (const curr_data of rel_data) {
                     await insertHelper({ model: rel_model, data: curr_data, defaults: rel_defaults })
                 }
             } else {
@@ -387,18 +393,18 @@ export const insertHelper = async (args) => {
     if (args.info) return (await fullSelectQueryHelper(args.model, args.info, base_id))[0];
 }
 
-// Updates a model's exposed fields, except for those explicity excluded
-// If the field is not in args, defaults to curr's field value
-// If the model's id is not passed in, grabs from args
+// Updates a model's exposed fields, except for 'id' and those explicity excluded
+// If the field is not in args, defaults to current field value
 // If curr is not passed in, uses the id to query for it
+// If a child does not have an ID, it is assumed that it will be inserted
 // Returns the updated object
 // Arguments:
-// model - the model object
+// model - the model object, including its id
 // info - GraphQL info
 // validationSchema - format that data must be in
 // input - the data being updated
 // curr - an object containing the value's current data, or null
-// id - the id of the row being updated
+// deleteMissingRelationships - if true, deletes any relationships that are either set to null, or don't appear in their respective list
 export const updateHelper = async (args) => {
     // Validate input format
     if (args.model.validationSchema) {
@@ -406,11 +412,12 @@ export const updateHelper = async (args) => {
         if (validateError) return validateError;
     }
     // Find base id and current data
-    if (!args.id) {
+    const base_id = args.input.id || args.curr.id;
+    if (!base_id) {
         console.error('ID must be passed into update helper, either explicitly or in data');
         return new CustomError(CODE.InvalidArgs);
     }
-    const curr = args.curr || await db(args.model.name).where('id', args.id).first()
+    const curr = args.curr || await db(args.model.name).where('id', base_id).first()
     console.log('IN UPDATE HELPER: CURR')
     console.log(curr);
     // Find exposed fields of the main model being inserted (not any possible children)
@@ -418,40 +425,63 @@ export const updateHelper = async (args) => {
     // Combine curr data with updating data
     const base_data = _.merge(curr, _.pick(args.input, base_fields));
     // Perform the base update
-    await db(args.model.name).where('id', args.id).update(base_data);
+    await db(args.model.name).where('id', base_id).update(base_data);
 
     // Handle model relationships
     // There are 3 scenarios:
-    // 1: relationship is not included in data, so it is skipped
-    // 2: relationship is a list of ids, which assigns each relationship id to an existing object
-    //    (one-to-one ids are not included here, since they are part of the exposed fields)
-    // 3: relationship is an object or lists of objects, which updates each relationship object
-    for (const relationship in args.model.relationships) {
-        const id_name = `${pluralize.singular(relationship.name)}Ids`;
-        const rel_model = MODELS.find(m => m.name === relationship.name);
+    // 1: relationship is an object or lists of objects, which updates each relationship object
+    // 2: relationship is an id or list of ids, which assigns each relationship id to an existing object
+    // 3: relationship is not included in data, so it is skipped
+    for (const relationship of args.model.relationships) {
+        const rel_model = relationship.getModel();
+        console.log('REL MODEL ISSS');
+        console.log(rel_model);
 
-        // Option 3
+        // Option 1
         if (relationship.name in args.input) {
             const rel_data = args.input[relationship.name];
+            // For security, query for valid ids
+            let valid_ids;
+            if (relationship.type === REL_TYPE.One) {
+                valid_ids = [curr[`${relationship.classNames[0]}Id`]];
+            } else if (relationship.type === REL_TYPE.Many) {
+                valid_ids = (await db(relationship.classNames[0]).select('id').where(`${args.model.name}Id`, base_id)).filter(d => d.id);
+            } else {
+                valid_ids = (await db(relationship.classNames[1]).select(`${relationship.ids[1]}Id`).where(`${relationship.ids[0]}Id`, base_id)).filter(d => d[`${relationship.ids[1]}Id`]);
+            }
+            console.log('VALID IDS', valid_ids);
+
+            // Helper for updating relationship object with field data
+            // If not ID passed in, creates new object instead
+            async function updateRelObject(input) {
+                console.log("IN UPDATERELOBJECT");
+                console.log(input);
+                if (!input.id) {
+                    await insertHelper({ model: rel_model, input: input });
+                } else if (input.id in valid_ids) {
+                    await updateHelper({ model: rel_model, input: input });
+                } else {
+                    console.error(`Failed to update child relationship for ${args.model.name} object: invalid ID`);
+                }
+            }
+
             if (Array.isArray(rel_data)) {
-                for (let curr_data in rel_data) {
-                    const curr_id = curr_data.id;
-                    delete curr_data.id;
-                    await updateHelper({ model: rel_model, id: curr_id, input: curr_data })
+                for (const data of rel_data) {
+                    await updateRelObject(data);
                 }
             } else {
-                const curr_id = rel_data.id;
-                delete rel_data.id;
-                await updateHelper({ model: rel_model, id: curr_id, input: rel_data })
+                await updateRelObject(rel_data);
             }
             continue;
         }
 
         // Option 2
-        if (id_name in args.input && relationship.type === REL_TYPE.Many) {
-            await updateChildRelationshipsHelper(rel_model, relationship.name, args.id, args.input[id_name]);
-        } else if (id_name in args.input && relationship.type === REL_TYPE.ManyMany) {
-            await updateJoinRowsHelper(rel_model, relationship.name, args.id, args.input[id_name]);
+        if (`${relationship.classNames[0]}Id` in args.input && relationship.type === REL_TYPE.One) {
+            await updateChildRelationshipsHelper(rel_model, relationship.name, [args.input[`${relationship.classNames[0]}Id`]]);
+        } else if (`${relationship.classNames[0]}Ids` in args.input && relationship.type === REL_TYPE.Many) {
+            await updateChildRelationshipsHelper(rel_model, relationship.name, args.input[`${relationship.classNames[0]}Ids`]);
+        } else if (`${relationship.classNames[0]}Ids` in args.input && relationship.type === REL_TYPE.ManyMany) {
+            await updateJoinRowsHelper(rel_model, relationship.name, args.input[`${relationship.classNames[0]}Ids`]);
         }
     }
 

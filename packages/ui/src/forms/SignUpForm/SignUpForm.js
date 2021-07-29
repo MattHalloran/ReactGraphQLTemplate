@@ -40,7 +40,7 @@ function SignUpForm({
 
     const formik = useFormik({
         initialValues: {
-            existingCustomer: true,
+            accountApproved: true,
             marketingEmails: true,
             firstName: '',
             lastName: '',
@@ -60,7 +60,7 @@ function SignUpForm({
                 PubSub.publish(PUBS.Loading, false);
                 if (response.ok) {
                     onSessionUpdate(response.session)
-                    if (values.existingCustomer) {
+                    if (values.accountApproved) {
                         PubSub.publish(PUBS.AlertDialog, {
                             message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
                             firstButtonText: 'OK',
@@ -204,16 +204,16 @@ function SignUpForm({
                 <Grid item xs={12}>
                     <FormControl component="fieldset">
                         <RadioGroup 
-                            id="existingCustomer"
-                            name="existingCustomer"
+                            id="accountApproved"
+                            name="accountApproved"
                             aria-label="existing-customer-check"
-                            value={formik.values.existingCustomer}
+                            value={formik.values.accountApproved}
                             onChange={formik.handleChange}
                         >
                             <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
                             <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
                         </RadioGroup>
-                        <FormHelperText>{formik.touched.existingCustomer && formik.errors.existingCustomer}</FormHelperText>
+                        <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                     </FormControl>
                 </Grid>
                 <Grid item xs={12}>

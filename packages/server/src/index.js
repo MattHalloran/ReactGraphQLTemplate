@@ -33,7 +33,7 @@ app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR
 app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
-app.use(API_VERSION, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
+app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context

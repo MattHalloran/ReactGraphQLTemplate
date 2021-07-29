@@ -11,6 +11,7 @@ import { BusinessModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input BusinessInput {
+        id: ID
         name: String!
         subscribedToNewsletters: Boolean
         discountIds: [ID!]
@@ -24,7 +25,7 @@ export const typeDef = gql`
         addresses: [Address!]!
         phones: [Phone!]!
         emails: [Email!]!
-        employees: [User!]!
+        employees: [Customer!]!
         discounts: [Discount!]!
     }
 
@@ -34,7 +35,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addBusiness(input: BusinessInput!): Business!
-        updateBusiness(id: ID!, input: BusinessInput!): Business!
+        updateBusiness(input: BusinessInput!): Business!
         deleteBusinesses(ids: [ID!]!): Boolean
     }
 `
@@ -55,8 +56,8 @@ export const resolvers = {
         },
         updateBusiness: async(_, args, { req }, info) => {
             // Must be admin, or updating your own
-            if(!req.isAdmin || (req.token.businessId !== args.id)) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            if(!req.isAdmin || (req.token.businessId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteBusinesses: async(_, args, { req }) => {
             // Must be admin, or deleting your own

@@ -5,20 +5,10 @@ export const updateOrderMutation = gql`
     ${orderFields}
     ${orderItemFields}
     mutation updateOrder(
-        $id: String!
-        $status: String
-        $specialInstructions: String
-        $desiredDeliveryDate: Date
-        $isDelivery: Boolean
-        $items: [OrderItemInput!]
+        $input: OrderInput!
     ) {
     login(
-        id: $id
-        status: $status
-        specialInstructions: $specialInstructions
-        desiredDeliveryDate: $desiredDeliveryDate
-        isDelivery: $isDelivery
-        items: $items
+        input: $input
     ) {
         ...orderFields
         items {

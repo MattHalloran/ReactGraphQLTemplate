@@ -28,7 +28,7 @@ export const getInventoryPage = (ids) => promiseWrapper(http.fetch_inventory_pag
 export const getInventoryFilters = () => promiseWrapper(http.fetch_inventory_filters);
 export const modifySku = (sku, operation, data) => promiseWrapper(http.modify_sku, sku, operation, data);
 export const modifyPlant = (operation, data) => promiseWrapper(http.modify_plant, operation, data);
-export const modifyUser = (id, operation) => promiseWrapper(http.modify_user, id, operation);
+export const modifyCustomer = (id, operation) => promiseWrapper(http.modify_customer, id, operation);
 export const setOrderStatus = (id, status) => promiseWrapper(http.set_order_status, id, status);
 
 export function submitOrder(cart) {

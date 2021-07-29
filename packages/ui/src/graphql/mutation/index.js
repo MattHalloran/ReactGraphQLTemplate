@@ -1,5 +1,5 @@
 export * from './addImages';
-export * from './editProfile';
+export * from './updateCustomer';
 export * from './login';
 export * from './logout';
 export * from './signUp';

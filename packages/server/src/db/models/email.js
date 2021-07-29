@@ -12,9 +12,10 @@ import { EmailModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input EmailInput {
+        id: ID
         emailAddress: String!
         receivesDeliveryUpdates: Boolean
-        userId: ID
+        customerId: ID
         businessId: ID
     }
 
@@ -22,7 +23,7 @@ export const typeDef = gql`
         id: ID!
         emailAddress: String!
         receivesDeliveryUpdates: Boolean!
-        user: User
+        customer: Customer
         business: Business
     }
 
@@ -32,7 +33,7 @@ export const typeDef = gql`
 
     extend type Mutation {
         addEmail(input: EmailInput!): Email!
-        updateEmail(id: ID!, input: EmailInput!): Email!
+        updateEmail(input: EmailInput!): Email!
         deleteEmails(ids: [ID!]!): Boolean
     }
 `
@@ -48,19 +49,19 @@ export const resolvers = {
     Mutation: {
         addEmail: async (_, args, { req }, info) => {
             // Must be admin, or adding to your own
-            if(!req.isAdmin || (req.token.businessId !== args.businessId)) return new CustomError(CODE.Unauthorized);
+            if(!req.isAdmin || (req.token.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
             return await insertHelper({ model: Model, info: info, input: args.input });
         },
         updateEmail: async (_, args, { req }, info) => {
             // Must be admin, or updating your own
             if(!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const curr = await db(Model.name).where('id', args.id).first();
+            const curr = await db(Model.name).where('id', args.input.id).first();
             if (req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await updateHelper({ model: Model, info: info, id: args.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input });
         },
         deleteEmails: async (_, args, { req }) => {
             // Must be admin, or deleting your own
-            // TODO must keep at least one email per user
+            // TODO must keep at least one email per customer
             let business_ids = await db(Model.name).select('businessId').whereIn('id', args.ids);
             business_ids = [...new Set(business_ids)];
             if (!req.isAdmin && (business_ids.length > 1 || req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);

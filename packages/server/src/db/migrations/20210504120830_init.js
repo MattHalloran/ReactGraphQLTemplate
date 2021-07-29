@@ -18,7 +18,7 @@ export async function up (knex) {
         table.string('name', 128).notNullable();
         table.boolean('subscribedToNewsletters').defaultTo(true).notNullable();
     });
-    await knex.schema.createTable(TABLES.User, (table) => {
+    await knex.schema.createTable(TABLES.Customer, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('firstName', 128).notNullable();
         table.string('lastName', 128).notNullable();
@@ -44,7 +44,7 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Feedback, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('text', 4096).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('customerId').references('id').inTable(TABLES.Customer).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Role, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
@@ -61,7 +61,7 @@ export async function up (knex) {
         // postal_code - Postal/Zip code
         // throughfare - Street Address
         // premise - Apartment, Suite, P.O. box number, etc.
-        table.increments();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('tag', 128);
         table.string('name', 128);
         table.string('country', 2).defaultTo('US').notNullable();
@@ -75,23 +75,21 @@ export async function up (knex) {
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Email, (table) => {
-        //TODO CONSTRAINT chk_keys check (user_id is not null or business_id is not null)
-        table.increments();
+        //TODO CONSTRAINT chk_keys check (customer_id is not null or business_id is not null)
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('emailAddress', 128).notNullable().unique();
         table.boolean('receivesDeliveryUpdates').defaultTo(true).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('customerId').references('id').inTable(TABLES.Customer).onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Phone, (table) => {
         // Numbers should be stored without formatting
-        //TODO CONSTRAINT chk_keys check (user_id is not null or business_id is not null),
+        //TODO CONSTRAINT chk_keys check (customer_id is not null or business_id is not null),
         //TODO UNIQUE (number, country_code, extension)
-        table.increments();
-        table.string('number', 10).notNullable();
-        table.string('countryCode', 8).defaultTo('1').notNullable();
-        table.string('extension', 8);
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        table.string('number', 20).notNullable();
         table.boolean('receivesDeliveryUpdates').defaultTo(true).notNullable();
-        table.uuid('userId').references('id').inTable(TABLES.User).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('customerId').references('id').inTable(TABLES.Customer).onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
@@ -136,11 +134,11 @@ export async function up (knex) {
         table.timestamp('desiredDeliveryDate');
         table.timestamp('expectedDeliveryDate');
         table.boolean('isDelivery').defaultTo(true).notNullable();
-        table.integer('addressId').references('id').inTable(TABLES.Address).onUpdate('CASCADE');
-        table.uuid('userId').references('id').inTable(TABLES.User).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('addressId').references('id').inTable(TABLES.Address).onUpdate('CASCADE');
+        table.uuid('customerId').references('id').inTable(TABLES.Customer).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.OrderItem, (table) => {
-        table.increments();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.integer('quantity').defaultTo(1).notNullable();
         table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
@@ -151,7 +149,7 @@ export async function up (knex) {
         table.string('label').notNullable();
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
-        table.increments();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
@@ -161,20 +159,20 @@ export async function up (knex) {
         table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
-        table.increments();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
-    await knex.schema.createTable(TABLES.UserRoles, (table) => {
-        table.increments();
-        table.uuid('userId').references('id').inTable(TABLES.User).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+    await knex.schema.createTable(TABLES.CustomerRoles, (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        table.uuid('customerId').references('id').inTable(TABLES.Customer).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
     });
     console.info('Migration complete!');
 }
 
 export async function down (knex) {
-    await knex.schema.dropTableIfExists(TABLES.UserRoles);
+    await knex.schema.dropTableIfExists(TABLES.CustomerRoles);
     await knex.schema.dropTableIfExists(TABLES.SkuDiscounts);
     await knex.schema.dropTableIfExists(TABLES.PlantImages);
     await knex.schema.dropTableIfExists(TABLES.BusinessDiscounts);
@@ -191,7 +189,7 @@ export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.Role);
     await knex.schema.dropTableIfExists(TABLES.Feedback);
     await knex.schema.dropTableIfExists(TABLES.Discount);
-    await knex.schema.dropTableIfExists(TABLES.User);
+    await knex.schema.dropTableIfExists(TABLES.Customer);
     await knex.schema.dropTableIfExists(TABLES.Business);
     await knex.schema.dropTableIfExists(TABLES.Task);
     await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');

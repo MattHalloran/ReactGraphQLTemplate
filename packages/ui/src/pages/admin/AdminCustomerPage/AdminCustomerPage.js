@@ -29,10 +29,10 @@ function AdminCustomerPage() {
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
     }
     useEffect(() => {
-        setCustomers(data?.users);
+        setCustomers(data?.customers);
     }, [data])
 
-    const new_user = () => {
+    const new_customer = () => {
         alert('Coming soon!');
         return;
         //TODO
@@ -48,7 +48,7 @@ function AdminCustomerPage() {
         <div id="page">
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Button onClick={new_user}>New Customer</Button>
+                <Button onClick={new_customer}>New Customer</Button>
             </div>
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>

@@ -13,6 +13,7 @@
         "typescript": "^4.2.4"
     },
     "dependencies": {
+        "libphonenumber-js": "^1.9.22",
         "nodemon": "^2.0.7"
     }
 }

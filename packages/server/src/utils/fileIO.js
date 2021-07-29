@@ -40,6 +40,7 @@ export function clean(file, defaultFolder) {
 export function plainImageName(src) {
     // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
     let fileName = path.basename(src);
+    if (!fileName || fileName.length <= 0) return { name: null, ext: null };
     // 'boop-xl.png' -> { name: 'boop-xl', ext: 'png' }
     let { name, ext } = clean(fileName);
     // 'boop-xl' -> 'boop'
@@ -65,7 +66,7 @@ export async function findFileName(file, defaultFolder) {
     let curr = 0;
     while (curr < MAX_FILE_NAME_ATTEMPTS) {
         let currName = `${name}-${curr}${ext}`;
-        if(!fs.existsSync(`${ASSET_DIR}/${folder}/${currName}`)) return `${currName}`;
+        if(!fs.existsSync(`${ASSET_DIR}/${folder}/${currName}`)) return { name: `${currName}`, ext: ext, folder: folder };
         curr++;
     }
     // If no valid name found after max tries, return null
@@ -175,8 +176,8 @@ export async function saveImage(stream, filename) {
         const previously_uploaded = (await db(TABLES.Image).select('id').where('hash', hash)).length > 0;
         if (previously_uploaded) throw Error('File has already been uploaded')
         // Download the original image
-        await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}`);
-        console.log('STREAMED TO', `${ASSET_DIR}/${folder}/${name}`)
+        await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}`);
+        console.log('STREAMED TO', `${ASSET_DIR}/${folder}/${name}${ext}`)
         // Find resize options
         const sizes = resizeOptions(dims.width, dims.height);
         console.log('GOT RESIZE OPTIONS', sizes);
@@ -191,13 +192,13 @@ export async function saveImage(stream, filename) {
         }
         console.log('saveImage success!', { 
             success: true, 
-            filename: name,
+            filename: `${name}${ext}`,
             dimensions: dims,
             hash: hash
         })
         return { 
             success: true, 
-            filename: name,
+            filename: `${name}${ext}`,
             dimensions: dims,
             hash: hash
         }

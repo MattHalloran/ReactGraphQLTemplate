@@ -11,14 +11,15 @@ import { FeedbackModel as Model } from '../relationships';
 
 export const typeDef = gql`
     input FeedbackInput {
+        id: ID
         text: String!
-        userId: ID
+        customerId: ID
     }
 
     type Feedback {
         id: ID!
         text: String!
-        user: User
+        customer: Customer
     }
 
     extend type Query {
@@ -45,9 +46,9 @@ export const resolvers = {
         },
         deleteFeedbacks: async (_, args, { req }) => {
             // Must be admin, or deleting your own
-            let user_ids = await db(Model.name).select('userId').whereIn('id', args.ids);
-            user_ids = [...new Set(user_ids)];
-            if (!req.isAdmin && (user_ids.length > 1 || req.token.user_id !== user_ids[0])) return new CustomError(CODE.Unauthorized);
+            let customer_ids = await db(Model.name).select('customerId').whereIn('id', args.ids);
+            customer_ids = [...new Set(customer_ids)];
+            if (!req.isAdmin && (customer_ids.length > 1 || req.token.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
             return await deleteHelper(Model.name, args.ids);
         }
     }

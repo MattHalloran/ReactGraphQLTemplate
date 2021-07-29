@@ -2,10 +2,10 @@ import { gql } from 'graphql-tag';
 import { emailFields } from './emailFields';
 import { phoneFields } from './phoneFields';
 
-export const userContactFields = gql`
+export const customerContactFields = gql`
     ${emailFields}
     ${phoneFields}
-    fragment userContactFields on User {
+    fragment customerContactFields on Customer {
         id
         firstName
         lastName
@@ -16,6 +16,9 @@ export const userContactFields = gql`
         phones {
             ...phoneFields
         }
-        business
+        business {
+            id
+            name
+        }
     }
 `

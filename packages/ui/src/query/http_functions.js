@@ -118,7 +118,7 @@ export async function modify_plant(operation, data) {
     return await fetchWrapper('modify_plant', options);
 }
 
-export async function modify_user(id, operation) {
+export async function modify_customer(id, operation) {
     let json = JSON.stringify({
         "id": id,
         "operation": operation
@@ -129,7 +129,7 @@ export async function modify_user(id, operation) {
         headers: HEADERS.Text,
         credentials: 'include'
     }
-    return await fetchWrapper('modify_user', options);
+    return await fetchWrapper('modify_customer', options);
 }
 
 export async function submit_order(cart) {

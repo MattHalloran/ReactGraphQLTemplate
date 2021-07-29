@@ -122,9 +122,9 @@ function Hamburger({
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
     ]
 
-    let user_actions = getUserActions(session, roles, cart);
+    let customer_actions = getUserActions(session, roles, cart);
     if (session !== null) {
-        user_actions.push(['Log Out', 'logout', LINKS.Home, logout, ExitToAppIcon]);
+        customer_actions.push(['Log Out', 'logout', LINKS.Home, logout, ExitToAppIcon]);
     }
 
     return (
@@ -168,7 +168,7 @@ function Hamburger({
                     </Collapse>
                     {optionsToList(nav_options)}
                     <Divider />
-                    {optionsToList(user_actions)}
+                    {optionsToList(customer_actions)}
                 </List>
                 {/* <div style={{ display: 'flex', justifyContent: 'space-around', background: `${theme.lightPrimaryColor}` }}>
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />

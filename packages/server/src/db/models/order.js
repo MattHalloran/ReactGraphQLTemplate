@@ -13,7 +13,7 @@ import { OrderModel as Model } from '../relationships';
 export const typeDef = gql`
     enum OrderStatus {
         CanceledByAdmin
-        CanceledByUser
+        CanceledByCustomer
         PendingCancel
         Rejected
         Draft
@@ -25,6 +25,7 @@ export const typeDef = gql`
     }
 
     input OrderInput {
+        id: ID
         status: OrderStatus
         specialInstructions: String
         desiredDeliveryDate: Date
@@ -40,16 +41,16 @@ export const typeDef = gql`
         expectedDeliveryDate: Date
         isDelivery: Boolean
         address: Address
-        user: User!
+        customer: Customer!
         items: [OrderItem!]!
     }
 
     extend type Query {
-        orders(ids: [ID!], userIds: [ID!], status: OrderStatus): [Order!]!
+        orders(ids: [ID!], customerIds: [ID!], status: OrderStatus): [Order!]!
     }
 
     extend type Mutation {
-        updateOrder(id: ID!, input: OrderInput): Order!
+        updateOrder(input: OrderInput): Order!
         submitOrder(id: ID!): Boolean
         cancelOrder(id: ID!): OrderStatus
         deleteOrders(ids: [ID!]!): Boolean
@@ -64,10 +65,10 @@ export const resolvers = {
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
 
             let ids = args.ids;
-            if (args.userIds !== null) {
+            if (args.customerIds !== null) {
                 const ids_query = await db(TABLES.Order)
                     .select('id')
-                    .whereIn('userId', args.userIds);
+                    .whereIn('customerId', args.customerIds);
                 ids = ids_query.filter(q => q.id);
             } else if (args.status !== null) {
                 const ids_query = await db(TABLES.Order)
@@ -81,8 +82,8 @@ export const resolvers = {
     Mutation: {
         updateOrder: async (_, args, { req }, info) => {
             // Must be admin, or updating your own
-            const curr = await db(Model.name).where('id', args.id).first();
-            if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
+            const curr = await db(Model.name).where('id', args.input.id).first();
+            if (!req.isAdmin && req.token.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             if (!req.isAdmin) {
                 // Customers can only update their own orders in certain states
                 const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
@@ -90,12 +91,12 @@ export const resolvers = {
                 // Customers cannot edit order status
                 delete args.input.status;
             }
-            return await updateHelper({ model: Model, info: info, id: curr.id, input: args.input });
+            return await updateHelper({ model: Model, info: info, input: args.input});
         },
         submitOrder: async (_, args, { req }) => {
             // Must be admin, or submitting your own
             const curr = await db(Model.name).where('id', args.id).first();
-            if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin && req.token.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             // Only orders in the draft state can be submitted
             if (curr.status !== ORDER_STATUS.Draft) return new CustomError(CODE.ErrorUnknown);
             await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.Pending);
@@ -104,11 +105,11 @@ export const resolvers = {
         cancelOrder: async (_, args, { req }) => {
             // Must be admin, or canceling your own
             const curr = await db(Model.name).where('id', args.id).first();
-            if (!req.isAdmin && req.token.user_id !== curr.userId) return new CustomError(CODE.Unauthorized);
+            if (!req.isAdmin && req.token.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             // Only pending orders in certain states
             if (curr.status === ORDER_STATUS.Pending) {
-                await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.CanceledByUser);
-                return ORDER_STATUS.CanceledByUser;
+                await db(Model.name).where('id', curr.id).update('status', ORDER_STATUS.CanceledByCustomer);
+                return ORDER_STATUS.CanceledByCustomer;
             }
             const pending_order_statuses = [ORDER_STATUS.Approved, ORDER_STATUS.Scheduled];
             if (curr.status in pending_order_statuses) {

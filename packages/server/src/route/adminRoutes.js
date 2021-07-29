@@ -3,7 +3,7 @@ import { CODE } from '@local/shared';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import * as auth from '../auth';
 import { ACCOUNT_STATUS, SKU_STATUS } from '@local/shared';
-import { Order, User, Plant, Sku, Email, Phone } from '../db/models';
+import { Order, Customer, Plant, Sku, Email, Phone } from '../db/models';
 import fs from 'fs';
 
 const router = express.Router();
@@ -111,10 +111,10 @@ router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
     //     return StatusCodes['SUCCESS']
 })
 
-router.post('/modify_user', auth.requireAdmin, async (req, res) => {
-    if (req.token.user_id === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
+router.post('/modify_customer', auth.requireAdmin, async (req, res) => {
+    if (req.token.customerId === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
     const operation = req.body.operation;
-    const validId = (await db(TABLES.User).where('id', req.body.id).count()) > 0;
+    const validId = (await db(TABLES.Customer).where('id', req.body.id).count()) > 0;
     const OPERATION_TO_STATUS = {
         'LOCK': ACCOUNT_STATUS.HardLock,
         'UNLOCK': ACCOUNT_STATUS.Unlocked,
@@ -122,15 +122,15 @@ router.post('/modify_user', auth.requireAdmin, async (req, res) => {
         'DELETE': ACCOUNT_STATUS.Deleted
     }
     if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        db(TABLES.User).where('id', req.body.id).update({ status: OPERATION_TO_STATUS[operation] });
+        db(TABLES.Customer).where('id', req.body.id).update({ status: OPERATION_TO_STATUS[operation] });
         if (operation === 'DELETE') {
             // Make sure emails and phones get deleted
-            await db(TABLES.Email).where('userId', req.body.id).del();
-            await db(TABLES.Phone).where('userId', req.body.id).del();
-            await db(TABLES.User).where('id', req.body.id).del();
+            await db(TABLES.Email).where('customerId', req.body.id).del();
+            await db(TABLES.Phone).where('customerId', req.body.id).del();
+            await db(TABLES.Customer).where('id', req.body.id).del();
         }
         //TODO don't show admin?
-        const customers = await db(TABLES.User).select('*');
+        const customers = await db(TABLES.Customer).select('*');
         res.json(customers);
         return res.sendStatus(CODE.Success);
     }

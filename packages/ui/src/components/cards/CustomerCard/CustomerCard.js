@@ -13,7 +13,7 @@ import {
     Phone as PhoneIcon,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { modifyUser } from 'query/http_promises';
+import { modifyCustomer } from 'query/http_promises';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
 import { PUBS, PubSub } from 'utils';
 
@@ -69,57 +69,57 @@ function CustomerCard({
         alert('Coming soon!')
     }
 
-    const approve_user = () => {
-        modifyUser(id, 'APPROVE')
+    const approve_customer = () => {
+        modifyCustomer(id, 'APPROVE')
             .then(response => {
                 onUpdate(response.customers);
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to approve user.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, {message: 'Failed to approve customer.', severity: 'error'});
             });
     }
 
-    const unlock_user = () => {
-        modifyUser(id, 'UNLOCK')
+    const unlock_customer = () => {
+        modifyCustomer(id, 'UNLOCK')
             .then(response => {
                 onUpdate(response.customers);
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to unlock user.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, {message: 'Failed to unlock customer.', severity: 'error'});
             });
     }
 
-    const lock_user = () => {
-        modifyUser(id, 'LOCK')
+    const lock_customer = () => {
+        modifyCustomer(id, 'LOCK')
             .then(response => {
                 onUpdate(response.customers);
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to lock user.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, {message: 'Failed to lock customer.', severity: 'error'});
             });
     }
 
-    const delete_user = () => {
+    const delete_customer = () => {
         if (!window.confirm(`Are you sure you want to delete the account for ${firstName} ${lastName}?`)) return;
-        modifyUser(id, 'DELETE')
+        modifyCustomer(id, 'DELETE')
             .then(response => {
                 onUpdate(response.customers);
             })
             .catch(err => {
                 console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to delete user.', severity: 'error'});
+                PubSub.publish(PUBS.Snack, {message: 'Failed to delete customer.', severity: 'error'});
             });
     };
 
     let orders_action = [view_orders, 'Orders'];
     let edit_action = [edit, 'Edit']
-    let approve_action = [approve_user, 'Approve'];
-    let unlock_action = [unlock_user, 'Unlock'];
-    let lock_action = [lock_user, 'Lock'];
-    let delete_action = [delete_user, 'Delete'];
+    let approve_action = [approve_customer, 'Approve'];
+    let unlock_action = [unlock_customer, 'Unlock'];
+    let lock_action = [lock_customer, 'Lock'];
+    let delete_action = [delete_customer, 'Delete'];
 
     let actions = [orders_action, edit_action];
     switch (status) {
