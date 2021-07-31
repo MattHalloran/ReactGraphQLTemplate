@@ -9,9 +9,15 @@ export const typeDef = gql`
         value: String!
     }
 
+    type TraitOptions {
+        name: String!
+        values: [String!]!
+    }
+
     extend type Query {
         traitNames: [String!]!
         traitValues(name: String!): [String!]!
+        traitOptions: [TraitOptions!]!
     }
 `
 
@@ -22,6 +28,22 @@ export const resolvers = {
         },
         traitValues: async (_, args) => {
             return await db(TABLES.PlantTrait).select('value').where('name', args.name)
+        },
+        // Returns all values previously entered for every trait
+        traitOptions: async (_, args) => {
+            // Query all data
+            const trait_data = await db(TABLES.PlantTrait).select('name', 'value');
+            // Combine data into object
+            let options = {};
+            for (const row of trait_data) {
+                options[row.name] ? options[row.name].append(row.value) : options[row.name] = [row.value];
+            }
+            // Format object
+            let trait_options = []
+            for (const [key, value] of Object.entries(options)) {
+                trait_options.append({ name: key, values: value });
+            }
+            return trait_options;
         }
     },
 }

@@ -1,4 +1,5 @@
 export * from './addImages';
+export * from './changeCustomerStatus';
 export * from './updateCustomer';
 export * from './login';
 export * from './logout';

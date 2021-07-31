@@ -7,11 +7,11 @@ export const imagesByLabelQuery = gql`
         $label: String!
         $size: ImageSize
     ) {
-    imagesByLabel(
-        label: $label
-        size: $size
-    ) {
-        ...imageFields
+        imagesByLabel(
+            label: $label
+            size: $size
+        ) {
+            ...imageFields
+        }
     }
-  }
 `

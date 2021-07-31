@@ -5,7 +5,7 @@ import { CustomError } from '../error';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper, 
+    selectQueryHelper, 
     updateHelper
 } from '../query';
 import { EmailModel as Model } from '../relationships';
@@ -43,7 +43,7 @@ export const resolvers = {
         emails: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(Model, info, args.ids);
+            return selectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

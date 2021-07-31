@@ -40,10 +40,10 @@ function ProfileForm() {
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
-            firstName: profile?.profile?.firstName,
-            lastName: profile?.profile?.lastName,
+            firstName: profile?.profile?.firstName ?? '',
+            lastName: profile?.profile?.lastName ?? '',
             business: profile?.profile?.business?.name ?? '',
-            pronouns: profile?.profile?.pronouns,
+            pronouns: profile?.profile?.pronouns ?? '',
             email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
             phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
             theme: profile?.profile?.theme,

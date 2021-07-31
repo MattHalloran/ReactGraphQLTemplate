@@ -111,30 +111,4 @@ router.post('/modify_plant', auth.requireAdmin, async (req, res) => {
     //     return StatusCodes['SUCCESS']
 })
 
-router.post('/modify_customer', auth.requireAdmin, async (req, res) => {
-    if (req.token.customerId === req.body.id) return res.sendStatus(CODE.CannotDeleteYourself);
-    const operation = req.body.operation;
-    const validId = (await db(TABLES.Customer).where('id', req.body.id).count()) > 0;
-    const OPERATION_TO_STATUS = {
-        'LOCK': ACCOUNT_STATUS.HardLock,
-        'UNLOCK': ACCOUNT_STATUS.Unlocked,
-        'APPROVE': ACCOUNT_STATUS.Unlocked,
-        'DELETE': ACCOUNT_STATUS.Deleted
-    }
-    if (Object.keys(OPERATION_TO_STATUS).includes(operation)) {
-        db(TABLES.Customer).where('id', req.body.id).update({ status: OPERATION_TO_STATUS[operation] });
-        if (operation === 'DELETE') {
-            // Make sure emails and phones get deleted
-            await db(TABLES.Email).where('customerId', req.body.id).del();
-            await db(TABLES.Phone).where('customerId', req.body.id).del();
-            await db(TABLES.Customer).where('id', req.body.id).del();
-        }
-        //TODO don't show admin?
-        const customers = await db(TABLES.Customer).select('*');
-        res.json(customers);
-        return res.sendStatus(CODE.Success);
-    }
-    return res.sendStatus(CODE.ErrorUnknown);
-})
-
 module.exports = router;

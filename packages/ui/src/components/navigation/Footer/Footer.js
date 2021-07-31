@@ -54,7 +54,7 @@ function Footer({
         ['address', 'View in Google Maps', business?.ADDRESS?.Link, business?.ADDRESS?.Label, BusinessIcon],
         ['contact-phone', 'Call Us', business?.PHONE?.Link, business?.PHONE?.Label, PhoneIcon],
         ['contact-fax', 'Fax Us', business?.FAX?.Link, business?.FAX?.Label, PrintIcon],
-        ['contact-email', 'Email Us', business?.EMAIL?.Link, business?.EMAI?.Label, EmailIcon],
+        ['contact-email', 'Email Us', business?.EMAIL?.Link, business?.EMAIL?.Label, EmailIcon],
     ]
 
     const bottomImages = [

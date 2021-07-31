@@ -8,6 +8,16 @@ export const orderFields = gql`
         desiredDeliveryDate
         expectedDeliveryDate
         isDelivery
-        address
+        address {
+            tag
+            name
+            country
+            administrativeArea
+            subAdministrativeArea
+            locality
+            postalCode
+            throughfare
+            premise
+        }
     }
 `

@@ -28,18 +28,6 @@ export async function fetchWrapper(route, httpParams) {
     }
 }
 
-export async function fetch_unused_plants(sorter) {
-    let json = JSON.stringify({
-        "sorter": sorter,
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.ApplicationJson,
-    }
-    return await fetchWrapper('unused_plants', options);
-}
-
 export async function fetch_inventory(sorter, page_size, admin) {
     let json = JSON.stringify({
         "sorter": sorter,
@@ -118,20 +106,6 @@ export async function modify_plant(operation, data) {
     return await fetchWrapper('modify_plant', options);
 }
 
-export async function modify_customer(id, operation) {
-    let json = JSON.stringify({
-        "id": id,
-        "operation": operation
-    });
-    let options = {
-        body: json,
-        method: 'post',
-        headers: HEADERS.Text,
-        credentials: 'include'
-    }
-    return await fetchWrapper('modify_customer', options);
-}
-
 export async function submit_order(cart) {
     let json = JSON.stringify({
         "cart": cart,
@@ -143,20 +117,4 @@ export async function submit_order(cart) {
         credentials: 'include'
     }
     return await fetchWrapper('submit_order', options);
-}
-
-export async function fetch_image(key, size) {
-    let options = {
-        method: 'get',
-        headers: HEADERS.Text
-    }
-    return await fetchWrapper(`image?key=${key}&size=${size}`, options);
-}
-
-export async function fetch_images(keys, size) {
-    let options = {
-        method: 'get',
-        headers: HEADERS.Text
-    }
-    return await fetchWrapper(`images?keys=${keys.filter(k => k !== null).join(',')}&size=${size}`, options);
 }

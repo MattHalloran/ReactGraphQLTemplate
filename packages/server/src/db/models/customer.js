@@ -8,8 +8,10 @@ import moment from 'moment';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper, 
-    updateHelper
+    insertJoinRows,
+    selectQueryHelper, 
+    updateHelper,
+    deleteJoinRows
 } from '../query';
 import { CustomerModel as Model } from '../relationships';
 import { TABLES } from '../tables';
@@ -117,13 +119,13 @@ export const resolvers = {
         customers: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(Model, info, args.ids);
+            return selectQueryHelper(Model, info, args.ids);
         },
         profile: async (_, _a, { req }, info) => {
             // Can only query your own profile
             const customerId = req.token.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
-            const results = await fullSelectQueryHelper(Model, info, [customerId]);
+            const results = await selectQueryHelper(Model, info, [customerId]);
             return results[0];
         }
     },
@@ -131,7 +133,7 @@ export const resolvers = {
         login: async (_, args, { req, res }, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (req.roles.length > 0) return (await fullSelectQueryHelper(Model, info, [req.customerId]))[0];
+                if (req.roles.length > 0) return (await selectQueryHelper(Model, info, [req.customerId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate input format
@@ -177,7 +179,7 @@ export const resolvers = {
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
                 await setCookie(res, customer.id, token);
-                return (await fullSelectQueryHelper(Model, info, [customer.id]))[0];
+                return (await selectQueryHelper(Model, info, [customer.id]))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = customer.loginAttempts + 1;
@@ -250,7 +252,7 @@ export const resolvers = {
             sendVerificationLink(args.email, customer_id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
-            return (await fullSelectQueryHelper(Model, info, [customer_id]))[0];
+            return (await selectQueryHelper(Model, info, [customer_id]))[0];
         },
         updateCustomer: async (_, args, { req, res }, info) => {
             // Must be admin, or updating your own
@@ -288,12 +290,12 @@ export const resolvers = {
         addCustomerRole: async (_, args, { req }) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await insertJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);
+            return await insertJoinRows(Model, 'roles', args.id, [args.roleId]);
         },
         removeCustomerRole: async (_, args, { req }) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await deleteJoinRowsHelper(Model, 'roles', args.id, [args.roleId]);
+            return await deleteJoinRows(Model, 'roles', args.id, [args.roleId]);
         },
     }
 }

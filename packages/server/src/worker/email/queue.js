@@ -4,7 +4,10 @@ import fs from 'fs';
 import { BUSINESS_JSON } from '../../consts';
 const { BUSINESS_NAME, SITE_URL } = JSON.parse(fs.readFileSync(BUSINESS_JSON, 'utf8'));
 
-const emailQueue = new Bull('email', { redis: process.env.REDIS_CONN });
+const emailQueue = new Bull('email', { redis: { 
+    port: process.env.REDIS_CONN.split(':')[1],
+    host: process.env.REDIS_CONN.split(':')[0]
+} });
 emailQueue.process(emailProcess);
 
 export function sendMail(to=[], subject='', text='', html='') {

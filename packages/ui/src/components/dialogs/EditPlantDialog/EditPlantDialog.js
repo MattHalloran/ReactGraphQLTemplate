@@ -100,7 +100,7 @@ function EditPlantDialog({
     // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
-    const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0])
+    const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0]);
 
     useEffect(() => {
         setChangedPlant({

@@ -63,6 +63,15 @@ export const ORDER_STATUS = {
     InTransit: 'In Transit',
     Delivered: 'Delivered'
 }
+export const PLANT_SORT_OPTIONS = {
+    AZ: 'AZ',
+    ZA: 'ZA',
+    PriceLowHigh: 'PriceLowHigh',
+    PriceHighLow: 'PriceHighLow',
+    Featured: 'Featured',
+    Newest: 'Newest',
+    Oldest: 'Oldest'
+}
 export const SKU_STATUS = {
     Deleted: 'Deleted',
     Inactive: 'Inactive',

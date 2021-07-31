@@ -5,7 +5,7 @@ import { CustomError } from '../error';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper
+    selectQueryHelper
 } from '../query';
 import { FeedbackModel as Model } from '../relationships';
 
@@ -37,7 +37,7 @@ export const resolvers = {
         feedbacks: async (_, args, { req }, info) => {
             // Must be admin
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(Model, info, args.ids);
+            return selectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

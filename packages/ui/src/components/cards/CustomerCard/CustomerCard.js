@@ -13,7 +13,8 @@ import {
     Phone as PhoneIcon,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { modifyCustomer } from 'query/http_promises';
+import { changeCustomerStatusMutation } from 'graphql/query';
+import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
 import { PUBS, PubSub } from 'utils';
 
@@ -50,6 +51,7 @@ function CustomerCard({
     onUpdate,
 }) {
     const classes = useStyles();
+    const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
 
     const status_map = {
         [ACCOUNT_STATUS.Deleted]: ['Deleted', 'grey'],
@@ -69,49 +71,23 @@ function CustomerCard({
         alert('Coming soon!')
     }
 
-    const approve_customer = () => {
-        modifyCustomer(id, 'APPROVE')
-            .then(response => {
-                onUpdate(response.customers);
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to approve customer.', severity: 'error'});
-            });
+    const modifyCustomer = (status, message) => {
+        changeCustomerStatus({ variables: { id: id, status: status } }).then((response) => {
+            if (response.changeCustomerStatus !== null) {
+                PubSub.publish(PUBS.Snack, { message: message });
+            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
+        }).catch((response) => {
+            console.error(response)
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+        })
     }
 
-    const unlock_customer = () => {
-        modifyCustomer(id, 'UNLOCK')
-            .then(response => {
-                onUpdate(response.customers);
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to unlock customer.', severity: 'error'});
-            });
-    }
-
-    const lock_customer = () => {
-        modifyCustomer(id, 'LOCK')
-            .then(response => {
-                onUpdate(response.customers);
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to lock customer.', severity: 'error'});
-            });
-    }
-
+    const approve_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked);
+    const unlock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked)
+    const lock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.HardLock)
     const delete_customer = () => {
         if (!window.confirm(`Are you sure you want to delete the account for ${firstName} ${lastName}?`)) return;
-        modifyCustomer(id, 'DELETE')
-            .then(response => {
-                onUpdate(response.customers);
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, {message: 'Failed to delete customer.', severity: 'error'});
-            });
+        modifyCustomer(id, ACCOUNT_STATUS.Deleted)
     };
 
     let orders_action = [view_orders, 'Orders'];

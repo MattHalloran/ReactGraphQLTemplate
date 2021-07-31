@@ -1,17 +1,27 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { CODE } from '@local/shared';
+import { CODE, PLANT_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper, 
+    selectQueryHelper, 
     updateHelper
 } from '../query';
 import { PlantModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 
 export const typeDef = gql`
+    enum PlantSortBy {
+        AZ
+        ZA
+        PriceLowHigh
+        PriceHighLow
+        Featured
+        Newest
+        Oldest
+    }
+
     input PlantImage {
         files: [Upload!]!
         alts: [String]
@@ -47,8 +57,8 @@ export const typeDef = gql`
 
     extend type Query {
         plants(ids: [ID!]): [Plant!]!
-        activePlants: [Plant!]!
-        inactivePlants: [Plant!]!
+        activePlants(sortBy: PlantSortBy): [Plant!]!
+        inactivePlants(sortBy: PlantSortBy): [Plant!]!
     }
 
     extend type Mutation {
@@ -63,23 +73,30 @@ export const resolvers = {
         plants: async (_, args, { req }, info) => {
             // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return fullSelectQueryHelper(Model, info, args.ids);
+            return selectQueryHelper(Model, info, args.ids);
         },
-        activePlants: async (_, _a, { req }, info) => {
+        activePlants: async (_, args, { req }, info) => {
             // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Active plants are referenced by a SKU
             const active_ids = await db(TABLES.Sku).select('plantId');
-            return fullSelectQueryHelper(Model, info, active_ids);
+            let plant_data = selectQueryHelper(Model, info, active_ids);
+            console.log('ACTIVE PLANT DATA ISSSS', plant_data)
+            const sortBy = args.sortBy || PLANT_SORT_OPTIONS.AZ;
+            //TODO sort
+            return plant_data;
         },
-        inactivePlants: async (_, _a, { req }, info) => {
+        inactivePlants: async (_, args, { req }, info) => {
             // Must be admin (customers query SKUs)
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Active plants are referenced by no SKUs
             const all_ids = await db(Model.name).select('id');
             const active_ids = await db(TABLES.Sku).select('plantId');
             const inactive_ids = all_ids.filter(id => !active_ids.includes(id));
-            return fullSelectQueryHelper(Model, info, inactive_ids);
+            let plant_data = selectQueryHelper(Model, info, inactive_ids);
+            const sortBy = args.sortBy || PLANT_SORT_OPTIONS.AZ;
+            //TODO sort
+            return plant_data;
         }
     },
     Mutation: {

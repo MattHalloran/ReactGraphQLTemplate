@@ -1,8 +1,8 @@
 const env1 = {
     client: 'pg',
     connection: {
-        host: process.env.DB_HOST || 'db', // Matches container name in docker-compose
-        port: process.env.DB_PORT || 5432,
+        host: process.env.DB_CONN.split(':')[0],
+        port: process.env.DB_CONN.split(':')[1],
         database: process.env.DB_NAME,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,

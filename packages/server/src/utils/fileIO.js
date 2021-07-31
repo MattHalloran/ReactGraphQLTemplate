@@ -24,7 +24,7 @@ const ASSET_DIR = `${process.env.PROJECT_DIR}/assets`;
 // ext - extension of file
 // folder - path of file
 export function clean(file, defaultFolder) {
-    const pathRegex = /([^a-z0-9 \.\/]+)/gi;
+    const pathRegex = /([^a-z0-9 \.\-\_\/]+)/gi;
     // First, remove any invalid characters
     const cleanPath = file.replace(pathRegex, '');
     const folder = path.dirname(cleanPath)?.replace('.', '') || defaultFolder?.replace(pathRegex, '')?.replace('.', '');
@@ -222,7 +222,10 @@ export async function deleteFile(file) {
     try {
         const { name, ext, folder } = clean(file);
         let fullname = `${ASSET_DIR}/${folder}/${name}${ext}`;
-        if (!fs.existsSync(fullname)) return false;
+        if (!fs.existsSync(fullname)) {
+            console.error(`Could not delete file ${fullname}: not found`);
+            return false;
+        }
         fs.unlinkSync(fullname);
         return true;
     } catch (error) {

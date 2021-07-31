@@ -3,10 +3,10 @@ import { CODE, COOKIE } from '@local/shared';
 import { TABLES } from './db/tables';
 import { db } from './db/db';
 import { CustomerModel } from './db/relationships';
-import { fullSelectQuery } from './db/query';
+import { selectQuery } from './db/query/select';
 import { CustomError } from './db/error';
 
-const SESSION_MILLI = 30*86400;
+const SESSION_MILLI = 30*86400*1000;
 
 // Return array of customer roles (ex: ['admin', 'customer'])
 async function findCustomerRoles(customer_id) {
@@ -30,7 +30,6 @@ export async function authenticate(req, _, next) {
     // First, check if a session cookie was supplied
     const session = cookies[COOKIE.Session];
     console.log("SESSION COOKIE", session);
-    console.log('all cookies', Object.keys(cookies))
     if (session === null || session === undefined) {
         next();
         return;
@@ -65,7 +64,7 @@ export function generateToken(customerId, businessId) {
 // Sets a session cookie
 export async function setCookie(res, customer_id, token) {
     // Request roles and orders when querying for customer
-    const customer = (await fullSelectQuery(CustomerModel, ['roles', 'orders'], [customer_id]))[0];
+    const customer = (await selectQuery(CustomerModel, ['roles', 'orders'], [customer_id]))[0];
     const cookie = {
         id: customer_id,
         token: token,

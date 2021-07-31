@@ -42,31 +42,31 @@ export const ORDER_STATES = [
 export const SORT_OPTIONS = [
     {
         label: 'A-Z',
-        value: 'az',
+        value: 'AZ',
     },
     {
         label: 'Z-A',
-        value: 'za',
+        value: 'ZA',
     },
     {
         label: 'Price: Low to High',
-        value: 'lth',
+        value: 'PriceLowHigh',
     },
     {
         label: 'Price: High to Low',
-        value: 'htl',
+        value: 'PriceHighLow',
     },
     {
         label: 'Featured',
-        value: 'feat',
+        value: 'Featured',
     },
     {
         label: 'Newest',
-        value: 'new',
+        value: 'Newest',
     },
     {
         label: 'Oldest',
-        value: 'old',
+        value: 'Oldest',
     }
 ]
 

@@ -5,7 +5,7 @@ import { CODE, ORDER_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { 
     deleteHelper, 
-    fullSelectQueryHelper, 
+    selectQueryHelper, 
     updateHelper
 } from '../query';
 import { OrderModel as Model } from '../relationships';
@@ -76,7 +76,7 @@ export const resolvers = {
                     .where('status', args.status);
                 ids = ids_query.filter(q => q.id);
             }
-            return fullSelectQueryHelper(Model, info, ids);
+            return selectQueryHelper(Model, info, ids);
         }
     },
     Mutation: {

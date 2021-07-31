@@ -4,7 +4,7 @@ import { CustomError } from '../error';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper, 
+    selectQueryHelper, 
     updateHelper
 } from '../query';
 import { SkuModel as Model } from '../relationships';
@@ -60,7 +60,7 @@ export const resolvers = {
     SkuStatus: SKU_STATUS,
     Query: {
         skus: async (_, args, _c, info) => {
-            return fullSelectQueryHelper(Model, info, args.ids);
+            return selectQueryHelper(Model, info, args.ids);
         }
     },
     Mutation: {

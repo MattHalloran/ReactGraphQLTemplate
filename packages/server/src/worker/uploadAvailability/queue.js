@@ -2,7 +2,10 @@ import Bull from 'bull';
 import { uploadAvailabilityProcess } from './process';
 import xlsx from 'node-xlsx';
 
-const uploadAvailabilityQueue = new Bull('uploadAvailability', { redis: process.env.REDIS_CONN });
+const uploadAvailabilityQueue = new Bull('uploadAvailability', { redis: { 
+    port: process.env.REDIS_CONN.split(':')[1],
+    host: process.env.REDIS_CONN.split(':')[0]
+} });
 uploadAvailabilityQueue.process(uploadAvailabilityProcess);
 
 export async function uploadAvailability(filename) {

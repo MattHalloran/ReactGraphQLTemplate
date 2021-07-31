@@ -3,10 +3,10 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
+import React, { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
-import { useMutation } from '@apollo/client';
+import { activePlantsQuery, inactivePlantsQuery, traitOptionsQuery } from 'graphql/query';
+import { useQuery, useMutation } from '@apollo/client';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
@@ -37,15 +37,13 @@ const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 function AdminInventoryPage() {
     const classes = useStyles();
     const [currTab, setCurrTab] = useState(0);
-    // Holds the list of plants with existing SKUs
-    const [existing, setExisting] = useState([]);
-    // Holds list of all plants
-    const [all, setAll] = useState([]);
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
-    const [trait_options, setTraitOptions] = useState(null);
-    const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
-    const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+
+    const [sortBy, setSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+    const { data: traitOptions } = useQuery(traitOptionsQuery);
+    const { data: activePlants } = useQuery(activePlantsQuery, { variables: { sortBy: sortBy } });
+    const { data: inactivePlants } = useQuery(inactivePlantsQuery, { variables: { sortBy: sortBy } });
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
@@ -67,43 +65,6 @@ function AdminInventoryPage() {
                 PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
             })
     }
-
-    useEffect(() => {
-        getInventory(existing_sort_by, 0, true)
-            .then((response) => {
-                setExisting(response.page_results);
-                console.log('SET all plantsssssssssss', response.page_results)
-            })
-            .catch((error) => {
-                console.error("Failed to load inventory", error);
-                alert(error.error);
-            });
-    }, [existing_sort_by])
-
-    useEffect(() => {
-        getUnusedPlants(all_sort_by)
-            .then((response) => {
-                setAll(response.plants);
-            })
-            .catch((error) => {
-                console.error("Failed to load plants", error);
-            });
-    }, [all_sort_by])
-
-    useLayoutEffect(() => {
-        let mounted = true;
-        getInventoryFilters()
-            .then((response) => {
-                if (!mounted) return;
-                console.log('GOT TRAIT OPTIONS', response);
-                setTraitOptions(response);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
-
-        return () => mounted = false;
-    }, [])
 
     // const deleteSku = (sku) => {
     //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
@@ -134,19 +95,11 @@ function AdminInventoryPage() {
     //         });
     // }
 
-    const handleSort = (value) => {
-        if (currTab === 0) {
-            setExistingSortBy(value);
-        } else {
-            setAllSortBy(value);
-        }
-    }
-
     return (
         <div id="page">
             <EditPlantDialog
                 plant={currPlant}
-                trait_options={trait_options}
+                trait_options={traitOptions}
                 open={currPlant !== null}
                 onClose={() => setCurrPlant(null)} />
             <AdminBreadcrumbs />
@@ -174,8 +127,8 @@ function AdminInventoryPage() {
             <Selector
                 fullWidth
                 options={currTab === 0 ? SORT_OPTIONS : PLANT_SORT_OPTIONS}
-                selected={currTab === 0 ? existing_sort_by : all_sort_by}
-                handleChange={(e) => handleSort(e.target.value)}
+                selected={sortBy}
+                handleChange={(e) => setSortBy(e.target.value)}
                 inputAriaLabel='sort-plants-selector-label'
                 label="Sort" />
             <AppBar className={classes.toggleBar} position="static">
@@ -186,14 +139,14 @@ function AdminInventoryPage() {
             </AppBar>
             <TabPanel value={currTab} index={0}>
                 <div className={classes.cardFlex}>
-                    {existing?.map((plant, index) => <PlantCard key={index}
+                    {inactivePlants?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)} />)}
                 </div>
             </TabPanel>
             <TabPanel value={currTab} index={1}>
                 <div className={classes.cardFlex}>
-                    {all?.map((plant, index) => <PlantCard key={index}
+                    {activePlants?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)} />)}
                 </div>

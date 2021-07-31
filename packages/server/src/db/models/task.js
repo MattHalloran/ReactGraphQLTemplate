@@ -6,7 +6,7 @@ import { CustomError } from '../error';
 import { 
     insertHelper, 
     deleteHelper, 
-    fullSelectQueryHelper, 
+    selectQueryHelper, 
     updateHelper
 } from '../query';
 
@@ -46,7 +46,7 @@ export const resolvers = {
                     .where('status', args.status);
                 ids = ids_query.filter(q => q.id);
             }
-            return fullSelectQueryHelper(null, TABLES.Task, ids, []);
+            return selectQueryHelper(null, TABLES.Task, ids, []);
         }
     }
 }
