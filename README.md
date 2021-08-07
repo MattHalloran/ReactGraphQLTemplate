@@ -35,6 +35,8 @@ In the assets/public folder, there is a file named `business.json`. Edit this fi
 ### 5. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
 
+## Open Graph Tags
+Open Graph is a metadata format that describes how your website should be shown when shared on social media. This data is set in the header, and can be edited at `packages/ui/public/index.html`. For more information, [here](https://developers.facebook.com/docs/sharing/webmasters/) is a guide from Facebook.
 
 ## Common commands
 - Start: `docker-compose up -d`
@@ -63,13 +65,15 @@ The site can be accessed by the VPS's IP address, but in most cases you'll want 
 
 Once you buy a domain, you must set up the correct DNS records. This can be done through the site that you bought the domain from, or the site that you bought the VPS from. [Here](https://www.youtube.com/watch?v=wYDDYahCg60) is a good example. **Note**: DNS changes may take several hours to take effect
 
-### 2. Set up VPS
+### 2. Set up VPS - Reverse proxy
 The VPS you'll be running this website on must be configured to handle website traffic. This is done through Nginx https://olex.biz/2019/09/hosting-with-docker-nginx-reverse-proxy-letsencrypt/
 
-Once you are connected to your VPS, do the following:
-1. `git clone ${PROJECT_URL}`
-2. `cd ${PROJECT_NAME}`
-3. Edit .env variables
-4. `chmod +x ./scripts/*`
-5. *(If starting for first time)* `./scripts/system/cleanSetup.sh`
-6. `docker-compose up -d`
+I've created a project that automates this process, which you can find [here](https://github.com/MattHalloran/NginxSSLReverseProxy#getting-started).
+
+### 3. Set up VPS - Main code
+1. `cd ~`
+2. `git clone ${PROJECT_URL}`
+3. `cd ${PROJECT_NAME}`
+4. Edit .env variables
+5. `chmod +x ./scripts/*`
+7. `docker-compose up -d`

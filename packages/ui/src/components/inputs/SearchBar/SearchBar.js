@@ -31,7 +31,7 @@ function SearchBar({
 
 SearchBar.propTypes = {
     label: PropTypes.string,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.string,
     onChange: PropTypes.func.isRequired,
 }
 

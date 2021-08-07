@@ -13,7 +13,7 @@ import {
     Phone as PhoneIcon,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { changeCustomerStatusMutation } from 'graphql/query';
+import { changeCustomerStatusMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
 import { PUBS, PubSub } from 'utils';

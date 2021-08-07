@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let copy = SORT_OPTIONS.slice();
-const PLANT_SORT_OPTIONS = copy.splice(0, 2);
+const SKU_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
     const classes = useStyles();
@@ -40,7 +40,7 @@ function AdminInventoryPage() {
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
 
-    const [sortBy, setSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
+    const [sortBy, setSortBy] = useState(SKU_SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
     const { data: activePlants } = useQuery(activePlantsQuery, { variables: { sortBy: sortBy } });
     const { data: inactivePlants } = useQuery(inactivePlantsQuery, { variables: { sortBy: sortBy } });
@@ -99,7 +99,7 @@ function AdminInventoryPage() {
         <div id="page">
             <EditPlantDialog
                 plant={currPlant}
-                trait_options={traitOptions}
+                trait_options={traitOptions?.traitOptions}
                 open={currPlant !== null}
                 onClose={() => setCurrPlant(null)} />
             <AdminBreadcrumbs />
@@ -126,7 +126,7 @@ function AdminInventoryPage() {
             <h2>Sort</h2>
             <Selector
                 fullWidth
-                options={currTab === 0 ? SORT_OPTIONS : PLANT_SORT_OPTIONS}
+                options={currTab === 0 ? SORT_OPTIONS : SKU_SORT_OPTIONS}
                 selected={sortBy}
                 handleChange={(e) => setSortBy(e.target.value)}
                 inputAriaLabel='sort-plants-selector-label'

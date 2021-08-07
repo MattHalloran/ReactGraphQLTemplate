@@ -6,7 +6,8 @@ import {
 } from 'components';
 import { ShoppingList } from '../ShoppingList/ShoppingList';
 import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
-import { getInventoryFilters } from "query/http_promises";
+import { traitOptionsQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
 import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
 import {
     Close as CloseIcon,
@@ -43,6 +44,7 @@ function ShoppingPage({
 }) {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
+    const { data: traitOptions } = useQuery(traitOptionsQuery);
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
@@ -58,27 +60,11 @@ function ShoppingPage({
     }, [])
 
     useEffect(() => {
-        let mounted = true;
-        getInventoryFilters()
-            .then((response) => {
-                if (!mounted) return;
-                // Add checked boolean to each filter
-                for (const value of Object.values(response)) {
-                    for (let i = 0; i < value.length; i++) {
-                        value[i] = {
-                            label: value[i],
-                            value: i,
-                            checked: false,
-                        }
-                    }
-                }
-                setFilters(response);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
-        return () => mounted = false;
-    }, [session])
+        let options = traitOptions?.traitOptions.map(o => {
+            return { ...o, checked: false }
+        });
+        setFilters(options);
+    }, [traitOptions])
 
     const handleFiltersChange = useCallback((group, value, checked) => {
         let modified_filters = { ...filters };
@@ -111,12 +97,9 @@ function ShoppingPage({
         setSortBy(SORT_OPTIONS[0].value)
         setSearchString('')
         let copy = { ...filters };
-        for (const key of copy) {
-            let filter_group = copy[key];
-            for (let i = 0; i < filter_group.length; i++) {
-                filter_group[i].checked = false;
-            }
-        }
+        copy.map(o => {
+            return { ...o, checked: false }
+        })
         setFilters(copy);
     }
 

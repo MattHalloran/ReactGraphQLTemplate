@@ -6,7 +6,7 @@ export const inactivePlantsQuery = gql`
     ${skuFields}
     ${discountFields}
     query InactivePlantsQuery(
-        $sortBy: PlantSortBy!
+        $sortBy: SkuSortBy!
     ) {
         inactivePlants(
             sortBy: $sortBy

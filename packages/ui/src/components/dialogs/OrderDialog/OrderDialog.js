@@ -20,7 +20,6 @@ import { makeStyles } from '@material-ui/styles';
 import { CartTable as Cart } from 'components';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { setOrderStatus } from 'query/http_promises';
 import { findWithAttr, ORDER_STATES, PUBS, PubSub } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
 import _ from 'underscore';
@@ -79,24 +78,24 @@ function OrderDialog({
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.Approved)
+        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Approved } } })
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
                 console.error(err);
                 PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error' });
             })
-    }, [order])
+    }, [order, updateOrder])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.Rejected)
+        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Rejected } } })
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {
                 console.error(err);
                 PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error' });
             })
-    }, [order])
+    }, [order, updateOrder])
 
     let status_string;
     let status_index = findWithAttr(ORDER_STATES, 'value', order?.status);

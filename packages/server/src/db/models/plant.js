@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 import { db } from '../db';
-import { CODE, PLANT_SORT_OPTIONS } from '@local/shared';
+import { CODE, SKU_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { 
     insertHelper, 
@@ -12,15 +12,6 @@ import { PlantModel as Model } from '../relationships';
 import { TABLES } from '../tables';
 
 export const typeDef = gql`
-    enum PlantSortBy {
-        AZ
-        ZA
-        PriceLowHigh
-        PriceHighLow
-        Featured
-        Newest
-        Oldest
-    }
 
     input PlantImage {
         files: [Upload!]!
@@ -57,8 +48,8 @@ export const typeDef = gql`
 
     extend type Query {
         plants(ids: [ID!]): [Plant!]!
-        activePlants(sortBy: PlantSortBy): [Plant!]!
-        inactivePlants(sortBy: PlantSortBy): [Plant!]!
+        activePlants(sortBy: SkuSortBy): [Plant!]!
+        inactivePlants(sortBy: SkuSortBy): [Plant!]!
     }
 
     extend type Mutation {
@@ -82,7 +73,7 @@ export const resolvers = {
             const active_ids = await db(TABLES.Sku).select('plantId');
             let plant_data = selectQueryHelper(Model, info, active_ids);
             console.log('ACTIVE PLANT DATA ISSSS', plant_data)
-            const sortBy = args.sortBy || PLANT_SORT_OPTIONS.AZ;
+            const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
             //TODO sort
             return plant_data;
         },
@@ -94,7 +85,7 @@ export const resolvers = {
             const active_ids = await db(TABLES.Sku).select('plantId');
             const inactive_ids = all_ids.filter(id => !active_ids.includes(id));
             let plant_data = selectQueryHelper(Model, info, inactive_ids);
-            const sortBy = args.sortBy || PLANT_SORT_OPTIONS.AZ;
+            const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
             //TODO sort
             return plant_data;
         }

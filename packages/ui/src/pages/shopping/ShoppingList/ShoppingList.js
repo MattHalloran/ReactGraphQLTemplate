@@ -1,9 +1,9 @@
-import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
+import { skusQuery } from 'graphql/query';
 import { updateOrderMutation } from 'graphql/mutation';
-import { useMutation } from '@apollo/client';
-import { getInventory, getInventoryPage } from "query/http_promises";
+import { useQuery, useMutation } from '@apollo/client';
 import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
@@ -23,17 +23,12 @@ function ShoppingList({
     session,
     onSessionUpdate,
     cart,
-    page_size,
     sort = SORT_OPTIONS[0].value,
     filters,
     hideOutOfStock,
     searchString = '',
 }) {
-    page_size = page_size ?? Math.ceil(window.innerHeight / 150) * Math.ceil(window.innerWidth / 150);
     const classes = useStyles();
-    // Plant data for every loaded plant
-    const [loaded_plants, setLoadedPlants] = useState([]);
-    const all_plant_ids = useRef([]);
     // Plant data for all visible plants (i.e. not filtered)
     const [plants, setPlants] = useState([]);
     // Full image data for every sku group
@@ -42,35 +37,17 @@ function ShoppingList({
     const urlParams = useParams();
     // Find the current SKU group index, by any of the group's SKUs
     let curr_index = plants?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
-    const loading = useRef(false);
+    const { data: skuData } = useQuery(skusQuery,  { variables: { sortBy: sort } });
     const [updateOrder] = useMutation(updateOrderMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
-    useEffect(() => {
-        if (!session) return;
-        let mounted = true;
-        getInventory(sort, page_size, false)
-            .then((response) => {
-                if (!mounted) return;
-                setLoadedPlants(response.page_results);
-                all_plant_ids.current = response.plant_ids;
-                console.log('ALL PLANT IDS IS', all_plant_ids.current)
-            })
-            .catch((error) => {
-                console.error("Failed to load inventory", error);
-                alert(error.error);
-            });
-
-        return () => mounted = false;
-    }, [sort, page_size, session]);
-
     // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
         //First, determine if plants without availability shall be shown
-        let visible_plants = loaded_plants;
+        let visible_plants = skuData?.skus;
         if (hideOutOfStock) {
-            visible_plants = loaded_plants?.filter(plant => {
+            visible_plants = visible_plants?.filter(plant => {
                 if (plant.skus.length === 0) return true;
                 return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
             })
@@ -82,11 +59,13 @@ function ShoppingList({
         }
         //Find all applied filters
         let applied_filters = [];
-        for (const key of filters) {
-            let filter_group = filters[key];
-            for (let i = 0; i < filter_group.length; i++) {
-                if (filter_group[i].checked) {
-                    applied_filters.push([key, filter_group[i].label]);
+        if (filters && filters[Symbol.iterator] === 'function') {
+            for (const key of filters) {
+                let filter_group = filters[key];
+                for (let i = 0; i < filter_group.length; i++) {
+                    if (filter_group[i].checked) {
+                        applied_filters.push([key, filter_group[i].label]);
+                    }
                 }
             }
         }
@@ -123,40 +102,7 @@ function ShoppingList({
             }
         }
         setPlants(filtered_plants);
-    }, [loaded_plants, filters, searchString, hideOutOfStock])
-
-    const loadNextPage = useCallback(() => {
-        if (loading.current || loaded_plants.length >= all_plant_ids.current.length) return;
-        loading.current = true;
-        let load_to = Math.min(all_plant_ids.current.length, loaded_plants.length + page_size - 1);
-        let clone = all_plant_ids.current.slice();
-        let page_ids = clone.splice(loaded_plants.length, load_to);
-        if (page_ids.length === 0) {
-            loading.current = false;
-            return;
-        }
-        getInventoryPage(page_ids).then(response => {
-            setLoadedPlants(c => c.concat(...response.data));
-        }).catch(error => {
-            console.error("Failed to load SKUs!", error);
-        }).finally(() => {
-            loading.current = false;
-        })
-        return () => loading.current = false;
-    }, [loaded_plants, all_plant_ids, page_size]);
-
-    //Load next page if scrolling near the bottom of the page
-    const checkScroll = useCallback(() => {
-        const divElement = document.getElementById(track_scrolling_id);
-        if (divElement.getBoundingClientRect().bottom <= 1.5 * window.innerHeight) {
-            loadNextPage();
-        }
-    }, [track_scrolling_id, loadNextPage])
-
-    useLayoutEffect(() => {
-        document.addEventListener('scroll', checkScroll);
-        return (() => document.removeEventListener('scroll', checkScroll));
-    })
+    }, [skuData, filters, searchString, hideOutOfStock])
 
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);
@@ -215,7 +161,6 @@ ShoppingList.propTypes = {
     session: PropTypes.object,
     onSessionUpdate: PropTypes.func.isRequired,
     cart: PropTypes.object,
-    page_size: PropTypes.number,
     sort: PropTypes.string,
     filters: PropTypes.object,
     searchString: PropTypes.string,

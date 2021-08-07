@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { CODE, SKU_STATUS } from '@local/shared';
+import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { 
     insertHelper, 
@@ -16,6 +16,16 @@ export const typeDef = gql`
         Deleted
         Inactive
         Active
+    }
+
+    enum SkuSortBy {
+        AZ
+        ZA
+        PriceLowHigh
+        PriceHighLow
+        Featured
+        Newest
+        Oldest
     }
 
     input SkuInput {
@@ -45,7 +55,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        skus(ids: [ID!]): [Sku!]!
+        skus(ids: [ID!], sortBy: SkuSortBy): [Sku!]!
     }
 
     extend type Mutation {
@@ -58,9 +68,16 @@ export const typeDef = gql`
 
 export const resolvers = {
     SkuStatus: SKU_STATUS,
+    SkuSortBy: SKU_SORT_OPTIONS,
     Query: {
+        // Query all active SKUs
         skus: async (_, args, _c, info) => {
-            return selectQueryHelper(Model, info, args.ids);
+            // Filter out SKUs that aren't active
+            const all_ids = await db(TABLES.Sku).select('id', 'quantity', 'status');
+            const filtered_ids = all_ids.filter(sku => sku.status === SKU_STATUS.Active);
+            // TODO Sort
+            const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
+            return selectQueryHelper(Model, info, filtered_ids);
         }
     },
     Mutation: {

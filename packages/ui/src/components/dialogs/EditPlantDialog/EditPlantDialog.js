@@ -23,7 +23,8 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { modifyPlant } from 'query/http_promises';
+import { updatePlantMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { NoImageIcon } from 'assets/img';
 import { Selector } from 'components';
 import { 
@@ -96,6 +97,7 @@ function EditPlantDialog({
     console.log('PLANT POPUP', plant)
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
+    const [updatePlant] = useMutation(updatePlantMutation);
 
     // Used for display image upload
     const [selectedImage, setSelectedImage] = useState(null);
@@ -127,7 +129,7 @@ function EditPlantDialog({
             display_image: selectedImage,
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
-        modifyPlant('UPDATE', plant_data)
+        updatePlant({ variables: { input: plant_data } })
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'SKU Updated.' });
             })

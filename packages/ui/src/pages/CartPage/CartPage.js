@@ -3,14 +3,13 @@ import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
-import { submitOrder } from 'query/http_promises';
 import { CartTable } from 'components';
 import {
     ArrowBack as ArrowBackIcon,
     ArrowForward as ArrowForwardIcon,
     Update as UpdateIcon
 } from '@material-ui/icons';
-import { updateOrderMutation } from 'graphql/mutation';
+import { updateOrderMutation, submitOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -46,6 +45,7 @@ function CartPage({
     const [currCart, setcurrCart] = useState(null)
     const [changedCart, setChangedCart] = useState(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
+    const [submitOrder] = useMutation(submitOrderMutation);
 
     console.log('LOADING CART PAGE', cart, changedCart)
 
@@ -75,8 +75,8 @@ function CartPage({
         setChangedCart(data);
     }, [currCart])
 
-    function requestQuote() {
-        submitOrder(changedCart)
+    const requestQuote = useCallback(() => {
+        submitOrder({ variables: { id: cart.id } })
             .then(() => {
                 PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
             })
@@ -84,7 +84,7 @@ function CartPage({
                 console.error(err);
                 PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'});
             })
-    }
+    }, [cart, business, submitOrder])
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated
@@ -103,7 +103,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, currCart, requestQuote, customer_id]);
+    }, [changedCart, currCart, requestQuote, business]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
