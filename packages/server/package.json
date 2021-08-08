@@ -37,7 +37,7 @@
     "image-size": "^1.0.0",
     "imghash": "^0.0.9",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.21.19",
+    "knex": "0.95.5",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "node-xlsx": "^0.16.1",

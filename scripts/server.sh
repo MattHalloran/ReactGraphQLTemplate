@@ -7,9 +7,9 @@ echo 'Starting backend...'
 
 cd ${PROJECT_DIR}/packages/server
 echo 'Migrating to latest database'
-yarn migrate-latest
+knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
 echo 'Ensuring database is populated with minimal data'
-yarn seed-run=
+knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
 
 # Clean any unused files
 yarn clean
