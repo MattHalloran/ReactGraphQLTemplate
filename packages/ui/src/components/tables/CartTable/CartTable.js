@@ -58,7 +58,7 @@ function CartTable({
         desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
         specialInstructions: cart?.specialInstructions,
     })
-    let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b, 0);
+    let all_total = cartState.items.map(i => i.sku.price*i.availability).reduce((a, b) => (a*1)+b, 0);
 
     useEffect(() => {
         onUpdate(cartState);
@@ -132,7 +132,7 @@ function CartTable({
                 <TableCell className={classes.tableCol} align="right">
                     <QuantityBox
                         min_value={0}
-                        max_value={data.sku?.quantity ?? 100}
+                        max_value={data.sku?.availability ?? 100}
                         initial_value={quantity}
                         valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} />
                 </TableCell>

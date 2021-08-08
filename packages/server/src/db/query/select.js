@@ -64,8 +64,6 @@ const isNull = (object) => {
 // ids - which ids to query data for
 // reqTuples - 2D array describing the table's requested relationships
 export const selectQuery = async (model, reqFields, ids) => {
-    console.log('full select query');
-    console.log(reqFields);
     const leftLabel = 'main';
     const rightLabels = 'abcdefghijkl';
     const joinLabels = 'mnopqrstuvwxyz';
@@ -98,11 +96,12 @@ export const selectQuery = async (model, reqFields, ids) => {
         query += reqStrings[i][1];
     }
     // Append where, if specific ids were selected
-    if (ids !== null && ids !== undefined) {
-        console.log('yee', ids)
-        const id_string = ids.map(i => `'${i}'`).join(', ');
-        console.log('yye', id_string)
-        query += ` where "${leftLabel}"."id" in (${id_string})`;
+    if (Array.isArray(ids)) {
+        if (ids.length === 0) {
+            console.warn('Requested an empty array of objects. Returning null');
+            return [];
+        }
+        query += ` where "${leftLabel}"."id" in (${ids.map(i => `'${i}'`).join(', ')})`;
     }
     // Append group bys
     // Note: the only columns in group by should be the parent id, and all array_agg ids

@@ -17,7 +17,7 @@ export async function uploadAvailabilityProcess() {
         note: header.indexOf('Notes'),
         price: header.indexOf('Price 10+'),
         sku: header.indexOf('Plant Code'),
-        quantity: header.indexOf('Quantity')
+        availability: header.indexOf('Quantity')
     }
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
     await db(TABLES.Sku).update({ status: SKU_STATUS.Inactive });
@@ -45,7 +45,7 @@ export async function uploadAvailabilityProcess() {
             size: row[index.size] ? parseInt(row[index.size].replace(/\D/g, '')) : 'N/A', //'#3' -> 3
             price: row[index.price] ? parseFloat(row[index.price].replace(/[^\d.-]/g, '')) : 'N/A', //'$23.32' -> 23.32
             note: row[index.note],
-            quantity: row[index.quantity] ?? 'N/A',
+            availability: row[index.availability] ?? 'N/A',
             plantId: plant_id,
             status: SKU_STATUS.Active
         }

@@ -11,7 +11,7 @@ export const fieldsToString = (label, fields) => {
 // ex: `array_agg(json_build_object('id', c.id, 'name', c.name)) as class`
 export const createArrayAgg = (rel, label) => {
     return ` array_agg(json_build_object(
-        ${fieldsToString(label, ['id', ...rel.exposedFields()])}
+        ${fieldsToString(label, rel.exposedFields())}
     )) as ${rel.name}`;
 }
 
@@ -19,7 +19,7 @@ export const createArrayAgg = (rel, label) => {
 // ex: `json_build_object('id', c.id, 'name', c.name) as class`
 export const createJsonBuildObject = (rel, label) => {
     return ` json_build_object(
-        ${fieldsToString(label, ['id', ...rel.exposedFields()])}
+        ${fieldsToString(label, rel.exposedFields())}
     ) as ${rel.name}`;
 }
 

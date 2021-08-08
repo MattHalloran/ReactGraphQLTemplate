@@ -9,6 +9,9 @@ import {
     TextField,
     Typography
 } from '@material-ui/core';
+import { useMutation } from '@apollo/client';
+import { writeAssetsMutation } from 'graphql/mutation';
+import { PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -37,19 +40,41 @@ function AdminContactPage({
 }) {
     const classes = useStyles();
     const [hours, setHours] = useState('');
+    const [updateHours] = useMutation(writeAssetsMutation);
 
     useEffect(() => {
-        console.log('SETTING BUSINESS', business, business.hours)
-        setHours(business.hours);
+        setHours(business?.hours);
     }, [business])
+
+    const applyHours = () => {
+        // Data must be sent as a file to use writeAssets
+        const blob = new Blob([hours], { type: 'text/plain' });
+        const file = new File([blob], 'hours.md', { type: blob.type });
+        updateHours({ variables: { files: [file] } })
+            .then((response) => {
+                if (response.data.writeAssets) {
+                    PubSub.publish(PUBS.Snack, { message: 'Hours updated' });
+                } else {
+                    PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error' });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error' });
+            });
+    }
+
+    const revertHours = () => {
+        setHours(business?.hours);
+    }
 
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => {}}>Apply Changes</Button>
+                <Button fullWidth disabled={business?.hours === hours} onClick={applyHours}>Apply Changes</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => {}}>Revert Changes</Button>
+                <Button fullWidth disabled={business?.hours === hours} onClick={revertHours}>Revert Changes</Button>
             </Grid>
         </Grid>
     )
@@ -77,8 +102,7 @@ function AdminContactPage({
                 </Grid>
                 <Grid item sm={12} md={6}>
                     <ReactMarkdown plugins={[gfm]} className={classes.hoursPreview}>
-                        {business.hours}
-                        {/* {contactInfo?.hours} */}
+                        {hours}
                     </ReactMarkdown>
                 </Grid>
             </Grid>

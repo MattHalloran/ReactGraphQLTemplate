@@ -1,8 +1,4 @@
 export const CODE = {
-    NoResults: {
-        code: 'NO_RESULTS',
-        message: 'Warning: Called successfully, but got no results'
-    },
     SomeImagesAlreadyUploaded: {
         code: 'SOME_IMAGES_ALREADY_UPLOADED',
         message: 'Warning: Some images were already uploaded'

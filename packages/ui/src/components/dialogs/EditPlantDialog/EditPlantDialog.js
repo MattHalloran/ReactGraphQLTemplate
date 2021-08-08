@@ -399,9 +399,9 @@ function EditPlantDialog({
                         <Grid item xs={6}>
                             <TextField
                                 size="small"
-                                label="Quantity"
-                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.quantity : null}
-                                onChange={e => updateSkuField('quantity', e.target.value)}
+                                label="Availability"
+                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.availability : null}
+                                onChange={e => updateSkuField('availability', e.target.value)}
                             />
                         </Grid>
                     </Grid>

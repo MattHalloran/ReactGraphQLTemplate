@@ -10,6 +10,8 @@ import {
 import { SkuModel as Model } from '../relationships';
 import { saveFile } from '../../utils';
 import { uploadAvailability } from '../../worker/uploadAvailability/queue';
+import { db } from '../db';
+import { TABLES } from '../tables';
 
 export const typeDef = gql`
     enum SkuStatus {
@@ -73,7 +75,7 @@ export const resolvers = {
         // Query all active SKUs
         skus: async (_, args, _c, info) => {
             // Filter out SKUs that aren't active
-            const all_ids = await db(TABLES.Sku).select('id', 'quantity', 'status');
+            const all_ids = await db(TABLES.Sku).select('id', 'availability', 'status');
             const filtered_ids = all_ids.filter(sku => sku.status === SKU_STATUS.Active);
             // TODO Sort
             const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;

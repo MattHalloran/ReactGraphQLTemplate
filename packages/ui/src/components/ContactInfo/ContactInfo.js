@@ -1,9 +1,7 @@
 import React from 'react';
 import {  
-    Button, 
     BottomNavigation, 
     BottomNavigationAction, 
-    Grid,
     IconButton, 
     Table, 
     TableBody, 
@@ -100,14 +98,6 @@ function ContactInfo({
                     </Tooltip>
                 ))}
             </BottomNavigation>
-            <Grid container spacing={2} justifyContent="center">
-                <Grid item xs={6}>
-                    <Button fullWidth onClick={() => alert('Coming soon!')}>Contact Form</Button>
-                </Grid>
-                <Grid item xs={6}>
-                    <Button fullWidth onClick={() => alert('Coming soon!')}>Give Feedback</Button>
-                </Grid>
-            </Grid>
         </div>
     );
 }

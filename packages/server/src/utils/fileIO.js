@@ -30,9 +30,9 @@ export function clean(file, defaultFolder) {
     const folder = path.dirname(cleanPath)?.replace('.', '') || defaultFolder?.replace(pathRegex, '')?.replace('.', '');
     if (!cleanPath || cleanPath.length === 0) return { name: null, ext: null, folder: null };
     // If a directory was passed in, instead of a file
-    if (!cleanPath.includes('.')) return { name: null, ext: null, folder };
+    if (!cleanPath.includes('.')) return { name: null, ext: null, folder: folder ?? defaultFolder };
     const { name, ext } = path.parse(path.basename(cleanPath));
-    return { name, ext, folder };
+    return { name, ext, folder: folder ?? defaultFolder };
 }
 
 // From a src string, return the filename stored in the database
@@ -124,7 +124,7 @@ export async function findImageUrl(filename, size) {
 // acceptedTypes - a string or array of accepted file types, in mimetype form (ex: 'application/vnd.ms-excel')
 export async function saveFile(stream, filename, mimetype, overwrite, acceptedTypes) {
     try {
-        const { name, ext, folder } = await (overwrite ? findFileName(filename) : clean(filename, 'public'));
+        const { name, ext, folder } = await (overwrite ? clean(filename, 'public') : findFileName(filename));
         if (name === null) throw Error('Could not create a valid file name');
         if (acceptedTypes) {
             if (Array.isArray(acceptedTypes) && !acceptedTypes.some(type => mimetype.startsWith(type))) {
@@ -268,7 +268,7 @@ export async function readFiles(files) {
 }
 
 // Writes a list of files
-export async function saveFiles(files, overwrite = false, acceptedTypes) {
+export async function saveFiles(files, overwrite = true, acceptedTypes) {
     let data = [];
     for (const file of files) {
         const { createReadStream, filename, mimetype } = await file;

@@ -143,7 +143,7 @@ function Hamburger({
                         <ListItemText primary="Contact Us" />
                         {contactOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
-                    <Collapse in={contactOpen} timeout="auto" unmountOnExit>
+                    <Collapse className={classes.menuItem} in={contactOpen} timeout="auto" unmountOnExit>
                         <ContactInfo business={business} />
                     </Collapse>
                     {/* Collapsible social media links */}

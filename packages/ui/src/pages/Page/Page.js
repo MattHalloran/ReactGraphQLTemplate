@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { LINKS } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { CUSTOMER_ROLES } from '@local/shared';
@@ -18,11 +18,13 @@ const Page = ({
     const [login] = useMutation(loginMutation);
 
     useEffect(() => {
-        console.log('LOGGING INNNNN.......')
         login().then((response) => {
             onSessionUpdate(response.data.login);
             setSessionChecked(true);
-        }).catch((response) => {console.error(response); setSessionChecked(true)})
+        }).catch((response) => { 
+            console.error(response); 
+            PubSub.publish(PUBS.Snack, { message: 'Error: Cannot connect to server', severity: 'error' }) 
+        })
     }, [login, onSessionUpdate])
 
     useEffect(() => {

@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         alignItems: 'stretch',
     },
+    plantSelector: {
+        marginBottom: '1em',
+    },
 }));
 
 let copy = SORT_OPTIONS.slice();
@@ -125,6 +128,7 @@ function AdminInventoryPage() {
             />
             <h2>Sort</h2>
             <Selector
+                className={classes.plantSelector}
                 fullWidth
                 options={currTab === 0 ? SORT_OPTIONS : SKU_SORT_OPTIONS}
                 selected={sortBy}
@@ -139,14 +143,14 @@ function AdminInventoryPage() {
             </AppBar>
             <TabPanel value={currTab} index={0}>
                 <div className={classes.cardFlex}>
-                    {inactivePlants?.map((plant, index) => <PlantCard key={index}
+                    {inactivePlants?.inactivePlants?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)} />)}
                 </div>
             </TabPanel>
             <TabPanel value={currTab} index={1}>
                 <div className={classes.cardFlex}>
-                    {activePlants?.map((plant, index) => <PlantCard key={index}
+                    {activePlants?.activePlants?.map((plant, index) => <PlantCard key={index}
                         plant={plant}
                         onClick={() => setCurrPlant(plant)} />)}
                 </div>

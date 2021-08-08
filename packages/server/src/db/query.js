@@ -11,8 +11,6 @@ import { selectQuery } from './query/select';
 // Selects all requested data, including nested children, using the GraphQL info object
 // Since a full select query only goes one child deep, we must combine the results
 export const selectQueryHelper = async (model, info, ids) => {
-    console.log('IN SELECT QUERY HELPERRRRRRRR');
-    console.log(getFieldNames(info));
     const requested_fields = info ? getFieldNames(info) : [];
     return selectQuery(model, requested_fields, ids);
 }

@@ -10,8 +10,7 @@ function PrivacyPolicyPage() {
 
     useEffect(() => {
         if (privacyData === undefined) return;
-        let data = privacyData.readAssets[0] ? JSON.parse(privacyData.readAssets[0]) : {};
-        setPrivacy(data);
+        setPrivacy(privacyData.readAssets[0]);
     }, [privacyData])
 
     return (

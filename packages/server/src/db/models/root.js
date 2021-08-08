@@ -21,7 +21,7 @@ export const typeDef = gql`
     }
     type Mutation {
         _empty: String
-        writeAssets(files: [String!]!, overwrite: Boolean): Boolean
+        writeAssets(files: [Upload!]!): Boolean
     }
 `
 
@@ -50,7 +50,9 @@ export const resolvers = {
     },
     Mutation: {
         writeAssets: async (_, args) => {
-            return await saveFiles(args.files);
+            const data = await saveFiles(args.files);
+            // Any failed writes will return null
+            return !data.some(d => d === null)
         },
     }
 }

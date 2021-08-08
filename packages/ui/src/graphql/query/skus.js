@@ -6,8 +6,7 @@ export const skusQuery = gql`
     ${plantFields}
     ${discountFields}
     query SkusQuery(
-        $sortBy: SkuSortBy!
-        $showUnavailable: Boolean
+        $sortBy: SkuSortBy
     ) {
         skus(
             sortBy: $sortBy

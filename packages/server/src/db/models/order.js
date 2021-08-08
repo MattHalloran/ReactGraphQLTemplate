@@ -65,12 +65,12 @@ export const resolvers = {
             if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
 
             let ids = args.ids;
-            if (args.customerIds !== null) {
+            if (args.customerIds) {
                 const ids_query = await db(TABLES.Order)
                     .select('id')
                     .whereIn('customerId', args.customerIds);
                 ids = ids_query.filter(q => q.id);
-            } else if (args.status !== null) {
+            } else if (args.status) {
                 const ids_query = await db(TABLES.Order)
                     .select('id')
                     .where('status', args.status);

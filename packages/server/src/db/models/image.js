@@ -76,7 +76,6 @@ export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
         imagesByName: async (_, args) => {
-            console.log('IN IMAGES BY NAMEEEE', args)
             // Loop through each fileName
             const paths = [];
             for (let i = 0; i < args.fileNames.length; i++) {
@@ -88,21 +87,16 @@ export const resolvers = {
         },
         imagesByLabel: async (_, args) => {
             // Locate images in database
-            console.log('AAAAA')
             const images = await db(Model.name)
                 .select('*')
                 .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
                 .where(`${TABLES.ImageLabels}.label`, args.label);
-            if (images === undefined || images.length === 0) return new CustomError(CODE.NoResults);
-            console.log('BBBBB')
+            if (images === undefined || images.length === 0) return [];
             // Loop through each image
             const image_data = [];
             for (let i = 0; i < images.length; i++) {
-                console.log('CCCCC')
                 // Try returning the image in the requested size, or any available size
-                console.log('FINDING FILE PATH',`${images[i].folder}/${images[i].fileName}${images[i].extension}`,  args.size)
                 const filePath = await findImageUrl(`${images[i].folder}/${images[i].fileName}${images[i].extension}`, args.size);
-                console.log('FOUND FILE PATH', filePath)
                 if (filePath) {
                     image_data.push({
                         src: filePath,
@@ -116,7 +110,6 @@ export const resolvers = {
                         description: null
                     })
                 }
-                console.log('BBBBBB')
             }
             return image_data;
         }

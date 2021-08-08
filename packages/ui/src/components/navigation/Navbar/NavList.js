@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
         fill: theme.palette.primary.contrastText,
     },
     contact: {
-        width: '300px',
+        width: 'calc(min(100vw, 400px))',
         height: '300px',
     },
 }));
