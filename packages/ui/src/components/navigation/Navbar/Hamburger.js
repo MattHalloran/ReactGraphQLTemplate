@@ -42,10 +42,10 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.primary.contrastText,
     },
     facebook: {
-        fill: '#43609C', // UCLA blue
+        fill: '#ffffff', //'#43609C', // UCLA blue
     },
     instagram: {
-        fill: '#F77737',
+        fill: '#ffffff', // '#F77737',
     },
     copyright: {
         color: theme.palette.primary.contrastText,

@@ -87,7 +87,7 @@ function Routes({
                 priority={0.1}
                 render={() => (
                     <Page title={title('Privacy Policy')} {...common}>
-                        <PrivacyPolicyPage />
+                        <PrivacyPolicyPage business={business} />
                     </Page>
                 )}
             />
@@ -98,7 +98,7 @@ function Routes({
                 priority={0.1}
                 render={() => (
                     <Page title={title('Terms & Conditions')} {...common}>
-                        <TermsPage />
+                        <TermsPage business={business} />
                     </Page>
                 )}
             />
