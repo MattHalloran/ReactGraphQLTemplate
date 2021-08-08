@@ -90,7 +90,6 @@ export const LINKS = {
     AdminInventory: "/admin/inventory",
     AdminOrders: "/admin/orders",
     Cart: "/cart",
-    Contact: "/contact",
     ForgotPassword: "/forgot-password",
     Gallery: "/gallery",
     Home: "/",

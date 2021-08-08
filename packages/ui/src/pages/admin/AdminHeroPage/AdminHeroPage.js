@@ -89,7 +89,7 @@ function AdminHeroPage() {
         <div id='page' className={classes.root}>
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Typography variant="h3" component="h1">Edit Hero</Typography>
+                <Typography variant="h3" component="h1">Manage Hero</Typography>
             </div>
             <Dropzone
                 dropzoneText={'Drag \'n\' drop new images here or click'}

@@ -7,10 +7,14 @@ import {
     AdminBreadcrumbs,
     OrderCard,
     OrderDialog,
-    Selector
+    Selector,
 } from 'components';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
+    header: {
+        textAlign: 'center',
+    },
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
@@ -47,6 +51,9 @@ function AdminOrderPage() {
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
             <AdminBreadcrumbs className={classes.padBottom}/>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Manage Orders</Typography>
+            </div>
             <Selector
                 fullWidth
                 options={ORDER_STATES}

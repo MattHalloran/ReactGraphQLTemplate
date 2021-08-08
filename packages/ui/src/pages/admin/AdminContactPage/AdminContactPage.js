@@ -83,7 +83,7 @@ function AdminContactPage({
         <div id="page" className={classes.root}>
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Typography variant="h3" component="h1">Edit Contact Info</Typography>
+                <Typography variant="h3" component="h1">Manage Contact Info</Typography>
             </div>
             { options }
             <Grid container spacing={2} direction="row">

@@ -29,7 +29,6 @@ export async function authenticate(req, _, next) {
     const { cookies } = req;
     // First, check if a session cookie was supplied
     const session = cookies[COOKIE.Session];
-    console.log("SESSION COOKIE", session);
     if (session === null || session === undefined) {
         next();
         return;
@@ -72,7 +71,6 @@ export async function setCookie(res, customer_id, token) {
         theme: customer.theme,
         orders: customer.orders
     };
-    console.log('SETTING COOKIE', COOKIE.Session, SESSION_MILLI, cookie);
     res.cookie(COOKIE.Session, cookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

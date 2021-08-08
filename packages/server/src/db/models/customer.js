@@ -133,7 +133,7 @@ export const resolvers = {
         login: async (_, args, { req, res }, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (req.roles.length > 0) return (await selectQueryHelper(Model, info, [req.customerId]))[0];
+                if (req.roles?.length > 0) return (await selectQueryHelper(Model, info, [req.customerId]))[0];
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate input format

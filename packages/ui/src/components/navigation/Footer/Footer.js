@@ -68,11 +68,11 @@ function Footer({
             <Grid container justifyContent='center' spacing={1}>
                 <Grid item xs={6}>
                     <List component="nav">
+                        <ListItem component="h5" >
+                            <ListItemText className={classes.upper} primary="Resources" />
+                        </ListItem>
                         <ListItem button component="a" href={LINKS.About} >
                             <ListItemText primary="About Us" />
-                        </ListItem>
-                        <ListItem button component="a" href={LINKS.Contact} >
-                            <ListItemText primary="Contact Us" />
                         </ListItem>
                         <ListItem
                             button
@@ -97,8 +97,8 @@ function Footer({
                 </Grid>
                 <Grid item xs={6}>
                     <List component="nav">
-                        <ListItem button component="h5" >
-                            <ListItemText className={classes.upper} primary={business?.BUSINESS_NAME?.Long} />
+                        <ListItem component="h5" >
+                            <ListItemText className={classes.upper} primary="Contact" />
                         </ListItem>
                         {contactLinks.map(([label, tooltip, src, text, Icon], key) => (
                             <Tooltip key={key} title={tooltip} placement="left">

@@ -7,7 +7,7 @@ import {
     CustomerCard
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -47,6 +47,9 @@ function AdminCustomerPage() {
     return (
         <div id="page">
             <AdminBreadcrumbs />
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Manage Customers</Typography>
+            </div>
             <div className={classes.header}>
                 <Button onClick={new_customer}>New Customer</Button>
             </div>

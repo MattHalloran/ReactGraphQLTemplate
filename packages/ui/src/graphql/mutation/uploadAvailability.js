@@ -4,7 +4,7 @@ export const uploadAvailabilityMutation = gql`
     mutation uploadAvailability(
         $file: Upload!
     ) {
-    updateImages(
+    uploadAvailability(
         file: $file
     )
 }

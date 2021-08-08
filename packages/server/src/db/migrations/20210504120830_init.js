@@ -31,7 +31,7 @@ export async function up (knex) {
         table.string('resetPasswordCode', 256);
         table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();
-        table.enu('status', Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.WaitingEmailVerification).notNullable();
+        table.enu('status', Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.Unlocked).notNullable();
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE');
     });
     await knex.schema.createTable(TABLES.Discount, (table) => {

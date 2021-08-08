@@ -5,15 +5,14 @@ ${PROJECT_DIR}/scripts/wait-for.sh ${DB_CONN} -t 1000 -- echo 'Database is up'
 ${PROJECT_DIR}/scripts/wait-for.sh ${REDIS_CONN} -t 1000 -- echo 'Redis is up'
 echo 'Starting backend...'
 
-#(cd packages/server && npm run start-dev) & (cd packages/ui && npm run start-dev)
-# For some reason, knex will not run if using npm run commands. So we must call them manually :(
 cd ${PROJECT_DIR}/packages/server
-knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
-knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
-# knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
+echo 'Migrating to latest database'
+yarn migrate-latest
+echo 'Ensuring database is populated with minimal data'
+yarn seed-run=
 
 # Clean any unused files
-npm run clean
+yarn clean
 
 cd ${PROJECT_DIR}/packages/server
-npm run start-${NODE_ENV}
+yarn start-${NODE_ENV}

@@ -71,7 +71,7 @@ function CustomerCard({
         alert('Coming soon!')
     }
 
-    const modifyCustomer = (status, message) => {
+    const modifyCustomer = (id, status, message) => {
         changeCustomerStatus({ variables: { id: id, status: status } }).then((response) => {
             if (response.changeCustomerStatus !== null) {
                 PubSub.publish(PUBS.Snack, { message: message });
@@ -82,12 +82,12 @@ function CustomerCard({
         })
     }
 
-    const approve_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked);
-    const unlock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked)
-    const lock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.HardLock)
+    const approve_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked, 'Customer Approved');
+    const unlock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.Unlocked, 'Customer unlocked')
+    const lock_customer = () => modifyCustomer(id, ACCOUNT_STATUS.HardLock, 'Customer locked')
     const delete_customer = () => {
         if (!window.confirm(`Are you sure you want to delete the account for ${firstName} ${lastName}?`)) return;
-        modifyCustomer(id, ACCOUNT_STATUS.Deleted)
+        modifyCustomer(id, ACCOUNT_STATUS.Deleted, 'Customer deleted')
     };
 
     let orders_action = [view_orders, 'Orders'];

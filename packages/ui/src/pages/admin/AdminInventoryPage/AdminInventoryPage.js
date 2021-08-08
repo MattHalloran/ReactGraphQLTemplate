@@ -16,10 +16,18 @@ import {
     Selector,
     TabPanel
 } from 'components';
-import { Tabs, Tab, AppBar } from '@material-ui/core';
+import { 
+    AppBar, 
+    Tab, 
+    Tabs, 
+    Typography 
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
+    header: {
+        textAlign: 'center',
+    },
     toggleBar: {
         background: theme.palette.primary.light,
         color: theme.palette.primary.contrastText,
@@ -52,7 +60,7 @@ function AdminInventoryPage() {
     const availabilityUpload = (acceptedFiles) => {
         uploadAvailability({
             variables: {
-                files: acceptedFiles[0]
+                file: acceptedFiles[0]
             }
         })
             .then((response) => {
@@ -106,7 +114,9 @@ function AdminInventoryPage() {
                 open={currPlant !== null}
                 onClose={() => setCurrPlant(null)} />
             <AdminBreadcrumbs />
-            <h1>Welcome to the inventory manager!</h1>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Manage Inventory</Typography>
+            </div>
             <h3>This page has the following features:</h3>
             <ul>
                 <li>Upload availability from a spreadsheet</li>

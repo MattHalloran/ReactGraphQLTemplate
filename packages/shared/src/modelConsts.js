@@ -1,8 +1,8 @@
 export const ACCOUNT_STATUS = {
     Deleted: 'Deleted',
     Unlocked: 'Unlocked',
-    SoftLock: 'Soft Lock',
-    HardLock: 'Hard Lock'
+    SoftLock: 'SoftLock',
+    HardLock: 'HardLock'
 }
 export const DEFAULT_PRONOUNS = [
     "he/him/his",
