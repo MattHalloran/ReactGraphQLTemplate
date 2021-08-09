@@ -127,10 +127,10 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
         const { name, ext, folder } = await (overwrite ? clean(filename, 'public') : findFileName(filename));
         if (name === null) throw Error('Could not create a valid file name');
         if (acceptedTypes) {
-            if (Array.isArray(acceptedTypes) && !acceptedTypes.some(type => mimetype.startsWith(type))) {
+            if (Array.isArray(acceptedTypes) && !acceptedTypes.some(type => mimetype.startsWith(type) || ext === type)) {
                 throw Error('File type not accepted');
             }
-            if (typeof acceptedTypes === "string" && !mimetype.startsWith(type)) {
+            if (typeof acceptedTypes === "string" && !(mimetype.startsWith(type) || ext === type)) {
                 throw Error('File type not accepted');
             }
         }

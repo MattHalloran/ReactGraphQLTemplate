@@ -87,8 +87,8 @@ export const resolvers = {
             const { createReadStream, mimetype } = await args.file;
             const stream = createReadStream();
             const filename = `private/availability-${Date.now()}.xls`;
-            const { success, filename: finalFileName } = await saveFile(stream, filename, mimetype, false, ['application/vnd.ms-excel']);
-            uploadAvailability(finalFileName);
+            const { success, filename: finalFileName } = await saveFile(stream, filename, mimetype, false, ['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']);
+            if (success) uploadAvailability(finalFileName);
             return success;
         },
         addSku: async (_, args, { req }, info) => {

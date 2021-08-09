@@ -130,7 +130,7 @@ function AdminInventoryPage() {
             <Dropzone
                 dropzoneText={'Drag \'n\' drop upload availability file here or click'}
                 maxFiles={1}
-                acceptedFileTypes={['application/vnd.ms-excel']}
+                acceptedFileTypes={['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']}
                 onUpload={availabilityUpload}
                 uploadText='Upload Availability'
                 cancelText='Cancel Upload'
