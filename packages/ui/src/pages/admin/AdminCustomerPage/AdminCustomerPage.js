@@ -25,8 +25,7 @@ function AdminCustomerPage() {
     const [customers, setCustomers] = useState(null);
     const { error, data } = useQuery(customersQuery);
     if (error) { 
-        console.error(error);
-        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
         setCustomers(data?.customers);

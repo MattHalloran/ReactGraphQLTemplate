@@ -3,7 +3,7 @@ import { db } from '../db';
 import bcrypt from 'bcrypt';
 import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
-import { generateToken, setCookie } from '../../auth';
+import { generateToken } from '../../auth';
 import moment from 'moment';
 import { 
     insertHelper, 
@@ -171,14 +171,12 @@ export const resolvers = {
             // Now we can validate the password
             const validPassword = bcrypt.compareSync(args.password, customer.password);
             if (validPassword) {
-                const token = generateToken(customer.id, customer.businessId);
+                await generateToken(res, customer.id);
                 await db(Model.name).where('id', customer.id).update({
-                    sessionToken: token,
                     loginAttempts: 0,
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                await setCookie(res, customer.id, token);
                 return (await selectQueryHelper(Model, info, [customer.id]))[0];
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
@@ -229,7 +227,6 @@ export const resolvers = {
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     status: ACCOUNT_STATUS.Unlocked,
                     businessId: business_id,
-                    sessionToken: generateToken(customer_id, business_id),
                 }
             ]).returning('id'))[0];
             // Create email
@@ -248,6 +245,7 @@ export const resolvers = {
                     businessId: business_id
                 }
             ]);
+            await generateToken(res, customer.id);
             // Send verification email
             sendVerificationLink(args.email, customer_id);
             // Send email to business owner

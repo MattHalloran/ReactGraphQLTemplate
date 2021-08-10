@@ -6,7 +6,8 @@ import { makeStyles } from '@material-ui/styles';
 
 const DEFAULT_STATE = {
     message: null,
-    severity: 'default',
+    severity: 'default', // one of ('default', 'warning', 'error')
+    data: null, // anything you'd like to print in development mode
     buttonText: null,
     buttonClicked: null,
     autoHideDuration: 5000,
@@ -49,6 +50,13 @@ function Snack() {
         let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...DEFAULT_STATE, ...o }));
         return () => PubSub.unsubscribe(snackSub);
     }, [])
+
+    useEffect(() => {
+        // Log snack errors if in development
+        if (process.env.NODE_ENV === 'development' && state.data) {
+            console.error('Snack data', state.data);
+        }
+    }, [state])
 
     return (
         <Snackbar

@@ -70,7 +70,6 @@ function Dropzone({
         accept: acceptedFileTypes,
         maxFiles: maxFiles,
         onDrop: acceptedFiles => {
-            console.log('IN ON DROPPP', acceptedFiles)
             if (acceptedFiles.length <= 0) {
                 PubSub.publish(PUBS.Snack, { message: 'Files not accepted', severity: 'error' });
                 return;
@@ -119,7 +118,7 @@ function Dropzone({
             </aside>}
             <Grid className={classes.gridPad} container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} disabled={disabled} fullWidth onClick={upload} disabled={files.length === 0}>{uploadText}</Button>
+                    <Button className={classes.itemPad} disabled={disabled && files.length === 0} fullWidth onClick={upload}>{uploadText}</Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Button className={classes.itemPad} disabled={disabled} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>

@@ -134,8 +134,7 @@ function EditPlantDialog({
                 PubSub.publish(PUBS.Snack, { message: 'SKU Updated.' });
             })
             .catch((error) => {
-                console.error(error);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update SKU.', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update SKU.', severity: 'error', data: error });
             });
     }
 

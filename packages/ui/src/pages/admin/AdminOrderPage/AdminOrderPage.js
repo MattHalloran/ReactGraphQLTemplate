@@ -33,8 +33,7 @@ function AdminOrderPage() {
     const [orders, setOrders] = useState(null);
     const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter } });
     if (error) { 
-        console.error(error);
-        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
         setOrders(data?.orders);

@@ -59,8 +59,7 @@ function AdminContactPage({
                 }
             })
             .catch((error) => {
-                console.error(error);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error', data: error });
             });
     }
 

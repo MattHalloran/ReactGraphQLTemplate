@@ -22,8 +22,7 @@ const Page = ({
             onSessionUpdate(response.data.login);
             setSessionChecked(true);
         }).catch((response) => { 
-            console.error(response); 
-            PubSub.publish(PUBS.Snack, { message: 'Error: Cannot connect to server', severity: 'error' }) 
+            PubSub.publish(PUBS.Snack, { message: 'Error: Cannot connect to server', severity: 'error', data: response }) 
         })
     }, [login, onSessionUpdate])
 

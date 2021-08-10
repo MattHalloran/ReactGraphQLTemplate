@@ -74,13 +74,12 @@ function SignUpForm({
                     onRedirect(LINKS.Shopping);
                 } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
-                console.error(response);
                 PubSub.publish(PUBS.Loading, false);
                 if (response.code === CODE.EmailInUse.code) {
                     if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form`)) {
                         onRedirect(LINKS.ForgotPassword);
                     }
-                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
+                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error', data: response });
             })
         },
     });

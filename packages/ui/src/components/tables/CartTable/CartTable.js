@@ -79,8 +79,7 @@ function CartTable({
     const updateItemQuantity = useCallback((sku, quantity) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku);
         if (index < 0 || index >= (cartState.items.length)) {
-            PubSub.publish(PUBS.Snack, {message: 'Failed to update item quantity', severity: 'error'});
-            console.log(index);
+            PubSub.publish(PUBS.Snack, { message: 'Failed to update item quantity', severity: 'error', data: { index: index } });
             return;
         }
         let cart_copy = { ...cartState };
@@ -91,7 +90,7 @@ function CartTable({
     const deleteCartItem = useCallback((sku) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku.sku);
         if (index < 0) {
-            PubSub.publish(PUBS.Snack, {message: `Failed to remove item for ${sku.sku}`, severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: `Failed to remove item for ${sku.sku}`, severity: 'error', data: sku });
             return;
         }
         let changed_item_list = deleteArrayIndex(cartState.items, index);
@@ -139,7 +138,7 @@ function CartTable({
                 <TableCell className={classes.tableCol} align="right">{total}</TableCell>
             </TableRow>
         );
-    }, [cartState])
+    }, [classes.tableCol, deleteCartItem, updateItemQuantity])
 
     const headCells = [
         { id: 'close', align: 'left', disablePadding: true, label: '' },

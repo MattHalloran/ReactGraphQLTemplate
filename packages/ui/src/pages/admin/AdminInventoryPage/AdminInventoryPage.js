@@ -71,9 +71,8 @@ function AdminInventoryPage() {
                 PubSub.publish(PUBS.Loading, false);
             })
             .catch((response) => {
-                console.error(response);
                 PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
             })
     }
 

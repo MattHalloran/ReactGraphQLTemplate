@@ -71,9 +71,8 @@ function OrderDialog({
                 PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
             } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
         }).catch((response) => {
-            console.error(response)
             PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
         })
     }
 
@@ -82,8 +81,7 @@ function OrderDialog({
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error', data: err });
             })
     }, [order, updateOrder])
 
@@ -92,8 +90,7 @@ function OrderDialog({
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error', data: err });
             })
     }, [order, updateOrder])
 

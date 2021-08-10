@@ -34,14 +34,12 @@ function AdminGalleryPage() {
             }
         })
             .then((response) => {
-                console.log('GOT ADD IMAGE RESPONSE', response);
-                PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)` });
+                PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
                 PubSub.publish(PUBS.Loading, false);
             })
             .catch((response) => {
-                console.error(response);
                 PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
             })
     }
 
