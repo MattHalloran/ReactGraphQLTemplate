@@ -9,7 +9,7 @@ import { IMAGE_SIZE } from "@local/shared";
 
 const FOLDER = 'images';
 const PATH = `${process.env.PROJECT_DIR}/assets/${FOLDER}`
-console.info(`Cleaning image data in: ${PATH}`);
+console.info(`🧼 Cleaning image data in: ${PATH}...`);
 
 // 1) Delete image files no longer associated with any image rows in the database
 const rows = (await db(TABLES.Image).select('*').where('folder', FOLDER)).map(d => {
@@ -48,5 +48,5 @@ for (const row of rows) {
     }
 }
 
-console.info('exiting...')
+console.info('✅ Cleaning complete')
 process.exit(0)

@@ -45,6 +45,7 @@ services:
             DB_NAME: "${DB_NAME}"
             DB_USER: "${DB_USER}"
             DB_PASSWORD: "${DB_PASSWORD}"
+            DB_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}"
             ADMIN_EMAIL: "${ADMIN_EMAIL}"
             ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
             SITE_EMAIL_FROM: "${SITE_EMAIL_FROM}"
@@ -66,6 +67,7 @@ services:
         volumes:
             - ./packages/server:${PROJECT_DIR}/packages/server:z
             - ./packages/shared:${PROJECT_DIR}/packages/shared:z
+            # - ./packages/server/src/prisma:${PROJECT_DIR}/packages/server/src/prisma:z
             - ./assets:${PROJECT_DIR}/assets:z
         depends_on: 
             - redis

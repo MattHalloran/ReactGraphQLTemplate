@@ -4,9 +4,12 @@ import * as auth from './auth';
 import cors from "cors";
 import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
-import { typeDefs, resolvers } from './db/models';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
+import schema from './schema';
+import context from './context';
+
+console.info('Starting server...')
 
 const app = express();
 
@@ -38,8 +41,8 @@ app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFile
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
 const apollo_options = new ApolloServer({ 
-    typeDefs, 
-    resolvers, 
+    schema: schema,
+    context: context,
     uploads: false, // Disables old version of graphql-upload
     context: ({ req, res }) => ({ req, res }),
     validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
@@ -53,4 +56,4 @@ apollo_options.applyMiddleware({
 // Start Express server
 app.listen(process.env.VIRTUAL_PORT);
 
-console.log(`LISTENING ON PORT ${process.env.VIRTUAL_PORT}`)
+console.info(`🚀 Server running on port ${process.env.VIRTUAL_PORT}`)

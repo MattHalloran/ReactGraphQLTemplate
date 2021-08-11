@@ -14,7 +14,7 @@ RUN mkdir -p ${PROJECT_DIR}/assets/images ${PROJECT_DIR}/assets/public ${PROJECT
     chown -R node:node ${PROJECT_DIR}
 
 # Install global packages (must be done as the root user)
-RUN yarn global add knex@0.95.5 nodemon
+RUN yarn global add knex@0.95.5 nodemon prisma
 
 # Switch to a user with less permissions
 USER node

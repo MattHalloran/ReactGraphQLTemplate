@@ -10,6 +10,8 @@ echo 'Migrating to latest database'
 knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
 echo 'Ensuring database is populated with minimal data'
 knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
+echo 'Generating Prisma schema from database'
+prisma introspect --schema src/prisma/schema.prisma && prisma generate --schema src/prisma/schema.prisma
 
 # Clean any unused files
 yarn clean

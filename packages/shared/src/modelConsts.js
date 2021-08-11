@@ -52,9 +52,9 @@ export const IMAGE_USE = {
 // IN_TRANSIT           | Order is currently being delivered
 // DELIVERED            | Order has been delivered
 export const ORDER_STATUS = {
-    CanceledByAdmin: 'Canceled By Admin',
-    CanceledByCustomer: 'Canceled By Customer',
-    PendingCancel: 'Pending Cancel',
+    CanceledByAdmin: 'CanceledByAdmin',
+    CanceledByCustomer: 'CanceledByCustomer',
+    PendingCancel: 'PendingCancel',
     Rejected: 'Rejected',
     Draft: 'Draft',
     Pending: 'Pending',

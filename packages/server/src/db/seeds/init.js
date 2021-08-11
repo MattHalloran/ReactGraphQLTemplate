@@ -1,40 +1,38 @@
 import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
-import { HASHING_ROUNDS } from '../models/customer';
+import { HASHING_ROUNDS } from '../../consts';
 import { db } from '../db';
 
 export async function seed() {
-    // // Truncate existing tables (delete all data)
-    // await Object.values(TABLES).forEach(async t => {
-    //     await knex.raw(`TRUNCATE TABLE "${t}" CASCADE`);
-    // });
-    console.info('Starting intial seed')
+    console.info('🌱 Starting database intial seed...');
 
-    // Determine if roles need to be added
-    const curr_role_titles = (await db(TABLES.Role).select('title')).map(r => r.title);
-    const role_data = [];
-    if (!curr_role_titles.includes('Customer')) {
-        console.info('Creating customer role')
-        role_data.push({ title: 'Customer', description: 'This role allows a customer to order products' });
-    }
-    if (!curr_role_titles.includes('Admin')) {
-        console.info('Creating admin role')
-        role_data.push({
-            title: 'Admin', description: 'This role grants administrative access. This comes with the ability to \
+    // Find existing roles
+    const role_titles = (await db(TABLES.Role).select('title')).map(r => r.title);
+    // Specify roles that should exist
+    const role_data = [
+        ['Customer', 'This role allows a customer to order products'],
+        ['Owner', 'This role grants administrative access. This comes with the ability to \
         approve new customers, change customer information, modify inventory and \
-        contact hours, and more.' });
-    }
-    // Insert roles
-    if (role_data.length > 0) {
-        await db(TABLES.Role).insert(role_data);
+        contact hours, and more.'],
+        ['Admin', 'This role grants access to everything. Only for developers']
+    ]
+    // Add missing roles
+    for (const role of role_data) {
+        if (!role_titles.includes(role[0])) {
+            console.info(`🏗 Creating ${role[0]} role`);
+            await db(TABLES.Role).insert({
+                title: role[0],
+                description: role[1],
+            });
+        }
     }
 
     // Determine if admin needs to be added
     const role_admin_id = (await db(TABLES.Role).select('id').where('title', 'Admin').first()).id;
     const has_admin = (await db(TABLES.CustomerRoles).where('roleId', role_admin_id)).length > 0;
     if (!has_admin) {
-        console.info('Creating admin account')
+        console.info(`👩🏼‍💻 Creating admin account`);
         // Insert admin's business
         const business_id = (await db(TABLES.Business).insert([
             {
@@ -71,4 +69,5 @@ export async function seed() {
             }
         ])
     }
+    console.info(`✅ Database seeding complete.`);
 }
