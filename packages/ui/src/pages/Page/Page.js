@@ -3,15 +3,14 @@ import PropTypes from 'prop-types';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { CUSTOMER_ROLES } from '@local/shared';
 
 const Page = ({
     title,
     onSessionUpdate,
     redirect = LINKS.Home,
     onRedirect,
-    roles,
-    authRole = null,
+    userRoles,
+    restrictedToRoles,
     children
 }) => {
     const [sessionChecked, setSessionChecked] = useState(false);
@@ -31,11 +30,11 @@ const Page = ({
     }, [title]);
 
     // If this page has restricted access
-    if (authRole !== null) {
-        let role_titles = roles?.map(r => r.title);
-        const valid_role = (role_titles?.indexOf(authRole) >= 0) || 
-                           (role_titles?.indexOf(CUSTOMER_ROLES.Admin) >= 0);
-        if (!valid_role && sessionChecked) onRedirect(redirect);
+    if (restrictedToRoles) {
+        if (!userRoles) return null;
+        const haveArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+        const needArray = Array.isArray(restrictedToRoles) ? restrictedToRoles : [restrictedToRoles];
+        const valid_role = haveArray.some(r => needArray.includes(r?.role?.title));
         return valid_role ? children : null;
     }
 
@@ -46,8 +45,8 @@ Page.propTypes = {
     title: PropTypes.string,
     onSessionUpdate: PropTypes.func.isRequired,
     redirect: PropTypes.string,
-    roles: PropTypes.array,
-    authRole: PropTypes.string,
+    userRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
+    restrictedToRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
     children: PropTypes.object.isRequired,
 }
 

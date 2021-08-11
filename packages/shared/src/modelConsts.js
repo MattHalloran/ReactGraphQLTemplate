@@ -106,7 +106,8 @@ export const TRAIT_NAME = {
     SoilType: 'Soil Type',
     LightRange: 'Light range'
 }
-export const CUSTOMER_ROLES = {
+export const ROLES = {
     Customer: "Customer",
+    Owner: "Owner",
     Admin: "Admin",
 }

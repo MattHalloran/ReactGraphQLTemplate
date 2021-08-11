@@ -24,7 +24,7 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 ### 1. Prerequisites
  Before developing a website from this template, make sure you have the following installed:   
 1. [Docker](https://www.docker.com/)
-2. [VSCode](https://code.visualstudio.com/)
+2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
 ### 2. Download this repository
 `git clone https://github.com/MattHalloran/NLN`
 ### 3. Set environment variables  

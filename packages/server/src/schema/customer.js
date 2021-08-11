@@ -125,7 +125,7 @@ export const resolvers = {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (context.req.roles && context.req.roles.length > 0) 
-                    return await context.prisma[_model].findFirst({ where: { id: context.req.customerId } }, ...(new PrismaSelect(info).value));
+                    return await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: context.req.customerId } });
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate input format
@@ -169,7 +169,6 @@ export const resolvers = {
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                console.log('YYYYYYYYY');
                 return await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: customer.id } });
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
