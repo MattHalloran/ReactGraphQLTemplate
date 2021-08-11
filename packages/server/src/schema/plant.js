@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-express';
 import { db, TABLES } from '../db';
 import { CODE, SKU_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Plant;
 
@@ -89,26 +90,26 @@ export const resolvers = {
     Mutation: {
         // Inserting plants is different than other inserts, because the fields are dynamic.
         // Because of this, the add must be done manually
-        addPlant: async (_, args, context) => {
+        addPlant: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].create({ data: { ...args.input } })
+            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updatePlant: async (_, args, context) => {
+        updatePlant: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].update({
+            return await context.prisma[_model].update((new PrismaSelect(info).value), {
                 where: { id: args.input.id || undefined },
                 data: { ...args.input }
             })
         },
-        deletePlants: async (_, args, context) => {
+        deletePlants: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].delete({
+            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
                 where: { id: { in: args.ids } }
             })
         },

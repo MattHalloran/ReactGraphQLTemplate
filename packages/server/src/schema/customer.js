@@ -170,13 +170,7 @@ export const resolvers = {
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
                 console.log('YYYYYYYYY');
-                const beep = new PrismaSelect(info).value
-                console.log('ZZZZZZZZ')
-                console.log(beep);
-                const data = await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: customer.id } });
-                console.log(data);
-                return data;
-                //return await context.prisma[_model].findFirst({ where: { id: customer.id } }, new PrismaSelect(info).value);
+                return await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: customer.id } });
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = customer.loginAttempts + 1;

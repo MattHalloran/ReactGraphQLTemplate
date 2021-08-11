@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-express';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { TABLES } from '../db';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Role;
 
@@ -16,7 +17,7 @@ export const typeDef = gql`
     type CustomerRole {
         customer: Customer!
         role: Role!
-    }//TODO morning me: many-to-many relationships must go through join table
+    }
 
     type Role {
         id: ID!
@@ -38,30 +39,30 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        roles: async (_, _args, context) => {
+        roles: async (_, _args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findMany();
+            return await context.prisma[_model].findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addRole: async (_, args, context) => {
+        addRole: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create({ data: { ...args.input } })
+            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateRole: async (_, args, context) => {
+        updateRole: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            return await context.prisma[_model].update((new PrismaSelect(info).value), {
                 where: { id: args.input.id || undefined },
                 data: { ...args.input }
             })
         },
-        deleteRoles: async (_, args, context) => {
+        deleteRoles: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete({
+            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
                 where: { id: { in: args.ids } }
             })
         }

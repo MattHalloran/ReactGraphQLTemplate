@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import { CODE, TASK_STATUS } from '@local/shared';
 import { CustomError } from '../error';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Task;
 

@@ -4,6 +4,7 @@ import { CustomError } from '../error';
 import { saveFile } from '../utils';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import { db, TABLES } from '../db';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Sku;
 
@@ -85,23 +86,23 @@ export const resolvers = {
             if (success) uploadAvailability(finalFileName);
             return success;
         },
-        addSku: async (_, args, context) => {
+        addSku: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create({ data: { ...args.input } })
+            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateSku: async (_, args, context) => {
+        updateSku: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            return await context.prisma[_model].update((new PrismaSelect(info).value), {
                 where: { id: args.input.id || undefined },
                 data: { ...args.input }
             })
         },
-        deleteSkus: async (_, args, context) => {
+        deleteSkus: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete({
+            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
                 where: { id: { in: args.ids } }
             })
         }
