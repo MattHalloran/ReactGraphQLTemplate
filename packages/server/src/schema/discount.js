@@ -1,15 +1,70 @@
-import {
-    inputObjectType,
-} from 'nexus';
+import { gql } from 'apollo-server-express';
+import { CODE } from '@local/shared';
+import { CustomError } from '../error';
+import { TABLES } from '../db';
 
-export const DiscountInput = inputObjectType({
-    name: 'DiscountInput',
-    definition(t) {
-        t.nonNull.string('title')
-        t.nonNull.float('discount')
-        t.string('comment')
-        t.string('terms')
-        t.list.nonNull.id('businessIds')
-        t.list.nonNull.id('skuIds')
+const _model = TABLES.Discount;
+
+export const typeDef = gql`
+    input DiscountInput {
+        id: ID
+        title: String!
+        discount: Float!
+        comment: String
+        terms: String
+        businessIds: [ID!]
+        skuIds: [ID!]
+    }
+
+    type Discount {
+        id: ID!
+        discount: Float!
+        title: String!
+        comment: String
+        terms: String
+        businesses: [Business!]!
+        skus: [Sku!]!
+    }
+
+    extend type Query {
+        discounts: [Discount!]!
+    }
+
+    extend type Mutation {
+        addDiscount(input: DiscountInput!): Discount!
+        updateDiscount(input: DiscountInput!): Discount!
+        deleteDiscounts(ids: [ID!]!): Boolean
+    }
+`
+
+export const resolvers = {
+    Query: {
+        discounts: async (_, args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].findMany();
+        }
     },
-})
+    Mutation: {
+        addDiscount: async (_, args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].create({ data: { ...args.input } })
+        },
+        updateDiscount: async (_, args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].update({
+                where: { id: args.input.id || undefined },
+                data: { ...args.input }
+            })
+        },
+        deleteDiscounts: async (_, args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].delete({
+                where: { id: { in: args.ids } }
+            })
+        }
+    }
+}

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { CODE, COOKIE } from '@local/shared';
-import { TABLES } from './db/tables';
-import { db } from './db/db';
-import { CustomError } from './db/error';
+import { TABLES } from './db';
+import { db } from './db';
+import { CustomError } from './error';
 
 const SESSION_MILLI = 30*86400*1000;
 
@@ -29,7 +29,7 @@ export async function authenticate(req, _, next) {
     }
     // Second, verify that the session token is valid
     jwt.verify(token, process.env.JWT_SECRET, async (error, payload) => {
-        if (error || isNaN(session.exp) || session.exp < Date.now()) {
+        if (error || isNaN(payload.exp) || payload.exp < Date.now()) {
             next();
             return;
         }
@@ -45,17 +45,17 @@ export async function authenticate(req, _, next) {
 
 // Generates a JSON Web Token (JWT)
 export async function generateToken(res, customerId) {
-    const user_roles = await findCustomerRoles(customerId);
+    const customerRoles = await findCustomerRoles(customerId);
     const tokenContents = {
         iat: Date.now(),
         iss: `https://${process.env.SITE_NAME}/`,
-        customerId: customer_id,
-        roles: user_roles,
-        isCustomer: customer_roles.includes('customer' || 'admin'),
-        isAdmin: customer_roles.includes('admin'),
+        customerId: customerId,
+        roles: customerRoles,
+        isCustomer: customerRoles.includes('customer' || 'admin'),
+        isAdmin: customerRoles.includes('admin'),
         exp: Date.now() + SESSION_MILLI,
     }
-    const token = jwt.sign(tokenContents, process.env.JWT_SECRET, { expiresIn: SESSION_MILLI });
+    const token = jwt.sign(tokenContents, process.env.JWT_SECRET);
     res.cookie(COOKIE.Session, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

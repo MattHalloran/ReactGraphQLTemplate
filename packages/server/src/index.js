@@ -6,8 +6,8 @@ import { ApolloServer } from 'apollo-server-express';
 import { depthLimit } from './depthLimit';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
-import schema from './schema';
-import context from './context';
+import { schema } from './schema';
+import { context } from './context';
 
 console.info('Starting server...')
 
@@ -42,9 +42,8 @@ app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFile
 // Context trickery allows request and response to be included in the context
 const apollo_options = new ApolloServer({ 
     schema: schema,
-    context: context,
+    context: (c) => context(c),
     uploads: false, // Disables old version of graphql-upload
-    context: ({ req, res }) => ({ req, res }),
     validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
  });
 apollo_options.applyMiddleware({ 

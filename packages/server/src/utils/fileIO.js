@@ -4,8 +4,7 @@ import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';
-import { db } from '../db/db';
-import { TABLES } from '../db/tables';
+import { db, TABLES } from '../db';
 
 // How many times a file name should be checked before giving up
 // ex: if 'billy.png' is taken, tries 'billy-1.png', 'billy-2.png', etc.

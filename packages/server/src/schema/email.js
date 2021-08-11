@@ -1,13 +1,71 @@
-import {
-    inputObjectType,
-} from 'nexus';
+import { gql } from 'apollo-server-express';
+import { db, TABLES } from '../db';
+import { CODE } from '@local/shared';
+import { CustomError } from '../error';
 
-export const EmailInput = inputObjectType({
-    name: 'EmailInput',
-    definition(t) {
-        t.nonNull.string('emailAddress')
-        t.boolean('receivesDeliveryUpdates')
-        t.id('userId')
-        t.id('businessId')
+const _model = TABLES.Email;
+
+export const typeDef = gql`
+    input EmailInput {
+        id: ID
+        emailAddress: String!
+        receivesDeliveryUpdates: Boolean
+        customerId: ID
+        businessId: ID
+    }
+
+    type Email {
+        id: ID!
+        emailAddress: String!
+        receivesDeliveryUpdates: Boolean!
+        customer: Customer
+        business: Business
+    }
+
+    extend type Query {
+        emails: [Email!]!
+    }
+
+    extend type Mutation {
+        addEmail(input: EmailInput!): Email!
+        updateEmail(input: EmailInput!): Email!
+        deleteEmails(ids: [ID!]!): Boolean
+    }
+`
+
+export const resolvers = {
+    Query: {
+        emails: async (_, _args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].findMany();
+        }
     },
-})
+    Mutation: {
+        addEmail: async (_, args, context) => {
+            // Must be admin, or adding to your own
+            if(!context.req.isAdmin || (context.req.token.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].create({ data: { ...args.input } });
+        },
+        updateEmail: async (_, args, context) => {
+            // Must be admin, or updating your own
+            if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            const curr = await db(_model).where('id', args.input.id).first();
+            if (context.req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].update({
+                where: { id: args.input.id || undefined },
+                data: { ...args.input }
+            })
+        },
+        deleteEmails: async (_, args, context) => {
+            // Must be admin, or deleting your own
+            // TODO must keep at least one email per customer
+            let business_ids = await db(_model).select('businessId').whereIn('id', args.ids);
+            business_ids = [...new Set(business_ids)];
+            if (!context.req.isAdmin && (business_ids.length > 1 || context.req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].delete({
+                where: { id: { in: args.ids } }
+            })
+        }
+    }
+}

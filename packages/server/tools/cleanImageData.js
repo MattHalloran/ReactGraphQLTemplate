@@ -1,7 +1,6 @@
 // 1) Delete image files no longer associated with any image rows in the database
 // 2) Delete image rows in the database no longer associated with any image files
-import { db } from "../src/db/db";
-import { TABLES } from "../src/db/tables";
+import { db, TABLES } from "../src/db";
 import fs from 'fs';
 import { deleteFile, plainImageName } from "../src/utils";
 import path from 'path';

@@ -21,7 +21,7 @@ model address {
   deliveryInstructions  String?   @db.VarChar(2048)
   businessId            String?   @db.Uuid
   business              business? @relation(fields: [businessId], references: [id])
-  order                 order[]
+  orders                order[]   @relation("OrderAddress")
 }
 
 model business {
@@ -59,11 +59,11 @@ model customer {
   status            String           @default("Unlocked")
   businessId        String?          @db.Uuid
   business          business?        @relation(fields: [businessId], references: [id])
-  customer_roles    customer_roles[]
-  email             email[]
+  roles             customer_roles[]
+  emails            email[]
   feedback          feedback[]
-  order             order[]
-  phone             phone[]
+  orders            order[]
+  phones            phone[]
 }
 
 model customer_roles {
@@ -144,9 +144,9 @@ model order {
   isDelivery           Boolean      @default(true)
   addressId            String?      @db.Uuid
   customerId           String       @db.Uuid
-  address              address?     @relation(fields: [addressId], references: [id])
+  address              address?     @relation("OrderAddress", fields: [addressId], references: [id])
   customer             customer     @relation(fields: [customerId], references: [id])
-  order_item           order_item[]
+  order_items          order_item[]
 }
 
 model order_item {
@@ -172,8 +172,8 @@ model plant {
   id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   latinName    String         @unique @db.VarChar(256)
   plant_images plant_images[]
-  plant_trait  plant_trait[]
-  sku          sku[]
+  plant_traits plant_trait[]
+  skus         sku[]
 }
 
 model plant_images {
@@ -222,7 +222,7 @@ model sku {
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
   updated_at     DateTime        @default(now()) @db.Timestamptz(6)
   plant          plant?          @relation(fields: [plantId], references: [id])
-  order_item     order_item[]
+  order_items    order_item[]
   sku_discounts  sku_discounts[]
 }
 

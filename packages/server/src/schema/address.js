@@ -1,107 +1,83 @@
-import {
-    arg,
-    inputObjectType, 
-    nonNull, 
-    list, 
-    intArg, 
-    extendType,
-    objectType
-} from 'nexus';
+import { gql } from 'apollo-server-express';
+import { db, TABLES } from '../db';
+import { CODE } from '@local/shared';
+import { CustomError } from '../error';
 
-const _type = 'Address';
+const _model = TABLES.Address;
 
-export const AddressInput = inputObjectType({
-    name: 'AddressInput',
-    definition(t) {
-        t.string('tag')
-        t.string('name')
-        t.nonNull.string('country')
-        t.nonNull.string('administrativeArea')
-        t.string('subAdministrativeArea')
-        t.nonNull.string('locality')
-        t.nonNull.string('postalCode')
-        t.nonNull.string('throughfare')
-        t.string('premise')
-        t.string('deliveryInstructions')
-        t.nonNull.id('businessId')
-    },
-})
-
-export const Address = objectType({
-    name: _type,
-    definition(t) {
-        t.nonNull.id('id')
-        t.string('tag')
-        t.string('name')
-        t.nonNull.string('country')
-        t.nonNull.string('administrativeArea')
-        t.string('subAdministrativeArea')
-        t.nonNull.string('locality')
-        t.nonNull.string('postalCode')
-        t.nonNull.string('throughfare')
-        t.string('premise')
-        t.string('deliveryInstructions')
-        t.nonNull.id('businessId')
-        t.nonNull.field('business', {
-            type: 'Business',
-            resolve: (parent, _, context) => {
-                return context.prisma.business.findUnique({
-                    where: { id: parent.businessId || undefined },
-                })
-            }
-        })
-        t.nonNull.list.nonNull.field('orders', {
-            type: 'Order',
-            resolve: (parent, _, context) => {
-                return context.prisma.order.findMany({
-                    where: { addressId: parent.id || undefined },
-                })
-            }
-        })
-    },
-})
-
-export const Query = extendType({
-    type: 'Query',
-    definition(t) {
-        t.field('addAddress', {
-            type: _type,
-            args: { input: nonNull(arg({ type: 'AddressInput' })) },
-            resolve: (_, args, context) => {
-                return context.prisma.address.create({ data: { ...args.input } })
-            }
-        })
+export const typeDef = gql`
+    input AddressInput {
+        id: ID
+        tag: String
+        name: String
+        country: String!
+        administrativeArea: String!
+        subAdministrativeArea: String
+        locality: String!
+        postalCode: String!
+        throughfare: String!
+        premise: String
+        deliveryInstructions: String
+        businessId: ID!
     }
-})
 
-export const Mutation = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.field('addAddress', {
-            type: _type,
-            args: { input: nonNull(arg({ type: 'AddressInput' })) },
-            resolve: async (_, args, context) => {
-                return context.prisma.address.create({ data: { ...args.input } })
-            }
-        })
-        t.field('updateAddress', {
-            type: _type,
-            args: { input: nonNull(arg({ type: 'AddressInput' })) },
-            resolve: async (_, args, context) => {
-                return context.prisma.address.update({
-                    where: { id: args.id || undefined },
-                    data: { ...args.input }
-                })
-            }
-        })
-        t.field('deleteAddresses', {
-            type: 'Boolean',
-            args: { ids: list(nonNull(intArg())) },
-            resolve: async (_, args, context) => {
-                return context.prisma.address.delete({
-                    where: { id: { in: args.ids } }
-                })
-            }
-        })
+    type Address {
+        id: ID!
+        tag: String
+        name: String
+        country: String!
+        administrativeArea: String!
+        subAdministrativeArea: String
+        locality: String!
+        postalCode: String!
+        throughfare: String!
+        premise: String
+        business: Business!
+        orders: [Order!]!
     }
-})
+
+    extend type Query {
+        addresses: [Address!]!
+    }
+
+    extend type Mutation {
+        addAddress(input: AddressInput!): Address!
+        updateAddress(input: AddressInput!): Address!
+        deleteAddresses(ids: [ID!]!): Boolean
+    }
+`
+
+export const resolvers = {
+    Query: {
+        addresses: async (_, _args, context) => {
+            // Must be admin
+            if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].findMany();
+        }
+    },
+    Mutation: {
+        addAddress: async (_, args, context) => {
+            // Must be admin, or adding to your own
+            if(!context.req.isAdmin && (context.req.token.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].create({ data: { ...args.input } })
+        },
+        updateAddress: async (_, args, context) => {
+            // Must be admin, or updating your own
+            const curr = await db(_model).where('id', args.input.id).first();
+            if (!context.req.isAdmin && context.req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].update({
+                where: { id: args.input.id || undefined },
+                data: { ...args.input }
+            })
+        },
+        deleteAddresses: async (_, args, context) => {
+            // Must be admin, or deleting your own
+            let business_ids = await db(_model).select('businessId').whereIn('id', args.ids);
+            business_ids = [...new Set(business_ids)];
+            if (!context.req.isAdmin && (business_ids.length > 1 || context.req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
+            return await context.prisma[_model].delete({
+                where: { id: { in: args.ids } }
+            })
+        }
+    }
+}

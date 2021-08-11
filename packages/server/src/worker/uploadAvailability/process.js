@@ -1,5 +1,4 @@
-import { db } from "../../db/db";
-import { TABLES } from "../../db/tables";
+import { db, TABLES } from "../../db";
 import { SKU_STATUS } from "@local/shared";
 
 // Reads an .xls availability file into the database.

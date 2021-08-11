@@ -8,7 +8,10 @@ export const customerSessionFields = gql`
         status
         theme
         roles {
-            title
+            role {
+                title
+                description
+            }
         }
     }
 `
