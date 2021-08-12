@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
@@ -30,7 +30,7 @@ export const typeDef = gql`
     extend type Mutation {
         addEmail(input: EmailInput!): Email!
         updateEmail(input: EmailInput!): Email!
-        deleteEmails(ids: [ID!]!): Boolean
+        deleteEmails(ids: [ID!]!): Count!
     }
 `
 
@@ -51,22 +51,22 @@ export const resolvers = {
         updateEmail: async (_, args, context, info) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const curr = await db(_model).where('id', args.input.id).first();
+            const curr = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
             if (context.req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteEmails: async (_, args, context, info) => {
+        deleteEmails: async (_, args, context) => {
             // Must be admin, or deleting your own
             // TODO must keep at least one email per customer
-            let business_ids = await db(_model).select('businessId').whereIn('id', args.ids);
-            business_ids = [...new Set(business_ids)];
+            const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
+            if (!specified) return new CustomError(CODE.ErrorUnknown);
+            const business_ids = [...new Set(specified.map(s => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

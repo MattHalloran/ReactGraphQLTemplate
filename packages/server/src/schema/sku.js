@@ -63,7 +63,7 @@ export const typeDef = gql`
         uploadAvailability(file: Upload!): Boolean
         addSku(input: SkuInput!): Sku!
         updateSku(input: SkuInput!): Sku!
-        deleteSkus(ids: [ID!]!): Boolean
+        deleteSkus(ids: [ID!]!): Count!
     }
 `
 
@@ -98,17 +98,16 @@ export const resolvers = {
         updateSku: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteSkus: async (_, args, context, info) => {
+        deleteSkus: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

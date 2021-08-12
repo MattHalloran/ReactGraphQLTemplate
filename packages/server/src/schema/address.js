@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
@@ -44,7 +44,7 @@ export const typeDef = gql`
     extend type Mutation {
         addAddress(input: AddressInput!): Address!
         updateAddress(input: AddressInput!): Address!
-        deleteAddresses(ids: [ID!]!): Boolean
+        deleteAddresses(ids: [ID!]!): Count!
     }
 `
 
@@ -64,21 +64,21 @@ export const resolvers = {
         },
         updateAddress: async (_, args, context, info) => {
             // Must be admin, or updating your own
-            const curr = await db(_model).where('id', args.input.id).first();
+            const curr = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
             if (!context.req.isAdmin && context.req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
         deleteAddresses: async (_, args, context) => {
             // Must be admin, or deleting your own
-            let business_ids = await db(_model).select('businessId').whereIn('id', args.ids);
-            business_ids = [...new Set(business_ids)];
+            const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
+            if (!specified) return new CustomError(CODE.ErrorUnknown);
+            const business_ids = [...new Set(specified.map(s => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

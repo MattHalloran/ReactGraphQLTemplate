@@ -27,7 +27,7 @@ export const typeDef = gql`
             skuId: ID!
         ): OrderItem
         updateOrderItem(input: OrderItemInput!): OrderItem
-        deleteOrderItems(ids: [ID!]!): Boolean
+        deleteOrderItems(ids: [ID!]!): Count!
     }
 `
 
@@ -36,8 +36,8 @@ export const resolvers = {
         addOrderItem: async (_, args, context, info) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const customer_id = await db(TABLES.Order).select('customerId').where('id', args.orderId).first();
-            if (context.req.token.customerId !== customer_id) return new CustomError(CODE.Unauthorized);
+            const order = await context.prisma[TABLES.Order].findUnique({ where: { id: args.orderId } });
+            if (context.req.token.customerId !== order.customerId) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { quantity: quantity, orderId: orderId, skuId: skuId } });
         },
         updateOrderItem: async (_, args, context, info) => {
@@ -48,12 +48,13 @@ export const resolvers = {
                 .where(`${TABLES.OrderItem}.id`, args.input.id)
                 .first();
             if (!context.req.isAdmin && context.req.token.customerId !== customer_id) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteOrderItems: async (_, args, context, info) => {
+        deleteOrderItems: async (_, args, context) => {
             // Must be admin, or deleting your own
             let customer_ids = await db(TABLES.Order)
                 .select(`${TABLES.Order}.customerId`)
@@ -61,9 +62,7 @@ export const resolvers = {
                 .whereIn(`${TABLES.OrderItem}.id`, args.ids);
             customer_ids = [...new Set(customer_ids)];
             if (!context.req.isAdmin && (customer_ids.length > 1 || context.req.token.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }

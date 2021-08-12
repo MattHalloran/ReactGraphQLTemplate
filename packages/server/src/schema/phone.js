@@ -30,7 +30,7 @@ export const typeDef = gql`
     extend type Mutation {
         addPhone(input: PhoneInput!): Phone!
         updatePhone(input: PhoneInput!): Phone!
-        deletePhones(ids: [ID!]!): Boolean
+        deletePhones(ids: [ID!]!): Count!
     }
 `
 
@@ -53,20 +53,20 @@ export const resolvers = {
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             const curr = await db(_model).where('id', args.input.id).first();
             if (context.req.token.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deletePhones: async (_, args, context, info) => {
+        deletePhones: async (_, args, context) => {
             // Must be admin, or deleting your own
             // TODO must leave one phone per customer
-            let business_ids = await db(_model).select('businessId').whereIn('id', args.ids);
-            business_ids = [...new Set(business_ids)];
+            const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
+            if (!specified) return new CustomError(CODE.ErrorUnknown);
+            const business_ids = [...new Set(specified.map(s => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.token.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }

@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 import { CODE, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
+import { saveImage } from '../utils';
 
 const _model = TABLES.Plant;
 
@@ -14,9 +15,8 @@ export const typeDef = gql`
     }
 
     input PlantImageInput {
-        src: String!
-        alt: String
-        description: String
+        files: [Upload!]!
+        alts: [String]
         labels: [String!]!
     }
 
@@ -24,7 +24,7 @@ export const typeDef = gql`
         id: ID
         latinName: String!
         traits: [PlantTraitInput]!
-        images: [PlantImageInput]!
+        images: PlantImageInput
     }
 
     type PlantImage {
@@ -48,7 +48,7 @@ export const typeDef = gql`
     extend type Mutation {
         addPlant(input: PlantInput!): Plant!
         updatePlant(input: PlantInput!): Plant!
-        deletePlants(ids: [ID!]!): Boolean
+        deletePlants(ids: [ID!]!): Count!
     }
 `
 
@@ -91,24 +91,41 @@ export const resolvers = {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
+            // Create plant object
+            const plant = await context.prisma[_model].create((new PrismaSelect(info).value), { data: { id: args.input.id, latinName: args.input.latinName } });
+            // Create trait objects
+            for (const { name, value } of (args.input.traits || [])) {
+                await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
+            }
+            // Create images
+            for (const image of (args.input?.images?.files || [])) {
+                const { success, imageId } = await saveImage(image, errorOnDuplicate=false)
+                if (success) {
+                    await prisma[TABLES.PlantImages].create({ data: { 
+                        plantId: plant.id,
+                        imageId
+                     } });
+                } else {
+                    console.error('Plant image save not successful')
+                }
+            }
+            // TODO Return select
         },
         updatePlant: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // TODO handle images
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            // TODO handle images and traits
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deletePlants: async (_, args, context, info) => {
+        deletePlants: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }

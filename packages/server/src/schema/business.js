@@ -33,7 +33,7 @@ export const typeDef = gql`
     extend type Mutation {
         addBusiness(input: BusinessInput!): Business!
         updateBusiness(input: BusinessInput!): Business!
-        deleteBusinesses(ids: [ID!]!): Boolean
+        deleteBusinesses(ids: [ID!]!): Count!
     }
 `
 
@@ -54,17 +54,16 @@ export const resolvers = {
         updateBusiness: async(_, args, context, info) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin || (context.req.token.businessId !== args.input.id)) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteBusinesses: async(_, args, context, info) => {
+        deleteBusinesses: async(_, args, context) => {
             // Must be admin, or deleting your own
             if(!context.req.isAdmin || args.ids.length > 1 || context.req.token.businessId !== args.ids[0]) return new CustomError(CODE.Unauthorized); 
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }

@@ -34,7 +34,7 @@ export const typeDef = gql`
     extend type Mutation {
         addDiscount(input: DiscountInput!): Discount!
         updateDiscount(input: DiscountInput!): Discount!
-        deleteDiscounts(ids: [ID!]!): Boolean
+        deleteDiscounts(ids: [ID!]!): Count!
     }
 `
 
@@ -55,17 +55,16 @@ export const resolvers = {
         updateDiscount: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteDiscounts: async (_, args, context, info) => {
+        deleteDiscounts: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

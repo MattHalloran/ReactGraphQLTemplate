@@ -1,21 +1,21 @@
 import jwt from 'jsonwebtoken';
 import { CODE, COOKIE } from '@local/shared';
 import { TABLES } from './db';
-import { db } from './db';
 import { CustomError } from './error';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
+const prisma = new PrismaClient()
 const SESSION_MILLI = 30*86400*1000;
 
 // Return array of customer roles (ex: ['admin', 'customer'])
-async function findCustomerRoles(customer_id) {
-    // Query customer's roles. Will return titles in an array (ex: [{'customer'}, {'admin'}] )
-    const roles_query = await db(TABLES.Customer)
-        .select(`${TABLES.Role}.title`)
-        .leftJoin(TABLES.CustomerRoles, `${TABLES.CustomerRoles}.customerId`, `${TABLES.Customer}.id`)
-        .leftJoin(TABLES.Role, `${TABLES.Role}.id`, `${TABLES.CustomerRoles}.roleId`)
-        .where(`${TABLES.Customer}.id`, customer_id);
-    // Format query to an array of lowercase role titles
-    return roles_query.map(r => r.title.toLowerCase());
+async function findCustomerRoles(customerId) {
+    // Query customer's roles
+    const user = await prisma[TABLES.Customer].findUnique({ 
+        where: { id: customerId },
+        select: { roles: { select: { role: { select: { title: true } } } } }
+    });
+    return user.roles?.map(r => r.role.title.toLowerCase()) || [];
 }
 
 // Verifies if a user is authenticated, using an http cookie

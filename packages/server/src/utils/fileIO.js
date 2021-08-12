@@ -4,7 +4,11 @@ import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
+
+const prisma = new PrismaClient()
 
 // How many times a file name should be checked before giving up
 // ex: if 'billy.png' is taken, tries 'billy-1.png', 'billy-2.png', etc.
@@ -48,7 +52,7 @@ export function plainImageName(src) {
     for (const [key, value] of Object.keys(IMAGE_SIZE)) {
         if (name.endsWith(`-${key}`)) {
             size = value;
-            name = name.slice(0, -(key.length+1));
+            name = name.slice(0, -(key.length + 1));
             break;
         }
     }
@@ -67,7 +71,7 @@ export async function findFileName(file, defaultFolder) {
     let curr = 0;
     while (curr < MAX_FILE_NAME_ATTEMPTS) {
         let currName = `${name}-${curr}${ext}`;
-        if(!fs.existsSync(`${ASSET_DIR}/${folder}/${currName}`)) return { name: `${currName}`, ext: ext, folder: folder };
+        if (!fs.existsSync(`${ASSET_DIR}/${folder}/${currName}`)) return { name: `${currName}`, ext: ext, folder: folder };
         curr++;
     }
     // If no valid name found after max tries, return null
@@ -77,18 +81,18 @@ export async function findFileName(file, defaultFolder) {
 // Convert a file stream into a buffer
 function streamToBuffer(stream, numBytes) {
     if (numBytes === null || numBytes === undefined) numBytes = MAX_BUFFER_SIZE;
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let _buf = []
-    
-        stream.on('data', chunk => { 
+
+        stream.on('data', chunk => {
             _buf.push(chunk);
             if (_buf.length >= numBytes) stream.destroy();
         })
-        stream.on('end', () => resolve(Buffer.concat(_buf)) )
-        stream.on('error', err => reject( err ))
+        stream.on('end', () => resolve(Buffer.concat(_buf)))
+        stream.on('error', err => reject(err))
 
     })
-} 
+}
 
 // Returns all image sizes smaller or equal to the image size
 function resizeOptions(width, height) {
@@ -106,16 +110,16 @@ export async function findImageUrl(filename, size) {
     console.log(filename, name, ext, folder, size)
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
-        if(fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
+        if (fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
     }
     // Search sizes by closest match
     let size_array = Object.keys(IMAGE_SIZE).map(key => ({ key, value: IMAGE_SIZE[key] }));
     const size_index = size_array.findIndex(obj => obj.value === size);
     for (let i = 0; i < size_array.length; i++) {
-        const curr = `${folder}/${name}-${size_array[(i+size_index)%(size_array.length)].key}${ext}`;
-        if(fs.existsSync(`${ASSET_DIR}/${curr}`)) return `${SERVER_URL}/${curr}`;
+        const curr = `${folder}/${name}-${size_array[(i + size_index) % (size_array.length)].key}${ext}`;
+        if (fs.existsSync(`${ASSET_DIR}/${curr}`)) return `${SERVER_URL}/${curr}`;
     }
-    if(fs.existsSync(`${ASSET_DIR}/${folder}/${folder}/${name}${ext}`)) return `${SERVER_URL}/${folder}/${folder}/${name}${ext}`;
+    if (fs.existsSync(`${ASSET_DIR}/${folder}/${folder}/${name}${ext}`)) return `${SERVER_URL}/${folder}/${folder}/${name}${ext}`;
     return null;
 }
 
@@ -140,8 +144,8 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
         }
         // Download the file
         await stream.pipe(fs.createWriteStream(`${ASSET_DIR}/${folder}/${name}${ext}`));
-        return { 
-            success: true, 
+        return {
+            success: true,
             filename: `${folder}/${name}${ext}`
         }
     } catch (error) {
@@ -161,50 +165,62 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
 //      hash - the image's hash
 //}
 // Arguments:
-// stream - data stream of file
-// filename - name of file, including extension (ex: 'boop.png')
-// folder - folder in server directory (ex: 'images')
-export async function saveImage(stream, filename) {
+// upload - image upload
+// alt - alt text for image
+// description - image description
+// errorOnDuplicate - If image previously updated, throw error
+export async function saveImage(upload, alt, description, errorOnDuplicate = false) {
     try {
+        // Destructure data. Each file upload is a promise
+        const { createReadStream, filename, mimetype } = await upload;
+        // Make sure that the file is actually an image
+        if (!mimetype.startsWith('image/')) throw Error('Invalid mimetype')
+        // Make sure image type is supported
+        let { ext: extCheck } = path.parse(filename);
+        if (Object.values(IMAGE_EXTENSION).indexOf(extCheck) <= 0) throw Error('Image type not supported')
+        // Create a read stream
+        const stream = createReadStream();
         const { name, ext, folder } = await findFileName(filename, 'images')
         if (name === null) throw Error('Could not create a valid file name');
         // Determine image dimensions
         const image_buffer = await streamToBuffer(stream);
-        console.log('IMAGE BUFFER', image_buffer)
-        const dims = sizeOf(image_buffer);
-        console.log('GOT DIMENSIONS', dims)
+        const dimensions = sizeOf(image_buffer);
         // Determine image hash
         const hash = await imghash.hash(image_buffer);
-        console.log('HERE IS HASH', hash)
+        let image;
         // Check if hash already exists (image previously uploaded)
-        const previously_uploaded = (await db(TABLES.Image).select('id').where('hash', hash)).length > 0;
-        if (previously_uploaded) throw Error('File has already been uploaded')
-        // Download the original image
-        await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}`);
-        console.log('STREAMED TO', `${ASSET_DIR}/${folder}/${name}${ext}`)
-        // Find resize options
-        const sizes = resizeOptions(dims.width, dims.height);
-        console.log('GOT RESIZE OPTIONS', sizes);
-        for (const [key, value] of Object.entries(sizes)) {
-            console.log('IN SIZES', key, value)
-            // Use largest dimension for resize
-            let sizing_dimension = dims.width > dims.height ? 'width' : 'height';
-            console.log('about to sharp',`${ASSET_DIR}/${folder}/${name}-${key}${ext}` );
-            await sharp(image_buffer)
-                .resize({[sizing_dimension]: value})
-                .toFile(`${ASSET_DIR}/${folder}/${name}-${key}${ext}`);
+        const previously_uploaded = await prisma[TABLES.Image].findUnique({ where: { hash: hash } });
+        if (previously_uploaded) {
+            if (errorOnDuplicate) throw Error('File has already been uploaded');
+        } else {
+            // Download the original image
+            await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}`);
+            // Find resize options
+            const sizes = resizeOptions(dimensions.width, dimensions.height);
+            for (const [key, value] of Object.entries(sizes)) {
+                // Use largest dimension for resize
+                let sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
+                await sharp(image_buffer)
+                    .resize({ [sizing_dimension]: value })
+                    .toFile(`${ASSET_DIR}/${folder}/${name}-${key}${ext}`);
+            }
+            image = await prisma[TABLES.Image].create({ data: { 
+                hash: hash,
+                folder: 'images',
+                file: name,
+                ext: ext,
+                alt: alt,
+                description: description,
+                width: dimensions.width,
+                height: dimensions.height
+             } });
         }
-        console.log('saveImage success!', { 
-            success: true, 
+        return {
+            success: true,
             filename: `${name}${ext}`,
-            dimensions: dims,
-            hash: hash
-        })
-        return { 
-            success: true, 
-            filename: `${name}${ext}`,
-            dimensions: dims,
-            hash: hash
+            dimensions: dimensions,
+            hash: hash,
+            imageId: image.id
         }
     } catch (error) {
         console.log('saveImage ran into an error')
@@ -212,7 +228,7 @@ export async function saveImage(stream, filename) {
         return {
             success: false,
             filename: filename,
-            dimensions: {width: 0, height: 0},
+            dimensions: { width: 0, height: 0 },
             hash: null
         }
     }

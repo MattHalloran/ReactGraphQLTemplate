@@ -23,7 +23,7 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { addImagesMutation, updateImagesMutation, updatePlantMutation } from 'graphql/mutation';
+import { addImagesMutation, deletePlantsMutation, updateImagesMutation, updatePlantMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { NoImageIcon } from 'assets/img';
 import { Dropzone, ImageList, Selector } from 'components';
@@ -98,6 +98,7 @@ function EditPlantDialog({
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
     const [updatePlant] = useMutation(updatePlantMutation);
+    const [deletePlant] = useMutation(deletePlantsMutation);
 
     const [imageData, setImageData] = useState([]);
     const [addImages] = useMutation(addImagesMutation);
@@ -111,15 +112,15 @@ function EditPlantDialog({
                 labels: ['hero']
             }
         })
-        .then((response) => {
-            //refetchImages(); TODO
-            PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
-            PubSub.publish(PUBS.Loading, false);
-        })
-        .catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-        })
+            .then((response) => {
+                //refetchImages(); TODO
+                PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
+                PubSub.publish(PUBS.Loading, false);
+            })
+            .catch((response) => {
+                PubSub.publish(PUBS.Loading, false);
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+            })
     }
 
     const applyChanges = useCallback((changed) => {
@@ -141,14 +142,14 @@ function EditPlantDialog({
                 deleting: delete_srcs
             }
         })
-        .then((response) => {
-            PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
-            PubSub.publish(PUBS.Loading, false);
-        })
-        .catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-        })
+            .then((response) => {
+                PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
+                PubSub.publish(PUBS.Loading, false);
+            })
+            .catch((response) => {
+                PubSub.publish(PUBS.Loading, false);
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+            })
     }, [imageData, updateImages])
 
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
@@ -173,6 +174,24 @@ function EditPlantDialog({
     function revertPlant() {
         setChangedPlant(plant);
     }
+
+    const confirmDelete = useCallback(() => {
+        PubSub.publish(PUBS.AlertDialog, {
+            message: `Are you sure you want to delete this plant, along with its SKUs? This cannot be undone`,
+            firstButtonText: 'Yes',
+            firstButtonClicked: () => {
+                deletePlant({ variables: { ids: [changedPlant.id] } })
+                    .then(() => {
+                        PubSub.publish(PUBS.Snack, { message: 'Plant deleted' });
+                        onClose();
+                    })
+                    .catch((error) => {
+                        PubSub.publish(PUBS.Snack, { message: 'Failed to delete plant', severity: 'error', data: error });
+                    });
+            },
+            secondButtonText: 'No',
+        });
+    }, [changedPlant, deletePlant, onClose])
 
     const savePlant = () => {
         let plant_data = {
@@ -271,15 +290,23 @@ function EditPlantDialog({
     let changes_made = !_.isEqual(plant, changedPlant);
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
                 <Button
                     fullWidth
                     disabled={!changes_made}
-                    startIcon={<RestoreIcon />}
+                    startIcon={<DeleteIcon />}
                     onClick={revertPlant}
                 >Revert</Button>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
+                <Button
+                    fullWidth
+                    disabled={!changedPlant?.id}
+                    startIcon={<RestoreIcon />}
+                    onClick={confirmDelete}
+                >Delete</Button>
+            </Grid>
+            <Grid item xs={12} sm={4}>
                 <Button
                     fullWidth
                     disabled={!changes_made}
@@ -382,7 +409,7 @@ function EditPlantDialog({
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                        <ImageList data={imageData} onApply={applyChanges}/>
+                            <ImageList data={imageData} onApply={applyChanges} />
                         </Grid>
                         {/* Replace display image */}
                         <Grid item xs={9}>

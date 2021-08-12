@@ -33,7 +33,7 @@ export const typeDef = gql`
     extend type Mutation {
         addRole(input: RoleInput!): Role!
         updateRole(input: RoleInput!): Role!
-        deleteRoles(ids: [ID!]!): Boolean
+        deleteRoles(ids: [ID!]!): Count!
     }
 `
 
@@ -54,17 +54,16 @@ export const resolvers = {
         updateRole: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update((new PrismaSelect(info).value), {
+            return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
-                data: { ...args.input }
+                data: { ...args.input },
+                ...(new PrismaSelect(info).value)
             })
         },
-        deleteRoles: async (_, args, context, info) => {
+        deleteRoles: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].delete((new PrismaSelect(info).value), {
-                where: { id: { in: args.ids } }
-            })
+            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

@@ -32,7 +32,7 @@ export const resolvers = {
             return await db(TABLES.PlantTrait).select('value').where('name', args.name)
         },
         // Returns all values previously entered for every trait
-        traitOptions: async (_, args, context, info) => {
+        traitOptions: async (_, _args, context) => {
             // Query all data
             const trait_data = await context.prisma[_model].findMany();
             // Combine data into object
