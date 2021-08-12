@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-express';
 import { db, TABLES } from '../db';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.PlantTrait;
 
@@ -31,9 +32,9 @@ export const resolvers = {
             return await db(TABLES.PlantTrait).select('value').where('name', args.name)
         },
         // Returns all values previously entered for every trait
-        traitOptions: async (_, args) => {
+        traitOptions: async (_, args, context, info) => {
             // Query all data
-            const trait_data = await db(TABLES.PlantTrait).select('name', 'value');
+            const trait_data = await context.prisma[_model].findMany();
             // Combine data into object
             let options = {};
             for (const row of trait_data) {
@@ -42,7 +43,7 @@ export const resolvers = {
             // Format object
             let trait_options = []
             for (const [key, value] of Object.entries(options)) {
-                trait_options.append({ name: key, values: value });
+                trait_options.push({ name: key, values: [...new Set(value)] });
             }
             return trait_options;
         }

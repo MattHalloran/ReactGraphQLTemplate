@@ -3,21 +3,20 @@ import { db, TABLES } from '../db';
 import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
-import { deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
+import { clean, convertImageUrl, deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
+import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Image;
 
 // Query image data from a src path (ex: 'https://thewebsite.com/api/images/boop.png')
-async function imageFromSrc(src) {
+async function imageFromSrc(src, prisma) {
     // Parse name, extension, and folder from src path. This gives a unique row
     let { name, ext } = plainImageName(src);
-    const { folder } = clean(src);
-    // Update the row with the new information
-    return await db(_model)
-        .where('fileName', name)
-        .andWhere('extension', ext)
-        .andWhere('folder', folder)
-        .first();
+    return await prisma[_model].findFirst({ where: { 
+        file: name,
+        ext,
+        folder: 'images'
+    } });
 }
 
 export const typeDef = gql`
@@ -35,20 +34,22 @@ export const typeDef = gql`
         description: String
     }
 
-    type ImageData {
-        src: String!
-        alt: String
-        description: String
-    }
-
     type AddImageResponse {
         successfulFileNames: [String!]!
         failedFileNames: [String!]!
     }
 
+    type Image {
+        id: ID!
+        src: String!
+        alt: String
+        description: String
+        width: Int!
+        height: Int!
+    }
+
     extend type Query {
-        imagesByName(fileNames: [String!]!, size: ImageSize): [String]!
-        imagesByLabel(label: String!, size: ImageSize): [ImageData!]!
+        imagesByLabel(label: String!, size: ImageSize): [Image!]!
     }
 
     extend type Mutation {
@@ -74,41 +75,21 @@ export const typeDef = gql`
 export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
-        imagesByName: async (_, args) => {
-            // Loop through each fileName
-            const paths = [];
-            for (let i = 0; i < args.fileNames.length; i++) {
-                // Try returning the image in the requested size, or any available size
-                const filePath = await findImageUrl(args.fileNames[i], args.size);
-                paths.push(filePath);
-            }
-            return paths;
-        },
-        imagesByLabel: async (_, args) => {
+        imagesByLabel: async (_, args, context, info) => {
             // Locate images in database
-            const images = await db(_model)
-                .select('*')
-                .leftJoin(TABLES.ImageLabels, `${TABLES.ImageLabels}.hash`, `${TABLES.Image}.hash`)
-                .where(`${TABLES.ImageLabels}.label`, args.label);
-            if (images === undefined || images.length === 0) return [];
-            // Loop through each image
-            const image_data = [];
-            for (let i = 0; i < images.length; i++) {
-                // Try returning the image in the requested size, or any available size
-                const filePath = await findImageUrl(`${images[i].folder}/${images[i].fileName}${images[i].extension}`, args.size);
-                if (filePath) {
-                    image_data.push({
-                        src: filePath,
-                        alt: images[i].alt,
-                        description: images[i].description
-                    });
-                } else {
-                    image_data.push({
-                        src: null,
-                        alt: null,
-                        description: null
-                    })
-                }
+            let image_data = await context.prisma[_model].findMany((new PrismaSelect(info).value), { 
+                where: { 
+                    labels: { 
+                        contains: { label: args.label }
+                    } 
+                } 
+            });
+            // Add size identifier to image srcs, if requested
+            if (image_data?.length > 0 && image_data[0].src) {
+                image_data = image_data.map(d => ({ 
+                    ...d,
+                    src: convertImageUrl(d.src, args.size)
+                }))
             }
             return image_data;
         }
@@ -144,8 +125,8 @@ export const resolvers = {
                     await db(_model).insert({
                         hash: hash,
                         folder: 'images',
-                        fileName: name,
-                        extension: ext,
+                        file: name,
+                        ext: ext,
                         alt: args.alts ? args.alts[i] : '',
                         width: dimensions.width,
                         height: dimensions.height
@@ -177,18 +158,22 @@ export const resolvers = {
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
-                let image = await imageFromSrc(args.data[i].src);
+                const image = await imageFromSrc(args.data[i].src, context.prisma);
+                console.log('IN UPDATE IMAGES', args.data[i])
                 await context.prisma[_model].update({
                     where: { id: image.id },
-                    data: { ...args.data[i] }
+                    data: { 
+                        alt: args.data[i].alt,
+                        description: args.data[i].description,
+                    }
                 })
             }
             if (!args.deleting) return true;
             // Loop through delete data passed in
             for (let i = 0; i < args.deleting.length; i++) {
-                let image = await imageFromSrc(args.deleting[i]);
+                const image = await imageFromSrc(args.deleting[i], context.prisma);
                 console.info('deleting image...', image);
-                await deleteImage(`${image.fileName}${image.extension}`);
+                await deleteImage(`${image.file}${image.ext}`);
                 await context.prisma[_model].delete({ where: { id: image.id } })
             }
             return true;
@@ -197,10 +182,9 @@ export const resolvers = {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Delete the files
-            const filenames = await db(_model).select('folder', 'filename', 'extension').whereIn('id', args.ids);
-            for (let i = 0; i < filenames.length; i++) {
-                let curr = filenames[i];
-                await deleteImage(`${curr.folder}/${curr.fileName}${curr.extension}`);
+            const srcs = await db(_model).select('src').whereIn('id', args.ids);
+            for (let i = 0; i < srcs.length; i++) {
+                await deleteImage(src[i]);
             }
             // Delete the database rows
             return await context.prisma[_model].delete({
@@ -211,10 +195,9 @@ export const resolvers = {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Delete the files
-            const filenames = await db(_model).select('folder', 'filename', 'extension').whereIn('label', args.labels);
+            const srcs = await db(_model).select('src').whereIn('label', args.labels);
             for (let i = 0; i < filenames.length; i++) {
-                let curr = filenames[i];
-                await deleteImage(`${curr.folder}/${curr.fileName}${curr.extension}`);
+                await deleteImage(srcs);
             }
             // Delete the database rows
             return await context.prisma[_model].delete({

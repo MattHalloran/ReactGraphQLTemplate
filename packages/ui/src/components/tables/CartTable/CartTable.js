@@ -111,7 +111,7 @@ function CartTable({
         let display;
         const display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
         if (display_data) {
-            display = <img src={`${display_data.folder}/${display_data.fileName}-m${display_data.extension}`} className="cart-image" alt={display_data.alt} />
+            display = <img src={display_data.src} className="cart-image" alt={display_data.alt} />
         } else {
             display = <NoImageIcon className="cart-image" />
         }

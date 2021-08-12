@@ -1,10 +1,23 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
+}
+
+model knex_migrations {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+}
+
+model knex_migrations_lock {
+  index     Int  @id @default(autoincrement())
+  is_locked Int?
 }
 
 model address {
@@ -20,16 +33,18 @@ model address {
   premise               String?   @db.VarChar(64)
   deliveryInstructions  String?   @db.VarChar(2048)
   businessId            String?   @db.Uuid
-  business              business? @relation(fields: [businessId], references: [id])
-  orders                order[]   @relation("OrderAddress")
+  business              business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  order                 order[]
 }
 
 model business {
   id                      String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name                    String               @db.VarChar(128)
   subscribedToNewsletters Boolean              @default(true)
+  created_at              DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime             @default(now()) @db.Timestamptz(6)
   address                 address[]
-  business_discounts      business_discounts[]
+  discounts               business_discounts[]
   customer                customer[]
   email                   email[]
   phone                   phone[]
@@ -39,8 +54,8 @@ model business_discounts {
   id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   businessId String   @db.Uuid
   discountId String   @db.Uuid
-  business   business @relation(fields: [businessId], references: [id])
-  discount   discount @relation(fields: [discountId], references: [id])
+  business   business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  discount   discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
 }
 
 model customer {
@@ -58,20 +73,22 @@ model customer {
   emailVerified     Boolean          @default(false)
   status            String           @default("Unlocked")
   businessId        String?          @db.Uuid
-  business          business?        @relation(fields: [businessId], references: [id])
+  created_at        DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime         @default(now()) @db.Timestamptz(6)
+  business          business?        @relation(fields: [businessId], references: [id], onDelete: NoAction)
   roles             customer_roles[]
-  emails            email[]
+  email             email[]
   feedback          feedback[]
-  orders            order[]
-  phones            phone[]
+  order             order[]
+  phone             phone[]
 }
 
 model customer_roles {
   id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   customerId String   @db.Uuid
   roleId     String   @db.Uuid
-  customer   customer @relation(fields: [customerId], references: [id])
-  role       role     @relation(fields: [roleId], references: [id])
+  customer   customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  role       role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
 }
 
 model discount {
@@ -90,49 +107,42 @@ model email {
   receivesDeliveryUpdates Boolean   @default(true)
   customerId              String?   @db.Uuid
   businessId              String?   @db.Uuid
-  business                business? @relation(fields: [businessId], references: [id])
-  customer                customer? @relation(fields: [customerId], references: [id])
+  business                business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer                customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model feedback {
   id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   text       String    @db.VarChar(4096)
   customerId String?   @db.Uuid
-  customer   customer? @relation(fields: [customerId], references: [id])
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+  customer   customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model image {
   id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   hash         String         @unique @db.VarChar(128)
   folder       String         @db.VarChar(256)
-  fileName     String         @db.VarChar(256)
-  extension    String
+  file         String         @db.VarChar(256)
+  ext          String
+  src          String?
   alt          String?        @db.VarChar(256)
   description  String?        @db.VarChar(1024)
   usedFor      String?
   width        Int
   height       Int
-  image_labels image_labels[]
+  labels       image_labels[]
   plant_images plant_images[]
+
+  @@unique([folder, file, ext], name: "image_folder_file_ext_unique")
 }
 
 model image_labels {
   id    Int    @id @default(autoincrement())
   hash  String @db.VarChar(128)
   label String @db.VarChar(255)
-  image image  @relation(fields: [hash], references: [hash])
-}
-
-model knex_migrations {
-  id             Int       @id @default(autoincrement())
-  name           String?   @db.VarChar(255)
-  batch          Int?
-  migration_time DateTime? @db.Timestamptz(6)
-}
-
-model knex_migrations_lock {
-  index     Int  @id @default(autoincrement())
-  is_locked Int?
+  image image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
 }
 
 model order {
@@ -144,9 +154,11 @@ model order {
   isDelivery           Boolean      @default(true)
   addressId            String?      @db.Uuid
   customerId           String       @db.Uuid
-  address              address?     @relation("OrderAddress", fields: [addressId], references: [id])
-  customer             customer     @relation(fields: [customerId], references: [id])
-  order_items          order_item[]
+  created_at           DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime     @default(now()) @db.Timestamptz(6)
+  address              address?     @relation(fields: [addressId], references: [id], onDelete: NoAction)
+  customer             customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  order_item           order_item[]
 }
 
 model order_item {
@@ -154,52 +166,56 @@ model order_item {
   quantity Int    @default(1)
   orderId  String @db.Uuid
   skuId    String @db.Uuid
-  order    order  @relation(fields: [orderId], references: [id])
-  sku      sku    @relation(fields: [skuId], references: [id])
+  order    order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sku      sku    @relation(fields: [skuId], references: [id], onDelete: Cascade)
 }
 
 model phone {
   id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  number                  String    @db.VarChar(20)
+  number                  String    @unique @db.VarChar(20)
   receivesDeliveryUpdates Boolean   @default(true)
   customerId              String?   @db.Uuid
   businessId              String?   @db.Uuid
-  business                business? @relation(fields: [businessId], references: [id])
-  customer                customer? @relation(fields: [customerId], references: [id])
+  business                business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer                customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model plant {
-  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  latinName    String         @unique @db.VarChar(256)
-  plant_images plant_images[]
-  plant_traits plant_trait[]
-  skus         sku[]
+  id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  latinName String         @unique @db.VarChar(256)
+  images    plant_images[]
+  traits    plant_trait[]
+  skus      sku[]
 }
 
 model plant_images {
   id      Int    @id @default(autoincrement())
   plantId String @db.Uuid
   imageId String @db.Uuid
-  image   image  @relation(fields: [imageId], references: [id])
-  plant   plant  @relation(fields: [plantId], references: [id])
+  image   image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
 }
 
 model plant_trait {
   id      Int    @id @default(autoincrement())
   plantId String @db.Uuid
-  name    String
+  name    String @db.VarChar(128)
   value   String @db.VarChar(512)
-  plant   plant  @relation(fields: [plantId], references: [id])
+  plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+
+  @@unique([plantId, name], name: "plant_trait_plantid_name_unique")
 }
 
 model queue_task {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   taskId      Int
-  name        String  @db.VarChar(256)
-  status      String  @default("Active")
-  description String? @db.VarChar(1024)
-  result      String? @db.VarChar(8192)
+  name        String   @db.VarChar(256)
+  status      String   @default("Active")
+  description String?  @db.VarChar(1024)
+  result      String?  @db.VarChar(8192)
   resultCode  Int?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
 }
 
 model role {
@@ -213,23 +229,23 @@ model sku {
   id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   sku            String          @db.VarChar(32)
   isDiscountable Boolean         @default(false)
-  size           String          @default("N/A") @db.VarChar(32)
+  size           Decimal?        @db.Decimal(8, 2)
   note           String?         @db.VarChar(2048)
   availability   Int             @default(0)
-  price          String          @default("N/A") @db.VarChar(16)
+  price          Decimal?        @db.Decimal(8, 2)
   status         String          @default("Active")
   plantId        String?         @db.Uuid
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
   updated_at     DateTime        @default(now()) @db.Timestamptz(6)
-  plant          plant?          @relation(fields: [plantId], references: [id])
-  order_items    order_item[]
-  sku_discounts  sku_discounts[]
+  plant          plant?          @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  order_item     order_item[]
+  discounts      sku_discounts[]
 }
 
 model sku_discounts {
   id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   skuId      String   @db.Uuid
   discountId String   @db.Uuid
-  discount   discount @relation(fields: [discountId], references: [id])
-  sku        sku      @relation(fields: [skuId], references: [id])
+  discount   discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  sku        sku      @relation(fields: [skuId], references: [id], onDelete: Cascade)
 }

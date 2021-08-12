@@ -35,22 +35,24 @@ export function clean(file, defaultFolder) {
 }
 
 // From a src string, return the filename stored in the database
-// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> { name: 'boop', ext: 'png')
+// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> { name: 'boop', ext: '.png')
 export function plainImageName(src) {
     // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
     let fileName = path.basename(src);
+    console.log('IN PLAIN IMAGE NAME', fileName)
     if (!fileName || fileName.length <= 0) return { name: null, ext: null };
     // 'boop-xl.png' -> { name: 'boop-xl', ext: 'png' }
     let { name, ext } = clean(fileName);
+    let size;
     // 'boop-xl' -> 'boop'
-    const sizeEndings = Object.keys(IMAGE_SIZE).map(s => `-${s}`);
-    for (let i = 0; i < sizeEndings.length; i++) {
-        if (name.endsWith(sizeEndings[i])) {
-            name = name.slice(0, -sizeEndings[i].length);
+    for (const sizeEnding of Object.keys(IMAGE_SIZE)) {
+        if (name.endsWith(`-${sizeEnding}`)) {
+            size = sizeEnding;
+            name = name.slice(0, -(sizeEnding.length+1));
             break;
         }
     }
-    return { name, ext };
+    return { name, ext, size };
 }
 
 // Returns a filename that can be used at the specified path
@@ -95,6 +97,16 @@ function resizeOptions(width, height) {
         if (width >= value || height >= value) sizes[key] = value;
     }
     return sizes;
+}
+
+// Returns the original URL if exists, or the next largest sized image available
+export async function convertImageUrl(url, defaultSize='M') {
+    console.log('IN CONVERT IMAGE URL');
+    console.log(url);
+    const { name, ext, size } = plainImageName(url);
+    console.log('best path is');
+    console.log(findImageUrl(`${name}${ext}`, size || defaultSize ));
+    return findImageUrl(`${name}${ext}`, size);
 }
 
 // Returns the filepath of the requested image at the closest available size

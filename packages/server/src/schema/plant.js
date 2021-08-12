@@ -1,18 +1,12 @@
 import { gql } from 'apollo-server-express';
 import { db, TABLES } from '../db';
-import { CODE, SKU_SORT_OPTIONS } from '@local/shared';
+import { CODE, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Plant;
 
 export const typeDef = gql`
-
-    input PlantImage {
-        files: [Upload!]!
-        alts: [String]
-        labels: [String!]!
-    }
 
     input PlantTraitInput {
         name: String!
@@ -33,11 +27,15 @@ export const typeDef = gql`
         images: [PlantImageInput]!
     }
 
+    type PlantImage {
+        image: Image!
+    }
+
     type Plant {
         id: ID!
         latinName: String!
         traits: [PlantTrait!]
-        images: [ImageData!]
+        images: [PlantImage!]
         skus: [Sku!]
     }
 
@@ -56,35 +54,34 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        plants: async (_, _args, context) => {
+        plants: async (_, _args, context, info) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findMany();
+            return await context.prisma[_model].findMany((new PrismaSelect(info).value));
         },
-        activePlants: async (_, args, context) => {
+        activePlants: async (_, args, context, info) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // // Active plants are referenced by a SKU
-            // const active_ids = await db(TABLES.Sku).select('plantId');
-            // let plant_data = selectQueryHelper(Model, info, active_ids);
-            // console.log('ACTIVE PLANT DATA ISSSS', plant_data)
-            // const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
-            // //TODO sort
-            // return plant_data;
-            return new CustomError(CODE.NotImplemented);
+            return await context.prisma[_model].findMany((new PrismaSelect(info).value), { 
+                where: { 
+                    skus: { 
+                        contains: { status: SKU_STATUS.Active }
+                    } 
+                } 
+            });
         },
-        inactivePlants: async (_, args, context) => {
+        inactivePlants: async (_, args, context, info) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // // Active plants are referenced by no SKUs
-            // const all_ids = await db(_model).select('id');
-            // const active_ids = await db(TABLES.Sku).select('plantId');
-            // const inactive_ids = all_ids.filter(id => !active_ids.includes(id));
-            // let plant_data = selectQueryHelper(Model, info, inactive_ids);
-            // const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
-            // //TODO sort
-            // return plant_data;
-            return new CustomError(CODE.NotImplemented);
+            return await context.prisma[_model].findMany((new PrismaSelect(info).value), { 
+                NOT: {
+                    where: { 
+                        skus: { 
+                            contains: { status: SKU_STATUS.Active }
+                        } 
+                    }
+                }
+            });
         }
     },
     Mutation: {

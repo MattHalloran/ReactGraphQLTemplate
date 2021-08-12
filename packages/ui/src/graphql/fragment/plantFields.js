@@ -10,7 +10,9 @@ export const plantFields = gql`
             value
         }
         images {
-            ...imageFields
+            image {
+                ...imageFields
+            }
         }
     }
 `

@@ -13,7 +13,7 @@ console.info(`🧼 Cleaning image data in: ${PATH}...`);
 // 1) Delete image files no longer associated with any image rows in the database
 const rows = (await db(TABLES.Image).select('*').where('folder', FOLDER)).map(d => {
     return {
-        file: `${d.fileName}${d.extension}`,
+        file: `${d.file}${d.ext}`,
         hash: d.hash
     }
 });

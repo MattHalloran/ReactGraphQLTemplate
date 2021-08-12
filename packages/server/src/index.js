@@ -8,6 +8,7 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
 import { schema } from './schema';
 import { context } from './context';
+import { convertImageUrl } from './utils';
 
 console.info('Starting server...')
 
@@ -33,7 +34,11 @@ app.use(cors({
 // Set static folders
 app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
-app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
+// Before querying image, convert file identifer to best-found match
+app.use('/images', (req, _res, next) => {
+    req.path = convertImageUrl(req.path);
+    next();
+}, express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
 app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)

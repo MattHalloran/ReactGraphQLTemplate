@@ -1,10 +1,9 @@
 import { gql } from 'graphql-tag';
-import { discountFields, plantFields, skuFields } from 'graphql/fragment';
+import { plantFields, skuFields } from 'graphql/fragment';
 
 export const inactivePlantsQuery = gql`
     ${plantFields}
     ${skuFields}
-    ${discountFields}
     query InactivePlantsQuery(
         $sortBy: SkuSortBy
     ) {
@@ -15,7 +14,13 @@ export const inactivePlantsQuery = gql`
             skus {
                 ...skuFields
                 discounts {
-                    ...discountFields
+                    discount {
+                        id
+                        discount
+                        title
+                        comment
+                        terms
+                    }
                 }
             }
         }

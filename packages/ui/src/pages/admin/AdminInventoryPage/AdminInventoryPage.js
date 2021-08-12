@@ -53,8 +53,8 @@ function AdminInventoryPage() {
 
     const [sortBy, setSortBy] = useState(SKU_SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
-    const { data: activePlants } = useQuery(activePlantsQuery, { variables: { sortBy: sortBy } });
-    const { data: inactivePlants } = useQuery(inactivePlantsQuery, { variables: { sortBy: sortBy } });
+    const { data: activePlants } = useQuery(activePlantsQuery, { variables: { sortBy: sortBy }, pollInterval: 5000 });
+    const { data: inactivePlants } = useQuery(inactivePlantsQuery, { variables: { sortBy: sortBy }, pollInterval: 5000 });
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {

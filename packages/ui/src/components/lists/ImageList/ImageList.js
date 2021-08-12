@@ -98,7 +98,7 @@ function ImageList({
 }
 
 ImageList.propTypes = {
-    data: PropTypes.object.isRequired,
+    data: PropTypes.array,
     onApply: PropTypes.func.isRequired,
 }
 

@@ -72,7 +72,7 @@ function PlantCard({
     let display;
     const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
     if (display_data) {
-        display = <CardMedia component="img" src={`${display_data.folder}/${display_data.fileName}-l${display_data.extension}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <CardMedia component="img" src={display_data.src} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
         display = <NoImageIcon className={classes.displayImage} />
     }

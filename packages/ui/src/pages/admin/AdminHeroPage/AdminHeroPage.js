@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 function AdminHeroPage() {
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
-    const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
+    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);
 
@@ -35,6 +35,7 @@ function AdminHeroPage() {
             }
         })
         .then((response) => {
+            refetchImages();
             PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
             PubSub.publish(PUBS.Loading, false);
         })

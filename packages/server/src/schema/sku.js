@@ -38,17 +38,21 @@ export const typeDef = gql`
         discountIds: [ID!]
     }
 
+    type SkuDiscount {
+        discount: Discount!
+    }
+
     type Sku {
         id: ID!
         sku: String!
         isDiscountable: Boolean!
-        size: String!
+        size: String
         note: String
         availability: Int!
-        price: String!
+        price: String
         status: SkuStatus!
         plant: Plant!
-        discounts: [Discount!]!
+        discounts: [SkuDiscount!]
     }
 
     extend type Query {
