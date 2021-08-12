@@ -45,10 +45,10 @@ export function plainImageName(src) {
     let { name, ext } = clean(fileName);
     let size;
     // 'boop-xl' -> 'boop'
-    for (const sizeEnding of Object.keys(IMAGE_SIZE)) {
-        if (name.endsWith(`-${sizeEnding}`)) {
-            size = sizeEnding;
-            name = name.slice(0, -(sizeEnding.length+1));
+    for (const [key, value] of Object.keys(IMAGE_SIZE)) {
+        if (name.endsWith(`-${key}`)) {
+            size = value;
+            name = name.slice(0, -(key.length+1));
             break;
         }
     }
@@ -99,30 +99,23 @@ function resizeOptions(width, height) {
     return sizes;
 }
 
-// Returns the original URL if exists, or the next largest sized image available
-export async function convertImageUrl(url, defaultSize='M') {
-    console.log('IN CONVERT IMAGE URL');
-    console.log(url);
-    const { name, ext, size } = plainImageName(url);
-    console.log('best path is');
-    console.log(findImageUrl(`${name}${ext}`, size || defaultSize ));
-    return findImageUrl(`${name}${ext}`, size);
-}
-
 // Returns the filepath of the requested image at the closest available size
 export async function findImageUrl(filename, size) {
     const { name, ext, folder } = clean(filename, 'images');
+    console.log('IN FIND IMAGE URL')
+    console.log(filename, name, ext, folder, size)
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
         if(fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
     }
-    // Search largest to smallest size
-    const sizes = resizeOptions(size || IMAGE_SIZE.L, size || IMAGE_SIZE.L);
-    const keys = Object.keys(sizes).reverse();
-    for (let i = 0; i < keys.length; i++) {
-        let curr = `${name}-${keys[i]}${ext}`;
-        if(fs.existsSync(`${ASSET_DIR}/${folder}/${curr}`)) return `${SERVER_URL}/${folder}/${curr}`;
+    // Search sizes by closest match
+    let size_array = Object.keys(IMAGE_SIZE).map(key => ({ key, value: IMAGE_SIZE[key] }));
+    const size_index = size_array.findIndex(obj => obj.value === size);
+    for (let i = 0; i < size_array.length; i++) {
+        const curr = `${folder}/${name}-${size_array[(i+size_index)%(size_array.length)].key}${ext}`;
+        if(fs.existsSync(`${ASSET_DIR}/${curr}`)) return `${SERVER_URL}/${curr}`;
     }
+    if(fs.existsSync(`${ASSET_DIR}/${folder}/${folder}/${name}${ext}`)) return `${SERVER_URL}/${folder}/${folder}/${name}${ext}`;
     return null;
 }
 
@@ -231,8 +224,10 @@ export async function saveImage(stream, filename) {
 // folder - folder in server directory (ex: 'images')
 export async function deleteFile(file) {
     try {
+        console.log('IN DELTE FILE', file)
         const { name, ext, folder } = clean(file);
         let fullname = `${ASSET_DIR}/${folder}/${name}${ext}`;
+        console.log(name, ext, folder, fullname)
         if (!fs.existsSync(fullname)) {
             console.error(`Could not delete file ${fullname}: not found`);
             return false;
@@ -250,9 +245,11 @@ export async function deleteFile(file) {
 // filename - name of the full image
 // folder - name of the folder
 export async function deleteImage(file) {
-    const { name, ext } = plainImageName(file);
-    const { folder } = clean(file) || 'images';
-    let files = [name];
+    console.log('IN DELETE IMAGE', file)
+    const { name, ext, folder: fileFolder } = plainImageName(file);
+    const folder = fileFolder || 'images';
+    console.log(name, ext, folder);
+    let files = [`${folder}/${name}${ext}`];
     Object.keys(IMAGE_SIZE).forEach(key => files.push(`${folder}/${name}-${key}${ext}`));
     let success = true;
     for (let i = 0; i < files.length; i++) {

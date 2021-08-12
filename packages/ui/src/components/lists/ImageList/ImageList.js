@@ -30,6 +30,7 @@ function ImageList({
     const [changed, setChanged] = useState(null);
 
     useEffect(() => {
+        console.log('IMAGE LIST DATAAAA', data)
         setChanged(data);
     }, [data])
 

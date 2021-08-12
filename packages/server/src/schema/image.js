@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { db, TABLES } from '../db';
-import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
+import { CODE, IMAGE_EXTENSION, IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
-import { clean, convertImageUrl, deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
+import { deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
 import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Image;
@@ -84,12 +84,16 @@ export const resolvers = {
                     } 
                 } 
             });
+            console.log('ARGS.SIZE is')
+            console.log(args.size)
             // Add size identifier to image srcs, if requested
             if (image_data?.length > 0 && image_data[0].src) {
-                image_data = image_data.map(d => ({ 
-                    ...d,
-                    src: convertImageUrl(d.src, args.size)
-                }))
+                image_data = image_data.map(d => {
+                    return {
+                        ...d,
+                        src: findImageUrl(d.src, args.size)
+                    }
+                })
             }
             return image_data;
         }
