@@ -13,7 +13,9 @@ export const skusQuery = gql`
         ) {
             ...skuFields
             discounts {
-                ...discountFields
+                discount {
+                    ...discountFields
+                }
             }
             plant {
                 ...plantFields

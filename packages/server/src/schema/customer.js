@@ -117,15 +117,18 @@ export const resolvers = {
             // Can only query your own profile
             const customerId = context.req.token.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findFirst({ where: { id: customerId } });
+            return await context.prisma[_model].findUnique({ where: { id: customerId }, ...(new PrismaSelect(info).value) });
         }
     },
     Mutation: {
         login: async (_, args, context, info) => {
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
-                if (context.req.roles && context.req.roles.length > 0) 
-                    return await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: context.req.customerId } });
+                if (context.req.roles && context.req.roles.length > 0) {
+                    const data = await context.prisma[_model].findUnique({ where: { id: context.req.customerId }, ...(new PrismaSelect(info).value) });
+                    if (data) return data;
+                    context.res.clearCookie(COOKIE.Session);
+                }
                 return new CustomError(CODE.BadCredentials);
             }
             // Validate input format
@@ -169,7 +172,7 @@ export const resolvers = {
                     lastLoginAttempt: moment().format(DATE_FORMAT),
                     resetPasswordCode: null
                 }).returning('*').then(rows => rows[0]);
-                return await context.prisma[_model].findFirst((new PrismaSelect(info).value), { where: { id: customer.id } });
+                return await context.prisma[_model].findUnique({ where: { id: customer.id }, ...(new PrismaSelect(info).value) });
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = customer.loginAttempts + 1;
@@ -242,7 +245,7 @@ export const resolvers = {
             sendVerificationLink(args.email, customer_id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
-            return await context.prisma[_model].findFirst({ where: { id: customer_id } });
+            return await context.prisma[_model].findUnique({ where: { id: customer_id }, ...(new PrismaSelect(info).value) });
         },
         updateCustomer: async (_, args, context, info) => {
             // Must be admin, or updating your own

@@ -65,7 +65,7 @@ function AdminInventoryPage() {
         })
             .then((response) => {
                 PubSub.publish(PUBS.AlertDialog, {
-                    message: 'Availability uploaded. This process can take up to 30 seconds. Please manually refresh the page to see results',
+                    message: 'Availability uploaded. This process can take up to 30 seconds. Please be patient💚',
                     firstButtonText: 'OK',
                 });
                 PubSub.publish(PUBS.Loading, false);

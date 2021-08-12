@@ -142,7 +142,7 @@ export async function up (knex) {
         table.integer('availability').defaultTo(0).notNullable();
         table.decimal('price');
         table.enu('status', Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant).onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.Order, (table) => {

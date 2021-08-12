@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import {  
-    AppBar,   
+import {
+    AppBar,
     Button,
-    Dialog, 
+    Dialog,
     Grid,
     IconButton,
-    List, 
-    ListItem, 
-    ListItemText, 
+    List,
+    ListItem,
+    ListItemText,
     ListSubheader,
     Slide,
     TextField,
-    Toolbar,   
+    Toolbar,
     Tooltip
 } from '@material-ui/core';
 import {
@@ -23,13 +23,13 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { updatePlantMutation } from 'graphql/mutation';
+import { addImagesMutation, updateImagesMutation, updatePlantMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { NoImageIcon } from 'assets/img';
-import { Selector } from 'components';
-import { 
+import { Dropzone, ImageList, Selector } from 'components';
+import {
     deleteArrayIndex,
-    displayPrice, 
+    displayPrice,
     displayPriceToDatabase,
     makeID,
     PUBS,
@@ -99,8 +99,58 @@ function EditPlantDialog({
     const [changedPlant, setChangedPlant] = useState(plant);
     const [updatePlant] = useMutation(updatePlantMutation);
 
-    // Used for display image upload
-    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageData, setImageData] = useState([]);
+    const [addImages] = useMutation(addImagesMutation);
+    const [updateImages] = useMutation(updateImagesMutation);
+
+    const uploadImages = (acceptedFiles) => {
+        PubSub.publish(PUBS.Loading, true);
+        addImages({
+            variables: {
+                files: acceptedFiles,
+                labels: ['hero']
+            }
+        })
+        .then((response) => {
+            //refetchImages(); TODO
+            PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
+            PubSub.publish(PUBS.Loading, false);
+        })
+        .catch((response) => {
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        })
+    }
+
+    const applyChanges = useCallback((changed) => {
+        PubSub.publish(PUBS.Loading, true);
+        // Prepare data for request
+        const data = changed.map(d => ({
+            src: d.src,
+            alt: d.alt,
+            description: d.description
+        }));
+        // Determine which files to mark as deleting
+        const original_srcs = imageData.map(d => d.src);
+        const final_srcs = changed.map(d => d.src);
+        const delete_srcs = original_srcs.filter(s => !final_srcs.includes(s));
+        // Perform update
+        updateImages({
+            variables: {
+                data: data,
+                deleting: delete_srcs
+            }
+        })
+        .then((response) => {
+            PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
+            PubSub.publish(PUBS.Loading, false);
+        })
+        .catch((response) => {
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        })
+    }, [imageData, updateImages])
+
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
     const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0]);
 
@@ -117,6 +167,7 @@ function EditPlantDialog({
             optimal_light: plant?.optimal_light ?? '',
             salt_tolerance: plant?.salt_tolerance ?? '',
         });
+        setImageData(plant?.images);
     }, [plant])
 
     function revertPlant() {
@@ -126,7 +177,6 @@ function EditPlantDialog({
     const savePlant = () => {
         let plant_data = {
             ...changedPlant,
-            display_image: selectedImage,
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
         updatePlant({ variables: { input: plant_data } })
@@ -193,25 +243,6 @@ function EditPlantDialog({
         )
     }
 
-    const fileSelectedHandler = (files) => {
-        if (files.length === 0) return;
-        let file = files[0]
-        let fileSplit = file.name.split('.');
-        processImage(file, fileSplit[0], fileSplit[1]);
-    }
-
-    const processImage = (file, name, extension) => {
-        let reader = new FileReader();
-        reader.onloadend = () => {
-            setSelectedImage({
-                name: name,
-                extension: extension,
-                data: reader.result
-            });
-        }
-        reader.readAsDataURL(file);
-    }
-
     function newSku() {
         setChangedPlant(p => ({
             ...p,
@@ -225,17 +256,6 @@ function EditPlantDialog({
             ...p,
             skus: deleteArrayIndex(p.skus, selectedSkuIndex),
         }));
-    }
-
-    //Show display image from uploaded image.
-    //If no upload image, from model data.
-    //If not model data, show NoImageIcon
-    let image_data = selectedImage?.data ?? changedPlant?.displayImage;
-    let display_image;
-    if (image_data) {
-        display_image = <img src={image_data} className={classes.displayImage} alt="TODO" />
-    } else {
-        display_image = <NoImageIcon className={classes.displayImage} />
     }
 
     const attribute_meta = {
@@ -287,7 +307,7 @@ function EditPlantDialog({
                         aria-labelledby="sku-select-subheader">
                         <ListSubheader component="div" id="sku-select-subheader">
                             SKUs
-                </ListSubheader>
+                        </ListSubheader>
                         {plant?.skus.map((s, index) => (
                             <ListItem
                                 button
@@ -350,12 +370,19 @@ function EditPlantDialog({
                         <Grid item xs={6}>
                             {getTextField('New value', ...attribute_meta[selectedAttribute])}
                         </Grid>
-                        {/* Display existing display image */}
-                        <Grid item xs={3}>
-                            <div className={classes.imageRow}>
-                                <p>Display Image</p>
-                                {display_image}
-                            </div>
+                        <h3>Edit images</h3>
+                        {/* Upload new images */}
+                        <Grid item xs={12}>
+                            <Dropzone
+                                dropzoneText={'Drag \'n\' drop new images here or click'}
+                                onUpload={uploadImages}
+                                uploadText='Upload Images'
+                                cancelText='Cancel Upload'
+                            />
+                        </Grid>
+                        {/* And edit existing images */}
+                        <Grid item xs={12}>
+                        <ImageList data={imageData} onApply={applyChanges}/>
                         </Grid>
                         {/* Replace display image */}
                         <Grid item xs={9}>

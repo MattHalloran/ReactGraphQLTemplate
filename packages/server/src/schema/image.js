@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 import { db, TABLES } from '../db';
-import { CODE, IMAGE_EXTENSION, IMAGE_SIZE, SERVER_URL } from '@local/shared';
+import { CODE, IMAGE_EXTENSION, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
 import path from 'path';
 import { deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
@@ -12,7 +12,7 @@ const _model = TABLES.Image;
 async function imageFromSrc(src, prisma) {
     // Parse name, extension, and folder from src path. This gives a unique row
     let { name, ext } = plainImageName(src);
-    return await prisma[_model].findFirst({ where: { 
+    return await prisma[_model].findUnique({ where: { 
         file: name,
         ext,
         folder: 'images'

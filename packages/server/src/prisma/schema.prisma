@@ -234,10 +234,10 @@ model sku {
   availability   Int             @default(0)
   price          Decimal?        @db.Decimal(8, 2)
   status         String          @default("Active")
-  plantId        String?         @db.Uuid
+  plantId        String          @db.Uuid
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
   updated_at     DateTime        @default(now()) @db.Timestamptz(6)
-  plant          plant?          @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  plant          plant           @relation(fields: [plantId], references: [id], onDelete: Cascade)
   order_item     order_item[]
   discounts      sku_discounts[]
 }

@@ -34,12 +34,11 @@ export async function uploadAvailabilityProcess(job) {
         console.log(row)
         // Insert or update plant data from row
         const latin_name = row[index.latin];
-        let plant = await prisma[TABLES.Plant].findFirst({ 
-            select: {
-                id: true,
-                traits: { select: { id: true, name: true, value: true } }
-            },
-        }, { where: { latinName: latin_name } });
+        console.log(latin_name)
+        let plant = await prisma[TABLES.Plant].findUnique({ where: { latinName: latin_name }, select: {
+            id: true,
+            traits: { select: { id: true, name: true, value: true } }
+        } });
         console.log('got matching plant')
         console.log(plant)
         const common_name_missing = !(plant?.traits) || !Array.isArray(plant.traits) || !plant.traits.some(t => t.name === 'common')
@@ -68,7 +67,7 @@ export async function uploadAvailabilityProcess(job) {
         }
         console.log('got sku data');
         console.log(sku_data);
-        const sku = await prisma[TABLES.Sku].findFirst({ where: { sku: sku_data.sku }});
+        const sku = await prisma[TABLES.Sku].findUnique({ where: { sku: sku_data.sku }});
         console.log('got matching sku')
         console.log(sku);
         if (sku) {
