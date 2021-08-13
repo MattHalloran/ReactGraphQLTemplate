@@ -170,7 +170,7 @@ export const resolvers = {
                 await generateToken(context.res, customer.id);
                 await context.prisma[_model].update({
                     where: { id: customer.id },
-                    data: { loginAttempts: 0, lastLoginAttempt: moment().format(DATE_FORMAT), resetPasswordCode: null },
+                    data: { loginAttempts: 0, lastLoginAttempt: new Date().toISOString(), resetPasswordCode: null },
                     ...(new PrismaSelect(info).value)
                 })
                 return await context.prisma[_model].findUnique({ where: { id: customer.id }, ...(new PrismaSelect(info).value) });
@@ -184,7 +184,7 @@ export const resolvers = {
                 }
                 await context.prisma[_model].update({
                     where: { id: customer.id },
-                    data: { status: new_status, loginAttempts: login_attempts, lastLoginAttempt: moment().format(DATE_FORMAT) }
+                    data: { status: new_status, loginAttempts: login_attempts, lastLoginAttempt: new Date().toISOString() }
                 })
                 return new CustomError(CODE.BadCredentials);
             }

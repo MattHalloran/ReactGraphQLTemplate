@@ -35,10 +35,9 @@ app.use(cors({
 // Set static folders
 app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
-// Before querying image, convert file identifer to best-found match
+// Before querying image, find the best-match size
 app.use('/images', async (req, res) => {
-    const correct_path = await findImageUrl(req.path.slice(1));
-    console.log("GOT PATTHHHHHH", correct_path)
+    const correct_path = await findImageUrl(`images/${req.path}`, req.query.size || 'XL');
     res.sendFile(`${process.env.PROJECT_DIR}/assets/images/${path.basename(correct_path)}`);
 });
 

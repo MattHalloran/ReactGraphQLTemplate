@@ -123,6 +123,7 @@ export async function up (knex) {
         table.comment('Plant identification data. Other data about plant is stored in traits table');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('latinName', 256).notNullable().unique();
+        table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.PlantTrait, (table) => {
         table.comment('An attribute of a plant');
@@ -135,7 +136,7 @@ export async function up (knex) {
     await knex.schema.createTable(TABLES.Sku, (table) => {
         table.comment('Data on inventory items');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.string('sku', 32).notNullable();
+        table.string('sku', 32).notNullable().unique();
         table.boolean('isDiscountable').defaultTo(false).notNullable();
         table.decimal('size');
         table.string('note', 2048);

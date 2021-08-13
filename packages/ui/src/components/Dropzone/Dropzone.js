@@ -118,10 +118,10 @@ function Dropzone({
             </aside>}
             <Grid className={classes.gridPad} container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} disabled={disabled && files.length === 0} fullWidth onClick={upload}>{uploadText}</Button>
+                    <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={upload}>{uploadText}</Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} disabled={disabled} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>
+                    <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>
                 </Grid>
             </Grid>
         </section>

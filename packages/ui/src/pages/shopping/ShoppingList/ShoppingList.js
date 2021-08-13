@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { skusQuery } from 'graphql/query';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
+import { getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog
@@ -55,7 +55,7 @@ function ShoppingList({
         //Now, filter out everything that doesn't match the search string
         if (searchString.length > 0) {
             let search = searchString.trim().toLowerCase();
-            visible_plants = visible_plants?.filter(plant => plant.latin_name?.toLowerCase().includes(search) || plant.common_name?.toLowerCase().includes(search));
+            visible_plants = visible_plants?.filter(plant => plant.latin_name?.toLowerCase().includes(search) || getPlantTrait('commonName', plant)?.toLowerCase().includes(search));
         }
         //Find all applied filters
         let applied_filters = [];

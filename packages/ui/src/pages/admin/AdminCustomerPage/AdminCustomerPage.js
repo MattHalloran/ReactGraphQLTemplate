@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 function AdminCustomerPage() {
     const classes = useStyles();
     const [customers, setCustomers] = useState(null);
-    const { error, data } = useQuery(customersQuery);
+    const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }

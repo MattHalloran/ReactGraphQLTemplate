@@ -55,11 +55,16 @@ function ContactInfo({
         e.preventDefault();
     }
 
-    const hours = [
-        'MON-FRI: 8:00 am to 3:00 pm',
-        'SAT-SUN: Closed',
-        'Note: Closed daily from 12:00 pm to 1:00 pm',
-    ]
+    // Parse business hours markdown into 2D array, remove |'s, and reduce to 1D array
+    let hours;
+    try {
+        hours = business?.hours ? 
+            business.hours.split('\n').slice(2).map(row => row.split('|').map(r => r.trim()).filter(r => r !== '')) :
+            [];
+        hours = hours.map(row => `${row[0]}: ${row[1]}`)
+    } catch (error) {
+        console.error('Failed to read business hours', error);
+    }
 
     const contactInfo = [
         ['Open in Google Maps', business?.ADDRESS?.Label, business?.ADDRESS?.Link, RoomIcon],

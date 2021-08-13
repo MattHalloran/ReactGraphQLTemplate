@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types'
 import { 
     Button,
@@ -11,9 +11,9 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { displayPrice } from 'utils';
+import { displayPrice, getPlantTrait } from 'utils';
 import { NoImageIcon } from 'assets/img';
-import { IMAGE_USE } from '@local/shared';
+import { IMAGE_USE, SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -55,6 +55,7 @@ function PlantCard({
     plant,
 }) {
     const classes = useStyles();
+    console.log('IN PLANT CARDDDDD', plant)
 
     const SkuStatus = {
         '-2': classes.deleted,
@@ -72,16 +73,17 @@ function PlantCard({
     let display;
     const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
     if (display_data) {
-        display = <CardMedia component="img" src={display_data.src} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <CardMedia component="img" src={`${SERVER_URL}/${display_data.src}?size=L`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
         display = <NoImageIcon className={classes.displayImage} />
     }
 
     let subtitle;
-    if (plant.common_name) {
+    const commonName = getPlantTrait('commonName', plant);
+    if (commonName) {
         subtitle = (
             <Typography gutterBottom variant="body1" component="h3">
-                {plant.common_name}
+                {commonName}
             </Typography>
         )
     }

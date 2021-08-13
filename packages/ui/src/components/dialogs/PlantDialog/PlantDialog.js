@@ -17,7 +17,7 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
-import { displayPrice } from 'utils';
+import { displayPrice, getPlantTrait } from 'utils';
 import { 
     BeeIcon,
     CalendarIcon,
@@ -41,7 +41,7 @@ import {
     AddShoppingCart as AddShoppingCartIcon,
     Close as CloseIcon
 } from '@material-ui/icons';
-import { IMAGE_USE } from '@local/shared';
+import { IMAGE_USE, SERVER_URL } from '@local/shared';
 import _ from 'underscore';
 
 const useStyles = makeStyles((theme) => ({
@@ -126,7 +126,7 @@ function PlantDialog({
     let display;
     const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
     if (display_data) {
-        display = <img src={display_data.src} className={classes.displayImage} alt={display_data.alt} />
+        display = <img src={`${SERVER_URL}/${display_data.src}?size=XL`} className={classes.displayImage} alt={display_data.alt} />
     } else {
         display = <NoImageIcon className={classes.displayImage} />
     }
@@ -179,7 +179,7 @@ function PlantDialog({
                     fullWidth
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(plant.latin_name ?? plant.common_name ?? 'plant', selected_sku, quantity)}
+                    onClick={() => onAddToCart(plant.latinName ?? getPlantTrait('commonName', plant) ?? 'plant', selected_sku, quantity)}
                 >Order</Button>
             </Grid>
         </Grid>
@@ -198,7 +198,7 @@ function PlantDialog({
                                 {plant.latin_name}
                             </Typography>
                             <Typography variant="h6">
-                                {plant.common_name}
+                                {getPlantTrait('commonName', plant)}
                             </Typography>
                         </Grid>
                         <Grid item xs={12}>

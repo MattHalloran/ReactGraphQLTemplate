@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import { CODE, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteImage, findImageUrl, plainImageName, saveImage } from '../utils';
+import { deleteImage, plainImageName, saveImage } from '../utils';
 import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Image;
@@ -20,11 +20,14 @@ async function imageFromSrc(src, prisma) {
 
 export const typeDef = gql`
     enum ImageSize {
+        XXS
         XS
         S
         M
         ML
         L
+        XL
+        XXL
     }
 
     input ImageUpdate {
@@ -48,7 +51,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        imagesByLabel(label: String!, size: ImageSize): [Image!]!
+        imagesByLabel(label: String!): [Image!]!
     }
 
     extend type Mutation {
@@ -83,17 +86,6 @@ export const resolvers = {
                     } 
                 } 
             });
-            console.log('ARGS.SIZE is')
-            console.log(args.size)
-            // Add size identifier to image srcs, if requested
-            if (image_data?.length > 0 && image_data[0].src) {
-                image_data = image_data.map(d => {
-                    return {
-                        ...d,
-                        src: findImageUrl(d.src, args.size)
-                    }
-                })
-            }
             return image_data;
         }
     },

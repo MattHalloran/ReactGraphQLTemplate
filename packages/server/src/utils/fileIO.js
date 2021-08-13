@@ -106,17 +106,17 @@ function resizeOptions(width, height) {
 // Returns the filepath of the requested image at the closest available size
 export async function findImageUrl(filename, size) {
     const { name, ext, folder } = clean(filename, 'images');
-    console.log('IN FIND IMAGE URL')
-    console.log(filename, name, ext, folder, size)
     // If size not specified, attempts to return original
     if (size === null || size === undefined) {
         if (fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
     }
     // Search sizes by closest match
-    let size_array = Object.keys(IMAGE_SIZE).map(key => ({ key, value: IMAGE_SIZE[key] }));
-    const size_index = size_array.findIndex(obj => obj.value === size);
-    for (let i = 0; i < size_array.length; i++) {
+    let size_array = Object.keys(IMAGE_SIZE).map(key => ({ key, value: IMAGE_SIZE[size] }));
+    let size_index = size_array.findIndex(obj => obj.key === size);
+    if (size_index < 0) size_index = size_array.length - 1;
+    for (let i = size_array.length; i > 0; i--) {
         const curr = `${folder}/${name}-${size_array[(i + size_index) % (size_array.length)].key}${ext}`;
+        console.log(curr, (i + size_index) % (size_array.length))
         if (fs.existsSync(`${ASSET_DIR}/${curr}`)) return `${SERVER_URL}/${curr}`;
     }
     if (fs.existsSync(`${ASSET_DIR}/${folder}/${folder}/${name}${ext}`)) return `${SERVER_URL}/${folder}/${folder}/${name}${ext}`;
@@ -194,10 +194,12 @@ export async function saveImage(upload, alt, description, errorOnDuplicate = fal
             if (errorOnDuplicate) throw Error('File has already been uploaded');
         } else {
             // Download the original image
-            await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}`);
+            await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}-XXL`);
             // Find resize options
             const sizes = resizeOptions(dimensions.width, dimensions.height);
             for (const [key, value] of Object.entries(sizes)) {
+                // XXL reserved for original image
+                if (key === 'XXL') continue;
                 // Use largest dimension for resize
                 let sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
                 await sharp(image_buffer)

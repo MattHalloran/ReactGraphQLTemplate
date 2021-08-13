@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { LINKS } from 'utils';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
+import { useLocation } from 'react-router-dom';
 
 const Page = ({
     title,
@@ -15,13 +16,15 @@ const Page = ({
 }) => {
     const [sessionChecked, setSessionChecked] = useState(false);
     const [login] = useMutation(loginMutation);
+    const location = useLocation();
 
     useEffect(() => {
         login().then((response) => {
             onSessionUpdate(response.data.login);
             setSessionChecked(true);
         }).catch((response) => { 
-            PubSub.publish(PUBS.Snack, { message: 'Error: Cannot connect to server', severity: 'error', data: response }) 
+            if (process.env.NODE_ENV === 'development') console.error('Error: cannot login', response);
+            setSessionChecked(true);
         })
     }, [login, onSessionUpdate])
 
@@ -31,11 +34,13 @@ const Page = ({
 
     // If this page has restricted access
     if (restrictedToRoles) {
-        if (!userRoles) return null;
-        const haveArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-        const needArray = Array.isArray(restrictedToRoles) ? restrictedToRoles : [restrictedToRoles];
-        const valid_role = haveArray.some(r => needArray.includes(r?.role?.title));
-        return valid_role ? children : null;
+        if (userRoles) {
+            const haveArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+            const needArray = Array.isArray(restrictedToRoles) ? restrictedToRoles : [restrictedToRoles];
+            if (haveArray.some(r => needArray.includes(r?.role?.title))) return children;
+        }
+        if (sessionChecked && location.pathname !== redirect) onRedirect(redirect);
+        return null;
     }
 
     return children;

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
-import { activePlantsQuery, inactivePlantsQuery, traitOptionsQuery } from 'graphql/query';
+import { plantsQuery, traitOptionsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
@@ -14,23 +14,19 @@ import {
     Dropzone,
     PlantCard,
     Selector,
-    TabPanel
+    SearchBar
 } from 'components';
-import { 
-    AppBar, 
-    Tab, 
-    Tabs, 
-    Typography 
+import {
+    FormControlLabel,
+    Grid,
+    Switch,
+    Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
     header: {
         textAlign: 'center',
-    },
-    toggleBar: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
     },
     cardFlex: {
         display: 'grid',
@@ -42,19 +38,16 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let copy = SORT_OPTIONS.slice();
-const SKU_SORT_OPTIONS = copy.splice(0, 2);
-
 function AdminInventoryPage() {
     const classes = useStyles();
-    const [currTab, setCurrTab] = useState(0);
+    const [showActive, setShowActive] = useState(true);
+    const [searchString, setSearchString] = useState('');
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
 
-    const [sortBy, setSortBy] = useState(SKU_SORT_OPTIONS[0].value);
+    const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
-    const { data: activePlants } = useQuery(activePlantsQuery, { variables: { sortBy: sortBy }, pollInterval: 5000 });
-    const { data: inactivePlants } = useQuery(inactivePlantsQuery, { variables: { sortBy: sortBy }, pollInterval: 5000 });
+    const { data: plantData } = useQuery(plantsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
@@ -65,7 +58,7 @@ function AdminInventoryPage() {
         })
             .then((response) => {
                 PubSub.publish(PUBS.AlertDialog, {
-                    message: 'Availability uploaded. This process can take up to 30 seconds. Please be patient💚',
+                    message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
                     firstButtonText: 'OK',
                 });
                 PubSub.publish(PUBS.Loading, false);
@@ -132,38 +125,41 @@ function AdminInventoryPage() {
                 acceptedFileTypes={['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']}
                 onUpload={availabilityUpload}
                 uploadText='Upload Availability'
-                cancelText='Cancel Upload'
                 disabled={loading}
             />
-            <h2>Sort</h2>
-            <Selector
-                className={classes.plantSelector}
-                fullWidth
-                options={currTab === 0 ? SORT_OPTIONS : SKU_SORT_OPTIONS}
-                selected={sortBy}
-                handleChange={(e) => setSortBy(e.target.value)}
-                inputAriaLabel='sort-plants-selector-label'
-                label="Sort" />
-            <AppBar className={classes.toggleBar} position="static">
-                <Tabs value={currTab} onChange={(_, value) => setCurrTab(value)} aria-label="simple tabs example">
-                    <Tab label="Plants with active SKUs" id='plants-with-active-skus-tab' aria-controls='plants-tabpanel-1' />
-                    <Tab label="Plants without active SKUs" id='plants-without-active-skus-tab' aria-controls='plants-tabpanel-2' />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={currTab} index={0}>
-                <div className={classes.cardFlex}>
-                    {inactivePlants?.inactivePlants?.map((plant, index) => <PlantCard key={index}
-                        plant={plant}
-                        onClick={() => setCurrPlant(plant)} />)}
-                </div>
-            </TabPanel>
-            <TabPanel value={currTab} index={1}>
-                <div className={classes.cardFlex}>
-                    {activePlants?.activePlants?.map((plant, index) => <PlantCard key={index}
-                        plant={plant}
-                        onClick={() => setCurrPlant(plant)} />)}
-                </div>
-            </TabPanel>
+            <h2>Filter</h2>
+            <Grid className={classes.padBottom} container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                    <Selector
+                        className={classes.plantSelector}
+                        fullWidth
+                        options={SORT_OPTIONS}
+                        selected={sortBy}
+                        handleChange={(e) => setSortBy(e.target.value)}
+                        inputAriaLabel='sort-plants-selector-label'
+                        label="Sort" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={showActive}
+                                onChange={(_, value) => setShowActive(value)}
+                                color="secondary"
+                            />
+                        }
+                        label={showActive ? "Active plants" : "Inactive plants"}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <SearchBar fullWidth onChange={(e) => setSearchString(e.target.value)} />
+                </Grid>
+            </Grid>
+            <div className={classes.cardFlex}>
+                {plantData?.plants?.map((plant, index) => <PlantCard key={index}
+                    plant={plant}
+                    onClick={() => setCurrPlant(plant)} />)}
+            </div>
         </div >
     );
 }

@@ -3,6 +3,7 @@ import 'jspdf-autotable';
 import { displayPrice, PUBS, PubSub } from 'utils';
 import { skusQuery } from 'graphql/query';
 import { initializeApollo } from 'graphql/initialize';
+import { getPlantTrait } from "./plantTools";
 
 const TITLE_FONT_SIZE = 30;
 const LIST_FONT_SIZE = 24;
@@ -17,7 +18,7 @@ const data_to_table = (data, showPrice) => {
     let result = [];
     for (let i = 0; i < data.length; i++) {
         let plant = data[i].plant;
-        let plant_name = plant.latin_name ?? plant.common_name;
+        let plant_name = plant.latin_name ?? getPlantTrait('commonName', plant);
         if (!plant.skus || plant.skus.length === 0) continue;
         for (let j = 0; j < plant.skus.length; j++) {
             let sku = plant.skus[j];

@@ -5,6 +5,7 @@ export const plantFields = gql`
     ${imageFields}
     fragment plantFields on Plant {
         id
+        latinName
         traits {
             name
             value

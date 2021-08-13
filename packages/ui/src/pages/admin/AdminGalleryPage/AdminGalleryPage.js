@@ -21,7 +21,7 @@ function AdminGalleryPage() {
     console.log('GALLERY PAGE RENDER...')
     const classes = useStyles();
     const [imageData, setImageData] = useState([]);
-    const { data: currImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'M' } });
+    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'M' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);
 
@@ -34,6 +34,7 @@ function AdminGalleryPage() {
             }
         })
             .then((response) => {
+                refetchImages();
                 PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
                 PubSub.publish(PUBS.Loading, false);
             })
@@ -94,7 +95,6 @@ function AdminGalleryPage() {
                 dropzoneText={'Drag \'n\' drop new images here or click'}
                 onUpload={uploadImages}
                 uploadText='Upload Images'
-                cancelText='Cancel Upload'
             />
             <h2>Reorder and delete images</h2>
             <ImageList data={imageData} onApply={applyChanges}/>

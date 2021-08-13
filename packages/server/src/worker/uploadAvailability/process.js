@@ -16,8 +16,8 @@ export async function uploadAvailabilityProcess(job) {
     const content = rows.slice(1, rows.length);
     // Determine which columns data is in
     const index = {
-        latin: header.indexOf('Botanical Name'),
-        common: header.indexOf('Common Name'),
+        latinName: header.indexOf('Botanical Name'),
+        commonName: header.indexOf('Common Name'),
         size: header.indexOf('Size'),
         note: header.indexOf('Notes'),
         price: header.indexOf('Price 10+'),
@@ -33,22 +33,22 @@ export async function uploadAvailabilityProcess(job) {
         console.log('in row')
         console.log(row)
         // Insert or update plant data from row
-        const latin_name = row[index.latin];
-        console.log(latin_name)
-        let plant = await prisma[TABLES.Plant].findUnique({ where: { latinName: latin_name }, select: {
+        const latinName = row[index.latinName];
+        console.log(latinName)
+        let plant = await prisma[TABLES.Plant].findUnique({ where: { latinName }, select: {
             id: true,
             traits: { select: { id: true, name: true, value: true } }
         } });
         console.log('got matching plant')
         console.log(plant)
-        const common_name_missing = !(plant?.traits) || !Array.isArray(plant.traits) || !plant.traits.some(t => t.name === 'common')
+        const common_name_missing = !(plant?.traits) || !Array.isArray(plant.traits) || !plant.traits.some(t => t.name === 'commonName')
         if (!plant) {
-            console.info(`Creating new plant: ${latin_name}`);
-            plant = await prisma[TABLES.Plant].create({ data: { latinName: latin_name } });
+            console.info(`Creating new plant: ${latinName}`);
+            plant = await prisma[TABLES.Plant].create({ data: { latinName } });
         }
         if (common_name_missing) {
             console.log('adding common name')
-            await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name: 'common', value: row[index.common] } });
+            await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name: 'commonName', value: row[index.commonName] } });
         }
         console.log('getting sku data')
         // Insert or update SKU data from row
@@ -67,21 +67,14 @@ export async function uploadAvailabilityProcess(job) {
         }
         console.log('got sku data');
         console.log(sku_data);
-        const sku = await prisma[TABLES.Sku].findUnique({ where: { sku: sku_data.sku }});
-        console.log('got matching sku')
-        console.log(sku);
-        if (sku) {
-            console.log('updating existing sku');
-            await prisma[TABLES.Sku].update({
-                where: { id: sku.id },
-                data: { ...sku_data }
+
+        try {
+            prisma[TABLES.Sku].upsert({
+                where: { sku: sku_data.sku },
+                update: { ...sku_data },
+                create: { ...sku_data }
             })
-        } else {
-            console.log('creating new sku');
-            try {await prisma[TABLES.Sku].create({ data: { ...sku_data } })} catch(error){console.error(error)}
-            const returnData = await prisma[TABLES.Sku].create({ data: { ...sku_data } });
-            console.log(returnData)
-        }
+        } catch(error) { console.error(error) }
     }
 
     console.info('✅ Availability updated!')

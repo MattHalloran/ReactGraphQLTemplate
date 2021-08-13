@@ -92,7 +92,6 @@ function AdminHeroPage() {
                 dropzoneText={'Drag \'n\' drop new images here or click'}
                 onUpload={uploadImages}
                 uploadText='Upload Images'
-                cancelText='Cancel Upload'
             />
             <h2>Reorder and delete images</h2>
             <ImageList data={imageData} onApply={applyChanges}/>

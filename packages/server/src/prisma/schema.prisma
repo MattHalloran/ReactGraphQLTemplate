@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialActions"]
+  previewFeatures = ["referentialActions", "orderByRelation"]
 }
 
 datasource db {
@@ -77,10 +77,10 @@ model customer {
   updated_at        DateTime         @default(now()) @db.Timestamptz(6)
   business          business?        @relation(fields: [businessId], references: [id], onDelete: NoAction)
   roles             customer_roles[]
-  email             email[]
+  emails            email[]
   feedback          feedback[]
-  order             order[]
-  phone             phone[]
+  orders            order[]
+  phones            phone[]
 }
 
 model customer_roles {
@@ -227,7 +227,7 @@ model role {
 
 model sku {
   id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  sku            String          @db.VarChar(32)
+  sku            String          @unique @db.VarChar(32)
   isDiscountable Boolean         @default(false)
   size           Decimal?        @db.Decimal(8, 2)
   note           String?         @db.VarChar(2048)

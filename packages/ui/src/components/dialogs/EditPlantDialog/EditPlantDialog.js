@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
     AppBar,
+    Autocomplete,
     Button,
     Dialog,
     Grid,
@@ -25,28 +26,33 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { addImagesMutation, deletePlantsMutation, updateImagesMutation, updatePlantMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { NoImageIcon } from 'assets/img';
-import { Dropzone, ImageList, Selector } from 'components';
+import { Dropzone, ImageList } from 'components';
 import {
+    addToArray,
     deleteArrayIndex,
     displayPrice,
     displayPriceToDatabase,
+    getPlantSkuField,
+    getPlantTrait,
     makeID,
     PUBS,
     PubSub,
-    updateArray
+    setPlantSkuField,
+    setPlantTrait
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
 import _ from 'underscore';
 
-const PLANT_ATTRIBUTES = [
-    'Drought Tolerance',
-    'Grown Height',
-    'Grown Spread',
-    'Growth Rate',
-    'Optimal Light',
-    'Salt Tolerance',
-]
+// Common plant traits, and their corresponding field names
+const PLANT_TRAITS = {
+    'Drought Tolerance': 'droughtTolerance',
+    'Grown Height': 'grownHeight',
+    'Grown Spread': 'grownSpread',
+    'Growth Rate': 'growthRate',
+    'Optimal Light': 'optimalLight',
+    'Salt Tolerance': 'saltTolerance',
+    'Size': 'size',
+}
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -94,7 +100,7 @@ function EditPlantDialog({
     open = true,
     onClose,
 }) {
-    console.log('PLANT POPUP', plant)
+    console.log('PLANT POPUP', trait_options)
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
     const [updatePlant] = useMutation(updatePlantMutation);
@@ -153,21 +159,10 @@ function EditPlantDialog({
     }, [imageData, updateImages])
 
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
-    const [selectedAttribute, setSelectedAttribute] = useState(PLANT_ATTRIBUTES[0]);
+    const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
 
     useEffect(() => {
-        setChangedPlant({
-            ...plant,
-            skus: plant?.skus ?? [],
-            latin_name: plant?.latin_name ?? '',
-            common_name: plant?.common_name ?? '',
-            drought_tolerance: plant?.drought_tolerance ?? '',
-            grown_height: plant?.grown_height ?? '',
-            grown_spread: plant?.grown_spread ?? '',
-            growth_rate: plant?.growth_rate ?? '',
-            optimal_light: plant?.optimal_light ?? '',
-            salt_tolerance: plant?.salt_tolerance ?? '',
-        });
+        setChangedPlant({ ...plant });
         setImageData(plant?.images);
     }, [plant])
 
@@ -207,60 +202,17 @@ function EditPlantDialog({
             });
     }
 
-    function updatePlantField(field, value) {
-        console.log('UPDATING PLANT FIELD', field, value)
-        setChangedPlant(p => ({
-            ...p,
-            [field]: value,
-        }));
-    }
+    const updateTrait = useCallback((traitName, value) => {
+        setChangedPlant(setPlantTrait(traitName, value, changedPlant))
+    }, [changedPlant])
 
-    function updateSkuField(field, value) {
-        console.log('UPDATING SKU FIELD', field, value, selectedSkuIndex)
-        if (selectedSkuIndex < 0) return;
-        setChangedPlant(p => {
-            let skus_list = p.skus;
-            let new_sku = skus_list[selectedSkuIndex];
-            new_sku[field] = value
-            skus_list = updateArray(skus_list, selectedSkuIndex, new_sku);
-            return ({
-                ...p,
-                skus: skus_list,
-            })
-        });
-    }
+    const updateSkuField = useCallback((fieldName, value) => {
+        setChangedPlant(setPlantSkuField(fieldName, value, changedPlant))
+    }, [changedPlant])
 
     useEffect(() => {
         console.log('changed plant is:::::', changedPlant);
     }, [changedPlant])
-
-    function getSelector(label, field, multiSelect = false) {
-        console.log('IN SELECTORRRRRR', field, plant)
-        return (
-            <Selector
-                fullWidth
-                size="small"
-                options={trait_options ? trait_options[field] : []}
-                selected={changedPlant ? changedPlant[field] : null}
-                handleChange={(e) => updatePlantField(field, e.target.value)}
-                inputAriaLabel={`plant-attribute-${field}-selector-label`}
-                label={label}
-                multiple={multiSelect} />
-        )
-    }
-
-    function getTextField(label, field) {
-        return (
-            <TextField
-                fullWidth
-                size="small"
-                id={field}
-                label={label}
-                value={changedPlant ? changedPlant[field] : null}
-                onChange={e => updatePlantField(field, e.target.value)}
-            />
-        )
-    }
 
     function newSku() {
         setChangedPlant(p => ({
@@ -277,16 +229,6 @@ function EditPlantDialog({
         }));
     }
 
-    const attribute_meta = {
-        'Drought Tolerance': ['drought_tolerance'],
-        'Grown Height': ['grown_height'],
-        'Grown Spread': ['grown_spread'],
-        'Growth Rate': ['growth_rate'],
-        'Optimal Light': ['optimal_light'],
-        'Salt Tolerance': ['salt_tolerance'],
-        'Size': ['size'],
-    }
-
     let changes_made = !_.isEqual(plant, changedPlant);
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
@@ -294,7 +236,7 @@ function EditPlantDialog({
                 <Button
                     fullWidth
                     disabled={!changes_made}
-                    startIcon={<DeleteIcon />}
+                    startIcon={<RestoreIcon />}
                     onClick={revertPlant}
                 >Revert</Button>
             </Grid>
@@ -302,7 +244,7 @@ function EditPlantDialog({
                 <Button
                     fullWidth
                     disabled={!changedPlant?.id}
-                    startIcon={<RestoreIcon />}
+                    startIcon={<DeleteIcon />}
                     onClick={confirmDelete}
                 >Delete</Button>
             </Grid>
@@ -362,41 +304,60 @@ function EditPlantDialog({
                 <div className={classes.content}>
                     <h3>Edit plant info</h3>
                     <Grid container spacing={2}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
-                                size="small"
-                                label="Latin Name"
-                                value={changedPlant?.latin_name}
-                                onChange={e => updatePlantField('latin_name', e.target.value)}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <TextField
-                                size="small"
-                                label="Common Name"
-                                value={changedPlant?.common_name}
-                                onChange={e => updatePlantField('common_name', e.target.value)}
-                            />
-                        </Grid>
-                        {/* Select which attribute you'd like to edit */}
-                        <Grid item xs={12}>
-                            <Selector
                                 fullWidth
                                 size="small"
-                                options={PLANT_ATTRIBUTES}
-                                selected={selectedAttribute}
-                                handleChange={(e) => setSelectedAttribute(e.target.value)}
-                                inputAriaLabel={"plant-attribute-select-label"}
-                                label={"Select attribute to edit"} />
+                                label="Latin Name"
+                                value={changedPlant?.latinName}
+                                onChange={e => setChangedPlant({ ...plant, latinName: e.target.value })}
+                            />
                         </Grid>
-                        {/* Pick from existing entries... */}
-                        <Grid item xs={6}>
-                            {getSelector('Existing value', ...attribute_meta[selectedAttribute])}
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Common Name"
+                                value={getPlantTrait('commonName')}
+                                onChange={e => updateTrait('commonName', e.target.value)}
+                            />
+                        </Grid>
+                        {/* Select which trait you'd like to edit */}
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                fullWidth
+                                id="setTraitField"
+                                name="setTraitField"
+                                options={Object.keys(PLANT_TRAITS)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Select plant trait"
+                                        value={PLANT_TRAITS[selectedTrait]}
+                                        onChange={e => setSelectedTrait(PLANT_TRAITS[e.target.value])}
+                                    />
+                                )}
+                            />
+                        </Grid>
+                        {/* Edit selected trait */}
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                fullWidth
+                                freeSolo
+                                id="setTraitValue"
+                                name="setTraitValue"
+                                options={trait_options ? trait_options[PLANT_TRAITS[selectedTrait]] : []}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Trait value"
+                                        value={getPlantTrait(PLANT_TRAITS[selectedTrait], changedPlant)}
+                                        onChange={e => updateTrait(PLANT_TRAITS[selectedTrait], e.target.value)}
+                                    />
+                                )}
+                            />
                         </Grid>
                         {/* ...or enter a custom value */}
-                        <Grid item xs={6}>
-                            {getTextField('New value', ...attribute_meta[selectedAttribute])}
-                        </Grid>
                         <h3>Edit images</h3>
                         {/* Upload new images */}
                         <Grid item xs={12}>
@@ -404,56 +365,53 @@ function EditPlantDialog({
                                 dropzoneText={'Drag \'n\' drop new images here or click'}
                                 onUpload={uploadImages}
                                 uploadText='Upload Images'
-                                cancelText='Cancel Upload'
                             />
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
                             <ImageList data={imageData} onApply={applyChanges} />
                         </Grid>
-                        {/* Replace display image */}
-                        <Grid item xs={9}>
-                            {/* <DropzoneAreaBase
-                                acceptedFiles={['image/*']}
-                                dropzoneText={"Drag and drop new images here or click"}
-                                onChange={fileSelectedHandler}
-                                showAlerts={false}
-                                filesLimit={1}
-                                classes={{
-                                    root: classes.imageRow,
-                                }}
-                            /> */}
-                        </Grid>
                     </Grid>
                     <h3>Edit SKU info</h3>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 size="small"
                                 label="Plant Code"
-                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.sku : null}
+                                value={getPlantSkuField('sku', selectedSkuIndex, changedPlant)}
                                 onChange={e => updateSkuField('sku', e.target.value)}
                             />
                         </Grid>
-                        <Grid item xs={6}>
-                            {getSelector('Existing size', ...attribute_meta['Size'])}
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                fullWidth
+                                freeSolo
+                                id="setSkuSize"
+                                name="setSkuSize"
+                                options={trait_options ? trait_options[PLANT_TRAITS['size']] : []}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Set SKU size"
+                                        value={getPlantSkuField('size', selectedSkuIndex, changedPlant)}
+                                        onChange={e => updateSkuField('size', e.target.value)}
+                                    />
+                                )}
+                            />
                         </Grid>
-                        <Grid item xs={6}>
-                            {getTextField('New size', ...attribute_meta['Size'])}
-                        </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 size="small"
                                 label="Price"
-                                value={changedPlant ? displayPrice(changedPlant.skus[selectedSkuIndex]?.price) : null}
+                                value={displayPrice(getPlantSkuField('price', selectedSkuIndex, changedPlant))}
                                 onChange={e => updateSkuField('price', displayPriceToDatabase(e.target.value))}
                             />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 size="small"
                                 label="Availability"
-                                value={changedPlant ? changedPlant.skus[selectedSkuIndex]?.availability : null}
+                                value={getPlantSkuField('availability', selectedSkuIndex, changedPlant)}
                                 onChange={e => updateSkuField('availability', e.target.value)}
                             />
                         </Grid>
