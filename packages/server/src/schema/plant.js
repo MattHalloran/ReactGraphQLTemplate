@@ -135,9 +135,7 @@ export const resolvers = {
                     }
                 }
             }
-            console.log(args);
-            console.log(activeQuery)
-            const results = await context.prisma[_model].findMany({ 
+            return await context.prisma[_model].findMany({ 
                 where: { 
                     ...idQuery,
                     ...searchQuery,
@@ -148,8 +146,6 @@ export const resolvers = {
                 },
                 ...(new PrismaSelect(info).value)
             });
-            console.log('RESULTS', results);
-            return results;
         },
     },
     Mutation: {

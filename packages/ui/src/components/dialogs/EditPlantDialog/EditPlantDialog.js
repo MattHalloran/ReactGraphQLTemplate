@@ -217,7 +217,7 @@ function EditPlantDialog({
     function newSku() {
         setChangedPlant(p => ({
             ...p,
-            skus: p.skus.concat({ sku: makeID(10) }),
+            skus: addToArray(p.skus, { sku: makeID(10) }),
         }));
     }
 
@@ -277,7 +277,7 @@ function EditPlantDialog({
                         <ListSubheader component="div" id="sku-select-subheader">
                             SKUs
                         </ListSubheader>
-                        {plant?.skus.map((s, index) => (
+                        {changedPlant?.skus?.map((s, index) => (
                             <ListItem
                                 button
                                 className={`sku-option ${index === selectedSkuIndex ? classes.selected : ''}`}
