@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { skusQuery } from 'graphql/query';
+import { plantsQuery } from 'graphql/query';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
+import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog
@@ -23,7 +23,7 @@ function ShoppingList({
     session,
     onSessionUpdate,
     cart,
-    sort = SORT_OPTIONS[0].value,
+    sortBy = SORT_OPTIONS[0].value,
     filters,
     hideOutOfStock,
     searchString = '',
@@ -36,27 +36,14 @@ function ShoppingList({
     let history = useHistory();
     const urlParams = useParams();
     // Find the current SKU group index, by any of the group's SKUs
-    let curr_index = plants?.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1
-    const { data: skuData } = useQuery(skusQuery,  { variables: { sortBy: sort } });
+    let curr_index = Array.isArray(plants) ? plants.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1 : -1;
+    const { data: plantData } = useQuery(plantsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
     const [updateOrder] = useMutation(updateOrderMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
     // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
-        //First, determine if plants without availability shall be shown
-        let visible_plants = skuData?.skus;
-        if (hideOutOfStock) {
-            visible_plants = visible_plants?.filter(plant => {
-                if (plant.skus.length === 0) return true;
-                return plant.skus.filter(sku => sku.status === 1 && sku.availability > 0).length > 0;
-            })
-        }
-        //Now, filter out everything that doesn't match the search string
-        if (searchString.length > 0) {
-            let search = searchString.trim().toLowerCase();
-            visible_plants = visible_plants?.filter(plant => plant.latin_name?.toLowerCase().includes(search) || getPlantTrait('commonName', plant)?.toLowerCase().includes(search));
-        }
         //Find all applied filters
         let applied_filters = [];
         if (filters && filters[Symbol.iterator] === 'function') {
@@ -71,18 +58,19 @@ function ShoppingList({
         }
         //If no filters are set, show all plants
         if (applied_filters.length === 0) {
-            setPlants(visible_plants);
+            setPlants(plantData?.plants);
             return;
         }
         //Select all plants that contain the filters
         let filtered_plants = [];
-        for (let i = 0; i < visible_plants?.length ?? 0; i++) {
-            let curr_plant = visible_plants[i];
+        for (let i = 0; i < plantData?.plants?.length ?? 0; i++) {
+            let curr_plant = plantData?.plants[i];
             for (let j = 0; j < applied_filters.length; j++) {
                 let trait = applied_filters[j][0];
                 let value = applied_filters[j][1];
 
                 // Grab data depending on if the field is for the sku or its associated plant
+                //TODO probably broken
                 let data;
                 if (trait === 'sizes') {
                     data = curr_plant.skus.map(s => s[trait]);
@@ -102,7 +90,7 @@ function ShoppingList({
             }
         }
         setPlants(filtered_plants);
-    }, [skuData, filters, searchString, hideOutOfStock])
+    }, [plantData, filters, searchString, hideOutOfStock])
 
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);
@@ -160,7 +148,7 @@ ShoppingList.propTypes = {
     session: PropTypes.object,
     onSessionUpdate: PropTypes.func.isRequired,
     cart: PropTypes.object,
-    sort: PropTypes.string,
+    sortBy: PropTypes.string,
     filters: PropTypes.object,
     searchString: PropTypes.string,
 };

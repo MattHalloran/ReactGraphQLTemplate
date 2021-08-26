@@ -6,7 +6,7 @@ import { updateObject } from "./objectTools";
 export const getPlantTrait = (traitName, plantData) => {
     if (!(typeof traitName === 'string')) return null;
     const lowered = traitName.toLowerCase();
-    return plantData?.traits?.find(t => t.name.toLowerCase() === lowered)?.value;
+    return plantData?.traits ? plantData.traits.find(t => t.name.toLowerCase() === lowered)?.value : null;
 }
 
 export const setPlantTrait = (traitName, value, plantData) => {

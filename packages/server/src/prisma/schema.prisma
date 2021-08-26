@@ -181,11 +181,13 @@ model phone {
 }
 
 model plant {
-  id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  latinName String         @unique @db.VarChar(256)
-  images    plant_images[]
-  traits    plant_trait[]
-  skus      sku[]
+  id         String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  latinName  String         @unique @db.VarChar(256)
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at DateTime       @default(now()) @db.Timestamptz(6)
+  images     plant_images[]
+  traits     plant_trait[]
+  skus       sku[]
 }
 
 model plant_images {

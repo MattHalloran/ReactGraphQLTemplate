@@ -153,7 +153,7 @@ function ShoppingPage({
                         inputAriaLabel='sort-selector-label'
                         label="Sort" />
                     <h2>Search</h2>
-                    <SearchBar className={classes.padBottom} fullWidth onChange={(e) => setSearchString(e.target.value)} />
+                    <SearchBar className={classes.padBottom} fullWidth debounce={300} onChange={(e) => setSearchString(e.target.value)} />
                     <h2>Filters</h2>
                     {filterData.map(d => filtersToSelector(...d))}
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}

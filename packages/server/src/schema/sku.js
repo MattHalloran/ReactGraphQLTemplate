@@ -56,7 +56,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        skus(sortBy: SkuSortBy): [Sku!]!
+        skus(ids: [ID!], sortBy: SkuSortBy, searchString: String, showOutOfStock: Boolean): [Sku!]!
     }
 
     extend type Mutation {
@@ -71,14 +71,85 @@ export const resolvers = {
     SkuStatus: SKU_STATUS,
     SkuSortBy: SKU_SORT_OPTIONS,
     Query: {
-        // Query all active SKUs
-        skus: async (_, args, context) => {
-            // Filter out SKUs that aren't active
-            const all_ids = await db(TABLES.Sku).select('id', 'availability', 'status');
-            const filtered_ids = all_ids.filter(sku => sku.status === SKU_STATUS.Active);
-            // TODO Sort
-            const sortBy = args.sortBy || SKU_SORT_OPTIONS.AZ;
-            return await context.prisma[_model].findMany();
+        // Query all SKUs
+        skus: async (_, args, context, info) => {
+            let idQuery;
+            if (Array.isArray(args.ids)) {
+                idQuery = {
+                    id: { in: args.ids }
+                }
+            }
+            // TODO sort
+            let sortQuery;
+            if (args.sortBy !== undefined) {
+                console.log("SORT BY", args.sortBy)
+                switch (args.sortBy) {
+                    case SKU_SORT_OPTIONS.AZ:
+                        break;
+                    case SKU_SORT_OPTIONS.ZA:
+                        break;
+                    case SKU_SORT_OPTIONS.PriceLowHigh:
+                        break;
+                    case SKU_SORT_OPTIONS.PriceHighLow:
+                        break;
+                    case SKU_SORT_OPTIONS.Features:
+                        break;
+                    case SKU_SORT_OPTIONS.Newest:
+                        sortQuery = {
+                            created_at: 'asc'
+                        }
+                        break;
+                    case SKU_SORT_OPTIONS.Oldest:
+                        sortQuery = {
+                            created_at: 'desc'
+                        }
+                        break;
+                }
+            }
+            let searchQuery;
+            if (args.searchString !== undefined && args.searchString.length > 0) {
+                searchQuery = {
+                    OR: [
+                        {
+                            plant: {
+                                latinName: {
+                                    contains: args.searchString.trim(),
+                                    mode: 'insensitive'
+                                },
+                            },
+                        },
+                        {
+                            plant: {
+                                traits: {
+                                    some: {
+                                        value: {
+                                            contains: args.searchString.trim(),
+                                            mode: 'insensitive'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+            let showOutOfStockQuery;
+            if (!args.showOutOfStock) {
+                showOutOfStockQuery = {
+                    availability: {
+                        gt: 0
+                    }
+                }
+            }
+            let whereQuery = { ...idQuery, ...searchQuery };
+            if (showOutOfStockQuery) whereQuery = { ...whereQuery, ...showOutOfStockQuery };
+            return await context.prisma[_model].findMany({
+                where: whereQuery,
+                orderBy: {
+                    ...sortQuery
+                },
+                ...(new PrismaSelect(info).value)
+            });
         }
     },
     Mutation: {

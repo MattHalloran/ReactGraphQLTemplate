@@ -38,7 +38,7 @@ export const resolvers = {
             // Combine data into object
             let options = {};
             for (const row of trait_data) {
-                options[row.name] ? options[row.name].append(row.value) : options[row.name] = [row.value];
+                options[row.name] ? options[row.name].push(row.value) : options[row.name] = [row.value];
             }
             // Format object
             let trait_options = []

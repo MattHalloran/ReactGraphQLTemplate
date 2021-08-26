@@ -39,18 +39,27 @@ export async function uploadAvailabilityProcess(job) {
             id: true,
             traits: { select: { id: true, name: true, value: true } }
         } });
-        console.log('got matching plant')
-        console.log(plant)
-        const common_name_missing = !(plant?.traits) || !Array.isArray(plant.traits) || !plant.traits.some(t => t.name === 'commonName')
         if (!plant) {
             console.info(`Creating new plant: ${latinName}`);
             plant = await prisma[TABLES.Plant].create({ data: { latinName } });
         }
-        if (common_name_missing) {
-            console.log('adding common name')
-            await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name: 'commonName', value: row[index.commonName] } });
+        // If traits don't exist, replace with empty array
+        if (!Array.isArray(plant.traits)) plant.traits = [];
+        // Upsert traits
+        for (const key of ['latinName', 'commonName']) {
+            if (row[index[key]]) {
+                try {
+                    const updateData = { plantId: plant.id, name: key, value: row[index[key]] };
+                    await prisma[TABLES.PlantTrait].upsert({
+                        where: { plant_trait_plantid_name_unique: { plantId: plant.id, name: key }},
+                        update: updateData,
+                        create: updateData
+                    })
+                } catch(error) { console.error(error)}
+            }
         }
         console.log('getting sku data')
+        console.log(plant)
         // Insert or update SKU data from row
         const sku_data = {
             sku: row[index.sku] ?? '',
@@ -69,10 +78,10 @@ export async function uploadAvailabilityProcess(job) {
         console.log(sku_data);
 
         try {
-            prisma[TABLES.Sku].upsert({
+            await prisma[TABLES.Sku].upsert({
                 where: { sku: sku_data.sku },
-                update: { ...sku_data },
-                create: { ...sku_data }
+                update: sku_data,
+                create: sku_data
             })
         } catch(error) { console.error(error) }
     }
