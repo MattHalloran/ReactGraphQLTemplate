@@ -1,7 +1,6 @@
 // 1) Delete image files no longer associated with any image rows in the database
 // 2) Delete image rows in the database no longer associated with any image files
-import { db } from "../src/db/db";
-import { TABLES } from "../src/db/tables";
+import { db, TABLES } from "../src/db";
 import fs from 'fs';
 import { deleteFile, plainImageName } from "../src/utils";
 import path from 'path';
@@ -9,12 +8,12 @@ import { IMAGE_SIZE } from "@local/shared";
 
 const FOLDER = 'images';
 const PATH = `${process.env.PROJECT_DIR}/assets/${FOLDER}`
-console.info(`Cleaning image data in: ${PATH}`);
+console.info(`🧼 Cleaning image data in: ${PATH}...`);
 
 // 1) Delete image files no longer associated with any image rows in the database
 const rows = (await db(TABLES.Image).select('*').where('folder', FOLDER)).map(d => {
     return {
-        file: `${d.fileName}${d.extension}`,
+        file: `${d.file}${d.ext}`,
         hash: d.hash
     }
 });
@@ -30,7 +29,7 @@ for (const file of files) {
     let { name, ext } = plainImageName(file);
     if (!rows.some(r => r.file === `${name}${ext}`)) {
         console.info(`Deleting ${file}`);
-        deleteFile(`${FOLDER}/file`);
+        deleteFile(`${FOLDER}/${file}`);
     }
 }
 
@@ -48,5 +47,5 @@ for (const row of rows) {
     }
 }
 
-console.info('exiting...')
+console.info('✅ Cleaning complete')
 process.exit(0)

@@ -18,8 +18,8 @@ import {
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { CartTable as Cart } from 'components';
-import { useMutate } from "restful-react";
-import { setOrderStatus } from 'query/http_promises';
+import { updateOrderMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_STATES, PUBS, PubSub } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
 import _ from 'underscore';
@@ -55,53 +55,44 @@ function OrderDialog({
     const classes = useStyles();
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);
-
-    const { mutate: updateCart } = useMutate({
-        verb: 'PUT',
-        path: 'cart',
-        resolve: (response) => {
-            if (response.ok) {
-                setChangedOrder(order);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            }
-            else {
-                console.error(response.message, order);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }
-        }
-    });
-
-    const orderUpdate = (data) => {
-        setChangedOrder(data)
-    }
+    const [updateOrder, {loading}] = useMutation(updateOrderMutation);
 
     useEffect(() => {
         setChangedOrder(order);
     }, [order])
 
-    const updateOrder = () => {
-        updateCart(order);
+    const orderUpdate = () => {
+        PubSub.publish(PUBS.Loading, true);
+        updateOrder({ variables: { input: order } }).then((response) => {
+            const data = response.data.updateOrder;
+            PubSub.publish(PUBS.Loading, false);
+            if (data !== null) {
+                setChangedOrder(data);
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
+            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
+        }).catch((response) => {
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        })
     }
 
     const approveOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.Approved)
+        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Approved } } })
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
             }).catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error', data: err });
             })
-    }, [order])
+    }, [order, updateOrder])
 
     const denyOrder = useCallback(() => {
-        setOrderStatus(order?.id, ORDER_STATUS.Rejected)
+        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Rejected } } })
             .then(() => {
                 PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
             }).catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error', data: err });
             })
-    }, [order])
+    }, [order, updateOrder])
 
     let status_string;
     let status_index = findWithAttr(ORDER_STATES, 'value', order?.status);
@@ -117,8 +108,8 @@ function OrderDialog({
                     <Button
                         fullWidth
                         startIcon={<UpdateIcon />}
-                        onClick={updateOrder}
-                        disabled={_.isEqual(order, changedOrder)}
+                        onClick={orderUpdate}
+                        disabled={loading || _.isEqual(order, changedOrder)}
                     >Update</Button>
                 </Grid>
                 <Grid item xs={12} sm={sm_num} md={4}>
@@ -126,7 +117,7 @@ function OrderDialog({
                         fullWidth
                         startIcon={<ThumbUpIcon />}
                         onClick={approveOrder}
-                        disabled={!_.isEqual(order, changedOrder)}
+                        disabled={loading || !_.isEqual(order, changedOrder)}
                     >Approve</Button>
                 </Grid>
                 <Grid item xs={12} sm={sm_num} md={4}>
@@ -134,7 +125,7 @@ function OrderDialog({
                         fullWidth
                         startIcon={<ThumbDownIcon />}
                         onClick={denyOrder}
-                        disabled={!_.isEqual(order, changedOrder)}
+                        disabled={loading || !_.isEqual(order, changedOrder)}
                     >Deny</Button>
                 </Grid>
             </Grid>
@@ -156,7 +147,7 @@ function OrderDialog({
             </AppBar>
             <div className={classes.container}>
                 <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                <Cart cart={order} onUpdate={orderUpdate} />
+                <Cart cart={order} onUpdate={(data) => setChangedOrder(data)} />
                 <br/>
                 {optionButtons(false)}
             </div>

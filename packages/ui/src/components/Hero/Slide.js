@@ -1,6 +1,7 @@
 import React from 'react';
 import { memo } from 'react'
 import { makeStyles } from '@material-ui/styles';
+import { SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles({
     slide: props => ({
@@ -14,7 +15,7 @@ const useStyles = makeStyles({
 const Slide = memo(({ content, width }) => {
     const classes = useStyles({width});
     return (
-        <img className={classes.slide} src={content} alt='' />
+        <img className={classes.slide} src={`${SERVER_URL}/${content}?size=XL`} alt='' />
     )
 })
 

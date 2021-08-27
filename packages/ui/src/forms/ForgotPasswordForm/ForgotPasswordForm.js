@@ -47,9 +47,8 @@ function ForgotPasswordForm({
                     onRedirect(LINKS.Home);
                 } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
             }).catch((response) => {
-                console.log('oh no', response)
                 PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
+                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error', data: response });
             })
         },
     });

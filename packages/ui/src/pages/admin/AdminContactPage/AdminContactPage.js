@@ -3,18 +3,15 @@ import { makeStyles } from '@material-ui/styles';
 import { AdminBreadcrumbs } from 'components';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
-// import { contactQuery } from 'graphql/query';
-// import { contactMutation } from 'graphql/mutation';
-import { useQuery, useMutation } from '@apollo/client';
 import {
     Button,
     Grid,
     TextField,
     Typography
 } from '@material-ui/core';
-import PubSub from 'utils/pubsub';
-import { PUBS } from 'utils';
-import { readAssetsQuery } from 'graphql/query/readAssets';
+import { useMutation } from '@apollo/client';
+import { writeAssetsMutation } from 'graphql/mutation';
+import { PUBS, PubSub } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -43,19 +40,40 @@ function AdminContactPage({
 }) {
     const classes = useStyles();
     const [hours, setHours] = useState('');
+    const [updateHours] = useMutation(writeAssetsMutation);
 
     useEffect(() => {
-        console.log('SETTING BUSINESS', business, business.hours)
-        setHours(business.hours);
+        setHours(business?.hours);
     }, [business])
+
+    const applyHours = () => {
+        // Data must be sent as a file to use writeAssets
+        const blob = new Blob([hours], { type: 'text/plain' });
+        const file = new File([blob], 'hours.md', { type: blob.type });
+        updateHours({ variables: { files: [file] } })
+            .then((response) => {
+                if (response.data.writeAssets) {
+                    PubSub.publish(PUBS.Snack, { message: 'Hours updated' });
+                } else {
+                    PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error' });
+                }
+            })
+            .catch((error) => {
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error', data: error });
+            });
+    }
+
+    const revertHours = () => {
+        setHours(business?.hours);
+    }
 
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => {}}>Apply Changes</Button>
+                <Button fullWidth disabled={business?.hours === hours} onClick={applyHours}>Apply Changes</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => {}}>Revert Changes</Button>
+                <Button fullWidth disabled={business?.hours === hours} onClick={revertHours}>Revert Changes</Button>
             </Grid>
         </Grid>
     )
@@ -64,7 +82,7 @@ function AdminContactPage({
         <div id="page" className={classes.root}>
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Typography variant="h3" component="h1">Edit Contact Info</Typography>
+                <Typography variant="h3" component="h1">Manage Contact Info</Typography>
             </div>
             { options }
             <Grid container spacing={2} direction="row">
@@ -83,8 +101,7 @@ function AdminContactPage({
                 </Grid>
                 <Grid item sm={12} md={6}>
                     <ReactMarkdown plugins={[gfm]} className={classes.hoursPreview}>
-                        {business.hours}
-                        {/* {contactInfo?.hours} */}
+                        {hours}
                     </ReactMarkdown>
                 </Grid>
             </Grid>

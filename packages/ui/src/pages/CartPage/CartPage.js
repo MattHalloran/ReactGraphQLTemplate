@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { Button } from '@material-ui/core';
-import { useMutate } from "restful-react";
-import { submitOrder } from 'query/http_promises';
 import { CartTable } from 'components';
 import {
     ArrowBack as ArrowBackIcon,
     ArrowForward as ArrowForwardIcon,
     Update as UpdateIcon
 } from '@material-ui/icons';
+import { updateOrderMutation, submitOrderMutation } from 'graphql/mutation';
+import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import _ from 'underscore';
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 function CartPage({
     business,
-    user_id,
+    customer_id,
     cart,
 }) {
     let history = useHistory();
@@ -44,23 +44,29 @@ function CartPage({
     // Holds cart changes before update is final
     const [currCart, setcurrCart] = useState(null)
     const [changedCart, setChangedCart] = useState(null);
+    const [updateOrder, {loading}] = useMutation(updateOrderMutation);
+    const [submitOrder] = useMutation(submitOrderMutation);
 
     console.log('LOADING CART PAGE', cart, changedCart)
 
-    const { mutate: updateCart } = useMutate({
-        verb: 'PUT',
-        path: 'cart',
-        resolve: (response) => {
-            if (response.ok) {
-                setChangedCart(response.cart);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            }
-            else {
-                console.error(response.message);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }
+    const orderUpdate = () => {
+        if (!customer_id) {
+            PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error' });
+            return;
         }
-    });
+        PubSub.publish(PUBS.Loading, true);
+        updateOrder({ variables: { input: changedCart } }).then((response) => {
+            const data = response.data.updateOrder;
+            PubSub.publish(PUBS.Loading, false);
+            if (data !== null) {
+                setChangedCart(data);
+                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
+            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
+        }).catch((response) => {
+            PubSub.publish(PUBS.Loading, false);
+            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        })
+    }
 
     const cartUpdate = useCallback((data) => {
         console.log('CART UPDATE', data);
@@ -68,16 +74,8 @@ function CartPage({
         setChangedCart(data);
     }, [currCart])
 
-    const updateOrder = () => {
-        if (!user_id) {
-            PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error'});
-            return;
-        }
-        updateCart(user_id, changedCart);
-    }
-
-    function requestQuote() {
-        submitOrder(changedCart)
+    const requestQuote = useCallback(() => {
+        submitOrder({ variables: { id: cart.id } })
             .then(() => {
                 PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
             })
@@ -85,7 +83,7 @@ function CartPage({
                 console.error(err);
                 PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'});
             })
-    }
+    }, [cart, business, submitOrder])
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated
@@ -104,7 +102,7 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [cart, changedCart, currCart, requestQuote, user_id]);
+    }, [changedCart, currCart, requestQuote, business]);
 
     console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
     let options = (
@@ -114,15 +112,15 @@ function CartPage({
                     fullWidth 
                     startIcon={<ArrowBackIcon />} 
                     onClick={() => history.push(LINKS.Shopping)}
-                    disabled={changedCart !== null && !_.isEqual(cart, changedCart)}
+                    disabled={loading || (changedCart !== null && !_.isEqual(cart, changedCart))}
                 >Continue Shopping</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
                 <Button 
                     fullWidth 
                     startIcon={<UpdateIcon />} 
-                    onClick={updateOrder}
-                    disabled={changedCart === null || _.isEqual(cart, changedCart)}
+                    onClick={orderUpdate}
+                    disabled={loading || (changedCart === null || _.isEqual(cart, changedCart))}
                 >Update Order</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -130,7 +128,7 @@ function CartPage({
                     fullWidth 
                     endIcon={<ArrowForwardIcon />} 
                     onClick={finalizeOrder}
-                    disabled={changedCart !== null && !_.isEqual(cart, changedCart)}
+                    disabled={loading || (changedCart !== null && !_.isEqual(cart, changedCart))}
                 >Request Quote</Button>
             </Grid>
         </Grid>
@@ -149,7 +147,7 @@ function CartPage({
 }
 
 CartPage.propTypes = {
-    user_id: PropTypes.string,
+    customer_id: PropTypes.string,
     cart: PropTypes.object,
 }
 

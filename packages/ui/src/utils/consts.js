@@ -1,72 +1,72 @@
-import { COOKIE } from '@local/shared';
+import { COOKIE, ORDER_STATUS } from '@local/shared';
 
 export const ORDER_STATES = [
     {
         label: 'Canceled by Admin',
-        value: -4,
+        value: ORDER_STATUS.CanceledByAdmin,
     },
     {
-        label: 'Canceled by User',
-        value: -3,
+        label: 'Canceled by Customer',
+        value: ORDER_STATUS.CanceledByCustomer,
     },
     {
         label: 'Pending Cancel',
-        value: -2,
+        value: ORDER_STATUS.PendingCancel,
     },
     {
         label: 'Rejected',
-        value: -1,
+        value: ORDER_STATUS.Rejected,
     },
     {
         label: 'Pending',
-        value: 1,
+        value: ORDER_STATUS.Pending,
     },
     {
         label: 'Approved',
-        value: 2,
+        value: ORDER_STATUS.Approved,
     },
     {
         label: 'Scheduled',
-        value: 3,
+        value: ORDER_STATUS.Scheduled,
     },
     {
         label: 'In Transit',
-        value: 4,
+        value: ORDER_STATUS.InTransit,
     },
     {
         label: 'Delivered',
-        value: 5,
+        value: ORDER_STATUS.Delivered,
     },
 ]
 
 export const SORT_OPTIONS = [
     {
         label: 'A-Z',
-        value: 'az',
+        value: 'AZ',
     },
     {
         label: 'Z-A',
-        value: 'za',
+        value: 'ZA',
     },
     {
         label: 'Price: Low to High',
-        value: 'lth',
+        value: 'PriceLowHigh',
     },
     {
         label: 'Price: High to Low',
-        value: 'htl',
+        value: 'PriceHighLow',
     },
     {
         label: 'Featured',
-        value: 'feat',
+        value: 'Featured',
     },
     {
         label: 'Newest',
-        value: 'new',
+        value: 'Newest',
     },
     {
         label: 'Oldest',
-        value: 'old',
+        value: 'Oldest',
     }
 ]
 
@@ -90,7 +90,6 @@ export const LINKS = {
     AdminInventory: "/admin/inventory",
     AdminOrders: "/admin/orders",
     Cart: "/cart",
-    Contact: "/contact",
     ForgotPassword: "/forgot-password",
     Gallery: "/gallery",
     Home: "/",

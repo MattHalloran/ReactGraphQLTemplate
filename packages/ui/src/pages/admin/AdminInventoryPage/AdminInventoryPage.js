@@ -3,130 +3,71 @@
 // 2) Edit existing SKU data, including general plant info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using plant species info
 
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { getInventory, getUnusedPlants, getInventoryFilters } from 'query/http_promises';
-import { useGet, useMutate } from "restful-react";
-import { Button } from '@material-ui/core';
+import React, { useState } from 'react';
+import { uploadAvailabilityMutation } from 'graphql/mutation';
+import { plantsQuery, traitOptionsQuery } from 'graphql/query';
+import { useQuery, useMutation } from '@apollo/client';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
     EditPlantDialog,
+    Dropzone,
     PlantCard,
     Selector,
-    TabPanel
+    SearchBar
 } from 'components';
-import { Tabs, Tab, AppBar } from '@material-ui/core';
-// import { DropzoneArea } from 'material-ui-dropzone';
+import {
+    FormControlLabel,
+    Grid,
+    Switch,
+    Typography
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
-    toggleBar: {
-        background: theme.palette.primary.light,
-        color: theme.palette.primary.contrastText,
+    header: {
+        textAlign: 'center',
     },
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         alignItems: 'stretch',
     },
+    plantSelector: {
+        marginBottom: '1em',
+    },
 }));
-
-let copy = SORT_OPTIONS.slice();
-const PLANT_SORT_OPTIONS = copy.splice(0, 2);
 
 function AdminInventoryPage() {
     const classes = useStyles();
-    const [currTab, setCurrTab] = useState(0);
-    // Holds the selected availability file, if uploading one
-    const [selected, setSelected] = useState(null);
-    // Holds the list of plants with existing SKUs
-    const [existing, setExisting] = useState([]);
-    const [existingThumbnails, setExistingThumbnails] = useState([]);
-    // Holds list of all plants
-    const [all, setAll] = useState([]);
-    const [allThumbnails, setAllThumbnails] = useState([]);
+    const [showActive, setShowActive] = useState(true);
+    const [searchString, setSearchString] = useState('');
     // Selected plant data. Used for popup
     const [currPlant, setCurrPlant] = useState(null);
-    const [trait_options, setTraitOptions] = useState(null);
-    const [existing_sort_by, setExistingSortBy] = useState(SORT_OPTIONS[0].value);
-    const [all_sort_by, setAllSortBy] = useState(PLANT_SORT_OPTIONS[0].value);
-    let existing_image_keys = existing?.map(p => p.display_key);
-    let all_image_keys = all?.map(p => p.display_key);
 
-    useGet({
-        path: "images",
-        queryParams: { keys: existing_image_keys, size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setExistingThumbnails(response.images);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
+    const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
+    const { data: traitOptions } = useQuery(traitOptionsQuery);
+    const { data: plantData } = useQuery(plantsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
+    const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
-    useGet({
-        path: "images",
-        queryParams: { keys: all_image_keys, size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setAllThumbnails(response.images);
+    const availabilityUpload = (acceptedFiles) => {
+        uploadAvailability({
+            variables: {
+                file: acceptedFiles[0]
             }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
-
-    const { mutate: uploadAvailability } = useMutate({
-        verb: 'PUT',
-        path: 'availability',
-        resolve: (response) => {
-            if (response.ok) {
-                alert('Availability file uploaded! Please give the server up to 15 seconds to update the database, then refresh the page.');
-            }
-            else {
-                console.error(response.message);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }
-        }
-    });
-
-    useEffect(() => {
-        getInventory(existing_sort_by, 0, true)
+        })
             .then((response) => {
-                setExisting(response.page_results);
-                console.log('SET all plantsssssssssss', response.page_results)
+                PubSub.publish(PUBS.AlertDialog, {
+                    message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
+                    firstButtonText: 'OK',
+                });
+                PubSub.publish(PUBS.Loading, false);
             })
-            .catch((error) => {
-                console.error("Failed to load inventory", error);
-                alert(error.error);
-            });
-    }, [existing_sort_by])
-
-    useEffect(() => {
-        getUnusedPlants(all_sort_by)
-            .then((response) => {
-                setAll(response.plants);
+            .catch((response) => {
+                PubSub.publish(PUBS.Loading, false);
+                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
             })
-            .catch((error) => {
-                console.error("Failed to load plants", error);
-            });
-    }, [all_sort_by])
-
-    useLayoutEffect(() => {
-        let mounted = true;
-        getInventoryFilters()
-            .then((response) => {
-                if (!mounted) return;
-                console.log('GOT TRAIT OPTIONS', response);
-                setTraitOptions(response);
-            })
-            .catch((error) => {
-                console.error("Failed to load filters", error);
-            });
-
-        return () => mounted = false;
-    }, [])
+    }
 
     // const deleteSku = (sku) => {
     //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
@@ -157,47 +98,17 @@ function AdminInventoryPage() {
     //         });
     // }
 
-    const fileSelectedHandler = (files) => {
-        if (files.length > 0) {
-            processFile(files[0]);
-        } else {
-            setSelected(null);
-        }
-    }
-
-    const processFile = (file) => {
-        let reader = new FileReader();
-        reader.onloadend = () => {
-            let fileData = reader.result;
-            setSelected(fileData);
-        }
-        reader.readAsDataURL(file);
-    }
-
-    const sendAvailability = () => {
-        if (!selected) return;
-        let form = new FormData();
-        form.append('data', selected)
-        uploadAvailability(form);
-    }
-
-    const handleSort = (value) => {
-        if (currTab === 0) {
-            setExistingSortBy(value);
-        } else {
-            setAllSortBy(value);
-        }
-    }
-
     return (
         <div id="page">
             <EditPlantDialog
                 plant={currPlant}
-                trait_options={trait_options}
+                trait_options={traitOptions?.traitOptions}
                 open={currPlant !== null}
                 onClose={() => setCurrPlant(null)} />
             <AdminBreadcrumbs />
-            <h1>Welcome to the inventory manager!</h1>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Manage Inventory</Typography>
+            </div>
             <h3>This page has the following features:</h3>
             <ul>
                 <li>Upload availability from a spreadsheet</li>
@@ -208,44 +119,47 @@ function AdminInventoryPage() {
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
-            {/* <DropzoneArea
-                acceptedFiles={['.xls']}
-                dropzoneText={"Drag and drop availability file here or click"}
-                onChange={fileSelectedHandler}
-                showAlerts={false}
-                filesLimit={1}
-            /> */}
-            <Button onClick={sendAvailability}>Upload Availability</Button>
-            <h2>Sort</h2>
-            <Selector
-                fullWidth
-                options={currTab === 0 ? SORT_OPTIONS : PLANT_SORT_OPTIONS}
-                selected={currTab === 0 ? existing_sort_by : all_sort_by}
-                handleChange={(e) => handleSort(e.target.value)}
-                inputAriaLabel='sort-plants-selector-label'
-                label="Sort" />
-            <AppBar className={classes.toggleBar} position="static">
-                <Tabs value={currTab} onChange={(_, value) => setCurrTab(value)} aria-label="simple tabs example">
-                    <Tab label="Plants with active SKUs" id='plants-with-active-skus-tab' aria-controls='plants-tabpanel-1' />
-                    <Tab label="Plants without active SKUs" id='plants-without-active-skus-tab' aria-controls='plants-tabpanel-2' />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={currTab} index={0}>
-                <div className={classes.cardFlex}>
-                    {existing?.map((plant, index) => <PlantCard key={index}
-                        plant={plant}
-                        onClick={() => setCurrPlant(plant)}
-                        thumbnail={existingThumbnails?.length >= index ? existingThumbnails[index] : null} />)}
-                </div>
-            </TabPanel>
-            <TabPanel value={currTab} index={1}>
-                <div className={classes.cardFlex}>
-                    {all?.map((plant, index) => <PlantCard key={index}
-                        plant={plant}
-                        onClick={() => setCurrPlant(plant)}
-                        thumbnail={allThumbnails?.length >= index ? allThumbnails[index] : null} />)}
-                </div>
-            </TabPanel>
+            <Dropzone
+                dropzoneText={'Drag \'n\' drop upload availability file here or click'}
+                maxFiles={1}
+                acceptedFileTypes={['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']}
+                onUpload={availabilityUpload}
+                uploadText='Upload Availability'
+                disabled={loading}
+            />
+            <h2>Filter</h2>
+            <Grid className={classes.padBottom} container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                    <Selector
+                        className={classes.plantSelector}
+                        fullWidth
+                        options={SORT_OPTIONS}
+                        selected={sortBy}
+                        handleChange={(e) => setSortBy(e.target.value)}
+                        inputAriaLabel='sort-plants-selector-label'
+                        label="Sort" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={showActive}
+                                onChange={(_, value) => setShowActive(value)}
+                                color="secondary"
+                            />
+                        }
+                        label={showActive ? "Active plants" : "Inactive plants"}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <SearchBar fullWidth onChange={(e) => setSearchString(e.target.value)} />
+                </Grid>
+            </Grid>
+            <div className={classes.cardFlex}>
+                {plantData?.plants?.map((plant, index) => <PlantCard key={index}
+                    plant={plant}
+                    onClick={() => setCurrPlant(plant)} />)}
+            </div>
         </div >
     );
 }

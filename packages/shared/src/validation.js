@@ -1,10 +1,13 @@
 import * as yup from 'yup';
-import { DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './modelConsts';
+import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './modelConsts';
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;
-export const PHONE_REGEX = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+// See https://stackoverflow.com/a/21456918/10240279 for more options
+export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+export const PASSWORD_REGEX_ERROR = "Must be at least 8 characters, with at least one character and one number";
 
+export const passwordSchema = yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).matches(PASSWORD_REGEX, PASSWORD_REGEX_ERROR);
 
 export const businessSchema = yup.object().shape({
     name: yup.string().max(128).required(),
@@ -39,13 +42,13 @@ export const discountSchema = yup.object().shape({
 export const emailSchema = yup.object().shape({
     emailAddress: yup.string().max(128).required(),
     receivesDeliveryUpdates: yup.bool().default(true).optional(),
-    userId: yup.string().optional(),
+    customerId: yup.string().optional(),
     businessId: yup.string().optional(),
 });
 
 export const feedbackSchema = yup.object().shape({
     text: yup.string().max(4096).required(),
-    userId: yup.string().required(),
+    customerId: yup.string().required(),
 });
 
 export const imageSchema = yup.object().shape({
@@ -71,22 +74,14 @@ export const orderSchema = yup.object().shape({
 });
 
 export const phoneSchema = yup.object().shape({
-    number: yup.string().max(10).required(),
-    countryCode: yup.string().max(8).default('1').required(),
-    extension: yup.string().max(8).optional(),
+    number: yup.string().max(20).required(),
     receivesDeliveryUpdates: yup.bool().default(true).required(),
-});
-
-export const plantSchema = yup.object().shape({
-    latinName: yup.string().max(256).required(),
-    textData: yup.string().max(8192).optional(),
-    imageData: yup.array().of(imageSchema).optional(),
 });
 
 export const roleSchema = yup.object().shape({
     title: yup.string().max(128).required(),
     description: yup.string().max(2048).optional(),
-    userIds: yup.array().of(yup.string().required()).optional(),
+    customerIds: yup.array().of(yup.string().required()).optional(),
 });
 
 export const skuSchema = yup.object().shape({
@@ -101,6 +96,28 @@ export const skuSchema = yup.object().shape({
     discountIds: yup.array().of(yup.string().required()).optional(),
 });
 
+export const traitSchema = yup.object().shape({
+    name: yup.string().max(256).required(),
+    value: yup.string().max(2048).required()
+})
+
+export const plantSchema = yup.object().shape({
+    latinName: yup.string().max(256).required(),
+    traits: yup.array().of(traitSchema).required(),
+    images: yup.array().of(imageSchema).required()
+});
+
+export const customerSchema = yup.object().shape({
+    id: yup.string().max(256).optional(),
+    firstName: yup.string().max(128).required(),
+    lastName: yup.string().max(128).required(),
+    pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
+    business: businessSchema,
+    emails: yup.array().of(emailSchema).required(),
+    phones: yup.array().of(phoneSchema).required(),
+    accountApproved: yup.boolean().required(),
+    status: yup.mixed().oneOf(Object.values(ACCOUNT_STATUS)).optional(),
+});
 
 
 // Schema for creating a new account
@@ -110,24 +127,26 @@ export const signUpSchema = yup.object().shape({
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     business: yup.string().max(128).required(),
     email: yup.string().email().required(),
-    phone: yup.string().matches(PHONE_REGEX).required(),
-    existingCustomer: yup.boolean().required(),
+    phone: yup.string().max(20).required(),
+    accountApproved: yup.boolean().required(),
     marketingEmails: yup.boolean().required(),
-    password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required(),
+    password: passwordSchema.required(),
     passwordConfirmation: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match')
 });
 
-// Schema for updating a user profile
+// Schema for updating a customer profile
 export const profileSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
     business: yup.string().max(128).required(),
     email: yup.string().email().required(),
-    phone: yup.string().matches(PHONE_REGEX).required(),
-    existingCustomer: yup.boolean().required(),
+    phone: yup.string().max(20).required(),
+    theme: yup.string().max(128).required(),
+    accountApproved: yup.boolean().required(),
+    // Don't apply validation to current password. If you change password requirements, customers would be unable to change their password
     currentPassword: yup.string().max(128).required(),
-    newPassword: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).optional(),
+    newPassword: passwordSchema.optional(),
     newPasswordConfirmation: yup.string().oneOf([yup.ref('newPassword'), null], 'Passwords must match')
 });
 
@@ -147,5 +166,5 @@ export const employeeSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),
     lastName: yup.string().max(128).required(),
     pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
-    password: yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).required()
+    password: passwordSchema.required()
 });

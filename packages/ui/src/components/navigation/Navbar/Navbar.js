@@ -96,7 +96,7 @@ function Navbar({
     const [show_hamburger, setShowHamburger] = useState(false);
     const [logout] = useMutation(logoutMutation);
 
-    const logoutUser = () => {
+    const logoutCustomer = () => {
         logout().then(() => {
             onSessionUpdate(null);
             onRedirect(LINKS.Home);
@@ -107,7 +107,7 @@ function Navbar({
         session: session, 
         business: business,
         onSessionUpdate: onSessionUpdate,
-        logout: logoutUser,
+        logout: logoutCustomer,
         roles: roles, 
         cart: cart,
         onRedirect: onRedirect

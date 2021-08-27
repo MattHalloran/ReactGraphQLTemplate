@@ -22,5 +22,5 @@
 * All plants travel at the expense and risk of the purchaser. We are not liable for material damaged while unloading or after delivery.
 * Please report claims within 48 hours of delivery. Damaged material must be returned to carrier in order to receive credit. Short counts and/or transit damage must be noted on the original invoice before the truck departs your location, and must be clearly noted with driver’s signature.
 * All pickups must be arranged at least one day in advance.
-* Shipping must be paid C.O.D. to carrier and can be arranged by <NAME_LONG> upon request.
+* Shipping must be paid C.O.D. to carrier and can be arranged by <BUSINESS_NAME.Long> upon request.
 * Spring orders must be shipped or picked up prior to April 15th, or the order may be released.

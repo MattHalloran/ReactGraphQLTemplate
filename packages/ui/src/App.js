@@ -132,12 +132,12 @@ export function App() {
                                     session={session}
                                     onSessionUpdate={setSession}
                                     business={business}
-                                    roles={session?.roles}
+                                    userRoles={session?.roles}
                                     cart={cart}
                                     onRedirect={redirect}
                                 />
                             </div>
-                            <IconNav session={session} roles={session?.roles} cart={cart} />
+                            <IconNav session={session} userRoles={session?.roles} cart={cart} />
                             <Footer session={session} business={business} />
                         </main>
                     </div>

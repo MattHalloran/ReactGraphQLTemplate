@@ -1,53 +1,90 @@
-import { Plant, Sku } from "../../db/models";
-import { SKU_STATUS } from "../../src/db/types";
+import { TABLES } from "../../db";
+import { SKU_STATUS } from "@local/shared";
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
+
+const prisma = new PrismaClient()
 
 // Reads an .xls availability file into the database.
 // SKUs of plants not in the availability file will be hidden
-export async function uploadAvailabilityProcess() {
+export async function uploadAvailabilityProcess(job) {
+    console.info('📊 Updating availability...')
+    console.info('SKUs not in the availability data will be hidden');
+
     const rows = job.data.rows;
     const header = rows[0];
     const content = rows.slice(1, rows.length);
     // Determine which columns data is in
     const index = {
-        latin: header.indexOf('Botanical Name'),
-        common: header.indexOf('Common Name'),
+        latinName: header.indexOf('Botanical Name'),
+        commonName: header.indexOf('Common Name'),
         size: header.indexOf('Size'),
         note: header.indexOf('Notes'),
         price: header.indexOf('Price 10+'),
         sku: header.indexOf('Plant Code'),
-        quantity: header.indexOf('Quantity')
+        availability: header.indexOf('Quantity')
     }
+    console.log('got indexes');
+    console.log(index)
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
-    await Sku.query().patch({ status: SKU_STATUS.Inactive });
-    content.forEach(row => {
-        // Insert or update plant based on row data
-        const plant_data = {
-            latinName: row[index.latin],
-            commonName: row[index.common],
+    await prisma[TABLES.Sku].updateMany({ data: { status: SKU_STATUS.Inactive } })
+    console.log('hid skus')
+    for (const row of content) {
+        console.log('in row')
+        console.log(row)
+        // Insert or update plant data from row
+        const latinName = row[index.latinName];
+        console.log(latinName)
+        let plant = await prisma[TABLES.Plant].findUnique({ where: { latinName }, select: {
+            id: true,
+            traits: { select: { id: true, name: true, value: true } }
+        } });
+        if (!plant) {
+            console.info(`Creating new plant: ${latinName}`);
+            plant = await prisma[TABLES.Plant].create({ data: { latinName } });
         }
-        const matching_plants = await Plant.query().where('latinName', row[index.latin]).select('id');
-        const plant = null;
-        if (matching_plants.length > 0) {
-            plant = matching_plants[0].patchAndFetch(plant_data);
-        } else {
-            plant = Plant.query().insertAndFetch(plant_data);
+        // If traits don't exist, replace with empty array
+        if (!Array.isArray(plant.traits)) plant.traits = [];
+        // Upsert traits
+        for (const key of ['latinName', 'commonName']) {
+            if (row[index[key]]) {
+                try {
+                    const updateData = { plantId: plant.id, name: key, value: row[index[key]] };
+                    await prisma[TABLES.PlantTrait].upsert({
+                        where: { plant_trait_plantid_name_unique: { plantId: plant.id, name: key }},
+                        update: updateData,
+                        create: updateData
+                    })
+                } catch(error) { console.error(error)}
+            }
         }
-        // Insert or update SKU based on row data
+        console.log('getting sku data')
+        console.log(plant)
+        // Insert or update SKU data from row
         const sku_data = {
             sku: row[index.sku] ?? '',
-            size: row[index.size] ? parseInt(row[index.size].replace(/\D/g, '')) : 'N/A', //'#3' -> 3
-            price: row[index.price] ? parseFloat(row[index.price].replace(/[^\d.-]/g, '')) : 'N/A', //'$23.32' -> 23.32
+            size: parseFloat((row[index.size]+'').replace(/\D/g, '')) || null, //'#3.5' -> 3.5
+            price: parseFloat((row[index.price]+'').replace(/[^\d.-]/g, '')) || null, //'$23.32' -> 23.32
             note: row[index.note],
-            quantity: row[index.quantity] ?? 'N/A',
+            availability: parseInt(row[index.availability]) || 0,
             plantId: plant.id,
             status: SKU_STATUS.Active
         }
-        const matching_skus = await Sku.query().where('sku', row[index.sku]).select('id');
-        const sku = null;
-        if (matching_skus.length > 0) {
-            sku = matching_skus[0].patchAndFetch(sku_data);
-        } else {
-            sku = Sku.query().insertAndFetch(sku_data);
+        if (!sku_data.sku) {
+            console.error('⛔️ Cannot update rows without a SKU');
+            continue;
         }
-    })
+        console.log('got sku data');
+        console.log(sku_data);
+
+        try {
+            await prisma[TABLES.Sku].upsert({
+                where: { sku: sku_data.sku },
+                update: sku_data,
+                create: sku_data
+            })
+        } catch(error) { console.error(error) }
+    }
+
+    console.info('✅ Availability updated!')
 }

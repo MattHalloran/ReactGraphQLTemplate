@@ -1,23 +1,12 @@
 import { gql } from 'graphql-tag';
+import { customerContactFields } from 'graphql/fragment';
 
 export const customersQuery = gql`
+    ${customerContactFields}
     query {
-        users {
-            firstName
-            lastName
-            business {
-                name
-            }
-            pronouns
+        customers {
+            ...customerContactFields
             status
-            emails {
-                emailAddress
-            }
-            phones {
-                number
-                countryCode
-                extension
-            }
         }
     }
 `

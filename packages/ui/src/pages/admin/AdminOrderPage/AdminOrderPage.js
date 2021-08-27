@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useGet } from "restful-react";
+import { ordersQuery } from 'graphql/query';
+import { useQuery } from '@apollo/client';
 import { ORDER_STATES, PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import {
     AdminBreadcrumbs,
     OrderCard,
     OrderDialog,
-    Selector
+    Selector,
 } from 'components';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
+    header: {
+        textAlign: 'center',
+    },
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
@@ -25,20 +30,18 @@ function AdminOrderPage() {
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
-
-    const { data: orders, refetch: getOrders } = useGet({
-        path: "orders",
-        lazy: true,
-        queryParams: { filter: filter },
-        resolve: (response) => {
-            if (!response.ok)
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
+    const [orders, setOrders] = useState(null);
+    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 5000 });
+    if (error) { 
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
+    }
+    useEffect(() => {
+        setOrders(data?.orders);
+    }, [data])
 
     useEffect(() => {
-        getOrders();
-    }, [filter, getOrders])
+        refetch();
+    }, [filter, refetch])
 
     return (
         <div id="page">
@@ -47,6 +50,9 @@ function AdminOrderPage() {
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
             <AdminBreadcrumbs className={classes.padBottom}/>
+            <div className={classes.header}>
+                <Typography variant="h3" component="h1">Manage Orders</Typography>
+            </div>
             <Selector
                 fullWidth
                 options={ORDER_STATES}

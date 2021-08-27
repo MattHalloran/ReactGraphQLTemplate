@@ -27,6 +27,11 @@ function AlertDialog() {
         return () => PubSub.unsubscribe(dialogSub);
     }, [])
 
+    const handleClick = (action) => {
+        if (action) action();
+        setState(default_state);
+    }
+
     return (
         <Dialog
             open={open}
@@ -41,11 +46,11 @@ function AlertDialog() {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={state.firstButtonClicked ?? (() => setState(default_state))} color="primary">
+                <Button onClick={() => handleClick(state.firstButtonClicked)} color="primary">
                     {state.firstButtonText}
                 </Button>
                 {state.secondButtonText ? (
-                    <Button onClick={state.secondButtonClicked ?? (() => setState(default_state))} color="primary">
+                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="primary">
                         {state.secondButtonText}
                     </Button>
                 ) : null}

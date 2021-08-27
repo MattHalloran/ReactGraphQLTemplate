@@ -40,7 +40,7 @@ function AdminMainPage() {
     return (
         <div id='page'>
             <div className={classes.header}>
-                <Typography variant="h3" component="h1">Admin Portal</Typography>
+                <Typography variant="h3" component="h1">Manage Site</Typography>
             </div>
             <div className={classes.flexed}>
                 {card_data.map(([title, description, link]) => (

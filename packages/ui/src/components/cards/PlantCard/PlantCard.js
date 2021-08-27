@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types'
 import { 
     Button,
@@ -11,8 +11,9 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { displayPrice } from 'utils';
+import { displayPrice, getPlantTrait } from 'utils';
 import { NoImageIcon } from 'assets/img';
+import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,14 +53,13 @@ const useStyles = makeStyles((theme) => ({
 function PlantCard({
     onClick,
     plant,
-    thumbnail
 }) {
     const classes = useStyles();
 
     const SkuStatus = {
-        '-2': classes.deleted,
-        '-1': classes.inactive,
-        '1': classes.active,
+        [SKU_STATUS.Deleted]: classes.deleted,
+        [SKU_STATUS.Inactive]: classes.inactive,
+        [SKU_STATUS.Active]: classes.active,
     }
 
     let sizes = plant.skus?.map(s => (
@@ -69,18 +69,20 @@ function PlantCard({
             color="secondary" />
     ));
 
-    let display_image;
-    if (thumbnail) {
-        display_image = <CardMedia component="img" src={`data:image/jpeg;base64,${thumbnail}`} className={classes.displayImage} title={plant.latin_name} />
+    let display;
+    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    if (display_data) {
+        display = <CardMedia component="img" src={`${SERVER_URL}/${display_data.src}?size=L`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
-        display_image = <NoImageIcon className={classes.displayImage} />
+        display = <NoImageIcon className={classes.displayImage} />
     }
 
     let subtitle;
-    if (plant.common_name) {
+    const commonName = getPlantTrait('commonName', plant);
+    if (commonName) {
         subtitle = (
             <Typography gutterBottom variant="body1" component="h3">
-                {plant.common_name}
+                {commonName}
             </Typography>
         )
     }
@@ -88,7 +90,7 @@ function PlantCard({
     return (
         <Card className={classes.root} onClick={() => onClick(plant)}>
             <CardActionArea>
-                {display_image}
+                {display}
                 <CardContent className={classes.content}>
                     <Typography gutterBottom variant="h6" component="h2">
                         {plant.latin_name}
@@ -111,7 +113,6 @@ function PlantCard({
 PlantCard.propTypes = {
     onClick: PropTypes.func.isRequired,
     plant: PropTypes.object.isRequired,
-    thumbnail: PropTypes.object,
 }
 
 export { PlantCard };

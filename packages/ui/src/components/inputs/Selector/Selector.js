@@ -51,13 +51,13 @@ function Selector({
         return formatted_select;
     }
 
-    let options_formatted = options.map(o => (
+    let options_formatted = options?.map(o => (
         (_.isString(o) || _.isNumber(o)) ?
                 {
                     label: o,
                     value: o
                 } : o
-    ));
+    )) || [];
     let options_labels = options_formatted.map(o => o.label);
     let selected_formatted = formatSelected(selected, options_formatted);
     let selected_labels = selected_formatted.map(s => s.label);

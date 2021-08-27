@@ -25,14 +25,14 @@ const useStyles = makeStyles((theme) => ({
 
 function IconNav({
     session,
-    roles,
+    userRoles,
     cart,
     ...props
 }) {
     let history = useHistory();
     const classes = useStyles();
 
-    let actions = getUserActions(session, roles, cart);
+    let actions = getUserActions(session, userRoles, cart);
 
     return (
         <BottomNavigation 
@@ -55,7 +55,7 @@ function IconNav({
 
 IconNav.propTypes = {
     session: PropTypes.object,
-    roles: PropTypes.array,
+    userRoles: PropTypes.array,
     cart: PropTypes.object,
 }
 

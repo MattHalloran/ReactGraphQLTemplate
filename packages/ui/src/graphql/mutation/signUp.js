@@ -1,6 +1,8 @@
 import { gql } from 'graphql-tag';
+import { customerSessionFields } from 'graphql/fragment';
 
 export const signUpMutation = gql`
+    ${customerSessionFields}
     mutation signUp(
         $firstName: String!
         $lastName: String!
@@ -8,7 +10,7 @@ export const signUpMutation = gql`
         $business: String!
         $email: String!
         $phone: String!
-        $existingCustomer: Boolean!
+        $accountApproved: Boolean!
         $marketingEmails: Boolean!
         $password: String!
     ) {
@@ -19,15 +21,11 @@ export const signUpMutation = gql`
         business: $business
         email: $email
         phone: $phone
-        existingCustomer: $existingCustomer
+        accountApproved: $accountApproved
         marketingEmails: $marketingEmails
         password: $password
     ) {
-        id
-        theme
-        roles {
-            title
-        }
+        ...customerSessionFields
     }
 }
 `

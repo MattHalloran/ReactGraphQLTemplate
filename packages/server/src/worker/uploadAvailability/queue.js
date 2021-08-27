@@ -1,14 +1,22 @@
 import Bull from 'bull';
 import { uploadAvailabilityProcess } from './process';
-import xlsx from 'node-xlsx';
+import XLSX from 'xlsx';
+import fs from 'fs'
 
-const uploadAvailabilityQueue = new Bull('uploadAvailability', { redis: process.env.REDIS_CONN });
+const uploadAvailabilityQueue = new Bull('uploadAvailability', { redis: { 
+    port: process.env.REDIS_CONN.split(':')[1],
+    host: process.env.REDIS_CONN.split(':')[0]
+} });
 uploadAvailabilityQueue.process(uploadAvailabilityProcess);
 
-export function uploadAvailability(data_buffer) {
-    const parsed = xlsx.parse(data_buffer);
-    const rows = parsed[0].data;
+export async function uploadAvailability(filename) {
+    // Wait to make sure file has been fully downloaded and is ready to read
+    await new Promise(r => setTimeout(r, 1000));
+    // Parse file
+    const workbook = XLSX.readFile(`${process.env.PROJECT_DIR}/assets/${filename}`);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    // Send to queue, with array of row data (array of arrays)
     uploadAvailabilityQueue.add({
-        rows: rows
+        rows: XLSX.utils.sheet_to_json(sheet, { header: 1 })
     });
 }

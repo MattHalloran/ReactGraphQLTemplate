@@ -13,7 +13,7 @@ import { makeStyles } from '@material-ui/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
-import { useGet } from 'restful-react';
+import { IMAGE_USE, SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
@@ -58,22 +58,7 @@ function CartTable({
         desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
         specialInstructions: cart?.specialInstructions,
     })
-    // Thumbnail data for every SKU
-    const [thumbnails, setThumbnails] = useState([]);
-    let all_total = cartState.items.map(i => i.sku.price*i.quantity).reduce((a, b) => (a*1)+b, 0);
-    let image_keys = cart?.items?.map(it => it.sku.plant.display_key);
-
-    useGet({
-        path: "images",
-        queryParams: { keys: image_keys, size: 'm' },
-        resolve: (response) => {
-            if (response.ok) {
-                setThumbnails(response.images);
-            }
-            else
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-        }
-    })
+    let all_total = cartState.items.map(i => i.sku.price*i.availability).reduce((a, b) => (a*1)+b, 0);
 
     useEffect(() => {
         onUpdate(cartState);
@@ -94,8 +79,7 @@ function CartTable({
     const updateItemQuantity = useCallback((sku, quantity) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku);
         if (index < 0 || index >= (cartState.items.length)) {
-            PubSub.publish(PUBS.Snack, {message: 'Failed to update item quantity', severity: 'error'});
-            console.log(index);
+            PubSub.publish(PUBS.Snack, { message: 'Failed to update item quantity', severity: 'error', data: { index: index } });
             return;
         }
         let cart_copy = { ...cartState };
@@ -106,35 +90,30 @@ function CartTable({
     const deleteCartItem = useCallback((sku) => {
         let index = cartState.items.findIndex(i => i.sku.sku === sku.sku);
         if (index < 0) {
-            PubSub.publish(PUBS.Snack, {message: `Failed to remove item for ${sku.sku}`, severity: 'error'});
+            PubSub.publish(PUBS.Snack, { message: `Failed to remove item for ${sku.sku}`, severity: 'error', data: sku });
             return;
         }
-        setThumbnails(deleteArrayIndex(thumbnails, index));
         let changed_item_list = deleteArrayIndex(cartState.items, index);
         setCartState(updateObject(cartState, 'items', changed_item_list));
-    }, [thumbnails, cartState])
+    }, [cartState])
 
     const cart_item_to_row = useCallback((data, key) => {
-        let index = cartState.items.findIndex(i => i.sku.sku === data.sku.sku);
-        let thumbnail;
-        if (index >= 0 && index < thumbnails.length)
-            thumbnail = thumbnails[index];
         let quantity = data.quantity;
         let price = parseInt(data.sku.price);
-        let display_price;
-        let display_total;
-        let display_image;
+        let total;
         if (isNaN(price)) {
-            display_price = 'TBD';
-            display_total = 'TBD';
+            price = 'TBD';
+            total = 'TBD';
         } else {
-            display_price = displayPrice(price);
-            display_total = displayPrice(quantity * price);
+            price = displayPrice(price);
+            total = displayPrice(quantity * price);
         }
-        if (thumbnail) {
-            display_image = <img src={`data:image/jpeg;base64,${thumbnail}`} className="cart-image" alt="TODO" />
+        let display;
+        const display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+        if (display_data) {
+            display = <img src={`${SERVER_URL}/${display_data.src}/?size=M`} className="cart-image" alt={display_data.alt} />
         } else {
-            display_image = <NoImageIcon className="cart-image" />
+            display = <NoImageIcon className="cart-image" />
         }
 
         return (
@@ -145,21 +124,21 @@ function CartTable({
                     </IconButton>
                 </TableCell>
                 <TableCell className={classes.tableCol} component="th" scope="row">
-                    {display_image}
+                    {display}
                     <Typography variant="body2">{data.sku?.plant?.latin_name}</Typography>
                 </TableCell>
-                <TableCell className={classes.tableCol} align="right">{display_price}</TableCell>
+                <TableCell className={classes.tableCol} align="right">{price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
                     <QuantityBox
                         min_value={0}
-                        max_value={data.sku?.quantity ?? 100}
+                        max_value={data.sku?.availability ?? 100}
                         initial_value={quantity}
                         valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} />
                 </TableCell>
-                <TableCell className={classes.tableCol} align="right">{display_total}</TableCell>
+                <TableCell className={classes.tableCol} align="right">{total}</TableCell>
             </TableRow>
         );
-    }, [thumbnails, cartState])
+    }, [classes.tableCol, deleteCartItem, updateItemQuantity])
 
     const headCells = [
         { id: 'close', align: 'left', disablePadding: true, label: '' },

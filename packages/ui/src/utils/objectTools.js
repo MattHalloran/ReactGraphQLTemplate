@@ -14,3 +14,21 @@ export const deleteObjectKey = (object, key) => {
     delete copy[key];
     return copy;
 }
+
+export const valueFromDot = (object, string) => {
+    function index(object, i) { return object[i] }
+    if (!string) return null;
+    return string.split('.').reduce(index, object);
+}
+
+export function convertToDot(obj, parent = [], keyValue = {}) {
+    for (let key in obj) {
+      let keyPath = [...parent, key];
+      if (obj[key]!== null && typeof obj[key] === 'object') {
+          Object.assign(keyValue, convertToDot(obj[key], keyPath, keyValue));
+      } else {
+          keyValue[keyPath.join('.')] = obj[key];
+      }
+  }
+  return keyValue;
+}

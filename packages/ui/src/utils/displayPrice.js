@@ -17,7 +17,7 @@ export const displayPriceToDatabase = (price) => {
     // If number, return cents
     // If not a number, return 'N/A'
     if (isNaN(number)) {
-        return 'N/A';
+        return null;
     }
     return number.toFixed(2) * 100;
 }

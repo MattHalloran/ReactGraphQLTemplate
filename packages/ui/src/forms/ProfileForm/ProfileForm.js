@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DEFAULT_PRONOUNS, profileSchema } from '@local/shared';
 import { useMutation, useQuery } from '@apollo/client';
-import { editProfileMutation } from 'graphql/mutation';
+import { updateCustomerMutation } from 'graphql/mutation';
 import { profileQuery } from 'graphql/query';
 import { useFormik } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
@@ -11,6 +11,9 @@ import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/styles';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import 'react-phone-input-2/lib/material.css';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -21,30 +24,71 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
+    phoneInput: {
+        width: 'inherit',
+    }
 }));
 
 function ProfileForm() {
     const classes = useStyles()
     const [editing, setEditing] = useState(false);
     const { data: profile } = useQuery(profileQuery);
-    const [editProfile, { loading }] = useMutation(editProfileMutation);
+    const [updateCustomer, { loading }] = useMutation(updateCustomerMutation);
+
+    console.log('PROFILE DATA ISSS', profile)
 
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
-            firstName: profile?.profile?.firstName,
-            lastName: profile?.profile?.lastName,
+            firstName: profile?.profile?.firstName ?? '',
+            lastName: profile?.profile?.lastName ?? '',
             business: profile?.profile?.business?.name ?? '',
-            pronouns: profile?.profile?.pronouns,
+            pronouns: profile?.profile?.pronouns ?? '',
             email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
-            phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '',
+            phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
             theme: profile?.profile?.theme,
+            accountApproved: profile?.profile?.accountApproved || false,
+            marketingEmails: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].receivesDeliveryUpdates : false,
+            currentPassword: '',
+            newPassword: '',
+            newPasswordConfirmation: ''
         },
         validationSchema: profileSchema,
         onSubmit: (values) => {
             PubSub.publish(PUBS.Loading, true);
-            editProfile({
-                variables: values
+            let input = ({
+                id: profile.profile.id,
+                firstName: values.firstName,
+                lastName: values.lastName,
+                business: {
+                    id: profile.profile.business.id,
+                    name: values.business
+                },
+                pronouns: values.pronouns,
+                emails: [
+                    {
+                        emailAddress: values.email,
+                        receivesDeliveryUpdates: values.marketingEmails
+                    }
+                ],
+                phones: [
+                    {
+                        number: values.phone
+                    }
+                ],
+                theme: values.theme,
+                accountApproved: values.accountApproved
+            });
+            // Only add email and phone ids if they previously existed
+            if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
+            if (profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
+            console.log('UPDATING CUSTOMER WITH THE FOLLOWING INPUT', input);
+            updateCustomer({
+                variables: {
+                    input: input,
+                    currentPassword: values.currentPassword,
+                    newPassword: values.newPassword
+                }
             }).then((response) => {
                 PubSub.publish(PUBS.Loading, false);
                 if (response.ok) {
@@ -139,17 +183,20 @@ function ProfileForm() {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField
-                            fullWidth
+                        <PhoneInput
+                            inputProps={{ id: "phone", helperText: 'fdafdafdsa' }}
+                            inputClass={classes.phoneInput}
+                            enableSearch={true}
+                            country={'us'}
                             id="phone"
                             name="phone"
                             autoComplete="tel"
-                            label="Phone Number"
                             value={formik.values.phone}
-                            onChange={formik.handleChange}
+                            onChange={(number, country, e) => formik.handleChange(e)}
                             error={formik.touched.phone && Boolean(formik.errors.phone)}
                             helperText={formik.touched.phone && formik.errors.phone}
                         />
+                        {formik.errors.phone}
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
@@ -160,8 +207,8 @@ function ProfileForm() {
                                 value={formik.values.theme}
                                 onChange={(e) => formik.handleChange(e) && PubSub.publish(PUBS.Theme, e.target.value)}
                             >
-                                <FormControlLabel value="true" control={<Radio />} label="Light ☀️" />
-                                <FormControlLabel value="false" control={<Radio />} label="Dark 🌙" />
+                                <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
+                                <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
                             </RadioGroup>
                             <FormHelperText>{formik.touched.theme && formik.errors.theme}</FormHelperText>
                         </FormControl>
@@ -169,16 +216,16 @@ function ProfileForm() {
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
                             <RadioGroup
-                                id="existingCustomer"
-                                name="existingCustomer"
+                                id="accountApproved"
+                                name="accountApproved"
                                 aria-label="existing-customer-check"
-                                value={formik.values.existingCustomer}
+                                value={formik.values.accountApproved}
                                 onChange={formik.handleChange}
                             >
-                                <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                                <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
+                                <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
+                                <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
                             </RadioGroup>
-                            <FormHelperText>{formik.touched.existingCustomer && formik.errors.existingCustomer}</FormHelperText>
+                            <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
@@ -219,6 +266,7 @@ function ProfileForm() {
                             fullWidth
                             id="newPassword"
                             name="newPassword"
+                            type="password"
                             autoComplete="new-password"
                             label="New Password"
                             value={formik.values.newPassword}
@@ -231,7 +279,8 @@ function ProfileForm() {
                         <TextField
                             fullWidth
                             id="newPasswordConfirmation"
-                            name="newPassword"
+                            name="newPasswordConfirmation"
+                            type="password"
                             autoComplete="new-password"
                             label="Confirm New Password"
                             value={formik.values.newPasswordConfirmation}
@@ -257,7 +306,7 @@ function ProfileForm() {
                         className={classes.submit}
                     >
                         Save Changes
-            </Button>
+                    </Button>
                 </Grid>
             </Grid>
         </form>
@@ -265,7 +314,7 @@ function ProfileForm() {
 }
 
 ProfileForm.propTypes = {
-    
+
 }
 
 export { ProfileForm };

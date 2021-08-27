@@ -7,7 +7,7 @@ import {
     CustomerCard
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -23,16 +23,15 @@ const useStyles = makeStyles((theme) => ({
 function AdminCustomerPage() {
     const classes = useStyles();
     const [customers, setCustomers] = useState(null);
-    const { error, data } = useQuery(customersQuery);
+    const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
-        console.error(error);
-        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error' });
+        PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
-        setCustomers(data?.users);
+        setCustomers(data?.customers);
     }, [data])
 
-    const new_user = () => {
+    const new_customer = () => {
         alert('Coming soon!');
         return;
         //TODO
@@ -48,7 +47,10 @@ function AdminCustomerPage() {
         <div id="page">
             <AdminBreadcrumbs />
             <div className={classes.header}>
-                <Button onClick={new_user}>New Customer</Button>
+                <Typography variant="h3" component="h1">Manage Customers</Typography>
+            </div>
+            <div className={classes.header}>
+                <Button onClick={new_customer}>New Customer</Button>
             </div>
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>

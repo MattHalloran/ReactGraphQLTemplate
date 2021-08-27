@@ -1,8 +1,8 @@
 export const ACCOUNT_STATUS = {
     Deleted: 'Deleted',
     Unlocked: 'Unlocked',
-    SoftLock: 'Soft Lock',
-    HardLock: 'Hard Lock'
+    SoftLock: 'SoftLock',
+    HardLock: 'HardLock'
 }
 export const DEFAULT_PRONOUNS = [
     "he/him/his",
@@ -21,26 +21,32 @@ export const IMAGE_EXTENSION = {
 }
 // Possible image sizes stored, and their max size
 export const IMAGE_SIZE = {
+    XXS: 32,
     XS: 64,
     S: 128,
     M: 256,
     ML: 512,
-    L: 1024
+    L: 1024,
+    XL: 2048,
+    XXL: 4096,
 }
-export const IMAGE_USE = {
-    Hero: 'Hero',
-    Gallery: 'Gallery',
+export const PLANT_IMAGE_USE = {
     PlantFlower: 'Plant Flower',
     PlantLeaf: 'Plant Leaf',
     PlantFruit: 'Plant Fruit',
     PlantBark: 'Plant Bark',
     PlantHabit: 'Plant Habit',
-    Display: 'Display'
+    PlantDisplay: 'Display'
+}
+export const IMAGE_USE = {
+    Hero: 'Hero',
+    Gallery: 'Gallery',
+    ...PLANT_IMAGE_USE
 }
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
-// CANCELED_BY_USER     |   1) User canceled order before approval (i.e. no admin approval needed), OR
+// CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
 //                          2) PENDING_CANCEL was approved by admin
-// PENDING_CANCEL       | User canceled order after approval (i.e. admin approval needed)
+// PENDING_CANCEL       | Customer canceled order after approval (i.e. admin approval needed)
 // REJECTED             | Order was pending, but admin denied it
 // DRAFT                | Order that hasn't been submitted yet (i.e. cart)
 // PENDING              | Order that has been submitted, but not approved by admin yet
@@ -49,9 +55,9 @@ export const IMAGE_USE = {
 // IN_TRANSIT           | Order is currently being delivered
 // DELIVERED            | Order has been delivered
 export const ORDER_STATUS = {
-    CanceledByAdmin: 'Canceled By Admin',
-    CanceledByUser: 'Canceled By User',
-    PendingCancel: 'Pending Cancel',
+    CanceledByAdmin: 'CanceledByAdmin',
+    CanceledByCustomer: 'CanceledByCustomer',
+    PendingCancel: 'PendingCancel',
     Rejected: 'Rejected',
     Draft: 'Draft',
     Pending: 'Pending',
@@ -59,6 +65,15 @@ export const ORDER_STATUS = {
     Scheduled: 'Scheduled',
     InTransit: 'In Transit',
     Delivered: 'Delivered'
+}
+export const SKU_SORT_OPTIONS = {
+    AZ: 'AZ',
+    ZA: 'ZA',
+    PriceLowHigh: 'PriceLowHigh',
+    PriceHighLow: 'PriceHighLow',
+    Featured: 'Featured',
+    Newest: 'Newest',
+    Oldest: 'Oldest'
 }
 export const SKU_STATUS = {
     Deleted: 'Deleted',
@@ -94,7 +109,8 @@ export const TRAIT_NAME = {
     SoilType: 'Soil Type',
     LightRange: 'Light range'
 }
-export const USER_ROLES = {
+export const ROLES = {
     Customer: "Customer",
+    Owner: "Owner",
     Admin: "Admin",
 }

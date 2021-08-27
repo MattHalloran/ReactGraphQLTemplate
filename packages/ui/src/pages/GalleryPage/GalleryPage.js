@@ -36,7 +36,7 @@ function GalleryPage() {
     const classes = useStyles();
     const { data: images, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'L' } });
 
-    if (error) PubSub.publish(PUBS.Snack, { message: error.message ?? 'Unknown error occurred', severity: 'error' });
+    if (error) PubSub.publish(PUBS.Snack, { message: error.message ?? 'Unknown error occurred', severity: 'error', data: error });
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
     // useHotkeys('arrowLeft', () => navigate(-1));

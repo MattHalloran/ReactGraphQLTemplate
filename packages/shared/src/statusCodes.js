@@ -1,8 +1,4 @@
 export const CODE = {
-    NoResults: {
-        code: 'NO_RESULTS',
-        message: 'Warning: Called successfully, but got no results'
-    },
     SomeImagesAlreadyUploaded: {
         code: 'SOME_IMAGES_ALREADY_UPLOADED',
         message: 'Warning: Some images were already uploaded'
@@ -27,8 +23,8 @@ export const CODE = {
         code: 'EMAIL_NOT_VERIFIED',
         message: 'Error: Email has not been verified yet. Sending new verification email'
     },
-    NoUser: {
-        code: 'NO_USER',
+    NoCustomer: {
+        code: 'NO_CUSTOMER',
         message: 'Error: No user with that email'
     },
     BadCredentials: {
