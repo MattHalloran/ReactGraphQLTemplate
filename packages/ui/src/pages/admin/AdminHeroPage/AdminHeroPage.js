@@ -10,7 +10,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { 
     AdminBreadcrumbs, 
     Dropzone, 
-    ImageList 
+    WrappedImageList 
 } from 'components';
 
 const useStyles = makeStyles((theme) => ({
@@ -94,7 +94,7 @@ function AdminHeroPage() {
                 uploadText='Upload Images'
             />
             <h2>Reorder and delete images</h2>
-            <ImageList data={imageData} onApply={applyChanges}/>
+            <WrappedImageList data={imageData} onApply={applyChanges}/>
         </div>
     );
 }

@@ -37,7 +37,10 @@ app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
 // Before querying image, find the best-match size
 app.use('/images', async (req, res) => {
-    const correct_path = await findImageUrl(`images/${req.path}`, req.query.size || 'XL');
+    console.log('IN /IMAGESSSSSSS')
+    console.log(req.path)
+    const correct_path = await findImageUrl(`images${req.path}`, req.query.size || 'XL');
+    console.log(correct_path)
     res.sendFile(`${process.env.PROJECT_DIR}/assets/images/${path.basename(correct_path)}`);
 });
 

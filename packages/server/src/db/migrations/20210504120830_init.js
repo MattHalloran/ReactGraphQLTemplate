@@ -170,30 +170,35 @@ export async function up (knex) {
         table.increments();
         table.string('hash', 128).references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('label').notNullable();
+        table.unique(['hash', 'label']);
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
         table.comment('Joining table to apply discounts to businesses');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('businessId').references('id').inTable(TABLES.Business).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['businessId', 'discountId']);
     });
     await knex.schema.createTable(TABLES.PlantImages, (table) => {
         table.comment('Joining table to associate plants with display images');
         table.increments();
         table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['plantId', 'imageId']);
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.comment('Joining table to apply discounts to SKUs');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['skuId', 'discountId']);
     });
     await knex.schema.createTable(TABLES.CustomerRoles, (table) => {
         table.comment('Joining table to apply roles to customers');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('customerId').references('id').inTable(TABLES.Customer).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('roleId').references('id').inTable(TABLES.Role).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['customerId', 'roleId']);
     });
     console.info('✅ Migration complete!');
 }

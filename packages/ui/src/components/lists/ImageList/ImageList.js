@@ -1,10 +1,9 @@
+import React, { useCallback, useState } from 'react';
 import update from 'immutability-helper';
 import { makeStyles } from '@material-ui/styles';
 import PropTypes from 'prop-types';
 import { ImageCard } from 'components';
-import React, { useCallback, useEffect, useState } from 'react';
 import { EditImageDialog } from 'components';
-import { Button, Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     flexed: {
@@ -12,95 +11,67 @@ const useStyles = makeStyles((theme) => ({
         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
         alignItems: 'stretch',
     },
-    pad: {
-        marginBottom: theme.spacing(2),
-        marginTop: theme.spacing(2)
-    },
-    gridItem: {
-        display: 'flex',
-    },
 }));
 
 function ImageList({
     data,
-    onApply
+    onUpdate
 }) {
     const classes = useStyles();
     const [selected, setSelected] = useState(-1);
-    const [changed, setChanged] = useState(null);
-
-    useEffect(() => {
-        console.log('IMAGE LIST DATAAAA', data)
-        setChanged(data);
-    }, [data])
 
     const moveCard = useCallback((dragIndex, hoverIndex) => {
         console.log('IN MOVE CARD', dragIndex, hoverIndex);
-        const dragCard = changed[dragIndex];
-        setChanged(update(changed, {
+        const dragCard = data[dragIndex];
+        onUpdate(update(data, {
             $splice: [
                 [dragIndex, 1],
                 [hoverIndex, 0, dragCard],
             ],
         }));
-    }, [changed]);
+    }, [data, onUpdate]);
 
     const saveImageData = useCallback((d) => {
-        let updated = [...changed];
+        let updated = [...data];
         updated[selected] = {
             ...updated[selected],
             ...d
         };
-        setChanged(updated);
+        onUpdate(updated);
         setSelected(-1);
-    }, [selected, changed])
+    }, [selected, data, onUpdate])
 
     const deleteImage = (index) => {
-        let updated = [...changed];
+        let updated = [...data];
         updated.splice(index, 1);
-        setChanged(updated);
+        onUpdate(updated);
     }
 
-    let options = (
-        <Grid classes={{ container: classes.pad }} container spacing={2}>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => onApply(changed)}>Apply Changes</Button>
-            </Grid>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
-                <Button fullWidth onClick={() => setChanged(data)}>Revert Changes</Button>
-            </Grid>
-        </Grid>
-    )
-
     return (
-        <div>
-            { options}
-            <div className={classes.flexed}>
-                <EditImageDialog
-                    open={selected >= 0}
-                    data={selected >= 0 ? changed[selected] : null}
-                    onClose={() => setSelected(-1)}
-                    onSave={saveImageData}
+        <div className={classes.flexed}>
+            <EditImageDialog
+                open={selected >= 0}
+                data={selected >= 0 ? data[selected] : null}
+                onClose={() => setSelected(-1)}
+                onSave={saveImageData}
+            />
+            {data?.map((item, index) => (
+                <ImageCard
+                    key={index}
+                    index={index}
+                    data={item}
+                    onDelete={() => deleteImage(index)}
+                    onEdit={() => setSelected(index)}
+                    moveCard={moveCard}
                 />
-                {changed?.map((item, index) => (
-                    <ImageCard
-                        key={index}
-                        index={index}
-                        data={item}
-                        onDelete={() => deleteImage(index)}
-                        onEdit={() => setSelected(index)}
-                        moveCard={moveCard}
-                    />
-                ))}
-            </div>
-            { options}
+            ))}
         </div>
     );
 }
 
 ImageList.propTypes = {
     data: PropTypes.array,
-    onApply: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
 }
 
 export { ImageList };

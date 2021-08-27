@@ -115,7 +115,6 @@ function EditPlantDialog({
         addImages({
             variables: {
                 files: acceptedFiles,
-                labels: ['hero']
             }
         })
             .then((response) => {
@@ -364,12 +363,13 @@ function EditPlantDialog({
                             <Dropzone
                                 dropzoneText={'Drag \'n\' drop new images here or click'}
                                 onUpload={uploadImages}
-                                uploadText='Upload Images'
+                                uploadText='Confirm'
+                                cancelText='Cancel'
                             />
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                            <ImageList data={imageData} onApply={applyChanges} />
+                            <ImageList data={imageData} onUpdate={e => console.log('Image list update TODO!!!', e)} />
                         </Grid>
                     </Grid>
                     <h3>Edit SKU info</h3>

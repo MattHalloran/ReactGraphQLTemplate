@@ -46,6 +46,7 @@ function ImageCard({
 }) {
     const classes = useStyles();
     const ref = useRef(null);
+    console.log('IN IMAGE CARD', data)
 
     const [, drop] = useDrop({
         accept: 'card',
@@ -87,7 +88,7 @@ function ImageCard({
             ref={ref}
         >
             <CardContent className={classes.content}>
-                <CardMedia image={data.src} className={classes.displayImage} />
+                <CardMedia image={`${data.src}`} className={classes.displayImage} />
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="edit image data" onClick={onEdit}>

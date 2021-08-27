@@ -13,7 +13,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { displayPrice, getPlantTrait } from 'utils';
 import { NoImageIcon } from 'assets/img';
-import { IMAGE_USE, SERVER_URL } from '@local/shared';
+import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -55,12 +55,11 @@ function PlantCard({
     plant,
 }) {
     const classes = useStyles();
-    console.log('IN PLANT CARDDDDD', plant)
 
     const SkuStatus = {
-        '-2': classes.deleted,
-        '-1': classes.inactive,
-        '1': classes.active,
+        [SKU_STATUS.Deleted]: classes.deleted,
+        [SKU_STATUS.Inactive]: classes.inactive,
+        [SKU_STATUS.Active]: classes.active,
     }
 
     let sizes = plant.skus?.map(s => (

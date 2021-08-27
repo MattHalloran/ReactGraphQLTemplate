@@ -56,6 +56,8 @@ model business_discounts {
   discountId String   @db.Uuid
   business   business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   discount   discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, discountId], name: "business_discounts_businessid_discountid_unique")
 }
 
 model customer {
@@ -89,6 +91,8 @@ model customer_roles {
   roleId     String   @db.Uuid
   customer   customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   role       role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, roleId], name: "customer_roles_customerid_roleid_unique")
 }
 
 model discount {
@@ -143,6 +147,8 @@ model image_labels {
   hash  String @db.VarChar(128)
   label String @db.VarChar(255)
   image image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
+
+  @@unique([hash, label], name: "image_labels_hash_label_unique")
 }
 
 model order {
@@ -196,6 +202,8 @@ model plant_images {
   imageId String @db.Uuid
   image   image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
   plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+
+  @@unique([plantId, imageId], name: "plant_images_plantid_imageid_unique")
 }
 
 model plant_trait {
@@ -250,4 +258,6 @@ model sku_discounts {
   discountId String   @db.Uuid
   discount   discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
   sku        sku      @relation(fields: [skuId], references: [id], onDelete: Cascade)
+
+  @@unique([skuId, discountId], name: "sku_discounts_skuid_discountid_unique")
 }

@@ -14,17 +14,11 @@ export const typeDef = gql`
         value: String!
     }
 
-    input PlantImageInput {
-        files: [Upload!]!
-        alts: [String]
-        labels: [String!]!
-    }
-
     input PlantInput {
         id: ID
         latinName: String!
         traits: [PlantTraitInput]!
-        images: PlantImageInput
+        imageIds: [ID!]
     }
 
     type PlantImage {
@@ -151,6 +145,7 @@ export const resolvers = {
     Mutation: {
         // Inserting plants is different than other inserts, because the fields are dynamic.
         // Because of this, the add must be done manually
+        // NOTE: images must be uploaded first
         addPlant: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
@@ -162,23 +157,38 @@ export const resolvers = {
                 await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
             }
             // Create images
-            for (const image of (args.input?.images?.files || [])) {
-                const { success, imageId } = await saveImage(image, errorOnDuplicate=false)
-                if (success) {
-                    await prisma[TABLES.PlantImages].create({ data: { 
-                        plantId: plant.id,
-                        imageId
-                     } });
-                } else {
-                    console.error('Plant image save not successful')
-                }
+            for (const imageId of (args.input?.imageIds || [])) {
+                await prisma[TABLES.PlantImages].create({ data: { 
+                    plantId: plant.id,
+                    imageId
+                 } });
             }
             // TODO Return select
         },
+        // NOTE: Images must be uploaded separately
         updatePlant: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // TODO handle images and traits
+            // Update images
+            await context.prisma[TABLES.PlantImages].deleteMany({ where: { id: args.input.id } });
+            for (const imageId of (args.input?.imageIds || [])) {
+                const rowData = { plantId: args.input.id, imageId };
+                await context.prisma[TABLES.PlantImages].upsert({
+                    where: { plant_images_plantid_imageid_unique: rowData},
+                    update: rowData,
+                    create: rowData
+                })
+            }
+            // Update traits
+            await context.prisma[TABLES.PlantTrait].deleteMany({ where: { id: args.input.id } });
+            for (const { name, value } of (args.input.traits || [])) {
+                const updateData = { plantId: args.input.id, name, value };
+                await context.prisma[TABLES.PlantTrait].upsert({
+                    where: { plant_trait_plantid_name_unique: { plantId: args.input.id, name }},
+                    update: updateData,
+                    create: updateData
+                })
+            }
             return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },

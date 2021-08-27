@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
+import { IMAGE_SIZE, SERVER_URL, IMAGE_EXTENSION } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';

@@ -11,11 +11,7 @@ const _model = TABLES.Image;
 async function imageFromSrc(src, prisma) {
     // Parse name, extension, and folder from src path. This gives a unique row
     let { name, ext } = plainImageName(src);
-    return await prisma[_model].findUnique({ where: { 
-        file: name,
-        ext,
-        folder: 'images'
-    } });
+    return await prisma[_model].findUnique({ where: { image_folder_file_ext_unique: { file: name, ext, folder: 'images' }} });
 }
 
 export const typeDef = gql`
@@ -100,11 +96,11 @@ export const resolvers = {
             let failedFileNames = [];
             // Loop through every image passed in
             for (let i = 0; i < args.files.length; i++) {
-                const { success, filename: finalFilename, hash } = await saveImage(args.files[i], args.alts ? args.alts[i] : undefined, errorOnDuplicate = false)
+                const { success, filename: finalFilename, hash } = await saveImage(args.files[i], args.alts ? args.alts[i] : undefined, undefined, false)
                 if (success) {
                     successfulFileNames.push(finalFilename);
                     for (let j = 0; j < args.labels.length; j++) {
-                        await prisma[TABLES.ImageLabels].create({ data: { 
+                        await context.prisma[TABLES.ImageLabels].create({ data: { 
                             hash: hash,
                             label: args.labels[j]
                          } });
