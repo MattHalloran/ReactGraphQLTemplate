@@ -125,21 +125,21 @@ model feedback {
 }
 
 model image {
-  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   hash         String         @unique @db.VarChar(128)
-  folder       String         @db.VarChar(256)
-  file         String         @db.VarChar(256)
-  ext          String
-  src          String?
   alt          String?        @db.VarChar(256)
   description  String?        @db.VarChar(1024)
   usedFor      String?
-  width        Int
-  height       Int
+  files        image_file[]
   labels       image_labels[]
   plant_images plant_images[]
+}
 
-  @@unique([folder, file, ext], name: "image_folder_file_ext_unique")
+model image_file {
+  hash   String @db.VarChar(128)
+  src    String @unique @db.VarChar(256)
+  width  Int
+  height Int
+  image  image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
 }
 
 model image_labels {
@@ -199,11 +199,11 @@ model plant {
 model plant_images {
   id      Int    @id @default(autoincrement())
   plantId String @db.Uuid
-  imageId String @db.Uuid
-  image   image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  hash    String @db.VarChar(128)
+  image   image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
   plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
 
-  @@unique([plantId, imageId], name: "plant_images_plantid_imageid_unique")
+  @@unique([plantId, hash], name: "plant_images_plantid_hash_unique")
 }
 
 model plant_trait {

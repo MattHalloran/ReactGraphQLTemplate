@@ -18,7 +18,7 @@ export const typeDef = gql`
         id: ID
         latinName: String!
         traits: [PlantTraitInput]!
-        imageIds: [ID!]
+        imageHashes: [ID!]
     }
 
     type PlantImage {
@@ -157,10 +157,10 @@ export const resolvers = {
                 await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
             }
             // Create images
-            for (const imageId of (args.input?.imageIds || [])) {
+            for (const hash of (args.input?.imageHashes || [])) {
                 await prisma[TABLES.PlantImages].create({ data: { 
                     plantId: plant.id,
-                    imageId
+                    hash
                  } });
             }
             // TODO Return select
@@ -171,10 +171,10 @@ export const resolvers = {
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
             await context.prisma[TABLES.PlantImages].deleteMany({ where: { id: args.input.id } });
-            for (const imageId of (args.input?.imageIds || [])) {
-                const rowData = { plantId: args.input.id, imageId };
+            for (const hash of (args.input?.imageHashes || [])) {
+                const rowData = { plantId: args.input.id, hash };
                 await context.prisma[TABLES.PlantImages].upsert({
-                    where: { plant_images_plantid_imageid_unique: rowData},
+                    where: { plant_images_plantid_hash_unique: rowData},
                     update: rowData,
                     create: rowData
                 })

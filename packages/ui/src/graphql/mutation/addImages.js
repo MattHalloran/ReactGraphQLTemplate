@@ -11,8 +11,9 @@ export const addImagesMutation = gql`
         alts: $alts
         labels: $labels
     ) {
-        successfulFileNames
-        failedFileNames
+        success
+        filename
+        hash
     }
 }
 `

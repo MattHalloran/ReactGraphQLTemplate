@@ -106,19 +106,18 @@ export async function up (knex) {
     });
     await knex.schema.createTable(TABLES.Image, (table) => {
         table.comment('Image metadata. Actual image is stored elsewhere');
-        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('hash', 128).notNullable().unique();
-        table.string('folder', 256).notNullable();
-        table.string('file', 256).notNullable();
-        table.enu('ext', Object.values(IMAGE_EXTENSION)).notNullable();
-        table.specificType('src', 'text GENERATED ALWAYS AS (folder || \'/\' || file || ext) stored')
         table.string('alt', 256);
         table.string('description', 1024);
         table.enu('usedFor', Object.values(IMAGE_USE));
+    });
+    await knex.schema.createTable(TABLES.ImageFile, (table) => {
+        table.comment('Image file names');
+        table.string('hash', 128).notNullable().references('hash').inTable(TABLES.Image).onUpdate('CASCADE').onDelete('CASCADE');
+        table.string('src', 256).notNullable().unique();
         table.integer('width').notNullable();
         table.integer('height').notNullable();
-        table.unique(['folder', 'file', 'ext']);
-    });
+    })
     await knex.schema.createTable(TABLES.Plant, (table) => {
         table.comment('Plant identification data. Other data about plant is stored in traits table');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
@@ -183,8 +182,8 @@ export async function up (knex) {
         table.comment('Joining table to associate plants with display images');
         table.increments();
         table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
-        table.uuid('imageId').references('id').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
-        table.unique(['plantId', 'imageId']);
+        table.string('hash', 128).references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['plantId', 'hash']);
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.comment('Joining table to apply discounts to SKUs');
@@ -214,6 +213,7 @@ export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.Sku);
     await knex.schema.dropTableIfExists(TABLES.PlantTrait);
     await knex.schema.dropTableIfExists(TABLES.Plant);
+    await knex.schema.dropTableIfExists(TABLES.ImageFile);
     await knex.schema.dropTableIfExists(TABLES.Image);
     await knex.schema.dropTableIfExists(TABLES.Phone);
     await knex.schema.dropTableIfExists(TABLES.Email);

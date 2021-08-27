@@ -57,21 +57,16 @@ function AdminHeroPage() {
         PubSub.publish(PUBS.Loading, true);
         // Prepare data for request
         const data = changed.map(d => ({
-            src: d.src,
+            hash: d.hash,
             alt: d.alt,
             description: d.description
         }));
         // Determine which files to mark as deleting
-        const original_srcs = imageData.map(d => d.src);
-        const final_srcs = changed.map(d => d.src);
-        const delete_srcs = original_srcs.filter(s => !final_srcs.includes(s));
+        const originals = imageData.map(d => d.hash);
+        const finals = changed.map(d => d.hash);
+        const deleting = originals.filter(s => !finals.includes(s));
         // Perform update
-        updateImages({
-            variables: {
-                data: data,
-                deleting: delete_srcs
-            }
-        })
+        updateImages({ variables: { data, deleting } })
         .then((response) => {
             PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
             PubSub.publish(PUBS.Loading, false);
