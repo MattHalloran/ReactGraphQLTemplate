@@ -44,7 +44,8 @@ function ShoppingPage({
 }) {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const { data: traitOptions } = useQuery(traitOptionsQuery);
+    const { data: traitOptionsData } = useQuery(traitOptionsQuery);
+    const [traitOptions, setTraitOptions] = useState({});
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
@@ -60,15 +61,17 @@ function ShoppingPage({
     }, [])
 
     useEffect(() => {
-        let options = traitOptions?.traitOptions.map(o => {
-            return { ...o, checked: false }
-        });
-        setFilters(options);
-    }, [traitOptions])
+        console.log('CALCULATING TRAIT OPTIONS', traitOptionsData?.traitOptions)
+        let traitOptions = {};
+        for (const option of traitOptionsData?.traitOptions ?? []) {
+            traitOptions[option.name] = option.values;
+        }
+        setTraitOptions(traitOptions);
+    }, [traitOptionsData])
 
-    const handleFiltersChange = useCallback((group, value, checked) => {
+    const handleFiltersChange = useCallback((name, value) => {
         let modified_filters = { ...filters };
-        modified_filters[group][value].checked = checked;
+        modified_filters[name] = value;
         setFilters(modified_filters)
     }, [filters])
 
@@ -76,31 +79,27 @@ function ShoppingPage({
         setHideOutOfStock(event.target.checked);
     }, [])
 
-    const filtersToSelector = (field, title, onChange) => {
-        if (!filters) return;
-        let options = filters[field];
+    const traitOptionsToSelector = useCallback((field, title) => {
+        if (!traitOptions) return;
+        let options = traitOptions[field];
         if (!options || !Array.isArray(options) || options.length <= 0) return null;
-        let selected = options.filter(o => o.checked);
+        let selected = filters ? filters[field] : '';
         return (
             <Selector
                 className={`${classes.padBottom} ${classes.selector}`}
                 fullWidth
                 options={options}
-                selected={selected}
-                handleChange={(e) => handleFiltersChange(field, e.target.value, true)}
+                selected={selected || ''}
+                handleChange={(e) => handleFiltersChange(field, e.target.value)}
                 inputAriaLabel={`${field}-selector-label`}
                 label={title} />
         )
-    }
+    }, [classes.padBottom, classes.selector, traitOptions, filters, handleFiltersChange])
 
     const resetSearchConstraints = () => {
         setSortBy(SORT_OPTIONS[0].value)
         setSearchString('')
-        let copy = { ...filters };
-        copy.map(o => {
-            return { ...o, checked: false }
-        })
-        setFilters(copy);
+        setFilters({});
     }
 
     let optionsContainer = (
@@ -124,19 +123,19 @@ function ShoppingPage({
         </Grid>
     );
 
-    let filterData = [
+    let traitList = [
         ['size', 'Sizes'],
-        ['optimal_light', 'Optimal Light'],
-        ['drought_tolerance', 'Drought Tolerance'],
-        ['grown_height', 'Grown Height'],
-        ['grown_spread', 'Grown Spread'],
-        ['growth_rate', 'Growth Rate'],
-        ['salt_tolerance', 'Salt Tolerance'],
-        ['attracts_polinators_and_wildlifes', 'Pollinator'],
-        ['light_ranges', 'Light Range'],
-        ['soil_moistures', 'Soil Moisture'],
-        ['soil_phs', 'Soil PH'],
-        ['soil_types', 'Soil Type'],
+        ['optimalLight', 'Optimal Light'],
+        ['droughtTolerance', 'Drought Tolerance'],
+        ['grownHeight', 'Grown Height'],
+        ['grownSpread', 'Grown Spread'],
+        ['growthRate', 'Growth Rate'],
+        ['saltTolerance', 'Salt Tolerance'],
+        ['attractsPolinatorsAndWildlifes', 'Pollinator'],
+        ['lightRanges', 'Light Range'],
+        ['soilMoistures', 'Soil Moisture'],
+        ['soilPhs', 'Soil PH'],
+        ['soilTypes', 'Soil Type'],
         ['zones', 'Zone'],
     ]
 
@@ -155,7 +154,7 @@ function ShoppingPage({
                     <h2>Search</h2>
                     <SearchBar className={classes.padBottom} fullWidth debounce={300} onChange={(e) => setSearchString(e.target.value)} />
                     <h2>Filters</h2>
-                    {filterData.map(d => filtersToSelector(...d))}
+                    {traitList.map(d => traitOptionsToSelector(...d))}
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>

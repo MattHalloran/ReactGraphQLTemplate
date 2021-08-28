@@ -23,10 +23,10 @@ export const typeDef = gql`
     extend type Mutation {
         addOrderItem(
             quantity: Int!
-            orderId: ID!
+            orderId: ID
             skuId: ID!
-        ): OrderItem
-        updateOrderItem(input: OrderItemInput!): OrderItem
+        ): OrderItem!
+        updateOrderItem(input: OrderItemInput!): OrderItem!
         deleteOrderItems(ids: [ID!]!): Count!
     }
 `
@@ -34,11 +34,26 @@ export const typeDef = gql`
 export const resolvers = {
     Mutation: {
         addOrderItem: async (_, args, context, info) => {
-            // Must be admin, or adding to your own
-            if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const order = await context.prisma[TABLES.Order].findUnique({ where: { id: args.orderId } });
-            if (context.req.token.customerId !== order.customerId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { quantity: quantity, orderId: orderId, skuId: skuId } });
+            // If no orderId, create a new order
+            let order;
+            if (!args.input.orderId) {
+                if (!context.req.token?.customerId) return new CustomError(CODE.Unauthorized);
+                order = await context.prisma[TABLES.Order].create({ data: { customerId: context.req.token.customerId }})
+            } else {
+                order = await context.prisma[TABLES.Order].findUnique({ where: { id: args.input.orderId } });
+            }
+            // Must be admin, or updating your own
+            if (!context.req.isAdmin && context.req.token.customerId !== order.customerId) return new CustomError(CODE.Unauthorized);
+            if (!context.req.isAdmin) {
+                // Customers can only update their own orders in certain states
+                const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
+                if (!(curr.status in editable_order_statuses)) return new CustomError(CODE.Unauthorized);
+            }
+            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { 
+                quantity: args.input.quantity, 
+                orderId: args.input.orderId, 
+                skuId: args.input.skuId 
+            } });
         },
         updateOrderItem: async (_, args, context, info) => {
             // Must be admin, or adding to your own

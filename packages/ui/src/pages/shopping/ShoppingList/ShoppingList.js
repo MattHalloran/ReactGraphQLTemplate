@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { plantsQuery } from 'graphql/query';
-import { updateOrderMutation } from 'graphql/mutation';
+import { addOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
+import { getPlantSkuField, getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog
@@ -38,56 +38,37 @@ function ShoppingList({
     // Find the current SKU group index, by any of the group's SKUs
     let curr_index = Array.isArray(plants) ? plants.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1 : -1;
     const { data: plantData } = useQuery(plantsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
-    const [updateOrder] = useMutation(updateOrderMutation);
+    const [addOrderItem] = useMutation(addOrderItemMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
     // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
-        //Find all applied filters
-        let applied_filters = [];
-        if (filters && filters[Symbol.iterator] === 'function') {
-            for (const key of filters) {
-                let filter_group = filters[key];
-                for (let i = 0; i < filter_group.length; i++) {
-                    if (filter_group[i].checked) {
-                        applied_filters.push([key, filter_group[i].label]);
-                    }
-                }
-            }
-        }
-        //If no filters are set, show all plants
-        if (applied_filters.length === 0) {
+        if (!filters || Object.values(filters).length === 0) {
             setPlants(plantData?.plants);
             return;
         }
-        //Select all plants that contain the filters
+        console.log('FILTERSSS', filters)
         let filtered_plants = [];
-        for (let i = 0; i < plantData?.plants?.length ?? 0; i++) {
-            let curr_plant = plantData?.plants[i];
-            for (let j = 0; j < applied_filters.length; j++) {
-                let trait = applied_filters[j][0];
-                let value = applied_filters[j][1];
-
-                // Grab data depending on if the field is for the sku or its associated plant
-                //TODO probably broken
-                let data;
-                if (trait === 'sizes') {
-                    data = curr_plant.skus.map(s => s[trait]);
-                } else {
-                    data = curr_plant[trait];
-                }
-
-                if (Array.isArray(data) && data.length > 0) {
-                    if (data.some(o => o.value === value)) {
-                        filtered_plants.push(curr_plant);
-                        break;
-                    }
-                } else if (data?.value === value) {
-                    filtered_plants.push(curr_plant);
+        for (const plant of plantData?.plants) {
+            let found = false;
+            for (const [key, value] of Object.entries(filters)) {
+                if (found) break;
+                const traitValue = getPlantTrait(key, plant);
+                if (traitValue && traitValue.toLowerCase() === (value+'').toLowerCase()) {
+                    found = true;
                     break;
                 }
+                if (!Array.isArray(plant.skus)) continue;
+                for (let i = 0; i < plant.skus.length; i++) {
+                    const skuValue = getPlantSkuField(key, i, plant);
+                    if (skuValue && skuValue.toLowerCase() === (value+'').toLowerCase()) {
+                        found = true;
+                        break;
+                    }
+                }
             }
+            if (found) filtered_plants.push(plant);
         }
         setPlants(filtered_plants);
     }, [plantData, filters, searchString, hideOutOfStock])
@@ -101,21 +82,19 @@ function ShoppingList({
     }
 
     const addToCart = (name, sku, quantity) => {
-        if (!session?.customer_id || !session?.token) return;
+        console.log('ADD TO CARTTTTTT', quantity)
+        if (!session?.id) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
             alert(`Error: Cannot add more than ${max_quantity}!`);
             return;
         }
-        let cart_copy = JSON.parse(JSON.stringify(cart));
-        cart_copy.items.push({ 'sku': sku.sku, 'quantity': quantity });
-
         PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { input: { id: session?.customer_id, ...cart_copy } } }).then((response) => {
-            const data = response.data.updateOrder;
+        addOrderItem({ variables: { input: { orderId: cart?.id, skuId: sku.id, quantity} } }).then((response) => {
+            const data = response.data.addOrderItem;
             PubSub.publish(PUBS.Loading, false);
             if (data !== null) {
-                onSessionUpdate({...session, cart: data });
+                onSessionUpdate();
                 PubSub.publish(PUBS.Snack, { 
                     message: `${quantity} ${name}(s) added to cart.`, 
                     buttonText: 'View Cart',

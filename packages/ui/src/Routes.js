@@ -42,6 +42,7 @@ function Routes({
     console.log('RENDERING ROUTES', business)
 
     const common = {
+        sessionChecked: session !== null && session !== undefined,
         onSessionUpdate: onSessionUpdate,
         onRedirect: onRedirect,
         userRoles: userRoles,

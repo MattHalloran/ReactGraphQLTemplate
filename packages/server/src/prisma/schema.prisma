@@ -164,7 +164,7 @@ model order {
   updated_at           DateTime     @default(now()) @db.Timestamptz(6)
   address              address?     @relation(fields: [addressId], references: [id], onDelete: NoAction)
   customer             customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  order_item           order_item[]
+  items                order_item[]
 }
 
 model order_item {

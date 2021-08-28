@@ -13,5 +13,15 @@ export const customerSessionFields = gql`
                 description
             }
         }
+        orders {
+            id
+            items {
+                id
+                quantity
+                sku {
+                    sku
+                }
+            }
+        }
     }
 `

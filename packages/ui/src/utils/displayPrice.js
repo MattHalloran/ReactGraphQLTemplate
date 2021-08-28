@@ -2,7 +2,7 @@
 // Convert price stored in database to user-friendly version
 export const displayPrice = (price) => {
     if (!price) return 'N/A';
-    let result = price/100;
+    let result = Number(price);
     if (isNaN(result)) return price;
     return `$${result.toFixed(2)}`;
 }
@@ -19,5 +19,5 @@ export const displayPriceToDatabase = (price) => {
     if (isNaN(number)) {
         return null;
     }
-    return number.toFixed(2) * 100;
+    return number.toFixed(2);
 }

@@ -44,7 +44,7 @@ const apollo_options = new ApolloServer({
     schema: schema,
     context: (c) => context(c),
     uploads: false, // Disables old version of graphql-upload
-    validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
+    validationRules: [ depthLimit(8) ] // Prevents DoS attack from arbitrarily-nested query
  });
 apollo_options.applyMiddleware({ 
     app, 

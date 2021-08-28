@@ -4,10 +4,8 @@ import { addToArray, updateArray } from "./arrayTools";
 import { updateObject } from "./objectTools";
 
 export const getPlantTrait = (traitName, plantData) => {
-    console.log('GET PLANT TRAIT', traitName, plantData)
     if (!(typeof traitName === 'string')) return null;
     const lowered = traitName.toLowerCase();
-    console.log('yeo', plantData?.traits ? plantData.traits.find(t => t.name.toLowerCase() === lowered)?.value : null)
     return plantData?.traits ? plantData.traits.find(t => t.name.toLowerCase() === lowered)?.value : null;
 }
 
@@ -20,19 +18,16 @@ export const setPlantTrait = (name, value, plantData, createIfNotExists=false) =
     const updatedTraits = traitIndex < 0 ?
         addToArray(plantData.traits, { name, value }):
         updateArray(plantData.traits, traitIndex, { name, value });
-    console.log('UPDATED TRAITS', updatedTraits);
     return updateObject(plantData, 'traits', updatedTraits);
 }
 
 export const getPlantSkuField = (fieldName, index, plantData) => {
     if (!Array.isArray(plantData?.skus)) return null;
     if (index < 0 || index >= plantData.skus.length) return null;
-    console.log('IN GET PLANT SKU FIELD', fieldName, index, plantData)
     return plantData.skus[index][fieldName];
 }
 
 export const setPlantSkuField = (fieldName, index, value, plantData) => {
-    console.log('in set plant sku field', fieldName, index, value, plantData)
     if (!Array.isArray(plantData?.skus)) return null;
     if (index < 0 || index >= plantData.skus.length) return null;
     const updatedSku = updateObject(plantData.skus[index], fieldName, value);

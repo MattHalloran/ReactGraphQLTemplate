@@ -11,7 +11,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { displayPrice, getPlantTrait } from 'utils';
+import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
@@ -70,9 +70,10 @@ function PlantCard({
     ));
 
     let display;
-    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
+    if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
     if (display_data) {
-        display = <CardMedia component="img" src={`${SERVER_URL}/${display_data.src}?size=L`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
         display = <NoImageIcon className={classes.displayImage} />
     }

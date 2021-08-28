@@ -43,13 +43,18 @@ import _ from 'underscore';
 
 // Common plant traits, and their corresponding field names
 const PLANT_TRAITS = {
+    'Attracts Pollinators & Wildlife': 'attractsPollinatorsAndWildlife',
     'Drought Tolerance': 'droughtTolerance',
     'Grown Height': 'grownHeight',
     'Grown Spread': 'grownSpread',
     'Growth Rate': 'growthRate',
+    'Light Ranges': 'lightRanges',
     'Optimal Light': 'optimalLight',
     'Salt Tolerance': 'saltTolerance',
-    'Size': 'size',
+    'Soil Moistures': 'soilMoistures',
+    'Soil PHs': 'soilPhs',
+    'Soil Types': 'soilTypes',
+    'Zones': 'zone'
 }
 
 const useStyles = makeStyles((theme) => ({

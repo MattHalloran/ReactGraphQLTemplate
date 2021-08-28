@@ -16,11 +16,9 @@ export const orderItemFields = gql`
                 ...plantFields
             }
             discounts {
-                id
-                discount
-                title
-                comment
-                terms
+                discount {
+                    ...discountFields
+                }
             }
         }
     }

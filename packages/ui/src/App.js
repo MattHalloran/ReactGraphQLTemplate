@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     AlertDialog,
     Footer,
@@ -16,8 +16,9 @@ import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
 import { useHistory } from 'react-router';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { readAssetsQuery } from 'graphql/query/readAssets';
+import { loginMutation } from 'graphql/mutation';
 
 const useStyles = makeStyles(() => ({
         "@global": {
@@ -60,6 +61,7 @@ export function App() {
     const [loading, setLoading] = useState(false);
     const [business, setBusiness] =  useState(null)
     const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
+    const [login] = useMutation(loginMutation);
     let history = useHistory();
 
     useEffect(() => {
@@ -91,7 +93,21 @@ export function App() {
         },
     };
 
+    const checkLogin = useCallback((session) => {
+        if (session) {
+            setSession(session);
+            return;
+        }
+        login().then((response) => {
+            setSession(response.data.login);
+        }).catch((response) => { 
+            if (process.env.NODE_ENV === 'development') console.error('Error: cannot login', response);
+            setSession({})
+        })
+    }, [login])
+
     useEffect(() => {
+        checkLogin();
         // Check for browser dark mode TODO set back to dark when ready
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
@@ -100,7 +116,7 @@ export function App() {
             PubSub.unsubscribe(loadingSub);
             PubSub.unsubscribe(businessSub);
         })
-    }, [])
+    }, [checkLogin])
 
     const redirect = (link) => history.push(link);
 
@@ -116,7 +132,7 @@ export function App() {
                                 <Navbar
                                     session={session}
                                     business={business}
-                                    onSessionUpdate={setSession}
+                                    onSessionUpdate={checkLogin}
                                     roles={session?.roles}
                                     cart={cart}
                                     onRedirect={redirect}
@@ -130,7 +146,7 @@ export function App() {
                                 <Snack />
                                 <Routes
                                     session={session}
-                                    onSessionUpdate={setSession}
+                                    onSessionUpdate={checkLogin}
                                     business={business}
                                     userRoles={session?.roles}
                                     cart={cart}

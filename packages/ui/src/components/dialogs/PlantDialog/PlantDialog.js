@@ -17,7 +17,7 @@ import {
     Toolbar, 
     Typography 
 } from '@material-ui/core';
-import { displayPrice, getPlantTrait } from 'utils';
+import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
 import { 
     BeeIcon,
     CalendarIcon,
@@ -67,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
     },
     right: {
         width: '50%',
-        height: '80%',
         float: 'right',
     },
     displayImage: {
@@ -98,7 +97,7 @@ function PlantDialog({
     console.log('EXPANDED PLANT', plant)
     plant = {
         ...plant,
-        latin_name: plant?.latin_name ?? 'Nothing selected',
+        latin_name: plant?.latinName,
         skus: plant?.skus ?? [],
     }
     const classes = useStyles();
@@ -124,31 +123,27 @@ function PlantDialog({
     }, [plant, order_options])
 
     let display;
-    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
+    if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
     if (display_data) {
-        display = <img src={`${SERVER_URL}/${display_data.src}?size=XL`} className={classes.displayImage} alt={display_data.alt} />
+        display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
         display = <NoImageIcon className={classes.displayImage} />
     }
 
-    const traitIconList = (field, Icon, title, alt) => {
-        if (!plant || !plant[field]) return null;
+    const traitIconList = (traitName, Icon, title, alt) => {
         if (!alt) alt = title;
-        let field_string;
-        if (Array.isArray(plant[field])) {
-            field_string = plant[field].map(f => f).join(', ')
-        } else {
-            field_string = plant[field];
-        }
+        const traitValue = getPlantTrait(traitName, plant);
+        if (!traitValue) return null;
         return (
             <div>
                 <ListItem>
                     <ListItemAvatar>
                         <Avatar className={classes.avatar}>
-                            <Icon />
+                            <Icon alt={alt} />
                         </Avatar>
                     </ListItemAvatar>
-                    <ListItemText primary={title} secondary={field_string} />
+                    <ListItemText primary={title} secondary={traitValue} />
                 </ListItem>
             </div>
         )
@@ -219,20 +214,20 @@ function PlantDialog({
                         : null}
                     <List>
                         {traitIconList("zones", MapIcon, "Zones")}
-                        {traitIconList("physiographic_regions", MapIcon, "Physiographic Region")}
-                        {traitIconList("attracts_pollinators_and_wildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                        {traitIconList("drought_tolerance", NoWaterIcon, "Drought Tolerance")}
-                        {traitIconList("salt_tolerance", SaltIcon, "Salt Tolerance")}
+                        {traitIconList("physiographicRegions", MapIcon, "Physiographic Region")}
+                        {traitIconList("attractsPollinatorsAndWildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                        {traitIconList("droughtTolerance", NoWaterIcon, "Drought Tolerance")}
+                        {traitIconList("saltTolerance", SaltIcon, "Salt Tolerance")}
                         <Divider />
-                        {traitIconList("bloom_colors", ColorWheelIcon, "Bloom Colors")}
-                        {traitIconList("bloom_times", CalendarIcon, "Bloom Times")}
+                        {traitIconList("bloomColors", ColorWheelIcon, "Bloom Colors")}
+                        {traitIconList("bloomTimes", CalendarIcon, "Bloom Times")}
                         <Divider />
-                        {traitIconList("light_ranges", RangeIcon, "Light Range")}
-                        {traitIconList("optimal_light", SunIcon, "Optimal Light")}
+                        {traitIconList("lightRanges", RangeIcon, "Light Range")}
+                        {traitIconList("optimalLight", SunIcon, "Optimal Light")}
                         <Divider />
-                        {traitIconList("soil_moistures", EvaporationIcon, "Soil Moisture")}
-                        {traitIconList("soil_phs", PHIcon, "Soil PH")}
-                        {traitIconList("soil_types", SoilTypeIcon, "Soil Type")}
+                        {traitIconList("soilMoistures", EvaporationIcon, "Soil Moisture")}
+                        {traitIconList("soilPhs", PHIcon, "Soil PH")}
+                        {traitIconList("soilTypes", SoilTypeIcon, "Soil Type")}
                     </List>
                 </div>
                 {options}
