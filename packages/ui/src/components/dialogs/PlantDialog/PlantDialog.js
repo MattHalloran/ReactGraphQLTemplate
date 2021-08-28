@@ -98,7 +98,7 @@ function PlantDialog({
     console.log('EXPANDED PLANT', plant)
     plant = {
         ...plant,
-        latin_name: plant?.latinName,
+        latinName: plant?.latinName,
         skus: plant?.skus ?? [],
     }
     const classes = useStyles();
@@ -127,7 +127,7 @@ function PlantDialog({
     let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
     if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
     if (display_data) {
-        display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latinName} />
     } else {
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
@@ -192,7 +192,7 @@ function PlantDialog({
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
                             <Typography variant="h6">
-                                {plant.latin_name}
+                                {plant.latinName}
                             </Typography>
                             <Typography variant="h6">
                                 {getPlantTrait('commonName', plant)}

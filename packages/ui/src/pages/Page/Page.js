@@ -38,6 +38,7 @@ Page.propTypes = {
     redirect: PropTypes.string,
     userRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
     restrictedToRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
+    fullWidth: PropTypes.bool,
     children: PropTypes.object.isRequired,
 }
 

@@ -117,7 +117,7 @@ function CartTable({
         let display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
         if (!display_data && data.sku.plant.images.length > 0) display_data = data.sku.plant.images[0].image;
         if (display_data) {
-            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.plant.latin_name} />
+            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.plant.latinName} />
         } else {
             display = <NoImageIcon className={classes.displayImage} />
         }
@@ -131,8 +131,8 @@ function CartTable({
                 </TableCell>
                 <TableCell className={classes.tableCol} padding="none" component="th" scope="row" align="center">
                     {display}
-                    <Typography variant="body2">{data.sku?.plant?.latin_name}</Typography>
                 </TableCell>
+                <TableCell className={classes.tableCol} align="left">{data.sku?.plant?.latinName}</TableCell>
                 <TableCell className={classes.tableCol} align="right">{price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
                     <QuantityBox
@@ -148,7 +148,8 @@ function CartTable({
 
     const headCells = [
         { id: 'close', align: 'left', disablePadding: true, label: '' },
-        { id: 'product', align: 'left', disablePadding: true, label: 'Product' },
+        { id: 'productImage', align: 'left', disablePadding: true, label: 'Product' },
+        { id: 'productName', disablePadding: true, label: '' },
         { id: 'price', align: 'right', disablePadding: false, label: 'Price' },
         { id: 'quantity', align: 'right', disablePadding: false, label: 'Quantity' },
         { id: 'total', align: 'right', disablePadding: false, label: 'Total' },

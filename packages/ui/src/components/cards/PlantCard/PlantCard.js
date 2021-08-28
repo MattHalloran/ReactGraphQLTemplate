@@ -73,7 +73,7 @@ function PlantCard({
     let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
     if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
     if (display_data) {
-        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latinName} />
     } else {
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
@@ -94,7 +94,7 @@ function PlantCard({
                 {display}
                 <CardContent className={classes.content}>
                     <Typography gutterBottom variant="h6" component="h2">
-                        {plant.latin_name}
+                        {plant.latinName}
                     </Typography>
                     {subtitle}
                     <div className="size-container">

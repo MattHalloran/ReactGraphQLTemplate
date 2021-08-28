@@ -29,7 +29,13 @@ const useStyles = makeStyles(() => ({
                 minWidth: '100%',
                 minHeight: '100%',
                 padding: '1em',
-                paddingTop: 'calc(14vh + 20px)',
+                paddingTop: 'calc(14vh + 20px)'
+            },
+            '@media (min-width:500px)': {
+                '#page': {
+                    paddingLeft: 'max(1em, calc(15% - 75px))',
+                    paddingRight: 'max(1em, calc(15% - 75px))',
+                }
             }
         },
         contentWrap: {
