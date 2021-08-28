@@ -4,7 +4,7 @@ export const addImagesMutation = gql`
     mutation addImages(
         $files: [Upload!]!
         $alts: [String]
-        $labels: [String!]!
+        $labels: [String!]
     ) {
     addImages(
         files: $files
@@ -12,7 +12,7 @@ export const addImagesMutation = gql`
         labels: $labels
     ) {
         success
-        filename
+        src
         hash
     }
 }

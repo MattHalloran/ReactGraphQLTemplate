@@ -30,8 +30,6 @@ import { Dropzone, ImageList } from 'components';
 import {
     addToArray,
     deleteArrayIndex,
-    displayPrice,
-    displayPriceToDatabase,
     getPlantSkuField,
     getPlantTrait,
     makeID,
@@ -118,9 +116,14 @@ function EditPlantDialog({
             }
         })
             .then((response) => {
-                //refetchImages(); TODO
                 PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
                 PubSub.publish(PUBS.Loading, false);
+                setImageData([...imageData, ...response.data.addImages.filter(d => d.success).map(d => {
+                    return {
+                        hash: d.hash,
+                        files: [{ src: d.src }]
+                    }
+                })])
             })
             .catch((response) => {
                 PubSub.publish(PUBS.Loading, false);
@@ -132,21 +135,16 @@ function EditPlantDialog({
         PubSub.publish(PUBS.Loading, true);
         // Prepare data for request
         const data = changed.map(d => ({
-            src: d.src,
+            src: d.hash,
             alt: d.alt,
             description: d.description
         }));
         // Determine which files to mark as deleting
-        const original_srcs = imageData.map(d => d.src);
-        const final_srcs = changed.map(d => d.src);
-        const delete_srcs = original_srcs.filter(s => !final_srcs.includes(s));
+        const originals = imageData.map(d => d.hash);
+        const finals = changed.map(d => d.hash);
+        const deleting = originals.filter(s => !finals.includes(s));
         // Perform update
-        updateImages({
-            variables: {
-                data: data,
-                deleting: delete_srcs
-            }
-        })
+        updateImages({ variables: { data, deleting } })
             .then((response) => {
                 PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
                 PubSub.publish(PUBS.Loading, false);
@@ -157,12 +155,19 @@ function EditPlantDialog({
             })
     }, [imageData, updateImages])
 
-    const [selectedSkuIndex, setSelectedSkuIndex] = useState(null);
+    const [selectedSkuIndex, setSelectedSkuIndex] = useState(-1);
     const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
 
     useEffect(() => {
         setChangedPlant({ ...plant });
-        setImageData(plant?.images);
+        if (Array.isArray(plant?.images)) {
+            setImageData(plant.images.map((d, index) => ({
+                ...d.image,
+                pos: index
+            })));
+        } else {
+            setImageData(null);
+        }
     }, [plant])
 
     function revertPlant() {
@@ -187,9 +192,20 @@ function EditPlantDialog({
         });
     }, [changedPlant, deletePlant, onClose])
 
-    const savePlant = () => {
+    const savePlant = useCallback(() => {
+        console.log("SAVING PLANTTTTT")
         let plant_data = {
-            ...changedPlant,
+            id: changedPlant.id,
+            latinName: changedPlant.latinName,
+            traits: changedPlant.traits.map(t => {
+                return { name: t.name, value: t.value }
+            }),
+            skus: changedPlant.skus.map(s => {
+                return { sku: s.sku, isDiscountable: s.isDiscountable, size: s.size, note: s.note, availability: parseInt(s.availability) || 0, price: s.price, status: s.status }
+            }),
+            images: imageData.map(d => {
+                return { hash: d.hash, src: d.src, alt: d.alt, description: d.description }
+            })
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
         updatePlant({ variables: { input: plant_data } })
@@ -199,19 +215,20 @@ function EditPlantDialog({
             .catch((error) => {
                 PubSub.publish(PUBS.Snack, { message: 'Failed to update SKU.', severity: 'error', data: error });
             });
-    }
+    }, [changedPlant, imageData, updatePlant])
 
-    const updateTrait = useCallback((traitName, value) => {
-        setChangedPlant(setPlantTrait(traitName, value, changedPlant))
+    const updateTrait = useCallback((traitName, value, createIfNotExists) => {
+        const updatedPlant = setPlantTrait(traitName, value, changedPlant, createIfNotExists);
+        console.log('UPDATE TRAITTTT', traitName, value, updatedPlant)
+        if (updatedPlant) setChangedPlant(updatedPlant);
     }, [changedPlant])
 
     const updateSkuField = useCallback((fieldName, value) => {
-        setChangedPlant(setPlantSkuField(fieldName, value, changedPlant))
-    }, [changedPlant])
-
-    useEffect(() => {
-        console.log('changed plant is:::::', changedPlant);
-    }, [changedPlant])
+        console.log('IN UPDATE SKU FIELD', fieldName, value);
+        const updatedPlant = setPlantSkuField(fieldName, selectedSkuIndex, value, changedPlant);
+        console.log('yope', updatedPlant)
+        if (updatedPlant) setChangedPlant(updatedPlant)
+    }, [changedPlant, selectedSkuIndex])
 
     function newSku() {
         setChangedPlant(p => ({
@@ -228,7 +245,7 @@ function EditPlantDialog({
         }));
     }
 
-    let changes_made = !_.isEqual(plant, changedPlant);
+    let changes_made = !_.isEqual(plant, changedPlant) || imageData.length > plant?.images;
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={12} sm={4}>
@@ -317,8 +334,8 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="Common Name"
-                                value={getPlantTrait('commonName')}
-                                onChange={e => updateTrait('commonName', e.target.value)}
+                                value={getPlantTrait('commonName', changedPlant)}
+                                onChange={e => updateTrait('commonName', e.target.value, false)}
                             />
                         </Grid>
                         {/* Select which trait you'd like to edit */}
@@ -328,32 +345,24 @@ function EditPlantDialog({
                                 id="setTraitField"
                                 name="setTraitField"
                                 options={Object.keys(PLANT_TRAITS)}
+                                onChange={(e, v) => setSelectedTrait(PLANT_TRAITS[v])}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
                                         label="Select plant trait"
-                                        value={PLANT_TRAITS[selectedTrait]}
-                                        onChange={e => setSelectedTrait(PLANT_TRAITS[e.target.value])}
+                                        value={PLANT_TRAITS[selectedTrait] ?? ''}
                                     />
                                 )}
                             />
                         </Grid>
                         {/* Edit selected trait */}
                         <Grid item xs={12} sm={6}>
-                            <Autocomplete
+                            <TextField
                                 fullWidth
-                                freeSolo
-                                id="setTraitValue"
-                                name="setTraitValue"
-                                options={trait_options ? trait_options[PLANT_TRAITS[selectedTrait]] : []}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Trait value"
-                                        value={getPlantTrait(PLANT_TRAITS[selectedTrait], changedPlant)}
-                                        onChange={e => updateTrait(PLANT_TRAITS[selectedTrait], e.target.value)}
-                                    />
-                                )}
+                                size="small"
+                                label="Trait value"
+                                value={getPlantTrait(selectedTrait, changedPlant) ?? ''}
+                                onChange={e => updateTrait(selectedTrait, e.target.value, true)}
                             />
                         </Grid>
                         {/* ...or enter a custom value */}
@@ -369,49 +378,44 @@ function EditPlantDialog({
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                            <ImageList data={imageData} onUpdate={e => console.log('Image list update TODO!!!', e)} />
+                            <ImageList data={imageData} onUpdate={applyChanges} />
                         </Grid>
                     </Grid>
                     <h3>Edit SKU info</h3>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                fullWidth
                                 size="small"
                                 label="Plant Code"
-                                value={getPlantSkuField('sku', selectedSkuIndex, changedPlant)}
+                                value={getPlantSkuField('sku', selectedSkuIndex, changedPlant) ?? ''}
                                 onChange={e => updateSkuField('sku', e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <Autocomplete
+                            <TextField
                                 fullWidth
-                                freeSolo
-                                id="setSkuSize"
-                                name="setSkuSize"
-                                options={trait_options ? trait_options[PLANT_TRAITS['size']] : []}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Set SKU size"
-                                        value={getPlantSkuField('size', selectedSkuIndex, changedPlant)}
-                                        onChange={e => updateSkuField('size', e.target.value)}
-                                    />
-                                )}
+                                size="small"
+                                label="SKU Size"
+                                value={getPlantSkuField('size', selectedSkuIndex, changedPlant) ?? ''}
+                                onChange={e => updateSkuField('size', e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                fullWidth
                                 size="small"
                                 label="Price"
-                                value={displayPrice(getPlantSkuField('price', selectedSkuIndex, changedPlant))}
-                                onChange={e => updateSkuField('price', displayPriceToDatabase(e.target.value))}
+                                value={getPlantSkuField('price', selectedSkuIndex, changedPlant) ?? ''}
+                                onChange={e => updateSkuField('price', e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                fullWidth
                                 size="small"
                                 label="Availability"
-                                value={getPlantSkuField('availability', selectedSkuIndex, changedPlant)}
+                                value={getPlantSkuField('availability', selectedSkuIndex, changedPlant) ?? ''}
                                 onChange={e => updateSkuField('availability', e.target.value)}
                             />
                         </Grid>

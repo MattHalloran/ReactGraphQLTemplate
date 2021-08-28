@@ -27,7 +27,7 @@ export const typeDef = gql`
 
     type AddImageResponse {
         success: Boolean!
-        filename: String!
+        src: String!
         hash: String
     }
 

@@ -119,7 +119,7 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
 // Saves an image file and its resizes in the specified folder at the server root directory
 // Returns: {
 //      success
-//      filename
+//      src
 //      hash
 //}
 // Arguments:
@@ -193,7 +193,7 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         }
         return {
             success: true,
-            filename: `${name}${ext}`,
+            src: full_size_filename,
             hash: hash
         }
     } catch (error) {
@@ -201,7 +201,7 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         console.error(error);
         return {
             success: false,
-            filename: filename,
+            src: filename,
             hash: null,
         }
     }

@@ -3,7 +3,6 @@ import { TABLES } from '../db';
 import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
-import { saveImage } from '../utils';
 
 const _model = TABLES.Plant;
 
@@ -18,7 +17,8 @@ export const typeDef = gql`
         id: ID
         latinName: String!
         traits: [PlantTraitInput]!
-        imageHashes: [ID!]
+        images: [ImageUpdate!]
+        skus: [SkuInput!]
     }
 
     type PlantImage {
@@ -157,10 +157,10 @@ export const resolvers = {
                 await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
             }
             // Create images
-            for (const hash of (args.input?.imageHashes || [])) {
+            for (const image of (args.input?.images || [])) {
                 await prisma[TABLES.PlantImages].create({ data: { 
                     plantId: plant.id,
-                    hash
+                    hash: image.hash
                  } });
             }
             // TODO Return select
@@ -170,9 +170,9 @@ export const resolvers = {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
-            await context.prisma[TABLES.PlantImages].deleteMany({ where: { id: args.input.id } });
-            for (const hash of (args.input?.imageHashes || [])) {
-                const rowData = { plantId: args.input.id, hash };
+            await context.prisma[TABLES.PlantImages].deleteMany({ where: { plantId: args.input.id } });
+            for (const image of (args.input?.images || [])) {
+                const rowData = { plantId: args.input.id, hash: image.hash };
                 await context.prisma[TABLES.PlantImages].upsert({
                     where: { plant_images_plantid_hash_unique: rowData},
                     update: rowData,
@@ -180,7 +180,7 @@ export const resolvers = {
                 })
             }
             // Update traits
-            await context.prisma[TABLES.PlantTrait].deleteMany({ where: { id: args.input.id } });
+            await context.prisma[TABLES.PlantTrait].deleteMany({ where: { plantId: args.input.id } });
             for (const { name, value } of (args.input.traits || [])) {
                 const updateData = { plantId: args.input.id, name, value };
                 await context.prisma[TABLES.PlantTrait].upsert({
@@ -189,9 +189,26 @@ export const resolvers = {
                     create: updateData
                 })
             }
+            // Update SKUs
+            if (args.input.skus) {
+                const currSkus = await context.prisma[TABLES.Sku].findMany({ where: { plantId: args.input.id }});
+                console.log('CURR SKUSSSS', currSkus);
+                const deletedSkus = currSkus.map(s => s.sku).filter(s => !args.input.skus.some(sku => sku.sku === s));
+                console.log('DELETED SKUS', deletedSkus);
+                await context.prisma[TABLES.Sku].deleteMany({ where: { sku: { in: deletedSkus } } });
+                for (const sku of args.input.skus) {
+                    console.log('UPSERTING SKU', sku);
+                    await context.prisma[TABLES.Sku].upsert({
+                        where: { sku: sku.sku},
+                        update: sku,
+                        create: { plantId: args.input.id, ...sku }
+                    })
+                }
+            }
+            // Update latin name
             return await context.prisma[_model].update({
-                where: { id: args.input.id || undefined },
-                data: { ...args.input },
+                where: { id: args.input.id },
+                data: { latinName: args.input.latinName },
                 ...(new PrismaSelect(info).value)
             })
         },

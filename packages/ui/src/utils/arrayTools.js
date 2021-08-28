@@ -5,6 +5,7 @@ export const addToArray = (array, value) => {
 }
 
 export const updateArray = (array, index, value) => {
+    console.log('IN UPDATE ARRAY', array, index, value)
     if (JSON.stringify(array[index]) === JSON.stringify(value)) return array;
     let copy = [...array];
     copy[index] = value;
