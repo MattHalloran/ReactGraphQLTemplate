@@ -115,7 +115,7 @@ export const resolvers = {
         },
         profile: async (_, _a, context, info) => {
             // Can only query your own profile
-            const customerId = context.req.token.customerId;
+            const customerId = context.req.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].findUnique({ where: { id: customerId }, ...(new PrismaSelect(info).value) });
         }
@@ -167,7 +167,7 @@ export const resolvers = {
             // Now we can validate the password
             const validPassword = bcrypt.compareSync(args.password, customer.password);
             if (validPassword) {
-                await generateToken(context.res, customer.id);
+                await generateToken(context.res, customer.id, customer.businessId);
                 await context.prisma[_model].update({
                     where: { id: customer.id },
                     data: { loginAttempts: 0, lastLoginAttempt: new Date().toISOString(), resetPasswordCode: null },
@@ -228,7 +228,7 @@ export const resolvers = {
                 customerId: customer.id,
                 businessId: business.id
             } })
-            await generateToken(context.res, customer.id);
+            await generateToken(context.res, customer.id, customer.businessId);
             // Send verification email
             sendVerificationLink(args.email, customer.id);
             // Send email to business owner
@@ -237,7 +237,7 @@ export const resolvers = {
         },
         updateCustomer: async (_, args, context, info) => {
             // Must be admin, or updating your own
-            if(!context.req.isAdmin && (context.req.token.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             // Check for correct password
             let customer = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
             if(!bcrypt.compareSync(args.currentPassword, customer.password)) return new CustomError(CODE.BadCredentials);

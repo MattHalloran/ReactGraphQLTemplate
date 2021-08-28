@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub } from 'utils';
+import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton, Typography } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -24,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
     },
     tableHead: {
         background: theme.palette.primary.main,
+    },
+    displayImage: {
+        maxHeight: '8vh',
     },
     tableCol: {
         verticalAlign: 'middle',
@@ -108,12 +111,15 @@ function CartTable({
             price = displayPrice(price);
             total = displayPrice(quantity * price);
         }
+
+        console.log('CART TABLE DISPLAY DATA LOGIC', data)
         let display;
-        const display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+        let display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
+        if (!display_data && data.sku.plant.images.length > 0) display_data = data.sku.plant.images[0].image;
         if (display_data) {
-            display = <img src={`${SERVER_URL}/${display_data.src}/?size=M`} className="cart-image" alt={display_data.alt} />
+            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.plant.latin_name} />
         } else {
-            display = <NoImageIcon className="cart-image" />
+            display = <NoImageIcon className={classes.displayImage} />
         }
 
         return (
@@ -123,7 +129,7 @@ function CartTable({
                         <CloseIcon />
                     </IconButton>
                 </TableCell>
-                <TableCell className={classes.tableCol} component="th" scope="row">
+                <TableCell className={classes.tableCol} padding="none" component="th" scope="row" align="center">
                     {display}
                     <Typography variant="body2">{data.sku?.plant?.latin_name}</Typography>
                 </TableCell>
@@ -138,7 +144,7 @@ function CartTable({
                 <TableCell className={classes.tableCol} align="right">{total}</TableCell>
             </TableRow>
         );
-    }, [classes.tableCol, deleteCartItem, updateItemQuantity])
+    }, [classes.displayImage, classes.tableCol, deleteCartItem, updateItemQuantity])
 
     const headCells = [
         { id: 'close', align: 'left', disablePadding: true, label: '' },

@@ -44,12 +44,13 @@ export async function authenticate(req, _, next) {
 }
 
 // Generates a JSON Web Token (JWT)
-export async function generateToken(res, customerId) {
+export async function generateToken(res, customerId, businessId) {
     const customerRoles = await findCustomerRoles(customerId);
     const tokenContents = {
         iat: Date.now(),
         iss: `https://${process.env.SITE_NAME}/`,
         customerId: customerId,
+        businessId: businessId,
         roles: customerRoles,
         isCustomer: customerRoles.includes('customer' || 'admin'),
         isAdmin: customerRoles.includes('admin'),
@@ -61,12 +62,6 @@ export async function generateToken(res, customerId) {
         secure: process.env.NODE_ENV === 'production',
         maxAge: SESSION_MILLI
     });
-}
-
-// Middleware that requires a valid token
-export async function requireToken(req, _, next) {
-    if (req.token === null || req.token === undefined) return new CustomError(CODE.Unauthorized);
-    next();
 }
 
 // Middleware that restricts access to customers (or admins)

@@ -129,6 +129,8 @@ model image {
   alt          String?        @db.VarChar(256)
   description  String?        @db.VarChar(1024)
   usedFor      String?
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
   files        image_file[]
   labels       image_labels[]
   plant_images plant_images[]

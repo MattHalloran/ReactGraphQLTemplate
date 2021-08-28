@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
 function ShoppingPage({
     session,
+    onSessionUpdate,
     business,
     cart,
 }) {
@@ -184,6 +185,7 @@ function ShoppingPage({
             </div>
             <ShoppingList
                 session={session}
+                onSessionUpdate={onSessionUpdate}
                 cart={cart}
                 sort={sortBy}
                 filters={filters}
@@ -196,6 +198,7 @@ function ShoppingPage({
 
 ShoppingPage.propTypes = {
     session: PropTypes.object,
+    onSessionUpdate: PropTypes.func.isRequired,
     cart: PropTypes.object,
 }
 

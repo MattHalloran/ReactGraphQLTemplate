@@ -1,6 +1,10 @@
 import { gql } from 'graphql-tag';
+import { orderFields } from './orderFields';
+import { orderItemFields } from './orderItemFields';
 
 export const customerSessionFields = gql`
+    ${orderFields}
+    ${orderItemFields}
     fragment customerSessionFields on Customer {
         id
         emailVerified
@@ -14,13 +18,9 @@ export const customerSessionFields = gql`
             }
         }
         orders {
-            id
+            ...orderFields
             items {
-                id
-                quantity
-                sku {
-                    sku
-                }
+                ...orderItemFields
             }
         }
     }

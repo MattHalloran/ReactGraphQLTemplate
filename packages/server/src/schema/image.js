@@ -74,19 +74,16 @@ export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
         imagesByLabel: async (_, args, context, info) => {
-            // Locate images in database
-            let image_data = await context.prisma[_model].findMany((new PrismaSelect(info).value), { 
-                where: { 
-                    labels: { 
-                        contains: { label: args.label }
-                    } 
-                } 
+            return await context.prisma[_model].findMany({ 
+                where: { labels: { some: { label: args.label } } },
+                orderBy: { created_at: 'desc' },
+                ...(new PrismaSelect(info).value)
             });
-            return image_data;
         }
     },
     Mutation: {
         addImages: async (_, args, context) => {
+            console.log('ADD IMAGES', args.labels)
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
@@ -99,7 +96,7 @@ export const resolvers = {
                     file: args.files[i],
                     alt: args.alts ? args.alts[i] : undefined,
                     description: args.descriptions ? args.descriptions[i] : undefined,
-                    labels: args.labels ? args.labels[i] : undefined,
+                    labels: args.labels,
                     errorOnDuplicate: false
                 }))
             }

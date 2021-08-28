@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
@@ -6,7 +7,6 @@ import { LINKS } from 'utils';
 import { Slider } from './Slider.js'
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import React, { useEffect, useState } from 'react';
 
 const useStyles = makeStyles(() => ({
     hero: {
@@ -59,15 +59,15 @@ function Hero({
 }) {
     let history = useHistory();
     const classes = useStyles();
-    const [imagePaths, setImagePaths] = useState(null);
+    const [images, setImages] = useState([]);
     const { data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'L' } });
     useEffect(() => {
-        setImagePaths(data?.imagesByLabel.map(d => d.src));
+        setImages(data?.imagesByLabel);
     }, [data])
 
     return (
         <div className={classes.hero}>
-            <Slider images={imagePaths} autoPlay={true} />
+            <Slider images={images} autoPlay={true} />
             <div className={classes.contentWrapper}>
                 <Typography variant='h2' component='h1' className={classes.title + ' ' + classes.textPop}>{text}</Typography>
                 <Typography variant='h4' component='h2' className={classes.subtitle + ' ' + classes.textPop}>{subtext}</Typography>

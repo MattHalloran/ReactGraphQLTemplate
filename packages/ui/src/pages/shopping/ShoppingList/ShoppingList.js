@@ -90,7 +90,7 @@ function ShoppingList({
             return;
         }
         PubSub.publish(PUBS.Loading, true);
-        addOrderItem({ variables: { input: { orderId: cart?.id, skuId: sku.id, quantity} } }).then((response) => {
+        addOrderItem({ variables: { quantity, orderId: cart?.id, skuId: sku.id } }).then((response) => {
             const data = response.data.addOrderItem;
             PubSub.publish(PUBS.Loading, false);
             if (data !== null) {
@@ -110,6 +110,7 @@ function ShoppingList({
     return (
         <div className={classes.root} id={track_scrolling_id}>
             {(curr_index >= 0) ? <PlantDialog
+                onSessionUpdate
                 plant={curr_index >= 0 ? plants[curr_index] : null}
                 onAddToCart={addToCart}
                 open={curr_index >= 0}

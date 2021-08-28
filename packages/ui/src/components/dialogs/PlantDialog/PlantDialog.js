@@ -24,7 +24,7 @@ import {
     ColorWheelIcon, 
     EvaporationIcon,
     MapIcon,
-    NoImageIcon, 
+    NoImageWithTextIcon, 
     NoWaterIcon, 
     PHIcon,
     RangeIcon,       
@@ -90,6 +90,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function PlantDialog({
     plant,
+    onSessionUpdate,
     onAddToCart,
     open = true,
     onClose,
@@ -128,7 +129,7 @@ function PlantDialog({
     if (display_data) {
         display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
-        display = <NoImageIcon className={classes.displayImage} />
+        display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
     const traitIconList = (traitName, Icon, title, alt) => {
@@ -172,6 +173,7 @@ function PlantDialog({
                 <Button
                     disabled={selected===null}
                     fullWidth
+                    style={{}}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
                     onClick={() => onAddToCart(plant.latinName ?? getPlantTrait('commonName', plant) ?? 'plant', selected_sku, quantity)}
@@ -238,6 +240,7 @@ function PlantDialog({
 
 PlantDialog.propTypes = {
     plant: PropTypes.object,
+    onSessionUpdate: PropTypes.func.isRequired,
     onAddToCart: PropTypes.func.isRequired,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,

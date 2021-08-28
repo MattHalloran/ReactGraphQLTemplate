@@ -110,6 +110,7 @@ export async function up (knex) {
         table.string('alt', 256);
         table.string('description', 1024);
         table.enu('usedFor', Object.values(IMAGE_USE));
+        table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.ImageFile, (table) => {
         table.comment('Image file names');

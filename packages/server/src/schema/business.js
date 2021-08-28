@@ -53,7 +53,7 @@ export const resolvers = {
         },
         updateBusiness: async(_, args, context, info) => {
             // Must be admin, or updating your own
-            if(!context.req.isAdmin || (context.req.token.businessId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            if(!context.req.isAdmin || (context.req.businessId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },
@@ -62,7 +62,7 @@ export const resolvers = {
         },
         deleteBusinesses: async(_, args, context) => {
             // Must be admin, or deleting your own
-            if(!context.req.isAdmin || args.ids.length > 1 || context.req.token.businessId !== args.ids[0]) return new CustomError(CODE.Unauthorized); 
+            if(!context.req.isAdmin || args.ids.length > 1 || context.req.businessId !== args.ids[0]) return new CustomError(CODE.Unauthorized); 
             return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         },
     }

@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
-import { NoImageIcon } from 'assets/img';
+import { NoImageWithTextIcon } from 'assets/img';
 import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
@@ -75,7 +75,7 @@ function PlantCard({
     if (display_data) {
         display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
     } else {
-        display = <NoImageIcon className={classes.displayImage} />
+        display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
     let subtitle;
