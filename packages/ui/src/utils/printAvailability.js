@@ -14,38 +14,26 @@ const centeredText = (text, doc, y) => {
     doc.text(textOffset, y, text);
 }
 
-const data_to_table = (data, showPrice) => {
-    let result = [];
-    for (let i = 0; i < data.length; i++) {
-        let plant = data[i].plant;
-        let plant_name = plant.latin_name ?? getPlantTrait('commonName', plant);
-        if (!plant.skus || plant.skus.length === 0) continue;
-        for (let j = 0; j < plant.skus.length; j++) {
-            let sku = plant.skus[j];
-            let display_name = plant_name ?? sku.sku;
-            let size = isNaN(sku.size) ? sku.size : `#${sku.size}`;
-            let availability = sku.availability ?? 'N/A';
-            if (showPrice) {
-                let price = displayPrice(sku.price);
-                result.push([display_name, size, availability, price]);
-            } else {
-                result.push([display_name, size, availability]);
-            }
-        }
-    }
-    return result;
+const skusToTable = (skus, showPrice) => {
+    return skus.map(sku => {
+        const displayName = sku.plant?.latinName ?? getPlantTrait('commonName', sku.plant) ?? sku.sku;
+        const size = isNaN(sku.size) ? sku.size : `#${sku.size}`;
+        const availability = sku.availability ?? 'N/A';
+        const price = displayPrice(sku.price);
+        if (showPrice) return [displayName, size, availability, price]
+        return [displayName, size, availability];
+    });
 }
 
 export const printAvailability = (session, title) => {
     let windowReference = window.open();
-    console.log(windowReference);
     const client = initializeApollo();
     client.query({
         query: skusQuery
     }).then(response => {
-        const data = response.skus;
+        const data = response.data.skus;
         const showPrice = session !== null;
-        const table_data = data_to_table(data, showPrice);
+        const table_data = skusToTable(data, showPrice);
         // Default export is a4 paper, portrait, using millimeters for units
         const doc = new jsPDF();
         doc.setFontSize(TITLE_FONT_SIZE);
@@ -62,6 +50,7 @@ export const printAvailability = (session, title) => {
         let blob = doc.output('blob', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
         windowReference.location = URL.createObjectURL(blob);
     }).catch(error => {
+        console.log('RAN INTO ERROR', error)
         PubSub.publish(PUBS.Snack, {message: 'Failed to load inventory.', severity: 'error', data: error });
     });
 }
