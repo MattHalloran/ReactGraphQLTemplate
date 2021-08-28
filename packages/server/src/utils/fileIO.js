@@ -222,35 +222,21 @@ export async function deleteFile(file) {
     }
 }
 
-// Deletes an image and all resizes
-// Arguments:
-// file - the image file name (including folder)
-export async function deleteImage(file) {
+// Deletes an image and all resizes, using its hash
+export async function deleteImage(hash) {
     // Find all files associated with image
     const imageData = await prisma[TABLES.Image].findUnique({ 
-        where: { 
-            files: { 
-                some: { src: file }
-            }
-        },
-        select: {
-            hash: true,
-            files: {
-                select: {
-                    src: true
-                }
-            }
-        }
+        where: { hash },
+        select: { files: { select: { src: true } } }
     });
-    console.log('IN DELETE IMAGE> GOT IMAGE DATAAAA');
-    console.log(imageData);
     if (!imageData) return false;
     // Delete database information for image
-    await prisma[TABLES.Image].delete({ where: { hash: imageData.hash }});
+    await prisma[TABLES.Image].delete({ where: { hash }});
     // Delete image files
+    let success = true;
     if (Array.isArray(imageData.files)) {
         for (const file of imageData.files) {
-            if (!await deleteFile(file)) success = false;
+            if (!await deleteFile(file.src)) success = false;
         }
     }
     return success;

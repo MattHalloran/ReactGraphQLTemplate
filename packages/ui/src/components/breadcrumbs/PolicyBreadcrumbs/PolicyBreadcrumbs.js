@@ -4,12 +4,14 @@ import {
     Link 
 } from '@material-ui/core';
 import { LINKS } from 'utils';
+import { useHistory } from 'react-router-dom';
 
 function PolicyBreadcrumbs({...props}) {
+    const history = useHistory();
     return (
         <Breadcrumbs separator="|" aria-label="Policies breadcrumb" {...props}>
-            <Link href={LINKS.PrivacyPolicy}>Privacy</Link>
-            <Link href={LINKS.Terms}>{'Terms & Conditions'}</Link>
+            <Link onClick={() => history.push(LINKS.PrivacyPolicy)}>Privacy</Link>
+            <Link onClick={() => history.push(LINKS.Terms)}>{'Terms & Conditions'}</Link>
         </Breadcrumbs>
     );
 }

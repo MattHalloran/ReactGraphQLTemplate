@@ -4,12 +4,14 @@ import {
     Link 
 } from '@material-ui/core';
 import { LINKS } from 'utils';
+import { useHistory } from 'react-router-dom';
 
 function InformationalBreadcrumbs({...props}) {
+    const history = useHistory();
     return (
         <Breadcrumbs separator="|" aria-label="About us breadcrumb" {...props}>
-            <Link href={LINKS.About}>About Us</Link>
-            <Link href={LINKS.Gallery}>Gallery</Link>
+            <Link onClick={() => history.push(LINKS.About)}>About Us</Link>
+            <Link onClick={() => history.push(LINKS.Gallery)}>Gallery</Link>
         </Breadcrumbs>
     );
 }

@@ -108,7 +108,7 @@ export const resolvers = {
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
                 await context.prisma[_model].update({
-                    where: { hash },
+                    where: { hash: args.data[i].hash },
                     data: { 
                         alt: args.data[i].alt,
                         description: args.data[i].description,
