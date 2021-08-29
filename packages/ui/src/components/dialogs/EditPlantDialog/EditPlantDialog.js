@@ -14,7 +14,8 @@ import {
     Slide,
     TextField,
     Toolbar,
-    Tooltip
+    Tooltip,
+    Typography
 } from '@material-ui/core';
 import {
     AddBox as AddBoxIcon,
@@ -24,7 +25,7 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { addImagesMutation, deletePlantsMutation, updateImagesMutation, updatePlantMutation } from 'graphql/mutation';
+import { addImagesMutation, deletePlantsMutation, updatePlantMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { Dropzone, ImageList } from 'components';
 import {
@@ -62,16 +63,23 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     container: {
-        padding: theme.spacing(1),
+        background: theme.palette.background.default,
     },
     sideNav: {
         width: '25%',
         height: '100%',
         float: 'left',
-        borderRight: `2px solid ${theme.palette.primary.contrastText}`,
+        borderRight: `2px solid ${theme.palette.text.primary}`,
+    },
+    title: {
+        paddingBottom: '1vh',
+    },
+    gridContainer: {
+        paddingBottom: '3vh',
     },
     optionsContainer: {
         padding: theme.spacing(2),
+        background: theme.palette.primary.main,
     },
     displayImage: {
         border: '1px solid black',
@@ -83,14 +91,19 @@ const useStyles = makeStyles((theme) => ({
         width: '75%',
         height: '100%',
         float: 'right',
+        padding: theme.spacing(1)
     },
     imageRow: {
         minHeight: '100px',
     },
     selected: {
-        background: theme.palette.primary.light,
+        background: theme.palette.primary.dark,
         color: theme.palette.primary.contrastText,
     },
+    skuHeader: {
+        background: theme.palette.primary.light,
+        color: theme.palette.primary.contrastText,
+    }
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -140,8 +153,7 @@ function EditPlantDialog({
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(-1);
     const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
 
-    useEffect(() => {
-        setChangedPlant({ ...plant });
+    const findImageData = useCallback(() => {
         setImagesChanged(false);
         if (Array.isArray(plant?.images)) {
             setImageData(plant.images.map((d, index) => ({
@@ -151,10 +163,16 @@ function EditPlantDialog({
         } else {
             setImageData(null);
         }
-    }, [plant, setImagesChanged])
+    }, [plant])
+
+    useEffect(() => {
+        setChangedPlant({ ...plant });
+        findImageData();
+    }, [findImageData, plant, setImagesChanged])
 
     function revertPlant() {
         setChangedPlant(plant);
+        findImageData();
     }
 
     const confirmDelete = useCallback(() => {
@@ -272,10 +290,11 @@ function EditPlantDialog({
             <div className={classes.container}>
                 <div className={classes.sideNav}>
                     <List
+                        style={{paddingTop: '0'}}
                         aria-label="sku select"
                         aria-labelledby="sku-select-subheader">
-                        <ListSubheader component="div" id="sku-select-subheader">
-                            SKUs
+                        <ListSubheader className={classes.skuHeader} component="div" id="sku-select-subheader">
+                            <Typography className={classes.title} variant="h5" component="h3">SKUs</Typography>
                         </ListSubheader>
                         {changedPlant?.skus?.map((s, index) => (
                             <ListItem
@@ -302,8 +321,8 @@ function EditPlantDialog({
                     </div>
                 </div>
                 <div className={classes.content}>
-                    <h3>Edit plant info</h3>
-                    <Grid container spacing={2}>
+                    <Typography className={classes.title} variant="h5" component="h3">Edit plant info</Typography>
+                    <Grid className={classes.gridContainer} container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -349,8 +368,9 @@ function EditPlantDialog({
                                 onChange={e => updateTrait(selectedTrait, e.target.value, true)}
                             />
                         </Grid>
-                        {/* ...or enter a custom value */}
-                        <h3>Edit images</h3>
+                    </Grid>
+                    <Typography className={classes.title} variant="h5" component="h3">Edit images</Typography>
+                    <Grid className={classes.gridContainer} container spacing={2}>
                         {/* Upload new images */}
                         <Grid item xs={12}>
                             <Dropzone
@@ -365,8 +385,8 @@ function EditPlantDialog({
                             <ImageList data={imageData} onUpdate={(d) => {setImageData(d); setImagesChanged(true)}} />
                         </Grid>
                     </Grid>
-                    <h3>Edit SKU info</h3>
-                    <Grid container spacing={2}>
+                    <Typography className={classes.title} variant="h5" component="h3">Edit SKU info</Typography>
+                    <Grid className={classes.gridContainer} container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth

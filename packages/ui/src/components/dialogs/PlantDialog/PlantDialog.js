@@ -1,48 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
-import { 
+import {
     AppBar,
     Avatar,
-    Button, 
-    Dialog, 
-    Divider,  
+    Button,
+    Collapse,
+    Dialog,
+    Divider,
     Grid,
-    IconButton,  
-    List, 
-    ListItem, 
-    ListItemAvatar, 
+    IconButton,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemIcon,
     ListItemText,
-    Slide, 
-    Toolbar, 
-    Typography 
+    Slide,
+    Toolbar,
+    Typography
 } from '@material-ui/core';
 import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
-import { 
+import {
     BeeIcon,
     CalendarIcon,
-    ColorWheelIcon, 
+    ColorWheelIcon,
     EvaporationIcon,
     MapIcon,
-    NoImageWithTextIcon, 
-    NoWaterIcon, 
+    NoImageWithTextIcon,
+    NoWaterIcon,
     PHIcon,
-    RangeIcon,       
-    SaltIcon, 
+    RangeIcon,
+    SaltIcon,
     SoilTypeIcon,
-    SunIcon 
+    SunIcon
 } from 'assets/img';
 import {
-    Collapsible,
     QuantityBox,
     Selector
 } from 'components';
 import {
     AddShoppingCart as AddShoppingCartIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    ExpandLess as ExpandLessIcon,
+    ExpandMore as ExpandMoreIcon,
+    Info as InfoIcon,
 } from '@material-ui/icons';
-import { IMAGE_USE, SERVER_URL } from '@local/shared';
+import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import _ from 'underscore';
+import Carousel from 'react-gallery-carousel';
+import 'react-gallery-carousel/dist/index.css';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -59,22 +65,11 @@ const useStyles = makeStyles((theme) => ({
     },
     container: {
         padding: theme.spacing(1),
-    },
-    left: {
-        width: '50%',
-        height: '80%',
-        float: 'left',
-    },
-    right: {
-        width: '50%',
-        float: 'right',
+        background: theme.palette.background.default,
+        minHeight: '-webkit-fill-available',
     },
     displayImage: {
-        display: 'block',
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        bottom: '0%',
+        maxHeight: '50vh',
     },
     avatar: {
         background: 'transparent',
@@ -103,7 +98,8 @@ function PlantDialog({
     }
     const classes = useStyles();
     const [quantity, setQuantity] = useState(1);
-    const [order_options, setOrderOptions] = useState([]);
+    const [orderOptions, setOrderOptions] = useState([]);
+    const [detailsOpen, setDetailsOpen] = useState(false);
     // Stores the id of the selected sku
     const [selected, setSelected] = useState(null);
     let selected_sku = plant.skus.find(s => s.id === selected);
@@ -116,21 +112,18 @@ function PlantDialog({
             }
         })
         // If options is unchanged, do not set
-        let curr_values = order_options.map(o => o.value);
+        let curr_values = orderOptions.map(o => o.value);
         let new_values = options.map(o => o.value);
         if (_.isEqual(curr_values, new_values)) return;
         setOrderOptions(options);
-        setSelected(order_options.length > 0 ? order_options[0].value : null);
-    }, [plant, order_options])
+        setSelected(options.length > 0 ? options[0].value : null);
+    }, [plant, orderOptions])
 
-    let display;
-    let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
-    if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
-    if (display_data) {
-        display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latinName} />
-    } else {
-        display = <NoImageWithTextIcon className={classes.displayImage} />
-    }
+    const images = Array.isArray(plant.images) ? plant.images.map(d => ({
+        alt: d.image.alt, 
+        src: `${SERVER_URL}/${getImageSrc(d.image)}`, 
+        thumbnail: `${SERVER_URL}/${getImageSrc(d.image, IMAGE_SIZE.M)}`
+    })) : [];
 
     const traitIconList = (traitName, Icon, title, alt) => {
         if (!alt) alt = title;
@@ -150,12 +143,16 @@ function PlantDialog({
         )
     }
 
+    const handleDetailsClick = () => {
+        setDetailsOpen(!detailsOpen);
+    };
+
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={6} sm={4}>
                 <Selector
                     fullWidth
-                    options={order_options}
+                    options={orderOptions}
                     selected={selected}
                     handleChange={(e) => setSelected(e.target.value)}
                     inputAriaLabel='size-selector-label'
@@ -171,7 +168,7 @@ function PlantDialog({
             </Grid>
             <Grid item xs={12} sm={4}>
                 <Button
-                    disabled={selected===null}
+                    disabled={selected === null}
                     fullWidth
                     style={{}}
                     color="secondary"
@@ -205,33 +202,46 @@ function PlantDialog({
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>
-                <div className={classes.left}>
-                    {display}
-                </div>
-                <div className={classes.right}>
-                    {plant.description ?
-                        <Collapsible style={{ height: '20%' }} title="Description">
-                            <p>{plant.description}</p>
-                        </Collapsible>
-                        : null}
-                    <List>
-                        {traitIconList("zones", MapIcon, "Zones")}
-                        {traitIconList("physiographicRegions", MapIcon, "Physiographic Region")}
-                        {traitIconList("attractsPollinatorsAndWildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                        {traitIconList("droughtTolerance", NoWaterIcon, "Drought Tolerance")}
-                        {traitIconList("saltTolerance", SaltIcon, "Salt Tolerance")}
-                        <Divider />
-                        {traitIconList("bloomColors", ColorWheelIcon, "Bloom Colors")}
-                        {traitIconList("bloomTimes", CalendarIcon, "Bloom Times")}
-                        <Divider />
-                        {traitIconList("lightRanges", RangeIcon, "Light Range")}
-                        {traitIconList("optimalLight", SunIcon, "Optimal Light")}
-                        <Divider />
-                        {traitIconList("soilMoistures", EvaporationIcon, "Soil Moisture")}
-                        {traitIconList("soilPhs", PHIcon, "Soil PH")}
-                        {traitIconList("soilTypes", SoilTypeIcon, "Soil Type")}
-                    </List>
-                </div>
+                <Grid container spacing={0}>
+                    <Grid item lg={6} xs={12}>
+                        {
+                            images.length > 0 ? 
+                            <Carousel className={classes.displayImage} canAutoPlay={false} images={images} /> : 
+                            <NoImageWithTextIcon className={classes.displayImage} />
+                        }
+                    </Grid>
+                    <Grid item lg={6} xs={12}>
+                        {plant.description ?
+                            <Collapse style={{ height: '20%' }} title="Description">
+                                <p>{plant.description}</p>
+                            </Collapse>
+                            : null}
+                        <ListItem className={classes.menuItem} button onClick={handleDetailsClick}>
+                            <ListItemIcon><InfoIcon /></ListItemIcon>
+                            <ListItemText primary="Details" />
+                            {detailsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </ListItem>
+                        <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
+                            <List>
+                                {traitIconList("zones", MapIcon, "Zones")}
+                                {traitIconList("physiographicRegions", MapIcon, "Physiographic Region")}
+                                {traitIconList("attractsPollinatorsAndWildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
+                                {traitIconList("droughtTolerance", NoWaterIcon, "Drought Tolerance")}
+                                {traitIconList("saltTolerance", SaltIcon, "Salt Tolerance")}
+                                <Divider />
+                                {traitIconList("bloomColors", ColorWheelIcon, "Bloom Colors")}
+                                {traitIconList("bloomTimes", CalendarIcon, "Bloom Times")}
+                                <Divider />
+                                {traitIconList("lightRanges", RangeIcon, "Light Range")}
+                                {traitIconList("optimalLight", SunIcon, "Optimal Light")}
+                                <Divider />
+                                {traitIconList("soilMoistures", EvaporationIcon, "Soil Moisture")}
+                                {traitIconList("soilPhs", PHIcon, "Soil PH")}
+                                {traitIconList("soilTypes", SoilTypeIcon, "Soil Type")}
+                            </List>
+                        </Collapse>
+                    </Grid>
+                </Grid>
                 {options}
             </div>
         </Dialog>
