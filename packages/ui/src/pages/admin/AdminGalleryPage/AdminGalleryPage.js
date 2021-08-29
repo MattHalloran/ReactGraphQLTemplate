@@ -67,7 +67,7 @@ function AdminGalleryPage() {
         const finals = changed.map(d => d.hash);
         const deleting = originals.filter(s => !finals.includes(s));
         // Perform update
-        updateImages({ variables: { data, deleting } })
+        updateImages({ variables: { data, deleting, label: 'gallery' } })
         .then((response) => {
             console.log('GOT UPDATE IMAGE RESPONSE', response);
             PubSub.publish(PUBS.Snack, { message: `Successfully updated images` });

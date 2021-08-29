@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types'
-import { 
+import {
     Button,
-    Card, 
+    Card,
     CardActionArea,
     CardActions,
     CardContent,
-    CardMedia, 
+    CardMedia,
     Chip,
     Typography
 } from '@material-ui/core';
@@ -63,9 +63,9 @@ function PlantCard({
     }
 
     let sizes = plant.skus?.map(s => (
-        <Chip 
-            className={`${classes.skuChip} ${SkuStatus[s.status+''] ?? classes.deleted}`} 
-            label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`} 
+        <Chip
+            className={`${classes.skuChip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
+            label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`}
             color="secondary" />
     ));
 
@@ -78,25 +78,14 @@ function PlantCard({
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
-    let subtitle;
-    const commonName = getPlantTrait('commonName', plant);
-    if (commonName) {
-        subtitle = (
-            <Typography gutterBottom variant="body1" component="h3">
-                {commonName}
-            </Typography>
-        )
-    }
-
     return (
         <Card className={classes.root} onClick={() => onClick(plant)}>
             <CardActionArea>
                 {display}
                 <CardContent className={classes.content}>
-                    <Typography gutterBottom variant="h6" component="h2">
-                        {plant.latinName}
+                    <Typography gutterBottom variant="h6" component="h3">
+                        {getPlantTrait('commonName', plant) ?? plant.latinName}
                     </Typography>
-                    {subtitle}
                     <div className="size-container">
                         {sizes}
                     </div>

@@ -170,6 +170,7 @@ export async function up (knex) {
         table.increments();
         table.string('hash', 128).references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('label').notNullable();
+        table.integer('index').notNullable();
         table.unique(['hash', 'label']);
     });
     await knex.schema.createTable(TABLES.BusinessDiscounts, (table) => {
@@ -184,6 +185,8 @@ export async function up (knex) {
         table.increments();
         table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('hash', 128).references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.integer('index').notNullable();
+        table.boolean('isDisplay').notNullable().defaultTo(false);
         table.unique(['plantId', 'hash']);
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {

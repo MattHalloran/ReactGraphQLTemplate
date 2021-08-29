@@ -148,6 +148,7 @@ model image_labels {
   id    Int    @id @default(autoincrement())
   hash  String @db.VarChar(128)
   label String @db.VarChar(255)
+  index Int
   image image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
 
   @@unique([hash, label], name: "image_labels_hash_label_unique")
@@ -199,11 +200,13 @@ model plant {
 }
 
 model plant_images {
-  id      Int    @id @default(autoincrement())
-  plantId String @db.Uuid
-  hash    String @db.VarChar(128)
-  image   image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
-  plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  plantId   String  @db.Uuid
+  hash      String  @db.VarChar(128)
+  index     Int
+  isDisplay Boolean @default(false)
+  image     image   @relation(fields: [hash], references: [hash], onDelete: Cascade)
+  plant     plant   @relation(fields: [plantId], references: [id], onDelete: Cascade)
 
   @@unique([plantId, hash], name: "plant_images_plantid_hash_unique")
 }

@@ -166,10 +166,11 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         }})
         if (Array.isArray(labels)) {
             await prisma[TABLES.ImageLabels].deleteMany({ where: { hash } });
-            for (const label of labels) {
+            for (let i = 0; i < labels.length; i++) {
                 await prisma[TABLES.ImageLabels].create({ data: {
                     hash,
-                    label
+                    label: labels[i],
+                    index: i
                 }})
             }
         }
@@ -201,7 +202,7 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         console.error(error);
         return {
             success: false,
-            src: filename,
+            src: null,
             hash: null,
         }
     }

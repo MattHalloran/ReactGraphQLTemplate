@@ -13,15 +13,22 @@ export const typeDef = gql`
         value: String!
     }
 
+    input PlantImageInput {
+        hash: String!
+        isDisplay: Boolean
+    }
+
     input PlantInput {
         id: ID
         latinName: String!
         traits: [PlantTraitInput]!
-        images: [ImageUpdate!]
+        images: [PlantImageInput!]
         skus: [SkuInput!]
     }
 
     type PlantImage {
+        index: Int!
+        isDisplay: Boolean!
         image: Image!
     }
 
@@ -157,13 +164,20 @@ export const resolvers = {
                 await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
             }
             // Create images
-            for (const image of (args.input?.images || [])) {
-                await prisma[TABLES.PlantImages].create({ data: { 
-                    plantId: plant.id,
-                    hash: image.hash
-                 } });
+            if (Array.isArray(args.input.images)) {
+                for (let i = 0; i < args.input.length; i++) {
+                    await prisma[TABLES.PlantImages].create({ data: {
+                        plantId: plant.id,
+                        hash: args.input.images[i].hash,
+                        isDisplay: args.input.images[i].isDisplay ?? false,
+                        index: i
+                    }})
+                }
             }
-            // TODO Return select
+            return await prisma[_model].findUnique({ 
+                where: { id: plant.id },
+                ...(new PrismaSelect(info).value)
+            });
         },
         // NOTE: Images must be uploaded separately
         updatePlant: async (_, args, context, info) => {
@@ -171,12 +185,30 @@ export const resolvers = {
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
             await context.prisma[TABLES.PlantImages].deleteMany({ where: { plantId: args.input.id } });
-            for (const image of (args.input?.images || [])) {
-                const rowData = { plantId: args.input.id, hash: image.hash };
-                await context.prisma[TABLES.PlantImages].upsert({
-                    where: { plant_images_plantid_hash_unique: rowData},
-                    update: rowData,
-                    create: rowData
+            if (Array.isArray(args.input.images)) {
+                let rowIds = [];
+                // Upsert passed in images
+                for (let i = 0; i < args.input.images.length; i++) {
+                    const curr = args.input.images[i];
+                    const rowData = { plantId: args.input.id, hash: curr.hash, index: i, isDisplay: curr.isDisplay ?? false };
+                    const rowId = { plantId: args.input.id, hash: curr.hash };
+                    rowIds.push(rowId);
+                    await context.prisma[TABLES.PlantImages].upsert({
+                        where: { plant_images_plantid_hash_unique: rowId },
+                        update: rowData,
+                        create: rowData
+                    })
+                }
+                // Delete images not passed in
+                await context.prisma[TABLES.PlantImages].deleteMany({ 
+                    where: {
+                        NOT: {
+                            AND: [
+                                { plantId: { in: rowIds.map(r => r.plantId ) } },
+                                { hash: { in: rowIds.map(r => r.hash) } }
+                            ]
+                        }
+                    }
                 })
             }
             // Update traits

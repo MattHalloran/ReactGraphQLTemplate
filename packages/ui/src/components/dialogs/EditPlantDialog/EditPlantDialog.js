@@ -110,8 +110,8 @@ function EditPlantDialog({
     const [deletePlant] = useMutation(deletePlantsMutation);
 
     const [imageData, setImageData] = useState([]);
+    const [imagesChanged, setImagesChanged] = useState(false);
     const [addImages] = useMutation(addImagesMutation);
-    const [updateImages] = useMutation(updateImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
         PubSub.publish(PUBS.Loading, true);
@@ -129,6 +129,7 @@ function EditPlantDialog({
                         files: [{ src: d.src }]
                     }
                 })])
+                setImagesChanged(true);
             })
             .catch((response) => {
                 PubSub.publish(PUBS.Loading, false);
@@ -136,35 +137,12 @@ function EditPlantDialog({
             })
     }
 
-    const applyChanges = useCallback((changed) => {
-        PubSub.publish(PUBS.Loading, true);
-        // Prepare data for request
-        const data = changed.map(d => ({
-            src: d.hash,
-            alt: d.alt,
-            description: d.description
-        }));
-        // Determine which files to mark as deleting
-        const originals = imageData.map(d => d.hash);
-        const finals = changed.map(d => d.hash);
-        const deleting = originals.filter(s => !finals.includes(s));
-        // Perform update
-        updateImages({ variables: { data, deleting } })
-            .then((response) => {
-                PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
-                PubSub.publish(PUBS.Loading, false);
-            })
-            .catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-            })
-    }, [imageData, updateImages])
-
     const [selectedSkuIndex, setSelectedSkuIndex] = useState(-1);
     const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
 
     useEffect(() => {
         setChangedPlant({ ...plant });
+        setImagesChanged(false);
         if (Array.isArray(plant?.images)) {
             setImageData(plant.images.map((d, index) => ({
                 ...d.image,
@@ -173,7 +151,7 @@ function EditPlantDialog({
         } else {
             setImageData(null);
         }
-    }, [plant])
+    }, [plant, setImagesChanged])
 
     function revertPlant() {
         setChangedPlant(plant);
@@ -197,7 +175,7 @@ function EditPlantDialog({
         });
     }, [changedPlant, deletePlant, onClose])
 
-    const savePlant = useCallback(() => {
+    const savePlant = useCallback(async () => {
         console.log("SAVING PLANTTTTT")
         let plant_data = {
             id: changedPlant.id,
@@ -209,18 +187,19 @@ function EditPlantDialog({
                 return { sku: s.sku, isDiscountable: s.isDiscountable, size: s.size, note: s.note, availability: parseInt(s.availability) || 0, price: s.price, status: s.status }
             }),
             images: imageData.map(d => {
-                return { hash: d.hash, src: d.src, alt: d.alt, description: d.description }
+                return { hash: d.hash, isDisplay: d.isDisplay ?? false }
             })
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
         updatePlant({ variables: { input: plant_data } })
             .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'SKU Updated.' });
+                PubSub.publish(PUBS.Snack, { message: 'Plant Updated.' });
+                setImagesChanged(false);
             })
             .catch((error) => {
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update SKU.', severity: 'error', data: error });
+                PubSub.publish(PUBS.Snack, { message: 'Failed to update Plant.', severity: 'error', data: error });
             });
-    }, [changedPlant, imageData, updatePlant])
+    }, [changedPlant, imageData, updatePlant, setImagesChanged])
 
     const updateTrait = useCallback((traitName, value, createIfNotExists) => {
         const updatedPlant = setPlantTrait(traitName, value, changedPlant, createIfNotExists);
@@ -250,7 +229,7 @@ function EditPlantDialog({
         }));
     }
 
-    let changes_made = !_.isEqual(plant, changedPlant) || imageData.length > plant?.images;
+    let changes_made = !_.isEqual(plant, changedPlant) || imagesChanged;
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={12} sm={4}>
@@ -383,7 +362,7 @@ function EditPlantDialog({
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                            <ImageList data={imageData} onUpdate={applyChanges} />
+                            <ImageList data={imageData} onUpdate={(d) => {setImageData(d); setImagesChanged(true)}} />
                         </Grid>
                     </Grid>
                     <h3>Edit SKU info</h3>

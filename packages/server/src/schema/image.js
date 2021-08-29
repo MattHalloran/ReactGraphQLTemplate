@@ -59,6 +59,7 @@ export const typeDef = gql`
         updateImages(
             data: [ImageUpdate!]!
             deleting: [String!]
+            label: String
         ): Boolean!
         deleteImages(
             hashes: [String!]!
@@ -74,9 +75,19 @@ export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
         imagesByLabel: async (_, args, context, info) => {
-            return await context.prisma[_model].findMany({ 
+            // Get all images with label
+            let images = await context.prisma[_model].findMany({
                 where: { labels: { some: { label: args.label } } },
-                orderBy: { created_at: 'desc' },
+                select: { hash: true, labels: { select: { label: true, index: true } } }
+            })
+            // Sort by position
+            images = images.sort((a, b) => {
+                const aIndex = a.labels.find(l => l.label === args.label);
+                const bIndex = b.labels.find(l => l.label === args.label);
+                return aIndex > bIndex;
+            })
+            return await context.prisma[_model].findMany({ 
+                where: { hash: { in: images.map(i => i.hash) } },
                 ...(new PrismaSelect(info).value)
             });
         }
@@ -107,11 +118,22 @@ export const resolvers = {
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
+                const curr = args.data[i];
+                if (args.label) {
+                    console.log('UPDATEEEEE')
+                    console.log(args.data[i].hash)
+                    // Update position in label
+                    await context.prisma[TABLES.ImageLabels].update({
+                        where: { image_labels_hash_label_unique: { hash: curr.hash, label: args.label } },
+                        data: { index: i }
+                    })
+                }
+                // Update alt and description
                 await context.prisma[_model].update({
-                    where: { hash: args.data[i].hash },
+                    where: { hash: curr.hash },
                     data: { 
-                        alt: args.data[i].alt,
-                        description: args.data[i].description,
+                        alt: curr.alt,
+                        description: curr.description,
                     }
                 })
             }

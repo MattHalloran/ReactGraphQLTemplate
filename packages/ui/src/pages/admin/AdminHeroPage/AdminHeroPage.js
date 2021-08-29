@@ -66,7 +66,7 @@ function AdminHeroPage() {
         const finals = changed.map(d => d.hash);
         const deleting = originals.filter(s => !finals.includes(s));
         // Perform update
-        updateImages({ variables: { data, deleting } })
+        updateImages({ variables: { data, deleting, label: 'hero' } })
         .then((response) => {
             PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
             PubSub.publish(PUBS.Loading, false);
