@@ -14,6 +14,7 @@ import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import _ from 'underscore';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -54,17 +55,12 @@ function CartPage({
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error' });
             return;
         }
-        PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { input: changedCart } }).then((response) => {
-            const data = response.data.updateOrder;
-            PubSub.publish(PUBS.Loading, false);
-            if (data !== null) {
-                setChangedCart(data);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-        }).catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: updateOrder,
+            data: { variables: { input: changedCart } },
+            successCondition: (response) => response.data.updateOrder,
+            onSuccess: (response) => setChangedCart(response.data.updateOrder),
+            successMessage: () => 'Order successfully updated.',
         })
     }
 

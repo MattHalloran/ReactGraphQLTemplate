@@ -16,7 +16,7 @@ import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS, DEFAULT_PRONOUNS } from '@local/shared';
-import { PUBS, PubSub } from 'utils';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -72,12 +72,11 @@ function CustomerCard({
     }
 
     const modifyCustomer = (id, status, message) => {
-        changeCustomerStatus({ variables: { id: id, status: status } }).then((response) => {
-            if (response.changeCustomerStatus !== null) {
-                PubSub.publish(PUBS.Snack, { message: message });
-            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-        }).catch((response) => {
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: changeCustomerStatus,
+            data: { variables: { id: id, status: status } },
+            successCondition: (response) => response.changeCustomerStatus !== null,
+            successMessage: () => message
         })
     }
 

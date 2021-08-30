@@ -11,7 +11,8 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { LINKS } from 'utils';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -35,20 +36,12 @@ function ForgotPasswordForm({
         },
         validationSchema: requestPasswordChangeSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.Loading, true);
-            console.log('in onsubmit', values)
-            requestPasswordChange({
-                variables: values
-            }).then((response) => {
-                console.log('yee', response)
-                PubSub.publish(PUBS.Loading, false);
-                if (response.ok) {
-                    PubSub.publish(PUBS.Snack, { message: 'Request sent. Please check email.' });
-                    onRedirect(LINKS.Home);
-                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }).catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error', data: response });
+            mutationWrapper({
+                mutation: requestPasswordChange,
+                data: { variables: values },
+                successCondition: (response) => response.ok,
+                onSuccess: () => onRedirect(LINKS.Home),
+                successMessage: () => 'Request sent. Please check email.',
             })
         },
     });

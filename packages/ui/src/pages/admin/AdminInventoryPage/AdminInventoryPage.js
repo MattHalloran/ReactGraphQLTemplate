@@ -23,6 +23,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -51,22 +52,14 @@ function AdminInventoryPage() {
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
-        uploadAvailability({
-            variables: {
-                file: acceptedFiles[0]
-            }
+        mutationWrapper({
+            mutation: uploadAvailability,
+            data: { variables: { file: acceptedFiles[0] } },
+            onSuccess: () => PubSub.publish(PUBS.AlertDialog, {
+                message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
+                firstButtonText: 'OK',
+            }),
         })
-            .then((response) => {
-                PubSub.publish(PUBS.AlertDialog, {
-                    message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
-                    firstButtonText: 'OK',
-                });
-                PubSub.publish(PUBS.Loading, false);
-            })
-            .catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-            })
     }
 
     console.log('ADMIN INVENTORY SELECTED IS', selected)

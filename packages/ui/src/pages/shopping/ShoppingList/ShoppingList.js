@@ -4,12 +4,13 @@ import PropTypes from "prop-types";
 import { plantsQuery } from 'graphql/query';
 import { addOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
+import { getPlantTrait, LINKS, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
+import { mutationWrapper } from "graphql/wrappers";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -89,21 +90,13 @@ function ShoppingList({
             alert(`Error: Cannot add more than ${max_quantity}!`);
             return;
         }
-        PubSub.publish(PUBS.Loading, true);
-        addOrderItem({ variables: { quantity, orderId: cart?.id, skuId: sku.id } }).then((response) => {
-            const data = response.data.addOrderItem;
-            PubSub.publish(PUBS.Loading, false);
-            if (data !== null) {
-                onSessionUpdate();
-                PubSub.publish(PUBS.Snack, { 
-                    message: `${quantity} ${name}(s) added to cart.`, 
-                    buttonText: 'View Cart',
-                    buttonClicked: toCart,
-                });
-            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-        }).catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: addOrderItem,
+            data: { variables: { quantity, orderId: cart?.id, skuId: sku.id } },
+            successCondition: (response) => response.data.addOrderItem,
+            onSuccess: () => onSessionUpdate(),
+            successMessage: () => `${quantity} ${name}(s) added to cart.`,
+            successData: { buttonText: 'View Cart', buttonClicked: toCart },
         })
     }
 

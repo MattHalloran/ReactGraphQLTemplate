@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     AlertDialog,
     Footer,
@@ -65,10 +65,16 @@ export function App() {
     const [theme, setTheme] = useState(themes.light);
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
+    const timerRef = useRef();
     const [business, setBusiness] =  useState(null)
     const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     const [login] = useMutation(loginMutation);
     let history = useHistory();
+
+    useEffect(() => () => {
+        clearTimeout(timerRef.current);
+        setLoading(false);
+    }, []);
 
     useEffect(() => {
         console.log("BUSINESS UPDATED", business)
@@ -116,7 +122,15 @@ export function App() {
         checkLogin();
         // Check for browser dark mode TODO set back to dark when ready
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
-        let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => setLoading(data));
+        // Handle loading spinner, which can have a delay
+        let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
+            if (Number.isInteger(data) && data === data*-1) {
+                clearTimeout(timerRef.current);
+                timerRef.current = window.setTimeout(() => setLoading(true), 2000);
+            } else {
+                setLoading(false);
+            }
+        });
         let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));
         return (() => {
             PubSub.unsubscribe(loadingSub);

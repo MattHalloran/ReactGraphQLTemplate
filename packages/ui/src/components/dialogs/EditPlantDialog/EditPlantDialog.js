@@ -40,6 +40,7 @@ import {
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
 import _ from 'underscore';
+import { mutationWrapper } from 'graphql/wrappers';
 
 // Common plant traits, and their corresponding field names
 const PLANT_TRAITS = {
@@ -127,15 +128,11 @@ function EditPlantDialog({
     const [addImages] = useMutation(addImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
-        PubSub.publish(PUBS.Loading, true);
-        addImages({
-            variables: {
-                files: acceptedFiles,
-            }
-        })
-            .then((response) => {
-                PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
-                PubSub.publish(PUBS.Loading, false);
+        mutationWrapper({
+            mutation: addImages,
+            data: { variables: { files: acceptedFiles, } },
+            successMessage: () => `Successfully uploaded ${acceptedFiles.length} image(s)`,
+            onSuccess: (response) => {
                 setImageData([...imageData, ...response.data.addImages.filter(d => d.success).map(d => {
                     return {
                         hash: d.hash,
@@ -143,11 +140,8 @@ function EditPlantDialog({
                     }
                 })])
                 setImagesChanged(true);
-            })
-            .catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-            })
+            }
+        })
     }
 
     const [currSku, setCurrSku] = useState(selectedSku);
@@ -182,18 +176,15 @@ function EditPlantDialog({
 
     const confirmDelete = useCallback(() => {
         PubSub.publish(PUBS.AlertDialog, {
-            message: `Are you sure you want to delete this plant, along with its SKUs? This cannot be undone`,
+            message: `Are you sure you want to delete this plant, along with its SKUs? This cannot be undone.`,
             firstButtonText: 'Yes',
-            firstButtonClicked: () => {
-                deletePlant({ variables: { ids: [changedPlant.id] } })
-                    .then(() => {
-                        PubSub.publish(PUBS.Snack, { message: 'Plant deleted' });
-                        onClose();
-                    })
-                    .catch((error) => {
-                        PubSub.publish(PUBS.Snack, { message: 'Failed to delete plant', severity: 'error', data: error });
-                    });
-            },
+            firstButtonClicked: () => mutationWrapper({
+                mutation: deletePlant,
+                data: { variables: { ids: [changedPlant.id] } },
+                successMessage: () => 'Plant deleted.',
+                onSuccess: () => onClose(),
+                errorMesage: () => 'Failed to delete plant.',
+            }),
             secondButtonText: 'No',
         });
     }, [changedPlant, deletePlant, onClose])
@@ -214,14 +205,13 @@ function EditPlantDialog({
             })
         }
         console.log('GOING TO MODIFY PLANT', plant_data)
-        updatePlant({ variables: { input: plant_data } })
-            .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'Plant Updated.' });
-                setImagesChanged(false);
-            })
-            .catch((error) => {
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update Plant.', severity: 'error', data: error });
-            });
+        mutationWrapper({
+            mutation: updatePlant,
+            data: { variables: { input: plant_data } },
+            successMessage: () => 'Plant updated.',
+            onSuccess: () => setImagesChanged(false),
+            errorMessage: () => 'Failed to delete plant.'
+        })
     }, [changedPlant, imageData, updatePlant, setImagesChanged])
 
     const updateTrait = useCallback((traitName, value, createIfNotExists) => {

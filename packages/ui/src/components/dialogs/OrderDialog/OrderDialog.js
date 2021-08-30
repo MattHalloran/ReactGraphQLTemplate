@@ -20,9 +20,10 @@ import { makeStyles } from '@material-ui/styles';
 import { CartTable as Cart } from 'components';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { findWithAttr, ORDER_STATES, PUBS, PubSub } from 'utils';
+import { findWithAttr, ORDER_STATES } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
 import _ from 'underscore';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -62,36 +63,31 @@ function OrderDialog({
     }, [order])
 
     const orderUpdate = () => {
-        PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { input: order } }).then((response) => {
-            const data = response.data.updateOrder;
-            PubSub.publish(PUBS.Loading, false);
-            if (data !== null) {
-                setChangedOrder(data);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-        }).catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: updateOrder,
+            data: { variables: { input: order } },
+            successCondition: (response) => response.data.updateOrder !== null,
+            successMessage: () => 'Order successfully updated.',
+            onSuccess: (response) => setChangedOrder(response.data.updateOrder),
         })
     }
 
     const approveOrder = useCallback(() => {
-        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Approved } } })
-            .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Approved\'.' });
-            }).catch(err => {
-                PubSub.publish(PUBS.Snack, { message: 'Failed to approve order.', severity: 'error', data: err });
-            })
+        mutationWrapper({
+            mutation: updateOrder,
+            data: { variables: { input: { ...order, status: ORDER_STATUS.Approved } } },
+            successMessage: () => 'Order status set to \'Approved\'.',
+            errorMessage: () => 'Failed to approve order.',
+        })
     }, [order, updateOrder])
 
     const denyOrder = useCallback(() => {
-        updateOrder({ variables: { input: { ...order, status: ORDER_STATUS.Rejected } } })
-            .then(() => {
-                PubSub.publish(PUBS.Snack, { message: 'Order status set to \'Denied\'' });
-            }).catch(err => {
-                PubSub.publish(PUBS.Snack, { message: 'Failed to deny order.', severity: 'error', data: err });
-            })
+        mutationWrapper({
+            mutation: updateOrder,
+            data: { variables: { input: { ...order, status: ORDER_STATUS.Rejected } } },
+            successMessage: () => 'Order status set to \'Denied\'.',
+            errorMessage: () => 'Failed to deny order.',
+        })
     }, [order, updateOrder])
 
     let status_string;

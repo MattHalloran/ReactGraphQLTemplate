@@ -6,7 +6,7 @@ import {
 } from 'components';
 import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc } from 'utils';
 import { NoImageIcon } from 'assets/img';
-import { IconButton, Typography } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';

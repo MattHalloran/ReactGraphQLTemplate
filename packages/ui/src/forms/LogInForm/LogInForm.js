@@ -12,7 +12,8 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { LINKS } from 'utils';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -43,22 +44,11 @@ function LogInForm({
         },
         validationSchema: logInSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.Loading, true);
-            login({
-                variables: {
-                    ...values,
-                    verificationCode: urlParams.code
-                }
-            }).then((response) => {
-                const data = response.data.login;
-                PubSub.publish(PUBS.Loading, false);
-                if (data !== null) {
-                    onSessionUpdate(data);
-                    onRedirect(LINKS.Shopping);
-                } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-            }).catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+            mutationWrapper({
+                mutation: login,
+                data: { variables: { ...values, verificationCode: urlParams.code } },
+                successCondition: (response) => response.data.login !== null,
+                onSuccess: (response) => { onSessionUpdate(response.data.login); onRedirect(LINKS.Shopping) },
             })
         },
     });

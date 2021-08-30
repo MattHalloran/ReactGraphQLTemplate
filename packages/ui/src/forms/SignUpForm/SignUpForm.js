@@ -19,6 +19,7 @@ import {
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
 import { LINKS, PUBS, PubSub } from 'utils';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -53,13 +54,12 @@ function SignUpForm({
         },
         validationSchema: signUpSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.Loading, true);
-            signUp({
-                variables: values
-            }).then((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                if (response.ok) {
-                    onSessionUpdate(response.session)
+            mutationWrapper({
+                mutation: signUp,
+                data: { variables: values },
+                successCondition: (response) => response.ok,
+                onSuccess: (response) => {
+                    onSessionUpdate(response.session);
                     if (values.accountApproved) {
                         PubSub.publish(PUBS.AlertDialog, {
                             message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
@@ -67,19 +67,18 @@ function SignUpForm({
                         });
                     } else {
                         PubSub.publish(PUBS.AlertDialog, {
-                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page`,
+                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page.`,
                             firstButtonText: 'OK',
                         });
                     }
-                    onRedirect(LINKS.Shopping);
-                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }).catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                if (response.code === CODE.EmailInUse.code) {
-                    if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form`)) {
-                        onRedirect(LINKS.ForgotPassword);
+                },
+                onError: (response) => {
+                    if (response.code === CODE.EmailInUse.code) {
+                        if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form.`)) {
+                            onRedirect(LINKS.ForgotPassword);
+                        }
                     }
-                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error', data: response });
+                }
             })
         },
     });
