@@ -31,7 +31,6 @@ import { Dropzone, ImageList } from 'components';
 import {
     addToArray,
     deleteArrayIndex,
-    getPlantSkuField,
     getPlantTrait,
     makeID,
     PUBS,
@@ -112,13 +111,14 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function EditPlantDialog({
     plant,
+    selectedSku,
     trait_options,
     open = true,
     onClose,
 }) {
-    console.log('PLANT POPUP', trait_options)
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
+    console.log('PLANT POPUP', changedPlant);
     const [updatePlant] = useMutation(updatePlantMutation);
     const [deletePlant] = useMutation(deletePlantsMutation);
 
@@ -150,8 +150,13 @@ function EditPlantDialog({
             })
     }
 
-    const [selectedSkuIndex, setSelectedSkuIndex] = useState(-1);
+    const [currSku, setCurrSku] = useState(selectedSku);
+    const currSkuIndex = (currSku && plant?.skus) ? plant.skus.findIndex(s => s.sku === currSku.sku) : 0;
     const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
+
+    useEffect(() => {
+        setCurrSku(selectedSku);
+    }, [selectedSku])
 
     const findImageData = useCallback(() => {
         setImagesChanged(false);
@@ -226,11 +231,9 @@ function EditPlantDialog({
     }, [changedPlant])
 
     const updateSkuField = useCallback((fieldName, value) => {
-        console.log('IN UPDATE SKU FIELD', fieldName, value);
-        const updatedPlant = setPlantSkuField(fieldName, selectedSkuIndex, value, changedPlant);
-        console.log('yope', updatedPlant)
+        const updatedPlant = setPlantSkuField(fieldName, currSkuIndex, value, changedPlant);
         if (updatedPlant) setChangedPlant(updatedPlant)
-    }, [changedPlant, selectedSkuIndex])
+    }, [changedPlant, currSkuIndex])
 
     function newSku() {
         setChangedPlant(p => ({
@@ -240,10 +243,10 @@ function EditPlantDialog({
     }
 
     function removeSku() {
-        if (selectedSkuIndex < 0) return;
+        if (!currSku) return;
         setChangedPlant(p => ({
             ...p,
-            skus: deleteArrayIndex(p.skus, selectedSkuIndex),
+            skus: deleteArrayIndex(p.skus, currSkuIndex),
         }));
     }
 
@@ -296,17 +299,18 @@ function EditPlantDialog({
                         <ListSubheader className={classes.skuHeader} component="div" id="sku-select-subheader">
                             <Typography className={classes.title} variant="h5" component="h3">SKUs</Typography>
                         </ListSubheader>
-                        {changedPlant?.skus?.map((s, index) => (
+                        {changedPlant?.skus?.map((s) => (
                             <ListItem
+                                key={s.sku}
                                 button
-                                className={`sku-option ${index === selectedSkuIndex ? classes.selected : ''}`}
-                                onClick={() => setSelectedSkuIndex(changedPlant?.skus?.indexOf(s) ?? -1)}>
+                                className={`sku-option ${s.sku === currSku?.sku ? classes.selected : ''}`}
+                                onClick={() => setCurrSku(s)}>
                                 <ListItemText primary={s.sku} />
                             </ListItem>
                         ))}
                     </List>
                     <div>
-                        {selectedSkuIndex >= 0 ?
+                        {currSku ?
                             <Tooltip title="Delete SKU">
                                 <IconButton onClick={removeSku}>
                                     <DeleteIcon />
@@ -392,7 +396,7 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="Plant Code"
-                                value={getPlantSkuField('sku', selectedSkuIndex, changedPlant) ?? ''}
+                                value={currSku?.sku ?? ''}
                                 onChange={e => updateSkuField('sku', e.target.value)}
                             />
                         </Grid>
@@ -401,7 +405,7 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="SKU Size"
-                                value={getPlantSkuField('size', selectedSkuIndex, changedPlant) ?? ''}
+                                value={currSku?.size ?? ''}
                                 onChange={e => updateSkuField('size', e.target.value)}
                             />
                         </Grid>
@@ -410,7 +414,7 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="Price"
-                                value={getPlantSkuField('price', selectedSkuIndex, changedPlant) ?? ''}
+                                value={currSku?.price ?? ''}
                                 onChange={e => updateSkuField('price', e.target.value)}
                             />
                         </Grid>
@@ -419,7 +423,7 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="Availability"
-                                value={getPlantSkuField('availability', selectedSkuIndex, changedPlant) ?? ''}
+                                value={currSku?.availability ?? ''}
                                 onChange={e => updateSkuField('availability', e.target.value)}
                             />
                         </Grid>
@@ -433,6 +437,7 @@ function EditPlantDialog({
 
 EditPlantDialog.propTypes = {
     sku: PropTypes.object.isRequired,
+    selectedSku: PropTypes.object,
     trait_options: PropTypes.object,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,

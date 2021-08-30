@@ -85,12 +85,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function PlantDialog({
     plant,
+    selectedSku,
     onSessionUpdate,
     onAddToCart,
     open = true,
     onClose,
 }) {
-    console.log('EXPANDED PLANT', plant)
+    console.log('EXPANDED PLANT', plant, selectedSku)
     plant = {
         ...plant,
         latinName: plant?.latinName,
@@ -101,14 +102,17 @@ function PlantDialog({
     const [orderOptions, setOrderOptions] = useState([]);
     const [detailsOpen, setDetailsOpen] = useState(false);
     // Stores the id of the selected sku
-    const [selected, setSelected] = useState(null);
-    let selected_sku = plant.skus.find(s => s.id === selected);
+    const [currSku, setCurrSku] = useState(selectedSku);
+
+    useEffect(() => {
+        setCurrSku(selectedSku);
+    }, [selectedSku])
 
     useEffect(() => {
         let options = plant.skus?.map(s => {
             return {
                 label: `#${s.size} : ${displayPrice(s.price)}`,
-                value: s.id,
+                value: s,
             }
         })
         // If options is unchanged, do not set
@@ -116,7 +120,6 @@ function PlantDialog({
         let new_values = options.map(o => o.value);
         if (_.isEqual(curr_values, new_values)) return;
         setOrderOptions(options);
-        setSelected(options.length > 0 ? options[0].value : null);
     }, [plant, orderOptions])
 
     const images = Array.isArray(plant.images) ? plant.images.map(d => ({
@@ -153,8 +156,8 @@ function PlantDialog({
                 <Selector
                     fullWidth
                     options={orderOptions}
-                    selected={selected}
-                    handleChange={(e) => setSelected(e.target.value)}
+                    selected={currSku}
+                    handleChange={(e) => setCurrSku(e.target.value)}
                     inputAriaLabel='size-selector-label'
                     label="Size" />
             </Grid>
@@ -168,12 +171,12 @@ function PlantDialog({
             </Grid>
             <Grid item xs={12} sm={4}>
                 <Button
-                    disabled={selected === null}
+                    disabled={!currSku}
                     fullWidth
                     style={{}}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(plant.latinName ?? getPlantTrait('commonName', plant) ?? 'plant', selected_sku, quantity)}
+                    onClick={() => onAddToCart(plant.latinName ?? getPlantTrait('commonName', plant) ?? 'plant', currSku, quantity)}
                 >Order</Button>
             </Grid>
         </Grid>
@@ -250,6 +253,7 @@ function PlantDialog({
 
 PlantDialog.propTypes = {
     plant: PropTypes.object,
+    selectedSku: PropTypes.object,
     onSessionUpdate: PropTypes.func.isRequired,
     onAddToCart: PropTypes.func.isRequired,
     open: PropTypes.bool,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { FormControl, InputLabel, Select, MenuItem, Chip } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/styles';
@@ -31,41 +31,37 @@ function Selector({
     const theme = useTheme();
 
     // Formats selected into label/value object array.
-    // Needs formatted options to get missing labels
-    const formatSelected = (selected, options) => {
-        let select_arr = _.isArray(selected) ? selected : [selected];
+    // options - Formatted options (array of label/value pairs)
+    const formatSelected = useCallback((options) => {
+        const select_arr = _.isArray(selected) ? selected : [selected];
+        if (!Array.isArray(options)) return select_arr;
         let formatted_select = [];
-        for (let i = 0; i < select_arr.length; i++) {
-            let curr_select = select_arr[i];
-            let curr_select_val = (_.isString(curr_select) || _.isNumber(curr_select)) ? curr_select : curr_select?.value;
-            for(let j = 0; j < options.length; j++) {
-                let curr_option = options[j];
-                if (curr_option.value === curr_select_val) {
+        for (const curr_select of select_arr) {
+            for (const curr_option of options) {
+                if (_.isEqual(curr_option.value, curr_select)) {
                     formatted_select.push({
                         label: curr_option.label,
-                        value: curr_select_val,
-                    });
+                        value: curr_select
+                    })
                 }
             }
         }
         return formatted_select;
-    }
+    }, [selected])
 
     let options_formatted = options?.map(o => (
-        (_.isString(o) || _.isNumber(o)) ?
-                {
-                    label: o,
-                    value: o
-                } : o
+        (o && o.label) ? o :
+            {
+                label: o,
+                value: o
+            }
     )) || [];
-    let options_labels = options_formatted.map(o => o.label);
-    let selected_formatted = formatSelected(selected, options_formatted);
-    let selected_labels = selected_formatted.map(s => s.label);
+    let selected_formatted = formatSelected(options_formatted);
 
     function getOptionStyle(label) {
         return {
             fontWeight:
-                options_labels.indexOf(label) === -1
+                options_formatted.find(o => o.label === label)
                     ? theme.typography.fontWeightRegular
                     : theme.typography.fontWeightMedium,
         };
@@ -73,7 +69,7 @@ function Selector({
 
     return (
         <FormControl variant="outlined" className={`${classes.root} ${fullWidth ? classes.fullWidth : ''}`}>
-            <InputLabel id={inputAriaLabel} shrink={selected_labels.length > 0}>{label}</InputLabel>
+            <InputLabel id={inputAriaLabel} shrink={selected_formatted?.length > 0}>{label}</InputLabel>
             <Select
                 labelId={inputAriaLabel}
                 value={selected}
@@ -86,7 +82,7 @@ function Selector({
                                 <Chip label={o.label} key={o.value} className={classes.chip} />
                             ))}
                         </div>
-                    ) : selected_labels[0]
+                    ) : selected_formatted ? selected_formatted[0].label : ''
                 }}
                 {...props}
             >

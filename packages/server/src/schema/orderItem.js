@@ -41,9 +41,15 @@ export const resolvers = {
             if (!args.orderId) {
                 const cartData = { customerId: context.req.customerId, status: ORDER_STATUS.Draft };
                 // Find current cart
-                order = await context.prisma[TABLES.Order].findUnique({ where: cartData})
+                const matchingOrders = await context.prisma[TABLES.Order].findMany({ where: {
+                    AND: [
+                        { customerId: cartData.customerId },
+                        { status: cartData.status}
+                    ]
+                }})
                 // If cart not found, create a new one
-                if (!order) order = await context.prisma[TABLES.Order].create({ data: cartData})
+                if (matchingOrders.length > 0) order = matchingOrders[0];
+                else order = await context.prisma[TABLES.Order].create({ data: cartData});
             } else {
                 order = await context.prisma[TABLES.Order].findUnique({ where: { id: args.orderId } });
             }
@@ -54,10 +60,11 @@ export const resolvers = {
                 const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
                 if (!(curr.status in editable_order_statuses)) return new CustomError(CODE.Unauthorized);
             }
+            // TODO add to existing order item if exists
             console.log('CREATING ORDR ITEM')
             return await context.prisma[_model].create({ data: { 
                 quantity: args.quantity, 
-                orderId: args.orderId, 
+                orderId: order.id, 
                 skuId: args.skuId 
             }, ...(new PrismaSelect(info).value) });
         },

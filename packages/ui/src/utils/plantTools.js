@@ -21,12 +21,6 @@ export const setPlantTrait = (name, value, plantData, createIfNotExists=false) =
     return updateObject(plantData, 'traits', updatedTraits);
 }
 
-export const getPlantSkuField = (fieldName, index, plantData) => {
-    if (!Array.isArray(plantData?.skus)) return null;
-    if (index < 0 || index >= plantData.skus.length) return null;
-    return plantData.skus[index][fieldName];
-}
-
 export const setPlantSkuField = (fieldName, index, value, plantData) => {
     if (!Array.isArray(plantData?.skus)) return null;
     if (index < 0 || index >= plantData.skus.length) return null;

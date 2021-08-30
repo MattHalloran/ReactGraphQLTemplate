@@ -183,7 +183,7 @@ function CartTable({
                         fullWidth
                         required
                         options={DELIVERY_OPTIONS}
-                        selected={cartState.is_delivery ? DELIVERY_OPTIONS[1] : DELIVERY_OPTIONS[0]}
+                        selected={cartState.is_delivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
                         handleChange={(e) => handleDeliveryChange(e.target.value)}
                         inputAriaLabel='delivery-selector-label'
                         label="Shipping Method" />

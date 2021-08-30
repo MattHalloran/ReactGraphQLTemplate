@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { plantsQuery } from 'graphql/query';
 import { addOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { getPlantSkuField, getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
+import { getPlantTrait, LINKS, PUBS, PubSub, SORT_OPTIONS } from "utils";
 import {
     PlantCard,
     PlantDialog
@@ -31,12 +31,12 @@ function ShoppingList({
     const classes = useStyles();
     // Plant data for all visible plants (i.e. not filtered)
     const [plants, setPlants] = useState([]);
-    // Full image data for every sku group
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams();
-    // Find the current SKU group index, by any of the group's SKUs
-    let curr_index = Array.isArray(plants) ? plants.findIndex(c => c.skus.findIndex(s => s.sku === urlParams.sku) >= 0) ?? -1 : -1;
+    // Find current plant and current sku
+    const currPlant = Array.isArray(plants) ? plants.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
+    const currSku = currPlant?.skus ? currPlant.skus.find(s => s.sku === urlParams.sku) : null;
     const { data: plantData } = useQuery(plantsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
     const [addOrderItem] = useMutation(addOrderItemMutation);
 
@@ -61,7 +61,7 @@ function ShoppingList({
                 }
                 if (!Array.isArray(plant.skus)) continue;
                 for (let i = 0; i < plant.skus.length; i++) {
-                    const skuValue = getPlantSkuField(key, i, plant);
+                    const skuValue = plant.skus[i][key];
                     if (skuValue && skuValue.toLowerCase() === (value+'').toLowerCase()) {
                         found = true;
                         break;
@@ -109,16 +109,17 @@ function ShoppingList({
 
     return (
         <div className={classes.root} id={track_scrolling_id}>
-            {(curr_index >= 0) ? <PlantDialog
+            {(currPlant) ? <PlantDialog
                 onSessionUpdate
-                plant={curr_index >= 0 ? plants[curr_index] : null}
+                plant={currPlant}
+                selectedSku={currSku}
                 onAddToCart={addToCart}
-                open={curr_index >= 0}
+                open={currPlant !== null}
                 onClose={() => history.goBack()} /> : null}
             
             {plants?.map((item, index) =>
                 <PlantCard key={index}
-                    onClick={() => expandSku(item.skus[0].sku)}
+                    onClick={(data) => expandSku(data.selectedSku.sku)}
                     plant={item} />)}
         </div>
     );

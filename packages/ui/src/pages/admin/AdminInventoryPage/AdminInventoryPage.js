@@ -42,8 +42,8 @@ function AdminInventoryPage() {
     const classes = useStyles();
     const [showActive, setShowActive] = useState(true);
     const [searchString, setSearchString] = useState('');
-    // Selected plant data. Used for popup
-    const [currPlant, setCurrPlant] = useState(null);
+    // Selected plant data. Used for popup. { plant, selectedSku }
+    const [selected, setSelected] = useState(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
@@ -69,42 +69,16 @@ function AdminInventoryPage() {
             })
     }
 
-    // const deleteSku = (sku) => {
-    //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-    //     modifySku(sku.sku, 'DELETE', {})
-    //         .then((response) => {
-    //             //TODO update list to reflect status chagne
-    //             console.log('TODOOO')
-    //         })
-    //         .catch((error) => {
-    //             console.error(error);
-    //             alert("Failed to delte sku");
-    //         });
-    // }
-
-    // const editSku = (sku_data) => {
-    //     setCurrPlant(sku_data);
-    // }
-
-    // const hideSku = (sku) => {
-    //     let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-    //     modifySku(sku.sku, operation, {})
-    //         .then((response) => {
-    //             //TODO update list to reflect status chagne
-    //             console.log('TODOOO')
-    //         })
-    //         .catch((error) => {
-    //             console.error("Failed to modify sku", error);
-    //         });
-    // }
+    console.log('ADMIN INVENTORY SELECTED IS', selected)
 
     return (
         <div id="page">
             <EditPlantDialog
-                plant={currPlant}
+                plant={selected?.plant}
+                selectedSku={selected?.selectedSku}
                 trait_options={traitOptions?.traitOptions}
-                open={currPlant !== null}
-                onClose={() => setCurrPlant(null)} />
+                open={selected !== null}
+                onClose={() => setSelected(null)} />
             <AdminBreadcrumbs />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
@@ -158,7 +132,7 @@ function AdminInventoryPage() {
             <div className={classes.cardFlex}>
                 {plantData?.plants?.map((plant, index) => <PlantCard key={index}
                     plant={plant}
-                    onClick={() => setCurrPlant(plant)} />)}
+                    onClick={setSelected} />)}
             </div>
         </div >
     );

@@ -17,7 +17,7 @@ export const deleteArrayIndex = (array, index) => {
 }
 
 export const deleteArrayObject = (array, obj) => {
-    var index = array.indexOf(obj);
+    var index = array.findIndex(obj);
     if (index !== -1) {
         let copy = [...array];
         copy.splice(index, 1);

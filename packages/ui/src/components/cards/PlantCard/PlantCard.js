@@ -62,11 +62,19 @@ function PlantCard({
         [SKU_STATUS.Active]: classes.active,
     }
 
+    const openWithSku = (e, sku) => {
+        e.stopPropagation();
+        console.log('IN OPEN WITH SKU', sku)
+        onClick({ plant, selectedSku: sku })
+    }
+
     let sizes = plant.skus?.map(s => (
         <Chip
-            className={`${classes.skuChip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
+            className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
             label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`}
-            color="secondary" />
+            color="secondary" 
+            onClick={(e) => openWithSku(e, s)}
+        />
     ));
 
     let display;
@@ -79,7 +87,7 @@ function PlantCard({
     }
 
     return (
-        <Card className={classes.root} onClick={() => onClick(plant)}>
+        <Card className={classes.root} onClick={() => onClick({ plant, selectedSku: plant.skus[0] })}>
             <CardActionArea>
                 {display}
                 <CardContent className={classes.content}>
