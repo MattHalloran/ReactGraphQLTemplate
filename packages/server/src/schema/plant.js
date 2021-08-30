@@ -202,12 +202,10 @@ export const resolvers = {
                 // Delete images not passed in
                 await context.prisma[TABLES.PlantImages].deleteMany({ 
                     where: {
-                        NOT: {
-                            AND: [
-                                { plantId: { in: rowIds.map(r => r.plantId ) } },
-                                { hash: { in: rowIds.map(r => r.hash) } }
-                            ]
-                        }
+                        AND: [
+                            { plantId: { in: rowIds.map(r => r.plantId ) } },
+                            { NOT: { hash: { in: rowIds.map(r => r.hash) } } }
+                        ]
                     }
                 })
             }
