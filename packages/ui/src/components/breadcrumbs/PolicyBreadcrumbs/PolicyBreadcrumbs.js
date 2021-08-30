@@ -1,22 +1,16 @@
 import React from 'react';
-import { 
-    Breadcrumbs, 
-    Link 
-} from '@material-ui/core';
 import { LINKS } from 'utils';
-import { useHistory } from 'react-router-dom';
+import { BreadcrumbsBase } from '../BreadcrumbsBase/BreadcrumbsBase';
 
-function PolicyBreadcrumbs({...props}) {
-    const history = useHistory();
-    return (
-        <Breadcrumbs separator="|" aria-label="Policies breadcrumb" {...props}>
-            <Link onClick={() => history.push(LINKS.PrivacyPolicy)}>Privacy</Link>
-            <Link onClick={() => history.push(LINKS.Terms)}>{'Terms & Conditions'}</Link>
-        </Breadcrumbs>
-    );
-}
+const paths = [
+    ['Privacy', LINKS.PrivacyPolicy],
+    ['Terms & Conditions', LINKS.Terms]
+]
 
-PolicyBreadcrumbs.propTypes = {
-}
+const PolicyBreadcrumbs = ({...props}) => BreadcrumbsBase({
+    paths: paths,
+    ariaLabel: 'Policies breadcrumb',
+    ...props
+})
 
 export { PolicyBreadcrumbs };
