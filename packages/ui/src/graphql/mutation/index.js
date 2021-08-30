@@ -1,5 +1,4 @@
 export * from './addImages';
-export * from './addOrderItem';
 export * from './changeCustomerStatus';
 export * from './deletePlantsMutation';
 export * from './updateCustomer';
@@ -12,4 +11,5 @@ export * from './updateOrder';
 export * from './updateImages';
 export * from './updatePlant';
 export * from './uploadAvailability';
+export * from './upsertOrderItem';
 export * from './writeAssets';

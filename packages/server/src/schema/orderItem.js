@@ -21,19 +21,18 @@ export const typeDef = gql`
     }
 
     extend type Mutation {
-        addOrderItem(
+        upsertOrderItem(
             quantity: Int!
             orderId: ID
             skuId: ID!
         ): OrderItem!
-        updateOrderItem(input: OrderItemInput!): OrderItem!
         deleteOrderItems(ids: [ID!]!): Count!
     }
 `
 
 export const resolvers = {
     Mutation: {
-        addOrderItem: async (_, args, context, info) => {
+        upsertOrderItem: async (_, args, context, info) => {
             // Must be signed in
             if (!context.req.customerId) return new CustomError(CODE.Unauthorized);
             // If no orderId, find or create a new order
@@ -60,25 +59,11 @@ export const resolvers = {
                 const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
                 if (!(curr.status in editable_order_statuses)) return new CustomError(CODE.Unauthorized);
             }
-            // TODO add to existing order item if exists
-            console.log('CREATING ORDR ITEM')
-            return await context.prisma[_model].create({ data: { 
-                quantity: args.quantity, 
-                orderId: order.id, 
-                skuId: args.skuId 
-            }, ...(new PrismaSelect(info).value) });
-        },
-        updateOrderItem: async (_, args, context, info) => {
-            // Must be admin, or adding to your own
-            const customer_id = await db(TABLES.Order)
-                .select(`${TABLES.Order}.customerId`)
-                .leftJoin(TABLES.OrderItem, `${TABLES.OrderItemModel}.orderId`, `${TABLES.Order}.id`)
-                .where(`${TABLES.OrderItem}.id`, args.input.id)
-                .first();
-            if (!context.req.isAdmin && context.req.customerId !== customer_id) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
-                where: { id: args.input.id || undefined },
-                data: { ...args.input },
+            // Add to existing order item, or create a new one
+            return await context.prisma[_model].upsert({
+                where: { order_item_orderid_skuid_unique: { orderId: order.id, skuId: args.skuId } },
+                create: { orderId: order.id, skuId: args.skuId, quantity: args.quantity },
+                update: { quantity: { increment: args.quantity } },
                 ...(new PrismaSelect(info).value)
             })
         },

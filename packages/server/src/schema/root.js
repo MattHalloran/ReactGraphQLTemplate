@@ -1,11 +1,8 @@
 import { gql } from 'apollo-server-express';
 import { GraphQLScalarType } from "graphql";
-import { Kind } from "graphql/language";
-import moment from 'moment';
 import { GraphQLUpload } from 'graphql-upload';
 import { readFiles, saveFiles } from '../utils';
-
-const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+import _ from 'lodash';
 
 export const typeDef = gql`
     scalar Date
@@ -40,17 +37,15 @@ export const resolvers = {
     Date: new GraphQLScalarType({
         name: "Date",
         description: "Custom description for the date scalar",
+        // Assumes data is either Unix timestamp or Date object
         parseValue(value) {
-          return moment(value); // value from the client
+            return new Date(value).toISOString(); // value from the client
         },
         serialize(value) {
-          return moment(value, DATE_FORMAT); // value sent to the client
+            return new Date(value).getTime(); // value sent to the client
         },
         parseLiteral(ast) {
-          if (ast.kind === Kind.STRING) {
-            return moment(ast.value); // ast value is always in string format
-          }
-          return null;
+            return new Date(value).toDateString(); // ast value is always in string format
         }
     }),
     Query: {

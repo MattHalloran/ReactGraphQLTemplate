@@ -90,7 +90,7 @@ function QuantityBox({
     }
 
     return (
-        <div className={classes.root} has_error={error?.length > 0} {...props}>
+        <div className={classes.root} {...props}>
             <IconButton
                 className={`${classes.button} ${classes.minus}`}
                 aria-label='minus'

@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
-import moment from 'moment';
 import { customerNotifyAdmin, sendVerificationLink } from '../worker/email/queue';
 import { HASHING_ROUNDS } from '../consts';
 import { PrismaSelect } from '@paljs/plugins';
@@ -13,7 +12,6 @@ const _model = TABLES.Customer;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
 const SOFT_LOCKOUT_DURATION_SECONDS = 15 * 60;
 const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
-const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export const typeDef = gql`
     enum AccountStatus {
@@ -149,9 +147,7 @@ export const resolvers = {
             }
             // Reset login attempts after 15 minutes
             const unable_to_reset = [ACCOUNT_STATUS.HardLock, ACCOUNT_STATUS.Deleted];
-            const last_login = moment(customer.lastLoginAttempt, DATE_FORMAT).valueOf();
-            console.log('LAST LOGIN', customer.lastLoginAttempt, last_login);
-            if (!unable_to_reset.includes(customer.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
+            if (!unable_to_reset.includes(customer.status) && Date.now() - new Date(customer.lastLoginAttempt).getTime() > SOFT_LOCKOUT_DURATION_SECONDS) {
                 customer = await context.prisma[_model].update({
                     where: { id: customer.id },
                     data: { loginAttempts: 0 }

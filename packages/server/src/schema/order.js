@@ -68,7 +68,11 @@ export const resolvers = {
     Mutation: {
         updateOrder: async (_, args, context, info) => {
             // Must be admin, or updating your own
-            const curr = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
+            console.log('UPDATING ORDER', args.input)
+            const curr = await context.prisma[_model].findUnique({ 
+                where: { id: args.input.id },
+                select: { id: true, customerId: true, status: true, items: { select: { id: true } } }
+            });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             if (!context.req.isAdmin) {
                 // Customers can only update their own orders in certain states
@@ -77,9 +81,23 @@ export const resolvers = {
                 // Customers cannot edit order status
                 delete args.input.status;
             }
+            // Determine which order item rows need to be updated, and which will be deleted
+            const updatedItemIds = args.input.items ? args.input.items.map(i => i.id) : [];
+            const deletingItemIds = curr.items.filter(i => !updatedItemIds.includes(i.id)).map(i => i.id);
+            if (args.input.items.length > 0) {
+                const updateMany = args.input.items.map(d => context.prisma[TABLES.OrderItem].updateMany({
+                    where: { id: d.id },
+                    data: { ...d }
+                }))
+                Promise.all(updateMany)
+            }
+            if (deletingItemIds.length > 0) {
+                await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds }} })
+            }
+            console.log('about to update')
             return await context.prisma[_model].update({
-                where: { id: args.input.id || undefined },
-                data: { ...args.input },
+                where: { id: curr.id },
+                data: { ...args.input, items: undefined },
                 ...(new PrismaSelect(info).value)
             })
         },

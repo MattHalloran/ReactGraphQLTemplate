@@ -164,6 +164,7 @@ export async function up (knex) {
         table.integer('quantity').defaultTo(1).notNullable();
         table.uuid('orderId').references('id').inTable(TABLES.Order).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.uuid('skuId').references('id').inTable(TABLES.Sku).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.unique(['orderId', 'skuId']);
     });
     await knex.schema.createTable(TABLES.ImageLabels, (table) => {
         table.comment('Joining table to allow images to be tagged into groups');

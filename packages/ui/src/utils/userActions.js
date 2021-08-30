@@ -7,6 +7,7 @@ import {
 } from '@material-ui/icons';
 import { ROLES } from '@local/shared';
 import { LINKS } from 'utils';
+import _ from 'underscore';
 
 // Returns user actions, in a list of this format:
 //  [
@@ -21,7 +22,7 @@ export function getUserActions(session, userRoles, cart) {
     let actions = [];
 
     // If someone is not logged in, display sign up/log in links
-    if (!session) {
+    if (!_.isObject(session) || Object.entries(session).length === 0) {
         actions.push(['Log In', 'login', LINKS.LogIn, null, PersonAddIcon, 0]);
     } else {
         // If an owner admin is logged in, display owner links

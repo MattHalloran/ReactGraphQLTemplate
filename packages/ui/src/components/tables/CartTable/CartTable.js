@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc } from 'utils';
+import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -40,11 +40,11 @@ const useStyles = makeStyles((theme) => ({
 const DELIVERY_OPTIONS = [
     {
         label: 'Pickup',
-        value: 0,
+        value: false,
     },
     {
         label: 'Delivery',
-        value: 1,
+        value: true,
     },
 ]
 
@@ -54,54 +54,38 @@ function CartTable({
     ...props
 }) {
     const classes = useStyles();
-    const [cartState, setCartState] = useState({
-        ...cart,
-        items: cart?.items ?? [],
-        isDelivery: cart?.isDelivery ?? true,
-        desired_delivery_date: cart?.desired_delivery_date ?? +(new Date()),
-        specialInstructions: cart?.specialInstructions,
-    })
-    let all_total = cartState.items.map(i => i.sku.price*i.availability).reduce((a, b) => (a*1)+b, 0);
+    let all_total = Array.isArray(cart?.items) ? cart.items.map(i => i.sku.price*i.availability).reduce((a, b) => (a*1)+b, 0) : -1;
 
-    useEffect(() => {
-        onUpdate(cartState);
-    }, [cartState, onUpdate])
+    const updateCartField = useCallback((fieldName, value) => {
+        onUpdate(updateObject(cart, fieldName, value));
+    }, [cart, onUpdate])
 
-    const setNotes = useCallback((notes) => {
-        setCartState(c => updateObject(c, 'specialInstructions', notes));
-    }, [])
-
-    const setDeliveryDate = useCallback((date) => {
-        setCartState(c => updateObject(c, 'desired_delivery_date', +date));
-    }, [])
-
-    const handleDeliveryChange = useCallback((value) => {
-        setCartState(c => updateObject(c, 'is_delivery', value));
-    }, [])
+    const setNotes = (notes) => updateCartField('specialInstructions', notes);
+    const setDeliveryDate = (date) => updateCartField('desiredDeliveryDate', +date);
+    const handleDeliveryChange = (value) => updateCartField('isDelivery', value);
 
     const updateItemQuantity = useCallback((sku, quantity) => {
-        let index = cartState.items.findIndex(i => i.sku.sku === sku);
-        if (index < 0 || index >= (cartState.items.length)) {
+        let index = cart.items.findIndex(i => i.sku.sku === sku);
+        if (index < 0 || index >= (cart.items.length)) {
             PubSub.publish(PUBS.Snack, { message: 'Failed to update item quantity', severity: 'error', data: { index: index } });
             return;
         }
-        let cart_copy = { ...cartState };
-        cart_copy.items[index].quantity = quantity;
-        setCartState(cart_copy);
-    }, [cartState])
+        onUpdate(updateObject(cart, 'items', updateArray(cart.items, index, updateObject(cart.items[index], 'quantity', quantity))))
+    }, [cart, onUpdate])
 
     const deleteCartItem = useCallback((sku) => {
-        let index = cartState.items.findIndex(i => i.sku.sku === sku.sku);
+        let index = cart.items.findIndex(i => i.sku.sku === sku.sku);
         if (index < 0) {
             PubSub.publish(PUBS.Snack, { message: `Failed to remove item for ${sku.sku}`, severity: 'error', data: sku });
             return;
         }
-        let changed_item_list = deleteArrayIndex(cartState.items, index);
-        setCartState(updateObject(cartState, 'items', changed_item_list));
-    }, [cartState])
+        let changed_item_list = deleteArrayIndex(cart.items, index);
+        updateCartField('items', changed_item_list);
+    }, [cart, updateCartField])
 
     const cart_item_to_row = useCallback((data, key) => {
-        let quantity = data.quantity;
+        const commonName = getPlantTrait('commonName', data.sku.plant);
+        const quantity = data.quantity;
         let price = parseInt(data.sku.price);
         let total;
         if (isNaN(price)) {
@@ -112,12 +96,11 @@ function CartTable({
             total = displayPrice(quantity * price);
         }
 
-        console.log('CART TABLE DISPLAY DATA LOGIC', data)
         let display;
         let display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
         if (!display_data && data.sku.plant.images.length > 0) display_data = data.sku.plant.images[0].image;
         if (display_data) {
-            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.plant.latinName} />
+            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={commonName} />
         } else {
             display = <NoImageIcon className={classes.displayImage} />
         }
@@ -132,7 +115,7 @@ function CartTable({
                 <TableCell className={classes.tableCol} padding="none" component="th" scope="row" align="center">
                     {display}
                 </TableCell>
-                <TableCell className={classes.tableCol} align="left">{data.sku?.plant?.latinName}</TableCell>
+                <TableCell className={classes.tableCol} align="left">{getPlantTrait('commonName', data.sku.plant)}</TableCell>
                 <TableCell className={classes.tableCol} align="right">{price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
                     <QuantityBox
@@ -172,18 +155,18 @@ function CartTable({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {cartState.items.map((c, index) => cart_item_to_row(c, index))}
+                        {Array.isArray(cart?.items) ? cart.items.map((c, index) => cart_item_to_row(c, index)) : null}
                     </TableBody>
                 </Table>
             </TableContainer>
-            <p>Total: {displayPrice(all_total)}</p>
+            <p>Total: {displayPrice(all_total) ?? 'N/A'}</p>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
                     <Selector
                         fullWidth
                         required
                         options={DELIVERY_OPTIONS}
-                        selected={cartState.is_delivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
+                        selected={cart?.isDelivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
                         handleChange={(e) => handleDeliveryChange(e.target.value)}
                         inputAriaLabel='delivery-selector-label'
                         label="Shipping Method" />
@@ -192,7 +175,7 @@ function CartTable({
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
                             label="Delivery Date"
-                            value={new Date(cartState.desired_delivery_date)}
+                            value={cart?.desiredDeliveryDate ? new Date(cart.desiredDeliveryDate) : +(new Date())}
                             onChange={(date) => {
                                 setDeliveryDate(date)
                             }}
@@ -206,7 +189,7 @@ function CartTable({
                         label="Special Instructions"
                         fullWidth
                         multiline
-                        value={cartState.specialInstructions}
+                        value={cart?.specialInstructions ?? ''}
                         onChange={e => setNotes(e.target.value)}
                     />
                 </Grid>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import { plantsQuery } from 'graphql/query';
-import { addOrderItemMutation } from 'graphql/mutation';
+import { upsertOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
 import { getPlantTrait, LINKS, SORT_OPTIONS } from "utils";
 import {
@@ -39,7 +39,7 @@ function ShoppingList({
     const currPlant = Array.isArray(plants) ? plants.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
     const currSku = currPlant?.skus ? currPlant.skus.find(s => s.sku === urlParams.sku) : null;
     const { data: plantData } = useQuery(plantsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
-    const [addOrderItem] = useMutation(addOrderItemMutation);
+    const [upsertOrderItem] = useMutation(upsertOrderItemMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -91,9 +91,9 @@ function ShoppingList({
             return;
         }
         mutationWrapper({
-            mutation: addOrderItem,
+            mutation: upsertOrderItem,
             data: { variables: { quantity, orderId: cart?.id, skuId: sku.id } },
-            successCondition: (response) => response.data.addOrderItem,
+            successCondition: (response) => response.data.upsertOrderItem,
             onSuccess: () => onSessionUpdate(),
             successMessage: () => `${quantity} ${name}(s) added to cart.`,
             successData: { buttonText: 'View Cart', buttonClicked: toCart },

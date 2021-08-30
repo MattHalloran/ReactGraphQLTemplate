@@ -177,6 +177,8 @@ model order_item {
   skuId    String @db.Uuid
   order    order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   sku      sku    @relation(fields: [skuId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, skuId], name: "order_item_orderid_skuid_unique")
 }
 
 model phone {

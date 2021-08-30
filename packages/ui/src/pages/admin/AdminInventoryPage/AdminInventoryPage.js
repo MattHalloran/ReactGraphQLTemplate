@@ -77,17 +77,14 @@ function AdminInventoryPage() {
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
             </div>
             <h3>This page has the following features:</h3>
-            <ul>
-                <li>Upload availability from a spreadsheet</li>
-                <li>Create a new SKU, either from scratch or with a plant template</li>
-                <li>Edit an existing SKU</li>
-                <li>Delete a SKU</li>
-            </ul>
+            <p>👉 Upload availability from a spreadsheet</p>
+            <p>👉 Edit/Delete an existing plant</p>
+            <p>👉 Add/Edit/Delete SKUs</p>
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
             <Dropzone
-                dropzoneText={'Drag \'n\' drop upload availability file here or click'}
+                dropzoneText={'Drag \'n\' drop availability file here or click'}
                 maxFiles={1}
                 acceptedFileTypes={['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']}
                 onUpload={availabilityUpload}

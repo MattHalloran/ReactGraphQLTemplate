@@ -176,7 +176,7 @@ function PlantDialog({
                     style={{}}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(plant.latinName ?? getPlantTrait('commonName', plant) ?? 'plant', currSku, quantity)}
+                    onClick={() => onAddToCart(getPlantTrait('commonName', plant) ?? plant.latinName, currSku, quantity)}
                 >Order</Button>
             </Grid>
         </Grid>

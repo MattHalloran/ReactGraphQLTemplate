@@ -1,3 +1,4 @@
+import _ from "underscore";
 
 // Convert price stored in database to user-friendly version
 export const displayPrice = (price) => {
@@ -16,8 +17,5 @@ export const displayPriceToDatabase = (price) => {
     let number = Number(priceString);
     // If number, return cents
     // If not a number, return 'N/A'
-    if (isNaN(number)) {
-        return null;
-    }
-    return number.toFixed(2);
+    return (_.isNumber(number) && number > 0) ? number.toFixed(2) : null;
 }

@@ -1,14 +1,14 @@
 import { gql } from 'graphql-tag';
 import { orderItemFields } from 'graphql/fragment';
 
-export const addOrderItemMutation = gql`
+export const upsertOrderItemMutation = gql`
     ${orderItemFields}
-    mutation addOrderItem(
+    mutation upsertOrderItem(
         $quantity: Int!
         $orderId: ID
         $skuId: ID!
     ) {
-    addOrderItem(
+    upsertOrderItem(
         quantity: $quantity
         orderId: $orderId
         skuId: $skuId

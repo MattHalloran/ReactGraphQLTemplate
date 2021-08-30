@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { LINKS, PUBS, PubSub } from 'utils';
@@ -37,38 +37,38 @@ const useStyles = makeStyles((theme) => ({
 
 function CartPage({
     business,
-    customer_id,
     cart,
+    onSessionUpdate
 }) {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final
-    const [currCart, setcurrCart] = useState(null)
     const [changedCart, setChangedCart] = useState(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
     const [submitOrder] = useMutation(submitOrderMutation);
 
-    console.log('LOADING CART PAGE', cart, changedCart)
+    useEffect(() => {
+        console.log('CART, not changedcart, updated')
+        setChangedCart(cart);
+    }, [cart])
 
     const orderUpdate = () => {
-        if (!customer_id) {
+        if (!cart?.customer?.id) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error' });
             return;
         }
         mutationWrapper({
             mutation: updateOrder,
-            data: { variables: { input: changedCart } },
+            data: { variables: { input: { 
+                id: changedCart.id,
+                desiredDeliveryDate: changedCart.desiredDeliveryDate,
+                isDelivery: changedCart.isDelivery,
+                items: changedCart.items.map(i => ({ id: i.id, quantity: i.quantity }))} } },
             successCondition: (response) => response.data.updateOrder,
-            onSuccess: (response) => setChangedCart(response.data.updateOrder),
+            onSuccess: () => onSessionUpdate(),
             successMessage: () => 'Order successfully updated.',
         })
     }
-
-    const cartUpdate = useCallback((data) => {
-        console.log('CART UPDATE', data);
-        if (currCart === null && data !== null) setcurrCart(data);
-        setChangedCart(data);
-    }, [currCart])
 
     const requestQuote = useCallback(() => {
         submitOrder({ variables: { id: cart.id } })
@@ -83,12 +83,12 @@ function CartPage({
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated
-        if (!_.isEqual(currCart, changedCart)) {
+        if (!_.isEqual(cart, changedCart)) {
             PubSub.publish(PUBS.Snack, {message: 'Please click "UPDATE ORDER" before submitting.', severity: 'warning'});
             return;
         }
         // Disallow empty orders
-        if (currCart.items.length <= 0) {
+        if (cart.items.length <= 0) {
             PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
@@ -98,9 +98,9 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [changedCart, currCart, requestQuote, business]);
+    }, [changedCart, cart, requestQuote, business]);
 
-    console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
+    console.log('rendering options', _.isEqual(cart, changedCart), cart, changedCart)
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -136,14 +136,13 @@ function CartPage({
                 <Typography variant="h3" component="h1">Cart</Typography>
             </div>
             { options}
-            <CartTable className={classes.padTop} cart={cart} onUpdate={cartUpdate} />
+            <CartTable className={classes.padTop} cart={changedCart} onUpdate={(d) => setChangedCart(d)} />
             { options}
         </div>
     );
 }
 
 CartPage.propTypes = {
-    customer_id: PropTypes.string,
     cart: PropTypes.object,
 }
 
