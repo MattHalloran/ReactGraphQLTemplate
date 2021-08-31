@@ -12133,6 +12133,11 @@ react-is@^17.0.0, react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
+react-lazily@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/react-lazily/-/react-lazily-0.9.0.tgz#370a79f8cc646752a4687e15fa7ad502a86b1915"
+  integrity sha512-FNLl1ZsKuDtFepqrNSrhlmAooUgXk6QtPnggc9kM7kXxsvdL1kZANjcJtSkRaFeIfFHSDvQrwxaYsM7q4Ry+hg==
+
 react-markdown@^6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/react-markdown/-/react-markdown-6.0.2.tgz#d89be45c278b1e5f0196f851fffb11e30c69f027"

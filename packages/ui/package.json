@@ -31,6 +31,7 @@
         "react-dynamic-sitemap": "^1.2.0",
         "react-gallery-carousel": "^0.1.4",
         "react-hotkeys": "^2.0.0-pre9",
+        "react-lazily": "^0.9.0",
         "react-markdown": "^6.0.2",
         "react-phone-input-2": "^2.14.0",
         "react-router-dom": "^5.2.0",
