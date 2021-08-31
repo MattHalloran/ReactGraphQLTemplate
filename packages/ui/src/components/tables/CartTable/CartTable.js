@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
     QuantityBox,
@@ -54,7 +54,7 @@ function CartTable({
     ...props
 }) {
     const classes = useStyles();
-    let all_total = Array.isArray(cart?.items) ? cart.items.map(i => i.sku.price*i.availability).reduce((a, b) => (a*1)+b, 0) : -1;
+    let all_total = Array.isArray(cart?.items) ? cart.items.map(i => (+i.sku.price)*(+i.quantity)).reduce((a, b) => (+a)+(+b), 0) : -1;
 
     const updateCartField = useCallback((fieldName, value) => {
         onUpdate(updateObject(cart, fieldName, value));
@@ -86,14 +86,14 @@ function CartTable({
     const cart_item_to_row = useCallback((data, key) => {
         const commonName = getPlantTrait('commonName', data.sku.plant);
         const quantity = data.quantity;
-        let price = parseInt(data.sku.price);
+        let price = +data.sku.price;
         let total;
         if (isNaN(price)) {
-            price = 'TBD';
             total = 'TBD';
+            price = 'TBD';
         } else {
-            price = displayPrice(price);
             total = displayPrice(quantity * price);
+            price = displayPrice(price);
         }
 
         let display;

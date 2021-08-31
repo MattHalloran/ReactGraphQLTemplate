@@ -64,18 +64,24 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     container: {
-        padding: theme.spacing(1),
         background: theme.palette.background.default,
-        minHeight: '-webkit-fill-available',
+        flex: 'auto',
+        paddingBottom: '15vh',
     },
     displayImage: {
-        maxHeight: '50vh',
+        maxHeight: '75vh',
     },
     avatar: {
         background: 'transparent',
     },
     optionsContainer: {
-        marginBottom: theme.spacing(1),
+        padding: theme.spacing(2),
+    },
+    bottom: {
+        background: theme.palette.primary.main,
+        position: 'fixed',
+        bottom: '0',
+        width: '-webkit-fill-available',
     },
 }));
 
@@ -123,8 +129,8 @@ function PlantDialog({
     }, [plant, orderOptions])
 
     const images = Array.isArray(plant.images) ? plant.images.map(d => ({
-        alt: d.image.alt, 
-        src: `${SERVER_URL}/${getImageSrc(d.image)}`, 
+        alt: d.image.alt,
+        src: `${SERVER_URL}/${getImageSrc(d.image)}`,
         thumbnail: `${SERVER_URL}/${getImageSrc(d.image, IMAGE_SIZE.M)}`
     })) : [];
 
@@ -182,6 +188,22 @@ function PlantDialog({
         </Grid>
     );
 
+    const displayedTraitData = [
+        ['zones', MapIcon, 'Zones'],
+        ['physiographicRegions', MapIcon, 'Physiographic Region'],
+        ['attractsPollinatorsAndWildlifes', BeeIcon, 'Attracted Pollinators and Wildlife'],
+        ['droughtTolerance', NoWaterIcon, 'Drought Tolerance'],
+        ['saltTolerance', SaltIcon, 'Salt Tolerance'],
+        ['bloomColors', ColorWheelIcon, 'Bloom Colors'],
+        ['bloomTimes', CalendarIcon, 'Bloom Times'],
+        ['lightRanges', RangeIcon, 'Light Range'],
+        ['optimalLight', SunIcon, 'Optimal Light'],
+        ['soilMoistures', EvaporationIcon, 'Soil Moisture'],
+        ['soilPhs', PHIcon, 'Soil PH'],
+        ['soilTypes', SoilTypeIcon, 'Soil Type']
+    ].map(d => traitIconList(...d)).filter(d => d !== null);
+    console.log('YOPW', displayedTraitData)
+
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar}>
@@ -208,9 +230,9 @@ function PlantDialog({
                 <Grid container spacing={0}>
                     <Grid item lg={6} xs={12}>
                         {
-                            images.length > 0 ? 
-                            <Carousel className={classes.displayImage} canAutoPlay={false} images={images} /> : 
-                            <NoImageWithTextIcon className={classes.displayImage} />
+                            images.length > 0 ?
+                                <Carousel className={classes.displayImage} canAutoPlay={false} images={images} /> :
+                                <NoImageWithTextIcon className={classes.displayImage} />
                         }
                     </Grid>
                     <Grid item lg={6} xs={12}>
@@ -219,33 +241,23 @@ function PlantDialog({
                                 <p>{plant.description}</p>
                             </Collapse>
                             : null}
-                        <ListItem className={classes.menuItem} button onClick={handleDetailsClick}>
-                            <ListItemIcon><InfoIcon /></ListItemIcon>
-                            <ListItemText primary="Details" />
-                            {detailsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                        </ListItem>
-                        <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
-                            <List>
-                                {traitIconList("zones", MapIcon, "Zones")}
-                                {traitIconList("physiographicRegions", MapIcon, "Physiographic Region")}
-                                {traitIconList("attractsPollinatorsAndWildlifes", BeeIcon, "Attracted Pollinators and Wildlife")}
-                                {traitIconList("droughtTolerance", NoWaterIcon, "Drought Tolerance")}
-                                {traitIconList("saltTolerance", SaltIcon, "Salt Tolerance")}
-                                <Divider />
-                                {traitIconList("bloomColors", ColorWheelIcon, "Bloom Colors")}
-                                {traitIconList("bloomTimes", CalendarIcon, "Bloom Times")}
-                                <Divider />
-                                {traitIconList("lightRanges", RangeIcon, "Light Range")}
-                                {traitIconList("optimalLight", SunIcon, "Optimal Light")}
-                                <Divider />
-                                {traitIconList("soilMoistures", EvaporationIcon, "Soil Moisture")}
-                                {traitIconList("soilPhs", PHIcon, "Soil PH")}
-                                {traitIconList("soilTypes", SoilTypeIcon, "Soil Type")}
-                            </List>
-                        </Collapse>
+                        {displayedTraitData.length > 0 ? (
+                            <React.Fragment>
+                                <ListItem className={classes.menuItem} button onClick={handleDetailsClick}>
+                                    <ListItemIcon><InfoIcon /></ListItemIcon>
+                                    <ListItemText primary="Details" />
+                                    {detailsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                </ListItem>
+                                <Collapse in={detailsOpen} timeout='auto' unmountOnExit>
+                                    <List>{displayedTraitData}</List>
+                                </Collapse>
+                            </React.Fragment>
+                        ) : null}
                     </Grid>
                 </Grid>
-                {options}
+                <div className={classes.bottom}>
+                    {options}
+                </div>
             </div>
         </Dialog>
     );
