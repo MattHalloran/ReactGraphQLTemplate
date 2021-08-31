@@ -11,6 +11,8 @@ export const plantFields = gql`
             value
         }
         images {
+            index
+            isDisplay
             image {
                 ...imageFields
             }

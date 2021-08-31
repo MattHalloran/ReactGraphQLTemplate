@@ -61,11 +61,11 @@ const Slider = ({
 
     useEffect(() => {
         if (images === null || images.length === 0) {
-            setSlides(null);
+            setSlides([]);
         } else {
             let copy = [...images, images[0]];
             setSlides(copy.map((s, i) => (
-                <Slide width={width} key={s + i} content={s} />
+                <Slide width={width} key={'slide-'+i} image={s} />
             )))
         }
     }, [width, images])
@@ -79,7 +79,7 @@ const Slider = ({
             >
                 {slides}
             </SliderContent>
-            <Dots slides={images} activeSlide={slideIndex} />
+            <Dots quantity={images.length} activeIndex={slideIndex} />
         </div>
     )
 }

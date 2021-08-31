@@ -1,18 +1,18 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'
-import { 
+import {
     Button,
-    Card, 
+    Card,
     CardActionArea,
     CardActions,
     CardContent,
-    CardMedia, 
+    CardMedia,
     Chip,
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { displayPrice, getPlantTrait } from 'utils';
-import { NoImageIcon } from 'assets/img';
+import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
+import { NoImageWithTextIcon } from 'assets/img';
 import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
@@ -62,40 +62,38 @@ function PlantCard({
         [SKU_STATUS.Active]: classes.active,
     }
 
+    const openWithSku = (e, sku) => {
+        e.stopPropagation();
+        console.log('IN OPEN WITH SKU', sku)
+        onClick({ plant, selectedSku: sku })
+    }
+
     let sizes = plant.skus?.map(s => (
-        <Chip 
-            className={`${classes.skuChip} ${SkuStatus[s.status+''] ?? classes.deleted}`} 
-            label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`} 
-            color="secondary" />
+        <Chip
+            className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
+            label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`}
+            color="secondary" 
+            onClick={(e) => openWithSku(e, s)}
+        />
     ));
 
     let display;
-    const display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay);
+    let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
+    if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
     if (display_data) {
-        display = <CardMedia component="img" src={`${SERVER_URL}/${display_data.src}?size=L`} className={classes.displayImage} alt={display_data.alt} title={plant.latin_name} />
+        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latinName} />
     } else {
-        display = <NoImageIcon className={classes.displayImage} />
-    }
-
-    let subtitle;
-    const commonName = getPlantTrait('commonName', plant);
-    if (commonName) {
-        subtitle = (
-            <Typography gutterBottom variant="body1" component="h3">
-                {commonName}
-            </Typography>
-        )
+        display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
     return (
-        <Card className={classes.root} onClick={() => onClick(plant)}>
+        <Card className={classes.root} onClick={() => onClick({ plant, selectedSku: plant.skus[0] })}>
             <CardActionArea>
                 {display}
                 <CardContent className={classes.content}>
-                    <Typography gutterBottom variant="h6" component="h2">
-                        {plant.latin_name}
+                    <Typography gutterBottom variant="h6" component="h3">
+                        {getPlantTrait('commonName', plant) ?? plant.latinName}
                     </Typography>
-                    {subtitle}
                     <div className="size-container">
                         {sizes}
                     </div>

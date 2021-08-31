@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     Typography
 } from '@material-ui/core';
-import { PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { imagesByLabelQuery } from 'graphql/query';
 import { addImagesMutation, updateImagesMutation } from 'graphql/mutation';
@@ -12,6 +11,7 @@ import {
     Dropzone, 
     WrappedImageList 
 } from 'components';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -27,21 +27,11 @@ function AdminHeroPage() {
     const [updateImages] = useMutation(updateImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
-        PubSub.publish(PUBS.Loading, true);
-        addImages({
-            variables: {
-                files: acceptedFiles,
-                labels: ['hero']
-            }
-        })
-        .then((response) => {
-            refetchImages();
-            PubSub.publish(PUBS.Snack, { message: `Successfully uploaded ${acceptedFiles.length} image(s)`, data: response });
-            PubSub.publish(PUBS.Loading, false);
-        })
-        .catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: addImages,
+            data: { variables: { files: acceptedFiles, labels: ['hero'] } },
+            successMessage: () => `Successfully uploaded ${acceptedFiles.length} image(s).`,
+            onSuccess: () => refetchImages(),
         })
     }
 
@@ -54,31 +44,21 @@ function AdminHeroPage() {
     }, [currImages])
 
     const applyChanges = useCallback((changed) => {
-        PubSub.publish(PUBS.Loading, true);
         // Prepare data for request
         const data = changed.map(d => ({
-            src: d.src,
+            hash: d.hash,
             alt: d.alt,
             description: d.description
         }));
         // Determine which files to mark as deleting
-        const original_srcs = imageData.map(d => d.src);
-        const final_srcs = changed.map(d => d.src);
-        const delete_srcs = original_srcs.filter(s => !final_srcs.includes(s));
+        const originals = imageData.map(d => d.hash);
+        const finals = changed.map(d => d.hash);
+        const deleting = originals.filter(s => !finals.includes(s));
         // Perform update
-        updateImages({
-            variables: {
-                data: data,
-                deleting: delete_srcs
-            }
-        })
-        .then((response) => {
-            PubSub.publish(PUBS.Snack, { message: `Successfully updated images`, data: response });
-            PubSub.publish(PUBS.Loading, false);
-        })
-        .catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: updateImages,
+            data: { variables: { data, deleting, label: 'hero' } },
+            successMessage: () => 'Successfully updated image(s).',
         })
     }, [imageData, updateImages])
 

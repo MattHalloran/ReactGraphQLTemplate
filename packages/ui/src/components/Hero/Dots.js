@@ -29,15 +29,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Dots = ({
-    slides,
-    activeSlide
+    quantity = 0,
+    activeIndex
 }) => {
     const classes = useStyles();
+
+    let slides = [];
+    for (let i = 0; i < quantity; i++) {
+        slides.push(<div key={'dot-'+i} className={`${classes.dot} ${activeIndex === i ? classes.active : classes.inactive}`} />)
+    }
+
     return (
         <div className={classes.dotContainer}>
-            {slides?.map((slide, i) => (
-                <div key={slide} className={`${classes.dot} ${activeSlide === i ? classes.active : classes.inactive}`} />
-            ))}
+            {slides}
         </div>
     )
 }

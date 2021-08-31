@@ -8,8 +8,6 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
 import { schema } from './schema';
 import { context } from './context';
-import { findImageUrl } from './utils';
-import path from 'path';
 
 console.info('Starting server...')
 
@@ -35,14 +33,7 @@ app.use(cors({
 // Set static folders
 app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
-// Before querying image, find the best-match size
-app.use('/images', async (req, res) => {
-    console.log('IN /IMAGESSSSSSS')
-    console.log(req.path)
-    const correct_path = await findImageUrl(`images${req.path}`, req.query.size || 'XL');
-    console.log(correct_path)
-    res.sendFile(`${process.env.PROJECT_DIR}/assets/images/${path.basename(correct_path)}`);
-});
+app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
 app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
@@ -53,7 +44,7 @@ const apollo_options = new ApolloServer({
     schema: schema,
     context: (c) => context(c),
     uploads: false, // Disables old version of graphql-upload
-    validationRules: [ depthLimit(6) ] // Prevents DoS attack from arbitrarily-nested query
+    validationRules: [ depthLimit(8) ] // Prevents DoS attack from arbitrarily-nested query
  });
 apollo_options.applyMiddleware({ 
     app, 

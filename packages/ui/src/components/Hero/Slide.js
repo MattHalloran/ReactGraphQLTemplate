@@ -2,6 +2,7 @@ import React from 'react';
 import { memo } from 'react'
 import { makeStyles } from '@material-ui/styles';
 import { SERVER_URL } from '@local/shared';
+import { getImageSrc } from 'utils';
 
 const useStyles = makeStyles({
     slide: props => ({
@@ -12,10 +13,11 @@ const useStyles = makeStyles({
     }),
 });
 
-const Slide = memo(({ content, width }) => {
-    const classes = useStyles({width});
+const Slide = memo(({ image, width }) => {
+    console.log('IN SLIDE', image)
+    const classes = useStyles({ width });
     return (
-        <img className={classes.slide} src={`${SERVER_URL}/${content}?size=XL`} alt='' />
+        <img className={classes.slide} src={image ? `${SERVER_URL}/${getImageSrc(image)}` : ''} alt={image?.alt ?? ''} />
     )
 })
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { LINKS, PUBS, PubSub } from 'utils';
@@ -14,6 +14,7 @@ import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import _ from 'underscore';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -36,63 +37,56 @@ const useStyles = makeStyles((theme) => ({
 
 function CartPage({
     business,
-    customer_id,
     cart,
+    onSessionUpdate
 }) {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final
-    const [currCart, setcurrCart] = useState(null)
     const [changedCart, setChangedCart] = useState(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
     const [submitOrder] = useMutation(submitOrderMutation);
 
-    console.log('LOADING CART PAGE', cart, changedCart)
+    useEffect(() => {
+        console.log('CART, not changedcart, updated')
+        setChangedCart(cart);
+    }, [cart])
 
     const orderUpdate = () => {
-        if (!customer_id) {
+        if (!cart?.customer?.id) {
             PubSub.publish(PUBS.Snack, {message: 'Failed to update order.', severity: 'error' });
             return;
         }
-        PubSub.publish(PUBS.Loading, true);
-        updateOrder({ variables: { input: changedCart } }).then((response) => {
-            const data = response.data.updateOrder;
-            PubSub.publish(PUBS.Loading, false);
-            if (data !== null) {
-                setChangedCart(data);
-                PubSub.publish(PUBS.Snack, { message: 'Order successfully updated.' });
-            } else PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error' });
-        }).catch((response) => {
-            PubSub.publish(PUBS.Loading, false);
-            PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
+        mutationWrapper({
+            mutation: updateOrder,
+            data: { variables: { input: { 
+                id: changedCart.id,
+                desiredDeliveryDate: changedCart.desiredDeliveryDate,
+                isDelivery: changedCart.isDelivery,
+                items: changedCart.items.map(i => ({ id: i.id, quantity: i.quantity }))} } },
+            successCondition: (response) => response.data.updateOrder,
+            onSuccess: () => onSessionUpdate(),
+            successMessage: () => 'Order successfully updated.',
         })
     }
 
-    const cartUpdate = useCallback((data) => {
-        console.log('CART UPDATE', data);
-        if (currCart === null && data !== null) setcurrCart(data);
-        setChangedCart(data);
-    }, [currCart])
-
     const requestQuote = useCallback(() => {
-        submitOrder({ variables: { id: cart.id } })
-            .then(() => {
-                PubSub.publish(PUBS.AlertDialog, {message: 'Order submitted! We will be in touch with you soon :)'});
-            })
-            .catch(err => {
-                console.error(err);
-                PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'});
-            })
+        mutationWrapper({
+            mutation: submitOrder,
+            data: { variables: { id: cart.id } },
+            onSuccess: () => PubSub.publish(PUBS.AlertDialog, { message: 'Order submitted! We will be in touch with you soon😊' }),
+            onError: () => PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'})
+        })
     }, [cart, business, submitOrder])
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated
-        if (!_.isEqual(currCart, changedCart)) {
+        if (!_.isEqual(cart, changedCart)) {
             PubSub.publish(PUBS.Snack, {message: 'Please click "UPDATE ORDER" before submitting.', severity: 'warning'});
             return;
         }
         // Disallow empty orders
-        if (currCart.items.length <= 0) {
+        if (cart.items.length <= 0) {
             PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
@@ -102,9 +96,9 @@ function CartPage({
             firstButtonClicked: requestQuote,
             secondButtonText: 'No',
         });
-    }, [changedCart, currCart, requestQuote, business]);
+    }, [changedCart, cart, requestQuote, business]);
 
-    console.log('rendering options', _.isEqual(cart, changedCart), _.isEqual(cart?.items, changedCart?.items))
+    console.log('rendering options', _.isEqual(cart, changedCart), cart, changedCart)
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -140,14 +134,13 @@ function CartPage({
                 <Typography variant="h3" component="h1">Cart</Typography>
             </div>
             { options}
-            <CartTable className={classes.padTop} cart={cart} onUpdate={cartUpdate} />
+            <CartTable className={classes.padTop} cart={changedCart} onUpdate={(d) => setChangedCart(d)} />
             { options}
         </div>
     );
 }
 
 CartPage.propTypes = {
-    customer_id: PropTypes.string,
     cart: PropTypes.object,
 }
 

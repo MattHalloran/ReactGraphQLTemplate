@@ -1,20 +1,16 @@
 import React from 'react';
-import { 
-    Breadcrumbs, 
-    Link 
-} from '@material-ui/core';
 import { LINKS } from 'utils';
+import { BreadcrumbsBase } from '../BreadcrumbsBase/BreadcrumbsBase';
 
-function InformationalBreadcrumbs({...props}) {
-    return (
-        <Breadcrumbs separator="|" aria-label="About us breadcrumb" {...props}>
-            <Link href={LINKS.About}>About Us</Link>
-            <Link href={LINKS.Gallery}>Gallery</Link>
-        </Breadcrumbs>
-    );
-}
+const paths = [
+    ['About Us', LINKS.About],
+    ['Gallery', LINKS.Gallery]
+]
 
-InformationalBreadcrumbs.propTypes = {
-}
+const InformationalBreadcrumbs = ({...props}) => BreadcrumbsBase({
+    paths: paths,
+    ariaLabel: 'About us breadcrumb',
+    ...props
+})
 
 export { InformationalBreadcrumbs };

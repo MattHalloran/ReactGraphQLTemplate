@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { IMAGE_SIZE, SERVER_URL, IMAGE_EXTENSION } from '@local/shared';
+import { IMAGE_SIZE, IMAGE_EXTENSION } from '@local/shared';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import imghash from 'imghash';
@@ -36,27 +36,6 @@ export function clean(file, defaultFolder) {
     if (!cleanPath.includes('.')) return { name: null, ext: null, folder: folder ?? defaultFolder };
     const { name, ext } = path.parse(path.basename(cleanPath));
     return { name, ext, folder: folder ?? defaultFolder };
-}
-
-// From a src string, return the filename stored in the database
-// (ex: 'https://thewebsite.com/api/images/boop-xl.png' -> { name: 'boop', ext: '.png')
-export function plainImageName(src) {
-    // 'https://thewebsite.com/api/images/boop-xl.png' -> 'boop-xl.png'
-    let fileName = path.basename(src);
-    console.log('IN PLAIN IMAGE NAME', fileName)
-    if (!fileName || fileName.length <= 0) return { name: null, ext: null };
-    // 'boop-xl.png' -> { name: 'boop-xl', ext: 'png' }
-    let { name, ext } = clean(fileName);
-    let size;
-    // 'boop-xl' -> 'boop'
-    for (const [key, value] of Object.keys(IMAGE_SIZE)) {
-        if (name.endsWith(`-${key}`)) {
-            size = value;
-            name = name.slice(0, -(key.length + 1));
-            break;
-        }
-    }
-    return { name, ext, size };
 }
 
 // Returns a filename that can be used at the specified path
@@ -103,26 +82,6 @@ function resizeOptions(width, height) {
     return sizes;
 }
 
-// Returns the filepath of the requested image at the closest available size
-export async function findImageUrl(filename, size) {
-    const { name, ext, folder } = clean(filename, 'images');
-    // If size not specified, attempts to return original
-    if (size === null || size === undefined) {
-        if (fs.existsSync(`${ASSET_DIR}/${folder}/${filename}`)) return `${SERVER_URL}/${folder}/${filename}`;
-    }
-    // Search sizes by closest match
-    let size_array = Object.keys(IMAGE_SIZE).map(key => ({ key, value: IMAGE_SIZE[size] }));
-    let size_index = size_array.findIndex(obj => obj.key === size);
-    if (size_index < 0) size_index = size_array.length - 1;
-    for (let i = size_array.length; i > 0; i--) {
-        const curr = `${folder}/${name}-${size_array[(i + size_index) % (size_array.length)].key}${ext}`;
-        console.log(curr, (i + size_index) % (size_array.length))
-        if (fs.existsSync(`${ASSET_DIR}/${curr}`)) return `${SERVER_URL}/${curr}`;
-    }
-    if (fs.existsSync(`${ASSET_DIR}/${folder}/${folder}/${name}${ext}`)) return `${SERVER_URL}/${folder}/${folder}/${name}${ext}`;
-    return null;
-}
-
 // Saves a file in the specified folder at the server root directory
 // Returns an object containing a success boolean and the file name
 // Arguments:
@@ -159,20 +118,19 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
 
 // Saves an image file and its resizes in the specified folder at the server root directory
 // Returns: {
-//      success - boolean indicating succes
-//      filename - the file name
-//      dimensions - width and height of image
-//      hash - the image's hash
+//      success
+//      src
+//      hash
 //}
 // Arguments:
 // upload - image upload
 // alt - alt text for image
 // description - image description
 // errorOnDuplicate - If image previously updated, throw error
-export async function saveImage(upload, alt, description, errorOnDuplicate = false) {
+export async function saveImage({ file, alt, description, labels, errorOnDuplicate = false }) {
     try {
         // Destructure data. Each file upload is a promise
-        const { createReadStream, filename, mimetype } = await upload;
+        const { createReadStream, filename, mimetype } = await file;
         // Make sure that the file is actually an image
         if (!mimetype.startsWith('image/')) throw Error('Invalid mimetype')
         // Make sure image type is supported
@@ -187,51 +145,65 @@ export async function saveImage(upload, alt, description, errorOnDuplicate = fal
         const dimensions = sizeOf(image_buffer);
         // Determine image hash
         const hash = await imghash.hash(image_buffer);
-        let image;
         // Check if hash already exists (image previously uploaded)
-        const previously_uploaded = await prisma[TABLES.Image].findUnique({ where: { hash: hash } });
-        if (previously_uploaded) {
-            if (errorOnDuplicate) throw Error('File has already been uploaded');
-        } else {
-            // Download the original image
-            await sharp(image_buffer).toFile(`${ASSET_DIR}/${folder}/${name}${ext}-XXL`);
-            // Find resize options
-            const sizes = resizeOptions(dimensions.width, dimensions.height);
-            for (const [key, value] of Object.entries(sizes)) {
-                // XXL reserved for original image
-                if (key === 'XXL') continue;
-                // Use largest dimension for resize
-                let sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
-                await sharp(image_buffer)
-                    .resize({ [sizing_dimension]: value })
-                    .toFile(`${ASSET_DIR}/${folder}/${name}-${key}${ext}`);
+        const previously_uploaded = await prisma[TABLES.Image].findUnique({ where: { hash } });
+        if (previously_uploaded && errorOnDuplicate) throw Error('File has already been uploaded');
+        // Download the original image, and store metadata in database
+        const full_size_filename = `${folder}/${name}-XXL${ext}`;
+        await sharp(image_buffer).toFile(`${ASSET_DIR}/${full_size_filename}`);
+        const imageData = { hash, alt, description };
+        await prisma[TABLES.Image].upsert({
+            where: { hash },
+            create: imageData,
+            update: imageData
+        })
+        await prisma[TABLES.ImageFile].deleteMany({ where: { hash } });
+        await prisma[TABLES.ImageFile].create({ data: { 
+            hash, 
+            src: full_size_filename, 
+            width: dimensions.width, 
+            height: dimensions.height 
+        }})
+        if (Array.isArray(labels)) {
+            await prisma[TABLES.ImageLabels].deleteMany({ where: { hash } });
+            for (let i = 0; i < labels.length; i++) {
+                await prisma[TABLES.ImageLabels].create({ data: {
+                    hash,
+                    label: labels[i],
+                    index: i
+                }})
             }
-            image = await prisma[TABLES.Image].create({ data: { 
-                hash: hash,
-                folder: 'images',
-                file: name,
-                ext: ext,
-                alt: alt,
-                description: description,
+        }
+        // Find resize options
+        const sizes = resizeOptions(dimensions.width, dimensions.height);
+        for (const [key, value] of Object.entries(sizes)) {
+            // XXL reserved for original image
+            if (key === 'XXL') continue;
+            // Use largest dimension for resize
+            const sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
+            const resize_filename = `${folder}/${name}-${key}${ext}`;
+            await sharp(image_buffer)
+                .resize({ [sizing_dimension]: value })
+                .toFile(`${ASSET_DIR}/${resize_filename}`);
+            await prisma[TABLES.ImageFile].create({ data: {
+                hash,
+                src: resize_filename,
                 width: dimensions.width,
                 height: dimensions.height
-             } });
+            }})
         }
         return {
             success: true,
-            filename: `${name}${ext}`,
-            dimensions: dimensions,
-            hash: hash,
-            imageId: image.id
+            src: full_size_filename,
+            hash: hash
         }
     } catch (error) {
         console.log('saveImage ran into an error')
         console.error(error);
         return {
             success: false,
-            filename: filename,
-            dimensions: { width: 0, height: 0 },
-            hash: null
+            src: null,
+            hash: null,
         }
     }
 }
@@ -242,15 +214,8 @@ export async function saveImage(upload, alt, description, errorOnDuplicate = fal
 // folder - folder in server directory (ex: 'images')
 export async function deleteFile(file) {
     try {
-        console.log('IN DELTE FILE', file)
         const { name, ext, folder } = clean(file);
-        let fullname = `${ASSET_DIR}/${folder}/${name}${ext}`;
-        console.log(name, ext, folder, fullname)
-        if (!fs.existsSync(fullname)) {
-            console.error(`Could not delete file ${fullname}: not found`);
-            return false;
-        }
-        fs.unlinkSync(fullname);
+        fs.unlinkSync(`${ASSET_DIR}/${folder}/${name}${ext}`);
         return true;
     } catch (error) {
         console.error(error);
@@ -258,20 +223,22 @@ export async function deleteFile(file) {
     }
 }
 
-// Deletes an image and all resizes
-// Arguments:
-// filename - name of the full image
-// folder - name of the folder
-export async function deleteImage(file) {
-    console.log('IN DELETE IMAGE', file)
-    const { name, ext, folder: fileFolder } = plainImageName(file);
-    const folder = fileFolder || 'images';
-    console.log(name, ext, folder);
-    let files = [`${folder}/${name}${ext}`];
-    Object.keys(IMAGE_SIZE).forEach(key => files.push(`${folder}/${name}-${key}${ext}`));
+// Deletes an image and all resizes, using its hash
+export async function deleteImage(hash) {
+    // Find all files associated with image
+    const imageData = await prisma[TABLES.Image].findUnique({ 
+        where: { hash },
+        select: { files: { select: { src: true } } }
+    });
+    if (!imageData) return false;
+    // Delete database information for image
+    await prisma[TABLES.Image].delete({ where: { hash }});
+    // Delete image files
     let success = true;
-    for (let i = 0; i < files.length; i++) {
-        if (!await deleteFile(files[i])) success = false;
+    if (Array.isArray(imageData.files)) {
+        for (const file of imageData.files) {
+            if (!await deleteFile(file.src)) success = false;
+        }
     }
     return success;
 }

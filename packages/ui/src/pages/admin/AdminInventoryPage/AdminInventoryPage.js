@@ -23,6 +23,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -42,8 +43,8 @@ function AdminInventoryPage() {
     const classes = useStyles();
     const [showActive, setShowActive] = useState(true);
     const [searchString, setSearchString] = useState('');
-    // Selected plant data. Used for popup
-    const [currPlant, setCurrPlant] = useState(null);
+    // Selected plant data. Used for popup. { plant, selectedSku }
+    const [selected, setSelected] = useState(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
@@ -51,76 +52,39 @@ function AdminInventoryPage() {
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
-        uploadAvailability({
-            variables: {
-                file: acceptedFiles[0]
-            }
+        mutationWrapper({
+            mutation: uploadAvailability,
+            data: { variables: { file: acceptedFiles[0] } },
+            onSuccess: () => PubSub.publish(PUBS.AlertDialog, {
+                message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
+                firstButtonText: 'OK',
+            }),
         })
-            .then((response) => {
-                PubSub.publish(PUBS.AlertDialog, {
-                    message: 'Availability uploaded. This process can take up to 30 seconds. The page will update automatically. Please be patient💚',
-                    firstButtonText: 'OK',
-                });
-                PubSub.publish(PUBS.Loading, false);
-            })
-            .catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred', severity: 'error', data: response });
-            })
     }
 
-    // const deleteSku = (sku) => {
-    //     if (!window.confirm('SKUs can be hidden from the shopping page. Are you sure you want to permanently delete this SKU?')) return;
-    //     modifySku(sku.sku, 'DELETE', {})
-    //         .then((response) => {
-    //             //TODO update list to reflect status chagne
-    //             console.log('TODOOO')
-    //         })
-    //         .catch((error) => {
-    //             console.error(error);
-    //             alert("Failed to delte sku");
-    //         });
-    // }
-
-    // const editSku = (sku_data) => {
-    //     setCurrPlant(sku_data);
-    // }
-
-    // const hideSku = (sku) => {
-    //     let operation = sku.status === 'ACTIVE' ? 'HIDE' : 'UNHIDE';
-    //     modifySku(sku.sku, operation, {})
-    //         .then((response) => {
-    //             //TODO update list to reflect status chagne
-    //             console.log('TODOOO')
-    //         })
-    //         .catch((error) => {
-    //             console.error("Failed to modify sku", error);
-    //         });
-    // }
+    console.log('ADMIN INVENTORY SELECTED IS', selected)
 
     return (
         <div id="page">
             <EditPlantDialog
-                plant={currPlant}
+                plant={selected?.plant}
+                selectedSku={selected?.selectedSku}
                 trait_options={traitOptions?.traitOptions}
-                open={currPlant !== null}
-                onClose={() => setCurrPlant(null)} />
+                open={selected !== null}
+                onClose={() => setSelected(null)} />
             <AdminBreadcrumbs />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
             </div>
             <h3>This page has the following features:</h3>
-            <ul>
-                <li>Upload availability from a spreadsheet</li>
-                <li>Create a new SKU, either from scratch or with a plant template</li>
-                <li>Edit an existing SKU</li>
-                <li>Delete a SKU</li>
-            </ul>
+            <p>👉 Upload availability from a spreadsheet</p>
+            <p>👉 Edit/Delete an existing plant</p>
+            <p>👉 Add/Edit/Delete SKUs</p>
             <div>
                 {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
             </div>
             <Dropzone
-                dropzoneText={'Drag \'n\' drop upload availability file here or click'}
+                dropzoneText={'Drag \'n\' drop availability file here or click'}
                 maxFiles={1}
                 acceptedFileTypes={['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']}
                 onUpload={availabilityUpload}
@@ -158,7 +122,7 @@ function AdminInventoryPage() {
             <div className={classes.cardFlex}>
                 {plantData?.plants?.map((plant, index) => <PlantCard key={index}
                     plant={plant}
-                    onClick={() => setCurrPlant(plant)} />)}
+                    onClick={setSelected} />)}
             </div>
         </div >
     );

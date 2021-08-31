@@ -1,20 +1,16 @@
 import React from 'react';
-import { 
-    Breadcrumbs, 
-    Link 
-} from '@material-ui/core';
 import { LINKS } from 'utils';
+import { BreadcrumbsBase } from '../BreadcrumbsBase/BreadcrumbsBase';
 
-function PolicyBreadcrumbs({...props}) {
-    return (
-        <Breadcrumbs separator="|" aria-label="Policies breadcrumb" {...props}>
-            <Link href={LINKS.PrivacyPolicy}>Privacy</Link>
-            <Link href={LINKS.Terms}>{'Terms & Conditions'}</Link>
-        </Breadcrumbs>
-    );
-}
+const paths = [
+    ['Privacy', LINKS.PrivacyPolicy],
+    ['Terms & Conditions', LINKS.Terms]
+]
 
-PolicyBreadcrumbs.propTypes = {
-}
+const PolicyBreadcrumbs = ({...props}) => BreadcrumbsBase({
+    paths: paths,
+    ariaLabel: 'Policies breadcrumb',
+    ...props
+})
 
 export { PolicyBreadcrumbs };

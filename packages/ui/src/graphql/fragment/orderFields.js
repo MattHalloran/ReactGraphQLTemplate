@@ -19,5 +19,8 @@ export const orderFields = gql`
             throughfare
             premise
         }
+        customer {
+            id
+        }
     }
 `

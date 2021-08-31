@@ -12,6 +12,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/styles';
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+import { getImageSrc } from 'utils';
+import { SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -88,7 +90,7 @@ function ImageCard({
             ref={ref}
         >
             <CardContent className={classes.content}>
-                <CardMedia image={`${data.src}`} className={classes.displayImage} />
+                <CardMedia image={`${SERVER_URL}/${getImageSrc(data)}`} className={classes.displayImage} />
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="edit image data" onClick={onEdit}>

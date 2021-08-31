@@ -11,4 +11,5 @@ export * from './updateOrder';
 export * from './updateImages';
 export * from './updatePlant';
 export * from './uploadAvailability';
+export * from './upsertOrderItem';
 export * from './writeAssets';

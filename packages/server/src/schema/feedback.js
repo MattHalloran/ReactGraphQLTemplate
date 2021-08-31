@@ -46,7 +46,7 @@ export const resolvers = {
             const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
             const customer_ids = [...new Set(specified.map(s => s.customerId))];
-            if (!context.req.isAdmin && (customer_ids.length > 1 || context.req.token.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
+            if (!context.req.isAdmin && (customer_ids.length > 1 || context.req.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
         }
     }

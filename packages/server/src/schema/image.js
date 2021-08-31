@@ -2,17 +2,10 @@ import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import { CODE, IMAGE_SIZE } from '@local/shared';
 import { CustomError } from '../error';
-import { deleteImage, plainImageName, saveImage } from '../utils';
+import { deleteImage, saveImage } from '../utils';
 import { PrismaSelect } from '@paljs/plugins';
 
 const _model = TABLES.Image;
-
-// Query image data from a src path (ex: 'https://thewebsite.com/api/images/boop.png')
-async function imageFromSrc(src, prisma) {
-    // Parse name, extension, and folder from src path. This gives a unique row
-    let { name, ext } = plainImageName(src);
-    return await prisma[_model].findUnique({ where: { image_folder_file_ext_unique: { file: name, ext, folder: 'images' }} });
-}
 
 export const typeDef = gql`
     enum ImageSize {
@@ -27,23 +20,29 @@ export const typeDef = gql`
     }
 
     input ImageUpdate {
-        src: String!
+        hash: String!
         alt: String
         description: String
     }
 
     type AddImageResponse {
-        successfulFileNames: [String!]!
-        failedFileNames: [String!]!
+        success: Boolean!
+        src: String
+        hash: String
+    }
+
+    type ImageFile {
+        hash: String!
+        src: String!
+        width: Int!
+        height: Int!
     }
 
     type Image {
-        id: ID!
-        src: String!
+        hash: String!
         alt: String
         description: String
-        width: Int!
-        height: Int!
+        files: [ImageFile!]
     }
 
     extend type Query {
@@ -54,14 +53,16 @@ export const typeDef = gql`
         addImages(
             files: [Upload!]!
             alts: [String]
-            labels: [String!]!
-        ): AddImageResponse!
+            descriptions: [String]
+            labels: [String!]
+        ): [AddImageResponse!]!
         updateImages(
             data: [ImageUpdate!]!
             deleting: [String!]
+            label: String
         ): Boolean!
-        deleteImagesById(
-            ids: [ID!]!
+        deleteImages(
+            hashes: [String!]!
         ): Count!
         # Images with labels that are not in this request will be saved
         deleteImagesByLabel(
@@ -74,110 +75,99 @@ export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
         imagesByLabel: async (_, args, context, info) => {
-            // Locate images in database
-            let image_data = await context.prisma[_model].findMany((new PrismaSelect(info).value), { 
-                where: { 
-                    labels: { 
-                        contains: { label: args.label }
-                    } 
-                } 
+            // Get all images with label
+            let images = await context.prisma[_model].findMany({
+                where: { labels: { some: { label: args.label } } },
+                select: { hash: true, labels: { select: { label: true, index: true } } }
+            })
+            // Sort by position
+            images = images.sort((a, b) => {
+                const aIndex = a.labels.find(l => l.label === args.label);
+                const bIndex = b.labels.find(l => l.label === args.label);
+                return aIndex > bIndex;
+            })
+            return await context.prisma[_model].findMany({ 
+                where: { hash: { in: images.map(i => i.hash) } },
+                ...(new PrismaSelect(info).value)
             });
-            return image_data;
         }
     },
     Mutation: {
         addImages: async (_, args, context) => {
+            console.log('ADD IMAGES', args.labels)
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
             // If alts provided, must match length of files
             if (args.alts && args.alts.length !== args.files.length) return new CustomError(CODE.InvalidArgs);
-            let successfulFileNames = [];
-            let failedFileNames = [];
+            let results = [];
             // Loop through every image passed in
             for (let i = 0; i < args.files.length; i++) {
-                const { success, filename: finalFilename, hash } = await saveImage(args.files[i], args.alts ? args.alts[i] : undefined, undefined, false)
-                if (success) {
-                    successfulFileNames.push(finalFilename);
-                    for (let j = 0; j < args.labels.length; j++) {
-                        await context.prisma[TABLES.ImageLabels].create({ data: { 
-                            hash: hash,
-                            label: args.labels[j]
-                         } });
-                    }
-                } else {
-                    console.error('NOT SUCCESSFUL')
-                    failedFileNames.push(filename);
-                }
+                results.push(await saveImage({
+                    file: args.files[i],
+                    alt: args.alts ? args.alts[i] : undefined,
+                    description: args.descriptions ? args.descriptions[i] : undefined,
+                    labels: args.labels,
+                    errorOnDuplicate: false
+                }))
             }
-            return {
-                successfulFileNames,
-                failedFileNames
-            };
+            return results;
         },
         updateImages: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Loop through update data passed in
             for (let i = 0; i < args.data.length; i++) {
-                const image = await imageFromSrc(args.data[i].src, context.prisma);
-                console.log('IN UPDATE IMAGES', args.data[i])
+                const curr = args.data[i];
+                if (args.label) {
+                    console.log('UPDATEEEEE')
+                    console.log(args.data[i].hash)
+                    // Update position in label
+                    await context.prisma[TABLES.ImageLabels].update({
+                        where: { image_labels_hash_label_unique: { hash: curr.hash, label: args.label } },
+                        data: { index: i }
+                    })
+                }
+                // Update alt and description
                 await context.prisma[_model].update({
-                    where: { id: image.id },
+                    where: { hash: curr.hash },
                     data: { 
-                        alt: args.data[i].alt,
-                        description: args.data[i].description,
+                        alt: curr.alt,
+                        description: curr.description,
                     }
                 })
             }
             if (!args.deleting) return true;
             // Loop through delete data passed in
-            for (let i = 0; i < args.deleting.length; i++) {
-                const image = await imageFromSrc(args.deleting[i], context.prisma);
-                console.info('deleting image...', image);
-                await deleteImage(`${image.file}${image.ext}`);
-                await context.prisma[_model].delete({ where: { id: image.id } })
+            for (const hash of args.deleting) {
+                await deleteImage(hash);
             }
             return true;
         },
-        deleteImagesById: async (_, args, context) => {
+        deleteImages: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // Delete the files
-            const images = context.prisma[_model].findMany({ where: { id: args.ids } });
-            for (const image of images) {
-                await deleteImage(image.src);
+            let count = 0;
+            for (const hash of args.hashes) {
+                if (await deleteImage(hash)) count++;
             }
-            return await context.prisma[_model].deleteMany({ where: { id: { in: images.ids } } });
+            return count;
         },
         deleteImagesByLabel: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            // Find all image_label data matching request
-            const labels = await context.prisma[TABLES.ImageLabels].findMany({ 
-                where: { label: { in: args.labels } },
-                select: { 
-                    id: true,
-                    label: true,
-                    image: {
-                        src: true,
-                        labels: {
-                            label: true
-                        }
-                    }
+            const imagesToDelete = await context.prisma[TABLES.Image].findMany({
+                where: { every: { label: { in: args.labels } } },
+                select: {
+                    hash: true
                 }
-            })
-            console.log('GOT LABELS', labels);
-            // Determine which images should be deleted (ones that lost all of their labels)
-            const old_images = labels.map(l => l.image).filter(i => i.labels && i.labels.every(lab => args.labels.includes(lab.label)));
-            console.log('deleting these images')
-            console.log(old_images);
-            // Delete images and labels data
-            const count = await context.prisma[TABLES.ImageLabels].deleteMany({ where: { id: { in: labels.id } } });
-            await context.prisma[_model].deleteMany({ where: { id: { in: old_images.id } } });
-            // Delete image files
-            for (const image of old_images) {
-                await deleteImage(image.src);
+            });
+            await context.prisma[TABLES.ImageLabels].deleteMany({
+                where: { label: { in: args.labels }}
+            });
+            let count = 0;
+            for (const image of imagesToDelete) {
+                if (await deleteImage(image.hash)) count++;
             }
             return count;
         },

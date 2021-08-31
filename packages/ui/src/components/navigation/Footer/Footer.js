@@ -77,10 +77,10 @@ function Footer({
                         <ListItem
                             button
                             component="a"
-                            href={`${SERVER_URL}/public/Confidential_Commercial_Credit_Application-2010.doc`}
+                            href={`${SERVER_URL}/Commercial_Credit_Application-2010.doc`}
                             target='_blank'
                             rel="noopener noreferrer"
-                            download="Confidential_Commercial_Credit_Application"
+                            download={`Commercial Credit Application - ${business?.BUSINESS_NAME?.Short}`}
                         >
                             <ListItemText primary="Credit App" />
                         </ListItem>

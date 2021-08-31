@@ -14,6 +14,7 @@ import { makeStyles } from '@material-ui/styles';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import 'react-phone-input-2/lib/material.css';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -55,7 +56,6 @@ function ProfileForm() {
         },
         validationSchema: profileSchema,
         onSubmit: (values) => {
-            PubSub.publish(PUBS.Loading, true);
             let input = ({
                 id: profile.profile.id,
                 firstName: values.firstName,
@@ -83,20 +83,15 @@ function ProfileForm() {
             if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
             if (profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
             console.log('UPDATING CUSTOMER WITH THE FOLLOWING INPUT', input);
-            updateCustomer({
-                variables: {
+            mutationWrapper({
+                mutation: updateCustomer,
+                data: { variables: {
                     input: input,
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword
-                }
-            }).then((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                if (response.ok) {
-                    PubSub.publish(PUBS.Snack, { message: 'Profile updated.' })
-                } else PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
-            }).catch((response) => {
-                PubSub.publish(PUBS.Loading, false);
-                PubSub.publish(PUBS.Snack, { message: response.message, severity: 'error' });
+                } },
+                successCondition: (response) => response.ok,
+                successMessage: () => 'Profile updated.',
             })
         },
     });

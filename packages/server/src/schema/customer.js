@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
-import moment from 'moment';
 import { customerNotifyAdmin, sendVerificationLink } from '../worker/email/queue';
 import { HASHING_ROUNDS } from '../consts';
 import { PrismaSelect } from '@paljs/plugins';
@@ -13,7 +12,6 @@ const _model = TABLES.Customer;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
 const SOFT_LOCKOUT_DURATION_SECONDS = 15 * 60;
 const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
-const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export const typeDef = gql`
     enum AccountStatus {
@@ -115,7 +113,7 @@ export const resolvers = {
         },
         profile: async (_, _a, context, info) => {
             // Can only query your own profile
-            const customerId = context.req.token.customerId;
+            const customerId = context.req.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].findUnique({ where: { id: customerId }, ...(new PrismaSelect(info).value) });
         }
@@ -149,9 +147,7 @@ export const resolvers = {
             }
             // Reset login attempts after 15 minutes
             const unable_to_reset = [ACCOUNT_STATUS.HardLock, ACCOUNT_STATUS.Deleted];
-            const last_login = moment(customer.lastLoginAttempt, DATE_FORMAT).valueOf();
-            console.log('LAST LOGIN', customer.lastLoginAttempt, last_login);
-            if (!unable_to_reset.includes(customer.status) && moment().valueOf() - last_login > SOFT_LOCKOUT_DURATION_SECONDS) {
+            if (!unable_to_reset.includes(customer.status) && Date.now() - new Date(customer.lastLoginAttempt).getTime() > SOFT_LOCKOUT_DURATION_SECONDS) {
                 customer = await context.prisma[_model].update({
                     where: { id: customer.id },
                     data: { loginAttempts: 0 }
@@ -167,7 +163,7 @@ export const resolvers = {
             // Now we can validate the password
             const validPassword = bcrypt.compareSync(args.password, customer.password);
             if (validPassword) {
-                await generateToken(context.res, customer.id);
+                await generateToken(context.res, customer.id, customer.businessId);
                 await context.prisma[_model].update({
                     where: { id: customer.id },
                     data: { loginAttempts: 0, lastLoginAttempt: new Date().toISOString(), resetPasswordCode: null },
@@ -228,7 +224,7 @@ export const resolvers = {
                 customerId: customer.id,
                 businessId: business.id
             } })
-            await generateToken(context.res, customer.id);
+            await generateToken(context.res, customer.id, customer.businessId);
             // Send verification email
             sendVerificationLink(args.email, customer.id);
             // Send email to business owner
@@ -237,7 +233,7 @@ export const resolvers = {
         },
         updateCustomer: async (_, args, context, info) => {
             // Must be admin, or updating your own
-            if(!context.req.isAdmin && (context.req.token.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             // Check for correct password
             let customer = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
             if(!bcrypt.compareSync(args.currentPassword, customer.password)) return new CustomError(CODE.BadCredentials);

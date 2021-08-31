@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import { useMutation } from '@apollo/client';
 import { writeAssetsMutation } from 'graphql/mutation';
-import { PUBS, PubSub } from 'utils';
+import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -50,17 +50,13 @@ function AdminContactPage({
         // Data must be sent as a file to use writeAssets
         const blob = new Blob([hours], { type: 'text/plain' });
         const file = new File([blob], 'hours.md', { type: blob.type });
-        updateHours({ variables: { files: [file] } })
-            .then((response) => {
-                if (response.data.writeAssets) {
-                    PubSub.publish(PUBS.Snack, { message: 'Hours updated' });
-                } else {
-                    PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error' });
-                }
-            })
-            .catch((error) => {
-                PubSub.publish(PUBS.Snack, { message: 'Failed to update hours', severity: 'error', data: error });
-            });
+        mutationWrapper({
+            mutation: updateHours,
+            data: { variables: { files: [file] } },
+            successCondition: (response) => response.data.writeAssets,
+            successMessage: () => 'Hours updated.',
+            errorMessage: () => 'Failed to update hours.',
+        })
     }
 
     const revertHours = () => {

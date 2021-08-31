@@ -39,9 +39,10 @@ function Routes({
     onRedirect
 }) {
 
-    console.log('RENDERING ROUTES', business)
+    console.log('RENDERING ROUTES', session)
 
     const common = {
+        sessionChecked: session !== null && session !== undefined,
         onSessionUpdate: onSessionUpdate,
         onRedirect: onRedirect,
         userRoles: userRoles,
@@ -182,8 +183,8 @@ function Routes({
                 exact
                 path={LINKS.Cart}
                 render={() => (
-                    <Page title={title('Cart')} {...common}>
-                        <CartPage {...common} customer_tag={session?.tag} cart={cart} />
+                    <Page title={title('Cart')} {...common} restrictedToRoles={Object.values(ROLES)} redirect={LINKS.LogIn}>
+                        <CartPage {...common} cart={cart} />
                     </Page>
                 )}
             />

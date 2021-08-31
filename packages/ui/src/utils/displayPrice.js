@@ -1,9 +1,13 @@
+import _ from "underscore";
 
 // Convert price stored in database to user-friendly version
 export const displayPrice = (price) => {
+    console.log('in display price', price)
     if (!price) return 'N/A';
-    let result = price/100;
+    let result = Number(price);
+    console.log('boop', result)
     if (isNaN(result)) return price;
+    console.log('yet', `$${result.toFixed(2)})`);
     return `$${result.toFixed(2)}`;
 }
 
@@ -16,8 +20,5 @@ export const displayPriceToDatabase = (price) => {
     let number = Number(priceString);
     // If number, return cents
     // If not a number, return 'N/A'
-    if (isNaN(number)) {
-        return null;
-    }
-    return number.toFixed(2) * 100;
+    return (_.isNumber(number) && number > 0) ? number.toFixed(2) : null;
 }

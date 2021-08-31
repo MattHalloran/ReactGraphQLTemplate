@@ -7,7 +7,7 @@ export const updateOrderMutation = gql`
     mutation updateOrder(
         $input: OrderInput!
     ) {
-    login(
+    updateOrder(
         input: $input
     ) {
         ...orderFields

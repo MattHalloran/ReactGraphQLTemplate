@@ -98,7 +98,7 @@ function Navbar({
 
     const logoutCustomer = () => {
         logout().then(() => {
-            onSessionUpdate(null);
+            onSessionUpdate();
             onRedirect(LINKS.Home);
         }).catch(() => {})
     }

@@ -15,6 +15,7 @@ export const STANDARD_TABLES = {
     Email: 'email',
     Feedback: 'feedback',
     Image: 'image',
+    ImageFile: 'image_file',
     Order: 'order',
     OrderItem: 'order_item',
     Phone: 'phone',
