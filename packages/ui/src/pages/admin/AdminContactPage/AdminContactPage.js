@@ -12,6 +12,7 @@ import {
 import { useMutation } from '@apollo/client';
 import { writeAssetsMutation } from 'graphql/mutation';
 import { mutationWrapper } from 'graphql/wrappers';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -39,6 +40,7 @@ function AdminContactPage({
     business
 }) {
     const classes = useStyles();
+    const theme = useTheme();
     const [hours, setHours] = useState('');
     const [updateHours] = useMutation(writeAssetsMutation);
 
@@ -76,7 +78,7 @@ function AdminContactPage({
 
     return (
         <div id="page" className={classes.root}>
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Contact Info</Typography>
             </div>

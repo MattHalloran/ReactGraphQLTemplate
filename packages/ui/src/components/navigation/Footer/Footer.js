@@ -13,7 +13,8 @@ import {
     Phone as PhoneIcon,
     Print as PrintIcon
 } from '@material-ui/icons';
-import { Copyright } from 'components';
+import { CopyrightBreadcrumbs } from 'components';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -49,6 +50,7 @@ function Footer({
     business
 }) {
     const classes = useStyles();
+    const theme = useTheme();
 
     const contactLinks = [
         ['address', 'View in Google Maps', business?.ADDRESS?.Link, business?.ADDRESS?.Label, BusinessIcon],
@@ -124,7 +126,7 @@ function Footer({
                     </Grid>
                 ))}
             </Grid>
-            <Copyright className={classes.copyright} business={business} />
+            <CopyrightBreadcrumbs className={classes.copyright} business={business} textColor={theme.palette.primary.contrastText} />
         </div>
     );
 }

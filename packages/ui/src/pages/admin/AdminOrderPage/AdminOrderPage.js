@@ -10,6 +10,7 @@ import {
     Selector,
 } from 'components';
 import { Typography } from '@material-ui/core';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -27,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AdminOrderPage() {
     const classes = useStyles();
+    const theme = useTheme();
     const [filter, setFilter] = useState(ORDER_STATES[4].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
@@ -49,7 +51,7 @@ function AdminOrderPage() {
                 order={currOrder}
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
-            <AdminBreadcrumbs className={classes.padBottom}/>
+            <AdminBreadcrumbs className={classes.padBottom} textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Orders</Typography>
             </div>

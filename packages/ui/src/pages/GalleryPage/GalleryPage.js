@@ -7,6 +7,7 @@ import { makeStyles } from '@material-ui/styles';
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles(() => ({
     imageList: {
@@ -35,6 +36,7 @@ const useStyles = makeStyles(() => ({
 
 function GalleryPage() {
     const classes = useStyles();
+    const theme = useTheme();
     const [images, setImages] = useState([]);
     const { data: imageData, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'L' } });
 
@@ -58,7 +60,7 @@ function GalleryPage() {
 
     return (
         <div id='page'>
-            <InformationalBreadcrumbs />
+            <InformationalBreadcrumbs textColor={theme.palette.primary.light} />
             <Carousel className={classes.carousel} canAutoPlay={false} images={images} />
         </div>
     );

@@ -4,10 +4,12 @@ import { readAssetsQuery } from 'graphql/query/readAssets';
 import ReactMarkdown from 'react-markdown';
 import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
+import { useTheme } from "@emotion/react";
 
 function PrivacyPolicyPage({
     business
 }) {
+    const theme = useTheme();
     const [privacy, setPrivacy] = useState(null);
     const { data: privacyData } = useQuery(readAssetsQuery, { variables: { files: ['privacy.md'] } });
 
@@ -22,7 +24,7 @@ function PrivacyPolicyPage({
 
     return (
         <div id="page">
-            <PolicyBreadcrumbs />
+            <PolicyBreadcrumbs textColor={theme.palette.primary.light} />
             <ReactMarkdown>{ privacy }</ReactMarkdown>
         </div>
     );

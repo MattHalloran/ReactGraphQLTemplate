@@ -24,6 +24,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from 'graphql/wrappers';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AdminInventoryPage() {
     const classes = useStyles();
+    const theme = useTheme();
     const [showActive, setShowActive] = useState(true);
     const [searchString, setSearchString] = useState('');
     // Selected plant data. Used for popup. { plant, selectedSku }
@@ -72,7 +74,7 @@ function AdminInventoryPage() {
                 trait_options={traitOptions?.traitOptions}
                 open={selected !== null}
                 onClose={() => setSelected(null)} />
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
             </div>

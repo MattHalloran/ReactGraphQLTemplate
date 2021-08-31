@@ -21,6 +21,8 @@ import {
 } from '@material-ui/icons';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { CopyrightBreadcrumbs } from 'components';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
@@ -65,6 +67,7 @@ function Hamburger({
     onRedirect
 }) {
     const classes = useStyles();
+    const theme = useTheme();
     const [contactOpen, setContactOpen] = useState(true);
     const [socialOpen, setSocialOpen] = useState(false);
     const [open, setOpen] = useState(false);
@@ -174,7 +177,7 @@ function Hamburger({
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.facebook.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
                 <SocialIcon style={{ marginBottom: '0' }} fgColor={theme.headerText} url="https://www.instagram.com/newlifenurseryinc/" target="_blank" rel="noopener noreferrer" />
             </div>*/}
-                <Copyright className={classes.copyright} business={business} />
+                <CopyrightBreadcrumbs className={classes.copyright} business={business} textColor={theme.palette.primary.contrastText} />
             </SwipeableDrawer>
         </React.Fragment>
     );
