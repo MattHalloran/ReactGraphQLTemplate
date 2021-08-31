@@ -8,6 +8,7 @@ import {
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
 import { Button, Typography } from '@material-ui/core';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -22,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AdminCustomerPage() {
     const classes = useStyles();
+    const theme = useTheme();
     const [customers, setCustomers] = useState(null);
     const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
@@ -45,7 +47,7 @@ function AdminCustomerPage() {
     
     return (
         <div id="page">
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Customers</Typography>
             </div>

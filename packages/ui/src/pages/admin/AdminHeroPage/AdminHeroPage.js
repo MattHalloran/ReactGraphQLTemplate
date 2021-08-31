@@ -12,6 +12,7 @@ import {
     WrappedImageList 
 } from 'components';
 import { mutationWrapper } from 'graphql/wrappers';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AdminHeroPage() {
     const classes = useStyles();
+    const theme = useTheme();
     const [imageData, setImageData] = useState([]);
     const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
     const [addImages] = useMutation(addImagesMutation);
@@ -64,7 +66,7 @@ function AdminHeroPage() {
 
     return (
         <div id='page' className={classes.root}>
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Hero</Typography>
             </div>

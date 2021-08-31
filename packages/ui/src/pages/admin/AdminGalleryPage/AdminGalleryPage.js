@@ -10,6 +10,7 @@ import {
     WrappedImageList 
 } from 'components';
 import { mutationWrapper } from 'graphql/wrappers';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -18,8 +19,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function AdminGalleryPage() {
-    console.log('GALLERY PAGE RENDER...')
     const classes = useStyles();
+    const theme = useTheme();
     const [imageData, setImageData] = useState([]);
     const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'M' } });
     const [addImages] = useMutation(addImagesMutation);
@@ -65,7 +66,7 @@ function AdminGalleryPage() {
 
     return (
         <div id='page' className={classes.root}>
-            <AdminBreadcrumbs />
+            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Gallery</Typography>
             </div>

@@ -7,6 +7,7 @@ import {
 import Facebook from 'assets/img/Facebook.png';
 import Instagram from 'assets/img/Instagram.png';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -22,6 +23,7 @@ function AboutPage({
     business,
 }) {
     const classes = useStyles();
+    const theme = useTheme();
     const socials = [
         [Facebook, 'Facebook', business?.SOCIAL?.Facebook],
         [Instagram, 'Instagram', business?.SOCIAL?.Instagram],
@@ -29,7 +31,7 @@ function AboutPage({
 
     return (
         <div id='page'>
-            <InformationalBreadcrumbs />
+            <InformationalBreadcrumbs textColor={theme.palette.primary.light} />
             <br/>
             <Grid container spacing={2}>
                 <Grid item md={12} lg={8}>

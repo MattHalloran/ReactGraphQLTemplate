@@ -4,10 +4,12 @@ import { readAssetsQuery } from 'graphql/query/readAssets';
 import ReactMarkdown from 'react-markdown';
 import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
+import { useTheme } from "@emotion/react";
 
 function TermsPage({
     business
 }) {
+    const theme = useTheme();
     const [terms, setTerms] = useState(null);
     const { data: termsData } = useQuery(readAssetsQuery, { variables: { files: ['terms.md'] } });
 
@@ -22,7 +24,7 @@ function TermsPage({
 
     return (
         <div id="page">
-            <PolicyBreadcrumbs />
+            <PolicyBreadcrumbs textColor={theme.palette.primary.light} />
             <ReactMarkdown>{ terms }</ReactMarkdown>
         </div>
     );
