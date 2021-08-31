@@ -1,7 +1,6 @@
 export * from './breadcrumbs';
 export * from './cards';
 export * from './ContactInfo/ContactInfo';
-export * from './Copyright/Copyright';
 export * from './dialogs';
 export * from './Dropzone/Dropzone';
 export * from './FeaturedPlants/FeaturedPlants';
