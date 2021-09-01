@@ -81,7 +81,8 @@ In the [schema directory](packages/service/src/schema), the GraphQL resolvers ar
     2. `depcheck`  
     3. Repeat in each package (packages/server, packages/shared, packages/ui)  
 Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
-- Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness!  
+- Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
+- Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/NLN/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
 
