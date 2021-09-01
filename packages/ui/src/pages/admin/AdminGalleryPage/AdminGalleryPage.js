@@ -22,7 +22,7 @@ function AdminGalleryPage() {
     const classes = useStyles();
     const theme = useTheme();
     const [imageData, setImageData] = useState([]);
-    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'M' } });
+    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);
 

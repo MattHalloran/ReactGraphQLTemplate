@@ -24,7 +24,7 @@ function AdminHeroPage() {
     const classes = useStyles();
     const theme = useTheme();
     const [imageData, setImageData] = useState([]);
-    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'M' } });
+    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);
 

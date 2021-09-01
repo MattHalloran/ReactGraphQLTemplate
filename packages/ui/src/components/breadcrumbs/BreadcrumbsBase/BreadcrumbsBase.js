@@ -5,6 +5,20 @@ import {
     Link 
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import { makeStyles } from '@material-ui/styles';
+import _ from 'lodash';
+
+const useStyles = makeStyles(() => ({
+    root: {
+        cursor: 'pointer',
+    },
+    li: {
+        minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+}))
 
 // Breadcrumbs reload all components if using href directly. Not sure why
 function BreadcrumbsBase({
@@ -15,13 +29,14 @@ function BreadcrumbsBase({
     style,
     ...props
 }) {
+    const classes = useStyles();
     const history = useHistory();
+    // Add user styling to default root style
+    let rootStyle = _.merge(classes.root, style ?? {});
     // Match separator color to link color, if not specified
-    let updatedStyle = style ?? {};
-    if (textColor && !updatedStyle.color) updatedStyle.color = textColor;
-    updatedStyle.cursor = 'pointer';
+    if (textColor && !rootStyle.color) rootStyle.color = textColor;
     return (
-            <Breadcrumbs separator={separator} aria-label={ariaLabel} style={updatedStyle} {...props}>
+            <Breadcrumbs style={style ?? {}} classes={{root: classes.root, li: classes.li}} separator={separator} aria-label={ariaLabel} {...props}>
                 {paths.map(p => (
                     <Link 
                         key={p[0]}

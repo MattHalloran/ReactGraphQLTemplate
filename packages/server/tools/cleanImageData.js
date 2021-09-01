@@ -42,7 +42,7 @@ for (const file of files) {
 for (const file of dbFiles) {
     if (!files.some(f => f === file)) {
         console.info(`Deleting image data for ${file}`);
-        await prisma[TABLES.Image].delete({ where: { files: { some: { src: file }}}})
+        await prisma[TABLES.Image].deleteMany({ where: { files: { some: { src: file }}}})
     }
 }
 

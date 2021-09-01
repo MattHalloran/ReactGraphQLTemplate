@@ -60,7 +60,7 @@ function Hero({
     let history = useHistory();
     const classes = useStyles();
     const [images, setImages] = useState([]);
-    const { data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero', size: 'L' } });
+    const { data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
     useEffect(() => {
         setImages(data?.imagesByLabel);
     }, [data])

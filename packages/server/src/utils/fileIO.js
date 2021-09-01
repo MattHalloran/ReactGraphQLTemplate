@@ -182,15 +182,15 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
             // Use largest dimension for resize
             const sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
             const resize_filename = `${folder}/${name}-${key}${ext}`;
-            await sharp(image_buffer)
+            const { width, height } = await sharp(image_buffer)
                 .resize({ [sizing_dimension]: value })
                 .toFile(`${ASSET_DIR}/${resize_filename}`);
             await prisma[TABLES.ImageFile].create({ data: {
                 hash,
                 src: resize_filename,
-                width: dimensions.width,
-                height: dimensions.height
-            }})
+                width: width,
+                height: height
+            }});
         }
         return {
             success: true,

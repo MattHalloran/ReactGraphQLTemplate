@@ -69,7 +69,7 @@ function EditImageDialog({
 
 EditImageDialog.propTypes = {
     open: PropTypes.bool.isRequired,
-    data: PropTypes.object.isRequired,
+    data: PropTypes.object,
     onClose: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
 }

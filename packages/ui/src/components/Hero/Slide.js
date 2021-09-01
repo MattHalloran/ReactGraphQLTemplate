@@ -14,10 +14,9 @@ const useStyles = makeStyles({
 });
 
 const Slide = memo(({ image, width }) => {
-    console.log('IN SLIDE', image)
     const classes = useStyles({ width });
     return (
-        <img className={classes.slide} src={image ? `${SERVER_URL}/${getImageSrc(image)}` : ''} alt={image?.alt ?? ''} />
+        <img className={classes.slide} src={image ? `${SERVER_URL}/${getImageSrc(image, width)}` : ''} alt={image?.alt ?? ''} />
     )
 })
 

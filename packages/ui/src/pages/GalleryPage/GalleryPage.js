@@ -38,7 +38,7 @@ function GalleryPage() {
     const classes = useStyles();
     const theme = useTheme();
     const [images, setImages] = useState([]);
-    const { data: imageData, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery', size: 'L' } });
+    const { data: imageData, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery' } });
 
     if (error) PubSub.publish(PUBS.Snack, { message: error.message ?? 'Unknown error occurred', severity: 'error', data: error });
 

@@ -74,14 +74,16 @@ In the [schema directory](packages/service/src/schema), the GraphQL resolvers ar
 
 ## Testing performance, accessibility, and SEO
 [Lighthouse](https://developers.google.com/web/tools/lighthouse) is an open-source tool for testing any website's (even localhost) performance, accessibility, and Search Engine Optimization (SEO). This can be accessed in Chrome Dev Tools. The tool generates a report in less than a minute, which gives plenty of details and resources that you can look through. This website template is designed to maximize Lighthouse performance by default, but your specific needs may vary. Some places to look at are:  
-    - [Sitemap.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
-    - Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):
-        1. In project's root directory, enter `yarn global add depcheck`  
-        2. `depcheck`
-        3. Repeat in each package (packages/server, packages/shared, packages/ui)
-    Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
-    - Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness!
-**NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'.
+- Compress static images - The easiest way to reduce request payloads is by compressing static images. This can be done on many sites, such as [this one for PNGs](https://compresspng.com/) and [this one](https://jakearchibald.github.io/svgomg/) for SVGs.
+- [Sitemap.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
+- Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):    
+    1. In project's root directory, enter `yarn global add depcheck`  
+    2. `depcheck`  
+    3. Repeat in each package (packages/server, packages/shared, packages/ui)  
+Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
+- Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness!  
+
+**NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
 
 
 ## Deploying project
