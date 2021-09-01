@@ -17,7 +17,7 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { CartTable as Cart } from 'components';
+import { CartTable } from 'components';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_STATES } from 'utils';
@@ -51,6 +51,8 @@ const useStyles = makeStyles((theme) => ({
         zIndex: 1,
     },
 }));
+
+const editableStatuses = [ORDER_STATUS.PendingCancel, ORDER_STATUS.Pending, ORDER_STATUS.Approved, ORDER_STATUS.Scheduled]
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -155,7 +157,7 @@ function OrderDialog({
             <div className={classes.container}>
                 <div className={classes.pad}>
                     <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                    <Cart cart={order} onUpdate={(data) => setChangedOrder(data)} />
+                    <CartTable cart={order} editable={editableStatuses.includes(order?.status)} onUpdate={(data) => setChangedOrder(data)} />
                 </div>
                 <div className={classes.bottom}>
                     {options}
