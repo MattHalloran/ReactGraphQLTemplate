@@ -9,6 +9,7 @@ import {
     IconButton,
     Slide,
     Toolbar,
+    Typography,
 } from '@material-ui/core';
 import {
     AddCircle as AddCircleIcon,
@@ -29,9 +30,17 @@ const useStyles = makeStyles((theme) => ({
     appBar: {
         position: 'relative',
     },
+    title: {
+        textAlign: 'center',
+    },
+    optionsContainer: {
+        padding: theme.spacing(2),
+        background: theme.palette.primary.main,
+    },
     container: {
         background: theme.palette.background.default,
         flex: 'auto',
+        padding: theme.spacing(1),
         paddingBottom: '15vh',
     },
     bottom: {
@@ -39,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'fixed',
         bottom: '0',
         width: '-webkit-fill-available',
+        zIndex: 1,
     },
 }));
 
@@ -157,6 +167,16 @@ function CustomerDialog({
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
                         <CloseIcon />
                     </IconButton>
+                    <Grid container spacing={0}>
+                        <Grid className={classes.title} item xs={12}>
+                            <Typography variant="h5">
+                                {customer?.fullName}
+                            </Typography>
+                            <Typography variant="h6">
+                                {customer?.business?.name}
+                            </Typography>
+                        </Grid>
+                    </Grid>
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>

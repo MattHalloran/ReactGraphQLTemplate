@@ -212,15 +212,12 @@ function PlantDialog({
                     </IconButton>
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
-                            <Typography variant="h6">
+                            <Typography variant="h5">
                                 {plant.latinName}
                             </Typography>
                             <Typography variant="h6">
                                 {getPlantTrait('commonName', plant)}
                             </Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            {options}
                         </Grid>
                     </Grid>
                 </Toolbar>

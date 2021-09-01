@@ -110,6 +110,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'fixed',
         bottom: '0',
         width: '-webkit-fill-available',
+        zIndex: 1,
     },
 }));
 
@@ -288,7 +289,6 @@ function EditPlantDialog({
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
                         <CloseIcon />
                     </IconButton>
-                    {options}
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>

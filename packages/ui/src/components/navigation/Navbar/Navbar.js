@@ -9,7 +9,7 @@ import { NavList } from './NavList';
 import { logoutMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 
-const SHOW_HAMBURGER_AT = 960;
+const SHOW_HAMBURGER_AT = 1000;
 
 const useStyles = makeStyles((theme) => ({
     toRight: {

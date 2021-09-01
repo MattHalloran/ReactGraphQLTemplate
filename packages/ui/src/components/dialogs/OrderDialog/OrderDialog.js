@@ -30,17 +30,25 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     title: {
-        marginLeft: theme.spacing(2),
-        flex: 1,
+        textAlign: 'center',
+    },
+    optionsContainer: {
+        padding: theme.spacing(2),
     },
     container: {
+        background: theme.palette.background.default,
+        flex: 'auto',
+        paddingBottom: '15vh',
+    },
+    pad: {
         padding: theme.spacing(1),
     },
-    topOption: {
-        width: 'max(9em, 40%)',
-        align: 'right',
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
+    bottom: {
+        background: theme.palette.primary.main,
+        position: 'fixed',
+        bottom: '0',
+        width: '-webkit-fill-available',
+        zIndex: 1,
     },
 }));
 
@@ -96,11 +104,9 @@ function OrderDialog({
         status_string = `Status: ${ORDER_STATES[status_index].label}`
     }
 
-    function optionButtons(is_top) {
-        let sm_num = is_top ? 12 : 4;
-        return (
-            <Grid className={is_top ? classes.topOption : ''} container spacing={1}>
-                <Grid item xs={12} sm={sm_num} md={4}>
+    let options = (
+            <Grid className={classes.optionsContainer} container spacing={1}>
+                <Grid item xs={12} sm={4}>
                     <Button
                         fullWidth
                         startIcon={<UpdateIcon />}
@@ -108,7 +114,7 @@ function OrderDialog({
                         disabled={loading || _.isEqual(order, changedOrder)}
                     >Update</Button>
                 </Grid>
-                <Grid item xs={12} sm={sm_num} md={4}>
+                <Grid item xs={12} sm={4}>
                     <Button
                         fullWidth
                         startIcon={<ThumbUpIcon />}
@@ -116,7 +122,7 @@ function OrderDialog({
                         disabled={loading || !_.isEqual(order, changedOrder)}
                     >Approve</Button>
                 </Grid>
-                <Grid item xs={12} sm={sm_num} md={4}>
+                <Grid item xs={12} sm={4}>
                     <Button
                         fullWidth
                         startIcon={<ThumbDownIcon />}
@@ -126,7 +132,6 @@ function OrderDialog({
                 </Grid>
             </Grid>
         )
-    }
 
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
@@ -135,17 +140,26 @@ function OrderDialog({
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
                         <CloseIcon />
                     </IconButton>
-                    <Typography variant="h6" className={classes.title}>
-                        {order?.customer?.first_name} {order?.customer?.last_name}'s Order
-                    </Typography>
-                    {optionButtons(true)}
+                    <Grid container spacing={0}>
+                        <Grid className={classes.title} item xs={12}>
+                            <Typography variant="h5">
+                                {order?.customer?.fullName}'s Order
+                            </Typography>
+                            <Typography variant="h6">
+                                {order?.customer?.business?.name}
+                            </Typography>
+                        </Grid>
+                    </Grid>
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>
-                <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                <Cart cart={order} onUpdate={(data) => setChangedOrder(data)} />
-                <br/>
-                {optionButtons(false)}
+                <div className={classes.pad}>
+                    <Typography variant="body1" gutterBottom>{status_string}</Typography>
+                    <Cart cart={order} onUpdate={(data) => setChangedOrder(data)} />
+                </div>
+                <div className={classes.bottom}>
+                    {options}
+                </div>
             </div>
         </Dialog>
     );

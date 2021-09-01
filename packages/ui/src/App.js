@@ -124,11 +124,12 @@ export function App() {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         // Handle loading spinner, which can have a delay
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
-            if (Number.isInteger(data) && data === data*-1) {
+            console.log('GOT SPINNER INFO', data)
+            if (Number.isInteger(data)) {
                 clearTimeout(timerRef.current);
-                timerRef.current = window.setTimeout(() => setLoading(true), 2000);
+                timerRef.current = window.setTimeout(() => setLoading(true), Math.abs(data));
             } else {
-                setLoading(false);
+                setLoading(Boolean(data));
             }
         });
         let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));

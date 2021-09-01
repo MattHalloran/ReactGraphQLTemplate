@@ -33,7 +33,7 @@ function AdminOrderPage() {
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
     const [orders, setOrders] = useState(null);
-    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 60000 });
+    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }

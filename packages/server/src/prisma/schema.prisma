@@ -64,7 +64,7 @@ model customer {
   id                String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   firstName         String           @db.VarChar(128)
   lastName          String           @db.VarChar(128)
-  fullName          String?
+  fullName          String
   pronouns          String           @default("they/them") @db.VarChar(128)
   theme             String           @default("light") @db.VarChar(255)
   password          String           @db.VarChar(256)

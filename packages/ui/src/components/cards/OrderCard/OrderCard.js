@@ -1,18 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { 
-    Button, 
-    Card, 
-    CardActions, 
-    CardContent, 
+import {
+    Button,
+    Card,
+    CardActions,
+    CardContent,
     IconButton,
+    Tooltip,
     Typography
- } from '@material-ui/core';
-import { 
+} from '@material-ui/core';
+import {
     Email as EmailIcon,
     Phone as PhoneIcon
- } from "@material-ui/icons";
+} from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
 import { ListDialog } from 'components';
 import { emailLink, mapIfExists, phoneLink, showPhone } from 'utils';
@@ -21,7 +22,8 @@ const cardStyles = makeStyles((theme) => ({
     root: {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
-        margin: theme.spacing(1),
+        borderRadius: 15,
+        margin: 3,
         padding: 10,
         minWidth: 150,
         minHeight: 50,
@@ -45,31 +47,30 @@ function OrderCard({
 
     const callPhone = (phoneLink) => {
         setPhoneDialogOpen(false);
-        window.location.href = phoneLink;
+        if (phoneLink) window.location.href = phoneLink;
     }
 
     const sendEmail = (emailLink) => {
         setEmailDialogOpen(false);
-        window.open(emailLink, '_blank', 'noopener,noreferrer')
+        if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
 
     // Phone and email [label, value] pairs
-    //const phone_list = mapIfExists(order, 'customer.phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
-    const phone_list = [['8675309', 'asdfdsafdsa'], ['fdafdasf', 'fffffffff']]
-    const email_list = mapIfExists(order, 'customer.emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
+    const phoneList = mapIfExists(order, 'customer.phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
+    const emailList = mapIfExists(order, 'customer.emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
 
     return (
         <Card className={classes.root}>
             {phoneDialogOpen ? (
                 <ListDialog
-                    title="Select Phone"
-                    data={phone_list}
+                    title={`Call ${order?.customer?.fullName}`}
+                    data={phoneList}
                     onClose={callPhone} />
             ) : null}
             {emailDialogOpen ? (
                 <ListDialog
-                    title="Select Email"
-                    data={email_list}
+                    title={`Email ${order?.customer?.fullName}`}
+                    data={emailList}
                     onClose={sendEmail} />
             ) : null}
             <CardContent onClick={onEdit}>
@@ -85,15 +86,19 @@ function OrderCard({
             </CardContent>
             <CardActions>
                 <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
-                {(phone_list.length > 0) ?
-                    (<IconButton onClick={() => setPhoneDialogOpen(true)}>
-                        <PhoneIcon className={classes.icon} />
-                    </IconButton>)
+                {(phoneList.length > 0) ?
+                    (<Tooltip title="View phone numbers" placement="bottom">
+                        <IconButton onClick={() => setPhoneDialogOpen(true)}>
+                            <PhoneIcon className={classes.icon} />
+                        </IconButton>
+                    </Tooltip>)
                     : null}
-                {(email_list.length > 0) ?
-                    (<IconButton onClick={() => setEmailDialogOpen(true)}>
+                {(emailList.length > 0) ?
+                (<Tooltip title="View emails" placement="bottom">
+                    <IconButton onClick={() => setEmailDialogOpen(true)}>
                         <EmailIcon className={classes.icon} />
-                    </IconButton>)
+                    </IconButton>
+                </Tooltip>)
                     : null}
             </CardActions>
         </Card>

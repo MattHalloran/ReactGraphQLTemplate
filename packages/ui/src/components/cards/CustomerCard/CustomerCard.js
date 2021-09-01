@@ -1,12 +1,13 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types'
-import { 
+import {
     Button,
     Card,
     CardActions,
-    CardContent, 
-    Chip,
-    Typography 
+    CardContent,
+    IconButton,
+    Tooltip,
+    Typography
 } from '@material-ui/core';
 import {
     Email as EmailIcon,
@@ -18,7 +19,8 @@ import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS } from '@local/shared';
 import { mutationWrapper } from 'graphql/wrappers';
 import { useTheme } from '@emotion/react';
-import { PUBS, PubSub } from 'utils';
+import { emailLink, mapIfExists, phoneLink, PUBS, PubSub, showPhone } from 'utils';
+import { ListDialog } from 'components/dialogs';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -32,12 +34,11 @@ const useStyles = makeStyles((theme) => ({
         padding: 8,
         position: 'inherit',
     },
-    chip: {
-        margin: 2,
-        cursor: 'pointer',
-    },
     actionButton: {
         color: theme.palette.primary.contrastText,
+    },
+    icon: {
+        fill: theme.palette.primary.contrastText,
     },
 }));
 
@@ -49,6 +50,18 @@ function CustomerCard({
     const classes = useStyles();
     const theme = useTheme();
     const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
+    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+    const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+
+    const callPhone = (phoneLink) => {
+        setPhoneDialogOpen(false);
+        if (phoneLink) window.location.href = phoneLink;
+    }
+
+    const sendEmail = (emailLink) => {
+        setEmailDialogOpen(false);
+        if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
+    }
 
     const status_map = useMemo(() => ({
         [ACCOUNT_STATUS.Deleted]: ['Deleted', 'grey'],
@@ -103,41 +116,31 @@ function CustomerCard({
     }
     actions.push(delete_action);
 
-
-    let phoneChips = Array.isArray(customer?.phones) ? customer.phones.map((p, index) => (
-        <Chip
-            key={index}
-            className={classes.chip}
-            onClick={() => callPhone(`${p.countryCode}${p.unformattedNumber}`)}
-            icon={<PhoneIcon />}
-            label={p.unformattedNumber}
-            color="secondary" />
-    )) : null;
-
-    let emailChips = Array.isArray(customer?.emails) ? customer.emails.map((e, index) => (
-        <Chip
-            key={index}
-            className={classes.chip}
-            onClick={() => sendEmail(e.emailAddress)}
-            icon={<EmailIcon />}
-            label={e.emailAddress}
-            color="secondary" />
-    )) : null;
-
-    const callPhone = (number) => window.location.href = `tel:${number}`
-    const sendEmail = (address, subject = '', body = '') => window.location.href = `mailto:${address}?subject=${subject}&body=${body}`;
+    // Phone and email [label, value] pairs
+    const phoneList = mapIfExists(customer, 'phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
+    const emailList = mapIfExists(customer, 'emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
 
     return (
-        <Card className={classes.root} style={{ border: `2px solid ${status_map[status][1]}` }} onClick={() => onEdit(customer)}>
-            <CardContent className={classes.content}>
+        <Card className={classes.root} style={{ border: `2px solid ${status_map[status][1]}` }}>
+            {phoneDialogOpen ? (
+                <ListDialog
+                    title={`Call ${customer?.fullName}`}
+                    data={phoneList}
+                    onClose={callPhone} />
+            ) : null}
+            {emailDialogOpen ? (
+                <ListDialog
+                    title={`Email ${customer?.fullName}`}
+                    data={emailList}
+                    onClose={sendEmail} />
+            ) : null}
+            <CardContent className={classes.content} onClick={() => onEdit(customer)}>
                 <Typography gutterBottom variant="h6" component="h2">
                     {customer?.firstName} {customer?.lastName}
                 </Typography>
                 <p>Status: {status_map[customer?.status][0]}</p>
                 <p>Business: {customer?.business?.name}</p>
                 <p>Pronouns: {customer?.pronouns ?? 'Unset'}</p>
-                {phoneChips}
-                {emailChips}
             </CardContent>
             <CardActions>
                 {actions?.map((o, index) =>
@@ -146,6 +149,20 @@ function CustomerCard({
                         className={classes.actionButton}
                         variant="text"
                         onClick={o[0]}>{o[1]}</Button>)}
+                {(phoneList.length > 0) ?
+                    (<Tooltip title="View phone numbers" placement="bottom">
+                        <IconButton onClick={() => setPhoneDialogOpen(true)}>
+                            <PhoneIcon className={classes.icon} />
+                        </IconButton>
+                    </Tooltip>)
+                    : null}
+                {(emailList.length > 0) ?
+                    (<Tooltip title="View emails" placement="bottom">
+                        <IconButton onClick={() => setEmailDialogOpen(true)}>
+                            <EmailIcon className={classes.icon} />
+                        </IconButton>
+                    </Tooltip>)
+                    : null}
             </CardActions>
         </Card>
     );

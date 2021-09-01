@@ -27,7 +27,7 @@ export async function up (knex) {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('firstName', 128).notNullable();
         table.string('lastName', 128).notNullable();
-        table.specificType('fullName', `text GENERATED ALWAYS AS ('firstName' || ' ' || 'lastName') stored`).notNullable();
+        table.specificType('fullName', `text GENERATED ALWAYS AS ("firstName" || ' ' || "lastName") stored`).notNullable();
         table.string('pronouns', 128).defaultTo('they/them').notNullable();
         table.string('theme').defaultTo(THEME.Light).notNullable();
         table.string('password', 256).notNullable();
