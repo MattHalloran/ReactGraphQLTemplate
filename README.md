@@ -2,6 +2,7 @@
 # New Life Nursery Website
 This website is designed both as a functional website for New Life Nursery Inc., and as a reference for creating powerful, maintainable websites.
 
+
 ## Website Features
 - Modern design, with automatic dark mode
 - Mobile-friendly
@@ -9,6 +10,7 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 - Ability to send emails/texts
 - Ability to upload images/files
 - Search Engine Optimization (SEO) techniques
+
 
 ## Development stack
 | Dependency  | Purpose  |  Version  |
@@ -19,6 +21,7 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 | [ExpressJs](https://expressjs.com/)  |  Backend Server  | `^4.17.1` |
 | [PostgreSQL](https://www.postgresql.org/)  | Database  | `postgres:13` |
 | [Redis](https://redis.io/) | Task Queueing | `redis` |
+
 
 ## How to start  
 ### 1. Prerequisites
@@ -35,8 +38,10 @@ In the assets/public folder, there is a file named `business.json`. Edit this fi
 ### 5. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
 
+
 ## Open Graph Tags
 Open Graph is a metadata format that describes how your website should be shown when shared on social media. This data is set in the header, and can be edited at `packages/ui/public/index.html`. For more information, [here](https://developers.facebook.com/docs/sharing/webmasters/) is a guide from Facebook.
+
 
 ## Common commands
 - Start: `docker-compose up -d`
@@ -48,22 +53,43 @@ Open Graph is a metadata format that describes how your website should be shown 
 - Rebuild with fresh database: `docker-compose down && rm -rf "${PROJECT_DIR}/data/postgres" && docker-compose up --build --force-recreate`
 - Check logs for a docker container: `docker logs <container-name>`
 
+
 ## Linting
 [Linting](https://en.wikipedia.org/wiki/Lint_(software)) is handled by [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react). Follow their README for more information
+
 
 ## Non-database storage
 It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
 
+
 ## Email setup
 It is often useful to send and receives emails with the website's address. Instructions to set that up can be found [here](/docs/MessengerSetup.txt)
+
 
 ## GraphQL debugging
 GraphQL syntax errors are notoriously hard to debug, as they often do not give a location. Luckily, this project is structured in a way that allows these issues to be tracked down. 
 
 In the [schema directory](packages/service/src/schema), the GraphQL resolvers are split up into individual files, which are stitched together in the [index file](packages/service/src/schema/index.js). In this file, the `models` object is used to combine all of the individual schemas. If you make this an empty array, you can comment out imports until the problem goes away. This allows you to pinpoint which schema file is causing the error. Common errors are empty parentheses (ex: `users():` instead of `users:`) and empty brackets.
 
+
+## Testing performance, accessibility, and SEO
+[Lighthouse](https://developers.google.com/web/tools/lighthouse) is an open-source tool for testing any website's (even localhost) performance, accessibility, and Search Engine Optimization (SEO). This can be accessed in Chrome Dev Tools. The tool generates a report in less than a minute, which gives plenty of details and resources that you can look through. This website template is designed to maximize Lighthouse performance by default, but your specific needs may vary. Some places to look at are:  
+- Compress static images - The easiest way to reduce request payloads is by compressing static images. This can be done on many sites, such as [this one for PNGs](https://compresspng.com/) and [this one](https://jakearchibald.github.io/svgomg/) for SVGs.
+- [Sitemap.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
+- Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):    
+    1. In project's root directory, enter `yarn global add depcheck`  
+    2. `depcheck`  
+    3. Repeat in each package (packages/server, packages/shared, packages/ui)  
+Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
+- Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
+- Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/NLN/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
+
+**NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
+
+
 ## Deploying project
 Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
+
 
 ### 1. Set up DNS
 The site can be accessed by the VPS's IP address, but in most cases you'll want to associate the server with a domain name. There are many places to buy domains, but I use [Google Domains](https://domains.google)

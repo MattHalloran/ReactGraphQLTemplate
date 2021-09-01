@@ -22,7 +22,7 @@ import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_STATES } from 'utils';
 import { ORDER_STATUS } from '@local/shared';
-import _ from 'underscore';
+import _ from 'lodash';
 import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({

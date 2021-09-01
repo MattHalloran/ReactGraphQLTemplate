@@ -46,7 +46,7 @@ import {
     Info as InfoIcon,
 } from '@material-ui/icons';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
-import _ from 'underscore';
+import _ from 'lodash';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
 

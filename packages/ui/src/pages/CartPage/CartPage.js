@@ -13,7 +13,7 @@ import { updateOrderMutation, submitOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import _ from 'underscore';
+import _ from 'lodash';
 import { mutationWrapper } from 'graphql/wrappers';
 
 const useStyles = makeStyles((theme) => ({

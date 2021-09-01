@@ -13,6 +13,7 @@ services:
             REACT_APP_SITE_NAME: "${SITE_NAME}"
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             REACT_APP_SERVER_PORT: "${SERVER_PORT}"
+            REACT_APP_SERVER_LOCATION: "${SERVER_LOCATION}"
             VIRTUAL_HOST: "${SITE_NAME}"
             VIRTUAL_PORT: "${UI_PORT}"
             LETSENCRYPT_HOST: "${SITE_NAME}"

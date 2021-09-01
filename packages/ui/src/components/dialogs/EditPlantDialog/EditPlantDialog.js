@@ -39,7 +39,7 @@ import {
     setPlantTrait
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
-import _ from 'underscore';
+import _ from 'lodash';
 import { mutationWrapper } from 'graphql/wrappers';
 
 // Common plant traits, and their corresponding field names

@@ -7,7 +7,7 @@ import {
 } from '@material-ui/icons';
 import { ROLES } from '@local/shared';
 import { LINKS } from 'utils';
-import _ from 'underscore';
+import _ from 'lodash';
 
 // Returns user actions, in a list of this format:
 //  [

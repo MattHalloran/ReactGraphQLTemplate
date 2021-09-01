@@ -1,4 +1,4 @@
-import _ from "underscore";
+import _ from 'lodash';
 
 // Convert price stored in database to user-friendly version
 export const displayPrice = (price) => {

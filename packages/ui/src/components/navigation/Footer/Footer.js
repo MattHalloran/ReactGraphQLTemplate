@@ -70,7 +70,7 @@ function Footer({
             <Grid container justifyContent='center' spacing={1}>
                 <Grid item xs={6}>
                     <List component="nav">
-                        <ListItem component="h5" >
+                        <ListItem variant="h5" component="h3" >
                             <ListItemText className={classes.upper} primary="Resources" />
                         </ListItem>
                         <ListItem button component="a" href={LINKS.About} >
@@ -86,7 +86,7 @@ function Footer({
                         >
                             <ListItemText primary="Credit App" />
                         </ListItem>
-                        <ListItem button href={LINKS.About} onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
+                        <ListItem button component="a" href={LINKS.About} onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
                         <ListItem button component="a" href={LINKS.Gallery} >
@@ -99,7 +99,7 @@ function Footer({
                 </Grid>
                 <Grid item xs={6}>
                     <List component="nav">
-                        <ListItem component="h5" >
+                        <ListItem variant="h5" component="h3" >
                             <ListItemText className={classes.upper} primary="Contact" />
                         </ListItem>
                         {contactLinks.map(([label, tooltip, src, text, Icon], key) => (
