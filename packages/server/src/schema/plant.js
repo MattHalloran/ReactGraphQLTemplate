@@ -35,6 +35,7 @@ export const typeDef = gql`
     type Plant {
         id: ID!
         latinName: String!
+        featured: Boolean!
         traits: [PlantTrait!]
         images: [PlantImage!]
         skus: [Sku!]
@@ -51,91 +52,38 @@ export const typeDef = gql`
     }
 `
 
+const SORT_TO_QUERY = {
+    [SKU_SORT_OPTIONS.AZ]: { latinName: 'asc', },
+    [SKU_SORT_OPTIONS.ZA]: { latinName: 'desc' },
+    [SKU_SORT_OPTIONS.Newest]: { created_at: 'desc' },
+    [SKU_SORT_OPTIONS.Oldest]: { created_at: 'asc' },
+}
+
+
 export const resolvers = {
     Query: {
         plants: async (_, args, context, info) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             let idQuery;
-            if (Array.isArray(args.ids)) {
-                idQuery = {
-                    id: { in: args.ids }
-                }
-            }
-            // TODO sort
+            if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
+            // Determine sort order
             let sortQuery;
-            if (args.sortBy !== undefined) {
-                console.log("SORT BY", args.sortBy)
-                switch(args.sortBy) {
-                    case SKU_SORT_OPTIONS.AZ:
-                        sortQuery = {
-                            latinName: 'asc'
-                        }
-                        break;
-                    case SKU_SORT_OPTIONS.ZA:
-                        sortQuery = {
-                            latinName: 'desc'
-                        }
-                        break;
-                    case SKU_SORT_OPTIONS.PriceLowHigh:
-                        break;
-                    case SKU_SORT_OPTIONS.PriceHighLow:
-                        break;
-                    case SKU_SORT_OPTIONS.Features:
-                        break;
-                    case SKU_SORT_OPTIONS.Newest:
-                        sortQuery = {
-                            created_at: 'asc'
-                        }
-                        break;
-                    case SKU_SORT_OPTIONS.Oldest:
-                        sortQuery = {
-                            created_at: 'desc'
-                        }
-                        break;
-                }
-            }
+            if (args.sortBy !== undefined) sortQuery = SORT_TO_QUERY[args.sortBy];
+            console.log("SORT BY", sortQuery)
+            // If search string provided, match by latinName or trait name
             let searchQuery;
             if (args.searchString !== undefined && args.searchString.length > 0) {
                 searchQuery = {
                     OR: [
-                        {
-                          latinName: {
-                            contains: args.searchString.trim(),
-                            mode: 'insensitive'
-                          },
-                        },
-                        {
-                            traits: { 
-                                some: {
-                                    value: {
-                                        contains: args.searchString.trim(),
-                                        mode: 'insensitive'
-                                    }
-                                }
-                            }
-                        }
+                        { latinName: { contains: args.searchString.trim(), mode: 'insensitive' } },
+                        { traits: { some: { value: { contains: args.searchString.trim(), mode: 'insensitive' } } } }
                       ]
                 }
             }
-            let activeQuery;
-            if (args.active !== undefined) {
-                if (args.active) {
-                    activeQuery = {
-                        skus: { 
-                            some: { status: SKU_STATUS.Active }
-                        }
-                    }
-                } else {
-                    activeQuery = {
-                        NOT: {
-                            skus: { 
-                                some: { status: SKU_STATUS.Active }
-                            }
-                        }
-                    }
-                }
-            }
+            // Toggle for showing active/inactive plants (whether the plant has any SKUs available to order)
+            let activeQuery = { skus: {  some: { status: SKU_STATUS.Active } } };
+            if (args.active === false) activeQuery = { NOT: activeQuery };
             return await context.prisma[_model].findMany({ 
                 where: { 
                     ...idQuery,

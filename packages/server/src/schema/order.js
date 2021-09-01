@@ -42,7 +42,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        orders(status: OrderStatus): [Order!]!
+        orders(ids: [ID!], status: OrderStatus, searchString: String): [Order!]!
     }
 
     extend type Mutation {
@@ -53,23 +53,58 @@ export const typeDef = gql`
     }
 `
 
+const STATUS_TO_SORT = {
+    [ORDER_STATUS.CanceledByAdmin]: { updated_at: 'desc', },
+    [ORDER_STATUS.CanceledByCustomer]: { updated_at: 'desc' },
+    [ORDER_STATUS.PendingCancel]: { updated_at: 'desc' },
+    [ORDER_STATUS.Rejected]: { updated_at: 'desc' },
+    [ORDER_STATUS.Draft]: { updated_at: 'desc' },
+    [ORDER_STATUS.Pending]: { updated_at: 'desc' },
+    [ORDER_STATUS.Approved]: { expectedDeliveryDate: 'desc' },
+    [ORDER_STATUS.Scheduled]: { expectedDeliveryDate: 'desc' },
+    [ORDER_STATUS.InTransit]: { expectedDeliveryDate: 'desc' },
+    [ORDER_STATUS.Delivered]: { expectedDeliveryDate: 'desc' },
+}
+
 export const resolvers = {
     OrderStatus: ORDER_STATUS,
     Query: {
         orders: async (_, args, context, info) => {
-            // Must be admin
+            // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            let idQuery;
+            if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
+            // Determine sort order
+            let sortQuery;
+            if (args.status !== undefined) sortQuery = STATUS_TO_SORT[args.status];
+            console.log("SORT BY", sortQuery);
+            // If search string provided, match it with customer or business name.
+            // Maybe in the future, this could also be matched to sku names and such
+            let searchQuery;
+            if (args.searchString !== undefined && args.searchString.length > 0) {
+                searchQuery = {
+                    OR: [
+                        { customer: { fullName: { contains: args.searchString.trim(), mode: 'insensitive' } } },
+                        { customer: { business: { name: { contains: args.searchString.trim(), mode: 'insensitive' } } } }
+                    ]
+                }
+            }
             return await context.prisma[_model].findMany({
-                where: { status: args.status },
+                where: {
+                    ...idQuery,
+                    ...searchQuery,
+                    status: args.status ?? undefined,
+                },
+                orderBy: sortQuery,
                 ...(new PrismaSelect(info).value)
             });
-        }
+        },
     },
     Mutation: {
         updateOrder: async (_, args, context, info) => {
             // Must be admin, or updating your own
             console.log('UPDATING ORDER', args.input)
-            const curr = await context.prisma[_model].findUnique({ 
+            const curr = await context.prisma[_model].findUnique({
                 where: { id: args.input.id },
                 select: { id: true, customerId: true, status: true, items: { select: { id: true } } }
             });
@@ -92,7 +127,7 @@ export const resolvers = {
                 Promise.all(updateMany)
             }
             if (deletingItemIds.length > 0) {
-                await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds }} })
+                await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds } } })
             }
             console.log('about to update')
             return await context.prisma[_model].update({

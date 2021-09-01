@@ -64,6 +64,7 @@ model customer {
   id                String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   firstName         String           @db.VarChar(128)
   lastName          String           @db.VarChar(128)
+  fullName          String?
   pronouns          String           @default("they/them") @db.VarChar(128)
   theme             String           @default("light") @db.VarChar(255)
   password          String           @db.VarChar(256)
@@ -194,6 +195,7 @@ model phone {
 model plant {
   id         String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   latinName  String         @unique @db.VarChar(256)
+  featured   Boolean        @default(false)
   created_at DateTime       @default(now()) @db.Timestamptz(6)
   updated_at DateTime       @default(now()) @db.Timestamptz(6)
   images     plant_images[]

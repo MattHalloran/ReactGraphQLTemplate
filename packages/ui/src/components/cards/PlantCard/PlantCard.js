@@ -11,7 +11,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
+import { showPrice, getImageSrc, getPlantTrait } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
 import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
@@ -72,7 +72,7 @@ function PlantCard({
         <Chip
             key={s.sku}
             className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
-            label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`}
+            label={`#${s.size} | ${showPrice(s.price)} | Avail: ${s.availability}`}
             color="secondary" 
             onClick={(e) => openWithSku(e, s)}
         />

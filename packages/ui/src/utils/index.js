@@ -1,6 +1,6 @@
 export * from './arrayTools';
 export * from './consts';
-export * from './displayPrice';
+export * from './formatData';
 export * from './imageTools';
 export * from './makeID';
 export * from './objectTools';

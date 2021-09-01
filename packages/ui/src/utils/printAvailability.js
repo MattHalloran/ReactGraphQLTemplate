@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-import { displayPrice, PUBS, PubSub } from 'utils';
+import { showPrice, PUBS, PubSub } from 'utils';
 import { skusQuery } from 'graphql/query';
 import { initializeApollo } from 'graphql/initialize';
 import { getPlantTrait } from "./plantTools";
@@ -19,7 +19,7 @@ const skusToTable = (skus, showPrice) => {
         const displayName = sku.plant?.latinName ?? getPlantTrait('commonName', sku.plant) ?? sku.sku;
         const size = isNaN(sku.size) ? sku.size : `#${sku.size}`;
         const availability = sku.availability ?? 'N/A';
-        const price = displayPrice(sku.price);
+        const price = showPrice(sku.price);
         if (showPrice) return [displayName, size, availability, price]
         return [displayName, size, availability];
     });

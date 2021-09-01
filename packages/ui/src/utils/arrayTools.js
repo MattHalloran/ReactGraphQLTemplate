@@ -1,5 +1,7 @@
 // Functions for manipulating arrays, especially state arrays
 
+import { valueFromDot } from "./objectTools";
+
 export const addToArray = (array, value) => {
     return [...array, value];
 }
@@ -53,4 +55,11 @@ export const rotateArray = (array, to_right = true) => {
         copy.push(first_elem);
         return copy;
     }
+}
+
+// If dot notation key exists in object, perform operation and return the results
+export function mapIfExists(object, notation, operation) {
+    const value = valueFromDot(object, notation);
+    if (!Array.isArray(value)) return null;
+    return value.map(v => operation(v))
 }

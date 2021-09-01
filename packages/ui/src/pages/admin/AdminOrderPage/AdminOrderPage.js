@@ -33,7 +33,7 @@ function AdminOrderPage() {
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
     const [orders, setOrders] = useState(null);
-    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 5000 });
+    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 60000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
@@ -64,7 +64,7 @@ function AdminOrderPage() {
                 label="Sort By" />
             <h3>Count: {orders?.length ?? 0}</h3>
             <div className={classes.cardFlex}>
-                {orders?.map((c, index) => <OrderCard key={index} onEdit={() => setCurrOrder(c)} {...c} />)}
+                {orders?.map((o) => <OrderCard key={o.id} order={o} onEdit={() => setCurrOrder(o)} />)}
             </div>
         </div >
     );

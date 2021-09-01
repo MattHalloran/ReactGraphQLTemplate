@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
+import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -92,8 +92,8 @@ function CartTable({
             total = 'TBD';
             price = 'TBD';
         } else {
-            total = displayPrice(quantity * price);
-            price = displayPrice(price);
+            total = showPrice(quantity * price);
+            price = showPrice(price);
         }
 
         let display;
@@ -159,7 +159,7 @@ function CartTable({
                     </TableBody>
                 </Table>
             </TableContainer>
-            <p>Total: {displayPrice(all_total) ?? 'N/A'}</p>
+            <p>Total: {showPrice(all_total) ?? 'N/A'}</p>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
                     <Selector

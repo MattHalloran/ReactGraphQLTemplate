@@ -15,6 +15,7 @@ import {
  } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
 import { ListDialog } from 'components';
+import { emailLink, mapIfExists, phoneLink, showPhone } from 'utils';
 
 const cardStyles = makeStyles((theme) => ({
     root: {
@@ -27,44 +28,35 @@ const cardStyles = makeStyles((theme) => ({
         cursor: 'pointer',
     },
     button: {
-        color: theme.palette.secondary.light,
+        color: theme.palette.primary.contrastText,
     },
     icon: {
-        fill: theme.palette.secondary.light,
+        fill: theme.palette.primary.contrastText,
     },
 }));
 
 function OrderCard({
     onEdit,
-    customer,
-    items,
-    desired_delivery_date,
+    order,
 }) {
     const classes = cardStyles();
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
-    const callPhone = (number) => {
+    const callPhone = (phoneLink) => {
         setPhoneDialogOpen(false);
-        if (!number) return;
-        let url = `tel:${number}`;
-        window.location.href = url;
+        window.location.href = phoneLink;
     }
 
-    const sendEmail = (address, subject = '', body = '') => {
+    const sendEmail = (emailLink) => {
         setEmailDialogOpen(false);
-        if (!address) return;
-        let url = `mailto:${address}?subject=${subject}&body=${body}`;
-        window.open(url, '_blank', 'noopener,noreferrer')
+        window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
 
     // Phone and email [label, value] pairs
-    let phone_list = customer.phones?.map(p => (
-        [p.unformatted_number, `${p.country_code}${p.unformatted_number}`]
-    )) ?? [];
-    let email_list = customer.emails?.map(e => (
-        [e.email_address, e.email_address]
-    )) ?? [];
+    //const phone_list = mapIfExists(order, 'customer.phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
+    const phone_list = [['8675309', 'asdfdsafdsa'], ['fdafdasf', 'fffffffff']]
+    const email_list = mapIfExists(order, 'customer.emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
 
     return (
         <Card className={classes.root}>
@@ -82,13 +74,13 @@ function OrderCard({
             ) : null}
             <CardContent onClick={onEdit}>
                 <Typography variant="h6" component="h3" gutterBottom>
-                    {customer.first_name} {customer.last_name}
+                    {order?.customer?.fullName ?? ''}
                 </Typography>
                 <Typography variant="body1" component="h4">
-                    Requested Date: {new Date(desired_delivery_date).toLocaleString('en-US').split(',')[0]}
+                    Requested Date: {order?.desiredDeliveryDate ? new Date(order?.desiredDeliveryDate).toDateString('en-US') : 'Unset'}
                 </Typography>
                 <Typography variant="body1" component="h4">
-                    Items: {items.length}
+                    Items: {order?.items?.length ?? 0}
                 </Typography>
             </CardContent>
             <CardActions>
@@ -109,11 +101,7 @@ function OrderCard({
 }
 
 OrderCard.propTypes = {
-    id: PropTypes.number,
-    onEdit: PropTypes.func.isRequired,
-    first_name: PropTypes.string,
-    last_name: PropTypes.string,
-    account_status: PropTypes.number,
+    order: PropTypes.object,
     onClick: PropTypes.func,
 }
 

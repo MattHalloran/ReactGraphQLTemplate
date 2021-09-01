@@ -18,7 +18,7 @@ import {
     Toolbar,
     Typography
 } from '@material-ui/core';
-import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
+import { showPrice, getImageSrc, getPlantTrait } from 'utils';
 import {
     BeeIcon,
     CalendarIcon,
@@ -116,7 +116,7 @@ function PlantDialog({
     useEffect(() => {
         let options = plant.skus?.map(s => {
             return {
-                label: `#${s.size} : ${displayPrice(s.price)}`,
+                label: `#${s.size} : ${showPrice(s.price)}`,
                 value: s,
             }
         })

@@ -38,6 +38,7 @@ export const typeDef = gql`
         id: ID!
         firstName: String!
         lastName: String!
+        fullName: String!
         pronouns: String!
         emails: [Email!]!
         phones: [Phone!]!
