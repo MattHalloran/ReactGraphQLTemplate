@@ -156,7 +156,7 @@ function EditPlantDialog({
 
     useEffect(() => {
         setCurrSkuIndex((selectedSku && plant?.skus) ? plant.skus.findIndex(s => s.sku === selectedSku.sku) : 0)
-    }, [selectedSku])
+    }, [plant, selectedSku])
 
     const findImageData = useCallback(() => {
         setImagesChanged(false);

@@ -9,6 +9,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { Button, Typography } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
+import { CustomerDialog } from 'components/dialogs/CustomerDialog/CustomerDialog';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -25,6 +26,7 @@ function AdminCustomerPage() {
     const classes = useStyles();
     const theme = useTheme();
     const [customers, setCustomers] = useState(null);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
     const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
@@ -33,33 +35,24 @@ function AdminCustomerPage() {
         setCustomers(data?.customers);
     }, [data])
 
-    const new_customer = () => {
-        alert('Coming soon!');
-        return;
-        //TODO
-    }
-
     console.log('CUSTOMERS', customers, data)
-
-    const onCustomersUpdate = (customers) => {
-        setCustomers(customers);
-    }
     
     return (
         <div id="page">
+            <CustomerDialog
+                customer={selectedCustomer}
+                open={selectedCustomer !== null}
+                onClose={() => setSelectedCustomer(null)} />
             <AdminBreadcrumbs textColor={theme.palette.primary.light} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Customers</Typography>
-            </div>
-            <div className={classes.header}>
-                <Button onClick={new_customer}>New Customer</Button>
             </div>
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>
                 <CustomerCard 
                     key={index}
-                    onUpdate={onCustomersUpdate}
-                    {...c} 
+                    onEdit={setSelectedCustomer}
+                    customer={c}
                 />)}
             </div>
         </div >
