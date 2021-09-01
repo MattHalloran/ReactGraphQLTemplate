@@ -93,7 +93,7 @@ export function App() {
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!', session);
         setTheme(session?.theme in themes ? themes[session?.theme] : themes.light);
-        setCart(session?.orders?.length > 0 ? session.orders[session.orders.length - 1] : null);
+        setCart(session?.cart ?? null);
     }, [session])
 
     const handlers = {

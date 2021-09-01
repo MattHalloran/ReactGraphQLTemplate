@@ -74,10 +74,10 @@ function CartPage({
         mutationWrapper({
             mutation: submitOrder,
             data: { variables: { id: cart.id } },
-            onSuccess: () => PubSub.publish(PUBS.AlertDialog, { message: 'Order submitted! We will be in touch with you soon😊' }),
+            onSuccess: () => {PubSub.publish(PUBS.AlertDialog, { message: 'Order submitted! We will be in touch with you soon😊' }); onSessionUpdate()},
             onError: () => PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'})
         })
-    }, [cart, business, submitOrder])
+    }, [submitOrder, cart, onSessionUpdate, business])
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated

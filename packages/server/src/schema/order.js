@@ -106,6 +106,7 @@ export const resolvers = {
             const curr = await context.prisma[_model].findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             // Only orders in the draft state can be submitted
+            console.log('GOT ORDER DATA', curr);
             if (curr.status !== ORDER_STATUS.Draft) return new CustomError(CODE.ErrorUnknown);
             await context.prisma[_model].update({
                 where: { id: curr.id },

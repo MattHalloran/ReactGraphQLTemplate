@@ -12,6 +12,12 @@ export const loginMutation = gql`
         password: $password
     ) {
         ...customerSessionFields
+        cart {
+            ...orderFields
+            items {
+                ...orderItemFields
+            }
+        }
     }
 }
 `

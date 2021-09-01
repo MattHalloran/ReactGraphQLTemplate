@@ -70,6 +70,7 @@ function PlantCard({
 
     let sizes = plant.skus?.map(s => (
         <Chip
+            key={s.sku}
             className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
             label={`#${s.size} | ${displayPrice(s.price)} | Avail: ${s.availability}`}
             color="secondary" 

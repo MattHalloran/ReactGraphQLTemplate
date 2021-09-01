@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import bcrypt from 'bcrypt';
-import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, ORDER_STATUS, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
 import { customerNotifyAdmin, sendVerificationLink } from '../worker/email/queue';
@@ -46,6 +46,7 @@ export const typeDef = gql`
         accountApproved: Boolean!
         emailVerified: Boolean!
         status: AccountStatus!
+        cart: Order
         orders: [Order!]!
         roles: [CustomerRole!]!
         feedback: [Feedback!]!
@@ -103,6 +104,15 @@ export const typeDef = gql`
     }
 `
 
+const getCart = async (prisma, info, customerId) => {
+    const selectInfo = new PrismaSelect(info).value.select.cart;
+    const results = await prisma[TABLES.Order].findMany({ 
+        where: { customerId: customerId, status: ORDER_STATUS.Draft },
+        ...selectInfo
+    });
+    return results.length > 0 ? results[0] : null;
+}
+
 export const resolvers = {
     AccountStatus: ACCOUNT_STATUS,
     Query: {
@@ -120,11 +130,19 @@ export const resolvers = {
     },
     Mutation: {
         login: async (_, args, context, info) => {
+            console.log('login info', new PrismaSelect(info).value.select.cart)
+            // First, remove 'cart' from the info object, as this will be added manually
+            let prismaInfo = new PrismaSelect(info).value
+            delete prismaInfo.select.cart;
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
                 if (context.req.roles && context.req.roles.length > 0) {
-                    const data = await context.prisma[_model].findUnique({ where: { id: context.req.customerId }, ...(new PrismaSelect(info).value) });
-                    if (data) return data;
+                    const cart = getCart(context.prisma, info, context.req.customerId);
+                    let userData = await context.prisma[_model].findUnique({ where: { id: context.req.customerId }, ...prismaInfo });
+                    if (userData) {
+                        if (cart) userData.cart = cart;
+                        return userData;
+                    }
                     context.res.clearCookie(COOKIE.Session);
                 }
                 return new CustomError(CODE.BadCredentials);
@@ -167,9 +185,13 @@ export const resolvers = {
                 await context.prisma[_model].update({
                     where: { id: customer.id },
                     data: { loginAttempts: 0, lastLoginAttempt: new Date().toISOString(), resetPasswordCode: null },
-                    ...(new PrismaSelect(info).value)
+                    ...prismaInfo
                 })
-                return await context.prisma[_model].findUnique({ where: { id: customer.id }, ...(new PrismaSelect(info).value) });
+                // Return cart, along with user data
+                const cart = getCart(context.prisma, info, customer.id);
+                const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });
+                if (cart) userData.cart = cart;
+                return userData;
             } else {
                 let new_status = ACCOUNT_STATUS.Unlocked;
                 let login_attempts = customer.loginAttempts + 1;
@@ -189,6 +211,9 @@ export const resolvers = {
             context.res.clearCookie(COOKIE.Session);
         },
         signUp: async (_, args, context, info) => {
+            // First, remove 'cart' from the info object, as this will be added manually
+            let prismaInfo = new PrismaSelect(info).value
+            delete prismaInfo.select.cart;
             // Validate input format
             const validateError = await validateArgs(signUpSchema, args);
             if (validateError) return validateError;
@@ -229,7 +254,11 @@ export const resolvers = {
             sendVerificationLink(args.email, customer.id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
-            return await context.prisma[_model].findUnique({ where: { id: customer.id }, ...(new PrismaSelect(info).value) });
+            // Return cart, along with user data
+            const cart = getCart(context.prisma, info, customer.id);
+            const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });
+            if (cart) userData.cart = cart;
+            return userData;
         },
         updateCustomer: async (_, args, context, info) => {
             // Must be admin, or updating your own
@@ -241,7 +270,7 @@ export const resolvers = {
             customer = await context.prisma[_model].update({
                 where: { id: args.input.id },
                 data: { ...args.input },
-                ...(new PrismaSelect(info).value)
+                ...prismaInfo
             })
             // Update password 
             if (args.newPassword) {

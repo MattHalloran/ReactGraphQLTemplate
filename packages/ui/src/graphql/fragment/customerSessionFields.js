@@ -17,11 +17,5 @@ export const customerSessionFields = gql`
                 description
             }
         }
-        orders {
-            ...orderFields
-            items {
-                ...orderItemFields
-            }
-        }
     }
 `

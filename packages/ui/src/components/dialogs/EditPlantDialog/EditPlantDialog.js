@@ -441,7 +441,7 @@ function EditPlantDialog({
 EditPlantDialog.propTypes = {
     sku: PropTypes.object.isRequired,
     selectedSku: PropTypes.object,
-    trait_options: PropTypes.object,
+    trait_options: PropTypes.array,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,
 }

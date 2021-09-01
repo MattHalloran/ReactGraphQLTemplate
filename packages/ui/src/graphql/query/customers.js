@@ -7,6 +7,12 @@ export const customersQuery = gql`
         customers {
             ...customerContactFields
             status
+            orders {
+                ...orderFields
+                items {
+                    ...orderItemFields
+            }
+        }
         }
     }
 `
