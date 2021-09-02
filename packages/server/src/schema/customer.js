@@ -89,7 +89,7 @@ export const typeDef = gql`
         ): Boolean
         requestPasswordChange(
             id: ID
-        ): Response
+        ): Boolean
         changeCustomerStatus(
             id: ID!
             status: AccountStatus!

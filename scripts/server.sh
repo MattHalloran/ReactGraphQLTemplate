@@ -10,8 +10,16 @@ echo 'Migrating to latest database'
 knex migrate:latest --env development --knexfile ./src/db/knexfile.js --esm
 echo 'Ensuring database is populated with minimal data'
 knex seed:run --knexfile ./src/db/knexfile.js --specific init.js --esm
-echo 'Generating Prisma schema from database'
-prisma introspect --schema src/prisma/schema.prisma && prisma generate --schema src/prisma/schema.prisma
+if [ "${CREATE_MOCK_DATA}" = true ]; then
+    echo 'Populating database with mock data'
+    knex seed:run --knexfile ./src/db/knexfile.js --specific mock.js --esm
+fi
+if [ "${PRISMA_INTROSPECT}" = true ]; then
+    echo 'Generating schema.prisma file from database'
+    prisma introspect --schema src/prisma/schema.prisma && prisma generate --schema src/prisma/schema.prisma
+fi
+echo 'Generating Prisma schema'
+prisma generate --schema src/prisma/schema.prisma
 
 # Clean any unused files
 yarn clean
