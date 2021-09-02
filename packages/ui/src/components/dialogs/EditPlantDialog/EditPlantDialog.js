@@ -40,7 +40,7 @@ import {
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
 import _ from 'lodash';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 
 // Common plant traits, and their corresponding field names
 const PLANT_TRAITS = {
@@ -110,6 +110,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'fixed',
         bottom: '0',
         width: '-webkit-fill-available',
+        zIndex: 1,
     },
 }));
 
@@ -156,7 +157,7 @@ function EditPlantDialog({
 
     useEffect(() => {
         setCurrSkuIndex((selectedSku && plant?.skus) ? plant.skus.findIndex(s => s.sku === selectedSku.sku) : 0)
-    }, [selectedSku])
+    }, [plant, selectedSku])
 
     const findImageData = useCallback(() => {
         setImagesChanged(false);
@@ -288,7 +289,6 @@ function EditPlantDialog({
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
                         <CloseIcon />
                     </IconButton>
-                    {options}
                 </Toolbar>
             </AppBar>
             <div className={classes.container}>
@@ -441,7 +441,7 @@ function EditPlantDialog({
 EditPlantDialog.propTypes = {
     sku: PropTypes.object.isRequired,
     selectedSku: PropTypes.object,
-    trait_options: PropTypes.object,
+    trait_options: PropTypes.array,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,
 }

@@ -4,7 +4,7 @@ import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client';
-import { initializeApollo } from 'graphql/initialize';
+import { initializeApollo } from 'graphql/utils/initialize';
 
 const client = initializeApollo();
 

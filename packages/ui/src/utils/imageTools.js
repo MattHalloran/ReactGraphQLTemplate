@@ -10,16 +10,19 @@ import _ from 'lodash';
 export function getImageSrc(image, size) {
     // Return null if invalid input
     if (!Array.isArray(image?.files) || image.files.length === 0) return null;
+    // Create copy of image files, to prevent any problems with sorting
+    const files = [...image.files];
+    console.log(files.sort((a, b) => b.width - a.width))
     // Return largest size if size not specified
-    if (!_.isNumber(size)) return image.files.sort((a, b) => b.width - a.width)[0].src;
+    if (!_.isNumber(size)) return files.sort((a, b) => b.width - a.width)[0].src;
     // Determine sizes >= requested
-    const largerSizes = image.files.filter(f => f.width >= size);
+    const largerSizes = files.filter(f => f.width >= size);
     // If any images match, return the smallest one
     if (largerSizes.length > 0) return largerSizes.sort((a, b) => a.width - b.width)[0].src;
     // Determine sizes < requested
-    const smallerSizes = image.files.filter(f => f.width < size);
+    const smallerSizes = files.filter(f => f.width < size);
     // If any images match, return the largest one
     if (smallerSizes.length > 0) return smallerSizes.sort((a, b) => b.width - a.width)[0].src;
-    // Shouldn't reach this point, unless the image data is formatted incorrectly
-    return null;
+    // This code is reached if the files contain no size data. In that case, return the first image
+    return files[0].src;
 }

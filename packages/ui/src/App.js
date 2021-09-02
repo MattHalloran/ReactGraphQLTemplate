@@ -93,7 +93,7 @@ export function App() {
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!', session);
         setTheme(session?.theme in themes ? themes[session?.theme] : themes.light);
-        setCart(session?.orders?.length > 0 ? session.orders[session.orders.length - 1] : null);
+        setCart(session?.cart ?? null);
     }, [session])
 
     const handlers = {
@@ -124,11 +124,11 @@ export function App() {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         // Handle loading spinner, which can have a delay
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
-            if (Number.isInteger(data) && data === data*-1) {
-                clearTimeout(timerRef.current);
-                timerRef.current = window.setTimeout(() => setLoading(true), 2000);
+            clearTimeout(timerRef.current);
+            if (Number.isInteger(data)) {
+                timerRef.current = window.setTimeout(() => setLoading(true), Math.abs(data));
             } else {
-                setLoading(false);
+                setLoading(Boolean(data));
             }
         });
         let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));

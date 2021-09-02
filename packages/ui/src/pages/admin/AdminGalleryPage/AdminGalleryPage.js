@@ -9,7 +9,7 @@ import {
     Dropzone, 
     WrappedImageList 
 } from 'components';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({

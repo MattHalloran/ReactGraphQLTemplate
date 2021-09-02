@@ -1,5 +1,6 @@
 export * from './addImages';
 export * from './changeCustomerStatus';
+export * from './deleteCustomerMutation';
 export * from './deletePlantsMutation';
 export * from './updateCustomer';
 export * from './login';

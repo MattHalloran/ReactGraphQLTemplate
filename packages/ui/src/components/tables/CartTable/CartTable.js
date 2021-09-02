@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, displayPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
+import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -51,6 +51,7 @@ const DELIVERY_OPTIONS = [
 function CartTable({
     cart,
     onUpdate,
+    editable = true,
     ...props
 }) {
     const classes = useStyles();
@@ -92,8 +93,8 @@ function CartTable({
             total = 'TBD';
             price = 'TBD';
         } else {
-            total = displayPrice(quantity * price);
-            price = displayPrice(price);
+            total = showPrice(quantity * price);
+            price = showPrice(price);
         }
 
         let display;
@@ -107,36 +108,37 @@ function CartTable({
 
         return (
             <TableRow key={key}>
-                <TableCell padding="checkbox">
+                {editable ? (<TableCell padding="checkbox">
                     <IconButton onClick={() => deleteCartItem(data.sku)}>
                         <CloseIcon />
                     </IconButton>
-                </TableCell>
+                </TableCell>) : null}
                 <TableCell className={classes.tableCol} padding="none" component="th" scope="row" align="center">
                     {display}
                 </TableCell>
                 <TableCell className={classes.tableCol} align="left">{getPlantTrait('commonName', data.sku.plant)}</TableCell>
                 <TableCell className={classes.tableCol} align="right">{price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
-                    <QuantityBox
+                    {editable ? (<QuantityBox
                         min_value={0}
                         max_value={data.sku?.availability ?? 100}
                         initial_value={quantity}
-                        valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} />
+                        valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} />) : quantity}
                 </TableCell>
                 <TableCell className={classes.tableCol} align="right">{total}</TableCell>
             </TableRow>
         );
-    }, [classes.displayImage, classes.tableCol, deleteCartItem, updateItemQuantity])
+    }, [classes.displayImage, classes.tableCol, deleteCartItem, editable, updateItemQuantity])
 
-    const headCells = [
-        { id: 'close', align: 'left', disablePadding: true, label: '' },
+    let headCells = [
         { id: 'productImage', align: 'left', disablePadding: true, label: 'Product' },
         { id: 'productName', disablePadding: true, label: '' },
         { id: 'price', align: 'right', disablePadding: false, label: 'Price' },
         { id: 'quantity', align: 'right', disablePadding: false, label: 'Quantity' },
         { id: 'total', align: 'right', disablePadding: false, label: 'Total' },
     ]
+    // Only show x button if cart is editable
+    if (editable) headCells.unshift({ id: 'close', align: 'left', disablePadding: true, label: '' });
 
     return (
         <div {...props} >
@@ -159,11 +161,12 @@ function CartTable({
                     </TableBody>
                 </Table>
             </TableContainer>
-            <p>Total: {displayPrice(all_total) ?? 'N/A'}</p>
+            <p>Total: {showPrice(all_total) ?? 'N/A'}</p>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
                     <Selector
                         fullWidth
+                        disabled={!editable}
                         required
                         options={DELIVERY_OPTIONS}
                         selected={cart?.isDelivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
@@ -175,6 +178,7 @@ function CartTable({
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
                             label="Delivery Date"
+                            disabled={!editable}
                             value={cart?.desiredDeliveryDate ? new Date(cart.desiredDeliveryDate) : +(new Date())}
                             onChange={(date) => {
                                 setDeliveryDate(date)
@@ -187,6 +191,7 @@ function CartTable({
                     <TextField
                         id="special-instructions"
                         label="Special Instructions"
+                        disabled={!editable}
                         fullWidth
                         multiline
                         value={cart?.specialInstructions ?? ''}
@@ -201,6 +206,7 @@ function CartTable({
 CartTable.propTypes = {
     cart: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    editable: PropTypes.bool,
 }
 
 export { CartTable };

@@ -15,12 +15,14 @@ export const deleteObjectKey = (object, key) => {
     return copy;
 }
 
-export const valueFromDot = (object, string) => {
+// Grabs data from an object using dot notation (ex: 'parent.child.property')
+export const valueFromDot = (object, notation) => {
     function index(object, i) { return object[i] }
-    if (!string) return null;
-    return string.split('.').reduce(index, object);
+    if (!notation) return null;
+    return notation.split('.').reduce(index, object);
 }
 
+// Maps the keys of an object to dot notation
 export function convertToDot(obj, parent = [], keyValue = {}) {
     for (let key in obj) {
       let keyPath = [...parent, key];

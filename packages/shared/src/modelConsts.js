@@ -63,8 +63,15 @@ export const ORDER_STATUS = {
     Pending: 'Pending',
     Approved: 'Approved',
     Scheduled: 'Scheduled',
-    InTransit: 'In Transit',
+    InTransit: 'InTransit',
     Delivered: 'Delivered'
+}
+export const PLANT_SORT_OPTIONS = {
+    AZ: 'AZ',
+    ZA: 'ZA',
+    Featured: 'Featured',
+    Newest: 'Newest',
+    Oldest: 'Oldest'
 }
 export const SKU_SORT_OPTIONS = {
     AZ: 'AZ',

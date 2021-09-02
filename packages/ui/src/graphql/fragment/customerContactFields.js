@@ -9,6 +9,7 @@ export const customerContactFields = gql`
         id
         firstName
         lastName
+        fullName
         pronouns
         emails {
             ...emailFields

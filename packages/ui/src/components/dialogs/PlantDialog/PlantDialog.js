@@ -7,7 +7,6 @@ import {
     Button,
     Collapse,
     Dialog,
-    Divider,
     Grid,
     IconButton,
     List,
@@ -19,7 +18,7 @@ import {
     Toolbar,
     Typography
 } from '@material-ui/core';
-import { displayPrice, getImageSrc, getPlantTrait } from 'utils';
+import { showPrice, getImageSrc, getPlantTrait } from 'utils';
 import {
     BeeIcon,
     CalendarIcon,
@@ -117,7 +116,7 @@ function PlantDialog({
     useEffect(() => {
         let options = plant.skus?.map(s => {
             return {
-                label: `#${s.size} : ${displayPrice(s.price)}`,
+                label: `#${s.size} : ${showPrice(s.price)}`,
                 value: s,
             }
         })
@@ -213,15 +212,12 @@ function PlantDialog({
                     </IconButton>
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
-                            <Typography variant="h6">
+                            <Typography variant="h5">
                                 {plant.latinName}
                             </Typography>
                             <Typography variant="h6">
                                 {getPlantTrait('commonName', plant)}
                             </Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            {options}
                         </Grid>
                     </Grid>
                 </Toolbar>

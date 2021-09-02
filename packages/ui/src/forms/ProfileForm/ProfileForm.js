@@ -14,7 +14,7 @@ import { makeStyles } from '@material-ui/styles';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import 'react-phone-input-2/lib/material.css';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {

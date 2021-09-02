@@ -4,7 +4,7 @@ import { BreadcrumbsBase } from '../BreadcrumbsBase/BreadcrumbsBase';
 
 const paths = [
     ['Privacy', LINKS.PrivacyPolicy],
-    ['Terms & Conditions', LINKS.Terms]
+    ['Terms', LINKS.Terms]
 ]
 
 const PolicyBreadcrumbs = ({...props}) => BreadcrumbsBase({
