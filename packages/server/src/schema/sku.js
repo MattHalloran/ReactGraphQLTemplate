@@ -56,7 +56,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        skus(ids: [ID!], sortBy: SkuSortBy, searchString: String, showOutOfStock: Boolean): [Sku!]!
+        skus(ids: [ID!], sortBy: SkuSortBy, searchString: String, onlyInStock: Boolean): [Sku!]!
     }
 
     extend type Mutation {
@@ -67,6 +67,15 @@ export const typeDef = gql`
     }
 `
 
+const SORT_TO_QUERY = {
+    [SKU_SORT_OPTIONS.AZ]: { plant: { latinName: 'asc' } },
+    [SKU_SORT_OPTIONS.ZA]: { plant: { latinName: 'desc' } },
+    [SKU_SORT_OPTIONS.PriceLowHigh]: { price: 'asc' },
+    [SKU_SORT_OPTIONS.PriceHighLow]: { price: 'desc' },
+    [SKU_SORT_OPTIONS.Newest]: { created_at: 'desc' },
+    [SKU_SORT_OPTIONS.Oldest]: { created_at: 'asc' },
+}
+
 export const resolvers = {
     SkuStatus: SKU_STATUS,
     SkuSortBy: SKU_SORT_OPTIONS,
@@ -74,80 +83,29 @@ export const resolvers = {
         // Query all SKUs
         skus: async (_, args, context, info) => {
             let idQuery;
-            if (Array.isArray(args.ids)) {
-                idQuery = {
-                    id: { in: args.ids }
-                }
-            }
-            // TODO sort
+            if (Array.isArray(args.ids)) idQuery = { id: { in: args.ids } };
+            // Determine sort order
             let sortQuery;
-            if (args.sortBy !== undefined) {
-                console.log("SORT BY", args.sortBy)
-                switch (args.sortBy) {
-                    case SKU_SORT_OPTIONS.AZ:
-                        break;
-                    case SKU_SORT_OPTIONS.ZA:
-                        break;
-                    case SKU_SORT_OPTIONS.PriceLowHigh:
-                        break;
-                    case SKU_SORT_OPTIONS.PriceHighLow:
-                        break;
-                    case SKU_SORT_OPTIONS.Features:
-                        break;
-                    case SKU_SORT_OPTIONS.Newest:
-                        sortQuery = {
-                            created_at: 'asc'
-                        }
-                        break;
-                    case SKU_SORT_OPTIONS.Oldest:
-                        sortQuery = {
-                            created_at: 'desc'
-                        }
-                        break;
-                }
-            }
+            if (args.sortBy !== undefined) sortQuery = SORT_TO_QUERY[args.sortBy];
+            console.log("SORT BY", args.sortBy);
             let searchQuery;
             if (args.searchString !== undefined && args.searchString.length > 0) {
                 searchQuery = {
                     OR: [
-                        {
-                            plant: {
-                                latinName: {
-                                    contains: args.searchString.trim(),
-                                    mode: 'insensitive'
-                                },
-                            },
-                        },
-                        {
-                            plant: {
-                                traits: {
-                                    some: {
-                                        value: {
-                                            contains: args.searchString.trim(),
-                                            mode: 'insensitive'
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        { plant: { latinName: { contains: args.searchString.trim(), mode: 'insensitive' } } },
+                        { plant: { traits: { some: { value: { contains: args.searchString.trim(), mode: 'insensitive' } } } } }
                     ]
                 }
             }
-            let showOutOfStockQuery;
-            if (!args.showOutOfStock) {
-                showOutOfStockQuery = {
-                    availability: {
-                        gt: 0
-                    }
-                }
-            }
-            let whereQuery = { ...idQuery, ...searchQuery };
-            if (showOutOfStockQuery) whereQuery = { ...whereQuery, ...showOutOfStockQuery };
+            let onlyInStockQuery;
+            if (!args.onlyInStock) onlyInStockQuery = { availability: { gt: 0 } };
             return await context.prisma[_model].findMany({
-                where: whereQuery,
-                orderBy: {
-                    ...sortQuery
+                where: {
+                    ...idQuery,
+                    ...searchQuery,
+                    ...showOutOfStockQuery
                 },
+                orderBy: sortQuery,
                 ...(new PrismaSelect(info).value)
             });
         }

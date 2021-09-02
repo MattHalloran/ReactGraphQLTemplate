@@ -26,7 +26,6 @@ const Slider = ({
 }) => {
     const classes = useStyles();
     const [width, setWidth] = useState(window.innerWidth);
-    const [slides, setSlides] = useState(null);
     const [slideIndex, setSlideIndex] = useState(0);
     const [translate, setTranslate] = useState(0);
     const [transition, setTransition] = useState(0);
@@ -36,13 +35,13 @@ const Slider = ({
     // Play and wait have circular dependencies, so they must be memoized together
     const { wait } = useMemo(() => {
         const play = (index) => {
-            timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
+            if (images.length > 0) timeoutRef.current = setTimeout(wait, slidingDuration, index === images.length - 1 ? 0 : index + 1);
             setTransition(slidingDuration);
             setTranslate(width * (index + 1));
         };
         const wait = (index) => {
             setSlideIndex(index);
-            timeoutRef.current = setTimeout(play, slidingDelay, index);
+            if (images.length > 0) timeoutRef.current = setTimeout(play, slidingDelay, index);
             setTransition(0);
             setTranslate(width * index);
         }
@@ -59,14 +58,14 @@ const Slider = ({
         }
     }, [autoPlay, wait])
 
-    useEffect(() => {
-        if (images === null || images.length === 0) {
-            setSlides([]);
-        } else {
+    const slides = useMemo(() => {
+        if (images?.length > 0) {
             let copy = [...images, images[0]];
-            setSlides(copy.map((s, i) => (
+            return copy.map((s, i) => (
                 <Slide width={width} key={'slide-'+i} image={s} />
-            )))
+            ));
+        } else {
+            return [];
         }
     }, [width, images])
 

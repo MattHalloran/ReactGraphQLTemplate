@@ -6,7 +6,7 @@ const CopyrightBreadcrumbs = ({business, ...props}) => {
     const paths = [
         [`© ${new Date().getFullYear()} ${business?.BUSINESS_NAME?.Long ?? business?.BUSINESS_NAME?.Short ?? 'Home'}`, LINKS.Home],
         ['Privacy', LINKS.PrivacyPolicy],
-        ['Terms & Conditions', LINKS.Terms]
+        ['Terms', LINKS.Terms]
     ]
     return BreadcrumbsBase({
         paths: paths,

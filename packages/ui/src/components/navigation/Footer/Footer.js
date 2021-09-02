@@ -68,7 +68,7 @@ function Footer({
     return (
         <div className={classes.root}>
             <Grid container justifyContent='center' spacing={1}>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                     <List component="nav">
                         <ListItem variant="h5" component="h3" >
                             <ListItemText className={classes.upper} primary="Resources" />
@@ -92,12 +92,9 @@ function Footer({
                         <ListItem button component="a" href={LINKS.Gallery} >
                             <ListItemText primary="Gallery" />
                         </ListItem>
-                        {/* <ListItem button component="a" href={LINKS.Featured} >
-                            <ListItemText primary="Featured Plants" />
-                        </ListItem> */}
                     </List>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                     <List component="nav">
                         <ListItem variant="h5" component="h3" >
                             <ListItemText className={classes.upper} primary="Contact" />
