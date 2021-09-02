@@ -124,9 +124,8 @@ export function App() {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         // Handle loading spinner, which can have a delay
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
-            console.log('GOT SPINNER INFO', data)
+            clearTimeout(timerRef.current);
             if (Number.isInteger(data)) {
-                clearTimeout(timerRef.current);
                 timerRef.current = window.setTimeout(() => setLoading(true), Math.abs(data));
             } else {
                 setLoading(Boolean(data));

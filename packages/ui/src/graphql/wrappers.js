@@ -29,11 +29,11 @@ export function mutationWrapper({
             if (_.isFunction(onError)) onError(response);
         }
     }).catch((response) => {
+        if (spinnerDelay) PubSub.publish(PUBS.Loading, false);
         if (errorMessage || errorData) {
             PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData.data ?? response });
         }
         else if (showDefaultErrorSnack) PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred.', severity: 'error', data: response });
-        if (spinnerDelay) PubSub.publish(PUBS.Loading, false);
         if (_.isFunction(onError)) onError(response);
     })
 }
