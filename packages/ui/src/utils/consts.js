@@ -1,6 +1,10 @@
 import { COOKIE, ORDER_STATUS } from '@local/shared';
 
-export const ORDER_STATES = [
+export const ORDER_FILTERS = [
+    {
+        label: 'All',
+        value: 'All',
+    },
     {
         label: 'Canceled by Admin',
         value: ORDER_STATUS.CanceledByAdmin,

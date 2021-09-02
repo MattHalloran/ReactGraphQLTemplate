@@ -236,7 +236,7 @@ function Routes({
                 )} />
                 <Route exact path={LINKS.AdminOrders} render={() => (
                     <Page title={"Order Page"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
-                        <AdminOrderPage />
+                        <AdminOrderPage userRoles={userRoles} />
                     </Page>
                 )} />
                 {/* END ADMIN PAGES */}

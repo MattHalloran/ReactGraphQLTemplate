@@ -17,7 +17,7 @@ import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS } from '@local/shared';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 import { emailLink, mapIfExists, phoneLink, PUBS, PubSub, showPhone } from 'utils';
 import { ListDialog } from 'components/dialogs';
@@ -149,14 +149,14 @@ function CustomerCard({
                         className={classes.actionButton}
                         variant="text"
                         onClick={o[0]}>{o[1]}</Button>)}
-                {(phoneList.length > 0) ?
+                {(phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
                         <IconButton onClick={() => setPhoneDialogOpen(true)}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
-                {(emailList.length > 0) ?
+                {(emailList?.length > 0) ?
                     (<Tooltip title="View emails" placement="bottom">
                         <IconButton onClick={() => setEmailDialogOpen(true)}>
                             <EmailIcon className={classes.icon} />

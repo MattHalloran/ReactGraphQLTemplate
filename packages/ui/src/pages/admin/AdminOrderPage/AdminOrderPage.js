@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ordersQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { ORDER_STATES, PUBS, PubSub } from 'utils';
+import { ORDER_FILTERS, PUBS, PubSub } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import {
     AdminBreadcrumbs,
@@ -26,14 +26,14 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function AdminOrderPage() {
+function AdminOrderPage({ userRoles }) {
     const classes = useStyles();
     const theme = useTheme();
-    const [filter, setFilter] = useState(ORDER_STATES[4].value);
+    const [filter, setFilter] = useState(ORDER_FILTERS[0].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
     const [orders, setOrders] = useState(null);
-    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter }, pollInterval: 5000 });
+    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter !== 'All' ? filter : undefined }, pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
@@ -48,6 +48,7 @@ function AdminOrderPage() {
     return (
         <div id="page">
             {currOrder ? (<OrderDialog 
+                userRoles={userRoles}
                 order={currOrder}
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
@@ -57,7 +58,7 @@ function AdminOrderPage() {
             </div>
             <Selector
                 fullWidth
-                options={ORDER_STATES}
+                options={ORDER_FILTERS}
                 selected={filter}
                 handleChange={(e) => setFilter(e.target.value)}
                 inputAriaLabel='order-type-selector-label'

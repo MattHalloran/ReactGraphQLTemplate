@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import { useMutation } from '@apollo/client';
 import { writeAssetsMutation } from 'graphql/mutation';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({

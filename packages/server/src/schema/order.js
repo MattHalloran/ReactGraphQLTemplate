@@ -54,7 +54,7 @@ export const typeDef = gql`
 `
 
 const STATUS_TO_SORT = {
-    [ORDER_STATUS.CanceledByAdmin]: { updated_at: 'desc', },
+    [ORDER_STATUS.CanceledByAdmin]: { updated_at: 'desc' },
     [ORDER_STATUS.CanceledByCustomer]: { updated_at: 'desc' },
     [ORDER_STATUS.PendingCancel]: { updated_at: 'desc' },
     [ORDER_STATUS.Rejected]: { updated_at: 'desc' },
@@ -75,9 +75,9 @@ export const resolvers = {
             let idQuery;
             if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
             // Determine sort order
-            let sortQuery;
-            if (args.status !== undefined) sortQuery = STATUS_TO_SORT[args.status];
-            console.log("SORT BY", sortQuery);
+            let sortQuery = { updated_at: 'desc' };
+            if (args.status) sortQuery = STATUS_TO_SORT[args.status];
+            console.log("SORT BY", args.status, sortQuery);
             // If search string provided, match it with customer or business name.
             // Maybe in the future, this could also be matched to sku names and such
             let searchQuery;
@@ -117,17 +117,20 @@ export const resolvers = {
                 delete args.input.status;
             }
             // Determine which order item rows need to be updated, and which will be deleted
-            const updatedItemIds = args.input.items ? args.input.items.map(i => i.id) : [];
-            const deletingItemIds = curr.items.filter(i => !updatedItemIds.includes(i.id)).map(i => i.id);
-            if (args.input.items.length > 0) {
-                const updateMany = args.input.items.map(d => context.prisma[TABLES.OrderItem].updateMany({
-                    where: { id: d.id },
-                    data: { ...d }
-                }))
-                Promise.all(updateMany)
-            }
-            if (deletingItemIds.length > 0) {
-                await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds } } })
+            if (Array.isArray(args.input.items)) {
+                const updatedItemIds = args.input.items.map(i => i.id);
+                const deletingItemIds = curr.items.filter(i => !updatedItemIds.includes(i.id)).map(i => i.id);
+                if (updatedItemIds.length > 0) {
+                    const updateMany = args.input.items.map(d => context.prisma[TABLES.OrderItem].updateMany({
+                        where: { id: d.id },
+                        data: { ...d }
+                    }))
+                    Promise.all(updateMany)
+                }
+                if (deletingItemIds.length > 0) {
+                    console.log('DELETING ITEMS')
+                    await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds } } })
+                }
             }
             console.log('about to update')
             return await context.prisma[_model].update({

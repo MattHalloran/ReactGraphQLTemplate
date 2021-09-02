@@ -63,7 +63,7 @@ export const ORDER_STATUS = {
     Pending: 'Pending',
     Approved: 'Approved',
     Scheduled: 'Scheduled',
-    InTransit: 'In Transit',
+    InTransit: 'InTransit',
     Delivered: 'Delivered'
 }
 export const PLANT_SORT_OPTIONS = {

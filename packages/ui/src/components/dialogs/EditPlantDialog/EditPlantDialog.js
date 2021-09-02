@@ -40,7 +40,7 @@ import {
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
 import _ from 'lodash';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 
 // Common plant traits, and their corresponding field names
 const PLANT_TRAITS = {

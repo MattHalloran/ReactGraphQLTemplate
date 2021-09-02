@@ -86,14 +86,14 @@ function OrderCard({
             </CardContent>
             <CardActions>
                 <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
-                {(phoneList.length > 0) ?
+                {(phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
                         <IconButton onClick={() => setPhoneDialogOpen(true)}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
-                {(emailList.length > 0) ?
+                {(emailList?.length > 0) ?
                 (<Tooltip title="View emails" placement="bottom">
                     <IconButton onClick={() => setEmailDialogOpen(true)}>
                         <EmailIcon className={classes.icon} />

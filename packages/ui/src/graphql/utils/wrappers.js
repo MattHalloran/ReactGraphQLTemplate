@@ -22,7 +22,7 @@ export function mutationWrapper({
             if (_.isFunction(onSuccess)) onSuccess(response)
         } else {
             if (errorMessage || errorData) {
-                PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData.data ?? response });
+                PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData?.data ?? response });
             }
             else if (showDefaultErrorSnack) PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred.', severity: 'error', data: response });
             if (spinnerDelay) PubSub.publish(PUBS.Loading, false);
@@ -31,7 +31,7 @@ export function mutationWrapper({
     }).catch((response) => {
         if (spinnerDelay) PubSub.publish(PUBS.Loading, false);
         if (errorMessage || errorData) {
-            PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData.data ?? response });
+            PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData?.data ?? response });
         }
         else if (showDefaultErrorSnack) PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred.', severity: 'error', data: response });
         if (_.isFunction(onError)) onError(response);

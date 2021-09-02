@@ -23,7 +23,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({

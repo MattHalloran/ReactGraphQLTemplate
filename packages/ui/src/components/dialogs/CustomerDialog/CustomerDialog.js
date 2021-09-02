@@ -22,7 +22,7 @@ import {
 } from '@material-ui/icons';
 import _ from 'lodash';
 import { ACCOUNT_STATUS } from '@local/shared';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 import { deleteCustomerMutation, updateCustomerMutation } from 'graphql/mutation';
 import { PUBS, PubSub } from 'utils';
 

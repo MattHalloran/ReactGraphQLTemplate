@@ -2,7 +2,7 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { showPrice, PUBS, PubSub } from 'utils';
 import { skusQuery } from 'graphql/query';
-import { initializeApollo } from 'graphql/initialize';
+import { initializeApollo } from 'graphql/utils/initialize';
 import { getPlantTrait } from "./plantTools";
 import { SKU_SORT_OPTIONS } from '@local/shared';
 

@@ -14,7 +14,7 @@ import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import _ from 'lodash';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     header: {

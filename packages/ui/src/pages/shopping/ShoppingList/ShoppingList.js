@@ -10,7 +10,7 @@ import {
     PlantDialog
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
-import { mutationWrapper } from "graphql/wrappers";
+import { mutationWrapper } from "graphql/utils/wrappers";
 
 const useStyles = makeStyles(() => ({
     root: {

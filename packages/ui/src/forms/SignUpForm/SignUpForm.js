@@ -19,7 +19,7 @@ import {
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
 import { LINKS, PUBS, PubSub } from 'utils';
-import { mutationWrapper } from 'graphql/wrappers';
+import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
     form: {
