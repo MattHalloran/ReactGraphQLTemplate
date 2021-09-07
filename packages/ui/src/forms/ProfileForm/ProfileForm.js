@@ -11,7 +11,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/styles';
-import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import 'react-phone-input-2/lib/material.css';
 import { mutationWrapper } from 'graphql/utils/wrappers';
@@ -181,20 +180,17 @@ function ProfileForm() {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <PhoneInput
-                            inputProps={{ id: "phone" }}
-                            inputClass={classes.phoneInput}
-                            enableSearch={true}
-                            country={'us'}
+                    <TextField
+                            fullWidth
                             id="phone"
                             name="phone"
                             autoComplete="tel"
+                            label="Phone Number"
                             value={formik.values.phone}
-                            onChange={(number, country, e) => formik.handleChange(e)}
+                            onChange={formik.handleChange}
                             error={formik.touched.phone && Boolean(formik.errors.phone)}
                             helperText={formik.touched.phone && formik.errors.phone}
                         />
-                        {formik.errors.phone}
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
@@ -203,7 +199,7 @@ function ProfileForm() {
                                 name="theme"
                                 aria-label="theme-check"
                                 value={formik.values.theme}
-                                onChange={(e) => formik.handleChange(e) && PubSub.publish(PUBS.Theme, e.target.value)}
+                                onChange={(e) => { formik.handleChange(e); PubSub.publish(PUBS.Theme, e.target.value) }}
                             >
                                 <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
                                 <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
@@ -233,7 +229,7 @@ function ProfileForm() {
                                     id="marketingEmails"
                                     name="marketingEmails"
                                     value="marketingEmails"
-                                    color="primary"
+                                    color="secondary"
                                     checked={formik.values.marketingEmails}
                                     onChange={formik.handleChange}
                                 />

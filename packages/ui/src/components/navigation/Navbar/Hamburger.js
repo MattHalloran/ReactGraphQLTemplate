@@ -27,7 +27,7 @@ import { useTheme } from '@emotion/react';
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
         background: theme.palette.primary.light,
-        borderLeft: `2px solid ${theme.palette.text.primary}`,
+        borderLeft: `1px solid ${theme.palette.text.primary}`,
     },
     menuItem: {
         color: theme.palette.primary.contrastText,

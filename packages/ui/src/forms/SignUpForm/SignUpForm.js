@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/styles';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
-import PhoneInput from 'react-phone-input-2';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -38,6 +37,8 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row-reverse',
     },
     clickSize: {
+        color: theme.palette.secondary.light,
+        cursor: 'pointer',
         minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
         display: 'flex',
         alignItems: 'center',
@@ -177,16 +178,14 @@ function SignUpForm({
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <PhoneInput
-                        inputProps={{ id: "phone" }}
-                        inputClass={classes.phoneInput}
-                        enableSearch={true}
-                        country={'us'}
+                    <TextField
+                        fullWidth
                         id="phone"
                         name="phone"
                         autoComplete="tel"
+                        label="Phone Number"
                         value={formik.values.phone}
-                        onChange={(number, country, e) => formik.handleChange(e)}
+                        onChange={formik.handleChange}
                         error={formik.touched.phone && Boolean(formik.errors.phone)}
                         helperText={formik.touched.phone && formik.errors.phone}
                     />
@@ -241,7 +240,7 @@ function SignUpForm({
                                 id="marketingEmails"
                                 name="marketingEmails"
                                 value="marketingEmails"
-                                color="primary"
+                                color="secondary"
                                 checked={formik.values.marketingEmails}
                                 onChange={formik.handleChange}
                             />

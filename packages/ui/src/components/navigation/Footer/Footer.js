@@ -21,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'hidden',
         backgroundColor: theme.palette.primary.dark,
         color: theme.palette.primary.contrastText,
-        borderTop: `2px solid ${theme.palette.text.primary}`,
         position: 'relative',
         paddingBottom: '7vh',
     },

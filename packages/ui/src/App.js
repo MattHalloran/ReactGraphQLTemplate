@@ -92,7 +92,10 @@ export function App() {
 
     useEffect(() => {
         console.log('SESSION UPDATED!!!!!!!', session);
-        setTheme(session?.theme in themes ? themes[session?.theme] : themes.light);
+        // Determine theme
+        if (session?.theme) setTheme(themes[session?.theme])
+        else if (session && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.dark);
+        else setTheme(themes.light);
         setCart(session?.cart ?? null);
     }, [session])
 
@@ -120,8 +123,6 @@ export function App() {
 
     useEffect(() => {
         checkLogin();
-        // Check for browser dark mode TODO set back to dark when ready
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.light);
         // Handle loading spinner, which can have a delay
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
             clearTimeout(timerRef.current);
@@ -132,9 +133,11 @@ export function App() {
             }
         });
         let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, data) =>{console.log('setting theeme', data); setTheme(themes[data] ?? themes.light)})
         return (() => {
             PubSub.unsubscribe(loadingSub);
             PubSub.unsubscribe(businessSub);
+            PubSub.unsubscribe(themeSub);
         })
     }, [checkLogin])
 
@@ -147,7 +150,7 @@ export function App() {
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
                         <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                        <main id="page-container" style={{ background: theme.palette.background.default }}>
+                        <main id="page-container" style={{ background: theme.palette.background.default, color: theme.palette.background.textPrimary }}>
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
                                     session={session}

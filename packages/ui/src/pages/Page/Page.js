@@ -2,17 +2,18 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { LINKS } from 'utils';
 import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router';
 
 const Page = ({
     title,
     sessionChecked,
     redirect = LINKS.Home,
-    onRedirect,
     userRoles,
     restrictedToRoles,
     children
 }) => {
     const location = useLocation();
+    const history = useHistory();
 
     useEffect(() => {
         document.title = title || "";
@@ -25,7 +26,7 @@ const Page = ({
             const needArray = Array.isArray(restrictedToRoles) ? restrictedToRoles : [restrictedToRoles];
             if (haveArray.some(r => needArray.includes(r?.role?.title))) return children;
         }
-        if (sessionChecked && location.pathname !== redirect) onRedirect(redirect);
+        if (sessionChecked && location.pathname !== redirect) history.replace(redirect);
         return null;
     }
 

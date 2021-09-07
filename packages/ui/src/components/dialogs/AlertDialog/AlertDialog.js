@@ -46,11 +46,11 @@ function AlertDialog() {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => handleClick(state.firstButtonClicked)} color="primary">
+                <Button onClick={() => handleClick(state.firstButtonClicked)} color="secondary">
                     {state.firstButtonText}
                 </Button>
                 {state.secondButtonText ? (
-                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="primary">
+                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="secondary">
                         {state.secondButtonText}
                     </Button>
                 ) : null}

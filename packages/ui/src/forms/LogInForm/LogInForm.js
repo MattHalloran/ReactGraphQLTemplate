@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row-reverse',
     },
     clickSize: {
+        color: theme.palette.secondary.light,
         minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
         display: 'flex',
         alignItems: 'center',
