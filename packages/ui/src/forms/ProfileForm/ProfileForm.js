@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         paddingBottom: theme.spacing(2),
     },
     phoneInput: {
-        width: 'inherit',
+        width: '100%',
     }
 }));
 
@@ -67,12 +67,14 @@ function ProfileForm() {
                 pronouns: values.pronouns,
                 emails: [
                     {
+                        id: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].id : '',
                         emailAddress: values.email,
                         receivesDeliveryUpdates: values.marketingEmails
                     }
                 ],
                 phones: [
                     {
+                        id: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].id : '',
                         number: values.phone
                     }
                 ],
@@ -90,7 +92,6 @@ function ProfileForm() {
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword
                 } },
-                successCondition: (response) => response.ok,
                 successMessage: () => 'Profile updated.',
             })
         },
@@ -139,6 +140,8 @@ function ProfileForm() {
                             id="pronouns"
                             name="pronouns"
                             options={DEFAULT_PRONOUNS}
+                            value={formik.values.pronouns}
+                            onChange={(_, value) => formik.setFieldValue('pronouns', value)}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -179,7 +182,7 @@ function ProfileForm() {
                     </Grid>
                     <Grid item xs={12}>
                         <PhoneInput
-                            inputProps={{ id: "phone", helperText: 'fdafdafdsa' }}
+                            inputProps={{ id: "phone" }}
                             inputClass={classes.phoneInput}
                             enableSearch={true}
                             country={'us'}

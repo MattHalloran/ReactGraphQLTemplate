@@ -33,7 +33,11 @@ export function mutationWrapper({
         if (errorMessage || errorData) {
             PubSub.publish(PUBS.Snack, { message: errorMessage(response), ...errorData, severity: errorData?.severity ?? 'error', data: errorData?.data ?? response });
         }
-        else if (showDefaultErrorSnack) PubSub.publish(PUBS.Snack, { message: response.message ?? 'Unknown error occurred.', severity: 'error', data: response });
+        else if (showDefaultErrorSnack) {
+            // Don't show internal errors, as they're often a block of code
+            const messageToShow = response.code === 'INTERNAL_SERVER_ERROR' ? 'Unknown error occurred.' : response.message ?? 'Unknown error occurred.';
+            PubSub.publish(PUBS.Snack, { message: messageToShow, severity: 'error', data: response });
+        }
         if (_.isFunction(onError)) onError(response);
     })
 }

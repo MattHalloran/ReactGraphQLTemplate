@@ -159,6 +159,19 @@ function Routes({
                         </Page>
                     )}
                 />
+                <Route
+                    exact
+                    path={`${LINKS.ResetPassword}/:code?`}
+                    sitemapIndex={true}
+                    priority={0.1}
+                    render={() => (
+                        <Page title={title('Forgot Password')} {...common}>
+                            <FormPage title="Forgot Password" maxWidth="700px">
+                                <ForgotPasswordForm {...common} />
+                            </FormPage>
+                        </Page>
+                    )}
+                />
                 {/* END PUBLIC PAGES */}
                 {/* START CUSTOMER PAGES */}
                 <Route

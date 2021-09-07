@@ -20,6 +20,8 @@ import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
+import { useHistory } from 'react-router-dom';
+import PhoneInput from 'react-phone-input-2';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -29,15 +31,26 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         margin: theme.spacing(3, 0, 2),
     },
+    phoneInput: {
+        width: '100%',
+    },
+    linkRight: {
+        flexDirection: 'row-reverse',
+    },
+    clickSize: {
+        minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
+        display: 'flex',
+        alignItems: 'center',
+    },
 }));
 
-function SignUpForm({ 
+function SignUpForm({
     business,
-    onSessionUpdate,
-    onRedirect
+    onSessionUpdate
 }) {
     const classes = useStyles();
-    const [signUp, {loading}] = useMutation(signUpMutation);
+    const history = useHistory();
+    const [signUp, { loading }] = useMutation(signUpMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -57,26 +70,29 @@ function SignUpForm({
             mutationWrapper({
                 mutation: signUp,
                 data: { variables: values },
-                successCondition: (response) => response.ok,
                 onSuccess: (response) => {
-                    onSessionUpdate(response.session);
-                    if (values.accountApproved) {
+                    onSessionUpdate(response.data.signUp);
+                    if (response.data.signUp?.accountApproved) {
                         PubSub.publish(PUBS.AlertDialog, {
                             message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
                             firstButtonText: 'OK',
+                            firstButtonClicked: () => history.push(LINKS.Shopping),
                         });
                     } else {
                         PubSub.publish(PUBS.AlertDialog, {
                             message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page.`,
                             firstButtonText: 'OK',
+                            firstButtonClicked: () => history.push(LINKS.Profile),
                         });
                     }
                 },
                 onError: (response) => {
                     if (response.code === CODE.EmailInUse.code) {
-                        if (window.confirm(`${response.message}. Press OK if you would like to be redirected to the forgot password form.`)) {
-                            onRedirect(LINKS.ForgotPassword);
-                        }
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: `${response.message}. Press OK if you would like to be redirected to the forgot password form.`,
+                            firstButtonText: 'OK',
+                            firstButtonClicked: () => history.push(LINKS.ForgotPassword),
+                        });
                     }
                 }
             })
@@ -120,6 +136,8 @@ function SignUpForm({
                         id="pronouns"
                         name="pronouns"
                         options={DEFAULT_PRONOUNS}
+                        value={formik.values.pronouns}
+                        onChange={(_, value) => formik.setFieldValue('pronouns', value)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -159,14 +177,16 @@ function SignUpForm({
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField
-                        fullWidth
+                    <PhoneInput
+                        inputProps={{ id: "phone" }}
+                        inputClass={classes.phoneInput}
+                        enableSearch={true}
+                        country={'us'}
                         id="phone"
                         name="phone"
                         autoComplete="tel"
-                        label="Phone Number"
                         value={formik.values.phone}
-                        onChange={formik.handleChange}
+                        onChange={(number, country, e) => formik.handleChange(e)}
                         error={formik.touched.phone && Boolean(formik.errors.phone)}
                         helperText={formik.touched.phone && formik.errors.phone}
                     />
@@ -201,7 +221,7 @@ function SignUpForm({
                 </Grid>
                 <Grid item xs={12}>
                     <FormControl component="fieldset">
-                        <RadioGroup 
+                        <RadioGroup
                             id="accountApproved"
                             name="accountApproved"
                             aria-label="existing-customer-check"
@@ -217,7 +237,7 @@ function SignUpForm({
                 <Grid item xs={12}>
                     <FormControlLabel
                         control={
-                            <Checkbox 
+                            <Checkbox
                                 id="marketingEmails"
                                 name="marketingEmails"
                                 value="marketingEmails"
@@ -239,11 +259,18 @@ function SignUpForm({
             >
                 Sign Up
             </Button>
-            <Grid container justifyContent="flex-end">
-                <Grid item>
-                    <Link href={LINKS.LogIn} variant="body2">
-                        <Typography variant="body2">
-                            Already have an account? Sign in
+            <Grid container spacing={2}>
+                <Grid item xs={6}>
+                    <Link onClick={() => history.push(LINKS.LogIn)}>
+                        <Typography className={classes.clickSize}>
+                            Already have an account? Log in
+                        </Typography>
+                    </Link>
+                </Grid>
+                <Grid item xs={6}>
+                    <Link onClick={() => history.push(LINKS.ForgotPassword)}>
+                        <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
+                            Forgot Password?
                         </Typography>
                     </Link>
                 </Grid>

@@ -36,6 +36,7 @@ export async function authenticate(req, _, next) {
         // Now, set token and role variables for other middleware to use
         req.validToken = true;
         req.customerId = payload.customerId;
+        req.businessId = payload.businessId;
         req.roles = payload.roles;
         req.isCustomer = payload.isCustomer;
         req.isAdmin = payload.isAdmin;

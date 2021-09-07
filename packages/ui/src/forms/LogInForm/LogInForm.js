@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { logInSchema } from '@local/shared';
@@ -24,8 +24,12 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(3, 0, 2),
     },
     linkRight: {
-        display: 'block',
-        textAlign: 'right',
+        flexDirection: 'row-reverse',
+    },
+    clickSize: {
+        minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
+        display: 'flex',
+        alignItems: 'center',
     },
 }));
 
@@ -33,8 +37,9 @@ function LogInForm({
     onSessionUpdate,
     onRedirect
 }) {
-    const urlParams = useParams();
     const classes = useStyles();
+    const history = useHistory();
+    const urlParams = useParams();
     const [login, {loading}] = useMutation(loginMutation);
 
     const formik = useFormik({
@@ -95,15 +100,15 @@ function LogInForm({
                     </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
-                    <Link href={LINKS.ForgotPassword} variant="body2">
-                        <Typography variant="body2">
+                    <Link onClick={() => history.push(LINKS.ForgotPassword)}>
+                        <Typography className={classes.clickSize}>
                             Forgot Password?
                         </Typography>
                     </Link>
                 </Grid>
                 <Grid item xs={6}>
-                    <Link href={LINKS.Register} variant="body2">
-                        <Typography variant="body2" className={classes.linkRight}>
+                    <Link onClick={() => history.push(LINKS.Register)}>
+                        <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
                             Don't have an account? Sign up
                         </Typography>
                     </Link>

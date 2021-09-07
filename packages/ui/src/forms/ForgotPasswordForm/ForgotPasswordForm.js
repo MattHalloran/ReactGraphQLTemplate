@@ -13,6 +13,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -22,12 +23,21 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         margin: theme.spacing(3, 0, 2),
     },
+    linkRight: {
+        flexDirection: 'row-reverse',
+    },
+    clickSize: {
+        minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
+        display: 'flex',
+        alignItems: 'center',
+    },
 }));
 
 function ForgotPasswordForm({
     onRedirect
 }) {
     const classes = useStyles();
+    const history = useHistory();
     const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
 
     const formik = useFormik({
@@ -39,7 +49,7 @@ function ForgotPasswordForm({
             mutationWrapper({
                 mutation: requestPasswordChange,
                 data: { variables: values },
-                successCondition: (response) => response.ok,
+                successCondition: (response) => response.data.requestPasswordChange,
                 onSuccess: () => onRedirect(LINKS.Home),
                 successMessage: () => 'Request sent. Please check email.',
             })
@@ -73,11 +83,18 @@ function ForgotPasswordForm({
             >
                 Submit
             </Button>
-            <Grid container justifyContent="flex-end">
-                <Grid item>
-                    <Link href={LINKS.LogIn} variant="body2">
-                        <Typography variant="body2">
+            <Grid container spacing={2}>
+                <Grid item xs={6}>
+                    <Link onClick={() => history.push(LINKS.LogIn)}>
+                        <Typography className={classes.clickSize}>
                             Remember? Back to Log In
+                        </Typography>
+                    </Link>
+                </Grid>
+                <Grid item xs={6}>
+                    <Link onClick={() => history.push(LINKS.Register)}>
+                        <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
+                            Don't have an account? Sign up
                         </Typography>
                     </Link>
                 </Grid>

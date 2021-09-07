@@ -161,6 +161,13 @@ export const requestPasswordChangeSchema = yup.object().shape({
     email: yup.string().email().required()
 })
 
+// Schema for resetting password
+export const resetPasswordSchema = yup.object().shape({
+    newPassword: passwordSchema.required(),
+    confirmNewPassword: yup.string().oneOf([yup.ref('newPassword'), null], 'Passwords must match')
+})
+
+
 // Schema for adding an employee to a business
 export const employeeSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),

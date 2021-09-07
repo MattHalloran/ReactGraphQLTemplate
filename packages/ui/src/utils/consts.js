@@ -101,6 +101,7 @@ export const LINKS = {
     PrivacyPolicy: "/privacy-policy",
     Profile: "/profile",
     Register: "/register",
+    ResetPassword: "/password-reset",
     Shopping: "/shopping",
     Terms: "/terms-and-conditions",
 }
