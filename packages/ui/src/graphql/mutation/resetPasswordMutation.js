@@ -6,10 +6,12 @@ export const resetPasswordMutation = gql`
     ${orderFields}
     ${orderItemFields}
     mutation resetPassword(
-        $code: String
-        $newPassword: String
+        $id: ID!
+        $code: String!
+        $newPassword: String!
     ) {
     resetPassword(
+        id: $id
         code: $code
         newPassword: $newPassword
     ) {

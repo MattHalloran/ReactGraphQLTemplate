@@ -37,12 +37,12 @@ export function orderNotifyAdmin() {
     });
 }
 
-export function sendResetPasswordLink(email, code) {
+export function sendResetPasswordLink(email, customer_id, code) {
     emailQueue.add({
         to: [email],
         subject: `${BUSINESS_NAME.Short} Password Reset`,
-        text: `A password reset was requested for your account with ${BUSINESS_NAME.Long}. If you sent this request, you may change your password through this link (${WEBSITE}/password-reset/${code}) to continue. If you did not send this request, please ignore this email.`,
-        html: `<p>A password reset was requested for your account with ${BUSINESS_NAME.Long}.</p><p>If you sent this request, you may change your password through this link (<a href=\"${WEBSITE}/password-reset/${code}\">${WEBSITE}/password-reset/${code}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
+        text: `A password reset was requested for your account with ${BUSINESS_NAME.Long}. If you sent this request, you may change your password through this link (${WEBSITE}/password-reset/${customer_id}/${code}) to continue. If you did not send this request, please ignore this email.`,
+        html: `<p>A password reset was requested for your account with ${BUSINESS_NAME.Long}.</p><p>If you sent this request, you may change your password through this link (<a href=\"${WEBSITE}/password-reset/${customer_id}/${code}\">${WEBSITE}/password-reset/${customer_id}/${code}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
     });
 }
 

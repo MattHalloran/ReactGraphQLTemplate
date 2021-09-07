@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import bcrypt from 'bcrypt';
-import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
@@ -93,6 +93,7 @@ export const typeDef = gql`
             email: String!
         ): Boolean
         resetPassword(
+            id: ID!
             code: String!
             newPassword: String!
         ): Customer!
@@ -275,7 +276,7 @@ export const resolvers = {
             // Find customer in database
             const customer = await customerFromEmail(args.email, context.prisma);
             // Generate request code
-            const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS);
+            const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS).replace('/', '');
             console.log('REQUEST CODE IS', requestCode);
             // Store code and request time in customer row
             await context.prisma[_model].update({
@@ -283,26 +284,33 @@ export const resolvers = {
                 data: { resetPasswordCode: requestCode, lastResetPasswordReqestAttempt: new Date().toISOString() }
             })
             // Send email with correct reset link
-            sendResetPasswordLink(args.email, requestCode);
+            sendResetPasswordLink(args.email, customer.id, requestCode);
             return true;
         },
         resetPassword: async(_, args, context, info) => {
             // Validate input format
-            //TODO
+            const validateError = await validateArgs(passwordSchema, args.newPassword);
+            if (validateError) return validateError;
             // Find customer in database
             const customer = await context.prisma[_model].findUnique({ 
-                where: { requestPasswordCode: args.code },
+                where: { id: args.id },
                 select: {
                     id: true,
+                    resetPasswordCode: true,
+                    lastResetPasswordReqestAttempt: true,
                     emails: { select: { emailAddress: true } }
                 }
             });
             if (!customer) return new CustomError(CODE.ErrorUnknown);
+            console.log('CUSTOMER IS', customer)
+            console.log(customer.resetPasswordCode, args.code);
+            console.log(new Date(customer.lastResetPasswordReqestAttempt).getTime())
             // Verify request code and that request was made within 48 hours
-            if (!bcrypt.compareSync(customer.resetPasswordCode, args.code) ||
+            if (!customer.resetPasswordCode ||
+                customer.resetPasswordCode !== args.code ||
                 Date.now() - new Date(customer.lastResetPasswordReqestAttempt).getTime() > REQUEST_PASSWORD_RESET_DURATION) {
                 // Generate new code
-                const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS);
+                const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS).replace('/', '');
                 // Store code and request time in customer row
                 await context.prisma[_model].update({
                     where: { id: customer.id },
@@ -310,7 +318,7 @@ export const resolvers = {
                 })
                 // Send new verification email
                 for (const email of customer.emails) {
-                    sendResetPasswordLink(email.emailAddress, requestCode);
+                    sendResetPasswordLink(email.emailAddress, customer.id, requestCode);
                 }
                 // Return error
                 return new CustomError(CODE.INVALID_RESET_CODE);
@@ -321,13 +329,13 @@ export const resolvers = {
                 data: { 
                     resetPasswordCode: null, 
                     lastResetPasswordReqestAttempt: null,
-                    password: bcrypt.hashSync(args.password, HASHING_ROUNDS)
+                    password: bcrypt.hashSync(args.newPassword, HASHING_ROUNDS)
                 }
             })
             // Return customer data
             const prismaInfo = getCustomerSelect(info);
-            const cart = await getCart(prisma, info, customer.id);
-            const customerData = await prisma[TABLES.Customer].findUnique({ where: { id: customer.id }, ...prismaInfo });
+            const cart = await getCart(context.prisma, info, customer.id);
+            const customerData = await context.prisma[TABLES.Customer].findUnique({ where: { id: customer.id }, ...prismaInfo });
             if (cart) customerData.cart = cart;
             return customerData;
         },

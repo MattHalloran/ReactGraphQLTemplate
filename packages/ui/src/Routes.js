@@ -9,6 +9,7 @@ import {
     ForgotPasswordForm,
     LogInForm,
     ProfileForm,
+    ResetPasswordForm,
     SignUpForm
 } from 'forms';
 
@@ -161,13 +162,13 @@ function Routes({
                 />
                 <Route
                     exact
-                    path={`${LINKS.ResetPassword}/:code?`}
+                    path={`${LINKS.ResetPassword}/:id?/:code?`}
                     sitemapIndex={true}
                     priority={0.1}
                     render={() => (
-                        <Page title={title('Forgot Password')} {...common}>
-                            <FormPage title="Forgot Password" maxWidth="700px">
-                                <ForgotPasswordForm {...common} />
+                        <Page title={title('Reset Password')} {...common}>
+                            <FormPage title="Reset Password" maxWidth="700px">
+                                <ResetPasswordForm {...common} />
                             </FormPage>
                         </Page>
                     )}
