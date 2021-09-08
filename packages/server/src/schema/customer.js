@@ -76,6 +76,7 @@ export const typeDef = gql`
             email: String!
             phone: String!
             accountApproved: Boolean!
+            theme: String!
             marketingEmails: Boolean!
             password: String!
         ): Customer!
@@ -87,7 +88,6 @@ export const typeDef = gql`
         deleteCustomer(
             id: ID!
             password: String
-            confirmPassword: String
         ): Boolean
         requestPasswordChange(
             email: String!
@@ -118,7 +118,10 @@ export const resolvers = {
         customers: async (_, _args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findMany((new PrismaSelect(info).value));
+            return await context.prisma[_model].findMany({
+                orderBy: { fullName: 'asc', },
+                ...(new PrismaSelect(info).value)
+            });
         },
         profile: async (_, _a, context, info) => {
             // Can only query your own profile
@@ -228,6 +231,7 @@ export const resolvers = {
                     pronouns: args.pronouns,
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     accountApproved: args.accountApproved,
+                    theme: args.theme,
                     status: ACCOUNT_STATUS.Unlocked,
                     emails: [{ emailAddress: args.email }],
                     phones: [{ number: args.phone }],
@@ -267,7 +271,31 @@ export const resolvers = {
             return user;
         },
         deleteCustomer: async (_, args, context) => {
-            return new CustomError(CODE.NotImplemented);
+            console.log('in dlete customer', context.req.isAdmin)
+            // Must be admin, or deleting your own
+            if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
+            // Check for correct password
+            let customer = await context.prisma[_model].findUnique({ 
+                where: { id: args.id },
+                select: {
+                    id: true,
+                    password: true
+                }
+            });
+            if (!customer) return new CustomError(CODE.ErrorUnknown);
+            // If admin, make sure you are not deleting yourself
+            if (context.req.isAdmin) {
+                console.log('checking if admin')
+                console.log(customer.id, context.req.customerId)
+                if (customer.id === context.req.customerId) return new CustomError(CODE.CannotDeleteYourself);
+            }
+            // If not admin, make sure correct password is entered
+            else if (!context.req.isAdmin) {
+                if(!bcrypt.compareSync(args.password, customer.password)) return new CustomError(CODE.BadCredentials);
+            }
+            // Delete account
+            await context.prisma[_model].delete({ where: { id: customer.id } });
+            return true;
         },
         requestPasswordChange: async (_, args, context) => {
             // Validate input format
@@ -342,11 +370,11 @@ export const resolvers = {
         changeCustomerStatus: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            await context.prisma[_model].update({
                 where: { id: args.id },
-                data: { status: args.status },
-                ...(new PrismaSelect(info).value)
+                data: { status: args.status }
             })
+            return true;
         },
         addCustomerRole: async (_, args, context, info) => {
             // Must be admin

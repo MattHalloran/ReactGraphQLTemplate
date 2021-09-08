@@ -21,6 +21,7 @@ import { makeStyles } from '@material-ui/styles';
 import { LINKS, PUBS, PubSub } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
+import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -50,13 +51,14 @@ function SignUpForm({
     onSessionUpdate
 }) {
     const classes = useStyles();
+    const theme = useTheme();
     const history = useHistory();
     const [signUp, { loading }] = useMutation(signUpMutation);
 
     const formik = useFormik({
         initialValues: {
-            accountApproved: true,
-            marketingEmails: true,
+            accountApproved: "true",
+            marketingEmails: "true",
             firstName: '',
             lastName: '',
             pronouns: '',
@@ -70,7 +72,11 @@ function SignUpForm({
         onSubmit: (values) => {
             mutationWrapper({
                 mutation: signUp,
-                data: { variables: values },
+                data: { variables: { 
+                    ...values, 
+                    accountApproved: Boolean(values.accountApproved),
+                    theme: theme.mode,
+                } },
                 onSuccess: (response) => {
                     onSessionUpdate(response.data.signUp);
                     if (response.data.signUp?.accountApproved) {
@@ -227,8 +233,8 @@ function SignUpForm({
                             value={formik.values.accountApproved}
                             onChange={formik.handleChange}
                         >
-                            <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
-                            <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
+                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
                         </RadioGroup>
                         <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                     </FormControl>

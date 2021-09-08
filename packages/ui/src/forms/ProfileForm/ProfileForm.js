@@ -11,8 +11,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/styles';
-import 'react-phone-input-2/lib/style.css';
-import 'react-phone-input-2/lib/material.css';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
@@ -46,8 +44,8 @@ function ProfileForm() {
             pronouns: profile?.profile?.pronouns ?? '',
             email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
             phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
-            theme: profile?.profile?.theme,
-            accountApproved: profile?.profile?.accountApproved || false,
+            theme: profile?.profile?.theme ?? 'light',
+            accountApproved: (profile?.profile?.accountApproved || false) + '',
             marketingEmails: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].receivesDeliveryUpdates : false,
             currentPassword: '',
             newPassword: '',
@@ -78,7 +76,7 @@ function ProfileForm() {
                     }
                 ],
                 theme: values.theme,
-                accountApproved: values.accountApproved
+                accountApproved: Boolean(values.accountApproved)
             });
             // Only add email and phone ids if they previously existed
             if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
@@ -216,8 +214,8 @@ function ProfileForm() {
                                 value={formik.values.accountApproved}
                                 onChange={formik.handleChange}
                             >
-                                <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
-                                <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
+                                <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                                <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
                             </RadioGroup>
                             <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                         </FormControl>
