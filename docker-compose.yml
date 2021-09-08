@@ -14,9 +14,9 @@ services:
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             REACT_APP_SERVER_PORT: "${SERVER_PORT}"
             REACT_APP_SERVER_LOCATION: "${SERVER_LOCATION}"
-            VIRTUAL_HOST: "${SITE_NAME}"
+            VIRTUAL_HOST: "${VIRTUAL_HOST}"
             VIRTUAL_PORT: "${UI_PORT}"
-            LETSENCRYPT_HOST: "${SITE_NAME}"
+            LETSENCRYPT_HOST: "${VIRTUAL_HOST}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
             - "${UI_PORT}:${UI_PORT}"
@@ -58,9 +58,9 @@ services:
             REACT_APP_SERVER_ROUTE: "${SERVER_ROUTE}"
             UI_PORT: "${UI_PORT}"
             REACT_APP_SERVER_PORT: "${SERVER_PORT}"
-            VIRTUAL_HOST: "${SITE_NAME}"
+            VIRTUAL_HOST: "${VIRTUAL_HOST}"
             VIRTUAL_PORT: "${SERVER_PORT}"
-            LETSENCRYPT_HOST: "${SITE_NAME}"
+            LETSENCRYPT_HOST: "${VIRTUAL_HOST}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
             - "${SERVER_PORT}:${SERVER_PORT}"
