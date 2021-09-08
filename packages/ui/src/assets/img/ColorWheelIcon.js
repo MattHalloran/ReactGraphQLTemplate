@@ -6,11 +6,11 @@ function ColorWheelIcon(props) {
         <svg viewBox="0 0 64 64" 
             xmlns="http://www.w3.org/2000/svg"
             className={props.className} 
-            aria-labelledby="title" 
+            aria-labelledby="colorwheel-title" 
             width={props.width} 
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Color Wheel'}</title>
+            <title id="colorwheel-title">{props.iconTitle ?? 'Color Wheel'}</title>
             <path d="M63 32H53c0-5.801-2.35-11.051-6.15-14.851l7.07-7.069C59.53 15.689 63 23.439 63 32z" fill="#f6bb42"/>
             <path d="M53 32h10c0 8.55-3.46 16.3-9.08 21.909l-7.07-7.06C50.65 43.05 53 37.8 53 32z" fill="#8cc152"/>
             <path d="M53.92 53.909v.011C48.31 59.529 40.57 63 32 63V53c5.8 0 11.05-2.351 14.85-6.15z" fill="#37bc9b"/>

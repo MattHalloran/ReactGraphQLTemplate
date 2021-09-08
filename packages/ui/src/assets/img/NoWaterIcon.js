@@ -6,11 +6,11 @@ function NoWaterIcon(props) {
         <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             className={props.className}
-            aria-labelledby="title"
+            aria-labelledby="nowater-title"
             width={props.width}
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Drought Tolerance'}</title>
+            <title id="nowater-title">{props.iconTitle ?? 'Drought Tolerance'}</title>
             <path d="M256 414c-68 0-123-55-123-123v-5c0-26 8-51 24-72l99-137 99 137c16 21 24 46 24 72v5c0 68-55 123-123 123z" fill="#87daff" />
             <path d="M355 214L256 77v337c68 0 123-55 123-123v-5c0-26-8-51-24-72z" fill="#00c3ff" />
             <path d="M256 129l-75 103a92 92 0 00-18 54v5a93 93 0 00186 0v-5c0-20-6-39-18-54l-75-103z" fill="#a5e9ff" />

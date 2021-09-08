@@ -52,7 +52,7 @@ function AdminOrderPage({ userRoles }) {
                 order={currOrder}
                 open={currOrder !== null}
                 onClose={() => setCurrOrder(null)} />) : null}
-            <AdminBreadcrumbs className={classes.padBottom} textColor={theme.palette.primary.light} />
+            <AdminBreadcrumbs className={classes.padBottom} textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Orders</Typography>
             </div>

@@ -7,11 +7,11 @@ function NewLifeLogo(props) {
             viewBox="0 0 1125 1125"
             version="1.2"
             className={props.className}
-            aria-labelledby="title"
+            aria-labelledby="newlifelogo-title"
             width={props.width}
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'New Life Nursery Logo'}</title>
+            <title id="newlifelogo-title">{props.iconTitle ?? 'New Life Nursery Logo'}</title>
             <defs>
                 <symbol overflow="visible" id="f">
                     <path d="M6-5a23 23 0 01-2 2H3v-1L2-6l2-1 2-2a26 26 0 000-2l-1-1a78 78 0 01-1-2l-3-3v-1-1l-2-1-4-5-1-2v-1l-1-1-2-2a87 87 0 00-3-3h-1-1a29 29 0 01-3 0h-2-3-1v-1h-1v-1l1-1h1l1-1 1-1 2-1h1a31 31 0 002-2h1l3 1a34 34 0 015 0h2l3 1h1l2 1h1a109 109 0 014 0l3 1a82 82 0 003 1h7a45 45 0 002 1l1-1a62 62 0 010-2l-3-3-2-4h-1v-1l-1-1h-1l-3-4a23 23 0 00-2-2H9l-1 1-1 1a23 23 0 01-2 1l-2 1-1-1-1-1v-1l-1-1 1-1 2-2a12 12 0 004-2l1-1 4-4h1l1-1h2l1 1v3l-1 3-1 1 1 1v2l1 1 1 1v1a28 28 0 012 2v1l5 7 1 1 2 2 4 4h1l1 2 3 3v1l-1 1h-1a11 11 0 01-4 0 18 18 0 00-2 0l-1-1h-1-1a28 28 0 01-5-1h-2l-1-1h-1-1l-1-1H6l-6-1a43 43 0 00-3-1h-1v1h-1l1 1v1l2 2 2 3 3 3 1 1 2 3h1v1l2 1a11 11 0 012 2v1l1-1a38 38 0 013-1l1-1h1v1l1 2-2 1v1h-1-1v1h-2l-2 2zm0 0" />

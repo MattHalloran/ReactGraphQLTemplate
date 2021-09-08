@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'inherit',
     },
     icon: {
-        fill: theme.palette.primary.contrastText,
+        fill: theme.palette.secondary.light,
     },
 }));
 
@@ -69,11 +69,11 @@ function CustomerCard({
     }
 
     const status_map = useMemo(() => ({
-        [ACCOUNT_STATUS.Deleted]: ['Deleted', 'grey'],
-        [ACCOUNT_STATUS.Unlocked]: ['Unlocked', theme.palette.primary.main],
-        [ACCOUNT_STATUS.WaitingApproval]: ['Waiting Approval', 'yellow'],
-        [ACCOUNT_STATUS.SoftLock]: ['Soft Locked', 'pink'],
-        [ACCOUNT_STATUS.HardLock]: ['Hard Locked', 'red']
+        [ACCOUNT_STATUS.Deleted]: 'Deleted',
+        [ACCOUNT_STATUS.Unlocked]: 'Unlocked',
+        [ACCOUNT_STATUS.WaitingApproval]: 'Waiting Approval',
+        [ACCOUNT_STATUS.SoftLock]: 'Soft Locked',
+        [ACCOUNT_STATUS.HardLock]: 'Hard Locked',
     }), [theme])
 
     const edit = () => {
@@ -149,7 +149,7 @@ function CustomerCard({
     const emailList = mapIfExists(customer, 'emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
 
     return (
-        <Card className={classes.root} style={{ border: `2px solid ${status_map[status][1]}` }}>
+        <Card className={classes.root}>
             {phoneDialogOpen ? (
                 <ListDialog
                     title={`Call ${customer?.fullName}`}
@@ -166,7 +166,7 @@ function CustomerCard({
                 <Typography gutterBottom variant="h6" component="h2">
                     {customer?.firstName} {customer?.lastName}
                 </Typography>
-                <p>Status: {status_map[customer?.status][0]}</p>
+                <p>Status: {status_map[customer?.status]}</p>
                 <p>Business: {customer?.business?.name}</p>
                 <p>Pronouns: {customer?.pronouns ?? 'Unset'}</p>
             </CardContent>

@@ -46,6 +46,7 @@ function CartPage({
     const [changedCart, setChangedCart] = useState(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
     const [submitOrder] = useMutation(submitOrderMutation);
+    console.log('changed cart is', changedCart);
 
     useEffect(() => {
         console.log('CART, not changedcart, updated')
@@ -122,7 +123,7 @@ function CartPage({
                     fullWidth 
                     endIcon={<ArrowForwardIcon />} 
                     onClick={finalizeOrder}
-                    disabled={loading || (changedCart !== null && !_.isEqual(cart, changedCart))}
+                    disabled={loading || changedCart === null || !_.isEqual(cart, changedCart)}
                 >Request Quote</Button>
             </Grid>
         </Grid>

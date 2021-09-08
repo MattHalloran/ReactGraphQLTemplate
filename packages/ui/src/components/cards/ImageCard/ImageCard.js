@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'inherit',
     },
     actionButton: {
-        color: theme.palette.primary.contrastText,
+        color: theme.palette.secondary.light,
     },
 }));
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles, useTheme } from '@material-ui/styles';
 import {
     AppBar,
     Avatar,
@@ -103,6 +103,7 @@ function PlantDialog({
         skus: plant?.skus ?? [],
     }
     const classes = useStyles();
+    const theme = useTheme();
     const [quantity, setQuantity] = useState(1);
     const [orderOptions, setOrderOptions] = useState([]);
     const [detailsOpen, setDetailsOpen] = useState(false);
@@ -164,7 +165,9 @@ function PlantDialog({
                     selected={currSku}
                     handleChange={(e) => setCurrSku(e.target.value)}
                     inputAriaLabel='size-selector-label'
-                    label="Size" />
+                    label="Size"
+                    color={theme.palette.primary.contrastText}
+                />
             </Grid>
             <Grid item xs={6} sm={4}>
                 <QuantityBox
@@ -204,7 +207,7 @@ function PlantDialog({
     console.log('YOPW', displayedTraitData)
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog aria-describedby="modal-title" fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
@@ -212,7 +215,7 @@ function PlantDialog({
                     </IconButton>
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
-                            <Typography variant="h5">
+                            <Typography id="modal-title" variant="h5">
                                 {plant.latinName}
                             </Typography>
                             <Typography variant="h6">

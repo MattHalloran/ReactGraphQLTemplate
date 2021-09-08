@@ -6,11 +6,11 @@ function CalendarIcon(props) {
             <svg viewBox="0 0 299.1 299.1" 
                   xmlns="http://www.w3.org/2000/svg" 
                   className={props.className} 
-                  aria-labelledby="title" 
+                  aria-labelledby="calendar-title" 
                   width={props.width} 
                   height={props.height}
                   onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Calendar'}</title>
+            <title id="calendar-title">{props.iconTitle ?? 'Calendar'}</title>
             <path d="M258 27H41C22 27 6 43 6 62v202c0 19 16 35 35 35h217c20 0 35-16 35-35V62c0-19-15-35-35-35z" 
                   fill="#ebf0f3"/>
             <path d="M293 92V50c0-19-15-35-35-35H41C22 15 6 31 6 50v42z"

@@ -112,7 +112,7 @@ function ShoppingList({
             
             {plants?.map((item, index) =>
                 <PlantCard key={index}
-                    onClick={(data) => expandSku(data.selectedSku.sku)}
+                    onClick={(data) => expandSku(data.selectedSku?.sku)}
                     plant={item} />)}
         </div>
     );

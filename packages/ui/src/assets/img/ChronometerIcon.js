@@ -6,11 +6,11 @@ function ChronometerIcon(props) {
             <svg xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 512 512" 
                   className={props.className} 
-                  aria-labelledby="title" 
+                  aria-labelledby="chronometer-title" 
                   width={props.width} 
                   height={props.height}
                   onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-                  <title id="title">{props.iconTitle ?? 'Chronometer'}</title>
+                  <title id="chronometer-title">{props.iconTitle ?? 'Chronometer'}</title>
                   <path d="M150 102l-30-30a36 36 0 00-52 0L46 93a37 37 0 000 52l30 30a15 15 0 0022 0l52-52c6-6 6-16 0-21z" fill="#105c6e"/>
                   <path d="M256 3c-8 0-15 7-15 15v48a15 15 0 0030 0V18c0-8-7-15-15-15z" fill="#26879c"/>
                   <path d="M293 0h-74a15 15 0 000 30h74a15 15 0 000-30z" fill="#de513c"/>

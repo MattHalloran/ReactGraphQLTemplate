@@ -78,7 +78,7 @@ function AdminContactPage({
 
     return (
         <div id="page" className={classes.root}>
-            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
+            <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Contact Info</Typography>
             </div>

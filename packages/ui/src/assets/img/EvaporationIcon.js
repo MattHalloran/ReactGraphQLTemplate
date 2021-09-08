@@ -7,11 +7,11 @@ function EvaporationIcon(props) {
         <svg viewBox="0 0 60 60" 
             xmlns="http://www.w3.org/2000/svg"
             className={props.className}
-            aria-labelledby="title" 
+            aria-labelledby="evaporation-title" 
             width={props.width} 
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Evaporation'}</title>
+            <title id="evaporation-title">{props.iconTitle ?? 'Evaporation'}</title>
             <g fillRule="nonzero" fill="none">
                 <rect fill="#ffdc00" height="4" rx="2" width="58" x="1" y="33"/>
                 <path d="M57 33h-3a2 2 0 110 4h3a2 2 0 100-4z" fill="#fec108"/>

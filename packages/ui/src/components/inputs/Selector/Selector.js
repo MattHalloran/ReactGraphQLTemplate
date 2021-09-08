@@ -25,10 +25,12 @@ function Selector({
     inputAriaLabel = 'select-label',
     noneOption = false,
     label = 'Select',
+    color,
     ...props
 }) {
     const classes = useStyles();
     const theme = useTheme();
+    const displayColor = color ?? theme.palette.background.contrastText;
 
     // Formats selected into label/value object array.
     // options - Formatted options (array of label/value pairs)
@@ -68,9 +70,13 @@ function Selector({
     }
 
     return (
-        <FormControl variant="outlined" className={`${classes.root} ${fullWidth ? classes.fullWidth : ''}`}>
-            <InputLabel id={inputAriaLabel} shrink={selected_formatted?.length > 0}>{label}</InputLabel>
+        <FormControl 
+            variant="outlined" 
+            className={`${classes.root} ${fullWidth ? classes.fullWidth : ''}`}
+        >
+            <InputLabel id={inputAriaLabel} shrink={selected_formatted?.length > 0} style={{color: displayColor}}>{label}</InputLabel>
             <Select
+                style={{color: displayColor}}
                 labelId={inputAriaLabel}
                 value={selected}
                 onChange={handleChange}

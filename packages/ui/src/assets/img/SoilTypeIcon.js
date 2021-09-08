@@ -6,11 +6,11 @@ function SoilTypeIcon(props) {
         <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             className={props.className}
-            aria-labelledby="title"
+            aria-labelledby="soil-title"
             width={props.width}
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Soil Type'}</title>
+            <title id="soil-title">{props.iconTitle ?? 'Soil Type'}</title>
             <path d="M488 24v464H24V32l24-8 40 24 64-24h32l48 24 48-24h32l48 16 32-16 32 16z" fill="#db8638" />
             <path d="M488 152v336H24V144h24l24 24 40-16 24 16 48-32h16l32 32h24l16-16h16l16-16h72l24 16z" fill="#c47220" />
             <path d="M488 320v168H24V312l24-24h32l80 32 24-24h24l16 16h64l40-16h40l72 24z" fill="#b66514" />

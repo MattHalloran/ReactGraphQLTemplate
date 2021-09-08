@@ -43,7 +43,7 @@ function AdminCustomerPage() {
                 customer={selectedCustomer}
                 open={selectedCustomer !== null}
                 onClose={() => setSelectedCustomer(null)} />
-            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
+            <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Customers</Typography>
             </div>

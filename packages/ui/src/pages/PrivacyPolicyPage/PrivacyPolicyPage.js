@@ -24,7 +24,7 @@ function PrivacyPolicyPage({
 
     return (
         <div id="page">
-            <PolicyBreadcrumbs textColor={theme.palette.primary.light} />
+            <PolicyBreadcrumbs textColor={theme.palette.secondary.dark} />
             <ReactMarkdown>{ privacy }</ReactMarkdown>
         </div>
     );

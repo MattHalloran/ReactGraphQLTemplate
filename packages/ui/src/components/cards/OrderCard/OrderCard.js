@@ -30,10 +30,10 @@ const cardStyles = makeStyles((theme) => ({
         cursor: 'pointer',
     },
     button: {
-        color: theme.palette.primary.contrastText,
+        color: theme.palette.secondary.light,
     },
     icon: {
-        fill: theme.palette.primary.contrastText,
+        fill: theme.palette.secondary.light,
     },
 }));
 
