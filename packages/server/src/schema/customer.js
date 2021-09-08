@@ -151,6 +151,19 @@ export const resolvers = {
             if (validateError) return validateError;
             // Get customer
             let customer = await customerFromEmail(args.email, context.prisma);
+            // Check for password in database, if doesn't exist, send a password reset link
+            if (!customer.password) {
+                // Generate new code
+                const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS).replace('/', '');
+                // Store code and request time in customer row
+                await context.prisma[_model].update({
+                    where: { id: customer.id },
+                    data: { resetPasswordCode: requestCode, lastResetPasswordReqestAttempt: new Date().toISOString() }
+                })
+                // Send new verification email
+                sendResetPasswordLink(args.email, customer.id, requestCode);
+                return new CustomError(CODE.MustResetPassword);
+            }
             // Validate verification code, if supplied
             if (args.verificationCode === customer.id && customer.emailVerified === false) {
                 customer = await context.prisma[_model].update({
@@ -338,7 +351,7 @@ export const resolvers = {
                     sendResetPasswordLink(email.emailAddress, customer.id, requestCode);
                 }
                 // Return error
-                return new CustomError(CODE.INVALID_RESET_CODE);
+                return new CustomError(CODE.InvalidResetCode);
             } 
             // Remove request data from customer, and set new password
             await context.prisma[_model].update({

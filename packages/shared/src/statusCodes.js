@@ -55,8 +55,12 @@ export const CODE = {
         code: 'NOT_IMPLEMENTED',
         message: 'Error: This has not been implemented yet. Please be patient :)'
     },
-    INVALID_RESET_CODE: {
+    InvalidResetCode: {
         code: 'INVALID_RESET_CODE',
         message: 'Error: Reset code expired or invalid. Sending a new code to your email.'
+    },
+    MustResetPassword: {
+        code: 'MUST_RESET_PASSWORD',
+        message: 'Before signing in, please follow the link sent to your email to change your password.'
     }
 }

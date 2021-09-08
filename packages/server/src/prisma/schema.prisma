@@ -67,7 +67,7 @@ model customer {
   fullName                       String?
   pronouns                       String           @default("they/them") @db.VarChar(128)
   theme                          String           @default("light") @db.VarChar(255)
-  password                       String           @db.VarChar(256)
+  password                       String?          @db.VarChar(256)
   loginAttempts                  Int              @default(0)
   lastLoginAttempt               DateTime         @default(now()) @db.Timestamptz(6)
   sessionToken                   String?          @db.VarChar(1024)

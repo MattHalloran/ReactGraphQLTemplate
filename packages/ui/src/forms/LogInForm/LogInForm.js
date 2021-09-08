@@ -2,7 +2,7 @@ import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { logInSchema } from '@local/shared';
+import { CODE, logInSchema } from '@local/shared';
 import { useFormik } from 'formik';
 import {
     Button,
@@ -12,7 +12,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { LINKS } from 'utils';
+import { LINKS, PUBS, PubSub } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +41,7 @@ function LogInForm({
     const classes = useStyles();
     const history = useHistory();
     const urlParams = useParams();
-    const [login, {loading}] = useMutation(loginMutation);
+    const [login, { loading }] = useMutation(loginMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -55,6 +55,15 @@ function LogInForm({
                 data: { variables: { ...values, verificationCode: urlParams.code } },
                 successCondition: (response) => response.data.login !== null,
                 onSuccess: (response) => { onSessionUpdate(response.data.login); onRedirect(LINKS.Shopping) },
+                onError: (response) => {
+                    if (Array.isArray(response.graphQLErrors) && response.graphQLErrors.some(e => e.extensions.code === CODE.MustResetPassword.code)) {
+                        PubSub.publish(PUBS.AlertDialog, {
+                            message: 'Before signing in, please follow the link sent to your email to change your password.',
+                            firstButtonText: 'OK',
+                            firstButtonClicked: () => history.push(LINKS.Home),
+                        });
+                    }
+                }
             })
         },
     });
@@ -98,7 +107,7 @@ function LogInForm({
                 className={classes.submit}
             >
                 Log In
-                    </Button>
+            </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
                     <Link onClick={() => history.push(LINKS.ForgotPassword)}>
