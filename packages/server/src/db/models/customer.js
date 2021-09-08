@@ -53,12 +53,13 @@ export async function upsertCustomer({ prisma, info, data }) {
     }
     // Upsert business
     if (data.business) {
-        business = await prisma[TABLES.Business].upsert({
-            where: { id: business?.id },
-            create: data.business,
-            update: data.business
-        })
+        if (data.business.id) {
+            business = await prisma[TABLES.Business].update({ where: { id: data.business.id }, data: data.business });
+        } else {
+            business = await prisma[TABLES.Business].create({ data: data.business });
+        }
         cleanedData.business = { connect: { id: business.id } }
+        console.log(cleanedData.business)
     }
     // Upsert customer
     let customer;

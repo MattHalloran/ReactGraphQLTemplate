@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
         padding: '0px',
     },
     navItem: {
-        background: theme.palette.primary.main,
+        background: 'transparent',
         color: theme.palette.primary.contrastText,
         textTransform: 'none',
         verticalAlign: 'text-top',

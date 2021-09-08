@@ -225,6 +225,7 @@ export const resolvers = {
                     firstName: args.firstName,
                     lastName: args.lastName,
                     pronouns: args.pronouns,
+                    business: {name: args.business},
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     accountApproved: args.accountApproved,
                     theme: args.theme,

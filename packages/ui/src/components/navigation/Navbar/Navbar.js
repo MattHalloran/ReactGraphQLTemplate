@@ -12,6 +12,9 @@ import { useMutation } from '@apollo/client';
 const SHOW_HAMBURGER_AT = 1000;
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        background: theme.palette.primary.main,
+    },
     toRight: {
         marginLeft: 'auto',
     },
@@ -125,7 +128,7 @@ function Navbar({
     return (
         <HideOnScroll>
             <AppBar>
-                <Toolbar>
+                <Toolbar className={classes.root}>
                     <div className={classes.navLogoContainer} onClick={() => onRedirect(LINKS.Home)}>
                         <div className={classes.navLogoDiv}>
                             <img src={Logo} alt={`${business?.BUSINESS_NAME?.Short} Logo`} className={classes.navLogo} />

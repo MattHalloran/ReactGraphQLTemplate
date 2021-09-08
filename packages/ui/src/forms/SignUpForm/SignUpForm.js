@@ -75,7 +75,8 @@ function SignUpForm({
                 data: { variables: { 
                     ...values, 
                     accountApproved: Boolean(values.accountApproved),
-                    theme: theme.mode,
+                    marketingEmails: Boolean(values.marketingEmails),
+                    theme: theme.palette.mode ?? 'light',
                 } },
                 onSuccess: (response) => {
                     onSessionUpdate(response.data.signUp);
