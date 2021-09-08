@@ -24,17 +24,11 @@ export async function uploadAvailabilityProcess(job) {
         sku: header.indexOf('Plant Code'),
         availability: header.indexOf('Quantity')
     }
-    console.log('got indexes');
-    console.log(index)
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
     await prisma[TABLES.Sku].updateMany({ data: { status: SKU_STATUS.Inactive } })
-    console.log('hid skus')
     for (const row of content) {
-        console.log('in row')
-        console.log(row)
         // Insert or update plant data from row
         const latinName = row[index.latinName];
-        console.log(latinName)
         let plant = await prisma[TABLES.Plant].findUnique({ where: { latinName }, select: {
             id: true,
             traits: { select: { id: true, name: true, value: true } }
@@ -58,8 +52,6 @@ export async function uploadAvailabilityProcess(job) {
                 } catch(error) { console.error(error)}
             }
         }
-        console.log('getting sku data')
-        console.log(plant)
         // Insert or update SKU data from row
         const sku_data = {
             sku: row[index.sku] ?? '',
@@ -74,9 +66,6 @@ export async function uploadAvailabilityProcess(job) {
             console.error('⛔️ Cannot update rows without a SKU');
             continue;
         }
-        console.log('got sku data');
-        console.log(sku_data);
-
         try {
             await prisma[TABLES.Sku].upsert({
                 where: { sku: sku_data.sku },

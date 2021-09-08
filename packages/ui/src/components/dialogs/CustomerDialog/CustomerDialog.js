@@ -70,7 +70,6 @@ function CustomerDialog({
     open = true,
     onClose,
 }) {
-    console.log('CUSTOMER DIALOG', customer)
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [currCustomer, setCurrCustomer] = useState(customer);

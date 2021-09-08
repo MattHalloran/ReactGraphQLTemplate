@@ -49,7 +49,6 @@ function ShoppingList({
             setPlants(plantData?.plants);
             return;
         }
-        console.log('FILTERSSS', filters)
         let filtered_plants = [];
         for (const plant of plantData?.plants) {
             let found = false;
@@ -83,7 +82,6 @@ function ShoppingList({
     }
 
     const addToCart = (name, sku, quantity) => {
-        console.log('ADD TO CARTTTTTT', quantity)
         if (!session?.id) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {

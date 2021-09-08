@@ -23,7 +23,7 @@ function AlertDialog() {
     let open = state.title !== null || state.message !== null;
 
     useEffect(() => {
-        let dialogSub = PubSub.subscribe(PUBS.AlertDialog, (_, o) => {console.log('yoted the yeet ', o); setState({...default_state, ...o})});
+        let dialogSub = PubSub.subscribe(PUBS.AlertDialog, (_, o) => setState({...default_state, ...o}));
         return () => PubSub.unsubscribe(dialogSub);
     }, [])
 

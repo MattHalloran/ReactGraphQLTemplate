@@ -40,7 +40,6 @@ export async function getCart(prisma, info, customerId) {
 
 // Upsert a customer, with business, emails, phones, and roles
 export async function upsertCustomer({ prisma, info, data }) {
-    console.log('UPSERT CUSTOMER', data);
     // Remove relationship data, as they are handled on a 
     // case-by-case basis
     let cleanedData = onlyPrimitives(data);
@@ -61,7 +60,6 @@ export async function upsertCustomer({ prisma, info, data }) {
         })
         cleanedData.business = { connect: { id: business.id } }
     }
-    console.log('GOINT TO UPSERT CUSTOMER', cleanedData)
     // Upsert customer
     let customer;
     if (!data.id) {
@@ -90,7 +88,6 @@ export async function upsertCustomer({ prisma, info, data }) {
         const phoneExists = await prisma[TABLES.Phone].findUnique({ where: { number: phone.number }});
         if (phoneExists && phoneExists.id !== phone.id) throw new CustomError(CODE.PhoneInUse)
         if (!phone.id) {
-            console.log('createing phone', phone)
             await prisma[TABLES.Phone].create({ data: { ...phone, id: undefined, customerId: customer.id } })
         } else {
             await prisma[TABLES.Phone].update({

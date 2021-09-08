@@ -64,8 +64,6 @@ function AdminInventoryPage() {
         })
     }
 
-    console.log('ADMIN INVENTORY SELECTED IS', selected)
-
     return (
         <div id="page">
             <EditPlantDialog

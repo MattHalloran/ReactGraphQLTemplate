@@ -94,7 +94,6 @@ export const resolvers = {
     },
     Mutation: {
         addImages: async (_, args, context) => {
-            console.log('ADD IMAGES', args.labels)
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
@@ -120,8 +119,6 @@ export const resolvers = {
             for (let i = 0; i < args.data.length; i++) {
                 const curr = args.data[i];
                 if (args.label) {
-                    console.log('UPDATEEEEE')
-                    console.log(args.data[i].hash)
                     // Update position in label
                     await context.prisma[TABLES.ImageLabels].update({
                         where: { image_labels_hash_label_unique: { hash: curr.hash, label: args.label } },

@@ -12,7 +12,6 @@ export function getImageSrc(image, size) {
     if (!Array.isArray(image?.files) || image.files.length === 0) return null;
     // Create copy of image files, to prevent any problems with sorting
     const files = [...image.files];
-    console.log(files.sort((a, b) => b.width - a.width))
     // Return largest size if size not specified
     if (!_.isNumber(size)) return files.sort((a, b) => b.width - a.width)[0].src;
     // Determine sizes >= requested

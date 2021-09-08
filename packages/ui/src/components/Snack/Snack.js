@@ -55,7 +55,7 @@ function Snack() {
         // Log snack errors if in development
         if (process.env.NODE_ENV === 'development' && state.data) {
             if (state.severity === 'error') console.error('Snack data', state.data);
-            else console.log('Snack data', state.data);
+            else console.info('Snack data', state.data);
         }
     }, [state])
 

@@ -67,7 +67,6 @@ function PlantCard({
 
     const openWithSku = (e, sku) => {
         e.stopPropagation();
-        console.log('IN OPEN WITH SKU', sku)
         onClick({ plant, selectedSku: sku })
     }
 

@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
                     paddingLeft: 'max(1em, calc(15% - 75px))',
                     paddingRight: 'max(1em, calc(15% - 75px))',
                 }
-            }
+            },
         },
         contentWrap: {
             minHeight: '100vh',
@@ -77,21 +77,14 @@ export function App() {
     }, []);
 
     useEffect(() => {
-        console.log("BUSINESS UPDATED", business)
-    }, [business])
-
-    useEffect(() => {
-        console.log('GOT BUSINESS DATA', businessData);
         if (businessData === undefined) return;
         let data = businessData.readAssets[1] ? JSON.parse(businessData.readAssets[1]) : {};
         let hoursRaw = businessData.readAssets[0];
         data.hours = hoursRaw;
-        console.log("SETTING BUSINESS DATA", data)
         setBusiness(data);
     }, [businessData])
 
     useEffect(() => {
-        console.log('SESSION UPDATED!!!!!!!', session);
         // Determine theme
         if (session?.theme) setTheme(themes[session?.theme])
         else if (session && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.dark);
@@ -133,7 +126,7 @@ export function App() {
             }
         });
         let businessSub = PubSub.subscribe(PUBS.Business, (_, data) => setBusiness(data));
-        let themeSub = PubSub.subscribe(PUBS.Theme, (_, data) =>{console.log('setting theeme', data); setTheme(themes[data] ?? themes.light)})
+        let themeSub = PubSub.subscribe(PUBS.Theme, (_, data) => setTheme(themes[data] ?? themes.light));
         return (() => {
             PubSub.unsubscribe(loadingSub);
             PubSub.unsubscribe(businessSub);
@@ -150,7 +143,13 @@ export function App() {
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
                         <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                        <main id="page-container" style={{ background: theme.palette.background.default, color: theme.palette.background.textPrimary }}>
+                        <main 
+                            id="page-container" 
+                            style={{ 
+                                background: theme.palette.background.default, 
+                                color: theme.palette.background.textPrimary,
+                            }}
+                        >
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
                                     session={session}

@@ -56,7 +56,6 @@ function CustomerCard({
     const [deleteCustomer] = useMutation(deleteCustomerMutation);
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
-    console.log('IN CUSTOMER CARD', customer)
 
     const callPhone = (phoneLink) => {
         setPhoneDialogOpen(false);

@@ -127,7 +127,6 @@ function EditPlantDialog({
 }) {
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
-    console.log('PLANT POPUP', changedPlant);
     const [updatePlant] = useMutation(updatePlantMutation);
     const [deletePlant] = useMutation(deletePlantsMutation);
 
@@ -197,7 +196,6 @@ function EditPlantDialog({
     }, [changedPlant, deletePlant, onClose])
 
     const savePlant = useCallback(async () => {
-        console.log("SAVING PLANTTTTT")
         let plant_data = {
             id: changedPlant.id,
             latinName: changedPlant.latinName,
@@ -211,7 +209,6 @@ function EditPlantDialog({
                 return { hash: d.hash, isDisplay: d.isDisplay ?? false }
             })
         }
-        console.log('GOING TO MODIFY PLANT', plant_data)
         mutationWrapper({
             mutation: updatePlant,
             data: { variables: { input: plant_data } },
@@ -223,7 +220,6 @@ function EditPlantDialog({
 
     const updateTrait = useCallback((traitName, value, createIfNotExists) => {
         const updatedPlant = setPlantTrait(traitName, value, changedPlant, createIfNotExists);
-        console.log('UPDATE TRAITTTT', traitName, value, updatedPlant)
         if (updatedPlant) setChangedPlant(updatedPlant);
     }, [changedPlant])
 

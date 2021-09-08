@@ -36,8 +36,6 @@ function AdminGalleryPage() {
     }
 
     useEffect(() => {
-        console.log('CURR IMAGES UPDATTEEEEE')
-        console.log(currImages);
         // Table data must be extensible, and needs position
         setImageData(currImages?.imagesByLabel?.map((d, index) => ({
             ...d,

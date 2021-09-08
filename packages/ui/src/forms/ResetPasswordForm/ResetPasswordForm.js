@@ -30,7 +30,6 @@ function ResetPasswordForm({
     const classes = useStyles();
     const urlParams = useParams();
     const [resetPassword, {loading}] = useMutation(resetPasswordMutation);
-    console.log('URL PARAMS', urlParams)
 
     const formik = useFormik({
         initialValues: {
@@ -39,7 +38,6 @@ function ResetPasswordForm({
         },
         validationSchema: resetPasswordSchema,
         onSubmit: (values) => {
-            console.log('ON SUBMIT', values)
             mutationWrapper({
                 mutation: resetPassword,
                 data: { variables: { id: urlParams.id, code: urlParams.code, newPassword: values.newPassword } },

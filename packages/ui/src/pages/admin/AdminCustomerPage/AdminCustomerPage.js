@@ -35,8 +35,6 @@ function AdminCustomerPage() {
         setCustomers(data?.customers);
     }, [data])
 
-    console.log('CUSTOMERS', customers, data)
-    
     return (
         <div id="page">
             <CustomerDialog

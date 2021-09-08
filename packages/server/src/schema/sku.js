@@ -87,7 +87,6 @@ export const resolvers = {
             // Determine sort order
             let sortQuery;
             if (args.sortBy !== undefined) sortQuery = SORT_TO_QUERY[args.sortBy];
-            console.log("SORT BY", args.sortBy);
             let searchQuery;
             if (args.searchString !== undefined && args.searchString.length > 0) {
                 searchQuery = {

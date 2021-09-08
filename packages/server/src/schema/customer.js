@@ -125,10 +125,8 @@ export const resolvers = {
         },
         profile: async (_, _a, context, info) => {
             // Can only query your own profile
-            console.log('in profile query', context.req.customerId)
             const customerId = context.req.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
-            console.log('validated. going to request')
             return await context.prisma[_model].findUnique({ where: { id: customerId }, ...(new PrismaSelect(info).value) });
         }
     },
@@ -153,7 +151,6 @@ export const resolvers = {
             if (validateError) return validateError;
             // Get customer
             let customer = await customerFromEmail(args.email, context.prisma);
-            console.log('GOT CUSTOMER', customer)
             // Validate verification code, if supplied
             if (args.verificationCode === customer.id && customer.emailVerified === false) {
                 customer = await context.prisma[_model].update({
@@ -220,7 +217,6 @@ export const resolvers = {
             if (validateError) return validateError;
             // Find customer role to give to new user
             const customerRole = await context.prisma[TABLES.Role].findUnique({ where: { title: 'Customer' } });
-            console.log('got customer role', customerRole)
             if (!customerRole) return new CustomError(CODE.ErrorUnknown);
             const customer = await upsertCustomer({
                 prisma: context.prisma,
@@ -267,11 +263,9 @@ export const resolvers = {
                 info,
                 data: args.input
             })
-            console.log('UPSERTED USER', user);
             return user;
         },
         deleteCustomer: async (_, args, context) => {
-            console.log('in dlete customer', context.req.isAdmin)
             // Must be admin, or deleting your own
             if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             // Check for correct password
@@ -285,8 +279,6 @@ export const resolvers = {
             if (!customer) return new CustomError(CODE.ErrorUnknown);
             // If admin, make sure you are not deleting yourself
             if (context.req.isAdmin) {
-                console.log('checking if admin')
-                console.log(customer.id, context.req.customerId)
                 if (customer.id === context.req.customerId) return new CustomError(CODE.CannotDeleteYourself);
             }
             // If not admin, make sure correct password is entered
@@ -305,7 +297,6 @@ export const resolvers = {
             const customer = await customerFromEmail(args.email, context.prisma);
             // Generate request code
             const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS).replace('/', '');
-            console.log('REQUEST CODE IS', requestCode);
             // Store code and request time in customer row
             await context.prisma[_model].update({
                 where: { id: customer.id },
@@ -330,9 +321,6 @@ export const resolvers = {
                 }
             });
             if (!customer) return new CustomError(CODE.ErrorUnknown);
-            console.log('CUSTOMER IS', customer)
-            console.log(customer.resetPasswordCode, args.code);
-            console.log(new Date(customer.lastResetPasswordReqestAttempt).getTime())
             // Verify request code and that request was made within 48 hours
             if (!customer.resetPasswordCode ||
                 customer.resetPasswordCode !== args.code ||

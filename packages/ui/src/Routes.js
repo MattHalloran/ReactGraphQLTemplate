@@ -45,8 +45,6 @@ function Routes({
     onRedirect
 }) {
 
-    console.log('RENDERING ROUTES', session)
-
     const common = {
         sessionChecked: session !== null && session !== undefined,
         onSessionUpdate: onSessionUpdate,

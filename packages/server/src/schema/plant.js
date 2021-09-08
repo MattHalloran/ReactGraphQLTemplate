@@ -67,7 +67,6 @@ export const resolvers = {
             // Determine sort order
             let sortQuery;
             if (args.sortBy !== undefined) sortQuery = SORT_TO_QUERY[args.sortBy];
-            console.log("SORT BY", sortQuery)
             // If search string provided, match by latinName or trait name
             let searchQuery;
             if (args.searchString.length > 0) searchQuery = { OR: [
@@ -168,12 +167,9 @@ export const resolvers = {
             // Update SKUs
             if (args.input.skus) {
                 const currSkus = await context.prisma[TABLES.Sku].findMany({ where: { plantId: args.input.id }});
-                console.log('CURR SKUSSSS', currSkus);
                 const deletedSkus = currSkus.map(s => s.sku).filter(s => !args.input.skus.some(sku => sku.sku === s));
-                console.log('DELETED SKUS', deletedSkus);
                 await context.prisma[TABLES.Sku].deleteMany({ where: { sku: { in: deletedSkus } } });
                 for (const sku of args.input.skus) {
-                    console.log('UPSERTING SKU', sku);
                     await context.prisma[TABLES.Sku].upsert({
                         where: { sku: sku.sku},
                         update: sku,

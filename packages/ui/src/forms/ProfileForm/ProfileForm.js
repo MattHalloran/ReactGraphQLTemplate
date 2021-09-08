@@ -33,8 +33,6 @@ function ProfileForm() {
     const { data: profile } = useQuery(profileQuery);
     const [updateCustomer, { loading }] = useMutation(updateCustomerMutation);
 
-    console.log('PROFILE DATA ISSS', profile)
-
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
@@ -81,7 +79,6 @@ function ProfileForm() {
             // Only add email and phone ids if they previously existed
             if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
             if (profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
-            console.log('UPDATING CUSTOMER WITH THE FOLLOWING INPUT', input);
             mutationWrapper({
                 mutation: updateCustomer,
                 data: { variables: {

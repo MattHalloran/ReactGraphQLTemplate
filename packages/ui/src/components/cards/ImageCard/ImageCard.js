@@ -48,7 +48,6 @@ function ImageCard({
 }) {
     const classes = useStyles();
     const ref = useRef(null);
-    console.log('IN IMAGE CARD', data)
 
     const [, drop] = useDrop({
         accept: 'card',

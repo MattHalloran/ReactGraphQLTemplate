@@ -10,7 +10,6 @@ const emailQueue = new Bull('email', { redis: {
 emailQueue.process(emailProcess);
 
 export function sendMail(to=[], subject='', text='', html='') {
-    console.log('in send mail.....')
     emailQueue.add({
         to: to,
         subject: subject,

@@ -50,9 +50,9 @@ const darkTheme = createTheme({
             dark: '#373737',
         },
         secondary: {
-            light: '#c1d5e0',
-            main: '#90a4ae',
-            dark: '#62757f',
+            light: '#80e27e',
+            main: '#4caf50',
+            dark: '#087f23',
         },
         background: {
             default: '#000000',

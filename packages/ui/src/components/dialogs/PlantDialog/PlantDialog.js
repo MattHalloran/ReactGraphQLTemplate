@@ -96,7 +96,6 @@ function PlantDialog({
     open = true,
     onClose,
 }) {
-    console.log('EXPANDED PLANT', plant, selectedSku)
     plant = {
         ...plant,
         latinName: plant?.latinName,
@@ -171,6 +170,7 @@ function PlantDialog({
             </Grid>
             <Grid item xs={6} sm={4}>
                 <QuantityBox
+                    style={{height: '100%'}}
                     min_value={0}
                     max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
                     initial_value={1}
@@ -181,7 +181,7 @@ function PlantDialog({
                 <Button
                     disabled={!currSku}
                     fullWidth
-                    style={{}}
+                    style={{height: '100%'}}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
                     onClick={() => onAddToCart(getPlantTrait('commonName', plant) ?? plant.latinName, currSku, quantity)}
@@ -204,7 +204,6 @@ function PlantDialog({
         ['soilPhs', PHIcon, 'Soil PH'],
         ['soilTypes', SoilTypeIcon, 'Soil Type']
     ].map(d => traitIconList(...d)).filter(d => d !== null);
-    console.log('YOPW', displayedTraitData)
 
     return (
         <Dialog aria-describedby="modal-title" fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>

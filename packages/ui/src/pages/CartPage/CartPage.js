@@ -46,10 +46,8 @@ function CartPage({
     const [changedCart, setChangedCart] = useState(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
     const [submitOrder] = useMutation(submitOrderMutation);
-    console.log('changed cart is', changedCart);
 
     useEffect(() => {
-        console.log('CART, not changedcart, updated')
         setChangedCart(cart);
     }, [cart])
 
@@ -99,7 +97,6 @@ function CartPage({
         });
     }, [changedCart, cart, requestQuote, business]);
 
-    console.log('rendering options', _.isEqual(cart, changedCart), cart, changedCart)
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
