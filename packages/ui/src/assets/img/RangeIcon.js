@@ -6,11 +6,11 @@ function RangeIcon(props) {
         <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             className={props.className}
-            aria-labelledby="title"
+            aria-labelledby="range-title"
             width={props.width}
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Light Ranges'}</title>
+            <title id="range-title">{props.iconTitle ?? 'Light Ranges'}</title>
             <path d="M264 132l-15 15v313l15 15h30V132z" fill="#f63" />
             <path d="M218 132h46v343h-46z" fill="#ff8b47" />
             <path d="M158 38l-15 15v312l15 15h30V38z" fill="#f9b348" />

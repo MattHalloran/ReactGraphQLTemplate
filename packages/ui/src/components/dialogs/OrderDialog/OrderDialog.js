@@ -116,7 +116,6 @@ function OrderDialog({
         const isOwner = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title));
         const isCanceled = [ORDER_STATUS.CanceledByAdmin, ORDER_STATUS.CanceledByCustomer, ORDER_STATUS.Rejected].includes(order?.status);
         const isOutTheDoor = [ORDER_STATUS.InTransit, ORDER_STATUS.Delivered].includes(order?.status);
-        console.log('IN CHANGE STATUS', userRoles, order?.status, isCustomer, isOwner, isCanceled, isOutTheDoor)
         return {
             [ORDER_STATUS.CanceledByAdmin]: [
                 isOwner && !isCanceled,

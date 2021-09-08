@@ -52,7 +52,6 @@ export const printAvailability = (session, title) => {
         let blob = doc.output('blob', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
         windowReference.location = URL.createObjectURL(blob);
     }).catch(error => {
-        console.log('RAN INTO ERROR', error)
         PubSub.publish(PUBS.Snack, {message: 'Failed to load inventory.', severity: 'error', data: error });
     });
 }

@@ -6,11 +6,11 @@ function PHIcon(props) {
         <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             className={props.className}
-            aria-labelledby="title"
+            aria-labelledby="ph-title"
             width={props.width}
             height={props.height}
             onClick={() => typeof props.onClick === 'function' && props.onClick()}>
-            <title id="title">{props.iconTitle ?? 'Soil PH'}</title>
+            <title id="ph-title">{props.iconTitle ?? 'Soil PH'}</title>
             <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="175.422" x2="336.578" y1="256.497" y2="95.341">
                 <stop offset="0" stopColor="#b3e152" />
                 <stop offset="1" stopColor="#f6e46f" />

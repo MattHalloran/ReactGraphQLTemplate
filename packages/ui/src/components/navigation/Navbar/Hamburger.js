@@ -23,11 +23,12 @@ import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Colla
 import { makeStyles } from '@material-ui/styles';
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
         background: theme.palette.primary.light,
-        borderLeft: `2px solid ${theme.palette.text.primary}`,
+        borderLeft: `1px solid ${theme.palette.text.primary}`,
     },
     menuItem: {
         color: theme.palette.primary.contrastText,
@@ -81,7 +82,7 @@ function Hamburger({
         })
     }, [])
 
-    const closeMenu = () => {console.log('CLOSING MENU');PubSub.publish(PUBS.BurgerMenuOpen, false);}
+    const closeMenu = () => PubSub.publish(PUBS.BurgerMenuOpen, false);
     const toggleOpen = () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle');
 
     const handleContactClick = () => {
@@ -93,7 +94,6 @@ function Hamburger({
     }
 
     const newTab = (link) => {
-        console.log(link);
         window.open(link, "_blank");
     }
 
@@ -126,7 +126,7 @@ function Hamburger({
     ]
 
     let customer_actions = getUserActions(session, roles, cart);
-    if (session !== null) {
+    if (_.isObject(session) && Object.entries(session).length > 0) {
         customer_actions.push(['Log Out', 'logout', LINKS.Home, logout, ExitToAppIcon]);
     }
 

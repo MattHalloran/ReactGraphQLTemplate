@@ -1,7 +1,8 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'utils';
-import { Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
+import { Typography, Card, CardContent, CardActions, Button, Tooltip, IconButton } from '@material-ui/core';
+import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         gridGap: '20px',
         alignItems: 'stretch',
     },
-    button: {
+    icon: {
         color: theme.palette.secondary.light,
     },
 }));
@@ -54,7 +55,11 @@ function AdminMainPage() {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button className={classes.button} variant="text" size="small" onClick={() => history.push(link)}>Open</Button>
+                            <Tooltip title="Open" placement="bottom">
+                                <IconButton onClick={() => history.push(link)}>
+                                    <LaunchIcon className={classes.icon} />
+                                </IconButton>
+                            </Tooltip>
                         </CardActions>
                     </Card>
                 ))}

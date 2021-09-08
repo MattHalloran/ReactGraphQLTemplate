@@ -60,7 +60,7 @@ function GalleryPage() {
 
     return (
         <div id='page'>
-            <InformationalBreadcrumbs textColor={theme.palette.primary.light} />
+            <InformationalBreadcrumbs textColor={theme.palette.secondary.dark} />
             <Carousel className={classes.carousel} canAutoPlay={false} images={images} />
         </div>
     );

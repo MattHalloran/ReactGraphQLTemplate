@@ -9,6 +9,7 @@ import {
     ForgotPasswordForm,
     LogInForm,
     ProfileForm,
+    ResetPasswordForm,
     SignUpForm
 } from 'forms';
 
@@ -43,8 +44,6 @@ function Routes({
     cart,
     onRedirect
 }) {
-
-    console.log('RENDERING ROUTES', session)
 
     const common = {
         sessionChecked: session !== null && session !== undefined,
@@ -155,6 +154,19 @@ function Routes({
                         <Page title={title('Forgot Password')} {...common}>
                             <FormPage title="Forgot Password" maxWidth="700px">
                                 <ForgotPasswordForm {...common} />
+                            </FormPage>
+                        </Page>
+                    )}
+                />
+                <Route
+                    exact
+                    path={`${LINKS.ResetPassword}/:id?/:code?`}
+                    sitemapIndex={true}
+                    priority={0.1}
+                    render={() => (
+                        <Page title={title('Reset Password')} {...common}>
+                            <FormPage title="Reset Password" maxWidth="700px">
+                                <ResetPasswordForm {...common} />
                             </FormPage>
                         </Page>
                     )}

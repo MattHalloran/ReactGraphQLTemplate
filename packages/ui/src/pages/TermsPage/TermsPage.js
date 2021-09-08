@@ -5,10 +5,20 @@ import ReactMarkdown from 'react-markdown';
 import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
 import { useTheme } from "@emotion/react";
+import { makeStyles } from "@material-ui/styles";
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        '& a': {
+            color: theme.palette.secondary.light,
+        },
+    },
+}));
 
 function TermsPage({
     business
 }) {
+    const classes = useStyles();
     const theme = useTheme();
     const [terms, setTerms] = useState(null);
     const { data: termsData } = useQuery(readAssetsQuery, { variables: { files: ['terms.md'] } });
@@ -23,8 +33,8 @@ function TermsPage({
     }, [termsData, business])
 
     return (
-        <div id="page">
-            <PolicyBreadcrumbs textColor={theme.palette.primary.light} />
+        <div id="page" className={classes.root}>
+            <PolicyBreadcrumbs textColor={theme.palette.secondary.dark} />
             <ReactMarkdown>{ terms }</ReactMarkdown>
         </div>
     );

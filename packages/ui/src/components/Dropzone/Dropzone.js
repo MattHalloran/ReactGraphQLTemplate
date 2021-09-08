@@ -14,44 +14,40 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
     },
+    dropContainer: {
+        background: 'white',
+        color: 'black',
+        border: '3px dashed gray',
+        borderRadius: '5px'
+    },
+    thumbsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 16
+    },
+    thumb: {
+        display: 'inline-flex',
+        borderRadius: 2,
+        border: '1px solid #eaeaea',
+        marginBottom: 8,
+        marginRight: 8,
+        width: 100,
+        height: 100,
+        padding: 4,
+        boxSizing: 'border-box'
+    },
+    thumbInner: {
+        display: 'flex',
+        minWidth: 0,
+        overflow: 'hidden'
+    },
+    img: {
+        display: 'block',
+        width: 'auto',
+        height: '100%'
+    },
 }));
-
-const dropContainer = {
-    background: 'white',
-    border: '3px dashed gray',
-    borderRadius: '5px'
-}
-
-const thumbsContainer = {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 16
-};
-
-const thumb = {
-    display: 'inline-flex',
-    borderRadius: 2,
-    border: '1px solid #eaeaea',
-    marginBottom: 8,
-    marginRight: 8,
-    width: 100,
-    height: 100,
-    padding: 4,
-    boxSizing: 'border-box'
-};
-
-const thumbInner = {
-    display: 'flex',
-    minWidth: 0,
-    overflow: 'hidden'
-};
-
-const img = {
-    display: 'block',
-    width: 'auto',
-    height: '100%'
-};
 
 
 function Dropzone({
@@ -90,11 +86,11 @@ function Dropzone({
     }
 
     const thumbs = files.map(file => (
-        <div style={thumb} key={file.name}>
-            <div style={thumbInner}>
+        <div className={classes.thumb} key={file.name}>
+            <div className={classes.thumbInner}>
                 <img
                     src={file.preview}
-                    style={img}
+                    className={classes.img}
                     alt="Dropzone preview"
                 />
             </div>
@@ -107,13 +103,13 @@ function Dropzone({
     }, [files]);
 
     return (
-        <section style={dropContainer}>
+        <section className={classes.dropContainer}>
             <div style={{textAlign: 'center'}} {...getRootProps({ className: 'dropzone' })}>
                 <input {...getInputProps()} />
                 <p>{dropzoneText}</p>
             </div>
             {showThumbs && 
-            <aside style={thumbsContainer}>
+            <aside className={classes.thumbsContainer}>
                 {thumbs}
             </aside>}
             <Grid className={classes.gridPad} container spacing={2}>

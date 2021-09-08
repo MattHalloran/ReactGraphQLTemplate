@@ -31,7 +31,7 @@ function AboutPage({
 
     return (
         <div id='page'>
-            <InformationalBreadcrumbs textColor={theme.palette.primary.light} />
+            <InformationalBreadcrumbs textColor={theme.palette.secondary.dark} />
             <br/>
             <Grid container spacing={2}>
                 <Grid item md={12} lg={8}>

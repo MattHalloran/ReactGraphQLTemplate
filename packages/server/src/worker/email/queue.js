@@ -10,7 +10,6 @@ const emailQueue = new Bull('email', { redis: {
 emailQueue.process(emailProcess);
 
 export function sendMail(to=[], subject='', text='', html='') {
-    console.log('in send mail.....')
     emailQueue.add({
         to: to,
         subject: subject,
@@ -37,12 +36,12 @@ export function orderNotifyAdmin() {
     });
 }
 
-export function sendResetPasswordLink(email, code) {
+export function sendResetPasswordLink(email, customer_id, code) {
     emailQueue.add({
         to: [email],
         subject: `${BUSINESS_NAME.Short} Password Reset`,
-        text: `A password reset was requested for your account with ${BUSINESS_NAME.Long}. If you sent this request, please click this link (${WEBSITE}/forgot-password/${code}) to continue. If you did not send this request, please ignore this email.`,
-        html: `<p>A password reset was requested for your account with ${BUSINESS_NAME.Long}.</p><p>If you sent this request, please click this link (<a href=\"${WEBSITE}/forgot-password/${code}\">${WEBSITE}/verify/${code}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
+        text: `A password reset was requested for your account with ${BUSINESS_NAME.Long}. If you sent this request, you may change your password through this link (${WEBSITE}/password-reset/${customer_id}/${code}) to continue. If you did not send this request, please ignore this email.`,
+        html: `<p>A password reset was requested for your account with ${BUSINESS_NAME.Long}.</p><p>If you sent this request, you may change your password through this link (<a href=\"${WEBSITE}/password-reset/${customer_id}/${code}\">${WEBSITE}/password-reset/${customer_id}/${code}</a>) to continue.<p>If you did not send this request, please ignore this email.<p>`
     });
 }
 
@@ -50,7 +49,7 @@ export function sendVerificationLink(email, customer_id) {
     emailQueue.add({
         to: [email],
         subject: `Verify ${BUSINESS_NAME.Short} Account`,
-        text: `Welcome to ${BUSINESS_NAME.Long}! Please click this link (${WEBSITE}/login/${customer_id}) to verify your account. If you did not create an account with us, please ignore this link.`,
-        html: `<p>Welcome to ${BUSINESS_NAME.Long}!</p><p>Please click this link (<a href=\"${WEBSITE}/login/${customer_id}\">${WEBSITE}/login/${customer_id}</a>) to verify your account.</p><p>If you did not create an account with us, please ignore this message.</p>`
+        text: `Welcome to ${BUSINESS_NAME.Long}! Please login through this link (${WEBSITE}/login/${customer_id}) to verify your account. If you did not create an account with us, please ignore this link.`,
+        html: `<p>Welcome to ${BUSINESS_NAME.Long}!</p><p>Please login through this link (<a href=\"${WEBSITE}/login/${customer_id}\">${WEBSITE}/login/${customer_id}</a>) to verify your account.</p><p>If you did not create an account with us, please ignore this message.</p>`
     });
 }

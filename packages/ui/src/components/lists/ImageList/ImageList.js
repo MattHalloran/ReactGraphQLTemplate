@@ -21,7 +21,6 @@ function ImageList({
     const [selected, setSelected] = useState(-1);
 
     const moveCard = useCallback((dragIndex, hoverIndex) => {
-        console.log('IN MOVE CARD', dragIndex, hoverIndex);
         const dragCard = data[dragIndex];
         onUpdate(update(data, {
             $splice: [

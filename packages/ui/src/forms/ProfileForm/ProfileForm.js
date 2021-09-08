@@ -11,9 +11,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/styles';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
-import 'react-phone-input-2/lib/material.css';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
         paddingBottom: theme.spacing(2),
     },
     phoneInput: {
-        width: 'inherit',
+        width: '100%',
     }
 }));
 
@@ -35,8 +32,6 @@ function ProfileForm() {
     const [editing, setEditing] = useState(false);
     const { data: profile } = useQuery(profileQuery);
     const [updateCustomer, { loading }] = useMutation(updateCustomerMutation);
-
-    console.log('PROFILE DATA ISSS', profile)
 
     const formik = useFormik({
         enableReinitialize: true,
@@ -47,8 +42,8 @@ function ProfileForm() {
             pronouns: profile?.profile?.pronouns ?? '',
             email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
             phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
-            theme: profile?.profile?.theme,
-            accountApproved: profile?.profile?.accountApproved || false,
+            theme: profile?.profile?.theme ?? 'light',
+            accountApproved: (profile?.profile?.accountApproved || false) + '',
             marketingEmails: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].receivesDeliveryUpdates : false,
             currentPassword: '',
             newPassword: '',
@@ -67,22 +62,23 @@ function ProfileForm() {
                 pronouns: values.pronouns,
                 emails: [
                     {
+                        id: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].id : '',
                         emailAddress: values.email,
                         receivesDeliveryUpdates: values.marketingEmails
                     }
                 ],
                 phones: [
                     {
+                        id: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].id : '',
                         number: values.phone
                     }
                 ],
                 theme: values.theme,
-                accountApproved: values.accountApproved
+                accountApproved: Boolean(values.accountApproved)
             });
             // Only add email and phone ids if they previously existed
             if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
             if (profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
-            console.log('UPDATING CUSTOMER WITH THE FOLLOWING INPUT', input);
             mutationWrapper({
                 mutation: updateCustomer,
                 data: { variables: {
@@ -90,7 +86,6 @@ function ProfileForm() {
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword
                 } },
-                successCondition: (response) => response.ok,
                 successMessage: () => 'Profile updated.',
             })
         },
@@ -139,6 +134,8 @@ function ProfileForm() {
                             id="pronouns"
                             name="pronouns"
                             options={DEFAULT_PRONOUNS}
+                            value={formik.values.pronouns}
+                            onChange={(_, value) => formik.setFieldValue('pronouns', value)}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -178,20 +175,17 @@ function ProfileForm() {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <PhoneInput
-                            inputProps={{ id: "phone", helperText: 'fdafdafdsa' }}
-                            inputClass={classes.phoneInput}
-                            enableSearch={true}
-                            country={'us'}
+                    <TextField
+                            fullWidth
                             id="phone"
                             name="phone"
                             autoComplete="tel"
+                            label="Phone Number"
                             value={formik.values.phone}
-                            onChange={(number, country, e) => formik.handleChange(e)}
+                            onChange={formik.handleChange}
                             error={formik.touched.phone && Boolean(formik.errors.phone)}
                             helperText={formik.touched.phone && formik.errors.phone}
                         />
-                        {formik.errors.phone}
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
@@ -200,7 +194,7 @@ function ProfileForm() {
                                 name="theme"
                                 aria-label="theme-check"
                                 value={formik.values.theme}
-                                onChange={(e) => formik.handleChange(e) && PubSub.publish(PUBS.Theme, e.target.value)}
+                                onChange={(e) => { formik.handleChange(e); PubSub.publish(PUBS.Theme, e.target.value) }}
                             >
                                 <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
                                 <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
@@ -217,8 +211,8 @@ function ProfileForm() {
                                 value={formik.values.accountApproved}
                                 onChange={formik.handleChange}
                             >
-                                <FormControlLabel value={true} control={<Radio />} label="I have ordered from New Life Nursery before" />
-                                <FormControlLabel value={false} control={<Radio />} label="I have never ordered from New Life Nursery" />
+                                <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
+                                <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
                             </RadioGroup>
                             <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                         </FormControl>
@@ -230,7 +224,7 @@ function ProfileForm() {
                                     id="marketingEmails"
                                     name="marketingEmails"
                                     value="marketingEmails"
-                                    color="primary"
+                                    color="secondary"
                                     checked={formik.values.marketingEmails}
                                     onChange={formik.handleChange}
                                 />

@@ -77,7 +77,6 @@ export const resolvers = {
             // Determine sort order
             let sortQuery = { updated_at: 'desc' };
             if (args.status) sortQuery = STATUS_TO_SORT[args.status];
-            console.log("SORT BY", args.status, sortQuery);
             // If search string provided, match it with customer or business name.
             // Maybe in the future, this could also be matched to sku names and such
             let searchQuery;
@@ -103,7 +102,6 @@ export const resolvers = {
     Mutation: {
         updateOrder: async (_, args, context, info) => {
             // Must be admin, or updating your own
-            console.log('UPDATING ORDER', args.input)
             const curr = await context.prisma[_model].findUnique({
                 where: { id: args.input.id },
                 select: { id: true, customerId: true, status: true, items: { select: { id: true } } }
@@ -128,11 +126,9 @@ export const resolvers = {
                     Promise.all(updateMany)
                 }
                 if (deletingItemIds.length > 0) {
-                    console.log('DELETING ITEMS')
                     await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds } } })
                 }
             }
-            console.log('about to update')
             return await context.prisma[_model].update({
                 where: { id: curr.id },
                 data: { ...args.input, items: undefined },
@@ -144,7 +140,6 @@ export const resolvers = {
             const curr = await context.prisma[_model].findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             // Only orders in the draft state can be submitted
-            console.log('GOT ORDER DATA', curr);
             if (curr.status !== ORDER_STATUS.Draft) return new CustomError(CODE.ErrorUnknown);
             await context.prisma[_model].update({
                 where: { id: curr.id },

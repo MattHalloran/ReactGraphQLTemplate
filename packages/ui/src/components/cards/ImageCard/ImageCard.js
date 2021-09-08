@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'inherit',
     },
     actionButton: {
-        color: theme.palette.primary.contrastText,
+        color: theme.palette.secondary.light,
     },
 }));
 
@@ -48,7 +48,6 @@ function ImageCard({
 }) {
     const classes = useStyles();
     const ref = useRef(null);
-    console.log('IN IMAGE CARD', data)
 
     const [, drop] = useDrop({
         accept: 'card',

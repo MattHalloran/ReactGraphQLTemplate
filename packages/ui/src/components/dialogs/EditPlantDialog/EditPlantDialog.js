@@ -127,7 +127,6 @@ function EditPlantDialog({
 }) {
     const classes = useStyles();
     const [changedPlant, setChangedPlant] = useState(plant);
-    console.log('PLANT POPUP', changedPlant);
     const [updatePlant] = useMutation(updatePlantMutation);
     const [deletePlant] = useMutation(deletePlantsMutation);
 
@@ -197,7 +196,6 @@ function EditPlantDialog({
     }, [changedPlant, deletePlant, onClose])
 
     const savePlant = useCallback(async () => {
-        console.log("SAVING PLANTTTTT")
         let plant_data = {
             id: changedPlant.id,
             latinName: changedPlant.latinName,
@@ -211,7 +209,6 @@ function EditPlantDialog({
                 return { hash: d.hash, isDisplay: d.isDisplay ?? false }
             })
         }
-        console.log('GOING TO MODIFY PLANT', plant_data)
         mutationWrapper({
             mutation: updatePlant,
             data: { variables: { input: plant_data } },
@@ -223,7 +220,6 @@ function EditPlantDialog({
 
     const updateTrait = useCallback((traitName, value, createIfNotExists) => {
         const updatedPlant = setPlantTrait(traitName, value, changedPlant, createIfNotExists);
-        console.log('UPDATE TRAITTTT', traitName, value, updatedPlant)
         if (updatedPlant) setChangedPlant(updatedPlant);
     }, [changedPlant])
 
@@ -294,7 +290,7 @@ function EditPlantDialog({
             <div className={classes.container}>
                 <div className={classes.sideNav}>
                     <List
-                        style={{paddingTop: '0'}}
+                        style={{ paddingTop: '0' }}
                         aria-label="sku select"
                         aria-labelledby="sku-select-subheader">
                         <ListSubheader className={classes.skuHeader} component="div" id="sku-select-subheader">
@@ -350,10 +346,11 @@ function EditPlantDialog({
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
                                 fullWidth
+                                freeSolo
                                 id="setTraitField"
                                 name="setTraitField"
                                 options={Object.keys(PLANT_TRAITS)}
-                                onChange={(e, v) => setSelectedTrait(PLANT_TRAITS[v])}
+                                onChange={(_, value) => setSelectedTrait(PLANT_TRAITS[value])}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -387,7 +384,7 @@ function EditPlantDialog({
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                            <ImageList data={imageData} onUpdate={(d) => {setImageData(d); setImagesChanged(true)}} />
+                            <ImageList data={imageData} onUpdate={(d) => { setImageData(d); setImagesChanged(true) }} />
                         </Grid>
                     </Grid>
                     <Typography className={classes.title} variant="h5" component="h3">Edit SKU info</Typography>
@@ -431,7 +428,7 @@ function EditPlantDialog({
                     </Grid>
                 </div>
                 <div className={classes.bottom}>
-                {options}
+                    {options}
                 </div>
             </div>
         </Dialog>

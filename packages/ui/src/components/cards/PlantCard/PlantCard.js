@@ -8,8 +8,11 @@ import {
     CardContent,
     CardMedia,
     Chip,
+    IconButton,
+    Tooltip,
     Typography
 } from '@material-ui/core';
+import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { showPrice, getImageSrc, getPlantTrait } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
@@ -45,8 +48,8 @@ const useStyles = makeStyles((theme) => ({
     active: {
         border: `2px solid ${theme.palette.secondary.dark}`,
     },
-    actionButton: {
-        color: theme.palette.primary.contrastText,
+    icon: {
+        color: theme.palette.secondary.light,
     },
 }));
 
@@ -64,7 +67,6 @@ function PlantCard({
 
     const openWithSku = (e, sku) => {
         e.stopPropagation();
-        console.log('IN OPEN WITH SKU', sku)
         onClick({ plant, selectedSku: sku })
     }
 
@@ -73,7 +75,7 @@ function PlantCard({
             key={s.sku}
             className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
             label={`#${s.size} | ${showPrice(s.price)} | Avail: ${s.availability}`}
-            color="secondary" 
+            color="secondary"
             onClick={(e) => openWithSku(e, s)}
         />
     ));
@@ -101,9 +103,11 @@ function PlantCard({
                 </CardContent>
             </CardActionArea>
             <CardActions>
-                <Button className={classes.actionButton} size="small" variant="text" onClick={onClick}>
-                    View
-                </Button>
+                <Tooltip title="View" placement="bottom">
+                    <IconButton onClick={onClick}>
+                        <LaunchIcon className={classes.icon} />
+                    </IconButton>
+                </Tooltip>
             </CardActions>
         </Card>
     );

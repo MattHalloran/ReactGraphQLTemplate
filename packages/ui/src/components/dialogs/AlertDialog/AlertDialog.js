@@ -23,7 +23,7 @@ function AlertDialog() {
     let open = state.title !== null || state.message !== null;
 
     useEffect(() => {
-        let dialogSub = PubSub.subscribe(PUBS.AlertDialog, (_, o) => {console.log('yoted the yeet ', o); setState({...default_state, ...o})});
+        let dialogSub = PubSub.subscribe(PUBS.AlertDialog, (_, o) => setState({...default_state, ...o}));
         return () => PubSub.unsubscribe(dialogSub);
     }, [])
 
@@ -46,11 +46,11 @@ function AlertDialog() {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => handleClick(state.firstButtonClicked)} color="primary">
+                <Button onClick={() => handleClick(state.firstButtonClicked)} color="secondary">
                     {state.firstButtonText}
                 </Button>
                 {state.secondButtonText ? (
-                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="primary">
+                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="secondary">
                         {state.secondButtonText}
                     </Button>
                 ) : null}

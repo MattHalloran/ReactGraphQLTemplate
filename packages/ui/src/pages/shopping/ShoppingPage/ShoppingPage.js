@@ -62,7 +62,6 @@ function ShoppingPage({
     }, [])
 
     useEffect(() => {
-        console.log('CALCULATING TRAIT OPTIONS', traitOptionsData?.traitOptions)
         let traitOptions = {};
         for (const option of traitOptionsData?.traitOptions ?? []) {
             traitOptions[option.name] = option.values;

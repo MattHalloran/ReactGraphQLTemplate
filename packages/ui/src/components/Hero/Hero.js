@@ -74,7 +74,7 @@ function Hero({
                 <Typography variant='h4' component='h2' className={classes.subtitle + ' ' + classes.textPop}>{subtext}</Typography>
                 <Button
                     type="submit"
-                    color="primary"
+                    color="secondary"
                     className={classes.mainButton}
                     onClick={() => history.push(LINKS.Shopping)}
                 >

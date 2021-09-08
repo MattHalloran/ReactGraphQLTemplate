@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 const useStyles = makeStyles((theme) => ({
     header: {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.background.default,
+        color: theme.palette.primary.contrastText,
         padding: '1em',
         textAlign: 'center'
     },

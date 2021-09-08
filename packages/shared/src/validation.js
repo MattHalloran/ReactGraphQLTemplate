@@ -4,7 +4,7 @@ import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './mo
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;
 // See https://stackoverflow.com/a/21456918/10240279 for more options
-export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
 export const PASSWORD_REGEX_ERROR = "Must be at least 8 characters, with at least one character and one number";
 
 export const passwordSchema = yup.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH).matches(PASSWORD_REGEX, PASSWORD_REGEX_ERROR);
@@ -160,6 +160,13 @@ export const logInSchema = yup.object().shape({
 export const requestPasswordChangeSchema = yup.object().shape({
     email: yup.string().email().required()
 })
+
+// Schema for resetting password
+export const resetPasswordSchema = yup.object().shape({
+    newPassword: passwordSchema.required(),
+    confirmNewPassword: yup.string().oneOf([yup.ref('newPassword'), null], 'Passwords must match')
+})
+
 
 // Schema for adding an employee to a business
 export const employeeSchema = yup.object().shape({

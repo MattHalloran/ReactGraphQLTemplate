@@ -10,11 +10,17 @@ import {
     Typography
 } from '@material-ui/core';
 import {
+    Delete as DeleteIcon,
+    DeleteForever as DeleteForeverIcon,
+    Edit as EditIcon,
     Email as EmailIcon,
+    Lock as LockIcon,
+    LockOpen as LockOpenIcon,
     Phone as PhoneIcon,
+    ThumbUp as ThumbUpIcon,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { changeCustomerStatusMutation } from 'graphql/mutation';
+import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
@@ -34,11 +40,8 @@ const useStyles = makeStyles((theme) => ({
         padding: 8,
         position: 'inherit',
     },
-    actionButton: {
-        color: theme.palette.primary.contrastText,
-    },
     icon: {
-        fill: theme.palette.primary.contrastText,
+        fill: theme.palette.secondary.light,
     },
 }));
 
@@ -50,6 +53,7 @@ function CustomerCard({
     const classes = useStyles();
     const theme = useTheme();
     const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
+    const [deleteCustomer] = useMutation(deleteCustomerMutation);
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
@@ -64,11 +68,11 @@ function CustomerCard({
     }
 
     const status_map = useMemo(() => ({
-        [ACCOUNT_STATUS.Deleted]: ['Deleted', 'grey'],
-        [ACCOUNT_STATUS.Unlocked]: ['Unlocked', theme.palette.primary.main],
-        [ACCOUNT_STATUS.WaitingApproval]: ['Waiting Approval', 'yellow'],
-        [ACCOUNT_STATUS.SoftLock]: ['Soft Locked', 'pink'],
-        [ACCOUNT_STATUS.HardLock]: ['Hard Locked', 'red']
+        [ACCOUNT_STATUS.Deleted]: 'Deleted',
+        [ACCOUNT_STATUS.Unlocked]: 'Unlocked',
+        [ACCOUNT_STATUS.WaitingApproval]: 'Waiting Approval',
+        [ACCOUNT_STATUS.SoftLock]: 'Soft Locked',
+        [ACCOUNT_STATUS.HardLock]: 'Hard Locked',
     }), [theme])
 
     const edit = () => {
@@ -84,44 +88,67 @@ function CustomerCard({
         })
     }, [changeCustomerStatus, customer])
 
+    const confirmPermanentDelete = useCallback(() => {
+        PubSub.publish(PUBS.AlertDialog, {
+            message: `Are you sure you want to permanently delete the account for ${customer.firstName} ${customer.lastName}? THIS ACTION CANNOT BE UNDONE!`,
+            firstButtonText: 'Yes',
+            firstButtonClicked: () => {
+                mutationWrapper({
+                    mutation: deleteCustomer,
+                    data: { variables: { id: customer?.id } },
+                    successCondition: (response) => response.deleteCustomer !== null,
+                    successMessage: () => 'Customer permanently deleted.'
+                })
+            },
+            secondButtonText: 'No',
+        });
+    }, [customer, deleteCustomer])
+
     const confirmDelete = useCallback(() => {
         PubSub.publish(PUBS.AlertDialog, {
             message: `Are you sure you want to delete the account for ${customer.firstName} ${customer.lastName}?`,
             firstButtonText: 'Yes',
-            firstButtonClicked: () => modifyCustomer(ACCOUNT_STATUS.Deleted, 'Customer deleted'),
+            firstButtonClicked: () => modifyCustomer(ACCOUNT_STATUS.Deleted, 'Customer deleted.'),
             secondButtonText: 'No',
         });
     }, [customer, modifyCustomer])
 
-    let edit_action = [edit, 'Edit']
-    let approve_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer Approved'), 'Approve'];
-    let unlock_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer unlocked'), 'Unlock'];
-    let lock_action = [() => modifyCustomer(ACCOUNT_STATUS.HardLock, 'Customer locked'), 'Lock'];
-    let delete_action = [confirmDelete, 'Delete'];
+    let edit_action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
+    let approve_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account approved.'), <ThumbUpIcon className={classes.icon} />, 'Approve customer account'];
+    let unlock_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
+    let lock_action = [() => modifyCustomer(ACCOUNT_STATUS.HardLock, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
+    let undelete_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
+    let delete_action = [confirmDelete, <DeleteIcon className={classes.icon} />, 'Delete user'];
+    let permanent_delete_action = [confirmPermanentDelete, <DeleteForeverIcon className={classes.icon} />, 'Permanently delete user']
 
     let actions = [edit_action];
-    switch (customer?.status) {
-        case ACCOUNT_STATUS.Unlocked:
-            actions.push(lock_action);
-            break;
-        case ACCOUNT_STATUS.WaitingApproval:
-            actions.push(approve_action);
-            break;
-        case ACCOUNT_STATUS.SoftLock:
-        case ACCOUNT_STATUS.HardLock:
-            actions.push(unlock_action);
-            break;
-        default:
-            break;
+    // Actions for customer accounts
+    if (!Array.isArray(customer?.roles) || !customer.roles.some(r => ['Owner', 'Admin'].includes(r.role.title))) {
+        switch (customer?.status) {
+            case ACCOUNT_STATUS.Unlocked:
+                actions.push(lock_action);
+                actions.push(delete_action)
+                break;
+            case ACCOUNT_STATUS.SoftLock:
+            case ACCOUNT_STATUS.HardLock:
+                actions.push(unlock_action);
+                actions.push(delete_action)
+                break;
+            case ACCOUNT_STATUS.Deleted:
+                actions.push(undelete_action);
+                actions.push(permanent_delete_action);
+            default:
+                break;
+        }
     }
-    actions.push(delete_action);
+    if (customer?.accountApproved === false) actions.push(approve_action);
 
     // Phone and email [label, value] pairs
     const phoneList = mapIfExists(customer, 'phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
     const emailList = mapIfExists(customer, 'emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
 
     return (
-        <Card className={classes.root} style={{ border: `2px solid ${status_map[status][1]}` }}>
+        <Card className={classes.root}>
             {phoneDialogOpen ? (
                 <ListDialog
                     title={`Call ${customer?.fullName}`}
@@ -138,17 +165,18 @@ function CustomerCard({
                 <Typography gutterBottom variant="h6" component="h2">
                     {customer?.firstName} {customer?.lastName}
                 </Typography>
-                <p>Status: {status_map[customer?.status][0]}</p>
+                <p>Status: {status_map[customer?.status]}</p>
                 <p>Business: {customer?.business?.name}</p>
                 <p>Pronouns: {customer?.pronouns ?? 'Unset'}</p>
             </CardContent>
             <CardActions>
-                {actions?.map((o, index) =>
-                    <Button
-                        key={index}
-                        className={classes.actionButton}
-                        variant="text"
-                        onClick={o[0]}>{o[1]}</Button>)}
+                {actions?.map((action, index) => 
+                    <Tooltip key={`action-${index}`} title={action[2]} placement="bottom">
+                        <IconButton onClick={action[0]}>
+                            {action[1]}
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {(phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
                         <IconButton onClick={() => setPhoneDialogOpen(true)}>

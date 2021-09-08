@@ -54,5 +54,9 @@ export const CODE = {
     NotImplemented: {
         code: 'NOT_IMPLEMENTED',
         message: 'Error: This has not been implemented yet. Please be patient :)'
+    },
+    INVALID_RESET_CODE: {
+        code: 'INVALID_RESET_CODE',
+        message: 'Error: Reset code expired or invalid. Sending a new code to your email.'
     }
 }

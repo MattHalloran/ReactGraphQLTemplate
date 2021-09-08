@@ -64,8 +64,6 @@ function AdminInventoryPage() {
         })
     }
 
-    console.log('ADMIN INVENTORY SELECTED IS', selected)
-
     return (
         <div id="page">
             <EditPlantDialog
@@ -74,7 +72,7 @@ function AdminInventoryPage() {
                 trait_options={traitOptions?.traitOptions}
                 open={selected !== null}
                 onClose={() => setSelected(null)} />
-            <AdminBreadcrumbs textColor={theme.palette.primary.light} />
+            <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
             </div>

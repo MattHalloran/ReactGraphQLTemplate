@@ -198,7 +198,6 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
             hash: hash
         }
     } catch (error) {
-        console.log('saveImage ran into an error')
         console.error(error);
         return {
             success: false,
@@ -252,8 +251,6 @@ export async function readFiles(files) {
         if (fs.existsSync(path)) {
             data.push(fs.readFileSync(path, 'utf8'));
         } else {
-            console.log('DOES NOT EXIST')
-            console.log(path)
             data.push(null);
         }
     }
