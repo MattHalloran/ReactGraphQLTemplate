@@ -12,6 +12,7 @@ import {
     ResetPasswordForm,
     SignUpForm
 } from 'forms';
+import { ScrollToTop } from 'components';
 
 // Lazy loading in the Routes component is a recommended way to improve performance. See https://reactjs.org/docs/code-splitting.html#route-based-code-splitting
 // const AboutPage = lazy(() => import('./pages'), 'AboutPage');
@@ -57,6 +58,7 @@ function Routes({
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
+            <ScrollToTop />
             <Switch>
                 {/* START PUBLIC PAGES */}
                 <Route
