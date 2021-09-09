@@ -59,7 +59,6 @@ export async function upsertCustomer({ prisma, info, data }) {
             business = await prisma[TABLES.Business].create({ data: data.business });
         }
         cleanedData.business = { connect: { id: business.id } }
-        console.log(cleanedData.business)
     }
     // Upsert customer
     let customer;

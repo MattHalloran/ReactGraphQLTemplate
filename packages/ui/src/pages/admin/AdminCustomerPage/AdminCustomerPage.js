@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Button, Typography } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
 import { CustomerDialog } from 'components/dialogs/CustomerDialog/CustomerDialog';
+import { NewCustomerDialog } from 'components/dialogs/NewCustomerDialog/NewCustomerDialog';
 
 const useStyles = makeStyles((theme) => ({
     header: {
@@ -27,6 +28,7 @@ function AdminCustomerPage() {
     const theme = useTheme();
     const [customers, setCustomers] = useState(null);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [newCustomerOpen, setNewCustomerOpen] = useState(false);
     const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
@@ -41,9 +43,13 @@ function AdminCustomerPage() {
                 customer={selectedCustomer}
                 open={selectedCustomer !== null}
                 onClose={() => setSelectedCustomer(null)} />
+            <NewCustomerDialog
+                open={newCustomerOpen}
+                onClose={() => setNewCustomerOpen(false)} />
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Customers</Typography>
+                <Button color="secondary" onClick={() => setNewCustomerOpen(true)}>Create Customer</Button>
             </div>
             <div className={classes.cardFlex}>
                 {customers?.map((c, index) =>

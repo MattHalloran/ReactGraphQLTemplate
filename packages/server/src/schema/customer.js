@@ -80,6 +80,7 @@ export const typeDef = gql`
             marketingEmails: Boolean!
             password: String!
         ): Customer!
+        addCustomer(input: CustomerInput!): Customer!
         updateCustomer(
             input: CustomerInput!
             currentPassword: String!
@@ -253,6 +254,35 @@ export const resolvers = {
             sendVerificationLink(args.email, customer.id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
+            // Return cart, along with user data
+            const cart = await getCart(context.prisma, info, customer.id);
+            const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });
+            if (cart) userData.cart = cart;
+            return userData;
+        },
+        addCustomer: async (_, args, context, info) => {
+            // Must be admin to add a customer directly
+            if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            const prismaInfo = getCustomerSelect(info);
+            // Find customer role to give to new user
+            const customerRole = await context.prisma[TABLES.Role].findUnique({ where: { title: 'Customer' } });
+            if (!customerRole) return new CustomError(CODE.ErrorUnknown);
+            const customer = await upsertCustomer({
+                prisma: context.prisma,
+                info,
+                data: {
+                    firstName: args.input.firstName,
+                    lastName: args.input.lastName,
+                    pronouns: args.input.pronouns,
+                    business: args.input.business,
+                    accountApproved: true,
+                    theme: 'light',
+                    status: ACCOUNT_STATUS.Unlocked,
+                    emails: args.input.emails,
+                    phones: args.input.phones,
+                    roles: [customerRole]
+                }
+            });
             // Return cart, along with user data
             const cart = await getCart(context.prisma, info, customer.id);
             const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });

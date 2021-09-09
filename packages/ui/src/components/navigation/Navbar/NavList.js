@@ -12,6 +12,7 @@ import {
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -53,7 +54,7 @@ function NavList({
 
     let cart_button;
     // If someone is not logged in, display sign up/log in links
-    if (!session) {
+    if (!_.isObject(session) || Object.keys(session).length === 0) {
         nav_options.push(['Sign Up', 'signup', LINKS.Register]);
     } else {
         // Cart option is rendered differently, so we must take it out of the array
