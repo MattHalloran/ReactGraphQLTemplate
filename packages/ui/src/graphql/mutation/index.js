@@ -1,3 +1,4 @@
+export * from './addCustomer';
 export * from './addImages';
 export * from './changeCustomerStatus';
 export * from './deleteCustomerMutation';

@@ -62,6 +62,7 @@ function CartPage({
                 id: changedCart.id,
                 desiredDeliveryDate: changedCart.desiredDeliveryDate,
                 isDelivery: changedCart.isDelivery,
+                specialInstructions: changedCart.specialInstructions,
                 items: changedCart.items.map(i => ({ id: i.id, quantity: i.quantity }))} } },
             successCondition: (response) => response.data.updateOrder,
             onSuccess: () => onSessionUpdate(),

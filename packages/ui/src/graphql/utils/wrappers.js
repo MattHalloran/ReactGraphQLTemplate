@@ -35,6 +35,7 @@ export function mutationWrapper({
         }
         else if (showDefaultErrorSnack) {
             // Don't show internal errors, as they're often a block of code
+            //TODO likely doesn't work
             const messageToShow = response.code === 'INTERNAL_SERVER_ERROR' ? 'Unknown error occurred.' : response.message ?? 'Unknown error occurred.';
             PubSub.publish(PUBS.Snack, { message: messageToShow, severity: 'error', data: response });
         }

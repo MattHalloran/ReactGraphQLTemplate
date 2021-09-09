@@ -75,7 +75,8 @@ function SignUpForm({
                 data: { variables: { 
                     ...values, 
                     accountApproved: Boolean(values.accountApproved),
-                    theme: theme.mode,
+                    marketingEmails: Boolean(values.marketingEmails),
+                    theme: theme.palette.mode ?? 'light',
                 } },
                 onSuccess: (response) => {
                     onSessionUpdate(response.data.signUp);
@@ -94,7 +95,7 @@ function SignUpForm({
                     }
                 },
                 onError: (response) => {
-                    if (response.code === CODE.EmailInUse.code) {
+                    if (Array.isArray(response.graphQLErrors) && response.graphQLErrors.some(e => e.extensions.code === CODE.EmailInUse.code)) {
                         PubSub.publish(PUBS.AlertDialog, {
                             message: `${response.message}. Press OK if you would like to be redirected to the forgot password form.`,
                             firstButtonText: 'OK',

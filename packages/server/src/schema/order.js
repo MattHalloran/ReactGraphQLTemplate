@@ -110,7 +110,7 @@ export const resolvers = {
             if (!context.req.isAdmin) {
                 // Customers can only update their own orders in certain states
                 const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
-                if (!(curr.status in editable_order_statuses)) return new CustomError(CODE.Unauthorized);
+                if (!editable_order_statuses.includes(curr.status))return new CustomError(CODE.Unauthorized);
                 // Customers cannot edit order status
                 delete args.input.status;
             }

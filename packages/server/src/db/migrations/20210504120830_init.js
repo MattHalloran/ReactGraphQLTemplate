@@ -30,7 +30,7 @@ export async function up (knex) {
         table.specificType('fullName', `text GENERATED ALWAYS AS ("firstName" || ' ' || "lastName") stored`);
         table.string('pronouns', 128).defaultTo('they/them').notNullable();
         table.string('theme').defaultTo(THEME.Light).notNullable();
-        table.string('password', 256).notNullable();
+        table.string('password', 256);
         table.integer('loginAttempts').defaultTo(0).notNullable();
         table.timestamp('lastLoginAttempt').defaultTo(knex.fn.now()).notNullable();
         table.string('sessionToken', 1024);

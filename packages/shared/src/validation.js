@@ -134,6 +134,16 @@ export const signUpSchema = yup.object().shape({
     passwordConfirmation: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match')
 });
 
+// Schema for creating a new customer
+export const addCustomerSchema = yup.object().shape({
+    firstName: yup.string().max(128).required(),
+    lastName: yup.string().max(128).required(),
+    pronouns: yup.string().max(128).default(DEFAULT_PRONOUNS[0]).optional(),
+    business: yup.string().max(128).required(),
+    email: yup.string().email().required(),
+    phone: yup.string().max(20).required(),
+});
+
 // Schema for updating a customer profile
 export const profileSchema = yup.object().shape({
     firstName: yup.string().max(128).required(),

@@ -142,7 +142,7 @@ function OrderDialog({
                 'Submit order', <DoneIcon />, 'Order approved.', 'Failed to approve order.'
             ],
             [ORDER_STATUS.Approved]: [
-                isOwner && [ORDER_STATUS.Pending, ORDER_STATUS.CanceledByAdmin].includes(order?.status),
+                isOwner && (order?.status === ORDER_STATUS.Pending || isCanceled),
                 'Approve Order', <ThumbUpIcon />, 'Order approved.', 'Failed to approve order.'
             ],
             [ORDER_STATUS.Scheduled]: [

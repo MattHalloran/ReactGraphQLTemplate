@@ -80,6 +80,7 @@ export const typeDef = gql`
             marketingEmails: Boolean!
             password: String!
         ): Customer!
+        addCustomer(input: CustomerInput!): Customer!
         updateCustomer(
             input: CustomerInput!
             currentPassword: String!
@@ -151,6 +152,19 @@ export const resolvers = {
             if (validateError) return validateError;
             // Get customer
             let customer = await customerFromEmail(args.email, context.prisma);
+            // Check for password in database, if doesn't exist, send a password reset link
+            if (!customer.password) {
+                // Generate new code
+                const requestCode = bcrypt.genSaltSync(HASHING_ROUNDS).replace('/', '');
+                // Store code and request time in customer row
+                await context.prisma[_model].update({
+                    where: { id: customer.id },
+                    data: { resetPasswordCode: requestCode, lastResetPasswordReqestAttempt: new Date().toISOString() }
+                })
+                // Send new verification email
+                sendResetPasswordLink(args.email, customer.id, requestCode);
+                return new CustomError(CODE.MustResetPassword);
+            }
             // Validate verification code, if supplied
             if (args.verificationCode === customer.id && customer.emailVerified === false) {
                 customer = await context.prisma[_model].update({
@@ -225,6 +239,7 @@ export const resolvers = {
                     firstName: args.firstName,
                     lastName: args.lastName,
                     pronouns: args.pronouns,
+                    business: {name: args.business},
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     accountApproved: args.accountApproved,
                     theme: args.theme,
@@ -239,6 +254,35 @@ export const resolvers = {
             sendVerificationLink(args.email, customer.id);
             // Send email to business owner
             customerNotifyAdmin(`${args.firstName} ${args.lastName}`);
+            // Return cart, along with user data
+            const cart = await getCart(context.prisma, info, customer.id);
+            const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });
+            if (cart) userData.cart = cart;
+            return userData;
+        },
+        addCustomer: async (_, args, context, info) => {
+            // Must be admin to add a customer directly
+            if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
+            const prismaInfo = getCustomerSelect(info);
+            // Find customer role to give to new user
+            const customerRole = await context.prisma[TABLES.Role].findUnique({ where: { title: 'Customer' } });
+            if (!customerRole) return new CustomError(CODE.ErrorUnknown);
+            const customer = await upsertCustomer({
+                prisma: context.prisma,
+                info,
+                data: {
+                    firstName: args.input.firstName,
+                    lastName: args.input.lastName,
+                    pronouns: args.input.pronouns,
+                    business: args.input.business,
+                    accountApproved: true,
+                    theme: 'light',
+                    status: ACCOUNT_STATUS.Unlocked,
+                    emails: args.input.emails,
+                    phones: args.input.phones,
+                    roles: [customerRole]
+                }
+            });
             // Return cart, along with user data
             const cart = await getCart(context.prisma, info, customer.id);
             const userData = await context.prisma[_model].findUnique({ where: { id: customer.id }, ...prismaInfo });
@@ -337,7 +381,7 @@ export const resolvers = {
                     sendResetPasswordLink(email.emailAddress, customer.id, requestCode);
                 }
                 // Return error
-                return new CustomError(CODE.INVALID_RESET_CODE);
+                return new CustomError(CODE.InvalidResetCode);
             } 
             // Remove request data from customer, and set new password
             await context.prisma[_model].update({

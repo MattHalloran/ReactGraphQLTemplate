@@ -78,6 +78,9 @@ function OrderCard({
                     {order?.customer?.fullName ?? ''}
                 </Typography>
                 <Typography variant="body1" component="h4">
+                    Status: {order?.status}
+                </Typography>
+                <Typography variant="body1" component="h4">
                     Requested Date: {order?.desiredDeliveryDate ? new Date(order?.desiredDeliveryDate).toDateString('en-US') : 'Unset'}
                 </Typography>
                 <Typography variant="body1" component="h4">

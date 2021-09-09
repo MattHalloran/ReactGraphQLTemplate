@@ -15,6 +15,7 @@ import {
 } from '@material-ui/icons';
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -49,6 +50,7 @@ function Footer({
     business
 }) {
     const classes = useStyles();
+    const history = useHistory();
     const theme = useTheme();
 
     const contactLinks = [
@@ -72,7 +74,7 @@ function Footer({
                         <ListItem variant="h5" component="h3" >
                             <ListItemText className={classes.upper} primary="Resources" />
                         </ListItem>
-                        <ListItem button component="a" href={LINKS.About} >
+                        <ListItem button component="a" onClick={() => history.push(LINKS.About)} >
                             <ListItemText primary="About Us" />
                         </ListItem>
                         <ListItem
@@ -85,10 +87,10 @@ function Footer({
                         >
                             <ListItemText primary="Credit App" />
                         </ListItem>
-                        <ListItem button component="a" href={LINKS.About} onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
+                        <ListItem button component="a" onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
-                        <ListItem button component="a" href={LINKS.Gallery} >
+                        <ListItem button component="a" onClick={() => history.push(LINKS.Gallery)} >
                             <ListItemText primary="Gallery" />
                         </ListItem>
                     </List>

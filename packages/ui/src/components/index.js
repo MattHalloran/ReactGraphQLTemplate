@@ -9,6 +9,7 @@ export * from './inputs';
 export * from './lists';
 export * from './navigation';
 export * from './PopupMenu/PopupMenu';
+export * from './ScrollToTop/ScrollToTop';
 export * from './Snack/Snack';
 export * from './tables';
 export * from './TabPanel/TabPanel';
