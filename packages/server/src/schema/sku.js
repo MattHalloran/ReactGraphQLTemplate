@@ -102,7 +102,7 @@ export const resolvers = {
                 where: {
                     ...idQuery,
                     ...searchQuery,
-                    ...showOutOfStockQuery
+                    ...onlyInStockQuery
                 },
                 orderBy: sortQuery,
                 ...(new PrismaSelect(info).value)

@@ -45,17 +45,19 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 // Common plant traits, and their corresponding field names
 const PLANT_TRAITS = {
     'Attracts Pollinators & Wildlife': 'attractsPollinatorsAndWildlife',
+    'Bloom Colors': 'bloomColors',
+    'Bloom Times': 'bloomTimes',
     'Drought Tolerance': 'droughtTolerance',
     'Grown Height': 'grownHeight',
     'Grown Spread': 'grownSpread',
     'Growth Rate': 'growthRate',
+    'Hardiness Zones': 'zone',
     'Light Ranges': 'lightRanges',
     'Optimal Light': 'optimalLight',
     'Salt Tolerance': 'saltTolerance',
     'Soil Moistures': 'soilMoistures',
     'Soil PHs': 'soilPhs',
     'Soil Types': 'soilTypes',
-    'Zones': 'zone'
 }
 
 const useStyles = makeStyles((theme) => ({
