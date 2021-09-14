@@ -1,6 +1,6 @@
 
-# New Life Nursery Website
-This website is designed both as a functional website for New Life Nursery Inc., and as a reference for creating powerful, maintainable websites.
+# ReactGraphQLTemplate
+This is a fully-functioning template for building modern, maintainable websites.
 
 
 ## Website Features
@@ -17,7 +17,8 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 |---|---|---|
 | [ReactJS](https://reactjs.org/)  | UI  |  `^17.0.2` |
 | [MaterialUI](https://material-ui.com/)  | UI Styling  |  `^5.0.0-beta.0`  |
-| [Apollo](https://www.apollographql.com/)  | API |  `^2.25.0` |
+| [Apollo](https://www.apollographql.com/)  | API (GraphQL) |  `^2.25.0` |
+| [Prisma](https://www.prisma.io/)  | Easier GraphQL building |  `^2.30.2`  |
 | [ExpressJs](https://expressjs.com/)  |  Backend Server  | `^4.17.1` |
 | [PostgreSQL](https://www.postgresql.org/)  | Database  | `postgres:13` |
 | [Redis](https://redis.io/) | Task Queueing | `redis` |
@@ -29,9 +30,9 @@ This website is designed both as a functional website for New Life Nursery Inc.,
 1. [Docker](https://www.docker.com/)
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
 ### 2. Download this repository
-`git clone https://github.com/MattHalloran/NLN`
+`git clone https://github.com/MattHalloran/ReactGraphQLTemplate`
 ### 3. Set environment variables  
-1. Edit environment variables in [.env-example](https://github.com/MattHalloran/NLN/blob/master/.env-example)
+1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
 ### 4. Business data
 In the assets/public folder, there is a file named `business.json`. Edit this file to match your business's data.
@@ -73,20 +74,20 @@ In the [schema directory](packages/service/src/schema), the GraphQL resolvers ar
 
 
 ## Local testing on another device
-Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index/js](https://github.com/MattHalloran/NLN/blob/master/packages/server/src/index.js); and (2) [packages/shared/src/apiConsts.js](https://github.com/MattHalloran/NLN/blob/master/packages/shared/src/apiConsts.js).
+Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index/js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/server/src/index.js); and (2) [packages/shared/src/apiConsts.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/shared/src/apiConsts.js).
 
 
 ## Testing performance, accessibility, and SEO
 [Lighthouse](https://developers.google.com/web/tools/lighthouse) is an open-source tool for testing any website's (even localhost) performance, accessibility, and Search Engine Optimization (SEO). This can be accessed in Chrome Dev Tools. The tool generates a report in less than a minute, which gives plenty of details and resources that you can look through. This website template is designed to maximize Lighthouse performance by default, but your specific needs may vary. Some places to look at are:  
 - Compress static images - The easiest way to reduce request payloads is by compressing static images. This can be done on many sites, such as [this one for PNGs](https://compresspng.com/) and [this one](https://jakearchibald.github.io/svgomg/) for SVGs.
-- [Sitemap.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/NLN/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
+- [Sitemap.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
 - Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):    
     1. In project's root directory, enter `yarn global add depcheck`  
     2. `depcheck`  
     3. Repeat in each package (packages/server, packages/shared, packages/ui)  
 Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
 - Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
-- Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/NLN/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
+- Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
 
