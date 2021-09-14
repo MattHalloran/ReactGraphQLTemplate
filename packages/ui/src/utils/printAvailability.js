@@ -27,7 +27,6 @@ const skusToTable = (skus, priceVisible) => {
 }
 
 export const printAvailability = (session, title) => {
-    let windowReference = window.open();
     const client = initializeApollo();
     client.query({
         query: skusQuery,
@@ -49,6 +48,7 @@ export const printAvailability = (session, title) => {
             head: header,
             body: table_data,
         })
+        let windowReference = window.open();
         let blob = doc.output('blob', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
         windowReference.location = URL.createObjectURL(blob);
     }).catch(error => {
