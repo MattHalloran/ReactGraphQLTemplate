@@ -75,6 +75,7 @@ const useStyles = makeStyles((theme) => ({
     },
     avatar: {
         background: 'transparent',
+        borderRadius: 0,
     },
     icon: {
         fill: theme.palette.mode === 'light' ? 'black': 'white',
@@ -197,7 +198,7 @@ function PlantDialog({
     );
 
     const displayedTraitData = [
-        ['zones', MapIcon, 'Zones'],
+        ['zone', MapIcon, 'Hardiness zones'],
         ['physiographicRegions', MapIcon, 'Physiographic Region'],
         ['attractsPollinatorsAndWildlife', BeeIcon, 'Attracted Pollinators and Wildlife'],
         ['droughtTolerance', NoWaterIcon, 'Drought Tolerance'],
