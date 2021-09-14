@@ -23,7 +23,7 @@ app.use(cookieParser(process.env.JWT_SECRET));
 app.use(auth.authenticate);
 
 // Cross-Origin access. Accepts requests from localhost and the website
-let origins = [/^http:\/\/localhost(?::[0-9]+)?$/, `http://${process.env.REACT_APP_SITE_NAME}`]
+let origins = [/^http:\/\/localhost(?::[0-9]+)?$/, `http://${process.env.REACT_APP_SITE_NAME}`, `http://www.${process.env.REACT_APP_SITE_NAME}`, `https://${process.env.REACT_APP_SITE_NAME}`, `https://www.${process.env.REACT_APP_SITE_NAME}`]
 if (process.env.REACT_APP_SITE_NAME) origins.push(process.env.REACT_APP_SITE_NAME);
 app.use(cors({
     credentials: true,
@@ -31,12 +31,12 @@ app.use(cors({
 }))
 
 // Set static folders
-app.use(express.static(`${process.env.PROJECT_DIR}/assets/public`));
-app.use('/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
-app.use('/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
+app.use('/api', express.static(`${process.env.PROJECT_DIR}/assets/public`));
+app.use('/api/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
+app.use('/api/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
-app.use(`/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
+app.use(`/api/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
@@ -48,7 +48,7 @@ const apollo_options = new ApolloServer({
  });
 apollo_options.applyMiddleware({ 
     app, 
-    path: `/${API_VERSION}`, 
+    path: `/api/${API_VERSION}`, 
     cors: false
 });
 

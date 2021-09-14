@@ -61,7 +61,7 @@ services:
             REACT_APP_SERVER_PORT: "${SERVER_PORT}"
             VIRTUAL_HOST: "${VIRTUAL_HOST}"
             VIRTUAL_PORT: "${SERVER_PORT}"
-            VIRTUAL_PATH: "/v1"
+            VIRTUAL_PATH: "/api"
             LETSENCRYPT_HOST: "${VIRTUAL_HOST}"
             LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
         ports:
