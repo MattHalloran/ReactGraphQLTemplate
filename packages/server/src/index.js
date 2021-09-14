@@ -31,12 +31,12 @@ app.use(cors({
 }))
 
 // Set static folders
-app.use('/api', express.static(`${process.env.PROJECT_DIR}/assets/public`));
-app.use('/api/private', auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
-app.use('/api/images', express.static(`${process.env.PROJECT_DIR}/assets/images`));
+app.use(process.env.REACT_APP_SERVER_ROUTE, express.static(`${process.env.PROJECT_DIR}/assets/public`));
+app.use(`${process.env.REACT_APP_SERVER_ROUTE}/private`, auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
+app.use(`${process.env.REACT_APP_SERVER_ROUTE}/images`, express.static(`${process.env.PROJECT_DIR}/assets/images`));
 
 // Set up image uploading
-app.use(`/api/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
+app.use(`${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
@@ -48,7 +48,7 @@ const apollo_options = new ApolloServer({
  });
 apollo_options.applyMiddleware({ 
     app, 
-    path: `/api/${API_VERSION}`, 
+    path: `${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, 
     cors: false
 });
 
