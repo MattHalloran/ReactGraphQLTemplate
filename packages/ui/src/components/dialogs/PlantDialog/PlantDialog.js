@@ -23,15 +23,18 @@ import {
     BeeIcon,
     CalendarIcon,
     ColorWheelIcon,
-    EvaporationIcon,
+    HeightIcon,
+    LampIcon,
     MapIcon,
+    MoistureIcon,
     NoImageWithTextIcon,
     NoWaterIcon,
     PHIcon,
-    RangeIcon,
     SaltIcon,
     SoilTypeIcon,
-    SunIcon
+    SpeedometerIcon,
+    SunIcon,
+    WidthIcon
 } from 'assets/img';
 import {
     QuantityBox,
@@ -73,6 +76,9 @@ const useStyles = makeStyles((theme) => ({
     avatar: {
         background: 'transparent',
     },
+    icon: {
+        fill: theme.palette.mode === 'light' ? 'black': 'white',
+    },
     optionsContainer: {
         padding: theme.spacing(2),
     },
@@ -105,7 +111,7 @@ function PlantDialog({
     const theme = useTheme();
     const [quantity, setQuantity] = useState(1);
     const [orderOptions, setOrderOptions] = useState([]);
-    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(true);
     // Stores the id of the selected sku
     const [currSku, setCurrSku] = useState(selectedSku);
 
@@ -142,7 +148,7 @@ function PlantDialog({
                 <ListItem>
                     <ListItemAvatar>
                         <Avatar className={classes.avatar}>
-                            <Icon alt={alt} />
+                            <Icon alt={alt} className={classes.icon} />
                         </Avatar>
                     </ListItemAvatar>
                     <ListItemText primary={title} secondary={traitValue} />
@@ -193,14 +199,17 @@ function PlantDialog({
     const displayedTraitData = [
         ['zones', MapIcon, 'Zones'],
         ['physiographicRegions', MapIcon, 'Physiographic Region'],
-        ['attractsPollinatorsAndWildlifes', BeeIcon, 'Attracted Pollinators and Wildlife'],
+        ['attractsPollinatorsAndWildlife', BeeIcon, 'Attracted Pollinators and Wildlife'],
         ['droughtTolerance', NoWaterIcon, 'Drought Tolerance'],
         ['saltTolerance', SaltIcon, 'Salt Tolerance'],
+        ['grownHeight', HeightIcon, 'Grown Height'],
+        ['grownSpread', WidthIcon, 'Grown Spread'],
+        ['growthRate', SpeedometerIcon, 'Growth Rate'],
         ['bloomColors', ColorWheelIcon, 'Bloom Colors'],
         ['bloomTimes', CalendarIcon, 'Bloom Times'],
-        ['lightRanges', RangeIcon, 'Light Range'],
+        ['lightRanges', LampIcon, 'Light Range'],
         ['optimalLight', SunIcon, 'Optimal Light'],
-        ['soilMoistures', EvaporationIcon, 'Soil Moisture'],
+        ['soilMoistures', MoistureIcon, 'Soil Moisture'],
         ['soilPhs', PHIcon, 'Soil PH'],
         ['soilTypes', SoilTypeIcon, 'Soil Type']
     ].map(d => traitIconList(...d)).filter(d => d !== null);
