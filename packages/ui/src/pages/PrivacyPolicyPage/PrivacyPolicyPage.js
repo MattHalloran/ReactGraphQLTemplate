@@ -10,7 +10,7 @@ import { makeStyles } from "@material-ui/styles";
 const useStyles = makeStyles((theme) => ({
     root: {
         '& a': {
-            color: theme.palette.secondary.light,
+            color: theme.palette.secondary.dark,
         },
     },
 }));

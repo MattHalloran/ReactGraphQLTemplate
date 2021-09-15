@@ -4,7 +4,6 @@ export * from './formatData';
 export * from './imageTools';
 export * from './makeID';
 export * from './objectTools';
-export * from './opacityHex';
 export * from './plantTools';
 export * from './printAvailability';
 export * from './pubsub';

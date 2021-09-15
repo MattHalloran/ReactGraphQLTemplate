@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row-reverse',
     },
     clickSize: {
-        color: theme.palette.secondary.light,
+        color: theme.palette.secondary.dark,
         cursor: 'pointer',
         minHeight: '48px', // Lighthouse recommends this for SEO, as it is more clickable
         display: 'flex',
@@ -57,7 +57,6 @@ function SignUpForm({
 
     const formik = useFormik({
         initialValues: {
-            accountApproved: "true",
             marketingEmails: "true",
             firstName: '',
             lastName: '',
@@ -74,25 +73,16 @@ function SignUpForm({
                 mutation: signUp,
                 data: { variables: { 
                     ...values, 
-                    accountApproved: Boolean(values.accountApproved),
                     marketingEmails: Boolean(values.marketingEmails),
                     theme: theme.palette.mode ?? 'light',
                 } },
                 onSuccess: (response) => {
                     onSessionUpdate(response.data.signUp);
-                    if (response.data.signUp?.accountApproved) {
-                        PubSub.publish(PUBS.AlertDialog, {
-                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. You may now begin shopping. Please verify your email within 48 hours.`,
-                            firstButtonText: 'OK',
-                            firstButtonClicked: () => history.push(LINKS.Shopping),
-                        });
-                    } else {
-                        PubSub.publish(PUBS.AlertDialog, {
-                            message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours. Since you have never ordered from us before, we must approve your account before you can order. If this was a mistake, you can edit this in the /profile page.`,
-                            firstButtonText: 'OK',
-                            firstButtonClicked: () => history.push(LINKS.Profile),
-                        });
-                    }
+                    PubSub.publish(PUBS.AlertDialog, {
+                        message: `Welcome to ${business?.BUSINESS_NAME?.Short}. Please verify your email within 48 hours.`,
+                        firstButtonText: 'OK',
+                        firstButtonClicked: () => history.push(LINKS.Profile),
+                    });
                 },
                 onError: (response) => {
                     if (Array.isArray(response.graphQLErrors) && response.graphQLErrors.some(e => e.extensions.code === CODE.EmailInUse.code)) {
@@ -224,21 +214,6 @@ function SignUpForm({
                         error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                         helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
                     />
-                </Grid>
-                <Grid item xs={12}>
-                    <FormControl component="fieldset">
-                        <RadioGroup
-                            id="accountApproved"
-                            name="accountApproved"
-                            aria-label="existing-customer-check"
-                            value={formik.values.accountApproved}
-                            onChange={formik.handleChange}
-                        >
-                            <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                            <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-                        </RadioGroup>
-                        <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
-                    </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                     <FormControlLabel
