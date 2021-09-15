@@ -17,6 +17,8 @@ export const IMAGE_EXTENSION = {
     Png: '.png',
     Jpg: '.jpg',
     Jpeg: '.jpeg',
+    Heic: '.heic',
+    Heif: '.heif',
     Ico: '.ico'
 }
 // Possible image sizes stored, and their max size

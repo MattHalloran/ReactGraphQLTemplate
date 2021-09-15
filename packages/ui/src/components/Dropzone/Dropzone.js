@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Dropzone({
-    acceptedFileTypes = ['image/*'],
+    acceptedFileTypes = ['image/*', '.heic'],
     dropzoneText = 'Drag \'n\' drop files here or click',
     onUpload,
     showThumbs = true,

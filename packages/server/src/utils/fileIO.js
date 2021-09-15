@@ -1,7 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import { IMAGE_SIZE, IMAGE_EXTENSION } from '@local/shared';
-import sizeOf from 'image-size';
+import probe from 'probe-image-size';
+import convert from 'heic-convert';
 import sharp from 'sharp';
 import imghash from 'imghash';
 import { TABLES } from '../db';
@@ -134,22 +135,36 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         // Make sure that the file is actually an image
         if (!mimetype.startsWith('image/')) throw Error('Invalid mimetype')
         // Make sure image type is supported
-        let { ext: extCheck } = path.parse(filename);
-        if (Object.values(IMAGE_EXTENSION).indexOf(extCheck) <= 0) throw Error('Image type not supported')
+        let { ext: extCheck } = path.parse(filename)
+        if (Object.values(IMAGE_EXTENSION).indexOf(extCheck.toLowerCase()) <= 0) throw Error('Image type not supported')
         // Create a read stream
         const stream = createReadStream();
         const { name, ext, folder } = await findFileName(filename, 'images')
         if (name === null) throw Error('Could not create a valid file name');
         // Determine image dimensions
-        const image_buffer = await streamToBuffer(stream);
-        const dimensions = sizeOf(image_buffer);
+        let image_buffer = await streamToBuffer(stream);
+        const dimensions = probe.sync(image_buffer);
+        console.log('GOT DIMENSIONS', dimensions);
+        // If image is .heic or .heif, convert to jpg. Thanks, Apple
+        if (['.heic', '.heif'].includes(extCheck.toLowerCase())) {
+            console.log('converting image buffer')
+            image_buffer = await convert({
+                buffer: image_buffer, // the HEIC file buffer
+                format: 'JPEG',      // output format
+                quality: 1           // the jpeg compression quality, between 0 and 1
+            });
+            extCheck = 'jpg'
+        }
         // Determine image hash
         const hash = await imghash.hash(image_buffer);
+        console.log('IMAGE HASH', hash)
         // Check if hash already exists (image previously uploaded)
         const previously_uploaded = await prisma[TABLES.Image].findUnique({ where: { hash } });
+        console.log('previously uploaded', previously_uploaded);
         if (previously_uploaded && errorOnDuplicate) throw Error('File has already been uploaded');
         // Download the original image, and store metadata in database
-        const full_size_filename = `${folder}/${name}-XXL${ext}`;
+        const full_size_filename = `${folder}/${name}-XXL${extCheck}`;
+        console.log('name', full_size_filename);
         await sharp(image_buffer).toFile(`${ASSET_DIR}/${full_size_filename}`);
         const imageData = { hash, alt, description };
         await prisma[TABLES.Image].upsert({
@@ -158,20 +173,24 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
             update: imageData
         })
         await prisma[TABLES.ImageFile].deleteMany({ where: { hash } });
-        await prisma[TABLES.ImageFile].create({ data: { 
-            hash, 
-            src: full_size_filename, 
-            width: dimensions.width, 
-            height: dimensions.height 
-        }})
+        await prisma[TABLES.ImageFile].create({
+            data: {
+                hash,
+                src: full_size_filename,
+                width: dimensions.width,
+                height: dimensions.height
+            }
+        })
         if (Array.isArray(labels)) {
             await prisma[TABLES.ImageLabels].deleteMany({ where: { hash } });
             for (let i = 0; i < labels.length; i++) {
-                await prisma[TABLES.ImageLabels].create({ data: {
-                    hash,
-                    label: labels[i],
-                    index: i
-                }})
+                await prisma[TABLES.ImageLabels].create({
+                    data: {
+                        hash,
+                        label: labels[i],
+                        index: i
+                    }
+                })
             }
         }
         // Find resize options
@@ -181,16 +200,18 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
             if (key === 'XXL') continue;
             // Use largest dimension for resize
             const sizing_dimension = dimensions.width > dimensions.height ? 'width' : 'height';
-            const resize_filename = `${folder}/${name}-${key}${ext}`;
+            const resize_filename = `${folder}/${name}-${key}${extCheck}`;
             const { width, height } = await sharp(image_buffer)
                 .resize({ [sizing_dimension]: value })
                 .toFile(`${ASSET_DIR}/${resize_filename}`);
-            await prisma[TABLES.ImageFile].create({ data: {
-                hash,
-                src: resize_filename,
-                width: width,
-                height: height
-            }});
+            await prisma[TABLES.ImageFile].create({
+                data: {
+                    hash,
+                    src: resize_filename,
+                    width: width,
+                    height: height
+                }
+            });
         }
         return {
             success: true,
@@ -225,13 +246,13 @@ export async function deleteFile(file) {
 // Deletes an image and all resizes, using its hash
 export async function deleteImage(hash) {
     // Find all files associated with image
-    const imageData = await prisma[TABLES.Image].findUnique({ 
+    const imageData = await prisma[TABLES.Image].findUnique({
         where: { hash },
         select: { files: { select: { src: true } } }
     });
     if (!imageData) return false;
     // Delete database information for image
-    await prisma[TABLES.Image].delete({ where: { hash }});
+    await prisma[TABLES.Image].delete({ where: { hash } });
     // Delete image files
     let success = true;
     if (Array.isArray(imageData.files)) {
