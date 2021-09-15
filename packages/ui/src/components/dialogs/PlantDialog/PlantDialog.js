@@ -29,7 +29,6 @@ import {
     MoistureIcon,
     NoImageWithTextIcon,
     NoWaterIcon,
-    PHIcon,
     SaltIcon,
     SoilTypeIcon,
     SpeedometerIcon,
@@ -211,7 +210,6 @@ function PlantDialog({
         ['lightRanges', LampIcon, 'Light Range'],
         ['optimalLight', SunIcon, 'Optimal Light'],
         ['soilMoistures', MoistureIcon, 'Soil Moisture'],
-        ['soilPhs', PHIcon, 'Soil PH'],
         ['soilTypes', SoilTypeIcon, 'Soil Type']
     ].map(d => traitIconList(...d)).filter(d => d !== null);
 

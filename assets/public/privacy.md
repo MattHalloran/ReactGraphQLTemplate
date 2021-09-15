@@ -173,7 +173,7 @@ The General Data Protection Regulation (GDPR) went into effect on May 25, 2018, 
         * the deleted Customer Personal Data cannot be recovered by Customer (for example, from the “trash”), 
         
     then <BUSINESS_NAME.Long> will delete such Customer Personal Data from its systems as soon as reasonably practicable and within a maximum period of 180 days, unless European or National Laws require storage.
-    * <BUSINESS_NAME.Long> may charge a fee (based on <BUSINESS_NAME.Long>'s reasonable costs) for any data deletion under this section. Ne Life Nursery will provide Customer with further details of any applicable fee, and the basis of its calculation, in advance of any such data deletion
+    * <BUSINESS_NAME.Long> may charge a fee (based on <BUSINESS_NAME.Long>'s reasonable costs) for any data deletion under this section. <BUSINESS_NAME.Long> will provide Customer with further details of any applicable fee, and the basis of its calculation, in advance of any such data deletion
 * **Deletion on Term Expiry**. On expiry of the Term, Customer instructs <BUSINESS_NAME.Long> to delete all Customer Personal Data (including existing copies) from <BUSINESS_NAME.Long>'s systems in accordance with applicable law.  will comply with this instruction as soon as reasonably practicable and within a maximum period of 180 days, unless European or National Laws require storage.
 
 ## California Requirements
