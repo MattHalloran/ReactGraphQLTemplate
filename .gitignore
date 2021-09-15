@@ -154,7 +154,6 @@ build/
 
 #Assets
 *assets/images/
-*server/plant_info/yards/yards*.json
 
 .eslintcache
 package-lock.json
