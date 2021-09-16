@@ -1,85 +1,85 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
-import { CODE, PLANT_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
+import { CODE, PRODUCT_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
 
-const _model = TABLES.Plant;
+const _model = TABLES.Product;
 
 export const typeDef = gql`
 
-    input PlantTraitInput {
+    input ProductTraitInput {
         name: String!
         value: String!
     }
 
-    input PlantImageInput {
+    input ProductImageInput {
         hash: String!
         isDisplay: Boolean
     }
 
-    input PlantInput {
+    input ProductInput {
         id: ID
-        latinName: String!
-        traits: [PlantTraitInput]!
-        images: [PlantImageInput!]
+        name: String!
+        traits: [ProductTraitInput]!
+        images: [ProductImageInput!]
         skus: [SkuInput!]
     }
 
-    type PlantImage {
+    type ProductImage {
         index: Int!
         isDisplay: Boolean!
         image: Image!
     }
 
-    type Plant {
+    type Product {
         id: ID!
-        latinName: String!
+        name: String!
         featured: Boolean!
-        traits: [PlantTrait!]
-        images: [PlantImage!]
+        traits: [ProductTrait!]
+        images: [ProductImage!]
         skus: [Sku!]
     }
 
     extend type Query {
-        plants(ids: [ID!], sortBy: SkuSortBy, searchString: String, active: Boolean, onlyInStock: Boolean): [Plant!]!
+        products(ids: [ID!], sortBy: SkuSortBy, searchString: String, active: Boolean, onlyInStock: Boolean): [Product!]!
     }
 
     extend type Mutation {
-        addPlant(input: PlantInput!): Plant!
-        updatePlant(input: PlantInput!): Plant!
-        deletePlants(ids: [ID!]!): Count!
+        addProduct(input: ProductInput!): Product!
+        updateProduct(input: ProductInput!): Product!
+        deleteProducts(ids: [ID!]!): Count!
     }
 `
 
 const SORT_TO_QUERY = {
-    [PLANT_SORT_OPTIONS.AZ]: { latinName: 'asc', },
-    [PLANT_SORT_OPTIONS.ZA]: { latinName: 'desc' },
-    [PLANT_SORT_OPTIONS.Newest]: { created_at: 'desc' },
-    [PLANT_SORT_OPTIONS.Oldest]: { created_at: 'asc' },
+    [PRODUCT_SORT_OPTIONS.AZ]: { name: 'asc', },
+    [PRODUCT_SORT_OPTIONS.ZA]: { name: 'desc' },
+    [PRODUCT_SORT_OPTIONS.Newest]: { created_at: 'desc' },
+    [PRODUCT_SORT_OPTIONS.Oldest]: { created_at: 'asc' },
 }
 
 export const resolvers = {
     Query: {
-        plants: async (_, args, context, info) => {
+        products: async (_, args, context, info) => {
             let idQuery;
             if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
             // Determine sort order
             let sortQuery;
             if (args.sortBy !== undefined) sortQuery = SORT_TO_QUERY[args.sortBy];
-            // If search string provided, match by latinName or trait name
+            // If search string provided, match by name or trait name
             let searchQuery;
             if (args.searchString.length > 0) searchQuery = { OR: [
-                { latinName: { contains: args.searchString.trim(), mode: 'insensitive' } },
+                { name: { contains: args.searchString.trim(), mode: 'insensitive' } },
                 { traits: { some: { value: { contains: args.searchString.trim(), mode: 'insensitive' } } } }
             ] };
-            // Toggle for showing active/inactive plants (whether the plant has any SKUs available to order)
-            // Only admins can view inactive plants
+            // Toggle for showing active/inactive products (whether the product has any SKUs available to order)
+            // Only admins can view inactive products
             let activeQuery;
             let activeQueryBase = { skus: {  some: { status: SKU_STATUS.Active } } };
             if (args.active === true) activeQuery = activeQueryBase;
             else if (args.active === false && context.req.isAdmin) activeQuery = { NOT: activeQueryBase };
-            // Toggle for showing/hiding plants that have no SKUs with any availability
+            // Toggle for showing/hiding products that have no SKUs with any availability
             let onlyInStock;
             if (args.onlyInStock === true) onlyInStock = { skus: { some: { availability: { gt: 0 } } } };
             return await context.prisma[_model].findMany({ 
@@ -95,24 +95,24 @@ export const resolvers = {
         },
     },
     Mutation: {
-        // Inserting plants is different than other inserts, because the fields are dynamic.
+        // Inserting products is different than other inserts, because the fields are dynamic.
         // Because of this, the add must be done manually
         // NOTE: images must be uploaded first
-        addPlant: async (_, args, context, info) => {
+        addProduct: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            // Create plant object
-            const plant = await context.prisma[_model].create((new PrismaSelect(info).value), { data: { id: args.input.id, latinName: args.input.latinName } });
+            // Create product object
+            const product = await context.prisma[_model].create((new PrismaSelect(info).value), { data: { id: args.input.id, name: args.input.name } });
             // Create trait objects
             for (const { name, value } of (args.input.traits || [])) {
-                await prisma[TABLES.PlantTrait].create({ data: { plantId: plant.id, name, value } });
+                await prisma[TABLES.ProductTrait].create({ data: { productId: product.id, name, value } });
             }
             // Create images
             if (Array.isArray(args.input.images)) {
                 for (let i = 0; i < args.input.length; i++) {
-                    await prisma[TABLES.PlantImages].create({ data: {
-                        plantId: plant.id,
+                    await prisma[TABLES.ProductImages].create({ data: {
+                        productId: product.id,
                         hash: args.input.images[i].hash,
                         isDisplay: args.input.images[i].isDisplay ?? false,
                         index: i
@@ -120,71 +120,71 @@ export const resolvers = {
                 }
             }
             return await prisma[_model].findUnique({ 
-                where: { id: plant.id },
+                where: { id: product.id },
                 ...(new PrismaSelect(info).value)
             });
         },
         // NOTE: Images must be uploaded separately
-        updatePlant: async (_, args, context, info) => {
+        updateProduct: async (_, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
-            await context.prisma[TABLES.PlantImages].deleteMany({ where: { plantId: args.input.id } });
+            await context.prisma[TABLES.ProductImages].deleteMany({ where: { productId: args.input.id } });
             if (Array.isArray(args.input.images)) {
                 let rowIds = [];
                 // Upsert passed in images
                 for (let i = 0; i < args.input.images.length; i++) {
                     const curr = args.input.images[i];
-                    const rowData = { plantId: args.input.id, hash: curr.hash, index: i, isDisplay: curr.isDisplay ?? false };
-                    const rowId = { plantId: args.input.id, hash: curr.hash };
+                    const rowData = { productId: args.input.id, hash: curr.hash, index: i, isDisplay: curr.isDisplay ?? false };
+                    const rowId = { productId: args.input.id, hash: curr.hash };
                     rowIds.push(rowId);
-                    await context.prisma[TABLES.PlantImages].upsert({
-                        where: { plant_images_plantid_hash_unique: rowId },
+                    await context.prisma[TABLES.ProductImages].upsert({
+                        where: { product_images_productid_hash_unique: rowId },
                         update: rowData,
                         create: rowData
                     })
                 }
                 // Delete images not passed in
-                await context.prisma[TABLES.PlantImages].deleteMany({ 
+                await context.prisma[TABLES.ProductImages].deleteMany({ 
                     where: {
                         AND: [
-                            { plantId: { in: rowIds.map(r => r.plantId ) } },
+                            { productId: { in: rowIds.map(r => r.productId ) } },
                             { NOT: { hash: { in: rowIds.map(r => r.hash) } } }
                         ]
                     }
                 })
             }
             // Update traits
-            await context.prisma[TABLES.PlantTrait].deleteMany({ where: { plantId: args.input.id } });
+            await context.prisma[TABLES.ProductTrait].deleteMany({ where: { productId: args.input.id } });
             for (const { name, value } of (args.input.traits || [])) {
-                const updateData = { plantId: args.input.id, name, value };
-                await context.prisma[TABLES.PlantTrait].upsert({
-                    where: { plant_trait_plantid_name_unique: { plantId: args.input.id, name }},
+                const updateData = { productId: args.input.id, name, value };
+                await context.prisma[TABLES.ProductTrait].upsert({
+                    where: { product_trait_productid_name_unique: { productId: args.input.id, name }},
                     update: updateData,
                     create: updateData
                 })
             }
             // Update SKUs
             if (args.input.skus) {
-                const currSkus = await context.prisma[TABLES.Sku].findMany({ where: { plantId: args.input.id }});
+                const currSkus = await context.prisma[TABLES.Sku].findMany({ where: { productId: args.input.id }});
                 const deletedSkus = currSkus.map(s => s.sku).filter(s => !args.input.skus.some(sku => sku.sku === s));
                 await context.prisma[TABLES.Sku].deleteMany({ where: { sku: { in: deletedSkus } } });
                 for (const sku of args.input.skus) {
                     await context.prisma[TABLES.Sku].upsert({
                         where: { sku: sku.sku},
                         update: sku,
-                        create: { plantId: args.input.id, ...sku }
+                        create: { productId: args.input.id, ...sku }
                     })
                 }
             }
-            // Update latin name
+            // Update name
             return await context.prisma[_model].update({
                 where: { id: args.input.id },
-                data: { latinName: args.input.latinName },
+                data: { name: args.input.name },
                 ...(new PrismaSelect(info).value)
             })
         },
-        deletePlants: async (_, args, context) => {
+        deleteProducts: async (_, args, context) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images

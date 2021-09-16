@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import {
-    Button,
     Card,
     CardActionArea,
     CardActions,
@@ -14,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { showPrice, getImageSrc, getPlantTrait } from 'utils';
+import { showPrice, getImageSrc, getProductTrait } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
 import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
 
@@ -53,9 +52,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function PlantCard({
+function ProductCard({
     onClick,
-    plant,
+    product,
 }) {
     const classes = useStyles();
 
@@ -67,10 +66,10 @@ function PlantCard({
 
     const openWithSku = (e, sku) => {
         e.stopPropagation();
-        onClick({ plant, selectedSku: sku })
+        onClick({ product, selectedSku: sku })
     }
 
-    let sizes = plant.skus?.map(s => (
+    let sizes = product.skus?.map(s => (
         <Chip
             key={s.sku}
             className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
@@ -81,21 +80,21 @@ function PlantCard({
     ));
 
     let display;
-    let display_data = plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
-    if (!display_data && plant.images.length > 0) display_data = plant.images[0].image;
+    let display_data = product.images.find(image => image.usedFor === IMAGE_USE.ProductDisplay)?.image;
+    if (!display_data && product.images.length > 0) display_data = product.images[0].image;
     if (display_data) {
-        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={plant.latinName} />
+        display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={product.name} />
     } else {
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
     return (
-        <Card className={classes.root} onClick={() => onClick({ plant, selectedSku: plant.skus[0] })}>
+        <Card className={classes.root} onClick={() => onClick({ product, selectedSku: product.skus[0] })}>
             <CardActionArea>
                 {display}
                 <CardContent className={classes.content}>
                     <Typography gutterBottom variant="h6" component="h3">
-                        {getPlantTrait('commonName', plant) ?? plant.latinName}
+                        {product.name}
                     </Typography>
                     <div className="size-container">
                         {sizes}
@@ -113,9 +112,9 @@ function PlantCard({
     );
 }
 
-PlantCard.propTypes = {
+ProductCard.propTypes = {
     onClick: PropTypes.func.isRequired,
-    plant: PropTypes.object.isRequired,
+    product: PropTypes.object.isRequired,
 }
 
-export { PlantCard };
+export { ProductCard };

@@ -33,7 +33,6 @@ export const typeDef = gql`
         business: BusinessInput
         theme: String
         status: AccountStatus
-        accountApproved: Boolean
     }
 
     type Customer {
@@ -46,7 +45,6 @@ export const typeDef = gql`
         phones: [Phone!]!
         business: Business
         theme: String!
-        accountApproved: Boolean!
         emailVerified: Boolean!
         status: AccountStatus!
         cart: Order
@@ -75,7 +73,6 @@ export const typeDef = gql`
             business: String!
             email: String!
             phone: String!
-            accountApproved: Boolean!
             theme: String!
             marketingEmails: Boolean!
             password: String!
@@ -241,7 +238,6 @@ export const resolvers = {
                     pronouns: args.pronouns,
                     business: {name: args.business},
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
-                    accountApproved: args.accountApproved,
                     theme: args.theme,
                     status: ACCOUNT_STATUS.Unlocked,
                     emails: [{ emailAddress: args.email }],
@@ -275,7 +271,6 @@ export const resolvers = {
                     lastName: args.input.lastName,
                     pronouns: args.input.pronouns,
                     business: args.input.business,
-                    accountApproved: true,
                     theme: 'light',
                     status: ACCOUNT_STATUS.Unlocked,
                     emails: args.input.emails,

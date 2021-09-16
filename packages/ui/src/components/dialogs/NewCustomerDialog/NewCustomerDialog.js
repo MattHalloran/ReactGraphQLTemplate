@@ -234,7 +234,7 @@ function NewCustomerDialog({
 }
 
 NewCustomerDialog.propTypes = {
-    plant: PropTypes.object,
+    product: PropTypes.object,
     open: PropTypes.bool,
     onClose: PropTypes.func.isRequired,
 }

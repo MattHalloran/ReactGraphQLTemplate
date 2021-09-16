@@ -73,7 +73,6 @@ model customer {
   sessionToken                   String?          @db.VarChar(1024)
   resetPasswordCode              String?          @unique @db.VarChar(256)
   lastResetPasswordReqestAttempt DateTime?        @db.Timestamptz(6)
-  accountApproved                Boolean          @default(false)
   emailVerified                  Boolean          @default(false)
   status                         String           @default("Unlocked")
   businessId                     String?          @db.Uuid
@@ -127,15 +126,15 @@ model feedback {
 }
 
 model image {
-  hash         String         @unique @db.VarChar(128)
-  alt          String?        @db.VarChar(256)
-  description  String?        @db.VarChar(1024)
-  usedFor      String?
-  created_at   DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
-  files        image_file[]
-  labels       image_labels[]
-  plant_images plant_images[]
+  hash            String         @unique @db.VarChar(128)
+  alt             String?        @db.VarChar(256)
+  description     String?        @db.VarChar(1024)
+  usedFor         String?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime       @default(now()) @db.Timestamptz(6)
+  files           image_file[]
+  labels          image_labels[]
+  product_images  product_images[]
 }
 
 model image_file {
@@ -193,37 +192,37 @@ model phone {
   customer                customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
-model plant {
+model product {
   id         String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  latinName  String         @unique @db.VarChar(256)
+  name       String         @unique @db.VarChar(256)
   featured   Boolean        @default(false)
   created_at DateTime       @default(now()) @db.Timestamptz(6)
   updated_at DateTime       @default(now()) @db.Timestamptz(6)
-  images     plant_images[]
-  traits     plant_trait[]
+  images     product_images[]
+  traits     product_trait[]
   skus       sku[]
 }
 
-model plant_images {
-  id        Int     @id @default(autoincrement())
-  plantId   String  @db.Uuid
-  hash      String  @db.VarChar(128)
-  index     Int
-  isDisplay Boolean @default(false)
-  image     image   @relation(fields: [hash], references: [hash], onDelete: Cascade)
-  plant     plant   @relation(fields: [plantId], references: [id], onDelete: Cascade)
+model product_images {
+  id           Int        @id @default(autoincrement())
+  productId    String     @db.Uuid
+  hash         String     @db.VarChar(128)
+  index        Int
+  isDisplay    Boolean    @default(false)
+  image        image      @relation(fields: [hash], references: [hash], onDelete: Cascade)
+  product      product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([plantId, hash], name: "plant_images_plantid_hash_unique")
+  @@unique([productId, hash], name: "product_images_productid_hash_unique")
 }
 
-model plant_trait {
-  id      Int    @id @default(autoincrement())
-  plantId String @db.Uuid
-  name    String @db.VarChar(128)
-  value   String @db.VarChar(512)
-  plant   plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+model product_trait {
+  id        Int       @id @default(autoincrement())
+  productId String    @db.Uuid
+  name      String    @db.VarChar(128)
+  value     String    @db.VarChar(512)
+  product   product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([plantId, name], name: "plant_trait_plantid_name_unique")
+  @@unique([productId, name], name: "product_trait_productid_name_unique")
 }
 
 model queue_task {
@@ -246,20 +245,20 @@ model role {
 }
 
 model sku {
-  id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  sku            String          @unique @db.VarChar(32)
-  isDiscountable Boolean         @default(false)
-  size           Decimal?        @db.Decimal(8, 2)
-  note           String?         @db.VarChar(2048)
-  availability   Int             @default(0)
-  price          Decimal?        @db.Decimal(8, 2)
-  status         String          @default("Active")
-  plantId        String          @db.Uuid
-  created_at     DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime        @default(now()) @db.Timestamptz(6)
-  plant          plant           @relation(fields: [plantId], references: [id], onDelete: Cascade)
-  order_item     order_item[]
-  discounts      sku_discounts[]
+  id                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sku               String          @unique @db.VarChar(32)
+  isDiscountable    Boolean         @default(false)
+  size              Decimal?        @db.Decimal(8, 2)
+  note              String?         @db.VarChar(2048)
+  availability      Int             @default(0)
+  price             Decimal?        @db.Decimal(8, 2)
+  status            String          @default("Active")
+  productId         String          @db.Uuid
+  created_at        DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime        @default(now()) @db.Timestamptz(6)
+  product           product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order_item        order_item[]
+  discounts         sku_discounts[]
 }
 
 model sku_discounts {

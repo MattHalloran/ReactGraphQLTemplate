@@ -1,22 +1,22 @@
 import { gql } from 'graphql-tag';
-import { plantFields, skuFields } from 'graphql/fragment';
+import { productFields, skuFields } from 'graphql/fragment';
 
-export const plantsQuery = gql`
-    ${plantFields}
+export const productsQuery = gql`
+    ${productFields}
     ${skuFields}
-    query ActivePlantsQuery(
+    query ActiveProductssQuery(
         $ids: [ID!]
         $sortBy: SkuSortBy
         $searchString: String
         $active: Boolean
     ) {
-        plants(
+        products(
             ids: $ids
             sortBy: $sortBy
             searchString: $searchString
             active: $active
         ) {
-            ...plantFields
+            ...productFields
             skus {
                 ...skuFields
                 discounts {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function FeaturedPlants() {
+function FeaturedProducts() {
 
     return (
         <div>
@@ -9,8 +9,8 @@ function FeaturedPlants() {
     );
 }
 
-FeaturedPlants.propTypes = {
+FeaturedProducts.propTypes = {
     
 }
 
-export { FeaturedPlants };
+export { FeaturedProducts };

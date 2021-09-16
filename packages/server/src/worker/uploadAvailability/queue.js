@@ -1,7 +1,6 @@
 import Bull from 'bull';
 import { uploadAvailabilityProcess } from './process';
 import XLSX from 'xlsx';
-import fs from 'fs'
 
 const uploadAvailabilityQueue = new Bull('uploadAvailability', { redis: { 
     port: process.env.REDIS_CONN.split(':')[1],

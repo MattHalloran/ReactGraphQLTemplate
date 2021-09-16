@@ -4,7 +4,7 @@ export * from './formatData';
 export * from './imageTools';
 export * from './makeID';
 export * from './objectTools';
-export * from './plantTools';
+export * from './productTools';
 export * from './printAvailability';
 export * from './pubsub';
 export * from './theme';

@@ -1,10 +1,10 @@
 import { gql } from 'graphql-tag';
 
-export const deletePlantsMutation = gql`
-    mutation deletePlants(
+export const deleteProductsMutation = gql`
+    mutation deleteProducts(
         $ids: [ID!]!
     ) {
-    deletePlants(
+    deleteProducts(
         ids: $ids
     ) {
         count

@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, getPlantTrait, updateArray } from 'utils';
+import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, getProductTrait, updateArray } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
@@ -85,7 +85,6 @@ function CartTable({
     }, [cart, updateCartField])
 
     const cart_item_to_row = useCallback((data, key) => {
-        const commonName = getPlantTrait('commonName', data.sku.plant);
         const quantity = data.quantity;
         let price = +data.sku.price;
         let total;
@@ -98,10 +97,10 @@ function CartTable({
         }
 
         let display;
-        let display_data = data.sku.plant.images.find(image => image.usedFor === IMAGE_USE.PlantDisplay)?.image;
-        if (!display_data && data.sku.plant.images.length > 0) display_data = data.sku.plant.images[0].image;
+        let display_data = data.sku.product.images.find(image => image.usedFor === IMAGE_USE.ProductDisplay)?.image;
+        if (!display_data && data.sku.product.images.length > 0) display_data = data.sku.product.images[0].image;
         if (display_data) {
-            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={commonName} />
+            display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.product?.name ?? ''} />
         } else {
             display = <NoImageIcon className={classes.displayImage} />
         }
@@ -116,7 +115,7 @@ function CartTable({
                 <TableCell className={classes.tableCol} padding="none" component="th" scope="row" align="center">
                     {display}
                 </TableCell>
-                <TableCell className={classes.tableCol} align="left">{getPlantTrait('commonName', data.sku.plant)}</TableCell>
+                <TableCell className={classes.tableCol} align="left">{data.sku.product?.name ?? ''}</TableCell>
                 <TableCell className={classes.tableCol} align="right">{price}</TableCell>
                 <TableCell className={classes.tableCol} align="right">
                     {editable ? (<QuantityBox
@@ -172,7 +171,7 @@ function CartTable({
                         selected={cart?.isDelivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
                         handleChange={(e) => handleDeliveryChange(e.target.value)}
                         inputAriaLabel='delivery-selector-label'
-                        label="Shipping Method" />
+                        label="Productping Method" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>

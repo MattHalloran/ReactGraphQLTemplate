@@ -1,16 +1,16 @@
 import { gql } from 'graphql-tag';
-import { plantFields, skuFields } from 'graphql/fragment';
+import { productFields, skuFields } from 'graphql/fragment';
 
-export const updatePlantMutation = gql`
-    ${plantFields}
+export const updateProductMutation = gql`
+    ${productFields}
     ${skuFields}
-    mutation updatePlant(
-        $input: PlantInput!
+    mutation updateProduct(
+        $input: ProductInput!
     ) {
-    updatePlant(
+    updateProduct(
         input: $input
     ) {
-        ...plantFields
+        ...productFields
         skus {
             ...skuFields
             discounts {

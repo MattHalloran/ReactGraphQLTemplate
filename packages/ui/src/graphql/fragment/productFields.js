@@ -1,11 +1,11 @@
 import { gql } from 'graphql-tag';
 import { imageFields } from './imageFields';
 
-export const plantFields = gql`
+export const productFields = gql`
     ${imageFields}
-    fragment plantFields on Plant {
+    fragment productFields on Product {
         id
-        latinName
+        name
         traits {
             name
             value

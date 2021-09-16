@@ -43,7 +43,6 @@ function ProfileForm() {
             email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
             phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
             theme: profile?.profile?.theme ?? 'light',
-            accountApproved: (profile?.profile?.accountApproved || false) + '',
             marketingEmails: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].receivesDeliveryUpdates : false,
             currentPassword: '',
             newPassword: '',
@@ -74,7 +73,6 @@ function ProfileForm() {
                     }
                 ],
                 theme: values.theme,
-                accountApproved: Boolean(values.accountApproved)
             });
             // Only add email and phone ids if they previously existed
             if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
@@ -200,21 +198,6 @@ function ProfileForm() {
                                 <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />
                             </RadioGroup>
                             <FormHelperText>{formik.touched.theme && formik.errors.theme}</FormHelperText>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormControl component="fieldset">
-                            <RadioGroup
-                                id="accountApproved"
-                                name="accountApproved"
-                                aria-label="existing-customer-check"
-                                value={formik.values.accountApproved}
-                                onChange={formik.handleChange}
-                            >
-                                <FormControlLabel value="true" control={<Radio />} label="I have ordered from New Life Nursery before" />
-                                <FormControlLabel value="false" control={<Radio />} label="I have never ordered from New Life Nursery" />
-                            </RadioGroup>
-                            <FormHelperText>{formik.touched.accountApproved && formik.errors.accountApproved}</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>

@@ -1,9 +1,9 @@
 import { gql } from 'graphql-tag';
-import { discountFields, plantFields, skuFields } from 'graphql/fragment';
+import { discountFields, productFields, skuFields } from 'graphql/fragment';
 
 export const skusQuery = gql`
     ${skuFields}
-    ${plantFields}
+    ${productFields}
     ${discountFields}
     query SkusQuery(
         $ids: [ID!]
@@ -23,8 +23,8 @@ export const skusQuery = gql`
                     ...discountFields
                 }
             }
-            plant {
-                ...plantFields
+            product {
+                ...productFields
             }
         }
     }

@@ -36,7 +36,6 @@ export async function up (knex) {
         table.string('sessionToken', 1024);
         table.string('resetPasswordCode', 256).unique();
         table.timestamp('lastResetPasswordReqestAttempt');
-        table.boolean('accountApproved').defaultTo(false).notNullable();
         table.boolean('emailVerified').defaultTo(false).notNullable();
         table.enu('status', Object.values(ACCOUNT_STATUS)).defaultTo(ACCOUNT_STATUS.Unlocked).notNullable();
         table.uuid('businessId').references('id').inTable(TABLES.Business).onUpdate('CASCADE');
@@ -121,20 +120,20 @@ export async function up (knex) {
         table.integer('width').notNullable();
         table.integer('height').notNullable();
     })
-    await knex.schema.createTable(TABLES.Plant, (table) => {
-        table.comment('Plant identification data. Other data about plant is stored in traits table');
+    await knex.schema.createTable(TABLES.Product, (table) => {
+        table.comment('Product identification data. Other data about the product is stored in traits table');
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.string('latinName', 256).notNullable().unique();
+        table.string('name', 256).notNullable().unique();
         table.boolean('featured').notNullable().defaultTo(false);
         table.timestamps(true, true);
     });
-    await knex.schema.createTable(TABLES.PlantTrait, (table) => {
-        table.comment('An attribute of a plant');
+    await knex.schema.createTable(TABLES.ProductTrait, (table) => {
+        table.comment('An attribute of a product');
         table.increments();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('productId').references('id').inTable(TABLES.Product).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('name', 128).notNullable();
         table.string('value', 512).notNullable();
-        table.unique(['plantId', 'name']);
+        table.unique(['productId', 'name']);
     });
     await knex.schema.createTable(TABLES.Sku, (table) => {
         table.comment('Data on inventory items');
@@ -146,7 +145,7 @@ export async function up (knex) {
         table.integer('availability').defaultTo(0).notNullable();
         table.decimal('price');
         table.enu('status', Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('productId').references('id').inTable(TABLES.Product).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.timestamps(true, true);
     });
     await knex.schema.createTable(TABLES.Order, (table) => {
@@ -184,14 +183,14 @@ export async function up (knex) {
         table.uuid('discountId').references('id').inTable(TABLES.Discount).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.unique(['businessId', 'discountId']);
     });
-    await knex.schema.createTable(TABLES.PlantImages, (table) => {
-        table.comment('Joining table to associate plants with display images');
+    await knex.schema.createTable(TABLES.ProductImages, (table) => {
+        table.comment('Joining table to associate products with display images');
         table.increments();
-        table.uuid('plantId').references('id').inTable(TABLES.Plant).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
+        table.uuid('productId').references('id').inTable(TABLES.Product).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.string('hash', 128).references('hash').inTable(TABLES.Image).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.integer('index').notNullable();
         table.boolean('isDisplay').notNullable().defaultTo(false);
-        table.unique(['plantId', 'hash']);
+        table.unique(['productId', 'hash']);
     });
     await knex.schema.createTable(TABLES.SkuDiscounts, (table) => {
         table.comment('Joining table to apply discounts to SKUs');
@@ -213,14 +212,14 @@ export async function up (knex) {
 export async function down (knex) {
     await knex.schema.dropTableIfExists(TABLES.CustomerRoles);
     await knex.schema.dropTableIfExists(TABLES.SkuDiscounts);
-    await knex.schema.dropTableIfExists(TABLES.PlantImages);
+    await knex.schema.dropTableIfExists(TABLES.ProductImages);
     await knex.schema.dropTableIfExists(TABLES.BusinessDiscounts);
     await knex.schema.dropTableIfExists(TABLES.ImageLabels);
     await knex.schema.dropTableIfExists(TABLES.OrderItem);
     await knex.schema.dropTableIfExists(TABLES.Order);
     await knex.schema.dropTableIfExists(TABLES.Sku);
-    await knex.schema.dropTableIfExists(TABLES.PlantTrait);
-    await knex.schema.dropTableIfExists(TABLES.Plant);
+    await knex.schema.dropTableIfExists(TABLES.ProductTrait);
+    await knex.schema.dropTableIfExists(TABLES.Product);
     await knex.schema.dropTableIfExists(TABLES.ImageFile);
     await knex.schema.dropTableIfExists(TABLES.Image);
     await knex.schema.dropTableIfExists(TABLES.Phone);

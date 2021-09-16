@@ -3,7 +3,7 @@ import 'jspdf-autotable';
 import { showPrice, PUBS, PubSub } from 'utils';
 import { skusQuery } from 'graphql/query';
 import { initializeApollo } from 'graphql/utils/initialize';
-import { getPlantTrait } from "./plantTools";
+import { getProductTrait } from "./productTools";
 import { SKU_SORT_OPTIONS } from '@local/shared';
 
 const TITLE_FONT_SIZE = 30;
@@ -17,7 +17,7 @@ const centeredText = (text, doc, y) => {
 
 const skusToTable = (skus, priceVisible) => {
     return skus.map(sku => {
-        const displayName = sku.plant?.latinName ?? getPlantTrait('commonName', sku.plant) ?? sku.sku;
+        const displayName = sku.product?.name ?? sku.sku;
         const size = isNaN(sku.size) ? sku.size : `#${sku.size}`;
         const availability = sku.availability ?? 'N/A';
         const price = showPrice(sku.price);
@@ -42,7 +42,7 @@ export const printAvailability = (session, title) => {
         let date = new Date();
         centeredText(`Availability: ${date.toDateString()}`, doc, 20);
         doc.setFontSize(LIST_FONT_SIZE);
-        let header = showPrice ? [['Plant', 'Size', 'Availability', 'Price']] : [['Plant', 'Size', 'Availability']]
+        let header = showPrice ? [['Product', 'Size', 'Availability', 'Price']] : [['Product', 'Size', 'Availability']]
         doc.autoTable({
             margin: { top: 30 },
             head: header,

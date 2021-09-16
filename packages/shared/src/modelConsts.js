@@ -32,18 +32,10 @@ export const IMAGE_SIZE = {
     XL: 2048,
     XXL: 4096,
 }
-export const PLANT_IMAGE_USE = {
-    PlantFlower: 'Plant Flower',
-    PlantLeaf: 'Plant Leaf',
-    PlantFruit: 'Plant Fruit',
-    PlantBark: 'Plant Bark',
-    PlantHabit: 'Plant Habit',
-    PlantDisplay: 'Display'
-}
 export const IMAGE_USE = {
     Hero: 'Hero',
     Gallery: 'Gallery',
-    ...PLANT_IMAGE_USE
+    ProductDisplay: 'Display'
 }
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
 // CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
@@ -68,7 +60,7 @@ export const ORDER_STATUS = {
     InTransit: 'InTransit',
     Delivered: 'Delivered'
 }
-export const PLANT_SORT_OPTIONS = {
+export const PRODUCT_SORT_OPTIONS = {
     AZ: 'AZ',
     ZA: 'ZA',
     Featured: 'Featured',
@@ -106,7 +98,7 @@ export const TRAIT_NAME = {
     GrowthRate: 'Growth rate',
     JerseryNative: 'Jersey native',
     OptimalLight: 'Optimal light',
-    PlantType: 'Plant type',
+    ProductType: 'Ship type',
     SaltTolerance: 'Salt tolerance',
     AttractsPollinatorsAndWildlife: 'Attracts pollinators and wildlife',
     BloomTime: 'Bloom time',

@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types'
 import {
-    Button,
     Card,
     CardActions,
     CardContent,
@@ -17,7 +16,6 @@ import {
     Lock as LockIcon,
     LockOpen as LockOpenIcon,
     Phone as PhoneIcon,
-    ThumbUp as ThumbUpIcon,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mutation';
@@ -114,7 +112,6 @@ function CustomerCard({
     }, [customer, modifyCustomer])
 
     let edit_action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
-    let approve_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account approved.'), <ThumbUpIcon className={classes.icon} />, 'Approve customer account'];
     let unlock_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
     let lock_action = [() => modifyCustomer(ACCOUNT_STATUS.HardLock, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
     let undelete_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
@@ -141,7 +138,6 @@ function CustomerCard({
                 break;
         }
     }
-    if (customer?.accountApproved === false) actions.push(approve_action);
 
     // Phone and email [label, value] pairs
     const phoneList = mapIfExists(customer, 'phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));

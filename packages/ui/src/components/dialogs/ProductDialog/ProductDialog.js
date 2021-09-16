@@ -18,7 +18,7 @@ import {
     Toolbar,
     Typography
 } from '@material-ui/core';
-import { showPrice, getImageSrc, getPlantTrait } from 'utils';
+import { showPrice, getImageSrc, getProductTrait } from 'utils';
 import {
     BeeIcon,
     CalendarIcon,
@@ -94,18 +94,18 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function PlantDialog({
-    plant,
+function ProductDialog({
+    product,
     selectedSku,
     onSessionUpdate,
     onAddToCart,
     open = true,
     onClose,
 }) {
-    plant = {
-        ...plant,
-        latinName: plant?.latinName,
-        skus: plant?.skus ?? [],
+    product = {
+        ...product,
+        name: product?.name,
+        skus: product?.skus ?? [],
     }
     const classes = useStyles();
     const theme = useTheme();
@@ -120,7 +120,7 @@ function PlantDialog({
     }, [selectedSku])
 
     useEffect(() => {
-        let options = plant.skus?.map(s => {
+        let options = product.skus?.map(s => {
             return {
                 label: `#${s.size} : ${showPrice(s.price)}`,
                 value: s,
@@ -131,9 +131,9 @@ function PlantDialog({
         let new_values = options.map(o => o.value);
         if (_.isEqual(curr_values, new_values)) return;
         setOrderOptions(options);
-    }, [plant, orderOptions])
+    }, [product, orderOptions])
 
-    const images = Array.isArray(plant.images) ? plant.images.map(d => ({
+    const images = Array.isArray(product.images) ? product.images.map(d => ({
         alt: d.image.alt,
         src: `${SERVER_URL}/${getImageSrc(d.image)}`,
         thumbnail: `${SERVER_URL}/${getImageSrc(d.image, IMAGE_SIZE.M)}`
@@ -141,7 +141,7 @@ function PlantDialog({
 
     const traitIconList = (traitName, Icon, title, alt) => {
         if (!alt) alt = title;
-        const traitValue = getPlantTrait(traitName, plant);
+        const traitValue = getProductTrait(traitName, product);
         if (!traitValue) return null;
         return (
             <div>
@@ -178,7 +178,7 @@ function PlantDialog({
                 <QuantityBox
                     style={{height: '100%'}}
                     min_value={0}
-                    max_value={Math.max.apply(Math, plant.skus.map(s => s.availability))}
+                    max_value={Math.max.apply(Math, product.skus.map(s => s.availability))}
                     initial_value={1}
                     value={quantity}
                     valueFunc={setQuantity} />
@@ -190,7 +190,7 @@ function PlantDialog({
                     style={{height: '100%'}}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(getPlantTrait('commonName', plant) ?? plant.latinName, currSku, quantity)}
+                    onClick={() => onAddToCart(product.name, currSku, quantity)}
                 >Order</Button>
             </Grid>
         </Grid>
@@ -223,10 +223,7 @@ function PlantDialog({
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
                             <Typography id="modal-title" variant="h5">
-                                {plant.latinName}
-                            </Typography>
-                            <Typography variant="h6">
-                                {getPlantTrait('commonName', plant)}
+                                {product.name}
                             </Typography>
                         </Grid>
                     </Grid>
@@ -242,9 +239,9 @@ function PlantDialog({
                         }
                     </Grid>
                     <Grid item lg={6} xs={12}>
-                        {plant.description ?
+                        {product.description ?
                             <Collapse style={{ height: '20%' }} title="Description">
-                                <p>{plant.description}</p>
+                                <p>{product.description}</p>
                             </Collapse>
                             : null}
                         {displayedTraitData.length > 0 ? (
@@ -269,8 +266,8 @@ function PlantDialog({
     );
 }
 
-PlantDialog.propTypes = {
-    plant: PropTypes.object,
+ProductDialog.propTypes = {
+    product: PropTypes.object,
     selectedSku: PropTypes.object,
     onSessionUpdate: PropTypes.func.isRequired,
     onAddToCart: PropTypes.func.isRequired,
@@ -278,4 +275,4 @@ PlantDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export { PlantDialog };
+export { ProductDialog };

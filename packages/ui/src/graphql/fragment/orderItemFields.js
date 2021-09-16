@@ -1,19 +1,19 @@
 import { gql } from 'graphql-tag';
 import { skuFields } from './skuFields';
-import { plantFields } from './plantFields';
+import { productFields } from './productFields';
 import { discountFields } from './discountFields';
 
 export const orderItemFields = gql`
     ${skuFields}
-    ${plantFields}
+    ${productFields}
     ${discountFields}
     fragment orderItemFields on OrderItem {
         id
         quantity
         sku {
             ...skuFields
-            plant {
-                ...plantFields
+            product {
+                ...productFields
             }
             discounts {
                 discount {

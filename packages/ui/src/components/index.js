@@ -3,7 +3,7 @@ export * from './cards';
 export * from './ContactInfo/ContactInfo';
 export * from './dialogs';
 export * from './Dropzone/Dropzone';
-export * from './FeaturedPlants/FeaturedPlants';
+export * from './FeaturedProducts/FeaturedProducts';
 export * from './Hero/Hero';
 export * from './inputs';
 export * from './lists';

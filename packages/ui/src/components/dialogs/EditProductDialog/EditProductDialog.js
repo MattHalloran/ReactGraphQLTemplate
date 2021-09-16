@@ -25,25 +25,25 @@ import {
     Update as UpdateIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { addImagesMutation, deletePlantsMutation, updatePlantMutation } from 'graphql/mutation';
+import { addImagesMutation, deleteProductsMutation, updateProductMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { Dropzone, ImageList } from 'components';
 import {
     addToArray,
     deleteArrayIndex,
-    getPlantTrait,
+    getProductTrait,
     makeID,
     PUBS,
     PubSub,
-    setPlantSkuField,
-    setPlantTrait
+    setProductSkuField,
+    setProductTrait
 } from 'utils';
 // import { DropzoneAreaBase } from 'material-ui-dropzone';
 import _ from 'lodash';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
-// Common plant traits, and their corresponding field names
-const PLANT_TRAITS = {
+// Common product traits, and their corresponding field names
+const PRODUCT_TRAITS = {
     'Attracts Pollinators & Wildlife': 'attractsPollinatorsAndWildlife',
     'Bloom Colors': 'bloomColors',
     'Bloom Times': 'bloomTimes',
@@ -120,17 +120,17 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function EditPlantDialog({
-    plant,
+function EditProductDialog({
+    product,
     selectedSku,
     trait_options,
     open = true,
     onClose,
 }) {
     const classes = useStyles();
-    const [changedPlant, setChangedPlant] = useState(plant);
-    const [updatePlant] = useMutation(updatePlantMutation);
-    const [deletePlant] = useMutation(deletePlantsMutation);
+    const [changedProduct, setChangedProduct] = useState(product);
+    const [updateProduct] = useMutation(updateProductMutation);
+    const [deleteProduct] = useMutation(deleteProductsMutation);
 
     const [imageData, setImageData] = useState([]);
     const [imagesChanged, setImagesChanged] = useState(false);
@@ -154,57 +154,57 @@ function EditPlantDialog({
     }
 
     const [currSkuIndex, setCurrSkuIndex] = useState(-1);
-    const [selectedTrait, setSelectedTrait] = useState(PLANT_TRAITS[0]);
+    const [selectedTrait, setSelectedTrait] = useState(PRODUCT_TRAITS[0]);
 
     useEffect(() => {
-        setCurrSkuIndex((selectedSku && plant?.skus) ? plant.skus.findIndex(s => s.sku === selectedSku.sku) : 0)
-    }, [plant, selectedSku])
+        setCurrSkuIndex((selectedSku && product?.skus) ? product.skus.findIndex(s => s.sku === selectedSku.sku) : 0)
+    }, [product, selectedSku])
 
     const findImageData = useCallback(() => {
         setImagesChanged(false);
-        if (Array.isArray(plant?.images)) {
-            setImageData(plant.images.map((d, index) => ({
+        if (Array.isArray(product?.images)) {
+            setImageData(product.images.map((d, index) => ({
                 ...d.image,
                 pos: index
             })));
         } else {
             setImageData(null);
         }
-    }, [plant])
+    }, [product])
 
     useEffect(() => {
-        setChangedPlant({ ...plant });
+        setChangedProduct({ ...product });
         findImageData();
-    }, [findImageData, plant, setImagesChanged])
+    }, [findImageData, product, setImagesChanged])
 
-    function revertPlant() {
-        setChangedPlant(plant);
+    function revertProduct() {
+        setChangedProduct(product);
         findImageData();
     }
 
     const confirmDelete = useCallback(() => {
         PubSub.publish(PUBS.AlertDialog, {
-            message: `Are you sure you want to delete this plant, along with its SKUs? This cannot be undone.`,
+            message: `Are you sure you want to delete this product, along with its SKUs? This cannot be undone.`,
             firstButtonText: 'Yes',
             firstButtonClicked: () => mutationWrapper({
-                mutation: deletePlant,
-                data: { variables: { ids: [changedPlant.id] } },
-                successMessage: () => 'Plant deleted.',
+                mutation: deleteProduct,
+                data: { variables: { ids: [changedProduct.id] } },
+                successMessage: () => 'Product deleted.',
                 onSuccess: () => onClose(),
-                errorMesage: () => 'Failed to delete plant.',
+                errorMesage: () => 'Failed to delete product.',
             }),
             secondButtonText: 'No',
         });
-    }, [changedPlant, deletePlant, onClose])
+    }, [changedProduct, deleteProduct, onClose])
 
-    const savePlant = useCallback(async () => {
-        let plant_data = {
-            id: changedPlant.id,
-            latinName: changedPlant.latinName,
-            traits: changedPlant.traits.map(t => {
+    const saveProduct = useCallback(async () => {
+        let product_data = {
+            id: changedProduct.id,
+            name: changedProduct.name,
+            traits: changedProduct.traits.map(t => {
                 return { name: t.name, value: t.value }
             }),
-            skus: changedPlant.skus.map(s => {
+            skus: changedProduct.skus.map(s => {
                 return { sku: s.sku, isDiscountable: s.isDiscountable, size: s.size, note: s.note, availability: parseInt(s.availability) || 0, price: s.price, status: s.status }
             }),
             images: imageData.map(d => {
@@ -212,31 +212,31 @@ function EditPlantDialog({
             })
         }
         mutationWrapper({
-            mutation: updatePlant,
-            data: { variables: { input: plant_data } },
-            successMessage: () => 'Plant updated.',
+            mutation: updateProduct,
+            data: { variables: { input: product_data } },
+            successMessage: () => 'Product updated.',
             onSuccess: () => setImagesChanged(false),
-            errorMessage: () => 'Failed to delete plant.'
+            errorMessage: () => 'Failed to delete product.'
         })
-    }, [changedPlant, imageData, updatePlant, setImagesChanged])
+    }, [changedProduct, imageData, updateProduct, setImagesChanged])
 
     const updateTrait = useCallback((traitName, value, createIfNotExists) => {
-        const updatedPlant = setPlantTrait(traitName, value, changedPlant, createIfNotExists);
-        if (updatedPlant) setChangedPlant(updatedPlant);
-    }, [changedPlant])
+        const updatedProduct = setProductTrait(traitName, value, changedProduct, createIfNotExists);
+        if (updatedProduct) setChangedProduct(updatedProduct);
+    }, [changedProduct])
 
     const getSkuField = useCallback((fieldName) => {
-        if (!Array.isArray(changedPlant?.skus) || currSkuIndex < 0 || currSkuIndex >= changedPlant.skus.length) return '';
-        return changedPlant.skus[currSkuIndex][fieldName];
-    }, [changedPlant, currSkuIndex])
+        if (!Array.isArray(changedProduct?.skus) || currSkuIndex < 0 || currSkuIndex >= changedProduct.skus.length) return '';
+        return changedProduct.skus[currSkuIndex][fieldName];
+    }, [changedProduct, currSkuIndex])
 
     const updateSkuField = useCallback((fieldName, value) => {
-        const updatedPlant = setPlantSkuField(fieldName, currSkuIndex, value, changedPlant);
-        if (updatedPlant) setChangedPlant(updatedPlant)
-    }, [changedPlant, currSkuIndex])
+        const updatedProduct = setProductSkuField(fieldName, currSkuIndex, value, changedProduct);
+        if (updatedProduct) setChangedProduct(updatedProduct)
+    }, [changedProduct, currSkuIndex])
 
     function newSku() {
-        setChangedPlant(p => ({
+        setChangedProduct(p => ({
             ...p,
             skus: addToArray(p.skus, { sku: makeID(10) }),
         }));
@@ -244,13 +244,13 @@ function EditPlantDialog({
 
     function removeSku() {
         if (currSkuIndex < 0) return;
-        setChangedPlant(p => ({
+        setChangedProduct(p => ({
             ...p,
             skus: deleteArrayIndex(p.skus, currSkuIndex),
         }));
     }
 
-    let changes_made = !_.isEqual(plant, changedPlant) || imagesChanged;
+    let changes_made = !_.isEqual(product, changedProduct) || imagesChanged;
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={12} sm={4}>
@@ -258,13 +258,13 @@ function EditPlantDialog({
                     fullWidth
                     disabled={!changes_made}
                     startIcon={<RestoreIcon />}
-                    onClick={revertPlant}
+                    onClick={revertProduct}
                 >Revert</Button>
             </Grid>
             <Grid item xs={12} sm={4}>
                 <Button
                     fullWidth
-                    disabled={!changedPlant?.id}
+                    disabled={!changedProduct?.id}
                     startIcon={<DeleteIcon />}
                     onClick={confirmDelete}
                 >Delete</Button>
@@ -274,7 +274,7 @@ function EditPlantDialog({
                     fullWidth
                     disabled={!changes_made}
                     startIcon={<UpdateIcon />}
-                    onClick={savePlant}
+                    onClick={saveProduct}
                 >Update</Button>
             </Grid>
         </Grid>
@@ -298,7 +298,7 @@ function EditPlantDialog({
                         <ListSubheader className={classes.skuHeader} component="div" id="sku-select-subheader">
                             <Typography className={classes.title} variant="h5" component="h3">SKUs</Typography>
                         </ListSubheader>
-                        {changedPlant?.skus?.map((s, i) => (
+                        {changedProduct?.skus?.map((s, i) => (
                             <ListItem
                                 key={s.sku}
                                 button
@@ -324,24 +324,15 @@ function EditPlantDialog({
                     </div>
                 </div>
                 <div className={classes.content}>
-                    <Typography className={classes.title} variant="h5" component="h3">Edit plant info</Typography>
+                    <Typography className={classes.title} variant="h5" component="h3">Edit product info</Typography>
                     <Grid className={classes.gridContainer} container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
                                 size="small"
-                                label="Latin Name"
-                                value={changedPlant?.latinName}
-                                onChange={e => setChangedPlant({ ...plant, latinName: e.target.value })}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                label="Common Name"
-                                value={getPlantTrait('commonName', changedPlant)}
-                                onChange={e => updateTrait('commonName', e.target.value, false)}
+                                label="Name"
+                                value={changedProduct?.name}
+                                onChange={e => setChangedProduct({ ...product, name: e.target.value })}
                             />
                         </Grid>
                         {/* Select which trait you'd like to edit */}
@@ -351,13 +342,13 @@ function EditPlantDialog({
                                 freeSolo
                                 id="setTraitField"
                                 name="setTraitField"
-                                options={Object.keys(PLANT_TRAITS)}
-                                onChange={(_, value) => setSelectedTrait(PLANT_TRAITS[value])}
+                                options={Object.keys(PRODUCT_TRAITS)}
+                                onChange={(_, value) => setSelectedTrait(PRODUCT_TRAITS[value])}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        label="Select plant trait"
-                                        value={PLANT_TRAITS[selectedTrait] ?? ''}
+                                        label="Select product trait"
+                                        value={PRODUCT_TRAITS[selectedTrait] ?? ''}
                                     />
                                 )}
                             />
@@ -368,7 +359,7 @@ function EditPlantDialog({
                                 fullWidth
                                 size="small"
                                 label="Trait value"
-                                value={getPlantTrait(selectedTrait, changedPlant) ?? ''}
+                                value={getProductTrait(selectedTrait, changedProduct) ?? ''}
                                 onChange={e => updateTrait(selectedTrait, e.target.value, true)}
                             />
                         </Grid>
@@ -395,7 +386,7 @@ function EditPlantDialog({
                             <TextField
                                 fullWidth
                                 size="small"
-                                label="Plant Code"
+                                label="Product Code"
                                 value={getSkuField('sku')}
                                 onChange={e => updateSkuField('sku', e.target.value)}
                             />
@@ -437,7 +428,7 @@ function EditPlantDialog({
     );
 }
 
-EditPlantDialog.propTypes = {
+EditProductDialog.propTypes = {
     sku: PropTypes.object.isRequired,
     selectedSku: PropTypes.object,
     trait_options: PropTypes.array,
@@ -445,4 +436,4 @@ EditPlantDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
 }
 
-export { EditPlantDialog };
+export { EditProductDialog };
