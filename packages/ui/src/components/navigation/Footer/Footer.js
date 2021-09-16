@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SERVER_URL } from '@local/shared';
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
-import { List, ListItem, ListItemIcon, ListItemText, Grid, ButtonBase, Tooltip } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip } from '@material-ui/core';
 import {
     Business as BusinessIcon,
     Email as EmailIcon,
@@ -66,21 +65,14 @@ function Footer({
                         <ListItem button component="a" onClick={() => history.push(LINKS.About)} >
                             <ListItemText primary="About Us" />
                         </ListItem>
-                        <ListItem
-                            button
-                            component="a"
-                            href={`${SERVER_URL}/Commercial_Credit_Application-2010.doc`}
-                            target='_blank'
-                            rel="noopener noreferrer"
-                            download={`Commercial Credit Application - ${business?.BUSINESS_NAME?.Short}`}
-                        >
-                            <ListItemText primary="Credit App" />
+                        <ListItem button component="a" onClick={() => history.push(LINKS.Gallery)} >
+                            <ListItemText primary="Gallery" />
+                        </ListItem>
+                        <ListItem button component="a" onClick={() => history.push(LINKS.Shopping)} >
+                            <ListItemText primary="Shop" />
                         </ListItem>
                         <ListItem button component="a" onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
                             <ListItemText primary="Print Availability" />
-                        </ListItem>
-                        <ListItem button component="a" onClick={() => history.push(LINKS.Gallery)} >
-                            <ListItemText primary="Gallery" />
                         </ListItem>
                     </List>
                 </Grid>

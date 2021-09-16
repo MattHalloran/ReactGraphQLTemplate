@@ -143,7 +143,7 @@ export async function up (knex) {
         table.decimal('size');
         table.string('note', 2048);
         table.integer('availability').defaultTo(0).notNullable();
-        table.decimal('price');
+        table.decimal('price', 20, 2);
         table.enu('status', Object.values(SKU_STATUS)).defaultTo(SKU_STATUS.Active).notNullable();
         table.uuid('productId').references('id').inTable(TABLES.Product).notNullable().onUpdate('CASCADE').onDelete('CASCADE');
         table.timestamps(true, true);

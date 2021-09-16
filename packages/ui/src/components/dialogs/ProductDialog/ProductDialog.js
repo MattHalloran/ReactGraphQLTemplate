@@ -20,20 +20,10 @@ import {
 } from '@material-ui/core';
 import { showPrice, getImageSrc, getProductTrait } from 'utils';
 import {
-    BeeIcon,
-    CalendarIcon,
-    ColorWheelIcon,
-    HeightIcon,
-    LampIcon,
-    MapIcon,
-    MoistureIcon,
     NoImageWithTextIcon,
-    NoWaterIcon,
-    SaltIcon,
-    SoilTypeIcon,
+    NoteIcon,
     SpeedometerIcon,
-    SunIcon,
-    WidthIcon
+    WarpIcon,
 } from 'assets/img';
 import {
     QuantityBox,
@@ -197,20 +187,9 @@ function ProductDialog({
     );
 
     const displayedTraitData = [
-        ['zone', MapIcon, 'Hardiness zones'],
-        ['physiographicRegions', MapIcon, 'Physiographic Region'],
-        ['attractsPollinatorsAndWildlife', BeeIcon, 'Attracted Pollinators and Wildlife'],
-        ['droughtTolerance', NoWaterIcon, 'Drought Tolerance'],
-        ['saltTolerance', SaltIcon, 'Salt Tolerance'],
-        ['grownHeight', HeightIcon, 'Grown Height'],
-        ['grownSpread', WidthIcon, 'Grown Spread'],
-        ['growthRate', SpeedometerIcon, 'Growth Rate'],
-        ['bloomColors', ColorWheelIcon, 'Bloom Colors'],
-        ['bloomTimes', CalendarIcon, 'Bloom Times'],
-        ['lightRanges', LampIcon, 'Light Range'],
-        ['optimalLight', SunIcon, 'Optimal Light'],
-        ['soilMoistures', MoistureIcon, 'Soil Moisture'],
-        ['soilTypes', SoilTypeIcon, 'Soil Type']
+        ['hasWarpDrive', WarpIcon, 'Has Warp Drive?'],
+        ['note', NoteIcon, 'Note'],
+        ['topSpeed', SpeedometerIcon, 'Top Speed'],
     ].map(d => traitIconList(...d)).filter(d => d !== null);
 
     return (

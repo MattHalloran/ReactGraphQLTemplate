@@ -26,7 +26,6 @@ function ShoppingList({
     cart,
     sortBy = SORT_OPTIONS[0].value,
     filters,
-    hideOutOfStock,
     searchString = '',
 }) {
     const classes = useStyles();
@@ -38,7 +37,7 @@ function ShoppingList({
     // Find current product and current sku
     const currProduct = Array.isArray(products) ? products.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
     const currSku = currProduct?.skus ? currProduct.skus.find(s => s.sku === urlParams.sku) : null;
-    const { data: productData } = useQuery(productsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
+    const { data: productData } = useQuery(productsQuery,  { variables: { sortBy, searchString, active: true } });
     const [upsertOrderItem] = useMutation(upsertOrderItemMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
@@ -71,7 +70,7 @@ function ShoppingList({
             if (found) filtered_products.push(product);
         }
         setProducts(filtered_products);
-    }, [productData, filters, searchString, hideOutOfStock])
+    }, [productData, filters, searchString])
 
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);

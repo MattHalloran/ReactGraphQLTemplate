@@ -6,16 +6,15 @@ import {
     CardActions,
     CardContent,
     CardMedia,
-    Chip,
     IconButton,
     Tooltip,
     Typography
 } from '@material-ui/core';
 import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { showPrice, getImageSrc, getProductTrait } from 'utils';
+import { getImageSrc } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
-import { IMAGE_USE, SERVER_URL, SKU_STATUS } from '@local/shared';
+import { IMAGE_USE, SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,9 +33,6 @@ const useStyles = makeStyles((theme) => ({
         padding: 8,
         marginTop: 200,
         position: 'inherit',
-    },
-    chip: {
-        margin: 2,
     },
     deleted: {
         border: '2px solid red',
@@ -58,27 +54,6 @@ function ProductCard({
 }) {
     const classes = useStyles();
 
-    const SkuStatus = {
-        [SKU_STATUS.Deleted]: classes.deleted,
-        [SKU_STATUS.Inactive]: classes.inactive,
-        [SKU_STATUS.Active]: classes.active,
-    }
-
-    const openWithSku = (e, sku) => {
-        e.stopPropagation();
-        onClick({ product, selectedSku: sku })
-    }
-
-    let sizes = product.skus?.map(s => (
-        <Chip
-            key={s.sku}
-            className={`${classes.chip} ${SkuStatus[s.status + ''] ?? classes.deleted}`}
-            label={`#${s.size} | ${showPrice(s.price)} | Avail: ${s.availability}`}
-            color="secondary"
-            onClick={(e) => openWithSku(e, s)}
-        />
-    ));
-
     let display;
     let display_data = product.images.find(image => image.usedFor === IMAGE_USE.ProductDisplay)?.image;
     if (!display_data && product.images.length > 0) display_data = product.images[0].image;
@@ -96,9 +71,6 @@ function ProductCard({
                     <Typography gutterBottom variant="h6" component="h3">
                         {product.name}
                     </Typography>
-                    <div className="size-container">
-                        {sizes}
-                    </div>
                 </CardContent>
             </CardActionArea>
             <CardActions>

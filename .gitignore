@@ -154,6 +154,11 @@ build/
 
 #Assets
 *assets/images/
+*assets/private/
+!*assets/private/example_availability.xlsx
+!*assets/private/space-1.jpg
+!*assets/private/space-2.jpg
+!*assets/private/space-3.jpg
 
 .eslintcache
 package-lock.json

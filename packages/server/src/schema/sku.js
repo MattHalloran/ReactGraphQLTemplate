@@ -3,8 +3,9 @@ import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { saveFile } from '../utils';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 import { PrismaSelect } from '@paljs/plugins';
+import path from 'path';
 
 const _model = TABLES.Sku;
 

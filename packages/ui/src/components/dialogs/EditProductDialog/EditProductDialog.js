@@ -44,20 +44,9 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 
 // Common product traits, and their corresponding field names
 const PRODUCT_TRAITS = {
-    'Attracts Pollinators & Wildlife': 'attractsPollinatorsAndWildlife',
-    'Bloom Colors': 'bloomColors',
-    'Bloom Times': 'bloomTimes',
-    'Drought Tolerance': 'droughtTolerance',
-    'Grown Height': 'grownHeight',
-    'Grown Spread': 'grownSpread',
-    'Growth Rate': 'growthRate',
-    'Hardiness Zones': 'zone',
-    'Light Ranges': 'lightRanges',
-    'Optimal Light': 'optimalLight',
-    'Salt Tolerance': 'saltTolerance',
-    'Soil Moistures': 'soilMoistures',
-    'Soil PHs': 'soilPhs',
-    'Soil Types': 'soilTypes',
+    'Has Warp Drive?': 'hasWarpDrive',
+    'Note': 'note',
+    'Top Speed': 'topSpeed',
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -326,7 +315,7 @@ function EditProductDialog({
                 <div className={classes.content}>
                     <Typography className={classes.title} variant="h5" component="h3">Edit product info</Typography>
                     <Grid className={classes.gridContainer} container spacing={2}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12}>
                             <TextField
                                 fullWidth
                                 size="small"

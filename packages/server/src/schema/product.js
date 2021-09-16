@@ -42,7 +42,7 @@ export const typeDef = gql`
     }
 
     extend type Query {
-        products(ids: [ID!], sortBy: SkuSortBy, searchString: String, active: Boolean, onlyInStock: Boolean): [Product!]!
+        products(ids: [ID!], sortBy: SkuSortBy, searchString: String, active: Boolean): [Product!]!
     }
 
     extend type Mutation {
@@ -79,15 +79,11 @@ export const resolvers = {
             let activeQueryBase = { skus: {  some: { status: SKU_STATUS.Active } } };
             if (args.active === true) activeQuery = activeQueryBase;
             else if (args.active === false && context.req.isAdmin) activeQuery = { NOT: activeQueryBase };
-            // Toggle for showing/hiding products that have no SKUs with any availability
-            let onlyInStock;
-            if (args.onlyInStock === true) onlyInStock = { skus: { some: { availability: { gt: 0 } } } };
             return await context.prisma[_model].findMany({ 
                 where: { 
                     ...idQuery,
                     ...searchQuery,
-                    ...activeQuery,
-                    ...onlyInStock
+                    ...activeQuery
                 },
                 orderBy: sortQuery,
                 ...(new PrismaSelect(info).value)

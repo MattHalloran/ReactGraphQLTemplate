@@ -30,7 +30,7 @@ export function getUserActions(session, userRoles, cart) {
         if (userRoles && haveArray.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title))) {
             actions.push(['Manage Site', 'admin', LINKS.Admin, null, SettingsIcon, 0]);
         }
-        actions.push(['Availability', 'availability', LINKS.Shopping, null, ShopIcon, 0],
+        actions.push(['Shop', 'shop', LINKS.Shopping, null, ShopIcon, 0],
             ['Profile', 'profile', LINKS.Profile, null, PersonIcon, 0],
             ['Cart', 'cart', LINKS.Cart, null, ShoppingCartIcon, cart?.items?.length ?? 0]);
     }

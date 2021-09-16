@@ -1,6 +1,8 @@
 
 # ReactGraphQLTemplate
-This is a fully-functioning template for building modern, maintainable websites.
+A fully-functioning template for building modern, maintainable websites.
+
+![Project Preview](assets/private/readme-display.png)
 
 
 ## Website Features
