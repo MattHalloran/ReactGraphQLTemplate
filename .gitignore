@@ -159,6 +159,7 @@ build/
 !*assets/private/space-1.jpg
 !*assets/private/space-2.jpg
 !*assets/private/space-3.jpg
+!*assets/private/readme-display.png
 
 .eslintcache
 package-lock.json
