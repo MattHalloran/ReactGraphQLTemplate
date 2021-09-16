@@ -153,13 +153,9 @@ build/
 *data/certbot/
 
 #Assets
-*assets/images/
-*assets/private/
-!*assets/private/example_availability.xlsx
-!*assets/private/space-1.jpg
-!*assets/private/space-2.jpg
-!*assets/private/space-3.jpg
-!*assets/private/readme-display.png
+assets/images/
+assets/private/*.xlsx
+!assets/private/example_availability.xlsx
 
 .eslintcache
 package-lock.json
