@@ -153,8 +153,9 @@ build/
 *data/certbot/
 
 #Assets
-*assets/images/
-*server/plant_info/yards/yards*.json
+assets/images/
+assets/private/*.xlsx
+!assets/private/example_availability.xlsx
 
 .eslintcache
 package-lock.json

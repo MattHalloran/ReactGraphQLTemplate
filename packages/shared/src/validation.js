@@ -92,7 +92,7 @@ export const skuSchema = yup.object().shape({
     availability: yup.number().integer().default(0).optional(),
     price: yup.string().max(16).optional(),
     status: yup.mixed().oneOf(Object.values(SKU_STATUS)).default(SKU_STATUS.Active).optional(),
-    plantId: yup.string().optional(),
+    productId: yup.string().optional(),
     discountIds: yup.array().of(yup.string().required()).optional(),
 });
 
@@ -101,8 +101,8 @@ export const traitSchema = yup.object().shape({
     value: yup.string().max(2048).required()
 })
 
-export const plantSchema = yup.object().shape({
-    latinName: yup.string().max(256).required(),
+export const productSchema = yup.object().shape({
+    name: yup.string().max(256).required(),
     traits: yup.array().of(traitSchema).required(),
     images: yup.array().of(imageSchema).required()
 });
@@ -115,7 +115,6 @@ export const customerSchema = yup.object().shape({
     business: businessSchema,
     emails: yup.array().of(emailSchema).required(),
     phones: yup.array().of(phoneSchema).required(),
-    accountApproved: yup.boolean().required(),
     status: yup.mixed().oneOf(Object.values(ACCOUNT_STATUS)).optional(),
 });
 
@@ -128,7 +127,6 @@ export const signUpSchema = yup.object().shape({
     business: yup.string().max(128).required(),
     email: yup.string().email().required(),
     phone: yup.string().max(20).required(),
-    accountApproved: yup.boolean().required(),
     marketingEmails: yup.boolean().required(),
     password: passwordSchema.required(),
     passwordConfirmation: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match')
@@ -153,7 +151,6 @@ export const profileSchema = yup.object().shape({
     email: yup.string().email().required(),
     phone: yup.string().max(20).required(),
     theme: yup.string().max(128).required(),
-    accountApproved: yup.boolean().required(),
     // Don't apply validation to current password. If you change password requirements, customers would be unable to change their password
     currentPassword: yup.string().max(128).required(),
     newPassword: passwordSchema.optional(),

@@ -13,7 +13,6 @@ export const addCustomerMutation = gql`
     ) {
         ...customerContactFields
         status
-        accountApproved
         orders {
             ...orderFields
             items {

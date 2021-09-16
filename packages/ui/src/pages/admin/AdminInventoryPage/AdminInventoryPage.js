@@ -1,18 +1,18 @@
 // This page gives the admin the ability to:
 // 1) Delete existing SKUs
-// 2) Edit existing SKU data, including general plant info, availability, etc.
-// 3) Create a new SKU, either from scratch or by using plant species info
+// 2) Edit existing SKU data, including general product info, availability, etc.
+// 3) Create a new SKU, either from scratch or by using product species info
 
 import React, { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
-import { plantsQuery, traitOptionsQuery } from 'graphql/query';
+import { productsQuery, traitOptionsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';
 import { PUBS, PubSub, SORT_OPTIONS } from 'utils';
 import {
     AdminBreadcrumbs,
-    EditPlantDialog,
+    EditProductDialog,
     Dropzone,
-    PlantCard,
+    ProductCard,
     Selector,
     SearchBar
 } from 'components';
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         alignItems: 'stretch',
     },
-    plantSelector: {
+    productSelector: {
         marginBottom: '1em',
     },
 }));
@@ -45,12 +45,12 @@ function AdminInventoryPage() {
     const theme = useTheme();
     const [showActive, setShowActive] = useState(true);
     const [searchString, setSearchString] = useState('');
-    // Selected plant data. Used for popup. { plant, selectedSku }
+    // Selected product data. Used for popup. { product, selectedSku }
     const [selected, setSelected] = useState(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const { data: traitOptions } = useQuery(traitOptionsQuery);
-    const { data: plantData } = useQuery(plantsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
+    const { data: productData } = useQuery(productsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
@@ -66,8 +66,8 @@ function AdminInventoryPage() {
 
     return (
         <div id="page">
-            <EditPlantDialog
-                plant={selected?.plant}
+            <EditProductDialog
+                product={selected?.product}
                 selectedSku={selected?.selectedSku}
                 trait_options={traitOptions?.traitOptions}
                 open={selected !== null}
@@ -78,10 +78,10 @@ function AdminInventoryPage() {
             </div>
             <h3>This page has the following features:</h3>
             <p>👉 Upload availability from a spreadsheet</p>
-            <p>👉 Edit/Delete an existing plant</p>
+            <p>👉 Edit/Delete an existing product</p>
             <p>👉 Add/Edit/Delete SKUs</p>
             <div>
-                {/* <Button onClick={() => editSku({})}>Create new plant</Button> */}
+                {/* <Button onClick={() => editSku({})}>Create new product</Button> */}
             </div>
             <Dropzone
                 dropzoneText={'Drag \'n\' drop availability file here or click'}
@@ -95,12 +95,12 @@ function AdminInventoryPage() {
             <Grid className={classes.padBottom} container spacing={2}>
                 <Grid item xs={12} sm={4}>
                     <Selector
-                        className={classes.plantSelector}
+                        className={classes.productSelector}
                         fullWidth
                         options={SORT_OPTIONS}
                         selected={sortBy}
                         handleChange={(e) => setSortBy(e.target.value)}
-                        inputAriaLabel='sort-plants-selector-label'
+                        inputAriaLabel='sort-products-selector-label'
                         label="Sort" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -112,7 +112,7 @@ function AdminInventoryPage() {
                                 color="secondary"
                             />
                         }
-                        label={showActive ? "Active plants" : "Inactive plants"}
+                        label={showActive ? "Active products" : "Inactive products"}
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -120,8 +120,8 @@ function AdminInventoryPage() {
                 </Grid>
             </Grid>
             <div className={classes.cardFlex}>
-                {plantData?.plants?.map((plant, index) => <PlantCard key={index}
-                    plant={plant}
+                {productData?.products?.map((product, index) => <ProductCard key={index}
+                    product={product}
                     onClick={setSelected} />)}
             </div>
         </div >

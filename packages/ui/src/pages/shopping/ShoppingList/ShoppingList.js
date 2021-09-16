@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { plantsQuery } from 'graphql/query';
+import { productsQuery } from 'graphql/query';
 import { upsertOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { getPlantTrait, LINKS, SORT_OPTIONS } from "utils";
+import { getProductTrait, LINKS, SORT_OPTIONS } from "utils";
 import {
-    PlantCard,
-    PlantDialog
+    ProductCard,
+    ProductDialog
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from "graphql/utils/wrappers";
@@ -26,19 +26,18 @@ function ShoppingList({
     cart,
     sortBy = SORT_OPTIONS[0].value,
     filters,
-    hideOutOfStock,
     searchString = '',
 }) {
     const classes = useStyles();
-    // Plant data for all visible plants (i.e. not filtered)
-    const [plants, setPlants] = useState([]);
+    // Product data for all visible products (i.e. not filtered)
+    const [products, setProducts] = useState([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams();
-    // Find current plant and current sku
-    const currPlant = Array.isArray(plants) ? plants.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
-    const currSku = currPlant?.skus ? currPlant.skus.find(s => s.sku === urlParams.sku) : null;
-    const { data: plantData } = useQuery(plantsQuery,  { variables: { sortBy, searchString, active: true, hideOutOfStock } });
+    // Find current product and current sku
+    const currProduct = Array.isArray(products) ? products.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
+    const currSku = currProduct?.skus ? currProduct.skus.find(s => s.sku === urlParams.sku) : null;
+    const { data: productData } = useQuery(productsQuery,  { variables: { sortBy, searchString, active: true } });
     const [upsertOrderItem] = useMutation(upsertOrderItemMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
@@ -46,32 +45,32 @@ function ShoppingList({
     // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
         if (!filters || Object.values(filters).length === 0) {
-            setPlants(plantData?.plants);
+            setProducts(productData?.products);
             return;
         }
-        let filtered_plants = [];
-        for (const plant of plantData?.plants) {
+        let filtered_products = [];
+        for (const product of productData?.products) {
             let found = false;
             for (const [key, value] of Object.entries(filters)) {
                 if (found) break;
-                const traitValue = getPlantTrait(key, plant);
+                const traitValue = getProductTrait(key, product);
                 if (traitValue && traitValue.toLowerCase() === (value+'').toLowerCase()) {
                     found = true;
                     break;
                 }
-                if (!Array.isArray(plant.skus)) continue;
-                for (let i = 0; i < plant.skus.length; i++) {
-                    const skuValue = plant.skus[i][key];
+                if (!Array.isArray(product.skus)) continue;
+                for (let i = 0; i < product.skus.length; i++) {
+                    const skuValue = product.skus[i][key];
                     if (skuValue && skuValue.toLowerCase() === (value+'').toLowerCase()) {
                         found = true;
                         break;
                     }
                 }
             }
-            if (found) filtered_plants.push(plant);
+            if (found) filtered_products.push(product);
         }
-        setPlants(filtered_plants);
-    }, [plantData, filters, searchString, hideOutOfStock])
+        setProducts(filtered_products);
+    }, [productData, filters, searchString])
 
     const expandSku = (sku) => {
         history.push(LINKS.Shopping + "/" + sku);
@@ -100,18 +99,18 @@ function ShoppingList({
 
     return (
         <div className={classes.root} id={track_scrolling_id}>
-            {(currPlant) ? <PlantDialog
+            {(currProduct) ? <ProductDialog
                 onSessionUpdate
-                plant={currPlant}
+                product={currProduct}
                 selectedSku={currSku}
                 onAddToCart={addToCart}
-                open={currPlant !== null}
+                open={currProduct !== null}
                 onClose={() => history.goBack()} /> : null}
             
-            {plants?.map((item, index) =>
-                <PlantCard key={index}
+            {products?.map((item, index) =>
+                <ProductCard key={index}
                     onClick={(data) => expandSku(data.selectedSku?.sku)}
-                    plant={item} />)}
+                    product={item} />)}
         </div>
     );
 }

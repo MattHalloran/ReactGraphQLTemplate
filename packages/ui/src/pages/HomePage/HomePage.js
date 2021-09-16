@@ -1,14 +1,14 @@
 import React from 'react';
 import { 
-    FeaturedPlants,
+    FeaturedProducts,
     Hero 
 } from 'components';
 
 function HomePage() {
     return (
         <div>
-            <Hero text="Beautiful, healthy plants" subtext="At competitive prices" />
-            <FeaturedPlants />
+            <Hero text="Need a fast, large, or cheap spaceship?" subtext="We've got you covered" />
+            <FeaturedProducts />
         </div >
     );
 }

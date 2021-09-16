@@ -3,8 +3,9 @@ import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
 import { CustomError } from '../error';
 import { saveFile } from '../utils';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 import { PrismaSelect } from '@paljs/plugins';
+import path from 'path';
 
 const _model = TABLES.Sku;
 
@@ -34,7 +35,7 @@ export const typeDef = gql`
         availability: Int
         price: String
         status: SkuStatus
-        plantId: ID
+        productId: ID
         discountIds: [ID!]
     }
 
@@ -51,7 +52,7 @@ export const typeDef = gql`
         availability: Int!
         price: String
         status: SkuStatus!
-        plant: Plant!
+        product: Product!
         discounts: [SkuDiscount!]
     }
 
@@ -68,8 +69,8 @@ export const typeDef = gql`
 `
 
 const SORT_TO_QUERY = {
-    [SKU_SORT_OPTIONS.AZ]: { plant: { latinName: 'asc' } },
-    [SKU_SORT_OPTIONS.ZA]: { plant: { latinName: 'desc' } },
+    [SKU_SORT_OPTIONS.AZ]: { product: { name: 'asc' } },
+    [SKU_SORT_OPTIONS.ZA]: { product: { name: 'desc' } },
     [SKU_SORT_OPTIONS.PriceLowHigh]: { price: 'asc' },
     [SKU_SORT_OPTIONS.PriceHighLow]: { price: 'desc' },
     [SKU_SORT_OPTIONS.Newest]: { created_at: 'desc' },
@@ -91,8 +92,8 @@ export const resolvers = {
             if (args.searchString !== undefined && args.searchString.length > 0) {
                 searchQuery = {
                     OR: [
-                        { plant: { latinName: { contains: args.searchString.trim(), mode: 'insensitive' } } },
-                        { plant: { traits: { some: { value: { contains: args.searchString.trim(), mode: 'insensitive' } } } } }
+                        { product: { name: { contains: args.searchString.trim(), mode: 'insensitive' } } },
+                        { product: { traits: { some: { value: { contains: args.searchString.trim(), mode: 'insensitive' } } } } }
                     ]
                 }
             }
@@ -111,10 +112,11 @@ export const resolvers = {
     },
     Mutation: {
         uploadAvailability: async (_, args) => {
-            const { createReadStream, mimetype } = await args.file;
+            const { createReadStream, filename, mimetype } = await args.file;
             const stream = createReadStream();
-            const filename = `private/availability-${Date.now()}.xls`;
-            const { success, filename: finalFileName } = await saveFile(stream, filename, mimetype, false, ['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']);
+            const { ext } = path.parse(filename)
+            const newFilename = `private/availability-${Date.now()}${ext}`;
+            const { success, filename: finalFileName } = await saveFile(stream, newFilename, mimetype, false, ['.csv', '.xls', '.xlsx', 'text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values']);
             if (success) uploadAvailability(finalFileName);
             return success;
         },

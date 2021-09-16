@@ -1,6 +1,8 @@
 
 # ReactGraphQLTemplate
-This is a fully-functioning template for building modern, maintainable websites.
+A fully-functioning template for building modern, maintainable websites.
+
+![Project Preview](assets/private/readme-display.png)
 
 
 ## Website Features
@@ -67,6 +69,24 @@ It is generally recommended to store data on an external server, but for smaller
 It is often useful to send and receives emails with the website's address. Instructions to set that up can be found [here](/docs/MessengerSetup.txt)
 
 
+## Favicons
+A favicon is the image displayed in a browser's tab window. It also has other uses, such as being the icon displayed if the site is added to the home screen on a phone. There are a lot of different formats out there, so it's easiest to use a site like [realfavicongenerator](https://realfavicongenerator.net/) to guide you through this process. All you need is an svg file of your desired image (usually your company logo).
+
+Favicons should be placed in `packages/ui/public`. The link and meta tags should be added to `packages/ui/public/index.html`. After your favicon files are in the correct location, if you have a `site.manifest` or `manifest.json` file, you should add `name` and `short_name` fields with your project's name and a short description, respectively.
+
+If you are planning to support Progressive Web Apps (PWA), then you should also have a square version of your logo referenced in the manifest file. [Here](https://maskable.app/editor) is a useful site for checking how your image looks with different masks.
+
+
+## Theming
+Picking the correct colors for your site can be easy or complicated, depending on how deeply you want to go into it (you could use color theory, for example). You also have to make sure that your theme's colors are different enough from each other to be distinguisable. I use [this color tool](https://material.io/resources/color/#!/?view.left=0&view.right=0) to create a solid starting point. The site's theme is set in `packages/ui/src/utils/theme.js`.
+
+By default, this site automatically sets dark or light theme depending on your browser's settings. This is accomplished in `packages/ui/src/App.js`.
+
+
+## Custom fonts
+The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into `packages/ui/public/index.html`. Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
+
+
 ## GraphQL debugging
 GraphQL syntax errors are notoriously hard to debug, as they often do not give a location. Luckily, this project is structured in a way that allows these issues to be tracked down. 
 
@@ -90,6 +110,12 @@ Before removing packages, please make sure that depcheck was correct. If you are
 - Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
+
+
+## Progressive Web App (PWA)
+A PWA is a website that can be installed on mobile devices. These don't have quite the same functionality as native apps, but hopefully one day they will. To make your website PWA-compatable, perform an audit on Lighthouse. Then, follow the steps it provides.
+
+One common issue that arises here is "Manifest doesn't have a maskable icon". Clicking on it provides more information, but the gist is that you need a square version of your project's logo. See [here](https://w3c.github.io/manifest/#icon-masks) for how it should be designed.
 
 
 ## Deploying project

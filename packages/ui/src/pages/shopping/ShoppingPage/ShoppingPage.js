@@ -8,7 +8,7 @@ import { ShoppingList } from '../ShoppingList/ShoppingList';
 import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
 import { traitOptionsQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { Switch, Grid, Button, SwipeableDrawer, FormControlLabel } from '@material-ui/core';
+import { Grid, Button, SwipeableDrawer } from '@material-ui/core';
 import {
     Close as CloseIcon,
     FilterList as FilterListIcon,
@@ -50,7 +50,6 @@ function ShoppingPage({
     const [filters, setFilters] = useState(null);
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
-    const [hideOutOfStock, setHideOutOfStock] = useState(false);
 
     useEffect(() => {
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
@@ -74,10 +73,6 @@ function ShoppingPage({
         modified_filters[name] = value;
         setFilters(modified_filters)
     }, [filters])
-
-    const handleHideChange = useCallback((event) => {
-        setHideOutOfStock(event.target.checked);
-    }, [])
 
     const traitOptionsToSelector = useCallback((field, title) => {
         if (!traitOptions) return;
@@ -124,19 +119,9 @@ function ShoppingPage({
     );
 
     let traitList = [
-        ['size', 'Sizes'],
-        ['optimalLight', 'Optimal Light'],
-        ['droughtTolerance', 'Drought Tolerance'],
-        ['grownHeight', 'Grown Height'],
-        ['grownSpread', 'Grown Spread'],
-        ['growthRate', 'Growth Rate'],
-        ['saltTolerance', 'Salt Tolerance'],
-        ['attractsPolinatorsAndWildlifes', 'Pollinator'],
-        ['lightRanges', 'Light Range'],
-        ['soilMoistures', 'Soil Moisture'],
-        ['soilPhs', 'Soil PH'],
-        ['soilTypes', 'Soil Type'],
-        ['zones', 'Zone'],
+        ['hasWarpDrive', 'Has Warp Drive?'],
+        ['note', 'Note'],
+        ['topSpeed', 'Top Speed'],
     ]
 
     return (
@@ -161,16 +146,6 @@ function ShoppingPage({
                 {optionsContainer}
             </SwipeableDrawer>
             <div className={classes.formControl}>
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={hideOutOfStock}
-                            onChange={handleHideChange}
-                            color="secondary"
-                        />
-                    }
-                    label="Hide out of stock"
-                />
                 <Button
                     color="secondary"
                     startIcon={<FilterListIcon />}
@@ -189,7 +164,6 @@ function ShoppingPage({
                 sort={sortBy}
                 filters={filters}
                 searchString={searchString}
-                hideOutOfStock={hideOutOfStock}
             />
         </div>
     );

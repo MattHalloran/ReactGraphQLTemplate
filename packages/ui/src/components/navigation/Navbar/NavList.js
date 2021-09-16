@@ -26,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
         background: 'transparent',
         color: theme.palette.primary.contrastText,
         textTransform: 'none',
-        verticalAlign: 'text-top',
     },
     menuItem: {
         color: theme.palette.primary.contrastText,

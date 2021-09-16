@@ -4,7 +4,7 @@ export * from './imageFields';
 export * from './orderFields';
 export * from './orderItemFields';
 export * from './phoneFields';
-export * from './plantFields';
+export * from './productFields';
 export * from './skuFields';
 export * from './customerContactFields';
 export * from './customerSessionFields';

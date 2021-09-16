@@ -45,7 +45,6 @@ export async function seed() {
                 firstName: 'admin',
                 lastName: 'account',
                 password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS),
-                accountApproved: true,
                 emailVerified: true,
                 status: ACCOUNT_STATUS.Unlocked,
                 businessId: business_id

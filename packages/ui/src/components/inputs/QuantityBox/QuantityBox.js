@@ -1,11 +1,12 @@
 import React, { useState, useRef } from "react";
 import PropTypes from 'prop-types';
-import { IconButton, TextField } from '@material-ui/core';
+import { FormControl, IconButton, Input, InputLabel } from '@material-ui/core';
 import {
     Add as AddIcon,
     Remove as RemoveIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
+import { makeID } from "utils";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -14,9 +15,15 @@ const useStyles = makeStyles((theme) => ({
     main: {
         background: theme.palette.primary.contrastText,
         width: '60%',
+        height: '100%',
+        display: 'grid',
         "& input::-webkit-clear-button, & input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
             display: "none",
      }
+    },
+    label: {
+        color: 'grey',
+        paddingTop: '10px',
     },
     button: {
         minWidth: 30,
@@ -46,6 +53,7 @@ function QuantityBox({
     ...props
 }) {
     const classes = useStyles();
+    const id = makeID(5);
     const [value, setValue] = useState(initial_value ?? '');
     // Time for a button press to become a hold
     const HOLD_DELAY = 250;
@@ -100,16 +108,19 @@ function QuantityBox({
                 onContextMenu={(e) => e.preventDefault()}>
                 <RemoveIcon />
             </IconButton>
-            <TextField
-                className={classes.main}
-                type="number"
-                variant="filled"
-                size="small"
-                inputProps={{ min: min_value, max: max_value }}
-                label={label}
-                value={value}
-                onChange={(e) => updateValue(e.target.value)}
-            />
+            <FormControl className={classes.main}>
+                <InputLabel htmlFor={`quantity-box-${id}`} className={classes.label}>{label}</InputLabel>
+                <Input 
+                    id={`quantity-box-${id}`} 
+                    aria-describedby={`helper-text-${id}`} 
+                    style={{color: 'black'}}
+                    variant="filled"
+                    type="number"
+                    inputProps={{ min: min_value, max: max_value }}
+                    value={value}
+                    onChange={(e) => updateValue(e.target.value)}
+                />
+            </FormControl>
             <IconButton
                 className={`${classes.button} ${classes.plus}`}
                 aria-label='plus'

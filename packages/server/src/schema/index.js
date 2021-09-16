@@ -12,15 +12,15 @@ import * as Image from './image';
 import * as Order from './order';
 import * as OrderItem from './orderItem';
 import * as Phone from './phone';
-import * as Plant from './plant';
-import * as PlantTrait from './plantTrait';
+import * as Product from './product';
+import * as ProductTrait from './productTrait';
 import * as Role from './role';
 import * as Sku from './sku';
 import * as Task from './task';
 
 const models = [Root, Address, Business, Customer, Discount, 
                 Email, Feedback, Image, Order, OrderItem, 
-                Phone, Plant, PlantTrait, Role, Sku, Task]
+                Phone, Product, ProductTrait, Role, Sku, Task]
 
 export const schema = makeExecutableSchema({
     typeDefs: models.map(m => m.typeDef),

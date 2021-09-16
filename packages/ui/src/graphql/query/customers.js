@@ -9,7 +9,6 @@ export const customersQuery = gql`
         customers {
             ...customerContactFields
             status
-            accountApproved
             orders {
                 ...orderFields
                 items {
