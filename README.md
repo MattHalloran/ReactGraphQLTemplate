@@ -137,5 +137,6 @@ I've created a project that automates this process, which you can find [here](ht
 2. `git clone ${PROJECT_URL}`
 3. `cd ${PROJECT_NAME}`
 4. Edit .env variables
-5. `chmod +x ./scripts/*`
+5. **Make sure that the urls in `packages/ui/public/index.html` point to the correct website**
+6. `chmod +x ./scripts/*`
 7. `docker-compose up -d`
