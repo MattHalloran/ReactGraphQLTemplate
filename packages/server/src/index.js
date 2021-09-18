@@ -22,9 +22,15 @@ app.use(cookieParser(process.env.JWT_SECRET));
 // For authentication
 app.use(auth.authenticate);
 
-// Cross-Origin access. Accepts requests from localhost and the website
-let origins = [/^http:\/\/localhost(?::[0-9]+)?$/, `http://${process.env.REACT_APP_SITE_NAME}`, `http://www.${process.env.REACT_APP_SITE_NAME}`, `https://${process.env.REACT_APP_SITE_NAME}`, `https://www.${process.env.REACT_APP_SITE_NAME}`]
-if (process.env.REACT_APP_SITE_NAME) origins.push(process.env.REACT_APP_SITE_NAME);
+// Cross-Origin access. Accepts requests from localhost and dns
+// If you want a public server, this can be set to ['*']
+let origins = [
+    /^http:\/\/localhost(?::[0-9]+)?$/, 
+    `http://${process.env.REACT_APP_SITE_NAME}`, 
+    `http://www.${process.env.REACT_APP_SITE_NAME}`, 
+    `https://${process.env.REACT_APP_SITE_NAME}`, 
+    `https://www.${process.env.REACT_APP_SITE_NAME}`
+]
 app.use(cors({
     credentials: true,
     origin: origins
