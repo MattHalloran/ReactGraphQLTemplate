@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     AlertDialog,
+    BottomNav,
     Footer,
-    IconNav,
     Navbar,
     Snack
 } from 'components';
@@ -175,7 +175,7 @@ export function App() {
                                     onRedirect={redirect}
                                 />
                             </div>
-                            <IconNav session={session} userRoles={session?.roles} cart={cart} />
+                            <BottomNav session={session} userRoles={session?.roles} cart={cart} />
                             <Footer session={session} business={business} />
                         </main>
                     </div>

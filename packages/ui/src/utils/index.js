@@ -1,4 +1,5 @@
 export * from './arrayTools';
+export * from './combineStyles';
 export * from './consts';
 export * from './formatData';
 export * from './imageTools';
