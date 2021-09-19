@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Dropzone({
-    acceptedFileTypes = ['image/*', '.heic'],
+    acceptedFileTypes = ['image/*', '.heic', '.heif'],
     dropzoneText = 'Drag \'n\' drop files here or click',
     onUpload,
     showThumbs = true,
@@ -76,12 +76,18 @@ function Dropzone({
         }
     });
 
-    const upload = () => {
+    const upload = (e) => {
+        e.stopPropagation();
         if (files.length === 0) {
             PubSub.publish(PUBS.Snack, { message: 'No files selected', severity: 'error' });
             return;
         }
         onUpload(files);
+        setFiles([]);
+    }
+
+    const cancel = (e) => {
+        e.stopPropagation();
         setFiles([]);
     }
 
@@ -104,22 +110,22 @@ function Dropzone({
 
     return (
         <section className={classes.dropContainer}>
-            <div style={{textAlign: 'center'}} {...getRootProps({ className: 'dropzone' })}>
+            <div style={{ textAlign: 'center' }} {...getRootProps({ className: 'dropzone' })}>
                 <input {...getInputProps()} />
                 <p>{dropzoneText}</p>
+                {showThumbs &&
+                    <aside className={classes.thumbsContainer}>
+                        {thumbs}
+                    </aside>}
+                <Grid className={classes.gridPad} container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={upload}>{uploadText}</Button>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={cancel}>{cancelText}</Button>
+                    </Grid>
+                </Grid>
             </div>
-            {showThumbs && 
-            <aside className={classes.thumbsContainer}>
-                {thumbs}
-            </aside>}
-            <Grid className={classes.gridPad} container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={upload}>{uploadText}</Button>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <Button className={classes.itemPad} disabled={disabled || files.length === 0} fullWidth onClick={() => setFiles([])}>{cancelText}</Button>
-                </Grid>
-            </Grid>
         </section>
     );
 }
