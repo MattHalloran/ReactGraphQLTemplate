@@ -72,7 +72,14 @@ It is often useful to send and receives emails with the website's address. Instr
 ## Favicons
 A favicon is the image displayed in a browser's tab window. It also has other uses, such as being the icon displayed if the site is added to the home screen on a phone. There are a lot of different formats out there, so it's easiest to use a site like [realfavicongenerator](https://realfavicongenerator.net/) to guide you through this process. All you need is an svg file of your desired image (usually your company logo).
 
-Favicons should be placed in `packages/ui/public`. The link and meta tags should be added to `packages/ui/public/index.html`. After your favicon files are in the correct location, if you have a `site.manifest` or `manifest.json` file, you should add `name` and `short_name` fields with your project's name and a short description, respectively.
+Favicons should be placed in `packages/ui/public`. The link and meta tags should be added to `packages/ui/public/index.html`. After your favicon files are in the correct location, if you have a `site.manifest` or `manifest.json` file, make sure you have the following fields to qualify as a Progressive Web Application (PWA):  
+1. `name` - Name of application in install dialog and Chrome Web Store. Maximum 45 characters  
+2. `short_name` - Short version of application name. Maximum 12 characters  
+3. `display` - either `fullscreen`, `standalone`, `minimal-ui`, or `browser`
+4. `scope` - usually `/`
+4. `start_url` - usually `/`  
+
+See [here](https://web.dev/add-manifest/) for more information on manifest fields.
 
 If you are planning to support Progressive Web Apps (PWA), then you should also have a square version of your logo referenced in the manifest file. [Here](https://maskable.app/editor) is a useful site for checking how your image looks with different masks.
 
