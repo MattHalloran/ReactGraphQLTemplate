@@ -4,7 +4,7 @@ import {
     QuantityBox,
     Selector
 } from 'components';
-import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, getProductTrait, updateArray } from 'utils';
+import { deleteArrayIndex, showPrice, updateObject, PUBS, PubSub, getImageSrc, updateArray } from 'utils';
 import { NoImageIcon } from 'assets/img';
 import { IconButton } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';

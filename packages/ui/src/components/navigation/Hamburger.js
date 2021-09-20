@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { 
-    ContactInfo,
-    Copyright
-} from 'components';
+import { ContactInfo } from 'components';
 import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,

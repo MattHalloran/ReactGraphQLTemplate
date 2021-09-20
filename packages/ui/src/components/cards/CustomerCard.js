@@ -22,7 +22,6 @@ import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mu
 import { useMutation } from '@apollo/client';
 import { ACCOUNT_STATUS } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
-import { useTheme } from '@emotion/react';
 import { emailLink, mapIfExists, phoneLink, PUBS, PubSub, showPhone } from 'utils';
 import { ListDialog } from 'components/dialogs';
 import { cardStyles } from './styles';
@@ -35,7 +34,6 @@ function CustomerCard({
     onEdit,
 }) {
     const classes = useStyles();
-    const theme = useTheme();
     const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
     const [deleteCustomer] = useMutation(deleteCustomerMutation);
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
@@ -57,7 +55,7 @@ function CustomerCard({
         [ACCOUNT_STATUS.WaitingApproval]: 'Waiting Approval',
         [ACCOUNT_STATUS.SoftLock]: 'Soft Locked',
         [ACCOUNT_STATUS.HardLock]: 'Hard Locked',
-    }), [theme])
+    }), [])
 
     const edit = () => {
         onEdit(customer);
@@ -120,6 +118,7 @@ function CustomerCard({
             case ACCOUNT_STATUS.Deleted:
                 actions.push(undelete_action);
                 actions.push(permanent_delete_action);
+                break;
             default:
                 break;
         }

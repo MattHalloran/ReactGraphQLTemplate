@@ -3,7 +3,6 @@ import 'jspdf-autotable';
 import { showPrice, PUBS, PubSub } from 'utils';
 import { skusQuery } from 'graphql/query';
 import { initializeApollo } from 'graphql/utils/initialize';
-import { getProductTrait } from "./productTools";
 import { SKU_SORT_OPTIONS } from '@local/shared';
 
 const TITLE_FONT_SIZE = 30;

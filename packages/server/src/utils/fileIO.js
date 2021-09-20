@@ -144,10 +144,8 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         // Determine image dimensions
         let image_buffer = await streamToBuffer(stream);
         const dimensions = probe.sync(image_buffer);
-        console.log('GOT DIMENSIONS', dimensions);
         // If image is .heic or .heif, convert to jpg. Thanks, Apple
         if (['.heic', '.heif'].includes(extCheck.toLowerCase())) {
-            console.log('converting image buffer')
             image_buffer = await convert({
                 buffer: image_buffer, // the HEIC file buffer
                 format: 'JPEG',      // output format
@@ -157,14 +155,11 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         }
         // Determine image hash
         const hash = await imghash.hash(image_buffer);
-        console.log('IMAGE HASH', hash)
         // Check if hash already exists (image previously uploaded)
         const previously_uploaded = await prisma[TABLES.Image].findUnique({ where: { hash } });
-        console.log('previously uploaded', previously_uploaded);
         if (previously_uploaded && errorOnDuplicate) throw Error('File has already been uploaded');
         // Download the original image, and store metadata in database
         const full_size_filename = `${folder}/${name}-XXL${extCheck}`;
-        console.log('name', full_size_filename);
         await sharp(image_buffer).toFile(`${ASSET_DIR}/${full_size_filename}`);
         const imageData = { hash, alt, description };
         await prisma[TABLES.Image].upsert({
