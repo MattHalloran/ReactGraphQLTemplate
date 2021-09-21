@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ContactInfo } from 'components';
-import { getUserActions, LINKS, PUBS, PubSub } from 'utils';
+import { actionsToList, createAction, getUserActions, LINKS, PUBS, PubSub } from 'utils';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,
-    ExitToApp as ExitToAppIcon,
     ExpandLess as ExpandLessIcon,
     ExpandMore as ExpandMoreIcon,
     Facebook as FacebookIcon,
-    Home as HomeIcon,
     Menu as MenuIcon,
     Info as InfoIcon,
     Instagram as InstagramIcon,
     PhotoLibrary as PhotoLibraryIcon,
     Share as ShareIcon,
 } from '@material-ui/icons';
-import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Badge, Collapse, Divider, ListItemText } from '@material-ui/core';
+import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
-import _ from 'lodash';
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
     drawerPaper: {
@@ -59,12 +57,11 @@ const useStyles = makeStyles((theme) => ({
 function Hamburger({
     session,
     business,
-    logout,
     roles,
     cart,
-    onRedirect
 }) {
     const classes = useStyles();
+    const history = useHistory();
     const theme = useTheme();
     const [contactOpen, setContactOpen] = useState(true);
     const [socialOpen, setSocialOpen] = useState(false);
@@ -94,45 +91,18 @@ function Hamburger({
         window.open(link, "_blank");
     }
 
-    const optionsToList = (options) => {
-        return options.map(([label, value, link, onClick, Icon, badgeNum], index) => (
-            <ListItem 
-                key={index}
-                className={classes.menuItem}
-                button
-                onClick={() => { 
-                    onRedirect(link); 
-                    if (onClick) onClick();
-                    closeMenu();
-                }}>
-                {Icon ?
-                    (<ListItemIcon>
-                        <Badge badgeContent={badgeNum ?? 0} color="error">
-                            <Icon className={classes.menuIcon} />
-                        </Badge>
-                    </ListItemIcon>) : null}
-                <ListItemText primary={label} />
-            </ListItem>
-        ))
-    }
-
-    let nav_options = [
-        ['Home', 'home', LINKS.Home, null, HomeIcon],
+    let nav_actions = getUserActions({ session, roles, cart });
+    let about_actions = [
         ['About Us', 'about', LINKS.About, null, InfoIcon],
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
-    ]
-
-    let customer_actions = getUserActions(session, roles, cart);
-    if (_.isObject(session) && Object.entries(session).length > 0) {
-        customer_actions.push(['Log Out', 'logout', LINKS.Home, logout, ExitToAppIcon]);
-    }
+    ].map(a => createAction(...a));
 
     return (
         <React.Fragment>
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onOpen={()=>{}} onClose={closeMenu}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onOpen={() => { }} onClose={closeMenu}>
                 <IconButton className={classes.close} onClick={closeMenu}>
                     <CloseIcon fontSize="large" />
                 </IconButton>
@@ -166,9 +136,19 @@ function Hamburger({
                             <ListItemText primary="Instagram" />
                         </ListItem>
                     </Collapse>
-                    {optionsToList(nav_options)}
+                    {actionsToList({
+                        actions: about_actions,
+                        history,
+                        classes: { listItem: classes.menuItem, listItemIcon: classes.menuIcon },
+                        onAnyClick: closeMenu,
+                    })}
                     <Divider />
-                    {optionsToList(customer_actions)}
+                    {actionsToList({
+                        actions: nav_actions,
+                        history,
+                        classes: { listItem: classes.menuItem, listItemIcon: classes.menuIcon },
+                        onAnyClick: closeMenu,
+                    })}
                 </List>
                 <CopyrightBreadcrumbs className={classes.copyright} business={business} textColor={theme.palette.primary.contrastText} />
             </SwipeableDrawer>

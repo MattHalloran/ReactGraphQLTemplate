@@ -4,15 +4,14 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { getUserActions, LINKS, updateArray } from 'utils';
-import { Container, Button, IconButton, Badge, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { actionsToList, actionToIconButton, actionsToMenu, createAction, getUserActions, LINKS } from 'utils';
+import { Container, List } from '@material-ui/core';
 import {
     Info as InfoIcon,
     PhotoLibrary as PhotoLibraryIcon,
-    ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import _ from 'lodash';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,68 +41,29 @@ const useStyles = makeStyles((theme) => ({
 function NavList({
     session,
     business,
-    logout,
     roles,
     cart,
-    onRedirect
 }) {
     const classes = useStyles();
-    
-    let nav_options = getUserActions(session, roles, cart);
+    const history = useHistory();
 
-    let cart_button;
-    // If someone is not logged in, display sign up/log in links
-    if (!_.isObject(session) || Object.keys(session).length === 0) {
-        nav_options.push(['Sign Up', 'signup', LINKS.Register]);
-    } else {
-        // Cart option is rendered differently, so we must take it out of the array
-        let cart_index = nav_options.length - 1;
-        let cart_option = nav_options[cart_index];
-        // Replace cart option with log out option
-        nav_options = updateArray(nav_options, cart_index, ['Log Out', 'logout', LINKS.Home, logout]);
-        cart_button = (
-            <IconButton edge="start" color="inherit" aria-label={cart_option[1]} onClick={() => onRedirect(LINKS.Cart)}>
-                <Badge badgeContent={cart_option[5]} color="error">
-                    <ShoppingCartIcon/>
-                </Badge>
-            </IconButton>
-        );
-    }
-
-    let about_options = [
+    let nav_actions = getUserActions({ session, roles, cart });
+    let about_actions = [
         ['About Us', 'about', LINKS.About, null, InfoIcon],
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
-    ]
+    ].map(a => createAction(...a))
 
-    const optionsToList = (options) => {
-        return options.map(([label, value, link, onClick, Icon], index) => (
-            <ListItem className={classes.menuItem} button key={index} onClick={() => { onRedirect(link); if (onClick) onClick() }}>
-                {Icon ?
-                    (<ListItemIcon>
-                            <Icon className={classes.menuIcon} />
-                    </ListItemIcon>) : null}
-                <ListItemText primary={label} />
-            </ListItem>
-        ))
-    }
-
-    const optionsToMenu = (options) => {
-        return options.map(([label, value, link, onClick], index) => (
-            <Button
-                key={index}
-                variant="text"
-                size="large"
-                className={classes.navItem}
-                onClick={() => { onRedirect(link); if(onClick) onClick()}}
-            >
-                {label}
-            </Button>
-        ));
+    // Cart is the only option displayed as an icon
+    let cart_button;
+    const cart_action = nav_actions.filter(a => a.value === 'cart');
+    if (cart_action.length > 0) {
+        nav_actions = nav_actions.filter(a => a.value !== 'cart');
+        cart_button = actionToIconButton({ action:cart_action[0], history });
     }
 
     return (
         <Container className={classes.root}>
-            <PopupMenu 
+            <PopupMenu
                 text="Contact"
                 variant="text"
                 size="large"
@@ -118,10 +78,18 @@ function NavList({
                 className={classes.navItem}
             >
                 <List>
-                    {optionsToList(about_options)}
+                    {actionsToList({
+                        actions: about_actions,
+                        history,
+                        classes: { listItem: classes.menuItem, listItemIcon: classes.menuIcon },
+                    })}
                 </List>
             </PopupMenu>
-            {optionsToMenu(nav_options)}
+            {actionsToMenu({
+                actions: nav_actions,
+                history,
+                classes: { button: classes.navItem },
+            })}
             {cart_button}
         </Container>
     );
