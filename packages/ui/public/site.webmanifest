@@ -50,24 +50,19 @@
     ],
     "shortcuts": [
         {
-            "name": "My Projects",
-            "url": "/projects",
-            "description": "Collection of created and saved projects"
+            "name": "Shop",
+            "url": "/shop",
+            "description": "Check out our availability"
         },
         {
-            "name": "Learn",
-            "url": "/learn",
-            "description": "Personal learning dashboard"
+            "name": "Profile",
+            "url": "/profile",
+            "description": "View and update profile and credentials"
         },
         {
-            "name": "Research",
-            "url": "/research",
-            "description": "Research dashboard"
-        },
-        {
-            "name": "Develop",
-            "url": "/develop",
-            "description": "Create and run routines"
+            "name": "Cart",
+            "url": "/cart",
+            "description": "View shopping cart"
         }
     ]
 }
