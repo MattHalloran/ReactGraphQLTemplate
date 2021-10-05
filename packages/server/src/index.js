@@ -52,6 +52,7 @@ const apollo_options = new ApolloServer({
     uploads: false, // Disables old version of graphql-upload
     validationRules: [ depthLimit(8) ] // Prevents DoS attack from arbitrarily-nested query
  });
+await apollo_options.start();
 apollo_options.applyMiddleware({ 
     app, 
     path: `${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, 
