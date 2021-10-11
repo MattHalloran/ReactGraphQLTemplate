@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
-import { CODE, PRODUCT_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
+import { CODE, PRODUCT_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
+import { SkuStatus } from '@prisma/client';
 
 const _model = TABLES.Product;
 
@@ -76,7 +77,7 @@ export const resolvers = {
             // Toggle for showing active/inactive products (whether the product has any SKUs available to order)
             // Only admins can view inactive products
             let activeQuery;
-            let activeQueryBase = { skus: {  some: { status: SKU_STATUS.Active } } };
+            let activeQueryBase = { skus: {  some: { status: SkuStatus.ACTIVE } } };
             if (args.active === true) activeQuery = activeQueryBase;
             else if (args.active === false && context.req.isAdmin) activeQuery = { NOT: activeQueryBase };
             return await context.prisma[_model].findMany({ 

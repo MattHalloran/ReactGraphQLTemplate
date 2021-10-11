@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
 import bcrypt from 'bcrypt';
-import { ACCOUNT_STATUS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { AccountStatus as AS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
@@ -17,10 +17,10 @@ const LOGIN_ATTEMPTS_TO_HARD_LOCKOUT = 10;
 
 export const typeDef = gql`
     enum AccountStatus {
-        Deleted
-        Unlocked
-        SoftLock
-        HardLock
+        DELETED
+        UNLOCKED
+        SOFT_LOCKED
+        HARD_LOCKED
     }
 
     input CustomerInput {
@@ -39,7 +39,6 @@ export const typeDef = gql`
         id: ID!
         firstName: String!
         lastName: String!
-        fullName: String
         pronouns: String!
         emails: [Email!]!
         phones: [Phone!]!
@@ -111,13 +110,13 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    AccountStatus: ACCOUNT_STATUS,
+    AccountStatus: AS,
     Query: {
         customers: async (_, _args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].findMany({
-                orderBy: { fullName: 'asc', },
+                orderBy: [{ firstName: 'asc', }, { lastName: 'asc' }],
                 ...(new PrismaSelect(info).value)
             });
         },
@@ -166,11 +165,11 @@ export const resolvers = {
             if (args.verificationCode === customer.id && customer.emailVerified === false) {
                 customer = await context.prisma[_model].update({
                     where: { id: customer.id },
-                    data: { status: ACCOUNT_STATUS.Unlocked, emailVerified: true }
+                    data: { status: AS.UNLOCKED, emailVerified: true }
                 })
             }
             // Reset login attempts after 15 minutes
-            const unable_to_reset = [ACCOUNT_STATUS.HardLock, ACCOUNT_STATUS.Deleted];
+            const unable_to_reset = [AS.HARD_LOCKED, AS.DELETED];
             if (!unable_to_reset.includes(customer.status) && Date.now() - new Date(customer.lastLoginAttempt).getTime() > SOFT_LOCKOUT_DURATION) {
                 customer = await context.prisma[_model].update({
                     where: { id: customer.id },
@@ -179,9 +178,9 @@ export const resolvers = {
             }
             // Before validating password, let's check to make sure the account is unlocked
             const status_to_code = {
-                [ACCOUNT_STATUS.Deleted]: CODE.NoCustomer,
-                [ACCOUNT_STATUS.SoftLock]: CODE.SoftLockout,
-                [ACCOUNT_STATUS.HardLock]: CODE.HardLockout
+                [AS.DELETED]: CODE.NoCustomer,
+                [AS.SOFT_LOCKED]: CODE.SoftLockout,
+                [AS.HARD_LOCKED]: CODE.HardLockout
             }
             if (customer.status in status_to_code) return new CustomError(status_to_code[customer.status]);
             // Now we can validate the password
@@ -204,12 +203,12 @@ export const resolvers = {
                 if (cart) userData.cart = cart;
                 return userData;
             } else {
-                let new_status = ACCOUNT_STATUS.Unlocked;
+                let new_status = AS.UNLOCKED;
                 let login_attempts = customer.loginAttempts + 1;
                 if (login_attempts >= LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT) {
-                    new_status = ACCOUNT_STATUS.SoftLock;
+                    new_status = AS.SOFT_LOCKED;
                 } else if (login_attempts > LOGIN_ATTEMPTS_TO_HARD_LOCKOUT) {
-                    new_status = ACCOUNT_STATUS.HardLock;
+                    new_status = AS.HARD_LOCKED;
                 }
                 await context.prisma[_model].update({
                     where: { id: customer.id },
@@ -239,7 +238,7 @@ export const resolvers = {
                     business: {name: args.business},
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     theme: args.theme,
-                    status: ACCOUNT_STATUS.Unlocked,
+                    status: AS.UNLOCKED,
                     emails: [{ emailAddress: args.email }],
                     phones: [{ number: args.phone }],
                     roles: [customerRole]
@@ -272,7 +271,7 @@ export const resolvers = {
                     pronouns: args.input.pronouns,
                     business: args.input.business,
                     theme: 'light',
-                    status: ACCOUNT_STATUS.Unlocked,
+                    status: AS.UNLOCKED,
                     emails: args.input.emails,
                     phones: args.input.phones,
                     roles: [customerRole]

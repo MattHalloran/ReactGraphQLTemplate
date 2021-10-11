@@ -1,8 +1,11 @@
-import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
 import { HASHING_ROUNDS } from '../../consts';
 import { db } from '../db';
+import pkg from '@prisma/client';
+const { PrismaClient, AccountStatus } = pkg;
+
+const prisma = new PrismaClient();
 
 // Create a user, with business, emails, phones, and roles
 async function createUser({ userData, businessData, emailsData, phonesData, roleIds }) {
@@ -31,11 +34,11 @@ async function createUser({ userData, businessData, emailsData, phonesData, role
     }
 }
 
-export async function seed() {
+async function main() {
     console.info('🎭 Creating mock data...');
 
     // Find existing roles
-    const roles = (await db(TABLES.Role).select('id', 'title'));
+    const roles = await prisma[TABLES.Role].findMany({ select: { id: true, title: true } });
     const customerRoleId = roles.filter(r => r.title === 'Customer')[0].id;
     const ownerRoleId = roles.filter(r => r.title === 'Owner')[0].id;
     // const adminRoleId = roles.filter(r => r.title === 'Admin')[0].id;
@@ -48,7 +51,7 @@ export async function seed() {
             lastName: 'Tusk🦏',
             password: bcrypt.hashSync('Elon', HASHING_ROUNDS),
             emailVerified: true,
-            status: ACCOUNT_STATUS.Unlocked,
+            status: AccountStatus.UNLOCKED,
         },
         emailsData: [
             { emailAddress: 'notarealemail@afakesite.com', receivesDeliveryUpdates: false },
@@ -69,7 +72,7 @@ export async function seed() {
             lastName: 'Cena',
             password: bcrypt.hashSync('John', HASHING_ROUNDS),
             emailVerified: true,
-            status: ACCOUNT_STATUS.Unlocked,
+            status: AccountStatus.UNLOCKED,
         },
         emailsData: [
             { emailAddress: 'itsjohncena@afakesite.com', receivesDeliveryUpdates: false }
@@ -84,7 +87,7 @@ export async function seed() {
             lastName: 'Customerpants',
             password: bcrypt.hashSync('Spongebob', HASHING_ROUNDS),
             emailVerified: true,
-            status: ACCOUNT_STATUS.Unlocked,
+            status: AccountStatus.UNLOCKED,
         },
         emailsData: [
             { emailAddress: 'spongebobmeboy@afakesite.com', receivesDeliveryUpdates: false }
@@ -98,3 +101,10 @@ export async function seed() {
 
     console.info(`✅ Database mock complete.`);
 }
+
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+}).finally(async () => {
+    await prisma.$disconnect();
+})

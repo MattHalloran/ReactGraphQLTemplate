@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
+import { TABLES } from '../db';
 
 const _model = TABLES.ProductTrait;
 
@@ -24,14 +24,14 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        traitNames: async () => {
-            return await db(TABLES.ProductTrait).select('name').unique();
+        traitNames: async ({ context }) => {
+            return await context.prisma[_model].findMany({ select: { name: true }, distinct: ['name']});
         },
-        traitValues: async (_, args) => {
-            return await db(TABLES.ProductTrait).select('value').where('name', args.name)
+        traitValues: async ({ args, context }) => {
+            return await context.prisma[_model].findMany({ where: { name: args.name }, select: { value: true }})
         },
         // Returns all values previously entered for every trait
-        traitOptions: async (_, _args, context) => {
+        traitOptions: async ({ context }) => {
             // Query all data
             const trait_data = await context.prisma[_model].findMany();
             // Combine data into object

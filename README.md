@@ -61,6 +61,15 @@ Open Graph is a metadata format that describes how your website should be shown 
 [Linting](https://en.wikipedia.org/wiki/Lint_(software)) is handled by [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react). Follow their README for more information
 
 
+## Database migrations
+Database migrations are handled by Prisma. Full documentation can be found [here](https://www.prisma.io/docs/concepts/components/prisma-migrate). The basic commands are:  
+1. `prisma migrate dev --name some-name` - create a migration called 'some-name'  
+2. `npx prisma migrate deploy` - upgrade database in production or testing environment
+
+## Database seeding
+Database seeding is also handled by Prisma, with full documentation [here](https://www.prisma.io/docs/guides/database/seed-database).
+
+
 ## Non-database storage
 It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
 

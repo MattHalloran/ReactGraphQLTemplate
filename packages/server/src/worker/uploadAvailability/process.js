@@ -1,7 +1,6 @@
 import { TABLES } from "../../db";
-import { SKU_STATUS } from "@local/shared";
 import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+const { PrismaClient, SkuStatus } = pkg;
 
 const prisma = new PrismaClient()
 
@@ -24,7 +23,7 @@ export async function uploadAvailabilityProcess(job) {
         availability: header.indexOf('Quantity')
     }
     // Hide all existing SKUs, so only the SKUs in this file can be set to visible
-    await prisma[TABLES.Sku].updateMany({ data: { status: SKU_STATUS.Inactive } })
+    await prisma[TABLES.Sku].updateMany({ data: { status: SkuStatus.INACTIVE } })
     for (const row of content) {
         // Insert or update product data from row
         const name = row[index.name];
@@ -59,7 +58,7 @@ export async function uploadAvailabilityProcess(job) {
             note: row[index.note],
             availability: parseInt(row[index.availability]) || 0,
             productId: product.id,
-            status: SKU_STATUS.Active
+            status: SkuStatus.ACTIVE
         }
         if (!sku_data.sku) {
             console.error('⛔️ Cannot update rows without a SKU');

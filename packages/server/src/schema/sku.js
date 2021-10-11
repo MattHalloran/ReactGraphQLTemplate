@@ -1,11 +1,12 @@
 import { gql } from 'apollo-server-express';
-import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
+import { CODE, SKU_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { saveFile } from '../utils';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
 import { TABLES } from '../db';
 import { PrismaSelect } from '@paljs/plugins';
 import path from 'path';
+import { SkuStatus as SS } from '@prisma/client';
 
 const _model = TABLES.Sku;
 
@@ -78,7 +79,7 @@ const SORT_TO_QUERY = {
 }
 
 export const resolvers = {
-    SkuStatus: SKU_STATUS,
+    SkuStatus: SS,
     SkuSortBy: SKU_SORT_OPTIONS,
     Query: {
         // Query all SKUs

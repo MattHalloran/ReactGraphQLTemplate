@@ -1,14 +1,17 @@
-import { ACCOUNT_STATUS } from '@local/shared';
 import { TABLES } from '../tables';
 import bcrypt from 'bcrypt';
 import { HASHING_ROUNDS } from '../../consts';
 import { db } from '../db';
+import pkg from '@prisma/client';
+const { PrismaClient, AccountStatus } = pkg;
 
-export async function seed() {
+const prisma = new PrismaClient();
+
+async function main() {
     console.info('🌱 Starting database intial seed...');
 
     // Find existing roles
-    const role_titles = (await db(TABLES.Role).select('title')).map(r => r.title);
+    const role_titles = await prisma[TABLES.Role].findMany({ select: { title: true } }).map(r => r.title);
     // Specify roles that should exist
     const role_data = [
         ['Customer', 'This role allows a customer to order products'],
@@ -21,16 +24,13 @@ export async function seed() {
     for (const role of role_data) {
         if (!role_titles.includes(role[0])) {
             console.info(`🏗 Creating ${role[0]} role`);
-            await db(TABLES.Role).insert({
-                title: role[0],
-                description: role[1],
-            });
+            await prisma[TABLES.Role].create({ data: { title: role[0], description: role[1] } })
         }
     }
 
     // Determine if admin needs to be added
-    const role_admin_id = (await db(TABLES.Role).select('id').where('title', 'Admin').first()).id;
-    const has_admin = (await db(TABLES.CustomerRoles).where('roleId', role_admin_id)).length > 0;
+    const role_admin_id = await prisma[TABLES.Role].findUnique({ where: { title: 'Admin' }, select: { id: true } })?.id;
+    const has_admin = (await prisma[TABLES.CustomerRoles].findMany({ where: { roleId: role_admin_id }})).length > 0;
     if (!has_admin) {
         console.info(`👩🏼‍💻 Creating admin account`);
         // Insert admin's business
@@ -46,7 +46,7 @@ export async function seed() {
                 lastName: 'account',
                 password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS),
                 emailVerified: true,
-                status: ACCOUNT_STATUS.Unlocked,
+                status: AccountStatus.UNLOCKED,
                 businessId: business_id
             }
         ]).returning('id'))[0];
@@ -68,5 +68,17 @@ export async function seed() {
             }
         ])
     }
+
+    // Populate mock data
+    if (process.env.CREATE_MOCK_DATA) {
+        import { main } from './mock';
+    }
     console.info(`✅ Database seeding complete.`);
 }
+
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+}).finally(async () => {
+    await prisma.$disconnect();
+})

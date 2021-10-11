@@ -14,7 +14,7 @@ import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { combineStyles, getImageSrc } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
-import { IMAGE_USE, SERVER_URL } from '@local/shared';
+import { ImageUse, SERVER_URL } from '@local/shared';
 import { cardStyles } from './styles';
 
 const componentStyles = (theme) => ({
@@ -46,7 +46,7 @@ function ProductCard({
     const classes = useStyles();
 
     let display;
-    let display_data = product.images.find(image => image.usedFor === IMAGE_USE.ProductDisplay)?.image;
+    let display_data = product.images.find(image => image.usedFor === ImageUse.PRODUCT_DISPLAY)?.image;
     if (!display_data && product.images.length > 0) display_data = product.images[0].image;
     if (display_data) {
         display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={product.name} />

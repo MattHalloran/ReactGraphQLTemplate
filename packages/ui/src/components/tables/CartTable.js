@@ -13,7 +13,7 @@ import { makeStyles } from '@material-ui/styles';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
-import { IMAGE_USE, SERVER_URL } from '@local/shared';
+import { ImageUse, SERVER_URL } from '@local/shared';
 
 const useStyles = makeStyles((theme) => ({
     tablePaper: {
@@ -97,7 +97,7 @@ function CartTable({
         }
 
         let display;
-        let display_data = data.sku.product.images.find(image => image.usedFor === IMAGE_USE.ProductDisplay)?.image;
+        let display_data = data.sku.product.images.find(image => image.usedFor === ImageUse.PRODUCT_DISPLAY)?.image;
         if (!display_data && data.sku.product.images.length > 0) display_data = data.sku.product.images[0].image;
         if (display_data) {
             display = <img src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={data.sku.product?.name ?? ''} />

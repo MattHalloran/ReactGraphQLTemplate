@@ -1,17 +1,18 @@
 import { gql } from 'apollo-server-express';
 import { TABLES } from '../db';
-import { CODE, TASK_STATUS } from '@local/shared';
+import { CODE } from '@local/shared';
 import { CustomError } from '../error';
-import { PrismaSelect } from '@paljs/plugins';
+import { TaskStatus as TS } from '@prisma/client';
 
 const _model = TABLES.Task;
 
 export const typeDef = gql`
     enum TaskStatus {
-        Unknown
-        Failed
-        Active
-        Completed
+        UNKNOWN
+        FAILED
+        ACTIVE
+        INACTIVE
+        COMPLETED
     }
 
     type Task {
@@ -30,7 +31,7 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    TaskStatus: TASK_STATUS,
+    TaskStatus: TS,
     Query: {
         tasks: async (_, args, context) => {
             // Must be admin

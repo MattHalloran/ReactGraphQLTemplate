@@ -2,7 +2,8 @@ import { PrismaSelect } from "@paljs/plugins";
 import { TABLES } from "../tables";
 import { onlyPrimitives } from "../../utils/objectTools";
 import { CustomError } from "../../error";
-import { CODE, ORDER_STATUS } from '@local/shared';
+import { CODE } from '@local/shared';
+import { OrderStatus } from '@prisma/client';
 
 // Validates email address, and returns customer data
 export async function customerFromEmail(email, prisma) {
@@ -31,7 +32,7 @@ export async function getCart(prisma, info, customerId) {
     let results;
     if (selectInfo) {
         results = await prisma[TABLES.Order].findMany({ 
-            where: { customerId: customerId, status: ORDER_STATUS.Draft },
+            where: { customerId: customerId, status: OrderStatus.DRAFT },
             ...selectInfo
         });
     }

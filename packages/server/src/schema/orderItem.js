@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
-import { CODE, ORDER_STATUS } from '@local/shared';
+import { TABLES } from '../db';
+import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
+import { OrderStatus } from '@prisma/client';
 
 const _model = TABLES.OrderItem;
 
@@ -38,7 +39,7 @@ export const resolvers = {
             // If no orderId, find or create a new order
             let order;
             if (!args.orderId) {
-                const cartData = { customerId: context.req.customerId, status: ORDER_STATUS.Draft };
+                const cartData = { customerId: context.req.customerId, status: OrderStatus.DRAFT };
                 // Find current cart
                 const matchingOrders = await context.prisma[TABLES.Order].findMany({ where: {
                     AND: [
@@ -56,7 +57,7 @@ export const resolvers = {
             if (!context.req.isAdmin && context.req.customerId !== order.customerId) return new CustomError(CODE.Unauthorized);
             if (!context.req.isAdmin) {
                 // Customers can only update their own orders in certain states
-                const editable_order_statuses = [ORDER_STATUS.Draft, ORDER_STATUS.Pending];
+                const editable_order_statuses = [OrderStatus.DRAFT, OrderStatus.PENDING];
                 if (!editable_order_statuses.includes(order.status)) return new CustomError(CODE.Unauthorized);
             }
             // Add to existing order item, or create a new one
@@ -69,10 +70,10 @@ export const resolvers = {
         },
         deleteOrderItems: async (_, args, context) => {
             // Must be admin, or deleting your own
-            let customer_ids = await db(TABLES.Order)
-                .select(`${TABLES.Order}.customerId`)
-                .leftJoin(TABLES.OrderItem, `${TABLES.OrderItemModel}.orderId`, `${TABLES.Order}.id`)
-                .whereIn(`${TABLES.OrderItem}.id`, args.ids);
+            let customer_ids = await context.prisma[TABLES.Customer].findMany({ 
+                where: { orders: { items: { id: { in: args.ids } } } },
+                select: { id: true }
+            });
             customer_ids = [...new Set(customer_ids)];
             if (!context.req.isAdmin && (customer_ids.length > 1 || context.req.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
             return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });

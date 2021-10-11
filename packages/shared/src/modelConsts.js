@@ -1,8 +1,8 @@
-export const ACCOUNT_STATUS = {
-    Deleted: 'Deleted',
-    Unlocked: 'Unlocked',
-    SoftLock: 'SoftLock',
-    HardLock: 'HardLock'
+export const AccountStatus = {
+    DELETED: 'Deleted',
+    UNLOCKED: 'Unlocked',
+    SOFT_LOCKED: 'SoftLock',
+    HARD_LOCKED: 'HardLock'
 }
 export const DEFAULT_PRONOUNS = [
     "he/him/his",
@@ -32,10 +32,10 @@ export const IMAGE_SIZE = {
     XL: 2048,
     XXL: 4096,
 }
-export const IMAGE_USE = {
-    Hero: 'Hero',
-    Gallery: 'Gallery',
-    ProductDisplay: 'Display'
+export const ImageUse = {
+    HERO: 'Hero',
+    GALLERY: 'Gallery',
+    PRODUCT_DISPLAY: 'Display'
 }
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
 // CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
@@ -48,17 +48,17 @@ export const IMAGE_USE = {
 // SCHEDULED            | Order has been scheduled for delivery
 // IN_TRANSIT           | Order is currently being delivered
 // DELIVERED            | Order has been delivered
-export const ORDER_STATUS = {
-    CanceledByAdmin: 'CanceledByAdmin',
-    CanceledByCustomer: 'CanceledByCustomer',
-    PendingCancel: 'PendingCancel',
-    Rejected: 'Rejected',
-    Draft: 'Draft',
-    Pending: 'Pending',
-    Approved: 'Approved',
-    Scheduled: 'Scheduled',
-    InTransit: 'InTransit',
-    Delivered: 'Delivered'
+export const OrderStatus = {
+    CANCELED_BY_ADMIN: 'CANCELED_BY_ADMIN',
+    CANCELED_BY_CUSTOMER: 'CANCELED_BY_CUSTOMER',
+    PENDING_CANCEL: 'PENDING_CANCEL',
+    REJECTED: 'REJECTED',
+    DRAFT: 'DRAFT',
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    SCHEDULED: 'SCHEDULED',
+    IN_TRANSIT: 'IN_TRANSIT',
+    DELIVERED: 'DELIVERED'
 }
 export const PRODUCT_SORT_OPTIONS = {
     AZ: 'AZ',
@@ -76,16 +76,10 @@ export const SKU_SORT_OPTIONS = {
     Newest: 'Newest',
     Oldest: 'Oldest'
 }
-export const SKU_STATUS = {
-    Deleted: 'Deleted',
-    Inactive: 'Inactive',
-    Active: 'Active',
-}
-export const TASK_STATUS = {
-    Unknown: 'Unknown',
-    Failed: 'Failed',
-    Active: 'Active',
-    Completed: 'Completed',
+export const SkuStatus = {
+    DELETED: 'DELETED',
+    INACTIVE: 'INACTIVE',
+    ACTIVE: 'ACTIVE',
 }
 export const THEME = {
     Light: 'light',

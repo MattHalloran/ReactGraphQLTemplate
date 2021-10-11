@@ -20,7 +20,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { ACCOUNT_STATUS } from '@local/shared';
+import { AccountStatus } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { emailLink, mapIfExists, phoneLink, PUBS, PubSub, showPhone } from 'utils';
 import { ListDialog } from 'components/dialogs';
@@ -30,7 +30,7 @@ const useStyles = makeStyles(cardStyles);
 
 function CustomerCard({
     customer,
-    status = ACCOUNT_STATUS.Deleted,
+    status = AccountStatus.DELETED,
     onEdit,
 }) {
     const classes = useStyles();
@@ -50,11 +50,10 @@ function CustomerCard({
     }
 
     const status_map = useMemo(() => ({
-        [ACCOUNT_STATUS.Deleted]: 'Deleted',
-        [ACCOUNT_STATUS.Unlocked]: 'Unlocked',
-        [ACCOUNT_STATUS.WaitingApproval]: 'Waiting Approval',
-        [ACCOUNT_STATUS.SoftLock]: 'Soft Locked',
-        [ACCOUNT_STATUS.HardLock]: 'Hard Locked',
+        [AccountStatus.DELETED]: 'Deleted',
+        [AccountStatus.UNLOCKED]: 'Unlocked',
+        [AccountStatus.SOFT_LOCKED]: 'Soft Locked',
+        [AccountStatus.HARD_LOCKED]: 'Hard Locked',
     }), [])
 
     const edit = () => {
@@ -90,15 +89,15 @@ function CustomerCard({
         PubSub.publish(PUBS.AlertDialog, {
             message: `Are you sure you want to delete the account for ${customer.firstName} ${customer.lastName}?`,
             firstButtonText: 'Yes',
-            firstButtonClicked: () => modifyCustomer(ACCOUNT_STATUS.Deleted, 'Customer deleted.'),
+            firstButtonClicked: () => modifyCustomer(AccountStatus.DELETED, 'Customer deleted.'),
             secondButtonText: 'No',
         });
     }, [customer, modifyCustomer])
 
     let edit_action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
-    let unlock_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
-    let lock_action = [() => modifyCustomer(ACCOUNT_STATUS.HardLock, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
-    let undelete_action = [() => modifyCustomer(ACCOUNT_STATUS.Unlocked, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
+    let unlock_action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
+    let lock_action = [() => modifyCustomer(AccountStatus.HARD_LOCKED, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
+    let undelete_action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
     let delete_action = [confirmDelete, <DeleteIcon className={classes.icon} />, 'Delete user'];
     let permanent_delete_action = [confirmPermanentDelete, <DeleteForeverIcon className={classes.icon} />, 'Permanently delete user']
 
@@ -106,16 +105,16 @@ function CustomerCard({
     // Actions for customer accounts
     if (!Array.isArray(customer?.roles) || !customer.roles.some(r => ['Owner', 'Admin'].includes(r.role.title))) {
         switch (customer?.status) {
-            case ACCOUNT_STATUS.Unlocked:
+            case AccountStatus.UNLOCKED:
                 actions.push(lock_action);
                 actions.push(delete_action)
                 break;
-            case ACCOUNT_STATUS.SoftLock:
-            case ACCOUNT_STATUS.HardLock:
+            case AccountStatus.SOFT_LOCKED:
+            case AccountStatus.HARD_LOCKED:
                 actions.push(unlock_action);
                 actions.push(delete_action)
                 break;
-            case ACCOUNT_STATUS.Deleted:
+            case AccountStatus.DELETED:
                 actions.push(undelete_action);
                 actions.push(permanent_delete_action);
                 break;
@@ -132,13 +131,13 @@ function CustomerCard({
         <Card className={classes.cardRoot}>
             {phoneDialogOpen ? (
                 <ListDialog
-                    title={`Call ${customer?.fullName}`}
+                    title={`Call ${customer?.firstName} ${customer?.lastName}`}
                     data={phoneList}
                     onClose={callPhone} />
             ) : null}
             {emailDialogOpen ? (
                 <ListDialog
-                    title={`Email ${customer?.fullName}`}
+                    title={`Email ${customer?.firstName} ${customer?.lastName}`}
                     data={emailList}
                     onClose={sendEmail} />
             ) : null}
