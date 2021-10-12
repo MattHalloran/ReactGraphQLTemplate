@@ -1,11 +1,13 @@
 import { gql } from 'apollo-server-express';
 import bcrypt from 'bcrypt';
-import { AccountStatus as AS, CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
+import { CODE, COOKIE, logInSchema, passwordSchema, signUpSchema, requestPasswordChangeSchema } from '@local/shared';
 import { CustomError, validateArgs } from '../error';
 import { generateToken } from '../auth';
 import { customerNotifyAdmin, sendResetPasswordLink, sendVerificationLink } from '../worker/email/queue';
 import { PrismaSelect } from '@paljs/plugins';
 import { customerFromEmail, getCart, getCustomerSelect, upsertCustomer } from '../db/models/customer';
+import pkg from '@prisma/client';
+const { AccountStatus } = pkg;
 
 const HASHING_ROUNDS = 8;
 const LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT = 3;
@@ -108,7 +110,7 @@ export const typeDef = gql`
 `
 
 export const resolvers = {
-    AccountStatus: AS,
+    AccountStatus: AccountStatus,
     Query: {
         customers: async (_parent, _args, context, info) => {
             // Must be admin
@@ -163,11 +165,11 @@ export const resolvers = {
             if (args.verificationCode === customer.id && customer.emailVerified === false) {
                 customer = await context.prisma.customer.update({
                     where: { id: customer.id },
-                    data: { status: AS.UNLOCKED, emailVerified: true }
+                    data: { status: AccountStatus.UNLOCKED, emailVerified: true }
                 })
             }
             // Reset login attempts after 15 minutes
-            const unable_to_reset = [AS.HARD_LOCKED, AS.DELETED];
+            const unable_to_reset = [AccountStatus.HARD_LOCKED, AccountStatus.DELETED];
             if (!unable_to_reset.includes(customer.status) && Date.now() - new Date(customer.lastLoginAttempt).getTime() > SOFT_LOCKOUT_DURATION) {
                 customer = await context.prisma.customer.update({
                     where: { id: customer.id },
@@ -176,9 +178,9 @@ export const resolvers = {
             }
             // Before validating password, let's check to make sure the account is unlocked
             const status_to_code = {
-                [AS.DELETED]: CODE.NoCustomer,
-                [AS.SOFT_LOCKED]: CODE.SoftLockout,
-                [AS.HARD_LOCKED]: CODE.HardLockout
+                [AccountStatus.DELETED]: CODE.NoCustomer,
+                [AccountStatus.SOFT_LOCKED]: CODE.SoftLockout,
+                [AccountStatus.HARD_LOCKED]: CODE.HardLockout
             }
             if (customer.status in status_to_code) return new CustomError(status_to_code[customer.status]);
             // Now we can validate the password
@@ -201,12 +203,12 @@ export const resolvers = {
                 if (cart) userData.cart = cart;
                 return userData;
             } else {
-                let new_status = AS.UNLOCKED;
+                let new_status = AccountStatus.UNLOCKED;
                 let login_attempts = customer.loginAttempts + 1;
                 if (login_attempts >= LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT) {
-                    new_status = AS.SOFT_LOCKED;
+                    new_status = AccountStatus.SOFT_LOCKED;
                 } else if (login_attempts > LOGIN_ATTEMPTS_TO_HARD_LOCKOUT) {
-                    new_status = AS.HARD_LOCKED;
+                    new_status = AccountStatus.HARD_LOCKED;
                 }
                 await context.prisma.customer.update({
                     where: { id: customer.id },
@@ -236,7 +238,7 @@ export const resolvers = {
                     business: {name: args.business},
                     password: bcrypt.hashSync(args.password, HASHING_ROUNDS),
                     theme: args.theme,
-                    status: AS.UNLOCKED,
+                    status: AccountStatus.UNLOCKED,
                     emails: [{ emailAddress: args.email }],
                     phones: [{ number: args.phone }],
                     roles: [customerRole]
@@ -269,7 +271,7 @@ export const resolvers = {
                     pronouns: args.input.pronouns,
                     business: args.input.business,
                     theme: 'light',
-                    status: AS.UNLOCKED,
+                    status: AccountStatus.UNLOCKED,
                     emails: args.input.emails,
                     phones: args.input.phones,
                     roles: [customerRole]
