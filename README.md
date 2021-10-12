@@ -100,13 +100,15 @@ By default, this site automatically sets dark or light theme depending on your b
 ## Custom fonts
 The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into `packages/ui/public/index.html`. Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
 
-Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a .ttf file for your desired font. This can be placed in `packages/ui/src/assets/fonts`, and registered in the global css section of `packages/ui/src/App.js` like so:  
+Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a .woff file for your desired font. This can be placed in `packages/ui/src/assets/fonts`, and registered in the global css section of `packages/ui/src/App.js` like so:  
 ```javascript
+    import SakBunderan from './assets/fonts/SakBunderan.woff';
+    ...
     "@global": {
         ...
         '@font-face': {
             fontFamily: 'SakBunderan',
-            src: `local('SakBunderan'), url('./fonts/SakBunderan.ttf') format('ttf')`,
+            src: `local('SakBunderan'), url(${SakBunderan}) format('truetype')`,
         }
     },
 ```

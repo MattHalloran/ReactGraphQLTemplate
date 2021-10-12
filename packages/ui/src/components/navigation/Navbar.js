@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         cursor: 'pointer',
         fontSize: '2em',
-        fontFamily: `'Lato', sans-serif;`,
+        fontFamily: `Lato`,
         color: theme.palette.primary.contrastText,
     },
     [theme.breakpoints.down(500)]: {
