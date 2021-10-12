@@ -62,9 +62,7 @@ Open Graph is a metadata format that describes how your website should be shown 
 
 
 ## Database migrations
-Database migrations are handled by Prisma. Full documentation can be found [here](https://www.prisma.io/docs/concepts/components/prisma-migrate). The basic commands are:  
-1. `prisma migrate dev --name some-name` - create a migration called 'some-name'  
-2. `npx prisma migrate deploy` - upgrade database in production or testing environment
+Database migrations are handled by Prisma. Full documentation can be found [here](https://www.prisma.io/docs/concepts/components/prisma-migrate)
 
 ## Database seeding
 Database seeding is also handled by Prisma, with full documentation [here](https://www.prisma.io/docs/guides/database/seed-database).

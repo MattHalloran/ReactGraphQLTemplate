@@ -1,11 +1,9 @@
 import { gql } from 'apollo-server-express';
-import { TABLES } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
-import { OrderStatus as OS } from '@prisma/client';
-
-const _model = TABLES.Order;
+import pkg from '@prisma/client';
+const { OrderStatus } = pkg;
 
 export const typeDef = gql`
     enum OrderStatus {
@@ -55,22 +53,22 @@ export const typeDef = gql`
 `
 
 const STATUS_TO_SORT = {
-    [OS.CANCELED_BY_ADMIN]: { updated_at: 'desc' },
-    [OS.CANCELED_BY_CUSTOMER]: { updated_at: 'desc' },
-    [OS.PENDING_CANCEL]: { updated_at: 'desc' },
-    [OS.REJECTED]: { updated_at: 'desc' },
-    [OS.DRAFT]: { updated_at: 'desc' },
-    [OS.PENDING]: { updated_at: 'desc' },
-    [OS.APPROVED]: { expectedDeliveryDate: 'desc' },
-    [OS.SCHEDULED]: { expectedDeliveryDate: 'desc' },
-    [OS.IN_TRANSIT]: { expectedDeliveryDate: 'desc' },
-    [OS.DELIVERED]: { expectedDeliveryDate: 'desc' },
+    [OrderStatus.CANCELED_BY_ADMIN]: { updated_at: 'desc' },
+    [OrderStatus.CANCELED_BY_CUSTOMER]: { updated_at: 'desc' },
+    [OrderStatus.PENDING_CANCEL]: { updated_at: 'desc' },
+    [OrderStatus.REJECTED]: { updated_at: 'desc' },
+    [OrderStatus.DRAFT]: { updated_at: 'desc' },
+    [OrderStatus.PENDING]: { updated_at: 'desc' },
+    [OrderStatus.APPROVED]: { expectedDeliveryDate: 'desc' },
+    [OrderStatus.SCHEDULED]: { expectedDeliveryDate: 'desc' },
+    [OrderStatus.IN_TRANSIT]: { expectedDeliveryDate: 'desc' },
+    [OrderStatus.DELIVERED]: { expectedDeliveryDate: 'desc' },
 }
 
 export const resolvers = {
-    OrderStatus: OS,
+    OrderStatus: OrderStatus,
     Query: {
-        orders: async (_, args, context, info) => {
+        orders: async (_parent, args, context, info) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             let idQuery;
@@ -90,7 +88,7 @@ export const resolvers = {
                     ]
                 }
             }
-            return await context.prisma[_model].findMany({
+            return await context.prisma.order.findMany({
                 where: {
                     ...idQuery,
                     ...searchQuery,
@@ -102,16 +100,16 @@ export const resolvers = {
         },
     },
     Mutation: {
-        updateOrder: async (_, args, context, info) => {
+        updateOrder: async (_parent, args, context, info) => {
             // Must be admin, or updating your own
-            const curr = await context.prisma[_model].findUnique({
+            const curr = await context.prisma.order.findUnique({
                 where: { id: args.input.id },
                 select: { id: true, customerId: true, status: true, items: { select: { id: true } } }
             });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             if (!context.req.isAdmin) {
                 // Customers can only update their own orders in certain states
-                const editable_order_statuses = [OS.DRAFT, OS.PENDING];
+                const editable_order_statuses = [OrderStatus.DRAFT, OrderStatus.PENDING];
                 if (!editable_order_statuses.includes(curr.status))return new CustomError(CODE.Unauthorized);
                 // Customers cannot edit order status
                 delete args.input.status;
@@ -121,57 +119,57 @@ export const resolvers = {
                 const updatedItemIds = args.input.items.map(i => i.id);
                 const deletingItemIds = curr.items.filter(i => !updatedItemIds.includes(i.id)).map(i => i.id);
                 if (updatedItemIds.length > 0) {
-                    const updateMany = args.input.items.map(d => context.prisma[TABLES.OrderItem].updateMany({
+                    const updateMany = args.input.items.map(d => context.prisma.order_item.updateMany({
                         where: { id: d.id },
                         data: { ...d }
                     }))
                     Promise.all(updateMany)
                 }
                 if (deletingItemIds.length > 0) {
-                    await context.prisma[TABLES.OrderItem].deleteMany({ where: { id: { in: deletingItemIds } } })
+                    await context.prisma.order_item.deleteMany({ where: { id: { in: deletingItemIds } } })
                 }
             }
-            return await context.prisma[_model].update({
+            return await context.prisma.order.update({
                 where: { id: curr.id },
                 data: { ...args.input, items: undefined },
                 ...(new PrismaSelect(info).value)
             })
         },
-        submitOrder: async (_, args, context) => {
+        submitOrder: async (_parent, args, context, _info) => {
             // Must be admin, or submitting your own
-            const curr = await context.prisma[_model].findUnique({ where: { id: args.id } });
+            const curr = await context.prisma.order.findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             // Only orders in the draft state can be submitted
-            if (curr.status !== OS.DRAFT) return new CustomError(CODE.ErrorUnknown);
-            await context.prisma[_model].update({
+            if (curr.status !== OrderStatus.DRAFT) return new CustomError(CODE.ErrorUnknown);
+            await context.prisma.order.update({
                 where: { id: curr.id },
-                data: { status: OS.PENDING }
+                data: { status: OrderStatus.PENDING }
             });
             return true;
         },
-        cancelOrder: async (_, args, context) => {
+        cancelOrder: async (_parent, args, context, _info) => {
             // Must be admin, or canceling your own
-            const curr = await context.prisma[_model].findUnique({ where: { id: args.id } });
+            const curr = await context.prisma.order.findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
             let order_status = curr.status;
             // Only pending orders can be fully cancelled by customer
-            if (curr.status === OS.PENDING) {
-                order_status = OS.CANCELED_BY_CUSTOMER;
+            if (curr.status === OrderStatus.PENDING) {
+                order_status = OrderStatus.CANCELED_BY_CUSTOMER;
             }
-            const pending_order_statuses = [OS.APPROVED, OS.SCHEDULED];
+            const pending_order_statuses = [OrderStatus.APPROVED, OrderStatus.SCHEDULED];
             if (curr.status in pending_order_statuses) {
-                order_status = OS.PENDING_CANCEL;
+                order_status = OrderStatus.PENDING_CANCEL;
             }
-            await context.prisma[_model].update({
+            await context.prisma.order.update({
                 where: { id: curr.id },
                 data: { status: order_status }
             })
             return order_status;
         },
-        deleteOrders: async (_, args, context) => {
+        deleteOrders: async (_parent, args, context, _info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
+            return await context.prisma.order.deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

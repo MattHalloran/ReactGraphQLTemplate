@@ -1,10 +1,7 @@
 import { gql } from 'apollo-server-express';
-import { db, TABLES } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
-
-const _model = TABLES.Phone;
 
 export const typeDef = gql`
     input PhoneInput {
@@ -36,37 +33,37 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        phones: async (_, _args, context, info) => {
+        phones: async (_parent, _args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findMany((new PrismaSelect(info).value));
+            return await context.prisma.phone.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addPhone: async (_, args, context, info) => {
+        addPhone: async (_parent, args, context, info) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin || (context.req.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
+            return await context.prisma.phone.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updatePhone: async (_, args, context, info) => {
+        updatePhone: async (_parent, args, context, info) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            const curr = await db(_model).where('id', args.input.id).first();
+            const curr = await context.prisma.phone.findUnique({ where: { id: args.input.id } });
             if (context.req.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            return await context.prisma.phone.update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },
                 ...(new PrismaSelect(info).value)
             })
         },
-        deletePhones: async (_, args, context) => {
+        deletePhones: async (_parent, args, context, _info) => {
             // Must be admin, or deleting your own
             // TODO must leave one phone per customer
-            const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
+            const specified = await context.prisma.phone.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
             const business_ids = [...new Set(specified.map(s => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
+            return await context.prisma.phone.deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }

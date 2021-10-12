@@ -1,7 +1,4 @@
 import { gql } from 'apollo-server-express';
-import { TABLES } from '../db';
-
-const _model = TABLES.ProductTrait;
 
 export const typeDef = gql`
     type ProductTrait {
@@ -24,16 +21,16 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        traitNames: async ({ context }) => {
-            return await context.prisma[_model].findMany({ select: { name: true }, distinct: ['name']});
+        traitNames: async (_parent, _args, context, _info) => {
+            return await context.prisma.product_trait.findMany({ select: { name: true }, distinct: ['name']});
         },
-        traitValues: async ({ args, context }) => {
-            return await context.prisma[_model].findMany({ where: { name: args.name }, select: { value: true }})
+        traitValues: async (_parent, args, context, _info) => {
+            return await context.prisma.product_trait.findMany({ where: { name: args.name }, select: { value: true }})
         },
         // Returns all values previously entered for every trait
-        traitOptions: async ({ context }) => {
+        traitOptions: async (_parent, _args, context, _info) => {
             // Query all data
-            const trait_data = await context.prisma[_model].findMany();
+            const trait_data = await context.prisma.product_trait.findMany();
             // Combine data into object
             let options = {};
             for (const row of trait_data) {

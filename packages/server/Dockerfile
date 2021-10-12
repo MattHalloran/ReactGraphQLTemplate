@@ -1,4 +1,4 @@
-FROM node:16-stretch
+FROM node:16-alpine
 EXPOSE 5000
 
 # Set variables
@@ -36,3 +36,7 @@ COPY --chown=node:node ${server}/src ${server}/tools ${server}/
 COPY --chown=node:node scripts/server.sh scripts/wait-for.sh ${scripts}/
 
 USER root
+
+# Update and install unix packages
+RUN apk update
+RUN apk add netcat-openbsd

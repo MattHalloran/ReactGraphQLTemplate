@@ -7,18 +7,6 @@ datasource db {
   url      = env("DB_URL")
 }
 
-model knex_migrations {
-  id             Int       @id @default(autoincrement())
-  name           String?   @db.VarChar(255)
-  batch          Int?
-  migration_time DateTime? @db.Timestamptz(6)
-}
-
-model knex_migrations_lock {
-  index     Int  @id @default(autoincrement())
-  is_locked Int?
-}
-
 // Physical address data
 // tag - Optional tag associated with address (ex: 'Main address')
 // name - Optional name, sometimes required for internal mail delivery systems
@@ -177,7 +165,7 @@ model image_labels {
 // Previous, current, and upcoming orders
 model order {
   id                   String       @id @default(uuid()) @db.Uuid
-  status               String       @default("Draft")
+  status               OrderStatus  @default(DRAFT)
   specialInstructions  String?      @db.VarChar(2048)
   desiredDeliveryDate  DateTime?    @db.Timestamptz(6)
   expectedDeliveryDate DateTime?    @db.Timestamptz(6)
@@ -320,6 +308,19 @@ enum ImageUse {
     HERO
     GALLERY
     PRODUCT_DISPLAY
+}
+
+enum OrderStatus {
+    CANCELED_BY_ADMIN
+    CANCELED_BY_CUSTOMER
+    PENDING_CANCEL
+    REJECTED
+    DRAFT
+    PENDING
+    APPROVED
+    SCHEDULED
+    IN_TRANSIT
+    DELIVERED
 }
 
 enum SkuStatus {
