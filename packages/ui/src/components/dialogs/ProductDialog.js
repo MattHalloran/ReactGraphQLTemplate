@@ -37,7 +37,7 @@ import {
     Info as InfoIcon,
 } from '@material-ui/icons';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
 
@@ -119,7 +119,7 @@ function ProductDialog({
         // If options is unchanged, do not set
         let curr_values = orderOptions.map(o => o.value);
         let new_values = options.map(o => o.value);
-        if (_.isEqual(curr_values, new_values)) return;
+        if (isEqual(curr_values, new_values)) return;
         setOrderOptions(options);
     }, [product, orderOptions])
 

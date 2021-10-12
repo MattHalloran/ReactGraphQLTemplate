@@ -13,7 +13,7 @@ import { updateOrderMutation, submitOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
@@ -82,7 +82,7 @@ function CartPage({
 
     const finalizeOrder = useCallback(() => {
         // Make sure order is updated
-        if (!_.isEqual(cart, changedCart)) {
+        if (!isEqual(cart, changedCart)) {
             PubSub.publish(PUBS.Snack, {message: 'Please click "UPDATE ORDER" before submitting.', severity: 'warning'});
             return;
         }
@@ -106,7 +106,7 @@ function CartPage({
                     fullWidth 
                     startIcon={<ArrowBackIcon />} 
                     onClick={() => history.push(LINKS.Shopping)}
-                    disabled={loading || (changedCart !== null && !_.isEqual(cart, changedCart))}
+                    disabled={loading || (changedCart !== null && !isEqual(cart, changedCart))}
                 >Continue Shopping</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -114,7 +114,7 @@ function CartPage({
                     fullWidth 
                     startIcon={<UpdateIcon />} 
                     onClick={orderUpdate}
-                    disabled={loading || (changedCart === null || _.isEqual(cart, changedCart))}
+                    disabled={loading || (changedCart === null || isEqual(cart, changedCart))}
                 >Update Order</Button>
             </Grid>
             <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
@@ -122,7 +122,7 @@ function CartPage({
                     fullWidth 
                     endIcon={<ArrowForwardIcon />} 
                     onClick={finalizeOrder}
-                    disabled={loading || changedCart === null || !_.isEqual(cart, changedCart)}
+                    disabled={loading || changedCart === null || !isEqual(cart, changedCart)}
                 >Request Quote</Button>
             </Grid>
         </Grid>
