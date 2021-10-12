@@ -4,7 +4,7 @@ import {
     SearchBar,
     Selector
 } from 'components';
-import { ShoppingList } from './ShoppingList';
+import { ShoppingList } from '../components/shopping/ShoppingList';
 import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
 import { traitOptionsQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
