@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { lazily } from 'react-lazily'
+import { lazily } from 'react-lazily';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { ROLES } from '@local/shared';
@@ -15,8 +15,6 @@ import {
 import { ScrollToTop } from 'components';
 
 // Lazy loading in the Routes component is a recommended way to improve performance. See https://reactjs.org/docs/code-splitting.html#route-based-code-splitting
-// const AboutPage = lazy(() => import('./pages'), 'AboutPage');
-// const AdminContactPage = lazy(() => import ('./pages/admin/AdminContactPage/AdminContactPage'), 'AdminContactPage');
 const {
     AboutPage,
     AdminContactPage,
