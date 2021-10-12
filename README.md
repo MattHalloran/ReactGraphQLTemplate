@@ -109,6 +109,7 @@ Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](
         '@font-face': {
             fontFamily: 'SakBunderan',
             src: `local('SakBunderan'), url(${SakBunderan}) format('truetype')`,
+            fontDisplay: 'swap',
         }
     },
 ```

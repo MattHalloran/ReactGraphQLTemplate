@@ -41,6 +41,7 @@ const useStyles = makeStyles(() => ({
             '@font-face': {
                 fontFamily: 'Lato',
                 src: `local('Lato'), url(${Lato}) format('truetype')`,
+                fontDisplay: 'swap',
             }
         },
         contentWrap: {
