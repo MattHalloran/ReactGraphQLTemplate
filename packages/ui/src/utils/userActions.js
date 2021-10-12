@@ -8,7 +8,7 @@ import {
 } from '@material-ui/icons';
 import { ROLES } from '@local/shared';
 import { LINKS } from 'utils';
-import _ from 'lodash';
+import isObject from 'lodash/isObject';
 import { initializeApollo } from 'graphql/utils/initialize';
 import { logoutMutation } from 'graphql/mutation';
 import {
@@ -26,7 +26,7 @@ export function getUserActions({ session, userRoles, cart, exclude = [] }) {
     let actions = [];
 
     // If someone is not logged in, display sign up/log in links
-    if (!_.isObject(session) || Object.entries(session).length === 0) {
+    if (!isObject(session) || Object.entries(session).length === 0) {
         actions.push(['Log In', 'login', LINKS.LogIn, null, PersonAddIcon, 0]);
     } else {
         // If an owner admin is logged in, display owner links

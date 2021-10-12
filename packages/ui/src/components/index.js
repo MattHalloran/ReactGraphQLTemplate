@@ -10,6 +10,7 @@ export * from './lists';
 export * from './navigation';
 export * from './PopupMenu';
 export * from './ScrollToTop';
+export * from './shopping';
 export * from './Snack';
 export * from './tables';
 export * from './TabPanel';

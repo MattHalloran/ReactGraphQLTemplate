@@ -13,6 +13,6 @@ export * from './HomePage';
 export * from './NotFoundPage';
 export * from './Page';
 export * from './PrivacyPolicyPage';
-export * from './shopping/ShoppingPage';
+export * from './ShoppingPage';
 export * from './styles';
 export * from './TermsPage';

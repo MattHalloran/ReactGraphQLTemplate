@@ -38,8 +38,7 @@ import {
     setProductSkuField,
     setProductTrait
 } from 'utils';
-// import { DropzoneAreaBase } from 'material-ui-dropzone';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
 // Common product traits, and their corresponding field names
@@ -239,7 +238,7 @@ function EditProductDialog({
         }));
     }
 
-    let changes_made = !_.isEqual(product, changedProduct) || imagesChanged;
+    let changes_made = !isEqual(product, changedProduct) || imagesChanged;
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={12} sm={4}>

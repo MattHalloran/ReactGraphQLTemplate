@@ -19,6 +19,7 @@ import { DndProvider } from 'react-dnd';
 import { useMutation, useQuery } from '@apollo/client';
 import { readAssetsQuery } from 'graphql/query/readAssets';
 import { loginMutation } from 'graphql/mutation';
+import Lato from './assets/fonts/Lato.woff';
 
 const useStyles = makeStyles(() => ({
         "@global": {
@@ -37,6 +38,11 @@ const useStyles = makeStyles(() => ({
                     paddingRight: 'max(1em, calc(15% - 75px))',
                 }
             },
+            '@font-face': {
+                fontFamily: 'Lato',
+                src: `local('Lato'), url(${Lato}) format('truetype')`,
+                fontDisplay: 'swap',
+            }
         },
         contentWrap: {
             minHeight: '100vh',

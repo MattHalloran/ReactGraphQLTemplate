@@ -28,7 +28,7 @@ import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_FILTERS } from 'utils';
 import { OrderStatus, ROLES } from '@local/shared';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
 const useStyles = makeStyles((theme) => ({
@@ -182,7 +182,7 @@ function OrderDialog({
                     fullWidth
                     startIcon={<UpdateIcon />}
                     onClick={orderUpdate}
-                    disabled={loading || _.isEqual(order, changedOrder)}
+                    disabled={loading || isEqual(order, changedOrder)}
                 >Update</Button>
             </Grid>
             {availableActions.map(action => (
@@ -191,7 +191,7 @@ function OrderDialog({
                         fullWidth
                         startIcon={action.icon}
                         onClick={() => setOrderStatus(action.status, action.successMessage, action.failureMessage)}
-                        disabled={loading || !_.isEqual(order, changedOrder)}
+                        disabled={loading || !isEqual(order, changedOrder)}
                     >{action.displayText}</Button>
                 </Grid>
             ))}
