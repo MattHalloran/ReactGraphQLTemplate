@@ -6,12 +6,12 @@ const HASHING_ROUNDS = 8;
 
 // Create a user, with business, emails, phones, and roles
 async function createUser({ userData, businessData, emailsData, phonesData, roleIds }) {
-    let business = prisma.business.findFirst({ where: { name: businessData.name }});
+    let business = await prisma.business.findFirst({ where: { name: businessData.name }});
     if (!business) {
         console.info(`🏢 Creating business for ${userData.firstName}`);
         business = await prisma.business.create({ data: businessData });
     }
-    let customer = prisma.customer.findFirst({ where: { firstName: userData.firstName, lastName: userData.lastName }});
+    let customer = await prisma.customer.findFirst({ where: { firstName: userData.firstName, lastName: userData.lastName }});
     if (!customer) {
         console.info(`👩🏼‍💻 Creating account for ${userData.firstName}`);
         // Insert account
