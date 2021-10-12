@@ -1,19 +1,18 @@
 import { gql } from 'apollo-server-express';
-import { CODE, SKU_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
+import { CODE, SKU_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { saveFile } from '../utils';
 import { uploadAvailability } from '../worker/uploadAvailability/queue';
-import { TABLES } from '../db';
 import { PrismaSelect } from '@paljs/plugins';
 import path from 'path';
-
-const _model = TABLES.Sku;
+import pkg from '@prisma/client';
+const { SkuStatus } = pkg;
 
 export const typeDef = gql`
     enum SkuStatus {
-        Deleted
-        Inactive
-        Active
+        DELETED
+        INACTIVE
+        ACTIVE
     }
 
     enum SkuSortBy {
@@ -78,11 +77,11 @@ const SORT_TO_QUERY = {
 }
 
 export const resolvers = {
-    SkuStatus: SKU_STATUS,
+    SkuStatus: SkuStatus,
     SkuSortBy: SKU_SORT_OPTIONS,
     Query: {
         // Query all SKUs
-        skus: async (_, args, context, info) => {
+        skus: async (_parent, args, context, info) => {
             let idQuery;
             if (Array.isArray(args.ids)) idQuery = { id: { in: args.ids } };
             // Determine sort order
@@ -99,7 +98,7 @@ export const resolvers = {
             }
             let onlyInStockQuery;
             if (!args.onlyInStock) onlyInStockQuery = { availability: { gt: 0 } };
-            return await context.prisma[_model].findMany({
+            return await context.prisma.sku.findMany({
                 where: {
                     ...idQuery,
                     ...searchQuery,
@@ -111,7 +110,7 @@ export const resolvers = {
         }
     },
     Mutation: {
-        uploadAvailability: async (_, args) => {
+        uploadAvailability: async (_parent, args, _context, _info) => {
             const { createReadStream, filename, mimetype } = await args.file;
             const stream = createReadStream();
             const { ext } = path.parse(filename)
@@ -120,24 +119,24 @@ export const resolvers = {
             if (success) uploadAvailability(finalFileName);
             return success;
         },
-        addSku: async (_, args, context, info) => {
+        addSku: async (_parent, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
+            return await context.prisma.sku.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateSku: async (_, args, context, info) => {
+        updateSku: async (_parent, args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            return await context.prisma.sku.update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteSkus: async (_, args, context) => {
+        deleteSkus: async (_parent, args, context, _info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
+            return await context.prisma.sku.deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

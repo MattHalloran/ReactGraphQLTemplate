@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -7,20 +7,18 @@ datasource db {
   url      = env("DB_URL")
 }
 
-model knex_migrations {
-  id             Int       @id @default(autoincrement())
-  name           String?   @db.VarChar(255)
-  batch          Int?
-  migration_time DateTime? @db.Timestamptz(6)
-}
-
-model knex_migrations_lock {
-  index     Int  @id @default(autoincrement())
-  is_locked Int?
-}
-
+// Physical address data
+// tag - Optional tag associated with address (ex: 'Main address')
+// name - Optional name, sometimes required for internal mail delivery systems
+// country - ISO 3166 country code
+// administrative_area - State/Province/Region (ISO code when available [ex: NJ])
+// sub_administrative_area - County/District (currently unused)
+// locality - City/Town
+// postal_code - Postal/Zip code
+// throughfare - Street Address
+// premise - Apartment, Suite, P.O. box number, etc.
 model address {
-  id                    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                    String    @id @default(uuid()) @db.Uuid
   tag                   String?   @db.VarChar(128)
   name                  String?   @db.VarChar(128)
   country               String    @default("US") @db.VarChar(2)
@@ -36,8 +34,9 @@ model address {
   order                 order[]
 }
 
+// Business entity that a customer belongs to
 model business {
-  id                      String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                      String               @id @default(uuid()) @db.Uuid
   name                    String               @db.VarChar(128)
   subscribedToNewsletters Boolean              @default(true)
   created_at              DateTime             @default(now()) @db.Timestamptz(6)
@@ -49,8 +48,9 @@ model business {
   phone                   phone[]
 }
 
+// Joining table to apply discounts to businesses
 model business_discounts {
-  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   businessId String   @db.Uuid
   discountId String   @db.Uuid
   business   business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -59,11 +59,11 @@ model business_discounts {
   @@unique([businessId, discountId], name: "business_discounts_businessid_discountid_unique")
 }
 
+// A user of the system
 model customer {
-  id                             String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                             String           @id @default(uuid()) @db.Uuid
   firstName                      String           @db.VarChar(128)
   lastName                       String           @db.VarChar(128)
-  fullName                       String?
   pronouns                       String           @default("they/them") @db.VarChar(128)
   theme                          String           @default("light") @db.VarChar(255)
   password                       String?          @db.VarChar(256)
@@ -73,7 +73,7 @@ model customer {
   resetPasswordCode              String?          @unique @db.VarChar(256)
   lastResetPasswordReqestAttempt DateTime?        @db.Timestamptz(6)
   emailVerified                  Boolean          @default(false)
-  status                         String           @default("Unlocked")
+  status                         AccountStatus    @default(UNLOCKED)
   businessId                     String?          @db.Uuid
   created_at                     DateTime         @default(now()) @db.Timestamptz(6)
   updated_at                     DateTime         @default(now()) @db.Timestamptz(6)
@@ -85,8 +85,9 @@ model customer {
   phones                         phone[]
 }
 
+// Joining table to apply roles to customers
 model customer_roles {
-  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   customerId String   @db.Uuid
   roleId     String   @db.Uuid
   customer   customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -95,8 +96,9 @@ model customer_roles {
   @@unique([customerId, roleId], name: "customer_roles_customerid_roleid_unique")
 }
 
+// A discount applied to an account, or a SKU
 model discount {
-  id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                 String               @id @default(uuid()) @db.Uuid
   discount           Decimal              @default(0) @db.Decimal(4, 4)
   title              String               @default("") @db.VarChar(128)
   comment            String?              @db.VarChar(1024)
@@ -105,8 +107,10 @@ model discount {
   sku_discounts      sku_discounts[]
 }
 
+// Email data
+//TODO CONSTRAINT chk_keys check (customer_id is not null or business_id is not null)
 model email {
-  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                      String    @id @default(uuid()) @db.Uuid
   emailAddress            String    @unique @db.VarChar(128)
   receivesDeliveryUpdates Boolean   @default(true)
   customerId              String?   @db.Uuid
@@ -115,8 +119,9 @@ model email {
   customer                customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
+// User feedback
 model feedback {
-  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String    @id @default(uuid()) @db.Uuid
   text       String    @db.VarChar(4096)
   customerId String?   @db.Uuid
   created_at DateTime  @default(now()) @db.Timestamptz(6)
@@ -124,6 +129,7 @@ model feedback {
   customer   customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
+// Image metadata. Actual image is stored elsewhere
 model image {
   hash            String         @unique @db.VarChar(128)
   alt             String?        @db.VarChar(256)
@@ -136,6 +142,7 @@ model image {
   product_images  product_images[]
 }
 
+// Image file names
 model image_file {
   hash   String @db.VarChar(128)
   src    String @unique @db.VarChar(256)
@@ -144,6 +151,7 @@ model image_file {
   image  image  @relation(fields: [hash], references: [hash], onDelete: Cascade)
 }
 
+// Joining table to allow images to be tagged into groups'
 model image_labels {
   id    Int    @id @default(autoincrement())
   hash  String @db.VarChar(128)
@@ -154,9 +162,10 @@ model image_labels {
   @@unique([hash, label], name: "image_labels_hash_label_unique")
 }
 
+// Previous, current, and upcoming orders
 model order {
-  id                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  status               String       @default("Draft")
+  id                   String       @id @default(uuid()) @db.Uuid
+  status               OrderStatus  @default(DRAFT)
   specialInstructions  String?      @db.VarChar(2048)
   desiredDeliveryDate  DateTime?    @db.Timestamptz(6)
   expectedDeliveryDate DateTime?    @db.Timestamptz(6)
@@ -170,8 +179,9 @@ model order {
   items                order_item[]
 }
 
+// Data for each item in an order
 model order_item {
-  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id       String @id @default(uuid()) @db.Uuid
   quantity Int    @default(1)
   orderId  String @db.Uuid
   skuId    String @db.Uuid
@@ -181,8 +191,10 @@ model order_item {
   @@unique([orderId, skuId], name: "order_item_orderid_skuid_unique")
 }
 
+// Phone data
+// Numbers should be stored without formatting
 model phone {
-  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                      String    @id @default(uuid()) @db.Uuid
   number                  String    @unique @db.VarChar(20)
   receivesDeliveryUpdates Boolean   @default(true)
   customerId              String?   @db.Uuid
@@ -191,8 +203,9 @@ model phone {
   customer                customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
+// Product identification data. Other data about the product is stored in traits table
 model product {
-  id         String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String         @id @default(uuid()) @db.Uuid
   name       String         @unique @db.VarChar(256)
   featured   Boolean        @default(false)
   created_at DateTime       @default(now()) @db.Timestamptz(6)
@@ -202,6 +215,7 @@ model product {
   skus       sku[]
 }
 
+// Joining table to associate products with display images
 model product_images {
   id           Int        @id @default(autoincrement())
   productId    String     @db.Uuid
@@ -214,6 +228,7 @@ model product_images {
   @@unique([productId, hash], name: "product_images_productid_hash_unique")
 }
 
+// An attribute of a product
 model product_trait {
   id        Int       @id @default(autoincrement())
   productId String    @db.Uuid
@@ -224,34 +239,37 @@ model product_trait {
   @@unique([productId, name], name: "product_trait_productid_name_unique")
 }
 
+// Task Queue information
 model queue_task {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   taskId      Int
-  name        String   @db.VarChar(256)
-  status      String   @default("Active")
-  description String?  @db.VarChar(1024)
-  result      String?  @db.VarChar(8192)
+  name        String       @db.VarChar(256)
+  status      TaskStatus   @default(ACTIVE)
+  description String?      @db.VarChar(1024)
+  result      String?      @db.VarChar(8192)
   resultCode  Int?
   created_at  DateTime @default(now()) @db.Timestamptz(6)
   updated_at  DateTime @default(now()) @db.Timestamptz(6)
 }
 
+// A user role. Each user can have multiple roles
 model role {
-  id             String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String           @id @default(uuid()) @db.Uuid
   title          String           @unique @db.VarChar(128)
   description    String?          @db.VarChar(2048)
   customer_roles customer_roles[]
 }
 
+// Data on inventory items
 model sku {
-  id                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                String          @id @default(uuid()) @db.Uuid
   sku               String          @unique @db.VarChar(32)
   isDiscountable    Boolean         @default(false)
   size              Decimal?        @db.Decimal(8, 2)
   note              String?         @db.VarChar(2048)
   availability      Int             @default(0)
   price             Decimal?        @db.Decimal(8, 2)
-  status            String          @default("Active")
+  status            SkuStatus       @default(ACTIVE)
   productId         String          @db.Uuid
   created_at        DateTime        @default(now()) @db.Timestamptz(6)
   updated_at        DateTime        @default(now()) @db.Timestamptz(6)
@@ -260,12 +278,53 @@ model sku {
   discounts         sku_discounts[]
 }
 
+// Joining table to apply discounts to SKUs
 model sku_discounts {
-  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   skuId      String   @db.Uuid
   discountId String   @db.Uuid
   discount   discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
   sku        sku      @relation(fields: [skuId], references: [id], onDelete: Cascade)
 
   @@unique([skuId, discountId], name: "sku_discounts_skuid_discountid_unique")
+}
+
+enum TaskStatus {
+    UNKNOWN
+    FAILED
+    ACTIVE
+    INACTIVE
+    COMPLETED
+}
+
+enum AccountStatus {
+    DELETED
+    UNLOCKED
+    SOFT_LOCKED
+    HARD_LOCKED
+}
+
+enum ImageUse {
+    HERO
+    GALLERY
+    PRODUCT_DISPLAY
+}
+
+enum OrderStatus {
+    CANCELED_BY_ADMIN
+    CANCELED_BY_CUSTOMER
+    PENDING_CANCEL
+    REJECTED
+    DRAFT
+    PENDING
+    APPROVED
+    SCHEDULED
+    IN_TRANSIT
+    DELIVERED
+}
+
+enum SkuStatus {
+    DELETED
+    INACTIVE
+    ACTIVE
 }

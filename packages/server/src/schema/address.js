@@ -1,10 +1,7 @@
 import { gql } from 'apollo-server-express';
-import { TABLES } from '../db';
 import { CODE } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
-
-const _model = TABLES.Address;
 
 export const typeDef = gql`
     input AddressInput {
@@ -50,35 +47,35 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        addresses: async (_, _args, context, info) => {
+        addresses: async (_parent, _args, context, info) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].findMany((new PrismaSelect(info).value));
+            return await context.prisma.address.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addAddress: async (_, args, context, info) => {
+        addAddress: async (_parent, args, context, _info) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin && (context.req.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].create((new PrismaSelect(info).value), { data: { ...args.input } })
+            return await context.prisma.address.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateAddress: async (_, args, context, info) => {
+        updateAddress: async (_parent, args, context, _info) => {
             // Must be admin, or updating your own
-            const curr = await context.prisma[_model].findUnique({ where: { id: args.input.id } });
+            const curr = await context.prisma.address.findUnique({ where: { id: args.input.id } });
             if (!context.req.isAdmin && context.req.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].update({
+            return await context.prisma.addres.update({
                 where: { id: args.input.id || undefined },
                 data: { ...args.input },
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteAddresses: async (_, args, context) => {
+        deleteAddresses: async (_parent, args, context, _info) => {
             // Must be admin, or deleting your own
-            const specified = await context.prisma[_model].findMany({ where: { id: { in: args.ids } } });
+            const specified = await context.prisma.address.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
             const business_ids = [...new Set(specified.map(s => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
-            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
+            return await context.prisma.address.deleteMany({ where: { id: { in: args.ids } } });
         }
     }
 }

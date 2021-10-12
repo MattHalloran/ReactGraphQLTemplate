@@ -58,19 +58,19 @@ function OrderCard({
         <Card className={`${classes.cardRoot} ${classes.orderCardRoot}`}>
             {phoneDialogOpen ? (
                 <ListDialog
-                    title={`Call ${order?.customer?.fullName}`}
+                    title={`Call ${order?.customer?.firstName} ${order?.customer?.lastName}`}
                     data={phoneList}
                     onClose={callPhone} />
             ) : null}
             {emailDialogOpen ? (
                 <ListDialog
-                    title={`Email ${order?.customer?.fullName}`}
+                    title={`Email ${order?.customer?.firstName} ${order?.customer?.lastName}`}
                     data={emailList}
                     onClose={sendEmail} />
             ) : null}
             <CardContent onClick={onEdit}>
                 <Typography variant="h6" component="h3" gutterBottom>
-                    {order?.customer?.fullName ?? ''}
+                    {`${order?.customer?.firstName} ${order?.customer?.lastName}`}
                 </Typography>
                 <Typography variant="body1" component="h4">
                     Status: {order?.status}

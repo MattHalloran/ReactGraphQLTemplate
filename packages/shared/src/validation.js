@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { ACCOUNT_STATUS, DEFAULT_PRONOUNS, ORDER_STATUS, SKU_STATUS } from './modelConsts';
+import { AccountStatus, DEFAULT_PRONOUNS, OrderStatus, SkuStatus } from './modelConsts';
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;
@@ -66,7 +66,7 @@ export const orderItemSchema = yup.object().shape({
 });
 
 export const orderSchema = yup.object().shape({
-    status: yup.mixed().oneOf(Object.values(ORDER_STATUS)).optional(),
+    status: yup.mixed().oneOf(Object.values(OrderStatus)).optional(),
     specialInstructions: yup.string().max(1024).optional(),
     desiredDeliveryDate: yup.date().optional(),
     isDelivery: yup.bool().required(),
@@ -91,7 +91,7 @@ export const skuSchema = yup.object().shape({
     note: yup.string().max(2048).optional(),
     availability: yup.number().integer().default(0).optional(),
     price: yup.string().max(16).optional(),
-    status: yup.mixed().oneOf(Object.values(SKU_STATUS)).default(SKU_STATUS.Active).optional(),
+    status: yup.mixed().oneOf(Object.values(SkuStatus)).default(SkuStatus.ACTIVE).optional(),
     productId: yup.string().optional(),
     discountIds: yup.array().of(yup.string().required()).optional(),
 });
@@ -115,7 +115,7 @@ export const customerSchema = yup.object().shape({
     business: businessSchema,
     emails: yup.array().of(emailSchema).required(),
     phones: yup.array().of(phoneSchema).required(),
-    status: yup.mixed().oneOf(Object.values(ACCOUNT_STATUS)).optional(),
+    status: yup.mixed().oneOf(Object.values(AccountStatus)).optional(),
 });
 
 

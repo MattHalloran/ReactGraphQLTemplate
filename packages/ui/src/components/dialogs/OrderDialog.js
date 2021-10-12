@@ -27,7 +27,7 @@ import { CartTable } from 'components';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_FILTERS } from 'utils';
-import { ORDER_STATUS, ROLES } from '@local/shared';
+import { OrderStatus, ROLES } from '@local/shared';
 import _ from 'lodash';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const editableStatuses = [ORDER_STATUS.PendingCancel, ORDER_STATUS.Pending, ORDER_STATUS.Approved, ORDER_STATUS.Scheduled]
+const editableStatuses = [OrderStatus.PENDING_CANCEL, OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.SCHEDULED]
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -114,47 +114,47 @@ function OrderDialog({
     const changeStatus = useMemo(() => {
         const isCustomer = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Customer].includes(r?.role?.title));
         const isOwner = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title));
-        const isCanceled = [ORDER_STATUS.CanceledByAdmin, ORDER_STATUS.CanceledByCustomer, ORDER_STATUS.Rejected].includes(order?.status);
-        const isOutTheDoor = [ORDER_STATUS.InTransit, ORDER_STATUS.Delivered].includes(order?.status);
+        const isCanceled = [OrderStatus.CANCELED_BY_ADMIN, OrderStatus.CANCELED_BY_CUSTOMER, OrderStatus.REJECTED].includes(order?.status);
+        const isOutTheDoor = [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED].includes(order?.status);
         return {
-            [ORDER_STATUS.CanceledByAdmin]: [
+            [OrderStatus.CANCELED_BY_ADMIN]: [
                 isOwner && !isCanceled,
                 'Cancel order', <BlockIcon />, 'Order canceled.', 'Failed to cancel order.'
             ],
-            [ORDER_STATUS.CanceledByCustomer]: [
-                isCustomer && !isCanceled && !isOutTheDoor && order?.status !== ORDER_STATUS.Approved,
+            [OrderStatus.CANCELED_BY_CUSTOMER]: [
+                isCustomer && !isCanceled && !isOutTheDoor && order?.status !== OrderStatus.APPROVED,
                 'Cancel order', <BlockIcon />, 'Order canceled.', 'Failed to cancel order.'
             ],
-            [ORDER_STATUS.PendingCancel]: [
-                isCustomer && order.status === ORDER_STATUS.Approved,
+            [OrderStatus.PENDING_CANCEL]: [
+                isCustomer && order.status === OrderStatus.APPROVED,
                 'Request cancellation', <BlockIcon />, 'Order cancellation requested.', 'Failed to request cancellation.'
             ],
-            [ORDER_STATUS.Rejected]: [
+            [OrderStatus.REJECTED]: [
                 isOwner && !isCanceled,
                 'Reject order', <ThumbDownIcon />, 'Order reverted back to cart.', 'Failed to change order.'
             ],
-            [ORDER_STATUS.Draft]: [
-                isCustomer && order?.status === ORDER_STATUS.Pending,
+            [OrderStatus.DRAFT]: [
+                isCustomer && order?.status === OrderStatus.PENDING,
                 'Revoke order submission', <EditIcon />, 'Order reverted back to cart.', 'Failed to change order.'
             ],
-            [ORDER_STATUS.Pending]: [
-                isCustomer && [ORDER_STATUS.Draft, ORDER_STATUS.PendingCancel].includes(order?.status),
+            [OrderStatus.PENDING]: [
+                isCustomer && [OrderStatus.DRAFT, OrderStatus.PENDING_CANCEL].includes(order?.status),
                 'Submit order', <DoneIcon />, 'Order approved.', 'Failed to approve order.'
             ],
-            [ORDER_STATUS.Approved]: [
-                isOwner && (order?.status === ORDER_STATUS.Pending || isCanceled),
+            [OrderStatus.APPROVED]: [
+                isOwner && (order?.status === OrderStatus.PENDING || isCanceled),
                 'Approve Order', <ThumbUpIcon />, 'Order approved.', 'Failed to approve order.'
             ],
-            [ORDER_STATUS.Scheduled]: [
-                isOwner && [ORDER_STATUS.Approved, ORDER_STATUS.InTransit].includes(order?.status),
+            [OrderStatus.SCHEDULED]: [
+                isOwner && [OrderStatus.APPROVED, OrderStatus.IN_TRANSIT].includes(order?.status),
                 'Set order status to "scheduled"', <EventAvailableIcon />, 'Order status set to "scheduled".', 'Failed to update order status.'
             ],
-            [ORDER_STATUS.InTransit]: [
-                isOwner && [ORDER_STATUS.Scheduled, ORDER_STATUS.Delivered].includes(order?.status),
+            [OrderStatus.IN_TRANSIT]: [
+                isOwner && [OrderStatus.SCHEDULED, OrderStatus.DELIVERED].includes(order?.status),
                 'Set order status to "in transit"', <LocalShippingIcon />, 'Order status set to "in transit".', 'Failed to update order status.'
             ],
-            [ORDER_STATUS.Delivered]: [
-                isOwner && order?.status === ORDER_STATUS.InTransit,
+            [OrderStatus.DELIVERED]: [
+                isOwner && order?.status === OrderStatus.IN_TRANSIT,
                 'Set order status to "Delivered"', <DoneAllIcon />, 'Order status set to "delivered".', 'Failed to update order status.'
             ]
         }
@@ -208,7 +208,7 @@ function OrderDialog({
                     <Grid container spacing={0}>
                         <Grid className={classes.title} item xs={12}>
                             <Typography variant="h5">
-                                {order?.customer?.fullName}'s order
+                                {`${order?.customer?.firstName} ${order?.customer?.lastName}`}'s order
                             </Typography>
                             <Typography variant="h6">
                                 {order?.customer?.business?.name}

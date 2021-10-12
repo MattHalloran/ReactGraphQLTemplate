@@ -1,10 +1,9 @@
 import { gql } from 'apollo-server-express';
-import { TABLES } from '../db';
-import { CODE, PRODUCT_SORT_OPTIONS, SKU_STATUS } from '@local/shared';
+import { CODE, PRODUCT_SORT_OPTIONS } from '@local/shared';
 import { CustomError } from '../error';
 import { PrismaSelect } from '@paljs/plugins';
-
-const _model = TABLES.Product;
+import pkg from '@prisma/client';
+const { SkuStatus } = pkg;
 
 export const typeDef = gql`
 
@@ -61,7 +60,7 @@ const SORT_TO_QUERY = {
 
 export const resolvers = {
     Query: {
-        products: async (_, args, context, info) => {
+        products: async (_parent, args, context, info) => {
             let idQuery;
             if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
             // Determine sort order
@@ -76,10 +75,10 @@ export const resolvers = {
             // Toggle for showing active/inactive products (whether the product has any SKUs available to order)
             // Only admins can view inactive products
             let activeQuery;
-            let activeQueryBase = { skus: {  some: { status: SKU_STATUS.Active } } };
+            let activeQueryBase = { skus: {  some: { status: SkuStatus.ACTIVE } } };
             if (args.active === true) activeQuery = activeQueryBase;
             else if (args.active === false && context.req.isAdmin) activeQuery = { NOT: activeQueryBase };
-            return await context.prisma[_model].findMany({ 
+            return await context.prisma.product.findMany({ 
                 where: { 
                     ...idQuery,
                     ...searchQuery,
@@ -94,20 +93,20 @@ export const resolvers = {
         // Inserting products is different than other inserts, because the fields are dynamic.
         // Because of this, the add must be done manually
         // NOTE: images must be uploaded first
-        addProduct: async (_, args, context, info) => {
+        addProduct: async ({ args, context, info }) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
             // Create product object
-            const product = await context.prisma[_model].create((new PrismaSelect(info).value), { data: { id: args.input.id, name: args.input.name } });
+            const product = await context.prisma.product.create((new PrismaSelect(info).value), { data: { id: args.input.id, name: args.input.name } });
             // Create trait objects
             for (const { name, value } of (args.input.traits || [])) {
-                await prisma[TABLES.ProductTrait].create({ data: { productId: product.id, name, value } });
+                await prisma.product_trait.create({ data: { productId: product.id, name, value } });
             }
             // Create images
             if (Array.isArray(args.input.images)) {
                 for (let i = 0; i < args.input.length; i++) {
-                    await prisma[TABLES.ProductImages].create({ data: {
+                    await prisma.product_images.create({ data: {
                         productId: product.id,
                         hash: args.input.images[i].hash,
                         isDisplay: args.input.images[i].isDisplay ?? false,
@@ -115,17 +114,17 @@ export const resolvers = {
                     }})
                 }
             }
-            return await prisma[_model].findUnique({ 
+            return await prisma.product.findUnique({ 
                 where: { id: product.id },
                 ...(new PrismaSelect(info).value)
             });
         },
         // NOTE: Images must be uploaded separately
-        updateProduct: async (_, args, context, info) => {
+        updateProduct: async ({ args, context, info }) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
-            await context.prisma[TABLES.ProductImages].deleteMany({ where: { productId: args.input.id } });
+            await context.prisma.product_images.deleteMany({ where: { productId: args.input.id } });
             if (Array.isArray(args.input.images)) {
                 let rowIds = [];
                 // Upsert passed in images
@@ -134,14 +133,14 @@ export const resolvers = {
                     const rowData = { productId: args.input.id, hash: curr.hash, index: i, isDisplay: curr.isDisplay ?? false };
                     const rowId = { productId: args.input.id, hash: curr.hash };
                     rowIds.push(rowId);
-                    await context.prisma[TABLES.ProductImages].upsert({
+                    await context.prisma.product_images.upsert({
                         where: { product_images_productid_hash_unique: rowId },
                         update: rowData,
                         create: rowData
                     })
                 }
                 // Delete images not passed in
-                await context.prisma[TABLES.ProductImages].deleteMany({ 
+                await context.prisma.product_images.deleteMany({ 
                     where: {
                         AND: [
                             { productId: { in: rowIds.map(r => r.productId ) } },
@@ -151,10 +150,10 @@ export const resolvers = {
                 })
             }
             // Update traits
-            await context.prisma[TABLES.ProductTrait].deleteMany({ where: { productId: args.input.id } });
+            await context.prisma.product_trait.deleteMany({ where: { productId: args.input.id } });
             for (const { name, value } of (args.input.traits || [])) {
                 const updateData = { productId: args.input.id, name, value };
-                await context.prisma[TABLES.ProductTrait].upsert({
+                await context.prisma.product_trait.upsert({
                     where: { product_trait_productid_name_unique: { productId: args.input.id, name }},
                     update: updateData,
                     create: updateData
@@ -162,11 +161,11 @@ export const resolvers = {
             }
             // Update SKUs
             if (args.input.skus) {
-                const currSkus = await context.prisma[TABLES.Sku].findMany({ where: { productId: args.input.id }});
+                const currSkus = await context.prisma.sku.findMany({ where: { productId: args.input.id }});
                 const deletedSkus = currSkus.map(s => s.sku).filter(s => !args.input.skus.some(sku => sku.sku === s));
-                await context.prisma[TABLES.Sku].deleteMany({ where: { sku: { in: deletedSkus } } });
+                await context.prisma.sku.deleteMany({ where: { sku: { in: deletedSkus } } });
                 for (const sku of args.input.skus) {
-                    await context.prisma[TABLES.Sku].upsert({
+                    await context.prisma.sku.upsert({
                         where: { sku: sku.sku},
                         update: sku,
                         create: { productId: args.input.id, ...sku }
@@ -174,17 +173,17 @@ export const resolvers = {
                 }
             }
             // Update name
-            return await context.prisma[_model].update({
+            return await context.prisma.product.update({
                 where: { id: args.input.id },
                 data: { name: args.input.name },
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteProducts: async (_, args, context) => {
+        deleteProducts: async ({ args, context }) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
-            return await context.prisma[_model].deleteMany({ where: { id: { in: args.ids } } });
+            return await context.prisma.product.deleteMany({ where: { id: { in: args.ids } } });
         },
     }
 }
