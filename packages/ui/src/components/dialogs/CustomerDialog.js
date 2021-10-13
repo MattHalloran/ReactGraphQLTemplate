@@ -24,7 +24,8 @@ import isEqual from 'lodash/isEqual';
 import { AccountStatus } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { deleteCustomerMutation, updateCustomerMutation } from 'graphql/mutation';
-import { PUBS, PubSub } from 'utils';
+import { PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {

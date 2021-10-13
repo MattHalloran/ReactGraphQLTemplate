@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ContactInfo } from 'components';
-import { actionsToList, createAction, getUserActions, LINKS, PUBS, PubSub } from 'utils';
+import { actionsToList, createAction, getUserActions, LINKS, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import {
     Close as CloseIcon,
     ContactSupport as ContactSupportIcon,

@@ -34,10 +34,10 @@ import {
     getProductTrait,
     makeID,
     PUBS,
-    PubSub,
     setProductSkuField,
     setProductTrait
 } from 'utils';
+import PubSub from 'pubsub-js';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 

@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { Button } from '@material-ui/core';
 import { CartTable } from 'components';
 import {

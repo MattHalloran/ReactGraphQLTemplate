@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { customersQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { PUBS, PubSub } from 'utils';
+import { PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import {
     AdminBreadcrumbs,
     CustomerCard

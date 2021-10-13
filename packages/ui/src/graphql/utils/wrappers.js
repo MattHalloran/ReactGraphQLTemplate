@@ -1,5 +1,6 @@
 import isFunction from 'lodash/isFunction';
-import { PUBS, PubSub } from "utils";
+import { PUBS } from "utils";
+import PubSub from 'pubsub-js';
 
 export function mutationWrapper({ 
     mutation, // Mutation function

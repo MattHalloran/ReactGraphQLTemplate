@@ -5,7 +5,8 @@ import {
     Selector
 } from 'components';
 import { ShoppingList } from '../components/shopping/ShoppingList';
-import { SORT_OPTIONS, PUBS, PubSub } from 'utils';
+import { SORT_OPTIONS, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { traitOptionsQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { Grid, Button, SwipeableDrawer } from '@material-ui/core';

@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-import { showPrice, PUBS, PubSub } from 'utils';
+import { showPrice, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { skusQuery } from 'graphql/query';
 import { initializeApollo } from 'graphql/utils/initialize';
 import { SKU_SORT_OPTIONS } from '@local/shared';

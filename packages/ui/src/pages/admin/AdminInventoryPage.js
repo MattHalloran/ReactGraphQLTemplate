@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
 import { productsQuery, traitOptionsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';
-import { combineStyles, PUBS, PubSub, SORT_OPTIONS } from 'utils';
+import { combineStyles, PUBS, SORT_OPTIONS } from 'utils';
+import PubSub from 'pubsub-js';
 import {
     AdminBreadcrumbs,
     EditProductDialog,

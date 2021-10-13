@@ -12,7 +12,8 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { LINKS, PUBS, PubSub } from 'utils';
+import { LINKS, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { IconButton, Button, Snackbar } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
-import { PUBS, PubSub } from 'utils';
+import { PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { makeStyles } from '@material-ui/styles';
 
 const DEFAULT_STATE = {

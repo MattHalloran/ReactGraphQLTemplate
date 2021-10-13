@@ -7,7 +7,8 @@ import {
     DialogContentText,
     DialogTitle,
 } from '@material-ui/core';
-import { PUBS, PubSub } from 'utils';
+import { PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 
 const default_state = {
     title: null,

@@ -14,7 +14,8 @@ import {
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
-import { combineStyles, LINKS, PUBS, PubSub } from 'utils';
+import { combineStyles, LINKS, PUBS } from 'utils';
+import PubSub from 'pubsub-js';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
