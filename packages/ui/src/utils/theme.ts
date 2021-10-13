@@ -1,8 +1,37 @@
 import { createTheme } from '@material-ui/core/styles';
 
+declare module '@material-ui/core/styles' {
+    interface Theme {
+        palette: {
+            mode: string;
+            primary: {
+                light: string;
+                main: string;
+                dark: string;
+            },
+            secondary: {
+                light: string;
+                main: string;
+                dark: string;
+            },
+            background: {
+                default: string;
+                paper: string;
+                textPrimary: string;
+                textSecondary: string;
+            },
+        };
+    }
+    // allow configuration using `createTheme`
+    interface ThemeOptions {
+        status?: {
+            danger?: string;
+        };
+    }
+}
+
 const commonTheme = createTheme({
     components: {
-        // Style sheet name ⚛️
         MuiButton: {
             defaultProps: {
                 variant: 'contained',
@@ -57,6 +86,7 @@ const darkTheme = createTheme({
         background: {
             default: '#000000',
             paper: '#212121',
+            // @ts-expect-error
             textPrimary: '#ffffff',
             textSecondary: '#c3c3c3',
         },

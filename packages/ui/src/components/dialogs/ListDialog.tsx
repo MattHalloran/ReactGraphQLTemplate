@@ -18,13 +18,25 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ListDialog({
+interface ListItemData {
+    label: string;
+    value: string;
+}
+
+interface Props {
+    open?: boolean;
+    onClose: (value?: string) => void;
+    title?: string;
+    data: ListItemData[];
+}
+
+const ListDialog: React.FC<Props> = ({
     open = true,
     onClose,
     title = 'Select Item',
     data,
     ...props
-}) {
+}) => {
     const classes = useStyles();
 
     return (
@@ -38,7 +50,7 @@ function ListDialog({
             {...props}>
             <DialogTitle className={classes.title} id="simple-dialog-title">{title}</DialogTitle>
             <List>
-                {data?.map(([label, value], index) => (
+                {data?.map(({ label, value }, index) => (
                     <ListItem button onClick={() => onClose(value)} key={index}>
                         <ListItemText primary={label} />
                     </ListItem>

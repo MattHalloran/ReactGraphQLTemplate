@@ -9,9 +9,9 @@ const paths = [
     ['Hero', LINKS.AdminHero],
     ['Gallery', LINKS.AdminGallery],
     ['Contact Info', LINKS.AdminContactInfo]
-]
+].map(row => ({ text: row[0], link: row[1] }))
 
-const AdminBreadcrumbs = ({...props}) => BreadcrumbsBase({
+const AdminBreadcrumbs: React.FC = ({ ...props }) => BreadcrumbsBase({
     paths: paths,
     ariaLabel: 'Admin breadcrumb',
     ...props

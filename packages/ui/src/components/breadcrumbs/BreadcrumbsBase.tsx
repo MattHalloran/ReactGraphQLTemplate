@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { 
     Breadcrumbs, 
     Link 
@@ -20,41 +19,44 @@ const useStyles = makeStyles(() => ({
     },
 }))
 
+interface Props {
+    paths: { text: string; link: string; }[];
+    separator?: string;
+    ariaLabel?: string;
+    textColor?: string;
+    style?: object;
+    className?: string;
+}
+
 // Breadcrumbs reload all components if using href directly. Not sure why
-function BreadcrumbsBase({
+const BreadcrumbsBase: React.FC<Props> = ({
     paths,
     separator = '|',
     ariaLabel = 'breadcrumb',
     textColor = 'textPrimary',
     style,
-    ...props
-}) {
+    className
+}) => {
     const classes = useStyles();
     const history = useHistory();
     // Add user styling to default root style
     let rootStyle = merge(classes.root, style ?? {});
     // Match separator color to link color, if not specified
-    if (textColor && !rootStyle.color) rootStyle.color = textColor;
+    // @ts-expect-error
+    if (textColor) rootStyle.color = textColor;
     return (
-            <Breadcrumbs style={style ?? {}} classes={{root: classes.root, li: classes.li}} separator={separator} aria-label={ariaLabel} {...props}>
+            <Breadcrumbs className={className} style={style ?? {}} classes={{root: classes.root, li: classes.li}} separator={separator} aria-label={ariaLabel}>
                 {paths.map(p => (
                     <Link 
-                        key={p[0]}
+                        key={p.text}
                         color={textColor}
-                        onClick={() => history.push(p[1])}
+                        onClick={() => history.push(p.link)}
                     >
-                        {window.location.pathname === p[1] ? <b>{p[0]}</b> : p[0]}
+                        {window.location.pathname === p.link ? <b>{p.text}</b> : p.text}
                     </Link>
                 ))}
             </Breadcrumbs>
     );
-}
-
-BreadcrumbsBase.propTypes = {
-    paths: PropTypes.array.isRequired,
-    separator: PropTypes.string,
-    ariaLabel: PropTypes.string,
-    textColor: PropTypes.string,
 }
 
 export { BreadcrumbsBase };

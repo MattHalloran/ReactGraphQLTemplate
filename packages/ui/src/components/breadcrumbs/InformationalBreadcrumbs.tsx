@@ -5,9 +5,9 @@ import { BreadcrumbsBase } from './BreadcrumbsBase';
 const paths = [
     ['About Us', LINKS.About],
     ['Gallery', LINKS.Gallery]
-]
+].map(row => ({ text: row[0], link: row[1] }))
 
-const InformationalBreadcrumbs = ({...props}) => BreadcrumbsBase({
+const InformationalBreadcrumbs: React.FC = ({...props}) => BreadcrumbsBase({
     paths: paths,
     ariaLabel: 'About us breadcrumb',
     ...props

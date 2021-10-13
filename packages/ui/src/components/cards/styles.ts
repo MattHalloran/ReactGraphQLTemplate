@@ -1,4 +1,7 @@
-export const cardStyles = (theme) => ({
+import { Theme } from "@material-ui/core";
+import { ClassNameMap } from "@material-ui/styles";
+
+export const cardStyles: ClassNameMap = (theme: Theme) => ({
     cardRoot: {
         background: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,

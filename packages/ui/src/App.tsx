@@ -6,7 +6,8 @@ import {
     Navbar,
     Snack
 } from 'components';
-import { PUBS, PubSub, themes } from 'utils';
+import PubSub from 'pubsub-js';
+import { PUBS, themes } from 'utils';
 import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
@@ -19,7 +20,7 @@ import { DndProvider } from 'react-dnd';
 import { useMutation, useQuery } from '@apollo/client';
 import { readAssetsQuery } from 'graphql/query/readAssets';
 import { loginMutation } from 'graphql/mutation';
-import Lato from './assets/fonts/Lato.woff';
+import Lato from 'assets/fonts/Lato.woff';
 
 const useStyles = makeStyles(() => ({
         "@global": {
@@ -63,7 +64,7 @@ const keyMap = {
     CLOSE_MENU_OR_POPUP: ["escape", "backspace"]
 };
 
-export function App() {
+export function App(): React.FC {
     const classes = useStyles();
     // Session cookie should automatically expire in time determined by server,
     // so no need to validate session on first load

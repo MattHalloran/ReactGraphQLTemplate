@@ -10,7 +10,16 @@ import {
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 
-const default_state = {
+interface State {
+    title?: string | null;
+    message?: string | null;
+    firstButtonText?: string;
+    firstButtonClicked?: (() => void) | null;
+    secondButtonText?: string | null;
+    secondButtonClicked?: (() => void) | null;
+}
+
+const default_state: State = {
     title: null,
     message: null,
     firstButtonText: 'Ok',
@@ -19,16 +28,16 @@ const default_state = {
     secondButtonClicked: null,
 };
 
-function AlertDialog() {
-    const [state, setState] = useState(default_state)
+const AlertDialog: React.FC = () => {
+    const [state, setState] = useState<State>(default_state)
     let open = state.title !== null || state.message !== null;
 
     useEffect(() => {
         let dialogSub = PubSub.subscribe(PUBS.AlertDialog, (_, o) => setState({...default_state, ...o}));
-        return () => PubSub.unsubscribe(dialogSub);
+        return () => { PubSub.unsubscribe(dialogSub) };
     }, [])
 
-    const handleClick = (action) => {
+    const handleClick = (action: (() => void) | null | undefined) => {
         if (action) action();
         setState(default_state);
     }

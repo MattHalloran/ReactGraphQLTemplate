@@ -40,12 +40,12 @@ function CustomerCard({
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
-    const callPhone = (phoneLink) => {
+    const callPhone = (phoneLink: string) => {
         setPhoneDialogOpen(false);
         if (phoneLink) window.location.href = phoneLink;
     }
 
-    const sendEmail = (emailLink) => {
+    const sendEmail = (emailLink: string) => {
         setEmailDialogOpen(false);
         if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
@@ -125,8 +125,8 @@ function CustomerCard({
     }
 
     // Phone and email [label, value] pairs
-    const phoneList = mapIfExists(customer, 'phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
-    const emailList = mapIfExists(customer, 'emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
+    const phoneList = mapIfExists(customer, 'phones', (p) => ({ label: showPhone(p.number), value: phoneLink(p.number)}));
+    const emailList = mapIfExists(customer, 'emails', (e) => ({ label: e.emailAddress, value: emailLink(e.emailAddress)}));
 
     return (
         <Card className={classes.cardRoot}>

@@ -35,14 +35,23 @@ const {
     TermsPage,
 } = lazily(() => import('./pages'));
 
-function Routes({
+interface Props {
+    session: any;
+    onSessionUpdate: any;
+    business: any;
+    userRoles: any;
+    cart: any;
+    onRedirect: any;
+}
+
+const Routes: React.FC<Props> = ({
     session,
     onSessionUpdate,
     business,
     userRoles,
     cart,
     onRedirect
-}) {
+}) => {
 
     const common = {
         sessionChecked: session !== null && session !== undefined,
