@@ -15,7 +15,7 @@ import { NewCustomerDialog } from 'components/dialogs/NewCustomerDialog';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
 
-const componentStyles = (theme) => ({
+const componentStyles = () => ({
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, .5fr))',
@@ -25,7 +25,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AdminCustomerPage() {
+const AdminCustomerPage: React.FC = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [customers, setCustomers] = useState(null);

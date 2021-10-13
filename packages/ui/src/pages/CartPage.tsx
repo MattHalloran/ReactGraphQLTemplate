@@ -37,11 +37,11 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function CartPage({
+const CartPage: React.FC = ({
     business,
     cart,
     onSessionUpdate
-}) {
+}) => {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final

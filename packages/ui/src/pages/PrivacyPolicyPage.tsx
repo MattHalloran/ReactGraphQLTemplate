@@ -15,9 +15,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function PrivacyPolicyPage({
+const PrivacyPolicyPage: React.FC = ({
     business
-}) {
+}) => {
     const classes = useStyles();
     const theme = useTheme();
     const [privacy, setPrivacy] = useState(null);
@@ -38,10 +38,6 @@ function PrivacyPolicyPage({
             <ReactMarkdown>{ privacy }</ReactMarkdown>
         </div>
     );
-}
-
-PrivacyPolicyPage.propTypes = {
-    
 }
 
 export { PrivacyPolicyPage };

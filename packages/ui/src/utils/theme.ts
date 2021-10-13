@@ -1,35 +1,14 @@
 import { createTheme } from '@material-ui/core/styles';
 
-declare module '@material-ui/core/styles' {
-    interface Theme {
-        palette: {
-            mode: string;
-            primary: {
-                light: string;
-                main: string;
-                dark: string;
-            },
-            secondary: {
-                light: string;
-                main: string;
-                dark: string;
-            },
-            background: {
-                default: string;
-                paper: string;
-                textPrimary: string;
-                textSecondary: string;
-            },
-        };
-    }
-    // allow configuration using `createTheme`
-    interface ThemeOptions {
-        status?: {
-            danger?: string;
-        };
+// Define custom theme properties
+declare module '@material-ui/core/styles/createPalette' {
+    interface TypeBackground {
+        textPrimary: string;
+        textSecondary: string;
     }
 }
 
+// Define common theme options (button appearance, etc.)
 const commonTheme = createTheme({
     components: {
         MuiButton: {
@@ -46,6 +25,7 @@ const commonTheme = createTheme({
     },
 });
 
+// Light theme
 const lightTheme = createTheme({
     ...commonTheme,
     palette: {
@@ -69,6 +49,7 @@ const lightTheme = createTheme({
     }
 })
 
+// Dark theme
 const darkTheme = createTheme({
     ...commonTheme,
     palette: {
@@ -86,7 +67,6 @@ const darkTheme = createTheme({
         background: {
             default: '#000000',
             paper: '#212121',
-            // @ts-expect-error
             textPrimary: '#ffffff',
             textSecondary: '#c3c3c3',
         },

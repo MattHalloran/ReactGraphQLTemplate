@@ -179,7 +179,7 @@ function EditProductDialog({
                 data: { variables: { ids: [changedProduct.id] } },
                 successMessage: () => 'Product deleted.',
                 onSuccess: () => onClose(),
-                errorMesage: () => 'Failed to delete product.',
+                errorMessage: () => 'Failed to delete product.',
             }),
             secondButtonText: 'No',
         });

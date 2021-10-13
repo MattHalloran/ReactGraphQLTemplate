@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-function GalleryPage() {
+const GalleryPage: React.FC = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [images, setImages] = useState([]);

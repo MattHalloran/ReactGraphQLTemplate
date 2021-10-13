@@ -1,11 +1,19 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { LINKS } from 'utils';
 import { useLocation } from 'react-router-dom';
 import { useHistory } from 'react-router';
 
-const Page = ({
-    title,
+interface Props {
+    title?: string;
+    sessionChecked: boolean;
+    redirect?: string;
+    userRoles: Role | Role[];
+    restrictedToRoles: string[];
+    children: React.FC;
+}
+
+const Page: React.FC<Props> = ({
+    title = '',
     sessionChecked,
     redirect = LINKS.Home,
     userRoles,
@@ -16,7 +24,7 @@ const Page = ({
     const history = useHistory();
 
     useEffect(() => {
-        document.title = title || "";
+        document.title = title;
     }, [title]);
 
     // If this page has restricted access
@@ -32,15 +40,5 @@ const Page = ({
 
     return children;
 };
-
-Page.propTypes = {
-    title: PropTypes.string,
-    sessionChecked: PropTypes.bool.isRequired,
-    redirect: PropTypes.string,
-    userRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
-    restrictedToRoles: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
-    fullWidth: PropTypes.bool,
-    children: PropTypes.object.isRequired,
-}
 
 export { Page };

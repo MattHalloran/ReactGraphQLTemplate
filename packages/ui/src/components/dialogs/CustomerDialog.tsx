@@ -26,6 +26,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { deleteCustomerMutation, updateCustomerMutation } from 'graphql/mutation';
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
+import { useMutation } from '@apollo/client';
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -74,6 +75,8 @@ function CustomerDialog({
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [currCustomer, setCurrCustomer] = useState(customer);
+    const [updateCustomerMut] = useMutation(updateCustomerMutation);
+    const [deleteCustomerMut] = useMutation(deleteCustomerMutation);
 
     useEffect(() => {
         setCurrCustomer(customer);
@@ -89,21 +92,21 @@ function CustomerDialog({
     // Locks/unlocks/undeletes a user
     const toggleLock = useCallback(() => {
         mutationWrapper({
-            mutation: updateCustomerMutation,
+            mutation: updateCustomerMut,
             data: { variables: { id: currCustomer.id, status: statusToggleData[2] } },
             successMessage: () => 'Customer updated.',
             errorMessage: () => 'Failed to update customer.'
         })
-    }, [currCustomer, statusToggleData])
+    }, [currCustomer.id, statusToggleData, updateCustomerMut])
 
     const deleteCustomer = useCallback(() => {
         mutationWrapper({
-            mutation: deleteCustomerMutation,
+            mutation: deleteCustomerMut,
             data: { variables: { id: currCustomer?.id }},
             successMessage: () => 'Customer deleted.',
             onSuccess: onClose,
         })
-    }, [currCustomer?.id, onClose])
+    }, [currCustomer?.id, deleteCustomerMut, onClose])
     
     const confirmDelete = useCallback(() => {
         PubSub.publish(PUBS.AlertDialog, {
@@ -116,11 +119,11 @@ function CustomerDialog({
 
     const updateCustomer = useCallback(() => {
         mutationWrapper({
-            mutation: updateCustomerMutation,
+            mutation: updateCustomerMut,
             data: { variables: { ...currCustomer }},
             successMessage: () => 'Customer updated.',
         })
-    }, [currCustomer])
+    }, [currCustomer, updateCustomerMut])
 
     let changes_made = !isEqual(customer, currCustomer);
     let options = (

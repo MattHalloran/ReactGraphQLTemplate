@@ -37,9 +37,9 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AdminContactPage({
+const AdminContactPage: React.FC = ({
     business
-}) {
+}) => {
     const classes = useStyles();
     const theme = useTheme();
     const [hours, setHours] = useState('');

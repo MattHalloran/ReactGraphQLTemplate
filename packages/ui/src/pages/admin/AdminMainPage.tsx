@@ -25,7 +25,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AdminMainPage() {
+const AdminMainPage: React.FC = () => {
     let history = useHistory();
     const classes = useStyles();
 

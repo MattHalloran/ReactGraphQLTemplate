@@ -20,9 +20,9 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AboutPage({
+const AboutPage: React.FC = ({
     business,
-}) {
+}) => {
     const classes = useStyles();
     const theme = useTheme();
     const socials = [

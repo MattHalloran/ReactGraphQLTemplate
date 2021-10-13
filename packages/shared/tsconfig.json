@@ -19,15 +19,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "noImplicitAny": false,
-    "noImplicitThis": true,
-    "strictNullChecks": true
+    "jsx": "react-jsx"
   },
   "include": [
     "src"
-, "../shared/src/models.ts"  ],
-  "exclude": [
-    "node_modules"
   ]
 }

@@ -27,7 +27,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AdminOrderPage({ userRoles }) {
+const AdminOrderPage: React.FC = ({ userRoles }) => {
     const classes = useStyles();
     const theme = useTheme();
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);

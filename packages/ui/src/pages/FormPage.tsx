@@ -31,12 +31,12 @@ const useStyles = makeStyles((theme) => ({
       },
 }));
 
-function FormPage({
+const FormPage: React.FC = ({
     title,
     autocomplete = 'on',
     children,
     maxWidth = '90%',
-}) {
+}) => {
     const classes = useStyles();
 
     return (

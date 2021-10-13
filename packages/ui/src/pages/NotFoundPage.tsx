@@ -16,7 +16,7 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function NotFoundPage() {
+const NotFoundPage: React.FC = () => {
     const classes = useStyles();
 
     return (
@@ -31,10 +31,6 @@ function NotFoundPage() {
             </div>
         </div>
     );
-}
-
-NotFoundPage.propTypes = {
-    
 }
 
 export { NotFoundPage };

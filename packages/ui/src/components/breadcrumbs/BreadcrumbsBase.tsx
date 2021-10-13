@@ -6,6 +6,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import merge from 'lodash/merge';
+import { BreadcrumbsBaseProps } from './types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -19,17 +20,7 @@ const useStyles = makeStyles(() => ({
     },
 }))
 
-interface Props {
-    paths: { text: string; link: string; }[];
-    separator?: string;
-    ariaLabel?: string;
-    textColor?: string;
-    style?: object;
-    className?: string;
-}
-
-// Breadcrumbs reload all components if using href directly. Not sure why
-const BreadcrumbsBase: React.FC<Props> = ({
+const BreadcrumbsBase: React.FC<BreadcrumbsBaseProps> = ({
     paths,
     separator = '|',
     ariaLabel = 'breadcrumb',

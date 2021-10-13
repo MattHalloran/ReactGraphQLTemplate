@@ -4,7 +4,7 @@ import {
     Hero 
 } from 'components';
 
-function HomePage() {
+const HomePage: React.FC = () => {
     return (
         <div>
             <Hero text="Need a fast, large, or cheap spaceship?" subtext="We've got you covered" />

@@ -38,12 +38,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ShoppingPage({
+const ShoppingPage: React.FC = ({
     session,
     onSessionUpdate,
     business,
     cart,
-}) {
+}) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { data: traitOptionsData } = useQuery(traitOptionsQuery);

@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import PropTypes from 'prop-types'
 import {
     Card,
     CardActions,
@@ -26,14 +25,14 @@ import { emailLink, mapIfExists, phoneLink, PUBS, showPhone } from 'utils';
 import PubSub from 'pubsub-js';
 import { ListDialog } from 'components/dialogs';
 import { cardStyles } from './styles';
+import { CustomerCardProps } from './types';
 
 const useStyles = makeStyles(cardStyles);
 
-function CustomerCard({
+const CustomerCard: React.FC<CustomerCardProps> = ({
     customer,
-    status = AccountStatus.DELETED,
     onEdit,
-}) {
+}) => {
     const classes = useStyles();
     const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
     const [deleteCustomer] = useMutation(deleteCustomerMutation);
@@ -64,7 +63,7 @@ function CustomerCard({
     const modifyCustomer = useCallback((status, message) => {
         mutationWrapper({
             mutation: changeCustomerStatus,
-            data: { variables: { id: customer?.id, status: status } },
+            data: { variables: { id: customer.id, status: status } },
             successCondition: (response) => response.changeCustomerStatus !== null,
             successMessage: () => message
         })
@@ -77,7 +76,7 @@ function CustomerCard({
             firstButtonClicked: () => {
                 mutationWrapper({
                     mutation: deleteCustomer,
-                    data: { variables: { id: customer?.id } },
+                    data: { variables: { id: customer.id } },
                     successCondition: (response) => response.deleteCustomer !== null,
                     successMessage: () => 'Customer permanently deleted.'
                 })
@@ -103,9 +102,9 @@ function CustomerCard({
     let permanent_delete_action = [confirmPermanentDelete, <DeleteForeverIcon className={classes.icon} />, 'Permanently delete user']
 
     let actions = [edit_action];
-    // Actions for customer accounts
-    if (!Array.isArray(customer?.roles) || !customer.roles.some(r => ['Owner', 'Admin'].includes(r.role.title))) {
-        switch (customer?.status) {
+    // Actions for customer accounts (i.e. not an owner or admin)
+    if (!(customer.roles?.some(r => ['Owner', 'Admin'].includes(r.role.title)) || false)) {
+        switch (customer.status) {
             case AccountStatus.UNLOCKED:
                 actions.push(lock_action);
                 actions.push(delete_action)
@@ -132,23 +131,23 @@ function CustomerCard({
         <Card className={classes.cardRoot}>
             {phoneDialogOpen ? (
                 <ListDialog
-                    title={`Call ${customer?.firstName} ${customer?.lastName}`}
+                    title={`Call ${customer.firstName} ${customer.lastName}`}
                     data={phoneList}
                     onClose={callPhone} />
             ) : null}
             {emailDialogOpen ? (
                 <ListDialog
-                    title={`Email ${customer?.firstName} ${customer?.lastName}`}
+                    title={`Email ${customer.firstName} ${customer.lastName}`}
                     data={emailList}
                     onClose={sendEmail} />
             ) : null}
             <CardContent className={classes.content} onClick={() => onEdit(customer)}>
                 <Typography gutterBottom variant="h6" component="h2">
-                    {customer?.firstName} {customer?.lastName}
+                    {customer.firstName} {customer.lastName}
                 </Typography>
-                <p>Status: {status_map[customer?.status]}</p>
-                <p>Business: {customer?.business?.name}</p>
-                <p>Pronouns: {customer?.pronouns ?? 'Unset'}</p>
+                <p>Status: {status_map[customer.status]}</p>
+                <p>Business: {customer.business?.name}</p>
+                <p>Pronouns: {customer.pronouns ?? 'Unset'}</p>
             </CardContent>
             <CardActions>
                 {actions?.map((action, index) => 
@@ -175,11 +174,6 @@ function CustomerCard({
             </CardActions>
         </Card>
     );
-}
-
-CustomerCard.propTypes = {
-    customer: PropTypes.object.isRequired,
-    onEdit: PropTypes.func.isRequired,
 }
 
 export { CustomerCard };

@@ -28,7 +28,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = () => ({
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
@@ -41,7 +41,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-function AdminInventoryPage() {
+const AdminInventoryPage: React.FC = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [showActive, setShowActive] = useState(true);
