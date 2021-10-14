@@ -6,7 +6,7 @@ import pkg from '@prisma/client';
 const { OrderStatus } = pkg;
 
 // Validates email address, and returns customer data
-export async function customerFromEmail(email, prisma) {
+export async function customerFromEmail(email: string, prisma) {
     if (!email) throw new CustomError(CODE.BadCredentials);
     // Validate email address
     const emailRow = await prisma.email.findUnique({ where: { emailAddress: email } });

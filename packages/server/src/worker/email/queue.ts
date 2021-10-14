@@ -18,7 +18,7 @@ export function sendMail(to=[], subject='', text='', html='') {
     });
 }
 
-export function customerNotifyAdmin(name) {
+export function customerNotifyAdmin(name: string) {
     emailQueue.add({
         to: [process.env.SITE_EMAIL_USERNAME],
         subject: `Account created for ${name}`,
@@ -36,7 +36,7 @@ export function orderNotifyAdmin() {
     });
 }
 
-export function sendResetPasswordLink(email, customer_id, code) {
+export function sendResetPasswordLink(email: string, customer_id: string | number, code: string) {
     emailQueue.add({
         to: [email],
         subject: `${BUSINESS_NAME.Short} Password Reset`,
@@ -45,7 +45,7 @@ export function sendResetPasswordLink(email, customer_id, code) {
     });
 }
 
-export function sendVerificationLink(email, customer_id) {
+export function sendVerificationLink(email: string, customer_id: string | number) {
     emailQueue.add({
         to: [email],
         subject: `Verify ${BUSINESS_NAME.Short} Account`,

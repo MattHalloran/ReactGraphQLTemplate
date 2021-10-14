@@ -7,7 +7,7 @@ const smsQueue = new Bull('sms', { redis: {
 } });
 smsQueue.process(smsProcess);
 
-export function sendSms(to=[], body) {
+export function sendSms(to=[], body: string) {
     smsQueue.add({
         to: to,
         body: body
