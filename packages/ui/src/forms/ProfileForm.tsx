@@ -7,7 +7,7 @@ import { useFormik } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
 import { combineStyles, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
-import { Button, Container, FormHelperText, Grid, TextField, Checkbox, FormControlLabel } from '@material-ui/core';
+import { Button, Container, FormHelperText, Grid, TextField, Checkbox, FormControlLabel, Theme } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -15,7 +15,7 @@ import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     buttons: {
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),

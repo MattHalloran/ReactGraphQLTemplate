@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, Theme } from '@material-ui/core';
 import { ImageList } from './ImageList';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     pad: {
         marginBottom: theme.spacing(2),
         marginTop: theme.spacing(2)

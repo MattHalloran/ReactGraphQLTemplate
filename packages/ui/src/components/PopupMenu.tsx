@@ -1,9 +1,9 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import Popover from '@material-ui/core/Popover';
-import { Button } from '@material-ui/core';
+import { Button, Theme } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     paper: {
         background: theme.palette.primary.light,
     },

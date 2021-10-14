@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
         padding: '0',
         color: 'white',
         textAlign: 'center',
-        fontWeight: '600',
+        fontWeight: 600,
         textShadow:
             `-1px -1px 0 black,  
             1px -1px 0 black,

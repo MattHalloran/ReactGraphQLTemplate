@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles({
-    slider: props => ({
+    slider: (props: { translate: number; transition: number; width: number; }) => ({
         transform: `translateX(-${props.translate}px)`,
         transition: `transform ease-out ${props.transition}ms`,
         height: '100%',
@@ -11,18 +11,23 @@ const useStyles = makeStyles({
     }),
 });
 
-const SliderContent = ({
+interface Props {
+    translate: number;
+    transition: number;
+    width: number;
+    children: React.ReactNode;
+}
+
+export const SliderContent: React.FC<Props> = ({
     translate,
     transition,
     width,
     children
 }) => {
-    const classes = useStyles({translate, transition, width});
+    const classes = useStyles({ translate, transition, width });
     return (
         <div className={classes.slider}>
             {children}
         </div>
     )
 }
-
-export { SliderContent }

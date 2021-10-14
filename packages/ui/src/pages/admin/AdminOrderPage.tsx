@@ -10,11 +10,11 @@ import {
     OrderDialog,
     Selector,
 } from 'components';
-import { Typography } from '@material-ui/core';
+import { Theme, Typography } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     cardFlex: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',

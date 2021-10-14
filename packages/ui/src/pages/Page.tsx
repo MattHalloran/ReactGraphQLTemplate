@@ -12,7 +12,7 @@ interface Props {
     children: React.ReactNode;
 }
 
-const Page: React.FC<Props> = ({
+export const Page: React.FC<Props> = ({
     title = '',
     sessionChecked,
     redirect = LINKS.Home,
@@ -40,5 +40,3 @@ const Page: React.FC<Props> = ({
 
     return children;
 };
-
-export { Page };

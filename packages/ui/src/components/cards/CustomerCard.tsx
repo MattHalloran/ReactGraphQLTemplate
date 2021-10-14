@@ -19,17 +19,21 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { AccountStatus } from '@local/shared';
+import { AccountStatus, Customer } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { emailLink, mapIfExists, phoneLink, PUBS, showPhone } from 'utils';
 import PubSub from 'pubsub-js';
 import { ListDialog } from 'components/dialogs';
 import { cardStyles } from './styles';
-import { CustomerCardProps } from './types';
 
 const useStyles = makeStyles(cardStyles);
 
-const CustomerCard: React.FC<CustomerCardProps> = ({
+interface Props {
+    customer: Customer;
+    onEdit: (customer: Customer) => void;
+}
+
+const CustomerCard: React.FC<Props> = ({
     customer,
     onEdit,
 }) => {

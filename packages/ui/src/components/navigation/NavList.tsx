@@ -4,7 +4,7 @@ import {
     PopupMenu
 } from 'components';
 import { actionsToList, actionToIconButton, actionsToMenu, createAction, getUserActions, LINKS } from 'utils';
-import { Container, List } from '@material-ui/core';
+import { Container, List, Theme } from '@material-ui/core';
 import {
     Info as InfoIcon,
     PhotoLibrary as PhotoLibraryIcon,
@@ -12,7 +12,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         display: 'flex',
         marginTop: '0px',

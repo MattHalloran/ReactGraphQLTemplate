@@ -6,6 +6,7 @@ import {
     CardActions,
     CardContent,
     IconButton,
+    Theme,
     Tooltip,
     Typography
 } from '@material-ui/core';
@@ -18,7 +19,7 @@ import { ListDialog } from 'components';
 import { combineStyles, emailLink, mapIfExists, phoneLink, showPhone } from 'utils';
 import { cardStyles } from './styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     orderCardRoot: {
         padding: 10,
         minWidth: 150,

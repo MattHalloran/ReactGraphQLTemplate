@@ -14,13 +14,13 @@ import {
     PhotoLibrary as PhotoLibraryIcon,
     Share as ShareIcon,
 } from '@material-ui/icons';
-import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText } from '@material-ui/core';
+import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     drawerPaper: {
         background: theme.palette.primary.light,
         borderLeft: `1px solid ${theme.palette.text.primary}`,

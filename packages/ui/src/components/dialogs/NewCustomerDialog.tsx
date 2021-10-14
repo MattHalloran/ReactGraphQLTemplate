@@ -9,6 +9,7 @@ import {
     IconButton,
     Slide,
     TextField,
+    Theme,
     Toolbar,
     Typography,
 } from '@material-ui/core';
@@ -23,7 +24,7 @@ import { addCustomerMutation } from 'graphql/mutation';
 import { useFormik } from 'formik';
 import { useMutation } from '@apollo/client';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         position: 'relative',
     },

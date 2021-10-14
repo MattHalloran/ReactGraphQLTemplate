@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import { formStyles } from './styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = () => ({
     phoneInput: {
         width: '100%',
     },

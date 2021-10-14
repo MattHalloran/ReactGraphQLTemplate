@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Logo from 'assets/img/Logo.svg';
 import { LINKS } from 'utils';
-import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Slide, useScrollTrigger, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Hamburger } from './Hamburger';
 import { NavList } from './NavList';
@@ -10,7 +10,7 @@ import { useMutation } from '@apollo/client';
 
 const SHOW_HAMBURGER_AT = 1000;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         background: theme.palette.primary.main,
     },

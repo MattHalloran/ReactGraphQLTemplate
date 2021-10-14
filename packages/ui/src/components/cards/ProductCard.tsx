@@ -6,6 +6,7 @@ import {
     CardContent,
     CardMedia,
     IconButton,
+    Theme,
     Tooltip,
     Typography
 } from '@material-ui/core';
@@ -16,7 +17,7 @@ import { NoImageWithTextIcon } from 'assets/img';
 import { ImageUse, SERVER_URL } from '@local/shared';
 import { cardStyles } from './styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     displayImage: {
         minHeight: 200,
         maxHeight: '50%',

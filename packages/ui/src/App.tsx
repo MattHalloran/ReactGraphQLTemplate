@@ -23,38 +23,38 @@ import { loginMutation } from 'graphql/mutation';
 import Lato from 'assets/fonts/Lato.woff';
 
 const useStyles = makeStyles(() => ({
-        "@global": {
-            body: {
-                backgroundColor: 'black',
-            },
+    "@global": {
+        body: {
+            backgroundColor: 'black',
+        },
+        '#page': {
+            minWidth: '100%',
+            minHeight: '100%',
+            padding: '1em',
+            paddingTop: 'calc(14vh + 20px)'
+        },
+        '@media (min-width:500px)': {
             '#page': {
-                minWidth: '100%',
-                minHeight: '100%',
-                padding: '1em',
-                paddingTop: 'calc(14vh + 20px)'
-            },
-            '@media (min-width:500px)': {
-                '#page': {
-                    paddingLeft: 'max(1em, calc(15% - 75px))',
-                    paddingRight: 'max(1em, calc(15% - 75px))',
-                }
-            },
-            '@font-face': {
-                fontFamily: 'Lato',
-                src: `local('Lato'), url(${Lato}) format('truetype')`,
-                fontDisplay: 'swap',
+                paddingLeft: 'max(1em, calc(15% - 75px))',
+                paddingRight: 'max(1em, calc(15% - 75px))',
             }
         },
-        contentWrap: {
-            minHeight: '100vh',
-        },
-        spinner: {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: '100000',
-        },
+        '@font-face': {
+            fontFamily: 'Lato',
+            src: `local('Lato'), url(${Lato}) format('truetype')`,
+            fontDisplay: 'swap',
+        }
+    },
+    contentWrap: {
+        minHeight: '100vh',
+    },
+    spinner: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 100000,
+    },
 }));
 
 const keyMap = {
@@ -73,7 +73,7 @@ export function App(): React.FC {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
     const timerRef = useRef();
-    const [business, setBusiness] =  useState(null)
+    const [business, setBusiness] = useState(null)
     const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     const [login] = useMutation(loginMutation);
     let history = useHistory();
@@ -115,7 +115,7 @@ export function App(): React.FC {
         }
         login().then((response) => {
             setSession(response.data.login);
-        }).catch((response) => { 
+        }).catch((response) => {
             if (process.env.NODE_ENV === 'development') console.error('Error: cannot login', response);
             setSession({})
         })
@@ -150,10 +150,10 @@ export function App(): React.FC {
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
                         <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
-                        <main 
-                            id="page-container" 
-                            style={{ 
-                                background: theme.palette.background.default, 
+                        <main
+                            id="page-container"
+                            style={{
+                                background: theme.palette.background.default,
                                 color: theme.palette.background.textPrimary,
                             }}
                         >

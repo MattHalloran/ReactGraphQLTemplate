@@ -1,7 +1,7 @@
 import React from 'react';
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
-import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip, Theme } from '@material-ui/core';
 import {
     Business as BusinessIcon,
     Email as EmailIcon,
@@ -11,7 +11,7 @@ import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         overflow: 'hidden',
         backgroundColor: theme.palette.primary.dark,

@@ -4,7 +4,8 @@ import {
     CardActions,
     CardContent,
     CardMedia,
-    IconButton
+    IconButton,
+    Theme
 } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -15,7 +16,7 @@ import { combineStyles, getImageSrc } from 'utils';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import { cardStyles } from './styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     imageContainer: {
         display: 'contents',
         position: 0,

@@ -1,4 +1,7 @@
-export const formStyles = (theme) => ({
+import { Theme } from "@material-ui/core";
+import { Styles } from "@material-ui/styles";
+
+export const formStyles: Styles<Theme, {}> = (theme: Theme) => ({
     form: {
         width: '100%',
         marginTop: theme.spacing(3),

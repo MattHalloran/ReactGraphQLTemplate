@@ -18,7 +18,14 @@ const useStyles = makeStyles({
     },
 });
 
-const Slider = ({
+interface Props {
+    images: any[];
+    autoPlay?: boolean;
+    slidingDelay?: number;
+    slidingDuration?: number;
+}
+
+export const Slider: React.FC<Props> = ({
     images = [],
     autoPlay = true,
     slidingDelay = DEFAULT_DELAY,
@@ -82,5 +89,3 @@ const Slider = ({
         </div>
     )
 }
-
-export { Slider };

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router';
 import { LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
-import { Button } from '@material-ui/core';
+import { Button, Theme } from '@material-ui/core';
 import { CartTable } from 'components';
 import {
     ArrowBack as ArrowBackIcon,
@@ -18,7 +18,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     padTop: {
         paddingTop: theme.spacing(2),
     },

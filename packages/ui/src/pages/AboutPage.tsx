@@ -11,7 +11,7 @@ import { useTheme } from '@emotion/react';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
 
-const componentStyles = (theme) => ({
+const componentStyles = () => ({
     social: {
         width: '80px',
         height: '80px',

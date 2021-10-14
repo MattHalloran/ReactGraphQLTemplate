@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton, Button, Snackbar } from '@material-ui/core';
+import { IconButton, Button, Snackbar, Theme } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -18,7 +18,7 @@ const DEFAULT_STATE = {
     },
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     default: {
         background: theme.palette.primary.light,
         color: theme.palette.primary.contrastText,

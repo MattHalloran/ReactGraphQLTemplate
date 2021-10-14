@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { FormControl, IconButton, Input, InputLabel } from '@material-ui/core';
+import { FormControl, IconButton, Input, InputLabel, Theme } from '@material-ui/core';
 import {
     Add as AddIcon,
     Remove as RemoveIcon
@@ -7,7 +7,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { makeID } from "utils";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         display: 'flex',
     },

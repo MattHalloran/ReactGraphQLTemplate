@@ -8,7 +8,7 @@ import { SORT_OPTIONS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { traitOptionsQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { Grid, Button, SwipeableDrawer } from '@material-ui/core';
+import { Grid, Button, SwipeableDrawer, Theme } from '@material-ui/core';
 import {
     Close as CloseIcon,
     FilterList as FilterListIcon,
@@ -18,7 +18,7 @@ import {
 import { printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     drawerPaper: {
         background: theme.palette.primary.light,
         color: theme.palette.primary.contrastText,

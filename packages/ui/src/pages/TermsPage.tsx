@@ -6,8 +6,9 @@ import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
 import { useTheme } from "@emotion/react";
 import { makeStyles } from "@material-ui/styles";
+import { Theme } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         '& a': {
             color: theme.palette.secondary.light,
@@ -15,7 +16,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const TermsPage: React.FC = ({
+interface Props {
+    business: any;
+}
+
+export const TermsPage: React.FC<Props> = ({
     business
 }) => {
     const classes = useStyles();
@@ -39,5 +44,3 @@ const TermsPage: React.FC = ({
         </div>
     );
 }
-
-export { TermsPage };

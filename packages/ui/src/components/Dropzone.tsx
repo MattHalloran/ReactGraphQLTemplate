@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     gridPad: {
         paddingLeft: theme.spacing(1),
         paddingRight: theme.spacing(1),

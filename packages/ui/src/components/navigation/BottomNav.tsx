@@ -1,10 +1,10 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
-import { BottomNavigation } from '@material-ui/core';
+import { BottomNavigation, Theme } from '@material-ui/core';
 import { actionsToBottomNav, getUserActions } from 'utils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         background: theme.palette.primary.dark,
         position: 'fixed',

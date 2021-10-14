@@ -9,6 +9,7 @@ import {
     TableContainer, 
     TableHead,
     TableRow, 
+    Theme, 
     Tooltip 
 } from '@material-ui/core';
 import { 
@@ -18,7 +19,7 @@ import {
 } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     tableHead: {
         background: theme.palette.primary.main,
     },

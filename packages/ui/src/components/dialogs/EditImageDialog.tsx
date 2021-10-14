@@ -7,10 +7,11 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    TextField
+    TextField,
+    Theme
 } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     title: {
         background: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,

@@ -7,6 +7,7 @@ import {
     Button,
     Grid,
     TextField,
+    Theme,
     Typography
 } from '@material-ui/core';
 import { useMutation } from '@apollo/client';
@@ -16,7 +17,7 @@ import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     tall: {
         height: '100%',
     },
@@ -37,7 +38,11 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-export const AdminContactPage: React.FC = ({
+interface Props {
+    business: any;
+}
+
+export const AdminContactPage: React.FC<Props> = ({
     business
 }) => {
     const classes = useStyles();

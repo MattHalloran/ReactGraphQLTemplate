@@ -14,6 +14,7 @@ import {
     ListItemIcon,
     ListItemText,
     Slide,
+    Theme,
     Toolbar,
     Typography
 } from '@material-ui/core';
@@ -40,7 +41,7 @@ import isEqual from 'lodash/isEqual';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         position: 'relative',
     },

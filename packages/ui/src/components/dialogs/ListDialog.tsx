@@ -4,11 +4,12 @@ import {
     DialogTitle,
     List,
     ListItem,
-    ListItemText
+    ListItemText,
+    Theme
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         background: theme.palette.background.paper,
     },

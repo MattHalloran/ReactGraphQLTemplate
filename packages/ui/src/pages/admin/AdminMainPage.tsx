@@ -1,12 +1,12 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { combineStyles, LINKS } from 'utils';
-import { Typography, Card, CardContent, CardActions, Tooltip, IconButton } from '@material-ui/core';
+import { Typography, Card, CardContent, CardActions, Tooltip, IconButton, Theme } from '@material-ui/core';
 import { Launch as LaunchIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { pageStyles } from '../styles';
 
-const componentStyles = (theme) => ({
+const componentStyles = (theme: Theme) => ({
     card: {
         background: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,

@@ -6,7 +6,7 @@ import {
 import { deleteArrayIndex, showPrice, updateObject, PUBS, getImageSrc, updateArray } from 'utils';
 import PubSub from 'pubsub-js';
 import { NoImageIcon } from 'assets/img';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Theme } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -15,7 +15,7 @@ import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import DatePicker from '@material-ui/lab/DatePicker';
 import { ImageUse, SERVER_URL } from '@local/shared';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     tablePaper: {
         background: theme.palette.background.paper,
     },

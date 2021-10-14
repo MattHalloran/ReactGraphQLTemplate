@@ -1,7 +1,8 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
+import { Theme } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     dotContainer: {
         position: 'absolute',
         bottom: '25px',
@@ -28,7 +29,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Dots = ({
+interface Props {
+    quantity?: number;
+    activeIndex: number;
+}
+
+export const Dots: React.FC<Props> = ({
     quantity = 0,
     activeIndex
 }) => {
@@ -45,5 +51,3 @@ const Dots = ({
         </div>
     )
 }
-
-export { Dots };

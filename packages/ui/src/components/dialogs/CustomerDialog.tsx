@@ -7,6 +7,7 @@ import {
     Grid,
     IconButton,
     Slide,
+    Theme,
     Toolbar,
     Typography,
 } from '@material-ui/core';
@@ -27,7 +28,7 @@ import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { useMutation } from '@apollo/client';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         position: 'relative',
     },

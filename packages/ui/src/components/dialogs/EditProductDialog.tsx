@@ -12,6 +12,7 @@ import {
     ListSubheader,
     Slide,
     TextField,
+    Theme,
     Toolbar,
     Tooltip,
     Typography
@@ -47,7 +48,7 @@ const PRODUCT_TRAITS = {
     'Top Speed': 'topSpeed',
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         position: 'relative',
     },

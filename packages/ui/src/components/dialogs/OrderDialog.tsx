@@ -6,6 +6,7 @@ import {
     Grid,
     IconButton,
     Slide,
+    Theme,
     Toolbar,
     Typography,
 } from '@material-ui/core';
@@ -30,7 +31,7 @@ import { OrderStatus, ROLES } from '@local/shared';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         position: 'relative',
     },
