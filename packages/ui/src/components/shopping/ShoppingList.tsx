@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import PropTypes from "prop-types";
 import { productsQuery } from 'graphql/query';
 import { upsertOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
@@ -20,14 +19,23 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-function ShoppingList({
+interface Props {
+    session: any;
+    onSessionUpdate: () => any;
+    cart: any;
+    sortBy: string;
+    filters: any[];
+    searchString: string;
+}
+
+export const ShoppingList: React.FC<Props> = ({
     session,
     onSessionUpdate,
     cart,
     sortBy = SORT_OPTIONS[0].value,
     filters,
     searchString = '',
-}) {
+}) => {
     const classes = useStyles();
     // Product data for all visible products (i.e. not filtered)
     const [products, setProducts] = useState([]);
@@ -114,14 +122,3 @@ function ShoppingList({
         </div>
     );
 }
-
-ShoppingList.propTypes = {
-    session: PropTypes.object,
-    onSessionUpdate: PropTypes.func.isRequired,
-    cart: PropTypes.object,
-    sortBy: PropTypes.string,
-    filters: PropTypes.object,
-    searchString: PropTypes.string,
-};
-
-export { ShoppingList };

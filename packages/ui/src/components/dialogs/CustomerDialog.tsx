@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import {
     AppBar,
@@ -67,11 +66,17 @@ const statusToggle = {
     [AccountStatus.HARD_LOCKED]: ['Hard Locked', 'Unlock', AccountStatus.UNLOCKED, (<LockOpenIcon />)]
 }
 
-function CustomerDialog({
+interface Props {
+    product: any;
+    open?: boolean;
+    onClose: () => any;
+}
+
+export const CustomerDialog: React.FC<Props> = ({
     customer,
     open = true,
     onClose,
-}) {
+}) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [currCustomer, setCurrCustomer] = useState(customer);
@@ -191,11 +196,3 @@ function CustomerDialog({
         </Dialog>
     );
 }
-
-CustomerDialog.propTypes = {
-    product: PropTypes.object,
-    open: PropTypes.bool,
-    onClose: PropTypes.func.isRequired,
-}
-
-export { CustomerDialog };

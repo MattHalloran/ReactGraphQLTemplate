@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import {
@@ -21,12 +20,19 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function EditImageDialog({
+interface Props {
+    open: boolean;
+    data: any;
+    onClose: () => any;
+    onSave: () => any;
+}
+
+export const EditImageDialog: React.FC<Props> = ({
     open,
     data,
     onClose,
     onSave,
-}) {
+}) => {
     const classes = useStyles();
     const [alt, setAlt] = useState('')
     const [description, setDescription] = useState('')
@@ -66,12 +72,3 @@ function EditImageDialog({
         </Dialog>
     );
 }
-
-EditImageDialog.propTypes = {
-    open: PropTypes.bool.isRequired,
-    data: PropTypes.object,
-    onClose: PropTypes.func.isRequired,
-    onSave: PropTypes.func.isRequired,
-}
-
-export { EditImageDialog };

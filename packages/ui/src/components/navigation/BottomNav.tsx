@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { BottomNavigation } from '@material-ui/core';
@@ -23,12 +22,18 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function BottomNav({
+interface Props {
+    session: any;
+    userRoles: any[];
+    cart: any;
+}
+
+export const BottomNav: React.FC<Props> = ({
     session,
     userRoles,
     cart,
     ...props
-}) {
+}) => {
     let history = useHistory();
     const classes = useStyles();
 
@@ -48,11 +53,3 @@ function BottomNav({
         </BottomNavigation>
     );
 }
-
-BottomNav.propTypes = {
-    session: PropTypes.object,
-    userRoles: PropTypes.array,
-    cart: PropTypes.object,
-}
-
-export { BottomNav };

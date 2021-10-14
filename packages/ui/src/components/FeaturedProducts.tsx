@@ -1,16 +1,9 @@
 import React from 'react';
 
-function FeaturedProducts() {
-
+export const FeaturedProducts = () => {
     return (
         <div>
             
         </div >
     );
 }
-
-FeaturedProducts.propTypes = {
-    
-}
-
-export { FeaturedProducts };

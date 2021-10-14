@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import {
     AppBar,
@@ -61,10 +60,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function NewCustomerDialog({
+interface Props {
+    open?: boolean;
+    onClose: () => any;
+}
+
+export const NewCustomerDialog: React.FC<Props> = ({
     open = true,
     onClose,
-}) {
+}) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [addCustomer] = useMutation(addCustomerMutation);
@@ -231,11 +235,3 @@ function NewCustomerDialog({
         </Dialog>
     );
 }
-
-NewCustomerDialog.propTypes = {
-    product: PropTypes.object,
-    open: PropTypes.bool,
-    onClose: PropTypes.func.isRequired,
-}
-
-export { NewCustomerDialog };

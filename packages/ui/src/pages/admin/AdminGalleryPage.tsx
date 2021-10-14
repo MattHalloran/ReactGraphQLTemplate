@@ -15,7 +15,7 @@ import { pageStyles } from '../styles';
 
 const useStyles = makeStyles(pageStyles);
 
-const AdminGalleryPage: React.FC = () => {
+export const AdminGalleryPage: React.FC = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [imageData, setImageData] = useState([]);
@@ -75,8 +75,3 @@ const AdminGalleryPage: React.FC = () => {
         </div>
     );
 }
-
-AdminGalleryPage.propTypes = {
-}
-
-export { AdminGalleryPage };

@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { lazily } from 'react-lazily';
-import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { ROLES } from '@local/shared';
 import { LINKS } from 'utils';
@@ -272,14 +271,6 @@ const Routes: React.FC<Props> = ({
             </Switch>
         </Suspense>
     );
-}
-
-Routes.propTypes = {
-    session: PropTypes.object,
-    onSessionUpdate: PropTypes.func.isRequired,
-    roles: PropTypes.array,
-    cart: PropTypes.object,
-    onRedirect: PropTypes.func.isRequired,
 }
 
 export { Routes };

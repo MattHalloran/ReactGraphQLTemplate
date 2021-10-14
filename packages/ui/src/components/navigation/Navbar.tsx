@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import Logo from 'assets/img/Logo.svg';
 import { LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger } from '@material-ui/core';
@@ -58,11 +57,14 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function HideOnScroll({
-    children,
-}) {
-    const trigger = useScrollTrigger();
+interface HideOnScrollProps {
+    children: React.ReactNode;
+}
 
+const HideOnScroll: React.FC<HideOnScrollProps> = ({
+    children,
+}) => {
+    const trigger = useScrollTrigger();
     return (
         <Slide appear={false} direction="down" in={!trigger}>
             {children}
@@ -70,18 +72,23 @@ function HideOnScroll({
     );
 }
 
-HideOnScroll.propTypes = {
-    children: PropTypes.element.isRequired,
-};
+interface Props {
+    session: any;
+    business: any;
+    roles: any[];
+    cart: any;
+    onSessionUpdate: () => any;
+    onRedirect: () => any;
+}
 
-function Navbar({
+export const Navbar: React.FC<Props> = ({
     session,
     business,
     onSessionUpdate,
     roles,
     cart,
     onRedirect
-}) {
+}) => {
     const classes = useStyles();
     const [show_hamburger, setShowHamburger] = useState(false);
     const [logout] = useMutation(logoutMutation);
@@ -130,11 +137,3 @@ function Navbar({
         </HideOnScroll>
     );
 }
-
-Navbar.propTypes = {
-    session: PropTypes.object,
-    roles: PropTypes.array,
-    cart: PropTypes.object,
-}
-
-export { Navbar };

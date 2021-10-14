@@ -9,7 +9,7 @@ interface Props {
     redirect?: string;
     userRoles: Role | Role[];
     restrictedToRoles: string[];
-    children: React.FC;
+    children: React.ReactNode;
 }
 
 const Page: React.FC<Props> = ({

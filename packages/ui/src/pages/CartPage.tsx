@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import PropTypes from "prop-types";
 import { useHistory } from 'react-router';
 import { LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -37,7 +36,13 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const CartPage: React.FC = ({
+interface Props {
+    business: any;
+    cart: any;
+    onSessionUpdate: () => any;
+}
+
+export const CartPage: React.FC<Props> = ({
     business,
     cart,
     onSessionUpdate
@@ -140,9 +145,3 @@ const CartPage: React.FC = ({
         </div>
     );
 }
-
-CartPage.propTypes = {
-    cart: PropTypes.object,
-}
-
-export { CartPage };

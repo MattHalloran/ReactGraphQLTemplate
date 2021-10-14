@@ -1,6 +1,5 @@
 // Code inspired by https://github.com/rmolinamir/hero-slider
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -54,10 +53,15 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-function Hero({
+interface Props {
+    text: string;
+    subtext: string;
+}
+
+export const Hero: React.FC<Props> = ({
     text,
     subtext,
-}) {
+}) => {
     let history = useHistory();
     const classes = useStyles();
     const [images, setImages] = useState([]);
@@ -84,10 +88,3 @@ function Hero({
         </div>
     );
 };
-
-Hero.propTypes = {
-    text: PropTypes.string.isRequired,
-    subtext: PropTypes.string.isRequired,
-}
-
-export { Hero };

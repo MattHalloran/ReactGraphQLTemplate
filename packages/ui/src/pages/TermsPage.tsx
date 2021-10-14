@@ -15,9 +15,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function TermsPage({
+const TermsPage: React.FC = ({
     business
-}) {
+}) => {
     const classes = useStyles();
     const theme = useTheme();
     const [terms, setTerms] = useState(null);
@@ -38,10 +38,6 @@ function TermsPage({
             <ReactMarkdown>{ terms }</ReactMarkdown>
         </div>
     );
-}
-
-TermsPage.propTypes = {
-    
 }
 
 export { TermsPage };

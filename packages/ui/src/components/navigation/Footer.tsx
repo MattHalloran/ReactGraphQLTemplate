@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip } from '@material-ui/core';
@@ -40,10 +39,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Footer({
+interface Props {
+    session: any;
+    business: any;
+}
+
+export const Footer: React.FC<Props> = ({
     session,
     business
-}) {
+}) => {
     const classes = useStyles();
     const history = useHistory();
     const theme = useTheme();
@@ -98,9 +102,3 @@ function Footer({
         </div>
     );
 }
-
-Footer.propTypes = {
-    session: PropTypes.object,
-}
-
-export { Footer };

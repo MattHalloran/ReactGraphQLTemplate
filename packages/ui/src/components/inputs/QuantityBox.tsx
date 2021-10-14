@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import PropTypes from 'prop-types';
 import { FormControl, IconButton, Input, InputLabel } from '@material-ui/core';
 import {
     Add as AddIcon,
@@ -41,17 +40,26 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function QuantityBox({
+interface Props {
+    label?: string;
+    initial_value?: number;
+    min_value?: number;
+    max_value?: number;
+    step?: number;
+    valueFunc: (updatedValue: number) => any;
+    errorFunc: (errorMessage: string) => any;
+}
+
+export const QuantityBox: React.FC<Props> = ({
     label = 'Quantity',
     initial_value = 0,
     min_value = -2097151,
     max_value = 2097151,
     step = 1,
-    valueFunc,
-    errorFunc,
-    validateFunc,
+    valueFunc = () => {},
+    errorFunc = () => {},
     ...props
-}) {
+}) => {
     const classes = useStyles();
     const id = makeID(5);
     const [value, setValue] = useState(initial_value ?? '');
@@ -61,18 +69,12 @@ function QuantityBox({
     const HOLD_INTERVAL = 50;
     let holdTimeout = useRef(null);
     let holdInterval = useRef(null);
-    let error = null;
-
-    if (validateFunc) {
-        error = validateFunc(value);
-        if (errorFunc) errorFunc(error);
-    }
 
     const updateValue = (quantity) => {
         if (quantity > max_value) quantity = max_value;
         if (quantity < min_value) quantity = min_value;
         setValue(quantity);
-        if (valueFunc) valueFunc(quantity);
+        valueFunc(quantity);
     }
 
     const incTick = () => {
@@ -133,16 +135,3 @@ function QuantityBox({
         </div>
     );
 }
-
-QuantityBox.propTypes = {
-    label: PropTypes.number,
-    initial_value: PropTypes.number,
-    min_value: PropTypes.number,
-    max_value: PropTypes.number,
-    step: PropTypes.number,
-    valueFunc: PropTypes.func,
-    errorFunc: PropTypes.func,
-    validateFunc: PropTypes.func,
-}
-
-export { QuantityBox };

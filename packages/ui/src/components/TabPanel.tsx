@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/styles';
@@ -10,7 +9,13 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function TabPanel(props) {
+interface Props {
+    children: React.ReactNode,
+    index: number | string,
+    value: number | string,
+}
+
+export const TabPanel: React.FC<Props> = (props) => {
     const classes = useStyles();
     const { children, value, index, ...other } = props;
 
@@ -31,11 +36,3 @@ function TabPanel(props) {
         </div>
     );
 }
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired,
-};
-
-export { TabPanel };

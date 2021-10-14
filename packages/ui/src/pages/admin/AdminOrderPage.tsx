@@ -27,7 +27,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const AdminOrderPage: React.FC = ({ userRoles }) => {
+export const AdminOrderPage: React.FC = ({ userRoles }) => {
     const classes = useStyles();
     const theme = useTheme();
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);
@@ -71,8 +71,3 @@ const AdminOrderPage: React.FC = ({ userRoles }) => {
         </div >
     );
 }
-
-AdminOrderPage.propTypes = {
-}
-
-export { AdminOrderPage };

@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 import {
     Button,
@@ -32,10 +31,15 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(cardStyles, componentStyles));
 
-function OrderCard({
+interface Props {
+    order: any;
+    onEdit: () => any;
+}
+
+export const OrderCard: React.FC<Props> = ({
     onEdit,
     order,
-}) {
+}) => {
     const classes = useStyles();
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
@@ -102,10 +106,3 @@ function OrderCard({
         </Card>
     );
 }
-
-OrderCard.propTypes = {
-    order: PropTypes.object,
-    onClick: PropTypes.func,
-}
-
-export { OrderCard };

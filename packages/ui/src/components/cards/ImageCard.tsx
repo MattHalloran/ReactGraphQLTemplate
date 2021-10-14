@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
     Card,
     CardActions,
@@ -32,13 +31,21 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(cardStyles, componentStyles));
 
-function ImageCard({
+interface Props {
+    onDelete: () => any;
+    onEdit: () => any;
+    data: any;
+    index: number;
+    moveCard: () => any;
+}
+
+export const ImageCard: React.FC<Props> = ({
     onDelete,
     onEdit,
     data,
     index,
     moveCard
-}) {
+}) => {
     const classes = useStyles();
     const ref = useRef(null);
 
@@ -95,13 +102,3 @@ function ImageCard({
         </Card>
     );
 }
-
-ImageCard.propTypes = {
-    onDelete: PropTypes.func.isRequired,
-    onEdit: PropTypes.func.isRequired,
-    data: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
-    moveCard: PropTypes.func.isRequired,
-}
-
-export { ImageCard };

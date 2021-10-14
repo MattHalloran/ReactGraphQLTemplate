@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { ContactInfo } from 'components';
 import { actionsToList, createAction, getUserActions, LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -55,12 +54,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Hamburger({
+interface Props {
+    session: any;
+    business: any;
+    roles: any[];
+    cart: any;
+}
+
+export const Hamburger: React.FC<Props> = ({
     session,
     business,
     roles,
     cart,
-}) {
+}) => {
     const classes = useStyles();
     const history = useHistory();
     const theme = useTheme();
@@ -156,12 +162,3 @@ function Hamburger({
         </React.Fragment>
     );
 }
-
-Hamburger.propTypes = {
-    session: PropTypes.object,
-    logout: PropTypes.func.isRequired,
-    roles: PropTypes.array,
-    cart: PropTypes.object,
-}
-
-export { Hamburger };

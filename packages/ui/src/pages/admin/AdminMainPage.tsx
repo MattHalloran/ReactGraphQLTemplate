@@ -25,7 +25,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const AdminMainPage: React.FC = () => {
+export const AdminMainPage: React.FC = () => {
     let history = useHistory();
     const classes = useStyles();
 
@@ -67,8 +67,3 @@ const AdminMainPage: React.FC = () => {
         </div >
     );
 }
-
-AdminMainPage.propTypes = {
-}
-
-export { AdminMainPage };

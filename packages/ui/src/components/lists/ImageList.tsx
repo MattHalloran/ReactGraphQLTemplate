@@ -1,11 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import update from 'immutability-helper';
 import { makeStyles } from '@material-ui/styles';
-import PropTypes from 'prop-types';
 import { ImageCard } from 'components';
 import { EditImageDialog } from 'components';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     flexed: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -13,10 +12,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ImageList({
+interface Props {
+    data: any[];
+    onUpdate: () => any;
+}
+
+export const ImageList: React.FC<Props> = ({
     data,
     onUpdate
-}) {
+}) => {
     const classes = useStyles();
     const [selected, setSelected] = useState(-1);
 
@@ -67,10 +71,3 @@ function ImageList({
         </div>
     );
 }
-
-ImageList.propTypes = {
-    data: PropTypes.array,
-    onUpdate: PropTypes.func.isRequired,
-}
-
-export { ImageList };

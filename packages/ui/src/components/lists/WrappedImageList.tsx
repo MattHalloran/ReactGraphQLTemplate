@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
-import PropTypes from 'prop-types';
 import { Button, Grid } from '@material-ui/core';
 import { ImageList } from './ImageList';
 
@@ -14,10 +13,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function WrappedImageList({
+interface Props {
+    data: any[];
+    onApply: () => any;
+}
+
+export const WrappedImageList: React.FC<Props> = ({
     data,
     onApply
-}) {
+}) => {
     const classes = useStyles();
     const [changed, setChanged] = useState(null);
 
@@ -44,10 +48,3 @@ function WrappedImageList({
         </div>
     );
 }
-
-WrappedImageList.propTypes = {
-    data: PropTypes.array,
-    onApply: PropTypes.func.isRequired,
-}
-
-export { WrappedImageList };

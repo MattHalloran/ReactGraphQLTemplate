@@ -1,11 +1,10 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { FormControl, InputLabel, Select, MenuItem, Chip } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import isArray from 'lodash/isArray';
 import isEqual from 'lodash/isEqual';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     fullWidth: {
         width: '-webkit-fill-available',
     },
@@ -15,7 +14,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Selector({
+interface Props {
+    options: any[];
+    selected: any;
+    handleChange: () => any;
+    fullWidth?: boolean;
+    multiple?: boolean;
+    inputAriaLabel?: string;
+    noneOption?: boolean;
+    label?: string;
+    color?: string;
+}
+
+export const Selector: React.FC<Props> = ({
     options,
     selected,
     handleChange,
@@ -26,7 +37,7 @@ function Selector({
     label = 'Select',
     color,
     ...props
-}) {
+}) => {
     const classes = useStyles();
     const theme = useTheme();
     const displayColor = color ?? theme.palette.background.contrastText;
@@ -103,16 +114,3 @@ function Selector({
         </FormControl>
     );
 }
-
-Selector.propTypes = {
-    options: PropTypes.array.isRequired,
-    selected: PropTypes.any.isRequired,
-    handleChange: PropTypes.func.isRequired,
-    fullWidth: PropTypes.bool,
-    multiple: PropTypes.bool,
-    inputAriaLabel: PropTypes.string,
-    noneOption: PropTypes.bool,
-    label: PropTypes.string,
-}
-
-export { Selector };

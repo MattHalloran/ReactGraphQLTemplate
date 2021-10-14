@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import {
     QuantityBox,
     Selector
@@ -49,12 +48,18 @@ const DELIVERY_OPTIONS = [
     },
 ]
 
-function CartTable({
+interface Props {
+    cart: any;
+    onUpdate: () => any;
+    editable?: boolean;
+}
+
+export const CartTable: React.FC<Props> = ({
     cart,
     onUpdate,
     editable = true,
     ...props
-}) {
+}) => {
     const classes = useStyles();
     let all_total = Array.isArray(cart?.items) ? cart.items.map(i => (+i.sku.price)*(+i.quantity)).reduce((a, b) => (+a)+(+b), 0) : -1;
 
@@ -202,11 +207,3 @@ function CartTable({
         </div>
     );
 }
-
-CartTable.propTypes = {
-    cart: PropTypes.object.isRequired,
-    onUpdate: PropTypes.func.isRequired,
-    editable: PropTypes.bool,
-}
-
-export { CartTable };

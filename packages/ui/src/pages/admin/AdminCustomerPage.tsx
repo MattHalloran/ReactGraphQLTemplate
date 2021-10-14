@@ -25,7 +25,7 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const AdminCustomerPage: React.FC = () => {
+export const AdminCustomerPage: React.FC = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [customers, setCustomers] = useState(null);
@@ -64,8 +64,3 @@ const AdminCustomerPage: React.FC = () => {
         </div >
     );
 }
-
-AdminCustomerPage.propTypes = {
-}
-
-export { AdminCustomerPage };

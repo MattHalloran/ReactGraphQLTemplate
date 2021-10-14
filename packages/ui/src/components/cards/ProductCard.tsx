@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types'
 import {
     Card,
     CardActionArea,
@@ -39,10 +38,15 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(cardStyles, componentStyles));
 
-function ProductCard({
+interface Props {
+    onClick: () => any;
+    product: any;
+}
+
+export const ProductCard: React.FC<Props> = ({
     onClick,
     product,
-}) {
+}) => {
     const classes = useStyles();
 
     let display;
@@ -74,10 +78,3 @@ function ProductCard({
         </Card>
     );
 }
-
-ProductCard.propTypes = {
-    onClick: PropTypes.func.isRequired,
-    product: PropTypes.object.isRequired,
-}
-
-export { ProductCard };

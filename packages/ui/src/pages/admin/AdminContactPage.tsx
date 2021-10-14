@@ -37,7 +37,7 @@ const componentStyles = (theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const AdminContactPage: React.FC = ({
+export const AdminContactPage: React.FC = ({
     business
 }) => {
     const classes = useStyles();
@@ -111,8 +111,3 @@ const AdminContactPage: React.FC = ({
         </div>
     );
 }
-
-AdminContactPage.propTypes = {
-}
-
-export { AdminContactPage };

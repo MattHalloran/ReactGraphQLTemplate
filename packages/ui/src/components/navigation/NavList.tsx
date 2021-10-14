@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
     ContactInfo,
     PopupMenu
@@ -38,12 +37,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function NavList({
+interface Props {
+    session: any;
+    business: any;
+    roles: any[];
+    cart: any;
+}
+
+export const NavList: React.FC<Props> = ({
     session,
     business,
     roles,
     cart,
-}) {
+}) => {
     const classes = useStyles();
     const history = useHistory();
 
@@ -94,12 +100,3 @@ function NavList({
         </Container>
     );
 }
-
-NavList.propTypes = {
-    session: PropTypes.object,
-    logout: PropTypes.func.isRequired,
-    roles: PropTypes.array,
-    cart: PropTypes.object,
-}
-
-export { NavList };

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import {
     AppBar,
@@ -84,14 +83,23 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function ProductDialog({
+interface Props {
+    product: any;
+    selectedSku: any;
+    onSessionUpdate: () => any;
+    onAddToCart: () => any;
+    open?: boolean;
+    onClose: () => any;
+}
+
+export const ProductDialog: React.FC<Props> = ({
     product,
     selectedSku,
     onSessionUpdate,
     onAddToCart,
     open = true,
     onClose,
-}) {
+}) => {
     product = {
         ...product,
         name: product?.name,
@@ -244,14 +252,3 @@ function ProductDialog({
         </Dialog>
     );
 }
-
-ProductDialog.propTypes = {
-    product: PropTypes.object,
-    selectedSku: PropTypes.object,
-    onSessionUpdate: PropTypes.func.isRequired,
-    onAddToCart: PropTypes.func.isRequired,
-    open: PropTypes.bool,
-    onClose: PropTypes.func.isRequired,
-}
-
-export { ProductDialog };

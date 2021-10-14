@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import {
     SearchBar,
     Selector
@@ -38,7 +37,14 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ShoppingPage: React.FC = ({
+interface Props {
+    session: any;
+    onSessionUpdate: () => any;
+    business: any;
+    cart: any;
+}
+
+export const ShoppingPage: React.FC<Props> = ({
     session,
     onSessionUpdate,
     business,
@@ -169,11 +175,3 @@ const ShoppingPage: React.FC = ({
         </div>
     );
 }
-
-ShoppingPage.propTypes = {
-    session: PropTypes.object,
-    onSessionUpdate: PropTypes.func.isRequired,
-    cart: PropTypes.object,
-}
-
-export { ShoppingPage };

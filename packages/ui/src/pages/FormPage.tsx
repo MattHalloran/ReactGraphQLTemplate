@@ -1,7 +1,6 @@
 import React from 'react';
 import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
     formHeader: {
@@ -31,7 +30,14 @@ const useStyles = makeStyles((theme) => ({
       },
 }));
 
-const FormPage: React.FC = ({
+interface Props {
+    title: string;
+    autocomplete?: string;
+    children: React.ReactNode;
+    maxWidth?: string | number;
+}
+
+export const FormPage: React.FC<Props> = ({
     title,
     autocomplete = 'on',
     children,
@@ -52,12 +58,3 @@ const FormPage: React.FC = ({
         </div>
     );
 }
-
-FormPage.propTypes = {
-    title: PropTypes.string.isRequired,
-    autocomplete: PropTypes.string,
-    children: PropTypes.any,
-    maxWidth: PropTypes.string,
-}
-
-export { FormPage };

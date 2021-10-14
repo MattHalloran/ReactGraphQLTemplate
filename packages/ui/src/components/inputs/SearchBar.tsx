@@ -1,20 +1,26 @@
 import React from 'react';
-import PropTypes from "prop-types";
 import { TextField, InputAdornment, IconButton } from '@material-ui/core';
 import { Search as SearchIcon } from '@material-ui/icons';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 
-function SearchBar({
+interface Props {
+    label?: string;
+    value: string;
+    onChange: (updatedText: string) => any;
+    debounce?: number;
+}
+
+export const SearchBar: React.FC<Props> = ({
     label = 'Search...',
     value,
     onChange,
-    debounce,
+    debounce = 50,
     ...props
-}) {
+}) => {
 
     const onChangeDebounced = AwesomeDebouncePromise(
         onChange,
-        debounce ?? 0,
+        debounce,
     );
 
     return (
@@ -35,12 +41,3 @@ function SearchBar({
         />
     );
 }
-
-SearchBar.propTypes = {
-    label: PropTypes.string,
-    value: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
-    debounce: PropTypes.number,
-}
-
-export { SearchBar };

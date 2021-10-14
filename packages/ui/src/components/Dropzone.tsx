@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import PropTypes from 'prop-types';
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { Button, Grid } from '@material-ui/core';
@@ -50,8 +49,18 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+interface Props {
+    acceptedFileTypes?: string[];
+    dropzoneText?: string;
+    onUpload: (files: any[]) => any;
+    showThumbs?: boolean;
+    maxFiles?: number;
+    uploadText?: string;
+    cancelText?: string;
+    disabled?: boolean;
+}
 
-function Dropzone({
+export const Dropzone: React.FC<Props> = ({
     acceptedFileTypes = ['image/*', '.heic', '.heif'],
     dropzoneText = 'Drag \'n\' drop files here or click',
     onUpload,
@@ -60,7 +69,7 @@ function Dropzone({
     uploadText = 'Upload file(s)',
     cancelText = 'Cancel upload',
     disabled = false
-}) {
+}) => {
     const classes = useStyles();
     const [files, setFiles] = useState([]);
     const { getRootProps, getInputProps } = useDropzone({
@@ -130,16 +139,3 @@ function Dropzone({
         </section>
     );
 }
-
-Dropzone.propTypes = {
-    acceptedFileTypes: PropTypes.array,
-    dropzoneText: PropTypes.string,
-    onUpload: PropTypes.func.isRequired,
-    showThumbs: PropTypes.bool,
-    maxFiles: PropTypes.number,
-    uploadText: PropTypes.string,
-    cancelText: PropTypes.string,
-    disabled: PropTypes.bool,
-}
-
-export { Dropzone };

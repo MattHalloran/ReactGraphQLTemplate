@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import {
     AppBar,
     Autocomplete,
@@ -108,13 +107,21 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function EditProductDialog({
+interface Props {
+    product: any;
+    selectedSku: any;
+    trait_options: any[];
+    open?: boolean;
+    onClose: () => any;
+}
+
+export const EditProductDialog: React.FC<Props> = ({
     product,
     selectedSku,
     trait_options,
     open = true,
     onClose,
-}) {
+}) => {
     const classes = useStyles();
     const [changedProduct, setChangedProduct] = useState(product);
     const [updateProduct] = useMutation(updateProductMutation);
@@ -415,13 +422,3 @@ function EditProductDialog({
         </Dialog>
     );
 }
-
-EditProductDialog.propTypes = {
-    sku: PropTypes.object.isRequired,
-    selectedSku: PropTypes.object,
-    trait_options: PropTypes.array,
-    open: PropTypes.bool,
-    onClose: PropTypes.func.isRequired,
-}
-
-export { EditProductDialog };

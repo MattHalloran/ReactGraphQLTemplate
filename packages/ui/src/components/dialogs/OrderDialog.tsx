@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import PropTypes from 'prop-types';
 import {
     AppBar,
     Button,
@@ -64,12 +63,19 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function OrderDialog({
+interface Props {
+    order: any;
+    userRoles: any;
+    open?: boolean;
+    onClose: () => any;
+}
+
+export const OrderDialog: React.FC<Props> = ({
     order,
     userRoles,
     open = true,
     onClose,
-}) {
+}) => {
     const classes = useStyles();
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);
@@ -229,11 +235,3 @@ function OrderDialog({
         </Dialog>
     );
 }
-
-OrderDialog.propTypes = {
-    order: PropTypes.object,
-    open: PropTypes.bool,
-    onClose: PropTypes.func.isRequired,
-}
-
-export { OrderDialog };
