@@ -28,12 +28,12 @@ interface Props {
     onSave: () => any;
 }
 
-export const EditImageDialog: React.FC<Props> = ({
+export const EditImageDialog = ({
     open,
     data,
     onClose,
     onSave,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [alt, setAlt] = useState('')
     const [description, setDescription] = useState('')

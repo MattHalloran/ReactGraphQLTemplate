@@ -37,10 +37,10 @@ interface Props {
     onEdit: () => any;
 }
 
-export const OrderCard: React.FC<Props> = ({
+export const OrderCard = ({
     onEdit,
     order,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);

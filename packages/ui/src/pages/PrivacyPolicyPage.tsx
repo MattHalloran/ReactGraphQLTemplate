@@ -7,6 +7,7 @@ import { convertToDot, valueFromDot } from "utils";
 import { useTheme } from "@emotion/react";
 import { makeStyles } from "@material-ui/styles";
 import { Theme } from "@material-ui/core";
+import { CommonProps } from "types";
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -16,13 +17,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface Props {
-    business: any;
-}
-
-export const PrivacyPolicyPage: React.FC<Props> = ({
+export const PrivacyPolicyPage = ({
     business
-}) => {
+}: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
     const theme = useTheme();
     const [privacy, setPrivacy] = useState(null);

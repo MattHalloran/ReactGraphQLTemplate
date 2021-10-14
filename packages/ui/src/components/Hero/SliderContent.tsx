@@ -18,12 +18,12 @@ interface Props {
     children: React.ReactNode;
 }
 
-export const SliderContent: React.FC<Props> = ({
+export const SliderContent = ({
     translate,
     transition,
     width,
     children
-}) => {
+}: Props) => {
     const classes = useStyles({ translate, transition, width });
     return (
         <div className={classes.slider}>

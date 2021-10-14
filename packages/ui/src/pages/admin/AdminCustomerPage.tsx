@@ -25,7 +25,7 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-export const AdminCustomerPage: React.FC = () => {
+export const AdminCustomerPage = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [customers, setCustomers] = useState(null);

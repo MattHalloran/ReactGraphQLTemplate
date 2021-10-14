@@ -17,7 +17,7 @@ import { pageStyles } from '../styles';
 
 const useStyles = makeStyles(pageStyles);
 
-export const AdminHeroPage: React.FC = () => {
+export const AdminHeroPage = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [imageData, setImageData] = useState([]);

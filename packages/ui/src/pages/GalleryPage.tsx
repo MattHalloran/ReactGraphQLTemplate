@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-const GalleryPage: React.FC = () => {
+export const GalleryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [images, setImages] = useState([]);
@@ -66,8 +66,3 @@ const GalleryPage: React.FC = () => {
         </div>
     );
 }
-
-GalleryPage.propTypes = {
-}
-
-export { GalleryPage };

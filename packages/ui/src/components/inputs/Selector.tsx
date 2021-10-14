@@ -26,7 +26,7 @@ interface Props {
     color?: string;
 }
 
-export const Selector: React.FC<Props> = ({
+export const Selector = ({
     options,
     selected,
     handleChange,
@@ -37,7 +37,7 @@ export const Selector: React.FC<Props> = ({
     label = 'Select',
     color,
     ...props
-}) => {
+}: Props) => {
     const classes = useStyles();
     const theme = useTheme();
     const displayColor = color ?? theme.palette.background.contrastText;

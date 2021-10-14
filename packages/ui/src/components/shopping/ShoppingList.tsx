@@ -10,6 +10,7 @@ import {
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from "graphql/utils/wrappers";
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -20,22 +21,18 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface Props {
-    session: any;
-    onSessionUpdate: () => any;
-    cart: any;
     sortBy: string;
     filters: any[];
     searchString: string;
 }
 
-export const ShoppingList: React.FC<Props> = ({
-    session,
+export const ShoppingList = ({
     onSessionUpdate,
     cart,
     sortBy = SORT_OPTIONS[0].value,
     filters,
     searchString = '',
-}) => {
+}: Pick<CommonProps, 'onSessionUpdate' | 'cart'> & Props) => {
     const classes = useStyles();
     // Product data for all visible products (i.e. not filtered)
     const [products, setProducts] = useState([]);
@@ -89,7 +86,6 @@ export const ShoppingList: React.FC<Props> = ({
     }
 
     const addToCart = (name, sku, quantity) => {
-        if (!session?.id) return;
         let max_quantity = parseInt(sku.availability);
         if (Number.isInteger(max_quantity) && quantity > max_quantity) {
             alert(`Error: Cannot add more than ${max_quantity}!`);

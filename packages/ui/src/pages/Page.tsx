@@ -2,24 +2,25 @@ import React, { useEffect } from 'react';
 import { LINKS } from 'utils';
 import { useLocation } from 'react-router-dom';
 import { useHistory } from 'react-router';
+import { Role } from '@local/shared';
 
 interface Props {
     title?: string;
     sessionChecked: boolean;
     redirect?: string;
-    userRoles: Role | Role[];
-    restrictedToRoles: string[];
+    userRoles: Role[];
+    restrictedToRoles?: string[];
     children: React.ReactNode;
 }
 
-export const Page: React.FC<Props> = ({
+export const Page = ({
     title = '',
     sessionChecked,
     redirect = LINKS.Home,
     userRoles,
-    restrictedToRoles,
+    restrictedToRoles = [],
     children
-}) => {
+}: Props) => {
     const location = useLocation();
     const history = useHistory();
 
@@ -30,9 +31,7 @@ export const Page: React.FC<Props> = ({
     // If this page has restricted access
     if (restrictedToRoles) {
         if (Array.isArray(userRoles)) {
-            const haveArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-            const needArray = Array.isArray(restrictedToRoles) ? restrictedToRoles : [restrictedToRoles];
-            if (haveArray.some(r => needArray.includes(r?.role?.title))) return children;
+            if (userRoles.some(r => restrictedToRoles.includes(r?.title))) return children;
         }
         if (sessionChecked && location.pathname !== redirect) history.replace(redirect);
         return null;

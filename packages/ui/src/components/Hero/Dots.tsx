@@ -34,10 +34,10 @@ interface Props {
     activeIndex: number;
 }
 
-export const Dots: React.FC<Props> = ({
+export const Dots = ({
     quantity = 0,
     activeIndex
-}) => {
+}: Props) => {
     const classes = useStyles();
 
     let slides = [];

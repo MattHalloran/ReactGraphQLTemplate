@@ -1,15 +1,16 @@
 import React from 'react';
 import { BreadcrumbsBase } from 'components';
 import { LINKS } from 'utils';
+import { BreadcrumbsBaseProps } from './types';
 
-interface Props  {
+interface Props extends BreadcrumbsBaseProps  {
     business: { BUSINESS_NAME: { Long: string; Short: string; } };
-    separator?: string;
-    textColor?: string;
-    className?: string;
 }
 
-const CopyrightBreadcrumbs: React.FC<Props> = ({ business, ...props }) => {
+export const CopyrightBreadcrumbs = ({ 
+    business, 
+    ...props 
+}: Omit<Props, 'paths' | 'ariaLabel' | 'style'>) => {
     const paths = [
         [`© ${new Date().getFullYear()} ${business?.BUSINESS_NAME?.Long ?? business?.BUSINESS_NAME?.Short ?? 'Home'}`, LINKS.Home],
         ['Privacy', LINKS.PrivacyPolicy],
@@ -26,5 +27,3 @@ const CopyrightBreadcrumbs: React.FC<Props> = ({ business, ...props }) => {
         ...props
     })
 }
-
-export { CopyrightBreadcrumbs };

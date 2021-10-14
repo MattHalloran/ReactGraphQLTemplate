@@ -54,12 +54,12 @@ interface Props {
     editable?: boolean;
 }
 
-export const CartTable: React.FC<Props> = ({
+export const CartTable = ({
     cart,
     onUpdate,
     editable = true,
     ...props
-}) => {
+}: Props) => {
     const classes = useStyles();
     let all_total = Array.isArray(cart?.items) ? cart.items.map(i => (+i.sku.price)*(+i.quantity)).reduce((a, b) => (+a)+(+b), 0) : -1;
 

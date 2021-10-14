@@ -58,10 +58,10 @@ interface Props {
     subtext: string;
 }
 
-export const Hero: React.FC<Props> = ({
+export const Hero = ({
     text,
     subtext,
-}) => {
+}: Props) => {
     let history = useHistory();
     const classes = useStyles();
     const [images, setImages] = useState([]);

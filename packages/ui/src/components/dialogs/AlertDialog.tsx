@@ -28,7 +28,7 @@ const default_state: State = {
     secondButtonClicked: null,
 };
 
-const AlertDialog: React.FC = () => {
+const AlertDialog = () => {
     const [state, setState] = useState<State>(default_state)
     let open = state.title !== null || state.message !== null;
 

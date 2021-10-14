@@ -66,10 +66,10 @@ interface Props {
     onClose: () => any;
 }
 
-export const NewCustomerDialog: React.FC<Props> = ({
+export const NewCustomerDialog = ({
     open = true,
     onClose,
-}) => {
+}: Props) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [addCustomer] = useMutation(addCustomerMutation);

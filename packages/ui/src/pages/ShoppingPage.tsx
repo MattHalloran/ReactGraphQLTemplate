@@ -38,18 +38,16 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface Props {
-    session: any;
     onSessionUpdate: () => any;
     business: any;
     cart: any;
 }
 
-export const ShoppingPage: React.FC<Props> = ({
-    session,
+export const ShoppingPage = ({
     onSessionUpdate,
     business,
     cart,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { data: traitOptionsData } = useQuery(traitOptionsQuery);
@@ -161,11 +159,10 @@ export const ShoppingPage: React.FC<Props> = ({
                 <Button
                     color="secondary"
                     startIcon={<PrintIcon />}
-                    onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)}
+                    onClick={() => printAvailability(true, business?.BUSINESS_NAME?.Long)}
                 >Print</Button>
             </div>
             <ShoppingList
-                session={session}
                 onSessionUpdate={onSessionUpdate}
                 cart={cart}
                 sort={sortBy}

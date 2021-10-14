@@ -25,12 +25,12 @@ interface Props {
     slidingDuration?: number;
 }
 
-export const Slider: React.FC<Props> = ({
+export const Slider = ({
     images = [],
     autoPlay = true,
     slidingDelay = DEFAULT_DELAY,
     slidingDuration = DEFAULT_DURATION,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [width, setWidth] = useState(window.innerWidth);
     const [slideIndex, setSlideIndex] = useState(0);

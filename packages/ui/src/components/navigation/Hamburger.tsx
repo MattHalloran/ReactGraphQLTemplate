@@ -19,6 +19,7 @@ import { makeStyles } from '@material-ui/styles';
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     drawerPaper: {
@@ -54,19 +55,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface Props {
-    session: any;
-    business: any;
-    roles: any[];
-    cart: any;
-}
-
-export const Hamburger: React.FC<Props> = ({
-    session,
+export const Hamburger = ({
     business,
-    roles,
+    userRoles,
     cart,
-}) => {
+}: Pick<CommonProps, 'business' | 'userRoles' | 'cart'>) => {
     const classes = useStyles();
     const history = useHistory();
     const theme = useTheme();
@@ -98,7 +91,7 @@ export const Hamburger: React.FC<Props> = ({
         window.open(link, "_blank");
     }
 
-    let nav_actions = getUserActions({ session, roles, cart });
+    let nav_actions = getUserActions({ userRoles, cart });
     let about_actions = [
         ['About Us', 'about', LINKS.About, null, InfoIcon],
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]

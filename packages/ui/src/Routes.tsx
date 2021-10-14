@@ -12,6 +12,7 @@ import {
     SignUpForm
 } from 'forms';
 import { ScrollToTop } from 'components';
+import { CommonProps } from 'types';
 
 // Lazy loading in the Routes component is a recommended way to improve performance. See https://reactjs.org/docs/code-splitting.html#route-based-code-splitting
 const {
@@ -34,33 +35,9 @@ const {
     TermsPage,
 } = lazily(() => import('./pages'));
 
-interface Props {
-    session: any;
-    onSessionUpdate: any;
-    business: any;
-    userRoles: any;
-    cart: any;
-    onRedirect: any;
-}
+const Routes = (props: CommonProps) => {
 
-const Routes: React.FC<Props> = ({
-    session,
-    onSessionUpdate,
-    business,
-    userRoles,
-    cart,
-    onRedirect
-}) => {
-
-    const common = {
-        sessionChecked: session !== null && session !== undefined,
-        onSessionUpdate: onSessionUpdate,
-        onRedirect: onRedirect,
-        userRoles: userRoles,
-        business: business
-    }
-
-    const title = (page) => `${page} | ${business?.BUSINESS_NAME?.Short}`;
+    const title = (page: string) => `${page} | ${props.business?.BUSINESS_NAME?.Short}`;
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
@@ -78,7 +55,7 @@ const Routes: React.FC<Props> = ({
                     priority={1.0}
                     changefreq="monthly"
                     render={() => (
-                        <Page title={title('Home')} {...common}>
+                        <Page title={title('Home')} {...props}>
                             <HomePage />
                         </Page>
                     )}
@@ -89,8 +66,8 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.7}
                     render={() => (
-                        <Page title={title('About')} {...common}>
-                            <AboutPage {...common} />
+                        <Page title={title('About')} {...props}>
+                            <AboutPage {...props} />
                         </Page>
                     )}
                 />
@@ -100,8 +77,8 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.1}
                     render={() => (
-                        <Page title={title('Privacy Policy')} {...common}>
-                            <PrivacyPolicyPage business={business} />
+                        <Page title={title('Privacy Policy')} {...props}>
+                            <PrivacyPolicyPage business={props.business} />
                         </Page>
                     )}
                 />
@@ -111,8 +88,8 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.1}
                     render={() => (
-                        <Page title={title('Terms & Conditions')} {...common}>
-                            <TermsPage business={business} />
+                        <Page title={title('Terms & Conditions')} {...props}>
+                            <TermsPage business={props.business} />
                         </Page>
                     )}
                 />
@@ -122,7 +99,7 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.3}
                     render={() => (
-                        <Page title={title('Gallery')} {...common}>
+                        <Page title={title('Gallery')} {...props}>
                             <GalleryPage />
                         </Page>
                     )}
@@ -133,9 +110,9 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.9}
                     render={() => (
-                        <Page title={title('Sign Up')} {...common}>
+                        <Page title={title('Sign Up')} {...props}>
                             <FormPage title="Sign Up" maxWidth="700px">
-                                <SignUpForm {...common} />
+                                <SignUpForm {...props} />
                             </FormPage>
                         </Page>
                     )}
@@ -146,9 +123,9 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.8}
                     render={() => (
-                        <Page title={title('Log In')} {...common}>
+                        <Page title={title('Log In')} {...props}>
                             <FormPage title="Log In" maxWidth="700px">
-                                <LogInForm {...common} />
+                                <LogInForm {...props} />
                             </FormPage>
                         </Page>
                     )}
@@ -159,9 +136,9 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.1}
                     render={() => (
-                        <Page title={title('Forgot Password')} {...common}>
+                        <Page title={title('Forgot Password')} {...props}>
                             <FormPage title="Forgot Password" maxWidth="700px">
-                                <ForgotPasswordForm {...common} />
+                                <ForgotPasswordForm {...props} />
                             </FormPage>
                         </Page>
                     )}
@@ -172,9 +149,9 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.1}
                     render={() => (
-                        <Page title={title('Reset Password')} {...common}>
+                        <Page title={title('Reset Password')} {...props}>
                             <FormPage title="Reset Password" maxWidth="700px">
-                                <ResetPasswordForm {...common} />
+                                <ResetPasswordForm {...props} />
                             </FormPage>
                         </Page>
                     )}
@@ -187,9 +164,9 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.4}
                     render={() => (
-                        <Page title={title('Profile')} {...common} restrictedToRoles={Object.values(ROLES)}>
+                        <Page title={title('Profile')} {...props} restrictedToRoles={Object.values(ROLES)}>
                             <FormPage title="Profile">
-                                <ProfileForm {...common} />
+                                <ProfileForm {...props} />
                             </FormPage>
                         </Page>
                     )}
@@ -200,8 +177,8 @@ const Routes: React.FC<Props> = ({
                     sitemapIndex={true}
                     priority={0.9}
                     render={() => (
-                        <Page title={title('Shop')} {...common} restrictedToRoles={Object.values(ROLES)} redirect={LINKS.LogIn}>
-                            <ShoppingPage {...common} session={session} cart={cart} />
+                        <Page title={title('Shop')} {...props} restrictedToRoles={Object.values(ROLES)} redirect={LINKS.LogIn}>
+                            <ShoppingPage {...props} />
                         </Page>
                     )}
                 />
@@ -209,8 +186,8 @@ const Routes: React.FC<Props> = ({
                     exact
                     path={LINKS.Cart}
                     render={() => (
-                        <Page title={title('Cart')} {...common} restrictedToRoles={Object.values(ROLES)} redirect={LINKS.LogIn}>
-                            <CartPage {...common} cart={cart} />
+                        <Page title={title('Cart')} {...props} restrictedToRoles={Object.values(ROLES)} redirect={LINKS.LogIn}>
+                            <CartPage {...props} />
                         </Page>
                     )}
                 />
@@ -220,7 +197,7 @@ const Routes: React.FC<Props> = ({
                     exact
                     path={LINKS.Admin}
                     render={() => (
-                        <Page title={title('Manage Site')} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                        <Page title={title('Manage Site')} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
                             <AdminMainPage />
                         </Page>
                     )}
@@ -229,41 +206,41 @@ const Routes: React.FC<Props> = ({
                     exact
                     path={LINKS.AdminContactInfo}
                     render={() => (
-                        <Page title={"Edit Contact Info"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
-                            <AdminContactPage business={business} />
+                        <Page title={"Edit Contact Info"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                            <AdminContactPage business={props.business} />
                         </Page>
                     )}
                 />
                 <Route exact path={LINKS.AdminCustomers} render={() => (
-                    <Page title={"Customer Page"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                    <Page title={"Customer Page"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
                         <AdminCustomerPage />
                     </Page>
                 )} />
                 <Route exact path={LINKS.AdminGallery} render={() => (
-                    <Page title={"Edit Gallery"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                    <Page title={"Edit Gallery"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
                         <AdminGalleryPage />
                     </Page>
                 )} />
                 <Route exact path={LINKS.AdminHero} render={() => (
-                    <Page title={"Edit Hero"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                    <Page title={"Edit Hero"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
                         <AdminHeroPage />
                     </Page>
                 )} />
                 <Route exact path={LINKS.AdminInventory} render={() => (
-                    <Page title={"Edit Inventory Info"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                    <Page title={"Edit Inventory Info"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
                         <AdminInventoryPage />
                     </Page>
                 )} />
                 <Route exact path={LINKS.AdminOrders} render={() => (
-                    <Page title={"Order Page"} {...common} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
-                        <AdminOrderPage userRoles={userRoles} />
+                    <Page title={"Order Page"} {...props} restrictedToRoles={[ROLES.Owner, ROLES.Admin]}>
+                        <AdminOrderPage userRoles={props.userRoles} />
                     </Page>
                 )} />
                 {/* END ADMIN PAGES */}
                 {/* 404 page */}
                 <Route
                     render={() => (
-                        <Page title={title('404')} {...common}>
+                        <Page title={title('404')} {...props}>
                             <NotFoundPage />
                         </Page>
                     )}

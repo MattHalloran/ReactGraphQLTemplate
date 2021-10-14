@@ -13,6 +13,7 @@ import {
 import { Theme, Typography } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
+import { CommonProps } from 'types';
 
 const componentStyles = (theme: Theme) => ({
     cardFlex: {
@@ -27,7 +28,9 @@ const componentStyles = (theme: Theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-export const AdminOrderPage: React.FC = ({ userRoles }) => {
+export const AdminOrderPage = ({ 
+    userRoles 
+}: Pick<CommonProps, 'userRoles'>) => {
     const classes = useStyles();
     const theme = useTheme();
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);

@@ -42,11 +42,11 @@ interface Props {
     onSessionUpdate: () => any;
 }
 
-export const CartPage: React.FC<Props> = ({
+export const CartPage = ({
     business,
     cart,
     onSessionUpdate
-}) => {
+}: Props) => {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final

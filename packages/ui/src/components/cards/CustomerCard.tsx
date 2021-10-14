@@ -33,10 +33,10 @@ interface Props {
     onEdit: (customer: Customer) => void;
 }
 
-const CustomerCard: React.FC<Props> = ({
+const CustomerCard = ({
     customer,
     onEdit,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
     const [deleteCustomer] = useMutation(deleteCustomerMutation);

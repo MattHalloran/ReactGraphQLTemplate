@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@emotion/react';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
+import { CommonProps } from 'types';
 
 const componentStyles = () => ({
     social: {
@@ -20,9 +21,9 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-const AboutPage: React.FC = ({
+export const AboutPage = ({
     business,
-}) => {
+}: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
     const theme = useTheme();
     const socials = [
@@ -59,8 +60,3 @@ const AboutPage: React.FC = ({
         </div >
     );
 }
-
-AboutPage.propTypes = {
-}
-
-export { AboutPage };

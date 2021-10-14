@@ -16,13 +16,14 @@ import { LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles(formStyles);
 
-function LogInForm({
+export const LogInForm = ({
     onSessionUpdate,
     onRedirect
-}) {
+}: Pick<CommonProps, 'onSessionUpdate' | 'onRedirect'>) => {
     const classes = useStyles();
     const history = useHistory();
     const urlParams = useParams();
@@ -112,5 +113,3 @@ function LogInForm({
         </form>
     );
 }
-
-export { LogInForm };

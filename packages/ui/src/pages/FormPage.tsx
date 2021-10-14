@@ -37,12 +37,12 @@ interface Props {
     maxWidth?: string | number;
 }
 
-export const FormPage: React.FC<Props> = ({
+export const FormPage = ({
     title,
     autocomplete = 'on',
     children,
     maxWidth = '90%',
-}) => {
+}: Props) => {
     const classes = useStyles();
 
     return (

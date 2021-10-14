@@ -1,6 +1,7 @@
 import React from 'react';
 import { LINKS } from 'utils';
 import { BreadcrumbsBase } from './BreadcrumbsBase';
+import { BreadcrumbsBaseProps } from './types';
 
 const paths = [
     ['Orders', LINKS.AdminOrders],
@@ -11,10 +12,8 @@ const paths = [
     ['Contact Info', LINKS.AdminContactInfo]
 ].map(row => ({ text: row[0], link: row[1] }))
 
-const AdminBreadcrumbs: React.FC = ({ ...props }) => BreadcrumbsBase({
+export const AdminBreadcrumbs = (props: Omit<BreadcrumbsBaseProps, 'paths' | 'ariaLabel'>) => BreadcrumbsBase({
     paths: paths,
     ariaLabel: 'Admin breadcrumb',
     ...props
 })
-
-export { AdminBreadcrumbs };

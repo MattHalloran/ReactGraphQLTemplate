@@ -111,18 +111,16 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 interface Props {
     product: any;
     selectedSku: any;
-    trait_options: any[];
     open?: boolean;
     onClose: () => any;
 }
 
-export const EditProductDialog: React.FC<Props> = ({
+export const EditProductDialog = ({
     product,
     selectedSku,
-    trait_options,
     open = true,
     onClose,
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [changedProduct, setChangedProduct] = useState(product);
     const [updateProduct] = useMutation(updateProductMutation);

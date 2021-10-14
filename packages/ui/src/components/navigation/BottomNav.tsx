@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { BottomNavigation, Theme } from '@material-ui/core';
 import { actionsToBottomNav, getUserActions } from 'utils';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -22,23 +23,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface Props {
-    session: any;
-    userRoles: any[];
-    cart: any;
-}
-
-export const BottomNav: React.FC<Props> = ({
-    session,
+export const BottomNav = ({
     userRoles,
     cart,
     ...props
-}) => {
+}: Pick<CommonProps, 'userRoles' | 'cart'>) => {
     let history = useHistory();
     const classes = useStyles();
 
     let actions = actionsToBottomNav({
-        actions: getUserActions({ session, userRoles, cart, exclude: ['logout'] }),
+        actions: getUserActions({ userRoles, cart, exclude: ['logout'] }),
         history,
         classes: { action: classes.icon }
     });

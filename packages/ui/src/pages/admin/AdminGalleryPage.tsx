@@ -15,7 +15,7 @@ import { pageStyles } from '../styles';
 
 const useStyles = makeStyles(pageStyles);
 
-export const AdminGalleryPage: React.FC = () => {
+export const AdminGalleryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [imageData, setImageData] = useState([]);

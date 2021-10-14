@@ -20,6 +20,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import { formStyles } from './styles';
+import { CommonProps } from 'types';
 
 const componentStyles = () => ({
     phoneInput: {
@@ -29,10 +30,10 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(formStyles, componentStyles));
 
-function SignUpForm({
+export const SignUpForm = ({
     business,
     onSessionUpdate
-}) {
+}: Pick<CommonProps, 'business' | 'onSessionUpdate'>) => {
     const classes = useStyles();
     const theme = useTheme();
     const history = useHistory();
@@ -242,5 +243,3 @@ function SignUpForm({
         </form>
     );
 }
-
-export { SignUpForm };

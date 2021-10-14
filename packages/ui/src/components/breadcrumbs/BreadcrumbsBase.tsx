@@ -20,14 +20,14 @@ const useStyles = makeStyles(() => ({
     },
 }))
 
-const BreadcrumbsBase: React.FC<BreadcrumbsBaseProps> = ({
+const BreadcrumbsBase = ({
     paths,
     separator = '|',
     ariaLabel = 'breadcrumb',
     textColor = 'textPrimary',
     style,
     className
-}) => {
+}: BreadcrumbsBaseProps) => {
     const classes = useStyles();
     const history = useHistory();
     // Add user styling to default root style

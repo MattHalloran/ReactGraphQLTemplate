@@ -15,12 +15,13 @@ import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles(formStyles);
 
-function ForgotPasswordForm({
+export const ForgotPasswordForm = ({
     onRedirect
-}) {
+}: Pick<CommonProps, 'onRedirect'>) => {
     const classes = useStyles();
     const history = useHistory();
     const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
@@ -87,5 +88,3 @@ function ForgotPasswordForm({
         </form>
     );
 }
-
-export { ForgotPasswordForm };

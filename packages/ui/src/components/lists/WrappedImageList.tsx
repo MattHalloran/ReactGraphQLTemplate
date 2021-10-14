@@ -18,10 +18,10 @@ interface Props {
     onApply: () => any;
 }
 
-export const WrappedImageList: React.FC<Props> = ({
+export const WrappedImageList = ({
     data,
     onApply
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [changed, setChanged] = useState(null);
 

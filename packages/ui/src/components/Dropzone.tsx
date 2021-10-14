@@ -60,7 +60,7 @@ interface Props {
     disabled?: boolean;
 }
 
-export const Dropzone: React.FC<Props> = ({
+export const Dropzone = ({
     acceptedFileTypes = ['image/*', '.heic', '.heif'],
     dropzoneText = 'Drag \'n\' drop files here or click',
     onUpload,
@@ -69,7 +69,7 @@ export const Dropzone: React.FC<Props> = ({
     uploadText = 'Upload file(s)',
     cancelText = 'Cancel upload',
     disabled = false
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [files, setFiles] = useState([]);
     const { getRootProps, getInputProps } = useDropzone({

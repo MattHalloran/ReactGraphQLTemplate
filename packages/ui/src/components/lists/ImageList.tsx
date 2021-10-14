@@ -17,10 +17,10 @@ interface Props {
     onUpdate: () => any;
 }
 
-export const ImageList: React.FC<Props> = ({
+export const ImageList = ({
     data,
     onUpdate
-}) => {
+}: Props) => {
     const classes = useStyles();
     const [selected, setSelected] = useState(-1);
 

@@ -10,13 +10,13 @@ interface Props {
     debounce?: number;
 }
 
-export const SearchBar: React.FC<Props> = ({
+export const SearchBar = ({
     label = 'Search...',
     value,
     onChange,
     debounce = 50,
     ...props
-}) => {
+}: Props) => {
 
     const onChangeDebounced = AwesomeDebouncePromise(
         onChange,

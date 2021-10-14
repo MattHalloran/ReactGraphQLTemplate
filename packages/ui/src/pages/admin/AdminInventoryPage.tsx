@@ -41,7 +41,7 @@ const componentStyles = () => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-export const AdminInventoryPage: React.FC = () => {
+export const AdminInventoryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
     const [showActive, setShowActive] = useState(true);

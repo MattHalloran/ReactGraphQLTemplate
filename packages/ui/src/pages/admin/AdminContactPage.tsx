@@ -16,6 +16,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
+import { CommonProps } from 'types';
 
 const componentStyles = (theme: Theme) => ({
     tall: {
@@ -38,13 +39,9 @@ const componentStyles = (theme: Theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-interface Props {
-    business: any;
-}
-
-export const AdminContactPage: React.FC<Props> = ({
+export const AdminContactPage = ({
     business
-}) => {
+}: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
     const theme = useTheme();
     const [hours, setHours] = useState('');

@@ -50,7 +50,7 @@ interface Props {
     errorFunc: (errorMessage: string) => any;
 }
 
-export const QuantityBox: React.FC<Props> = ({
+export const QuantityBox = ({
     label = 'Quantity',
     initial_value = 0,
     min_value = -2097151,
@@ -59,7 +59,7 @@ export const QuantityBox: React.FC<Props> = ({
     valueFunc = () => {},
     errorFunc = () => {},
     ...props
-}) => {
+}: Props) => {
     const classes = useStyles();
     const id = makeID(5);
     const [value, setValue] = useState(initial_value ?? '');

@@ -5,8 +5,7 @@ import { AppBar, Toolbar, Typography, Slide, useScrollTrigger, Theme } from '@ma
 import { makeStyles } from '@material-ui/styles';
 import { Hamburger } from './Hamburger';
 import { NavList } from './NavList';
-import { logoutMutation } from 'graphql/mutation';
-import { useMutation } from '@apollo/client';
+import { CommonProps } from 'types';
 
 const SHOW_HAMBURGER_AT = 1000;
 
@@ -61,9 +60,9 @@ interface HideOnScrollProps {
     children: React.ReactNode;
 }
 
-const HideOnScroll: React.FC<HideOnScrollProps> = ({
+const HideOnScroll = ({
     children,
-}) => {
+}: HideOnScrollProps) => {
     const trigger = useScrollTrigger();
     return (
         <Slide appear={false} direction="down" in={!trigger}>
@@ -72,42 +71,19 @@ const HideOnScroll: React.FC<HideOnScrollProps> = ({
     );
 }
 
-interface Props {
-    session: any;
-    business: any;
-    roles: any[];
-    cart: any;
-    onSessionUpdate: () => any;
-    onRedirect: () => any;
-}
-
-export const Navbar: React.FC<Props> = ({
-    session,
+export const Navbar = ({
     business,
-    onSessionUpdate,
-    roles,
+    userRoles,
     cart,
     onRedirect
-}) => {
+}: Pick<CommonProps, 'business' | 'userRoles' | 'cart' | 'onRedirect'>) => {
     const classes = useStyles();
     const [show_hamburger, setShowHamburger] = useState(false);
-    const [logout] = useMutation(logoutMutation);
-
-    const logoutCustomer = () => {
-        logout().then(() => {
-            onSessionUpdate();
-            onRedirect(LINKS.Home);
-        }).catch(() => {})
-    }
 
     let child_props = { 
-        session: session, 
         business: business,
-        onSessionUpdate: onSessionUpdate,
-        logout: logoutCustomer,
-        roles: roles, 
+        userRoles: userRoles, 
         cart: cart,
-        onRedirect: onRedirect
     }
 
     useEffect(() => {

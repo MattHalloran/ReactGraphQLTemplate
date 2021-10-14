@@ -27,7 +27,7 @@ const componentStyles = (theme: Theme) => ({
 
 const useStyles = makeStyles(combineStyles(formStyles, componentStyles));
 
-function ProfileForm() {
+export const ProfileForm = () => {
     const classes = useStyles()
     const [editing, setEditing] = useState(false);
     const { data: profile } = useQuery(profileQuery);
@@ -284,9 +284,3 @@ function ProfileForm() {
         </form>
     );
 }
-
-ProfileForm.propTypes = {
-
-}
-
-export { ProfileForm };

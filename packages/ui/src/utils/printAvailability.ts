@@ -26,14 +26,13 @@ const skusToTable = (skus, priceVisible) => {
     });
 }
 
-export const printAvailability = (session, title) => {
+export const printAvailability = (priceVisible: boolean, title: string) => {
     const client = initializeApollo();
     client.query({
         query: skusQuery,
         sortBy: SKU_SORT_OPTIONS.AZ
     }).then(response => {
         const data = response.data.skus;
-        const priceVisible = session !== null;
         const table_data = skusToTable(data, priceVisible);
         // Default export is a4 paper, portrait, using millimeters for units
         const doc = new jsPDF();
@@ -42,7 +41,7 @@ export const printAvailability = (session, title) => {
         let date = new Date();
         centeredText(`Availability: ${date.toDateString()}`, doc, 20);
         doc.setFontSize(LIST_FONT_SIZE);
-        let header = showPrice ? [['Product', 'Size', 'Availability', 'Price']] : [['Product', 'Size', 'Availability']]
+        let header = priceVisible ? [['Product', 'Size', 'Availability', 'Price']] : [['Product', 'Size', 'Availability']]
         doc.autoTable({
             margin: { top: 30 },
             head: header,

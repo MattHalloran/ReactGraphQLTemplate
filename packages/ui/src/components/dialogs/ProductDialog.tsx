@@ -87,20 +87,18 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 interface Props {
     product: any;
     selectedSku: any;
-    onSessionUpdate: () => any;
     onAddToCart: () => any;
     open?: boolean;
     onClose: () => any;
 }
 
-export const ProductDialog: React.FC<Props> = ({
+export const ProductDialog = ({
     product,
     selectedSku,
-    onSessionUpdate,
     onAddToCart,
     open = true,
     onClose,
-}) => {
+}: Props) => {
     product = {
         ...product,
         name: product?.name,

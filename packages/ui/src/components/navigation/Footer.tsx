@@ -10,6 +10,7 @@ import {
 import { CopyrightBreadcrumbs } from 'components';
 import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -39,15 +40,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface Props {
-    session: any;
-    business: any;
-}
-
-export const Footer: React.FC<Props> = ({
-    session,
-    business
-}) => {
+export const Footer = ({
+    business,
+    userRoles,
+}: Pick<CommonProps, 'business' | 'userRoles'>) => {
     const classes = useStyles();
     const history = useHistory();
     const theme = useTheme();
@@ -63,7 +59,7 @@ export const Footer: React.FC<Props> = ({
             <Grid container justifyContent='center' spacing={1}>
                 <Grid item xs={12} sm={6}>
                     <List component="nav">
-                        <ListItem variant="h5" component="h3" >
+                        <ListItem component="h3" >
                             <ListItemText className={classes.upper} primary="Resources" />
                         </ListItem>
                         <ListItem button component="a" onClick={() => history.push(LINKS.About)} >
@@ -75,14 +71,14 @@ export const Footer: React.FC<Props> = ({
                         <ListItem button component="a" onClick={() => history.push(LINKS.Shopping)} >
                             <ListItemText primary="Shop" />
                         </ListItem>
-                        <ListItem button component="a" onClick={() => printAvailability(session, business?.BUSINESS_NAME?.Long)} >
+                        <ListItem button component="a" onClick={() => printAvailability(Array.isArray(userRoles), business?.BUSINESS_NAME?.Long)} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
                     </List>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <List component="nav">
-                        <ListItem variant="h5" component="h3" >
+                        <ListItem component="h3" >
                             <ListItemText className={classes.upper} primary="Contact" />
                         </ListItem>
                         {contactLinks.map(([label, tooltip, src, text, Icon], key) => (

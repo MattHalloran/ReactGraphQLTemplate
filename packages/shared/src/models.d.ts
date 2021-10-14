@@ -48,3 +48,51 @@ export interface Customer {
     orders: Order[];
     phones: Phone[];
 }
+
+export interface OrderItem {
+    id: UUID;
+    quantity: number;
+    orderId?: UUID;
+    order?: Order;
+    skuId: UUID;
+    sku: Sku;
+}
+
+export interface Order {
+    id: UUID;
+    status: string;
+    specialInstructions?: string;
+    desiredDeliveryDate?: string;
+    expectedDeliveryDate?: string;
+    isDelivery: boolean;
+    addressId?: UUID;
+    address?: Address;
+    customerId: Customer;
+    customer: Customer;
+    items: OrderItem[];
+}
+
+export interface Product {
+    id: UUID;
+    name: string;
+    featured?: boolean;
+}
+
+export interface Role {
+    id?: UUID;
+    title: string;
+    description?: string;
+}
+
+export interface Sku {
+    id: UUID;
+    sku: string;
+    isDiscountable: boolean;
+    size?: number;
+    note?: string;
+    availability: number;
+    price?: number;
+    status: string;
+    productId: UUID;
+    product: Product;
+}

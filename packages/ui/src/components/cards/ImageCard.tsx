@@ -40,13 +40,13 @@ interface Props {
     moveCard: () => any;
 }
 
-export const ImageCard: React.FC<Props> = ({
+export const ImageCard = ({
     onDelete,
     onEdit,
     data,
     index,
     moveCard
-}) => {
+}: Props) => {
     const classes = useStyles();
     const ref = useRef(null);
 

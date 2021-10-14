@@ -18,6 +18,7 @@ import {
     Room as RoomIcon
 } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     tableHead: {
@@ -45,10 +46,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-function ContactInfo({
+export const ContactInfo = ({
     business,
     ...props
-}) {
+}: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
 
     const openLink = (e, link) => {
@@ -107,5 +108,3 @@ function ContactInfo({
         </div>
     );
 }
-
-export { ContactInfo };

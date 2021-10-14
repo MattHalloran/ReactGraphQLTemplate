@@ -64,7 +64,7 @@ const keyMap = {
     CLOSE_MENU_OR_POPUP: ["escape", "backspace"]
 };
 
-export function App(): React.FC {
+export function App() {
     const classes = useStyles();
     // Session cookie should automatically expire in time determined by server,
     // so no need to validate session on first load
@@ -141,7 +141,7 @@ export function App(): React.FC {
         })
     }, [checkLogin])
 
-    const redirect = (link) => history.push(link);
+    const redirect = (link: string) => history.push(link);
 
     return (
         <StyledEngineProvider injectFirst>
@@ -159,10 +159,9 @@ export function App(): React.FC {
                         >
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
-                                    session={session}
                                     business={business}
                                     onSessionUpdate={checkLogin}
-                                    roles={session?.roles}
+                                    userRoles={session?.roles}
                                     cart={cart}
                                     onRedirect={redirect}
                                 />
@@ -174,7 +173,7 @@ export function App(): React.FC {
                                 <AlertDialog />
                                 <Snack />
                                 <Routes
-                                    session={session}
+                                    sessionChecked={session !== null && session !== undefined}
                                     onSessionUpdate={checkLogin}
                                     business={business}
                                     userRoles={session?.roles}
@@ -182,8 +181,8 @@ export function App(): React.FC {
                                     onRedirect={redirect}
                                 />
                             </div>
-                            <BottomNav session={session} userRoles={session?.roles} cart={cart} />
-                            <Footer session={session} business={business} />
+                            <BottomNav userRoles={session?.roles} cart={cart} />
+                            <Footer userRoles={session?.roles} business={business} />
                         </main>
                     </div>
                 </DndProvider>

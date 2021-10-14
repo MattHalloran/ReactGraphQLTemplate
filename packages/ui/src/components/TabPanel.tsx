@@ -16,7 +16,7 @@ interface Props {
     value: number | string,
 }
 
-export const TabPanel: React.FC<Props> = (props) => {
+export const TabPanel = (props: Props) => {
     const classes = useStyles();
     const { children, value, index, ...other } = props;
 

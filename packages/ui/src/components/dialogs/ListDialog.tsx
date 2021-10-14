@@ -31,13 +31,13 @@ interface Props {
     data: ListItemData[];
 }
 
-const ListDialog: React.FC<Props> = ({
+const ListDialog = ({
     open = true,
     onClose,
     title = 'Select Item',
     data,
     ...props
-}) => {
+}: Props) => {
     const classes = useStyles();
 
     return (

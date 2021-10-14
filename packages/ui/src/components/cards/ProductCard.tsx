@@ -44,10 +44,10 @@ interface Props {
     product: any;
 }
 
-export const ProductCard: React.FC<Props> = ({
+export const ProductCard = ({
     onClick,
     product,
-}) => {
+}: Props) => {
     const classes = useStyles();
 
     let display;

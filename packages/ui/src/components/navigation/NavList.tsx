@@ -11,6 +11,7 @@ import {
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 import { useHistory } from 'react-router-dom';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -37,23 +38,15 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface Props {
-    session: any;
-    business: any;
-    roles: any[];
-    cart: any;
-}
-
-export const NavList: React.FC<Props> = ({
-    session,
+export const NavList = ({
     business,
-    roles,
+    userRoles,
     cart,
-}) => {
+}: Pick<CommonProps, 'business' | 'userRoles' | 'cart'>) => {
     const classes = useStyles();
     const history = useHistory();
 
-    let nav_actions = getUserActions({ session, roles, cart });
+    let nav_actions = getUserActions({ userRoles, cart });
     let about_actions = [
         ['About Us', 'about', LINKS.About, null, InfoIcon],
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]

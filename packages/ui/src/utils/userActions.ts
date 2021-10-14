@@ -6,7 +6,7 @@ import {
     Shop as ShopIcon,
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
-import { ROLES } from '@local/shared';
+import { Order, Role, ROLES } from '@local/shared';
 import { LINKS } from 'utils';
 import isObject from 'lodash/isObject';
 import { initializeApollo } from 'graphql/utils/initialize';
@@ -21,12 +21,18 @@ import {
     ListItemText,
 } from '@material-ui/core';
 
+interface Props {
+    userRoles: Role[] | null | undefined;
+    cart: Order | null | undefined;
+    exclude?: string[] | undefined;
+}
+
 // Returns navigational actions available to the user
-export function getUserActions({ session, userRoles, cart, exclude = [] }) {
+export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
     let actions = [];
 
     // If someone is not logged in, display sign up/log in links
-    if (!isObject(session) || Object.entries(session).length === 0) {
+    if (userRoles) {
         actions.push(['Log In', 'login', LINKS.LogIn, null, PersonAddIcon, 0]);
     } else {
         // If an owner admin is logged in, display owner links

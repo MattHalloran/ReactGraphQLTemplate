@@ -71,12 +71,12 @@ interface Props {
     onClose: () => any;
 }
 
-export const OrderDialog: React.FC<Props> = ({
+export const OrderDialog = ({
     order,
     userRoles,
     open = true,
     onClose,
-}) => {
+}: Props) => {
     const classes = useStyles();
     // Holds order changes before update is final
     const [changedOrder, setChangedOrder] = useState(order);

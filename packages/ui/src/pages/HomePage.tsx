@@ -4,7 +4,7 @@ import {
     Hero 
 } from 'components';
 
-const HomePage: React.FC = () => {
+export const HomePage = () => {
     return (
         <div>
             <Hero text="Need a fast, large, or cheap spaceship?" subtext="We've got you covered" />
@@ -12,9 +12,3 @@ const HomePage: React.FC = () => {
         </div >
     );
 }
-
-HomePage.propTypes = {
-    
-}
-
-export { HomePage };

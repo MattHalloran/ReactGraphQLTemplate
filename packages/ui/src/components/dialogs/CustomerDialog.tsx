@@ -68,16 +68,16 @@ const statusToggle = {
 }
 
 interface Props {
-    product: any;
+    customer: any;
     open?: boolean;
     onClose: () => any;
 }
 
-export const CustomerDialog: React.FC<Props> = ({
+export const CustomerDialog = ({
     customer,
     open = true,
     onClose,
-}) => {
+}: Props) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
     const [currCustomer, setCurrCustomer] = useState(customer);

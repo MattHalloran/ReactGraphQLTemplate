@@ -13,13 +13,14 @@ import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useParams } from 'react-router-dom';
 import { formStyles } from './styles';
+import { CommonProps } from 'types';
 
 const useStyles = makeStyles(formStyles);
 
-function ResetPasswordForm({
+export const ResetPasswordForm = ({
     onSessionUpdate,
     onRedirect
-}) {
+}: Pick<CommonProps, 'onSessionUpdate' | 'onRedirect'>) => {
     const classes = useStyles();
     const urlParams = useParams();
     const [resetPassword, {loading}] = useMutation(resetPasswordMutation);
@@ -86,5 +87,3 @@ function ResetPasswordForm({
         </form>
     );
 }
-
-export { ResetPasswordForm };
