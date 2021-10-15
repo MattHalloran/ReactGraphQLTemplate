@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import update from 'immutability-helper';
 import { makeStyles } from '@material-ui/styles';
 import { ImageCard } from 'components';

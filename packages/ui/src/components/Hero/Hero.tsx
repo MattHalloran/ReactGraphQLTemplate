@@ -1,5 +1,5 @@
 // Code inspired by https://github.com/rmolinamir/hero-slider
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';

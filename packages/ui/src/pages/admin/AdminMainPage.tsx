@@ -1,4 +1,3 @@
-import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { combineStyles, LINKS } from 'utils';
 import { Typography, Card, CardContent, CardActions, Tooltip, IconButton, Theme } from '@material-ui/core';

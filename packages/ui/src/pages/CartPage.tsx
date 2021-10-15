@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router';
 import { LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -17,6 +17,7 @@ import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
+import { CommonProps } from 'types';
 
 const componentStyles = (theme: Theme) => ({
     padTop: {
@@ -36,17 +37,11 @@ const componentStyles = (theme: Theme) => ({
 
 const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 
-interface Props {
-    business: any;
-    cart: any;
-    onSessionUpdate: () => any;
-}
-
 export const CartPage = ({
     business,
     cart,
     onSessionUpdate
-}: Props) => {
+}: Pick<CommonProps, 'business' | 'cart' | 'onSessionUpdate'>) => {
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final

@@ -9,12 +9,12 @@ import arrify from 'arrify'
  * @param {Function} [callback] - Called each time validation runs. Receives an Object which is a map of the depths for each operation. 
  * @returns {Function} The validator function for GraphQL validation phase.
  */
-export const depthLimit = (maxDepth, options = {}, callback = () => { }) => validationContext => {
+export const depthLimit = (maxDepth: any, options = {}, callback: any = () => { }) => (validationContext: any) => {
     try {
         const { definitions } = validationContext.getDocument()
         const fragments = getFragments(definitions)
         const queries = getQueriesAndMutations(definitions)
-        const queryDepths = {}
+        const queryDepths: any = {}
         for (let name in queries) {
             queryDepths[name] = determineDepth(queries[name], fragments, 0, maxDepth, validationContext, name, options)
         }
@@ -28,8 +28,8 @@ export const depthLimit = (maxDepth, options = {}, callback = () => { }) => vali
     }
 }
 
-function getFragments(definitions) {
-    return definitions.reduce((map, definition) => {
+function getFragments(definitions: any) {
+    return definitions.reduce((map: any, definition: any) => {
         if (definition.kind === Kind.FRAGMENT_DEFINITION) {
             map[definition.name.value] = definition
         }
@@ -38,8 +38,8 @@ function getFragments(definitions) {
 }
 
 // this will actually get both queries and mutations. we can basically treat those the same
-function getQueriesAndMutations(definitions) {
-    return definitions.reduce((map, definition) => {
+function getQueriesAndMutations(definitions: any) {
+    return definitions.reduce((map: any, definition: any) => {
         if (definition.kind === Kind.OPERATION_DEFINITION) {
             map[definition.name ? definition.name.value : ''] = definition
         }
@@ -47,7 +47,7 @@ function getQueriesAndMutations(definitions) {
     }, {})
 }
 
-function determineDepth(node, fragments, depthSoFar, maxDepth, context, operationName, options) {
+const determineDepth: any = (node: any, fragments: any, depthSoFar: any, maxDepth: any, context: any, operationName: any, options: any) => {
     if (depthSoFar > maxDepth) {
         return context.reportError(
             new GraphQLError(`'${operationName}' exceeds maximum operation depth of ${maxDepth}`, [node])
@@ -62,7 +62,7 @@ function determineDepth(node, fragments, depthSoFar, maxDepth, context, operatio
             if (shouldIgnore || !node.selectionSet) {
                 return 0
             }
-            return 1 + Math.max(...node.selectionSet.selections.map(selection =>
+            return 1 + Math.max(...node.selectionSet.selections.map((selection: any) =>
                 determineDepth(selection, fragments, depthSoFar + 1, maxDepth, context, operationName, options)
             ))
         case Kind.FRAGMENT_SPREAD:
@@ -70,7 +70,7 @@ function determineDepth(node, fragments, depthSoFar, maxDepth, context, operatio
         case Kind.INLINE_FRAGMENT:
         case Kind.FRAGMENT_DEFINITION:
         case Kind.OPERATION_DEFINITION:
-            return Math.max(...node.selectionSet.selections.map(selection =>
+            return Math.max(...node.selectionSet.selections.map((selection: any) =>
                 determineDepth(selection, fragments, depthSoFar, maxDepth, context, operationName, options)
             ))
         /* istanbul ignore next */
@@ -79,7 +79,7 @@ function determineDepth(node, fragments, depthSoFar, maxDepth, context, operatio
     }
 }
 
-function seeIfIgnored(node, ignore) {
+function seeIfIgnored(node: any, ignore: any) {
     for (let rule of arrify(ignore)) {
         const fieldName = node.name.value
         switch (rule.constructor) {

@@ -31,7 +31,7 @@ export const typeDef = gql`
 export const resolvers = {
     TaskStatus: TaskStatus,
     Query: {
-        tasks: async (_parent, args, context, _info) => {
+        tasks: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.task.findMany({

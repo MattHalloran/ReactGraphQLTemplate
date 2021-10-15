@@ -23,5 +23,5 @@ const models = [Root, Address, Business, Customer, Discount,
 
 export const schema = makeExecutableSchema({
     typeDefs: models.map(m => m.typeDef),
-    resolvers: merge(...models.map(m => m.resolvers))
+    resolvers: merge(models.map(m => m.resolvers))
 })

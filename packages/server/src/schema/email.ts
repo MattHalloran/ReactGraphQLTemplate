@@ -33,19 +33,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        emails: async (_parent, _args, context, info) => {
+        emails: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.email.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addEmail: async (_parent, args, context, info) => {
+        addEmail: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin || (context.req.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
             return await context.prisma.email.create((new PrismaSelect(info).value), { data: { ...args.input } });
         },
-        updateEmail: async (_parent, args, context, info) => {
+        updateEmail: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             const curr = await context.prisma.email.findUnique({ where: { id: args.input.id } });
@@ -56,7 +56,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteEmails: async (_parent, args, context, _info) => {
+        deleteEmails: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             // TODO must keep at least one email per customer
             const specified = await context.prisma.emil.findMany({ where: { id: { in: args.ids } } });

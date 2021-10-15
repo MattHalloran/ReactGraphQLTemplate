@@ -1,6 +1,8 @@
-export function combineStyles(...styles) {
-    return function CombineStyles(theme) {
-        const outStyles = styles.map((arg) => {
+import { Theme } from "@material-ui/core";
+
+export const combineStyles: any = (...styles: Array<Theme | {} | string>) => {
+    return function CombineStyles(theme: Theme) {
+        const outStyles = styles.map((arg: Theme | {} | string) => {
             // Apply the "theme" object for style functions.
             if (typeof arg === 'function') {
                 return arg(theme);

@@ -68,7 +68,7 @@ const STATUS_TO_SORT = {
 export const resolvers = {
     OrderStatus: OrderStatus,
     Query: {
-        orders: async (_parent, args, context, info) => {
+        orders: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin (customers query SKUs)
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             let idQuery;
@@ -100,7 +100,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        updateOrder: async (_parent, args, context, info) => {
+        updateOrder: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or updating your own
             const curr = await context.prisma.order.findUnique({
                 where: { id: args.input.id },
@@ -135,7 +135,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        submitOrder: async (_parent, args, context, _info) => {
+        submitOrder: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or submitting your own
             const curr = await context.prisma.order.findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
@@ -147,7 +147,7 @@ export const resolvers = {
             });
             return true;
         },
-        cancelOrder: async (_parent, args, context, _info) => {
+        cancelOrder: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or canceling your own
             const curr = await context.prisma.order.findUnique({ where: { id: args.id } });
             if (!context.req.isAdmin && context.req.customerId !== curr.customerId) return new CustomError(CODE.Unauthorized);
@@ -166,7 +166,7 @@ export const resolvers = {
             })
             return order_status;
         },
-        deleteOrders: async (_parent, args, context, _info) => {
+        deleteOrders: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.order.deleteMany({ where: { id: { in: args.ids } } });

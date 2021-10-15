@@ -81,7 +81,7 @@ export const resolvers = {
     SkuSortBy: SKU_SORT_OPTIONS,
     Query: {
         // Query all SKUs
-        skus: async (_parent, args, context, info) => {
+        skus: async (_parent: undefined, args: any, context: any, info: any) => {
             let idQuery;
             if (Array.isArray(args.ids)) idQuery = { id: { in: args.ids } };
             // Determine sort order
@@ -110,7 +110,7 @@ export const resolvers = {
         }
     },
     Mutation: {
-        uploadAvailability: async (_parent, args, _context, _info) => {
+        uploadAvailability: async (_parent: undefined, args: any, _context: any, _info: any) => {
             const { createReadStream, filename, mimetype } = await args.file;
             const stream = createReadStream();
             const { ext } = path.parse(filename)
@@ -119,12 +119,12 @@ export const resolvers = {
             if (success) uploadAvailability(finalFileName);
             return success;
         },
-        addSku: async (_parent, args, context, info) => {
+        addSku: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.sku.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateSku: async (_parent, args, context, info) => {
+        updateSku: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.sku.update({
@@ -133,7 +133,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteSkus: async (_parent, args, context, _info) => {
+        deleteSkus: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.sku.deleteMany({ where: { id: { in: args.ids } } });

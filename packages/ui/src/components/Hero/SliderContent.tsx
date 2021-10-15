@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles({
@@ -15,7 +15,7 @@ interface Props {
     translate: number;
     transition: number;
     width: number;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export const SliderContent = ({

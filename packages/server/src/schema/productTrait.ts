@@ -24,7 +24,7 @@ export const resolvers = {
         traitNames: async (_parent, _args, context, _info) => {
             return await context.prisma.product_trait.findMany({ select: { name: true }, distinct: ['name']});
         },
-        traitValues: async (_parent, args, context, _info) => {
+        traitValues: async (_parent: undefined, args: any, context: any, _info: any) => {
             return await context.prisma.product_trait.findMany({ where: { name: args.name }, select: { value: true }})
         },
         // Returns all values previously entered for every trait

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { ContactInfo } from 'components';
 import { actionsToList, createAction, getUserActions, LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -98,7 +98,7 @@ export const Hamburger = ({
     ].map(a => createAction(...a));
 
     return (
-        <React.Fragment>
+        <Fragment>
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
@@ -152,6 +152,6 @@ export const Hamburger = ({
                 </List>
                 <CopyrightBreadcrumbs className={classes.copyright} business={business} textColor={theme.palette.primary.contrastText} />
             </SwipeableDrawer>
-        </React.Fragment>
+        </Fragment>
     );
 }

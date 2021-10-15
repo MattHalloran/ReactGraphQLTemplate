@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
     AlertDialog,
     BottomNav,
@@ -163,7 +163,6 @@ export function App() {
                                     onSessionUpdate={checkLogin}
                                     userRoles={session?.roles}
                                     cart={cart}
-                                    onRedirect={redirect}
                                 />
                                 {loading ?
                                     <div className={classes.spinner}>
@@ -178,7 +177,6 @@ export function App() {
                                     business={business}
                                     userRoles={session?.roles}
                                     cart={cart}
-                                    onRedirect={redirect}
                                 />
                             </div>
                             <BottomNav userRoles={session?.roles} cart={cart} />

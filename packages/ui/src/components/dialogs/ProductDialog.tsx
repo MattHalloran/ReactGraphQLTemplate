@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import {
     AppBar,
@@ -13,7 +13,6 @@ import {
     ListItemAvatar,
     ListItemIcon,
     ListItemText,
-    Slide,
     Theme,
     Toolbar,
     Typography
@@ -40,6 +39,7 @@ import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
 import isEqual from 'lodash/isEqual';
 import Carousel from 'react-gallery-carousel';
 import 'react-gallery-carousel/dist/index.css';
+import { UpTransition } from 'components';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -79,10 +79,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         width: '-webkit-fill-available',
     },
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface Props {
     product: any;
@@ -200,7 +196,7 @@ export const ProductDialog = ({
     ].map(d => traitIconList(...d)).filter(d => d !== null);
 
     return (
-        <Dialog aria-describedby="modal-title" fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog aria-describedby="modal-title" fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
@@ -231,7 +227,7 @@ export const ProductDialog = ({
                             </Collapse>
                             : null}
                         {displayedTraitData.length > 0 ? (
-                            <React.Fragment>
+                            <Fragment>
                                 <ListItem className={classes.menuItem} button onClick={handleDetailsClick}>
                                     <ListItemIcon><InfoIcon /></ListItemIcon>
                                     <ListItemText primary="Details" />
@@ -240,7 +236,7 @@ export const ProductDialog = ({
                                 <Collapse in={detailsOpen} timeout='auto' unmountOnExit>
                                     <List>{displayedTraitData}</List>
                                 </Collapse>
-                            </React.Fragment>
+                            </Fragment>
                         ) : null}
                     </Grid>
                 </Grid>

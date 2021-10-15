@@ -1,4 +1,3 @@
-import React from 'react';
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip, Theme } from '@material-ui/core';

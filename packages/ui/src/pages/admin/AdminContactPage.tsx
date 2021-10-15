@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { AdminBreadcrumbs } from 'components';
 import ReactMarkdown from 'react-markdown';

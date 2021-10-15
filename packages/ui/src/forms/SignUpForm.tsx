@@ -1,4 +1,3 @@
-import React from 'react';
 import { signUpMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { CODE, DEFAULT_PRONOUNS, signUpSchema } from '@local/shared';

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { LINKS } from 'utils';
 import { useLocation } from 'react-router-dom';
 import { useHistory } from 'react-router';
@@ -10,7 +10,7 @@ interface Props {
     redirect?: string;
     userRoles: Role[];
     restrictedToRoles?: string[];
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export const Page = ({

@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/styles';
@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface Props {
-    children: React.ReactNode,
+    children: ReactNode,
     index: number | string,
     value: number | string,
 }

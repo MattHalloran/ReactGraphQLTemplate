@@ -1,4 +1,3 @@
-import React from 'react';
 import { memo } from 'react'
 import { makeStyles } from '@material-ui/styles';
 import { SERVER_URL } from '@local/shared';

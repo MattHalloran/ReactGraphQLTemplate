@@ -3,7 +3,9 @@ export const AccountStatus = {
     UNLOCKED: 'Unlocked',
     SOFT_LOCKED: 'SoftLock',
     HARD_LOCKED: 'HardLock'
-}
+} as const;
+export type AccountStatus = typeof AccountStatus[keyof typeof AccountStatus];
+
 export const DEFAULT_PRONOUNS = [
     "he/him/his",
     "she/her/hers",
@@ -11,6 +13,7 @@ export const DEFAULT_PRONOUNS = [
     "ze/zir/zirs",
     "ze/hir/hirs",
 ]
+
 export const IMAGE_EXTENSION = {
     Bmp: '.bmp',
     Gif: '.gif',
@@ -20,7 +23,9 @@ export const IMAGE_EXTENSION = {
     Heic: '.heic',
     Heif: '.heif',
     Ico: '.ico'
-}
+} as const;
+export type IMAGE_EXTENSION = typeof IMAGE_EXTENSION[keyof typeof IMAGE_EXTENSION];
+
 // Possible image sizes stored, and their max size
 export const IMAGE_SIZE = {
     XXS: 32,
@@ -31,12 +36,16 @@ export const IMAGE_SIZE = {
     L: 1024,
     XL: 2048,
     XXL: 4096,
-}
+} as const;
+export type IMAGE_SIZE = typeof IMAGE_SIZE[keyof typeof IMAGE_SIZE];
+
 export const ImageUse = {
     HERO: 'Hero',
     GALLERY: 'Gallery',
     PRODUCT_DISPLAY: 'Display'
-}
+} as const;
+export type ImageUse = typeof ImageUse[keyof typeof ImageUse];
+
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
 // CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
 //                          2) PENDING_CANCEL was approved by admin
@@ -59,14 +68,18 @@ export const OrderStatus = {
     SCHEDULED: 'SCHEDULED',
     IN_TRANSIT: 'IN_TRANSIT',
     DELIVERED: 'DELIVERED'
-}
+} as const;
+export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
 export const PRODUCT_SORT_OPTIONS = {
     AZ: 'AZ',
     ZA: 'ZA',
     Featured: 'Featured',
     Newest: 'Newest',
     Oldest: 'Oldest'
-}
+} as const;
+export type PRODUCT_SORT_OPTIONS = typeof PRODUCT_SORT_OPTIONS[keyof typeof PRODUCT_SORT_OPTIONS];
+
 export const SKU_SORT_OPTIONS = {
     AZ: 'AZ',
     ZA: 'ZA',
@@ -75,37 +88,25 @@ export const SKU_SORT_OPTIONS = {
     Featured: 'Featured',
     Newest: 'Newest',
     Oldest: 'Oldest'
-}
+} as const;
+export type SKU_SORT_OPTIONS = typeof SKU_SORT_OPTIONS[keyof typeof SKU_SORT_OPTIONS];
+
 export const SkuStatus = {
     DELETED: 'DELETED',
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE',
-}
+} as const;
+export type SkuStatus = typeof SkuStatus[keyof typeof SkuStatus];
+
 export const THEME = {
     Light: 'light',
     Dark: 'dark'
-}
-export const TRAIT_NAME = {
-    DroughtTolerance: 'Drought tolerance',
-    GrownHeight: 'Grown height',
-    GrownSpread: 'Grown spread',
-    GrowthRate: 'Growth rate',
-    JerseryNative: 'Jersey native',
-    OptimalLight: 'Optimal light',
-    ProductType: 'Ship type',
-    SaltTolerance: 'Salt tolerance',
-    AttractsPollinatorsAndWildlife: 'Attracts pollinators and wildlife',
-    BloomTime: 'Bloom time',
-    BloomColor: 'Bloom color',
-    Zone: 'Zone',
-    PhysiographicRegion: 'Physiographic region',
-    SoilMoisture: 'Soil moisture',
-    SoilPh: 'Soil PH',
-    SoilType: 'Soil Type',
-    LightRange: 'Light range'
-}
+} as const;
+export type THEME = typeof THEME[keyof typeof THEME];
+
 export const ROLES = {
     Customer: "Customer",
     Owner: "Owner",
     Admin: "Admin",
-}
+} as const;
+export type ROLES = typeof ROLES[keyof typeof ROLES];

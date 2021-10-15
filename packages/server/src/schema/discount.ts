@@ -37,19 +37,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        discounts: async (_parent, _args, context, info) => {
+        discounts: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.discount.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addDiscount: async (_parent, args, context, info) => {
+        addDiscount: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.discount.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateDiscount: async (_parent, args, context, info) => {
+        updateDiscount: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.discount.update({
@@ -58,7 +58,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteDiscounts: async (_parent, args, context, _info) => {
+        deleteDiscounts: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.discount.deleteMany({ where: { id: { in: args.ids } } });

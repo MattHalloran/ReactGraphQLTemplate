@@ -1,4 +1,3 @@
-import React from 'react';
 import { LINKS } from 'utils';
 import { BreadcrumbsBase } from './BreadcrumbsBase';
 import { BreadcrumbsBaseProps } from './types';

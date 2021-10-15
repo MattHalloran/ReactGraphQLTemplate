@@ -36,19 +36,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        roles: async (_parent, _args, context, info) => {
+        roles: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.role.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addRole: async (_parent, args, context, info) => {
+        addRole: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.role.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateRole: async (_parent, args, context, info) => {
+        updateRole: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.role.update({
@@ -57,7 +57,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteRoles: async (_parent, args, context, _info) => {
+        deleteRoles: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.role.deleteMany({ where: { id: { in: args.ids } } });

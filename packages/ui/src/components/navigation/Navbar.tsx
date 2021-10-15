@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Logo from 'assets/img/Logo.svg';
 import { LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger, Theme } from '@material-ui/core';
@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Hamburger } from './Hamburger';
 import { NavList } from './NavList';
 import { CommonProps } from 'types';
+import { useHistory } from 'react-router';
 
 const SHOW_HAMBURGER_AT = 1000;
 
@@ -57,7 +58,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface HideOnScrollProps {
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 const HideOnScroll = ({
@@ -74,10 +75,10 @@ const HideOnScroll = ({
 export const Navbar = ({
     business,
     userRoles,
-    cart,
-    onRedirect
-}: Pick<CommonProps, 'business' | 'userRoles' | 'cart' | 'onRedirect'>) => {
+    cart
+}: Pick<CommonProps, 'business' | 'userRoles' | 'cart'>) => {
     const classes = useStyles();
+    const history = useHistory();
     const [show_hamburger, setShowHamburger] = useState(false);
 
     let child_props = { 
@@ -99,7 +100,7 @@ export const Navbar = ({
         <HideOnScroll>
             <AppBar>
                 <Toolbar className={classes.root}>
-                    <div className={classes.navLogoContainer} onClick={() => onRedirect(LINKS.Home)}>
+                    <div className={classes.navLogoContainer} onClick={() => history.push(LINKS.Home)}>
                         <div className={classes.navLogoDiv}>
                             <img src={Logo} alt={`${business?.BUSINESS_NAME?.Short} Logo`} className={classes.navLogo} />
                         </div>

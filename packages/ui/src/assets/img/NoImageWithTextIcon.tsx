@@ -1,4 +1,3 @@
-import React from 'react';
 import { SvgProps } from './types';
 
 export const NoImageWithTextIcon = (props: SvgProps) => (

@@ -47,19 +47,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        addresses: async (_parent, _args, context, info) => {
+        addresses: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.address.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addAddress: async (_parent, args, context, _info) => {
+        addAddress: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin && (context.req.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
             return await context.prisma.address.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updateAddress: async (_parent, args, context, _info) => {
+        updateAddress: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or updating your own
             const curr = await context.prisma.address.findUnique({ where: { id: args.input.id } });
             if (!context.req.isAdmin && context.req.businessId !== curr.businessId) return new CustomError(CODE.Unauthorized);
@@ -69,7 +69,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteAddresses: async (_parent, args, context, _info) => {
+        deleteAddresses: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             const specified = await context.prisma.address.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);

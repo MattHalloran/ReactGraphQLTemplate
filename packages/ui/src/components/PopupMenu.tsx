@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import Popover from '@material-ui/core/Popover';
 import { Button, Theme } from '@material-ui/core';
@@ -15,7 +15,7 @@ export function PopupMenu({
     ...props
 }) {
     const classes = useStyles();
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);

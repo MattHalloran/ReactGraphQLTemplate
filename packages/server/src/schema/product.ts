@@ -60,7 +60,7 @@ const SORT_TO_QUERY = {
 
 export const resolvers = {
     Query: {
-        products: async (_parent, args, context, info) => {
+        products: async (_parent: undefined, args: any, context: any, info: any) => {
             let idQuery;
             if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
             // Determine sort order

@@ -1,11 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     AppBar,
     Button,
     Dialog,
     Grid,
     IconButton,
-    Slide,
     Theme,
     Toolbar,
     Typography,
@@ -30,6 +29,7 @@ import { findWithAttr, ORDER_FILTERS } from 'utils';
 import { OrderStatus, ROLES } from '@local/shared';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
+import { UpTransition } from 'components';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -59,10 +59,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const editableStatuses = [OrderStatus.PENDING_CANCEL, OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.SCHEDULED]
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface Props {
     order: any;
@@ -206,7 +202,7 @@ export const OrderDialog = ({
     )
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">

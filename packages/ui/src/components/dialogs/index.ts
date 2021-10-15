@@ -4,3 +4,4 @@ export * from './EditProductDialog';
 export * from './ListDialog';
 export * from './OrderDialog';
 export * from './ProductDialog';
+export * from './transitions';

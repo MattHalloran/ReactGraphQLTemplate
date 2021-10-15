@@ -112,7 +112,7 @@ export const typeDef = gql`
 export const resolvers = {
     AccountStatus: AccountStatus,
     Query: {
-        customers: async (_parent, _args, context, info) => {
+        customers: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.customer.findMany({
@@ -120,7 +120,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             });
         },
-        profile: async (_parent, _args, context, info) => {
+        profile: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Can only query your own profile
             const customerId = context.req.customerId;
             if (customerId === null || customerId === undefined) return new CustomError(CODE.Unauthorized);
@@ -128,7 +128,7 @@ export const resolvers = {
         }
     },
     Mutation: {
-        login: async (_parent, args, context, info) => {
+        login: async (_parent: undefined, args: any, context: any, info: any) => {
             const prismaInfo = getCustomerSelect(info);
             // If username and password wasn't passed, then use the session cookie data to validate
             if (args.username === undefined && args.password === undefined) {
@@ -217,10 +217,10 @@ export const resolvers = {
                 return new CustomError(CODE.BadCredentials);
             }
         },
-        logout: async (_parent, _args, context, _info) => {
+        logout: async (_parent: undefined, _args: any, context: any, _info: any) => {
             context.res.clearCookie(COOKIE.Session);
         },
-        signUp: async (_parent, args, context, info) => {
+        signUp: async (_parent: undefined, args: any, context: any, info: any) => {
             const prismaInfo = getCustomerSelect(info);
             // Validate input format
             const validateError = await validateArgs(signUpSchema, args);
@@ -255,7 +255,7 @@ export const resolvers = {
             if (cart) userData.cart = cart;
             return userData;
         },
-        addCustomer: async (_parent, args, context, info) => {
+        addCustomer: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin to add a customer directly
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             const prismaInfo = getCustomerSelect(info);
@@ -283,7 +283,7 @@ export const resolvers = {
             if (cart) userData.cart = cart;
             return userData;
         },
-        updateCustomer: async (_parent, args, context, info) => {
+        updateCustomer: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             // Check for correct password
@@ -303,7 +303,7 @@ export const resolvers = {
             })
             return user;
         },
-        deleteCustomer: async (_parent, args, context, _info) => {
+        deleteCustomer: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             if(!context.req.isAdmin && (context.req.customerId !== args.input.id)) return new CustomError(CODE.Unauthorized);
             // Check for correct password
@@ -327,7 +327,7 @@ export const resolvers = {
             await context.prisma.customer.delete({ where: { id: customer.id } });
             return true;
         },
-        requestPasswordChange: async (_parent, args, context, _info) => {
+        requestPasswordChange: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Validate input format
             const validateError = await validateArgs(requestPasswordChangeSchema, args);
             if (validateError) return validateError;
@@ -344,7 +344,7 @@ export const resolvers = {
             sendResetPasswordLink(args.email, customer.id, requestCode);
             return true;
         },
-        resetPassword: async(_parent, args, context, info) => {
+        resetPassword: async(_parent: undefined, args: any, context: any, info: any) => {
             // Validate input format
             const validateError = await validateArgs(passwordSchema, args.newPassword);
             if (validateError) return validateError;
@@ -393,7 +393,7 @@ export const resolvers = {
             if (cart) customerData.cart = cart;
             return customerData;
         },
-        changeCustomerStatus: async (_parent, args, context, _info) => {
+        changeCustomerStatus: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             await context.prisma.customer.update({
@@ -402,7 +402,7 @@ export const resolvers = {
             })
             return true;
         },
-        addCustomerRole: async (_parent, args, context, info) => {
+        addCustomerRole: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             await context.prisma.customer_roles.create({ data: { 
@@ -411,7 +411,7 @@ export const resolvers = {
             } })
             return await context.prisma.customer.findUnique({ where: { id: args.id }, ...(new PrismaSelect(info).value) });
         },
-        removeCustomerRole: async (_parent, args, context, _info) => {
+        removeCustomerRole: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.customer_roles.delete({ where: { 

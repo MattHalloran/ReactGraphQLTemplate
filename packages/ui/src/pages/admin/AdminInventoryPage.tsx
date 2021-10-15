@@ -3,7 +3,7 @@
 // 2) Edit existing SKU data, including general product info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using product species info
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
 import { productsQuery, traitOptionsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';

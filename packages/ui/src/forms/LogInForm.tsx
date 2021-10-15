@@ -1,4 +1,3 @@
-import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { loginMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
@@ -21,9 +20,8 @@ import { CommonProps } from 'types';
 const useStyles = makeStyles(formStyles);
 
 export const LogInForm = ({
-    onSessionUpdate,
-    onRedirect
-}: Pick<CommonProps, 'onSessionUpdate' | 'onRedirect'>) => {
+    onSessionUpdate
+}: Pick<CommonProps, 'onSessionUpdate'>) => {
     const classes = useStyles();
     const history = useHistory();
     const urlParams = useParams();
@@ -40,7 +38,7 @@ export const LogInForm = ({
                 mutation: login,
                 data: { variables: { ...values, verificationCode: urlParams.code } },
                 successCondition: (response) => response.data.login !== null,
-                onSuccess: (response) => { onSessionUpdate(response.data.login); onRedirect(LINKS.Shopping) },
+                onSuccess: (response) => { onSessionUpdate(response.data.login); history.push(LINKS.Shopping) },
                 onError: (response) => {
                     if (Array.isArray(response.graphQLErrors) && response.graphQLErrors.some(e => e.extensions.code === CODE.MustResetPassword.code)) {
                         PubSub.publish(PUBS.AlertDialog, {

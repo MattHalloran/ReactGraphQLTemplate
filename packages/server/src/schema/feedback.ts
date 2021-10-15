@@ -28,17 +28,17 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        feedbacks: async (_parent, _args, context, info) => {
+        feedbacks: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.feedback.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addFeedback: async (_parent, args, context, info) => {
+        addFeedback: async (_parent: undefined, args: any, context: any, info: any) => {
             return await context.prisma.feedback.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        deleteFeedbacks: async (_parent, args, context) => {
+        deleteFeedbacks: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             const specified = await context.prisma.feedback.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);

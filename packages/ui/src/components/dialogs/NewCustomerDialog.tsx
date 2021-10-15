@@ -1,4 +1,3 @@
-import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import {
     AppBar,
@@ -7,7 +6,6 @@ import {
     Dialog,
     Grid,
     IconButton,
-    Slide,
     TextField,
     Theme,
     Toolbar,
@@ -23,6 +21,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { addCustomerMutation } from 'graphql/mutation';
 import { useFormik } from 'formik';
 import { useMutation } from '@apollo/client';
+import { UpTransition } from 'components';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -56,10 +55,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         width: '100%',
     },
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface Props {
     open?: boolean;
@@ -122,7 +117,7 @@ export const NewCustomerDialog = ({
     );
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">

@@ -8,6 +8,7 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
 import { schema } from './schema';
 import { context } from './context';
+import { exit } from 'process';
 
 console.info('Starting server...')
 
@@ -25,10 +26,10 @@ app.use(auth.authenticate);
 // Cross-Origin access. Accepts requests from localhost and dns
 // If you want a public server, this can be set to ['*']
 let origins = [
-    /^http:\/\/localhost(?::[0-9]+)?$/, 
-    `http://${process.env.REACT_APP_SITE_NAME}`, 
-    `http://www.${process.env.REACT_APP_SITE_NAME}`, 
-    `https://${process.env.REACT_APP_SITE_NAME}`, 
+    /^http:\/\/localhost(?::[0-9]+)?$/,
+    `http://${process.env.REACT_APP_SITE_NAME}`,
+    `http://www.${process.env.REACT_APP_SITE_NAME}`,
+    `https://${process.env.REACT_APP_SITE_NAME}`,
     `https://www.${process.env.REACT_APP_SITE_NAME}`
 ]
 app.use(cors({
@@ -37,6 +38,10 @@ app.use(cors({
 }))
 
 // Set static folders
+if (!process.env.REACT_APP_SERVER_ROUTE) {
+    console.error('REACT_APP_SERVER_ROUTE not defined! Please check .env file.');
+    exit(1);
+}
 app.use(process.env.REACT_APP_SERVER_ROUTE, express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use(`${process.env.REACT_APP_SERVER_ROUTE}/private`, auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
 app.use(`${process.env.REACT_APP_SERVER_ROUTE}/images`, express.static(`${process.env.PROJECT_DIR}/assets/images`));
@@ -46,20 +51,19 @@ app.use(`${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, graphqlUploadExp
 
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
-const apollo_options = new ApolloServer({ 
+const apollo_options = new ApolloServer({
     schema: schema,
     context: (c) => context(c),
-    uploads: false, // Disables old version of graphql-upload
-    validationRules: [ depthLimit(8) ] // Prevents DoS attack from arbitrarily-nested query
- });
-await apollo_options.start();
-apollo_options.applyMiddleware({ 
-    app, 
-    path: `${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, 
-    cors: false
+    validationRules: [depthLimit(8)] // Prevents DoS attack from arbitrarily-nested query
 });
+apollo_options.start().then(() => {
+    apollo_options.applyMiddleware({
+        app,
+        path: `${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`,
+        cors: false
+    });
+    // Start Express server
+    app.listen(process.env.VIRTUAL_PORT);
 
-// Start Express server
-app.listen(process.env.VIRTUAL_PORT);
-
-console.info(`🚀 Server running on port ${process.env.VIRTUAL_PORT}`)
+    console.info(`🚀 Server running on port ${process.env.VIRTUAL_PORT}`)
+})

@@ -1,4 +1,3 @@
-import React from 'react';
 import { requestPasswordChangeMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { requestPasswordChangeSchema } from '@local/shared';
@@ -15,13 +14,10 @@ import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
-import { CommonProps } from 'types';
 
 const useStyles = makeStyles(formStyles);
 
-export const ForgotPasswordForm = ({
-    onRedirect
-}: Pick<CommonProps, 'onRedirect'>) => {
+export const ForgotPasswordForm = () => {
     const classes = useStyles();
     const history = useHistory();
     const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
@@ -36,7 +32,7 @@ export const ForgotPasswordForm = ({
                 mutation: requestPasswordChange,
                 data: { variables: values },
                 successCondition: (response) => response.data.requestPasswordChange,
-                onSuccess: () => onRedirect(LINKS.Home),
+                onSuccess: () => history.push(LINKS.Home),
                 successMessage: () => 'Request sent. Please check email.',
             })
         },

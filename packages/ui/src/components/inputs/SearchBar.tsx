@@ -1,4 +1,3 @@
-import React from 'react';
 import { TextField, InputAdornment, IconButton } from '@material-ui/core';
 import { Search as SearchIcon } from '@material-ui/icons';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';

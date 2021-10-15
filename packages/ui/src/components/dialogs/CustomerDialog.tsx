@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import {
     AppBar,
@@ -6,7 +6,6 @@ import {
     Dialog,
     Grid,
     IconButton,
-    Slide,
     Theme,
     Toolbar,
     Typography,
@@ -27,6 +26,7 @@ import { deleteCustomerMutation, updateCustomerMutation } from 'graphql/mutation
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { useMutation } from '@apollo/client';
+import { UpTransition } from 'components';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -53,10 +53,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         zIndex: 1,
     },
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 // Associates account states with a dynamic action button
 // curr_account_value: [curr_account_label, toggled_account_label, toggled_account_value, toggle_icon]
@@ -170,7 +166,7 @@ export const CustomerDialog = ({
     );
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">

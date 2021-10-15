@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     AppBar,
     Autocomplete,
@@ -10,7 +10,6 @@ import {
     ListItem,
     ListItemText,
     ListSubheader,
-    Slide,
     TextField,
     Theme,
     Toolbar,
@@ -40,6 +39,7 @@ import {
 import PubSub from 'pubsub-js';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
+import { UpTransition } from 'components';
 
 // Common product traits, and their corresponding field names
 const PRODUCT_TRAITS = {
@@ -103,10 +103,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         zIndex: 1,
     },
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface Props {
     product: any;
@@ -275,7 +271,7 @@ export const EditProductDialog = ({
     );
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+        <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">

@@ -3,7 +3,7 @@ const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient()
 
-export const context = ({ req, res }) => ({
+export const context = ({ req, res }: any) => ({
     prisma,
     req,
     res

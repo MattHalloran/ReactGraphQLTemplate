@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { FormControl, InputLabel, Select, MenuItem, Chip } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import isArray from 'lodash/isArray';

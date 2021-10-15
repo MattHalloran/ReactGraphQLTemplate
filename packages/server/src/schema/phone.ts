@@ -33,19 +33,19 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        phones: async (_parent, _args, context, info) => {
+        phones: async (_parent: undefined, _args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             return await context.prisma.phone.findMany((new PrismaSelect(info).value));
         }
     },
     Mutation: {
-        addPhone: async (_parent, args, context, info) => {
+        addPhone: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or adding to your own
             if(!context.req.isAdmin || (context.req.businessId !== args.input.businessId)) return new CustomError(CODE.Unauthorized);
             return await context.prisma.phone.create((new PrismaSelect(info).value), { data: { ...args.input } })
         },
-        updatePhone: async (_parent, args, context, info) => {
+        updatePhone: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin, or updating your own
             if(!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             const curr = await context.prisma.phone.findUnique({ where: { id: args.input.id } });
@@ -56,7 +56,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deletePhones: async (_parent, args, context, _info) => {
+        deletePhones: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             // TODO must leave one phone per customer
             const specified = await context.prisma.phone.findMany({ where: { id: { in: args.ids } } });

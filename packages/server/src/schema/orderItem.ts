@@ -31,7 +31,7 @@ export const typeDef = gql`
 
 export const resolvers = {
     Mutation: {
-        upsertOrderItem: async (_parent, args, context, info) => {
+        upsertOrderItem: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be signed in
             if (!context.req.customerId) return new CustomError(CODE.Unauthorized);
             // If no orderId, find or create a new order
@@ -66,7 +66,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteOrderItems: async (_parent, args, context, _info) => {
+        deleteOrderItems: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin, or deleting your own
             let customer_ids = await context.prisma.customer.findMany({ 
                 where: { orders: { items: { id: { in: args.ids } } } },

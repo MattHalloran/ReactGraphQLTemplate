@@ -1,4 +1,3 @@
-import React from 'react';
 import { resetPasswordMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { resetPasswordSchema } from '@local/shared';
@@ -14,14 +13,15 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useParams } from 'react-router-dom';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles(formStyles);
 
 export const ResetPasswordForm = ({
-    onSessionUpdate,
-    onRedirect
-}: Pick<CommonProps, 'onSessionUpdate' | 'onRedirect'>) => {
+    onSessionUpdate
+}: Pick<CommonProps, 'onSessionUpdate'>) => {
     const classes = useStyles();
+    const history = useHistory();
     const urlParams = useParams();
     const [resetPassword, {loading}] = useMutation(resetPasswordMutation);
 
@@ -35,7 +35,7 @@ export const ResetPasswordForm = ({
             mutationWrapper({
                 mutation: resetPassword,
                 data: { variables: { id: urlParams.id, code: urlParams.code, newPassword: values.newPassword } },
-                onSuccess: (response) => { onSessionUpdate(response.data.resetPassword); onRedirect(LINKS.Shopping) },
+                onSuccess: (response) => { onSessionUpdate(response.data.resetPassword); history.push(LINKS.Shopping) },
                 successMessage: () => 'Password reset.',
             })
         },

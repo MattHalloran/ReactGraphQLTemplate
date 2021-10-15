@@ -1,4 +1,3 @@
-import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { BottomNavigation, Theme } from '@material-ui/core';

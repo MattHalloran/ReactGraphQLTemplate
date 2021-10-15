@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
 import { COOKIE, OrderStatus } from '@local/shared';
 
 export const ORDER_FILTERS = [
@@ -83,7 +84,8 @@ export const PUBS = {
     ArrowMenuOpen: "arrowMenuOpen",
     Business: "business",
     Theme: "theme",
-}
+} as const;
+export type PUBS = typeof PUBS[keyof typeof PUBS];
 
 export const LINKS = {
     About: "/about",
@@ -105,4 +107,5 @@ export const LINKS = {
     ResetPassword: "/password-reset",
     Shopping: "/shopping",
     Terms: "/terms-and-conditions",
-}
+} as const;
+export type LINKS = typeof LINKS[keyof typeof LINKS];

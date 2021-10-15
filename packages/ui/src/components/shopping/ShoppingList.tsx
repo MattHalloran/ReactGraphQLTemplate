@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { productsQuery } from 'graphql/query';
 import { upsertOrderItemMutation } from 'graphql/mutation';

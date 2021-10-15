@@ -71,7 +71,7 @@ export const typeDef = gql`
 export const resolvers = {
     ImageSize: IMAGE_SIZE,
     Query: {
-        imagesByLabel: async (_parent, args, context, info) => {
+        imagesByLabel: async (_parent: undefined, args: any, context: any, info: any) => {
             // Get all images with label
             let images = await context.prisma.image.findMany({
                 where: { labels: { some: { label: args.label } } },
@@ -90,7 +90,7 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addImages: async (_parent, args, context, _info) => {
+        addImages: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Check for valid arguments
@@ -109,7 +109,7 @@ export const resolvers = {
             }
             return results;
         },
-        updateImages: async (_parent, args, context, _info) => {
+        updateImages: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Loop through update data passed in
@@ -138,7 +138,7 @@ export const resolvers = {
             }
             return true;
         },
-        deleteImages: async (_parent, args, context, _info) => {
+        deleteImages: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             let count = 0;
@@ -147,7 +147,7 @@ export const resolvers = {
             }
             return count;
         },
-        deleteImagesByLabel: async (_parent, args, context, _info) => {
+        deleteImagesByLabel: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             const imagesToDelete = await context.prisma.image.findMany({

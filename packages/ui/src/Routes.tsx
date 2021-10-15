@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { lazily } from 'react-lazily';
 import { Switch, Route } from 'react-router-dom';
 import { ROLES } from '@local/shared';
