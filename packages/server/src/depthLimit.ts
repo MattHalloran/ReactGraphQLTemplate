@@ -1,5 +1,5 @@
-import { GraphQLError, Kind } from 'graphql'
-import arrify from 'arrify'
+import { GraphQLError, Kind } from 'graphql';
+import arrify from 'arrify';
 
 /**
  * Creates a validator for the GraphQL query depth

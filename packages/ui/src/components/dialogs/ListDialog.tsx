@@ -18,16 +18,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-interface ListItemData {
-    label: string;
-    value: string;
+export interface ListItemData {
+    label: string | null;
+    value: string | null;
 }
 
 interface Props {
     open?: boolean;
-    onClose: (value?: string) => void;
+    onClose: (value?: string | null) => void;
     title?: string;
-    data: ListItemData[];
+    data: ListItemData[] | null;
 }
 
 const ListDialog = ({

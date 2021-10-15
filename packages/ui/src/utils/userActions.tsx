@@ -8,7 +8,6 @@ import {
 } from '@material-ui/icons';
 import { Order, Role, ROLES } from '@local/shared';
 import { LINKS } from 'utils';
-import isObject from 'lodash/isObject';
 import { initializeApollo } from 'graphql/utils/initialize';
 import { logoutMutation } from 'graphql/mutation';
 import {

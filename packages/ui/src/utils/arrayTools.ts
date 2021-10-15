@@ -26,7 +26,9 @@ export const deleteArrayObject = (array, obj) => {
     }
 }
 
-export const findWithAttr = (array, attr, value) => {
+// For an array of objects, return the first index where an object has a key/value 
+// pair matching the attr/value pair
+export const findWithAttr = (array: any[], attr: string, value: any) => {
     for(let i = 0; i < array.length; i += 1) {
         if(array[i][attr] === value) {
             return i;
@@ -35,14 +37,14 @@ export const findWithAttr = (array, attr, value) => {
     return -1;
 }
 
-export const moveArrayIndex = (array, from, to) => {
+export const moveArrayIndex = (array: any[], from: number, to: number) => {
     let copy = [...array];
     copy.splice(to, 0, copy.splice(from, 1)[0]);
     return copy;
 }
 
 // Shifts everything to the right, and puts the last element in the beginning
-export const rotateArray = (array, to_right = true) => {
+export const rotateArray = (array: any[], to_right = true) => {
     if (array.length === 0) return array;
     let copy = [...array];
     if (to_right) {
@@ -57,7 +59,7 @@ export const rotateArray = (array, to_right = true) => {
 }
 
 // If dot notation key exists in object, perform operation and return the results
-export function mapIfExists(object, notation, operation) {
+export function mapIfExists<S,T>(object: S, notation: string, operation: (obj: S) => T) {
     const value = valueFromDot(object, notation);
     if (!Array.isArray(value)) return null;
     return value.map(v => operation(v))

@@ -177,7 +177,7 @@ export const resolvers = {
                 })
             }
             // Before validating password, let's check to make sure the account is unlocked
-            const status_to_code = {
+            const status_to_code: any = {
                 [AccountStatus.DELETED]: CODE.NoCustomer,
                 [AccountStatus.SOFT_LOCKED]: CODE.SoftLockout,
                 [AccountStatus.HARD_LOCKED]: CODE.HardLockout
@@ -203,7 +203,7 @@ export const resolvers = {
                 if (cart) userData.cart = cart;
                 return userData;
             } else {
-                let new_status = AccountStatus.UNLOCKED;
+                let new_status: any = AccountStatus.UNLOCKED;
                 let login_attempts = customer.loginAttempts + 1;
                 if (login_attempts >= LOGIN_ATTEMPTS_TO_SOFT_LOCKOUT) {
                     new_status = AccountStatus.SOFT_LOCKED;

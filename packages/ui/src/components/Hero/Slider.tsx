@@ -36,8 +36,8 @@ export const Slider = ({
     const [slideIndex, setSlideIndex] = useState(0);
     const [translate, setTranslate] = useState(0);
     const [transition, setTransition] = useState(0);
-    const sliderRef = useRef()
-    const timeoutRef = useRef(null);
+    const sliderRef = useRef();
+    const timeoutRef = useRef<NodeJS.Timer | null>(null);
 
     // Play and wait have circular dependencies, so they must be memoized together
     const { wait } = useMemo(() => {

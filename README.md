@@ -27,8 +27,8 @@ A fully-functioning template for building modern, maintainable websites.
 
 
 ## How to start  
-### 1. Prerequisites
- Before developing a website from this template, make sure you have the following installed:   
+### 1. Prerequisites  
+Before developing a website from this template, make sure you have the following installed:   
 1. [Docker](https://www.docker.com/)
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
 ### 2. Download this repository
@@ -36,9 +36,13 @@ A fully-functioning template for building modern, maintainable websites.
 ### 3. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
-### 4. Business data
-In the assets/public folder, there is a file named `business.json`. Edit this file to match your business's data.
-### 5. Docker
+### 4. Generate prisma client  
+To work with Prisma, types for your models must be generated.  
+1. `cd packages/server`  
+2. `prisma generate --schema src/prisma/schema.prisma`
+### 5. Business data
+Edit the file `assets/public/business.json` to match your business's data.
+### 6. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
 
 

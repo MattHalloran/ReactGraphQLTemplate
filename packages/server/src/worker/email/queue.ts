@@ -1,12 +1,10 @@
 import Bull from 'bull';
 import { emailProcess } from './process';
 import fs from 'fs';
+import { HOST, PORT } from 'worker/connection';
 const { BUSINESS_NAME, WEBSITE } = JSON.parse(fs.readFileSync(`${process.env.PROJECT_DIR}/assets/public/business.json`, 'utf8'));
 
-const emailQueue = new Bull('email', { redis: { 
-    port: process.env.REDIS_CONN.split(':')[1],
-    host: process.env.REDIS_CONN.split(':')[0]
-} });
+const emailQueue = new Bull('email', { redis: { port: PORT, host: HOST } });
 emailQueue.process(emailProcess);
 
 export function sendMail(to=[], subject='', text='', html='') {

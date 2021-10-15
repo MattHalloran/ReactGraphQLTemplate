@@ -1,11 +1,15 @@
 import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
+import { envVariableExists } from 'utils/envVariableExists';
 const { PrismaClient, AccountStatus } = pkg;
 const prisma = new PrismaClient();
 const HASHING_ROUNDS = 8;
 
 async function main() {
     console.info('🌱 Starting database intial seed...');
+
+    // First, check if required environment variables are set
+    if (['ADMIN_PASSWORD', 'ADMIN_EMAIL'].some(name => !envVariableExists(name))) process.exit(1);
 
     // Find existing roles
     const role_titles = (await prisma.role.findMany({ select: { title: true } })).map(r => r.title);
@@ -26,7 +30,7 @@ async function main() {
     }
 
     // Determine if admin needs to be added
-    const role_admin = await prisma.role.findUnique({ where: { title: 'Admin' }, select: { id: true } });
+    const role_admin: any = await prisma.role.findUnique({ where: { title: 'Admin' }, select: { id: true } });
     const has_admin = (await prisma.customer_roles.findMany({ where: { roleId: role_admin.id }})).length > 0;
     if (!has_admin) {
         console.info(`👤 Creating admin account`);
@@ -36,14 +40,14 @@ async function main() {
         const customer_admin = await prisma.customer.create({ data: {
             firstName: 'admin',
             lastName: 'account',
-            password: bcrypt.hashSync(process.env.ADMIN_PASSWORD, HASHING_ROUNDS),
+            password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || '', HASHING_ROUNDS),
             emailVerified: true,
             status: AccountStatus.UNLOCKED,
             businessId: business.id
         }});
         // Insert admin email
         await prisma.email.create({ data: {
-            emailAddress: process.env.ADMIN_EMAIL,
+            emailAddress: process.env.ADMIN_EMAIL || '',
             receivesDeliveryUpdates: false,
             customerId: customer_admin.id
         }})

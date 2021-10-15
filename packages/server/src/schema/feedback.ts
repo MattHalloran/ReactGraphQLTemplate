@@ -42,7 +42,7 @@ export const resolvers = {
             // Must be admin, or deleting your own
             const specified = await context.prisma.feedback.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
-            const customer_ids = [...new Set(specified.map(s => s.customerId))];
+            const customer_ids = [...new Set(specified.map((s: any) => s.customerId))];
             if (!context.req.isAdmin && (customer_ids.length > 1 || context.req.customerId !== customer_ids[0])) return new CustomError(CODE.Unauthorized);
             return await context.prisma.feedback.deleteMany({ where: { id: { in: args.ids } } });
         }

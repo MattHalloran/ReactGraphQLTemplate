@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const HASHING_ROUNDS = 8;
 
 // Create a user, with business, emails, phones, and roles
-async function createUser({ userData, businessData, emailsData, phonesData, roleIds }) {
+async function createUser({ userData, businessData, emailsData, phonesData, roleIds }: any) {
     let business = await prisma.business.findFirst({ where: { name: businessData.name }});
     if (!business) {
         console.info(`🏢 Creating business for ${userData.firstName}`);

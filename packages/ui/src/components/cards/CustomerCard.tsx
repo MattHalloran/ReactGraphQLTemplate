@@ -23,7 +23,7 @@ import { AccountStatus, Customer } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { emailLink, mapIfExists, phoneLink, PUBS, showPhone } from 'utils';
 import PubSub from 'pubsub-js';
-import { ListDialog } from 'components/dialogs';
+import { ListDialog } from 'components';
 import { cardStyles } from './styles';
 
 const useStyles = makeStyles(cardStyles);
@@ -43,12 +43,12 @@ const CustomerCard = ({
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
-    const callPhone = (phoneLink: string) => {
+    const callPhone = (phoneLink?: string | null) => {
         setPhoneDialogOpen(false);
         if (phoneLink) window.location.href = phoneLink;
     }
 
-    const sendEmail = (emailLink: string) => {
+    const sendEmail = (emailLink?: string | null) => {
         setEmailDialogOpen(false);
         if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
@@ -127,9 +127,8 @@ const CustomerCard = ({
         }
     }
 
-    // Phone and email [label, value] pairs
-    const phoneList = mapIfExists(customer, 'phones', (p) => ({ label: showPhone(p.number), value: phoneLink(p.number)}));
-    const emailList = mapIfExists(customer, 'emails', (e) => ({ label: e.emailAddress, value: emailLink(e.emailAddress)}));
+    const phoneList = mapIfExists(customer, 'phones', (p: any) => ({ label: showPhone(p.number), value: phoneLink(p.number)}));
+    const emailList = mapIfExists(customer, 'emails', (e: any) => ({ label: e.emailAddress, value: emailLink(e.emailAddress)}));
 
     return (
         <Card className={classes.cardRoot}>
@@ -161,14 +160,14 @@ const CustomerCard = ({
                         </IconButton>
                     </Tooltip>
                 )}
-                {(phoneList?.length > 0) ?
+                {(phoneList && phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
                         <IconButton onClick={() => setPhoneDialogOpen(true)}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
-                {(emailList?.length > 0) ?
+                {(emailList && emailList?.length > 0) ?
                     (<Tooltip title="View emails" placement="bottom">
                         <IconButton onClick={() => setEmailDialogOpen(true)}>
                             <EmailIcon className={classes.icon} />

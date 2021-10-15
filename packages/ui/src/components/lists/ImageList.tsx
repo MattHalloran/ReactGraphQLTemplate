@@ -14,7 +14,7 @@ const useStyles = makeStyles(() => ({
 
 interface Props {
     data: any[];
-    onUpdate: () => any;
+    onUpdate: (data: any) => any;
 }
 
 export const ImageList = ({

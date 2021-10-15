@@ -7,7 +7,7 @@
 import isNumber from 'lodash/isNumber';
 
 // 3. largest size smaller than requested
-export function getImageSrc(image, size) {
+export function getImageSrc(image: any, size?: number) {
     // Return null if invalid input
     if (!Array.isArray(image?.files) || image.files.length === 0) return null;
     // Create copy of image files, to prevent any problems with sorting

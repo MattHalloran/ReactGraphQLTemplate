@@ -8,17 +8,17 @@ const prisma = new PrismaClient()
 const SESSION_MILLI = 30*86400*1000;
 
 // Return array of customer roles (ex: ['admin', 'customer'])
-async function findCustomerRoles(customerId) {
+async function findCustomerRoles(customerId: any) {
     // Query customer's roles
-    const user = await prisma.customer.findUnique({ 
+    const user: any = await prisma.customer.findUnique({ 
         where: { id: customerId },
         select: { roles: { select: { role: { select: { title: true } } } } }
     });
-    return user.roles?.map(r => r.role.title.toLowerCase()) || [];
+    return user.roles?.map((r: any) => r.role.title.toLowerCase()) || [];
 }
 
 // Verifies if a user is authenticated, using an http cookie
-export async function authenticate(req, _, next) {
+export async function authenticate(req: any, _: any, next: any) {
     const { cookies } = req;
     // First, check if a valid session cookie was supplied
     const token = cookies[COOKIE.Session];
@@ -26,8 +26,12 @@ export async function authenticate(req, _, next) {
         next();
         return;
     }
+    if (!process.env.JWT_SECRET) {
+        console.error('❗️ JWT_SECRET not set! Please check .env file');
+        return;
+    }
     // Second, verify that the session token is valid
-    jwt.verify(token, process.env.JWT_SECRET, async (error, payload) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (error: any, payload: any) => {
         if (error || isNaN(payload.exp) || payload.exp < Date.now()) {
             next();
             return;
@@ -44,7 +48,7 @@ export async function authenticate(req, _, next) {
 }
 
 // Generates a JSON Web Token (JWT)
-export async function generateToken(res, customerId, businessId) {
+export async function generateToken(res: any, customerId: any, businessId: any) {
     const customerRoles = await findCustomerRoles(customerId);
     const tokenContents = {
         iat: Date.now(),
@@ -56,6 +60,10 @@ export async function generateToken(res, customerId, businessId) {
         isAdmin: customerRoles.includes('admin'),
         exp: Date.now() + SESSION_MILLI,
     }
+    if (!process.env.JWT_SECRET) {
+        console.error('❗️ JWT_SECRET not set! Please check .env file');
+        return;
+    }
     const token = jwt.sign(tokenContents, process.env.JWT_SECRET);
     res.cookie(COOKIE.Session, token, {
         httpOnly: true,
@@ -65,13 +73,13 @@ export async function generateToken(res, customerId, businessId) {
 }
 
 // Middleware that restricts access to customers (or admins)
-export async function requireCustomer(req, _, next) {
+export async function requireCustomer(req: any, _: any, next: any) {
     if (!req.isCustomer) return new CustomError(CODE.Unauthorized);
     next();
 }
 
 // Middle ware that restricts access to admins
-export async function requireAdmin(req, _, next) {
+export async function requireAdmin(req: any, _: any, next: any) {
     if (!req.isAdmin) return new CustomError(CODE.Unauthorized);
     next();
 }

@@ -51,7 +51,7 @@ export const typeDef = gql`
     }
 `
 
-const SORT_TO_QUERY = {
+const SORT_TO_QUERY: {[key: string]: {}} = {
     [PRODUCT_SORT_OPTIONS.AZ]: { name: 'asc', },
     [PRODUCT_SORT_OPTIONS.ZA]: { name: 'desc' },
     [PRODUCT_SORT_OPTIONS.Newest]: { created_at: 'desc' },
@@ -93,7 +93,7 @@ export const resolvers = {
         // Inserting products is different than other inserts, because the fields are dynamic.
         // Because of this, the add must be done manually
         // NOTE: images must be uploaded first
-        addProduct: async ({ args, context, info }) => {
+        addProduct: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images
@@ -101,12 +101,12 @@ export const resolvers = {
             const product = await context.prisma.product.create((new PrismaSelect(info).value), { data: { id: args.input.id, name: args.input.name } });
             // Create trait objects
             for (const { name, value } of (args.input.traits || [])) {
-                await prisma.product_trait.create({ data: { productId: product.id, name, value } });
+                await context.prisma.product_trait.create({ data: { productId: product.id, name, value } });
             }
             // Create images
             if (Array.isArray(args.input.images)) {
                 for (let i = 0; i < args.input.length; i++) {
-                    await prisma.product_images.create({ data: {
+                    await context.prisma.product_images.create({ data: {
                         productId: product.id,
                         hash: args.input.images[i].hash,
                         isDisplay: args.input.images[i].isDisplay ?? false,
@@ -114,13 +114,13 @@ export const resolvers = {
                     }})
                 }
             }
-            return await prisma.product.findUnique({ 
+            return await context.prisma.product.findUnique({ 
                 where: { id: product.id },
                 ...(new PrismaSelect(info).value)
             });
         },
         // NOTE: Images must be uploaded separately
-        updateProduct: async ({ args, context, info }) => {
+        updateProduct: async (_parent: undefined, args: any, context: any, info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // Update images
@@ -162,7 +162,7 @@ export const resolvers = {
             // Update SKUs
             if (args.input.skus) {
                 const currSkus = await context.prisma.sku.findMany({ where: { productId: args.input.id }});
-                const deletedSkus = currSkus.map(s => s.sku).filter(s => !args.input.skus.some(sku => sku.sku === s));
+                const deletedSkus = currSkus.map((s: any) => s.sku).filter((s: any) => !args.input.skus.some((sku: any) => sku.sku === s));
                 await context.prisma.sku.deleteMany({ where: { sku: { in: deletedSkus } } });
                 for (const sku of args.input.skus) {
                     await context.prisma.sku.upsert({
@@ -179,7 +179,7 @@ export const resolvers = {
                 ...(new PrismaSelect(info).value)
             })
         },
-        deleteProducts: async ({ args, context }) => {
+        deleteProducts: async (_parent: undefined, args: any, context: any, _info: any) => {
             // Must be admin
             if (!context.req.isAdmin) return new CustomError(CODE.Unauthorized);
             // TODO handle images

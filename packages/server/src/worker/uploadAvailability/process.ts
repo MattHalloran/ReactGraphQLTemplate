@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 // Reads an .xls or .xlsx availability file into the database.
 // SKUs of products not in the availability file will be hidden
-export async function uploadAvailabilityProcess(job) {
+export async function uploadAvailabilityProcess(job: any) {
     console.info('📊 Updating availability...')
     console.info('SKUs not in the availability data will be hidden');
 
@@ -13,7 +13,7 @@ export async function uploadAvailabilityProcess(job) {
     const header = rows[0];
     const content = rows.slice(1, rows.length);
     // Determine which columns data is in
-    const index = {
+    const index: {[key: string]: number} = {
         name: header.indexOf('Name'),
         size: header.indexOf('Size'),
         note: header.indexOf('Notes'),
@@ -26,7 +26,7 @@ export async function uploadAvailabilityProcess(job) {
     for (const row of content) {
         // Insert or update product data from row
         const name = row[index.name];
-        let product = await prisma.product.findUnique({ where: { name }, select: {
+        let product: any = await prisma.product.findUnique({ where: { name }, select: {
             id: true,
             traits: { select: { id: true, name: true, value: true } }
         } });

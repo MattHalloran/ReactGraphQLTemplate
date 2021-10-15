@@ -21,18 +21,18 @@ export const typeDef = gql`
 
 export const resolvers = {
     Query: {
-        traitNames: async (_parent, _args, context, _info) => {
+        traitNames: async (_parent: undefined, _args: any, context: any, _info: any) => {
             return await context.prisma.product_trait.findMany({ select: { name: true }, distinct: ['name']});
         },
         traitValues: async (_parent: undefined, args: any, context: any, _info: any) => {
             return await context.prisma.product_trait.findMany({ where: { name: args.name }, select: { value: true }})
         },
         // Returns all values previously entered for every trait
-        traitOptions: async (_parent, _args, context, _info) => {
+        traitOptions: async (_parent: undefined, _args: any, context: any, _info: any) => {
             // Query all data
             const trait_data = await context.prisma.product_trait.findMany();
             // Combine data into object
-            let options = {};
+            let options: {[key: string]: string[]} = {};
             for (const row of trait_data) {
                 options[row.name] ? options[row.name].push(row.value) : options[row.name] = [row.value];
             }

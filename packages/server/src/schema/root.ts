@@ -43,8 +43,8 @@ export const resolvers = {
         serialize(value) {
             return new Date(value).getTime(); // value sent to the client
         },
-        parseLiteral(ast) {
-            return new Date(value).toDateString(); // ast value is always in string format
+        parseLiteral(ast: any) {
+            return new Date(ast).toDateString(); // ast value is always in string format
         }
     }),
     Query: {

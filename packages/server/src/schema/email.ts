@@ -61,7 +61,7 @@ export const resolvers = {
             // TODO must keep at least one email per customer
             const specified = await context.prisma.emil.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
-            const business_ids = [...new Set(specified.map(s => s.businessId))];
+            const business_ids = [...new Set(specified.map((s: any) => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
             return await context.prisma.email.deleteMany({ where: { id: { in: args.ids } } });
         }

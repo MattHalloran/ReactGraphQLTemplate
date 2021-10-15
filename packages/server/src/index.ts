@@ -8,9 +8,13 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
 import { schema } from './schema';
 import { context } from './context';
-import { exit } from 'process';
+import { envVariableExists } from 'utils/envVariableExists';
 
 console.info('Starting server...')
+
+// Check for required .env variables
+if (['JWT_SECRET', 'REACT_APP_SERVER_ROUTE'].some(name => !envVariableExists(name))) process.exit(1);
+
 
 const app = express();
 
@@ -38,11 +42,7 @@ app.use(cors({
 }))
 
 // Set static folders
-if (!process.env.REACT_APP_SERVER_ROUTE) {
-    console.error('REACT_APP_SERVER_ROUTE not defined! Please check .env file.');
-    exit(1);
-}
-app.use(process.env.REACT_APP_SERVER_ROUTE, express.static(`${process.env.PROJECT_DIR}/assets/public`));
+app.use(process.env.REACT_APP_SERVER_ROUTE || '', express.static(`${process.env.PROJECT_DIR}/assets/public`));
 app.use(`${process.env.REACT_APP_SERVER_ROUTE}/private`, auth.requireAdmin, express.static(`${process.env.PROJECT_DIR}/assets/private`));
 app.use(`${process.env.REACT_APP_SERVER_ROUTE}/images`, express.static(`${process.env.PROJECT_DIR}/assets/images`));
 

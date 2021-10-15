@@ -39,7 +39,7 @@ const componentStyles = (theme: Theme) => ({
 const useStyles = makeStyles(combineStyles(cardStyles, componentStyles));
 
 interface Props {
-    onClick: () => any;
+    onClick: (...props: any[]) => any;
     product: any;
 }
 
@@ -49,7 +49,7 @@ export const ProductCard = ({
 }: Props) => {
     const classes = useStyles();
 
-    let display;
+    let display: {} | null | undefined;
     let display_data = product.images.find(image => image.usedFor === ImageUse.PRODUCT_DISPLAY)?.image;
     if (!display_data && product.images.length > 0) display_data = product.images[0].image;
     if (display_data) {

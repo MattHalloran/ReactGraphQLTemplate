@@ -11,19 +11,19 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-export async function emailProcess(job) {
+export async function emailProcess(job: any) {
     transporter.sendMail({
         from : `"${process.env.SITE_EMAIL_FROM}" <${process.env.SITE_EMAIL_USERNAME}>`,
         to: job.data.to.join(', '),
         subject: job.data.subject,
         text: job.data.text,
         html: job.data.html
-    }).then(info => {
+    }).then((info: any) => {
         return {
             'success': info.rejected.length === 0,
             'info': info
         }
-    }).catch(err => {
+    }).catch((err: any) => {
         console.error(err);
         return {
             'success': false

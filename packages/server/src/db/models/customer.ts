@@ -6,7 +6,7 @@ import pkg from '@prisma/client';
 const { OrderStatus } = pkg;
 
 // Validates email address, and returns customer data
-export async function customerFromEmail(email: string, prisma) {
+export async function customerFromEmail(email: string, prisma: any) {
     if (!email) throw new CustomError(CODE.BadCredentials);
     // Validate email address
     const emailRow = await prisma.email.findUnique({ where: { emailAddress: email } });
@@ -19,7 +19,7 @@ export async function customerFromEmail(email: string, prisma) {
 
 // 'cart' is not a field or relationship in the database,
 // so it must be removed from the select
-export function getCustomerSelect(info) {
+export function getCustomerSelect(info: any) {
     let prismaInfo = new PrismaSelect(info).value;
     delete prismaInfo.select.cart;
     return prismaInfo;
@@ -27,7 +27,7 @@ export function getCustomerSelect(info) {
 
 // 'cart' is not a field or relationship in the database,
 // so it must be manually queried
-export async function getCart(prisma, info, customerId) {
+export async function getCart(prisma: any, info: any, customerId: any) {
     const selectInfo = new PrismaSelect(info).value.select.cart;
     let results;
     if (selectInfo) {
@@ -40,10 +40,10 @@ export async function getCart(prisma, info, customerId) {
 }
 
 // Upsert a customer, with business, emails, phones, and roles
-export async function upsertCustomer({ prisma, info, data }) {
+export async function upsertCustomer({ prisma, info, data }: any) {
     // Remove relationship data, as they are handled on a 
     // case-by-case basis
-    let cleanedData = onlyPrimitives(data);
+    let cleanedData: any = onlyPrimitives(data);
     // If user already exists, try to find their business
     let business;
     if (data.id) {

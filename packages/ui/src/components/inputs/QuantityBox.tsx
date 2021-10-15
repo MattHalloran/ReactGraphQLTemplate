@@ -67,8 +67,8 @@ export const QuantityBox = ({
     const HOLD_DELAY = 250;
     // Time between hold increments
     const HOLD_INTERVAL = 50;
-    let holdTimeout = useRef(null);
-    let holdInterval = useRef(null);
+    let holdTimeout = useRef<NodeJS.Timeout | null>(null);
+    let holdInterval = useRef<NodeJS.Timer | null>(null);
 
     const updateValue = (quantity) => {
         if (quantity > max_value) quantity = max_value;
@@ -85,7 +85,7 @@ export const QuantityBox = ({
         updateValue(v => v - step);
     }
 
-    const startTouch = (adding) => {
+    const startTouch = (adding: boolean) => {
         holdTimeout.current = setTimeout(() => {
             if (adding)
                 holdInterval.current = setInterval(incTick, HOLD_INTERVAL);

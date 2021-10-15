@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
     data: any[];
-    onApply: () => any;
+    onApply: (data: any) => any;
 }
 
 export const WrappedImageList = ({
@@ -23,7 +23,7 @@ export const WrappedImageList = ({
     onApply
 }: Props) => {
     const classes = useStyles();
-    const [changed, setChanged] = useState(null);
+    const [changed, setChanged] = useState<any>(null);
 
     useEffect(() => {
         setChanged(data);
@@ -31,10 +31,10 @@ export const WrappedImageList = ({
 
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
+            <Grid className={classes.gridItem} item xs={12} sm={6}>
                 <Button fullWidth onClick={() => onApply(changed)}>Apply Changes</Button>
             </Grid>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
+            <Grid className={classes.gridItem} item xs={12} sm={6}>
                 <Button fullWidth onClick={() => setChanged(data)}>Revert Changes</Button>
             </Grid>
         </Grid>

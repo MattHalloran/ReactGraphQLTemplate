@@ -61,7 +61,7 @@ export const resolvers = {
             // TODO must leave one phone per customer
             const specified = await context.prisma.phone.findMany({ where: { id: { in: args.ids } } });
             if (!specified) return new CustomError(CODE.ErrorUnknown);
-            const business_ids = [...new Set(specified.map(s => s.businessId))];
+            const business_ids = [...new Set(specified.map((s: any) => s.businessId))];
             if (!context.req.isAdmin && (business_ids.length > 1 || context.req.business_id !== business_ids[0])) return new CustomError(CODE.Unauthorized);
             return await context.prisma.phone.deleteMany({ where: { id: { in: args.ids } } });
         },

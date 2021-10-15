@@ -39,7 +39,7 @@ export const Dots = ({
 }: Props) => {
     const classes = useStyles();
 
-    let slides = [];
+    let slides: any = [];
     for (let i = 0; i < quantity; i++) {
         slides.push(<div key={'dot-'+i} className={`${classes.dot} ${activeIndex === i ? classes.active : classes.inactive}`} />)
     }

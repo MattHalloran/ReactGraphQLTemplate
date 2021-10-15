@@ -26,7 +26,7 @@ const ASSET_DIR = `${process.env.PROJECT_DIR}/assets`;
 // name - name of file, excluding extension and location
 // ext - extension of file
 // folder - path of file
-export function clean(file, defaultFolder) {
+export function clean(file: any, defaultFolder?: any) {
     const pathRegex = /([^a-z0-9 \.\-\_\/]+)/gi;
     // First, remove any invalid characters
     const cleanPath = file.replace(pathRegex, '');
@@ -42,7 +42,7 @@ export function clean(file, defaultFolder) {
 // Args:
 // filenname - name of file (ex: 'public/boop.png')
 // defaultFolder - default for file's location (ex: 'images')
-export async function findFileName(file, defaultFolder) {
+export async function findFileName(file: any, defaultFolder?: any) {
     const { name, ext, folder } = clean(file, defaultFolder);
     // If file name is available, no need to append a number
     if (!fs.existsSync(`${ASSET_DIR}/${folder}/${name}${ext}`)) return { name, ext, folder };
@@ -54,28 +54,27 @@ export async function findFileName(file, defaultFolder) {
         curr++;
     }
     // If no valid name found after max tries, return null
-    return null;
+    return { name: null, ext: null, folder: null };
 }
 
 // Convert a file stream into a buffer
-function streamToBuffer(stream, numBytes) {
-    if (numBytes === null || numBytes === undefined) numBytes = MAX_BUFFER_SIZE;
+function streamToBuffer(stream: any, numBytes = MAX_BUFFER_SIZE) {
     return new Promise((resolve, reject) => {
-        let _buf = []
+        let _buf: any = []
 
-        stream.on('data', chunk => {
+        stream.on('data', (chunk: any) => {
             _buf.push(chunk);
             if (_buf.length >= numBytes) stream.destroy();
         })
         stream.on('end', () => resolve(Buffer.concat(_buf)))
-        stream.on('error', err => reject(err))
+        stream.on('error', (err: any) => reject(err))
 
     })
 }
 
 // Returns all image sizes smaller or equal to the image size
-function resizeOptions(width, height) {
-    let sizes = {};
+function resizeOptions(width: number, height: number) {
+    let sizes: any = {};
     for (const [key, value] of Object.entries(IMAGE_SIZE)) {
         if (width >= value || height >= value) sizes[key] = value;
     }
@@ -89,7 +88,7 @@ function resizeOptions(width, height) {
 // filename - name of file, including extension and folder (ex: 'public/boop.png')
 // overwrite - boolean indicating if existing files can be overwritten
 // acceptedTypes - a string or array of accepted file types, in mimetype form (ex: 'application/vnd.ms-excel')
-export async function saveFile(stream, filename, mimetype, overwrite, acceptedTypes) {
+export async function saveFile(stream: any, filename: string, mimetype: any, overwrite = false, acceptedTypes?: string | string[]) {
     try {
         const { name, ext, folder } = await (overwrite ? clean(filename, 'public') : findFileName(filename));
         if (name === null) throw Error('Could not create a valid file name');
@@ -97,7 +96,7 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
             if (Array.isArray(acceptedTypes) && !acceptedTypes.some(type => mimetype.startsWith(type) || ext === type)) {
                 throw Error('File type not accepted');
             }
-            if (typeof acceptedTypes === "string" && !(mimetype.startsWith(type) || ext === type)) {
+            if (typeof acceptedTypes === "string" && !(mimetype.startsWith(acceptedTypes) || ext === acceptedTypes)) {
                 throw Error('File type not accepted');
             }
         }
@@ -127,7 +126,7 @@ export async function saveFile(stream, filename, mimetype, overwrite, acceptedTy
 // alt - alt text for image
 // description - image description
 // errorOnDuplicate - If image previously updated, throw error
-export async function saveImage({ file, alt, description, labels, errorOnDuplicate = false }) {
+export async function saveImage({ file, alt, description, labels, errorOnDuplicate = false }: any) {
     try {
         // Destructure data. Each file upload is a promise
         const { createReadStream, filename, mimetype } = await file;
@@ -138,11 +137,12 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         if (Object.values(IMAGE_EXTENSION).indexOf(extCheck.toLowerCase()) <= 0) throw Error('Image type not supported')
         // Create a read stream
         const stream = createReadStream();
-        const { name, ext, folder } = await findFileName(filename, 'images')
+        const { name, folder } = await findFileName(filename, 'images')
         if (name === null) throw Error('Could not create a valid file name');
         // Determine image dimensions
-        let image_buffer = await streamToBuffer(stream);
-        const dimensions = probe.sync(image_buffer);
+        let image_buffer: any = await streamToBuffer(stream);
+        const dimensions: probe.ProbeResult | null = probe.sync(image_buffer);
+        if (dimensions === null) throw Error('Failed to determine image dimensions');
         // // If image is .heic or .heif, convert to jpg. Thanks, Apple
         // if (['.heic', '.heif'].includes(extCheck.toLowerCase())) {
         //     image_buffer = await convert({
@@ -226,7 +226,7 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
 // Arguments:
 // filename - name of file, including extension (ex: 'boop.png')
 // folder - folder in server directory (ex: 'images')
-export async function deleteFile(file) {
+export async function deleteFile(file: string) {
     try {
         const { name, ext, folder } = clean(file);
         fs.unlinkSync(`${ASSET_DIR}/${folder}/${name}${ext}`);
@@ -238,7 +238,7 @@ export async function deleteFile(file) {
 }
 
 // Deletes an image and all resizes, using its hash
-export async function deleteImage(hash) {
+export async function deleteImage(hash: any) {
     // Find all files associated with image
     const imageData = await prisma.image.findUnique({
         where: { hash },
@@ -258,7 +258,7 @@ export async function deleteImage(hash) {
 }
 
 // Reads a list of files
-export async function readFiles(files) {
+export async function readFiles(files: any) {
     let data = [];
     for (const file of files) {
         const { name, ext, folder } = clean(file, 'public');
@@ -273,7 +273,7 @@ export async function readFiles(files) {
 }
 
 // Writes a list of files
-export async function saveFiles(files, overwrite = true, acceptedTypes) {
+export async function saveFiles(files: any, overwrite = true, acceptedTypes?: string | string[]) {
     let data = [];
     for (const file of files) {
         const { createReadStream, filename, mimetype } = await file;

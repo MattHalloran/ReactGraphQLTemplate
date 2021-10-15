@@ -44,19 +44,18 @@ export const OrderCard = ({
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
-    const callPhone = (phoneLink) => {
+    const callPhone = (phoneLink?: string | null) => {
         setPhoneDialogOpen(false);
         if (phoneLink) window.location.href = phoneLink;
     }
 
-    const sendEmail = (emailLink) => {
+    const sendEmail = (emailLink?: string | null) => {
         setEmailDialogOpen(false);
         if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
 
-    // Phone and email [label, value] pairs
-    const phoneList = mapIfExists(order, 'customer.phones', (p) => ([showPhone(p.number), phoneLink(p.number)]));
-    const emailList = mapIfExists(order, 'customer.emails', (e) => ([e.emailAddress, emailLink(e.emailAddress)]));
+    const phoneList = mapIfExists(order, 'customer.phones', (p: any) => ({ label: showPhone(p.number), value: phoneLink(p.number)}));
+    const emailList = mapIfExists(order, 'customer.emails', (e: any) => ({ label: e.emailAddress, value: emailLink(e.emailAddress)}));
 
     return (
         <Card className={`${classes.cardRoot} ${classes.orderCardRoot}`}>
@@ -88,14 +87,14 @@ export const OrderCard = ({
             </CardContent>
             <CardActions>
                 <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
-                {(phoneList?.length > 0) ?
+                {(phoneList && phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
                         <IconButton onClick={() => setPhoneDialogOpen(true)}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
-                {(emailList?.length > 0) ?
+                {(emailList && emailList?.length > 0) ?
                 (<Tooltip title="View emails" placement="bottom">
                     <IconButton onClick={() => setEmailDialogOpen(true)}>
                         <EmailIcon className={classes.icon} />

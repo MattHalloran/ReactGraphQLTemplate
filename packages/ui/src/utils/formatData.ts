@@ -4,7 +4,7 @@
 import isNumber from 'lodash/isNumber';
 
 // Convert price stored in database to user-friendly version
-export const showPrice = (price) => {
+export const showPrice = (price: string) => {
     if (!price) return 'N/A';
     let result = Number(price);
     if (isNaN(result)) return price;
@@ -24,7 +24,7 @@ export const storePrice = (price) => {
 }
 
 // '15558675309' -> '+1 (555) 867-5309'
-export const showPhone = (phone) => {
+export const showPhone = (phone: string) => {
     var cleaned = ('' + phone).replace(/\D/g, '');
     var match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
     if (match) {
@@ -40,5 +40,5 @@ export const storePhone = (phone) => {
 }
 
 // '15558675309' -> 'tel:+15558675309'
-export const phoneLink = (phone) => `tel:${phone}`
-export const emailLink = (address, subject = '', body = '') => `mailto:${address}?subject=${subject}&body=${body}`;
+export const phoneLink = (phone: string) => `tel:${phone}`
+export const emailLink = (address: string, subject = '', body = '') => `mailto:${address}?subject=${subject}&body=${body}`;

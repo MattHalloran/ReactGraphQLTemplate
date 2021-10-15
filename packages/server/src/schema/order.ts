@@ -52,7 +52,7 @@ export const typeDef = gql`
     }
 `
 
-const STATUS_TO_SORT = {
+const STATUS_TO_SORT: {[key: string]: {}} = {
     [OrderStatus.CANCELED_BY_ADMIN]: { updated_at: 'desc' },
     [OrderStatus.CANCELED_BY_CUSTOMER]: { updated_at: 'desc' },
     [OrderStatus.PENDING_CANCEL]: { updated_at: 'desc' },
@@ -74,7 +74,7 @@ export const resolvers = {
             let idQuery;
             if (Array.isArray(args.ids)) { idQuery = { id: { in: args.ids } } }
             // Determine sort order
-            let sortQuery = { updated_at: 'desc' };
+            let sortQuery: any = { updated_at: 'desc' };
             if (args.status) sortQuery = STATUS_TO_SORT[args.status];
             // If search string provided, match it with customer or business name.
             // Maybe in the future, this could also be matched to sku names and such
@@ -116,10 +116,10 @@ export const resolvers = {
             }
             // Determine which order item rows need to be updated, and which will be deleted
             if (Array.isArray(args.input.items)) {
-                const updatedItemIds = args.input.items.map(i => i.id);
-                const deletingItemIds = curr.items.filter(i => !updatedItemIds.includes(i.id)).map(i => i.id);
+                const updatedItemIds = args.input.items.map((i: any) => i.id);
+                const deletingItemIds = curr.items.filter((i: any) => !updatedItemIds.includes(i.id)).map((i: any) => i.id);
                 if (updatedItemIds.length > 0) {
-                    const updateMany = args.input.items.map(d => context.prisma.order_item.updateMany({
+                    const updateMany = args.input.items.map((d: any) => context.prisma.order_item.updateMany({
                         where: { id: d.id },
                         data: { ...d }
                     }))

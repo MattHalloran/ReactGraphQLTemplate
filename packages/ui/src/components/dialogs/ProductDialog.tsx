@@ -228,7 +228,7 @@ export const ProductDialog = ({
                             : null}
                         {displayedTraitData.length > 0 ? (
                             <Fragment>
-                                <ListItem className={classes.menuItem} button onClick={handleDetailsClick}>
+                                <ListItem button onClick={handleDetailsClick}>
                                     <ListItemIcon><InfoIcon /></ListItemIcon>
                                     <ListItemText primary="Details" />
                                     {detailsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}

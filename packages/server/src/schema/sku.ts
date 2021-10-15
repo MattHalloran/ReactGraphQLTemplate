@@ -67,7 +67,7 @@ export const typeDef = gql`
     }
 `
 
-const SORT_TO_QUERY = {
+const SORT_TO_QUERY: {[key: string]: {}} = {
     [SKU_SORT_OPTIONS.AZ]: { product: { name: 'asc' } },
     [SKU_SORT_OPTIONS.ZA]: { product: { name: 'desc' } },
     [SKU_SORT_OPTIONS.PriceLowHigh]: { price: 'asc' },

@@ -138,7 +138,7 @@ const Routes = (props: CommonProps) => {
                     render={() => (
                         <Page title={title('Forgot Password')} {...props}>
                             <FormPage title="Forgot Password" maxWidth="700px">
-                                <ForgotPasswordForm {...props} />
+                                <ForgotPasswordForm />
                             </FormPage>
                         </Page>
                     )}
@@ -166,7 +166,7 @@ const Routes = (props: CommonProps) => {
                     render={() => (
                         <Page title={title('Profile')} {...props} restrictedToRoles={Object.values(ROLES)}>
                             <FormPage title="Profile">
-                                <ProfileForm {...props} />
+                                <ProfileForm />
                             </FormPage>
                         </Page>
                     )}

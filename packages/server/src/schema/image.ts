@@ -78,13 +78,13 @@ export const resolvers = {
                 select: { hash: true, labels: { select: { label: true, index: true } } }
             })
             // Sort by position
-            images = images.sort((a, b) => {
-                const aIndex = a.labels.find(l => l.label === args.label);
-                const bIndex = b.labels.find(l => l.label === args.label);
+            images = images.sort((a: any, b: any) => {
+                const aIndex = a.labels.find((l: any) => l.label === args.label);
+                const bIndex = b.labels.find((l: any) => l.label === args.label);
                 return aIndex > bIndex;
             })
             return await context.prisma.image.findMany({ 
-                where: { hash: { in: images.map(i => i.hash) } },
+                where: { hash: { in: images.map((i: any) => i.hash) } },
                 ...(new PrismaSelect(info).value)
             });
         }
