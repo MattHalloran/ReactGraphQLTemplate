@@ -9,7 +9,8 @@ import {
     Grid,
     Link,
     TextField,
-    Typography
+    Typography,
+    useTheme
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
@@ -17,7 +18,6 @@ import { combineStyles, LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
-import { useTheme } from '@emotion/react';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
 
@@ -115,7 +115,6 @@ export const SignUpForm = ({
                         fullWidth
                         freeSolo
                         id="pronouns"
-                        name="pronouns"
                         options={DEFAULT_PRONOUNS}
                         value={formik.values.pronouns}
                         onChange={(_, value) => formik.setFieldValue('pronouns', value)}
@@ -206,7 +205,7 @@ export const SignUpForm = ({
                                 name="marketingEmails"
                                 value="marketingEmails"
                                 color="secondary"
-                                checked={formik.values.marketingEmails}
+                                checked={Boolean(formik.values.marketingEmails)}
                                 onChange={formik.handleChange}
                             />
                         }

@@ -17,7 +17,7 @@ import {
     Room as RoomIcon
 } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/styles';
-import { CommonProps } from 'types';
+import { Business } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     tableHead: {
@@ -45,10 +45,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
+interface Props {
+    business: Business;
+    className?: string;
+}
+
 export const ContactInfo = ({
     business,
+    className,
     ...props
-}: Pick<CommonProps, 'business'>) => {
+}: Props) => {
     const classes = useStyles();
 
     const openLink = (e, link) => {
@@ -74,7 +80,7 @@ export const ContactInfo = ({
     ]
 
     return (
-        <div style={{ minWidth: 'fit-content', height: 'fit-content'}} {...props}>
+        <div style={{ minWidth: 'fit-content', height: 'fit-content'}} className={className} {...props}>
             <TableContainer>
                 <Table aria-label="contact-hours-table" size="small">
                     <TableHead className={classes.tableHead}>

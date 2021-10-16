@@ -18,7 +18,7 @@ const useStyles = makeStyles(pageStyles);
 export const AdminGalleryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [imageData, setImageData] = useState([]);
+    const [imageData, setImageData] = useState<any[]>([]);
     const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);

@@ -23,7 +23,10 @@ interface Props {
     inputAriaLabel?: string;
     noneOption?: boolean;
     label?: string;
+    required?: boolean;
+    disabled?: boolean;
     color?: string;
+    className?: string;
 }
 
 export const Selector = ({
@@ -35,7 +38,10 @@ export const Selector = ({
     inputAriaLabel = 'select-label',
     noneOption = false,
     label = 'Select',
+    required = true,
+    disabled = false,
     color,
+    className,
     ...props
 }: Props) => {
     const classes = useStyles();
@@ -86,11 +92,14 @@ export const Selector = ({
         >
             <InputLabel id={inputAriaLabel} shrink={selected_formatted?.length > 0} style={{color: displayColor}}>{label}</InputLabel>
             <Select
+                className={className}
                 style={{color: displayColor}}
                 labelId={inputAriaLabel}
                 value={selected}
                 onChange={handleChange}
                 label={label}
+                required={required}
+                disabled={disabled}
                 renderValue={() => {
                     return multiple ? (
                         <div className={classes.chips}>

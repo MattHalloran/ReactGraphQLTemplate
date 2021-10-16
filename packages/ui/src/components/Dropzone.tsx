@@ -71,7 +71,7 @@ export const Dropzone = ({
     disabled = false
 }: Props) => {
     const classes = useStyles();
-    const [files, setFiles] = useState([]);
+    const [files, setFiles] = useState<any[]>([]);
     const { getRootProps, getInputProps } = useDropzone({
         accept: acceptedFileTypes,
         maxFiles: maxFiles,

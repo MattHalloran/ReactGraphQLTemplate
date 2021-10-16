@@ -4,7 +4,7 @@
 import isNumber from 'lodash/isNumber';
 
 // Convert price stored in database to user-friendly version
-export const showPrice = (price: string) => {
+export const showPrice = (price: string | number) => {
     if (!price) return 'N/A';
     let result = Number(price);
     if (isNaN(result)) return price;

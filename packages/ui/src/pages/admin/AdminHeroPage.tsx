@@ -20,7 +20,7 @@ const useStyles = makeStyles(pageStyles);
 export const AdminHeroPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [imageData, setImageData] = useState([]);
+    const [imageData, setImageData] = useState<any[]>([]);
     const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
     const [addImages] = useMutation(addImagesMutation);
     const [updateImages] = useMutation(updateImagesMutation);

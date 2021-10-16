@@ -52,7 +52,7 @@ export const ShoppingPage = ({
     const [open, setOpen] = useState(false);
     const { data: traitOptionsData } = useQuery(traitOptionsQuery);
     const [traitOptions, setTraitOptions] = useState({});
-    const [filters, setFilters] = useState(null);
+    const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
     const [searchString, setSearchString] = useState('');
 
@@ -60,9 +60,7 @@ export const ShoppingPage = ({
         let openSub = PubSub.subscribe(PUBS.ArrowMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });
-        return (() => {
-            PubSub.unsubscribe(openSub);
-        })
+        return () => { PubSub.unsubscribe(openSub) };
     }, [])
 
     useEffect(() => {
@@ -165,7 +163,7 @@ export const ShoppingPage = ({
             <ShoppingList
                 onSessionUpdate={onSessionUpdate}
                 cart={cart}
-                sort={sortBy}
+                sortBy={sortBy}
                 filters={filters}
                 searchString={searchString}
             />

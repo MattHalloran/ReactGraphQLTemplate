@@ -49,7 +49,7 @@ function Snack() {
 
     useEffect(() => {
         let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...DEFAULT_STATE, ...o }));
-        return () => PubSub.unsubscribe(snackSub);
+        return () => { PubSub.unsubscribe(snackSub) };
     }, [])
 
     useEffect(() => {

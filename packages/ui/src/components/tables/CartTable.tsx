@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
     QuantityBox,
     Selector
@@ -5,7 +6,7 @@ import {
 import { deleteArrayIndex, showPrice, updateObject, PUBS, getImageSrc, updateArray } from 'utils';
 import PubSub from 'pubsub-js';
 import { NoImageIcon } from 'assets/img';
-import { IconButton, Theme } from '@material-ui/core';
+import { IconButton, TableCellProps, Theme } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { Paper, Grid, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -49,7 +50,7 @@ const DELIVERY_OPTIONS = [
 
 interface Props {
     cart: any;
-    onUpdate: () => any;
+    onUpdate: (data: any) => any;
     editable?: boolean;
 }
 
@@ -91,13 +92,13 @@ export const CartTable = ({
 
     const cart_item_to_row = useCallback((data, key) => {
         const quantity = data.quantity;
-        let price = +data.sku.price;
+        let price = data.sku.price;
         let total;
-        if (isNaN(price)) {
+        if (isNaN(+price)) {
             total = 'TBD';
             price = 'TBD';
         } else {
-            total = showPrice(quantity * price);
+            total = showPrice(quantity * +price);
             price = showPrice(price);
         }
 
@@ -134,15 +135,17 @@ export const CartTable = ({
         );
     }, [classes.displayImage, classes.tableCol, deleteCartItem, editable, updateItemQuantity])
 
-    let headCells = [
-        { id: 'productImage', align: 'left', disablePadding: true, label: 'Product' },
-        { id: 'productName', disablePadding: true, label: '' },
-        { id: 'price', align: 'right', disablePadding: false, label: 'Price' },
-        { id: 'quantity', align: 'right', disablePadding: false, label: 'Quantity' },
-        { id: 'total', align: 'right', disablePadding: false, label: 'Total' },
-    ]
+    // [label, title, align, padding]
+    type HeadCellData = [string, string, TableCellProps["align"], TableCellProps["padding"]];
+    let headCells: HeadCellData[] = [
+        ['productImage', 'Product', 'left', 'none'],
+        ['productName', '', 'right', 'none'],
+        ['price', 'Price', 'right', 'normal'],
+        ['quantity', 'Quantity', 'right', 'normal'],
+        ['total', 'Total', 'right', 'normal'],
+    ];
     // Only show x button if cart is editable
-    if (editable) headCells.unshift({ id: 'close', align: 'left', disablePadding: true, label: '' });
+    if (editable) headCells.unshift(['close', '', 'left', 'none']);
 
     return (
         <div {...props} >
@@ -150,12 +153,12 @@ export const CartTable = ({
                 <Table aria-label="cart table">
                     <TableHead className={classes.tableHead}>
                         <TableRow>
-                            {headCells.map(({ id, align, disablePadding, label }, index) => (
+                            {headCells.map(([id, label, align, padding]) => (
                                 <TableCell
                                     key={id}
                                     id={id}
                                     align={align}
-                                    disablePadding={disablePadding}
+                                    padding={padding}
                                 >{label}</TableCell>
                             ))}
                         </TableRow>

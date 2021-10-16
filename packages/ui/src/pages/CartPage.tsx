@@ -45,7 +45,7 @@ export const CartPage = ({
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final
-    const [changedCart, setChangedCart] = useState(null);
+    const [changedCart, setChangedCart] = useState<any>(null);
     const [updateOrder, {loading}] = useMutation(updateOrderMutation);
     const [submitOrder] = useMutation(submitOrderMutation);
 

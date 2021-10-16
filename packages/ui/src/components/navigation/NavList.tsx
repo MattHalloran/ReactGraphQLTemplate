@@ -53,9 +53,9 @@ export const NavList = ({
 
     // Cart is the only option displayed as an icon
     let cart_button;
-    const cart_action = nav_actions.filter(a => a.value === 'cart');
+    const cart_action = nav_actions.filter((a: any) => a.value === 'cart');
     if (cart_action.length > 0) {
-        nav_actions = nav_actions.filter(a => a.value !== 'cart');
+        nav_actions = nav_actions.filter((a: any) => a.value !== 'cart');
         cart_button = actionToIconButton({ action:cart_action[0], history });
     }
 

@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
-import { productsQuery, traitOptionsQuery } from 'graphql/query';
+import { productsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';
 import { combineStyles, PUBS, SORT_OPTIONS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -47,10 +47,9 @@ export const AdminInventoryPage = () => {
     const [showActive, setShowActive] = useState(true);
     const [searchString, setSearchString] = useState('');
     // Selected product data. Used for popup. { product, selectedSku }
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelected] = useState<any>(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
-    const { data: traitOptions } = useQuery(traitOptionsQuery);
     const { data: productData } = useQuery(productsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
     const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
 
@@ -70,7 +69,6 @@ export const AdminInventoryPage = () => {
             <EditProductDialog
                 product={selected?.product}
                 selectedSku={selected?.selectedSku}
-                trait_options={traitOptions?.traitOptions}
                 open={selected !== null}
                 onClose={() => setSelected(null)} />
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />

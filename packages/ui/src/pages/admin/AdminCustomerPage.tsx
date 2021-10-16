@@ -14,6 +14,7 @@ import { CustomerDialog } from 'components/dialogs/CustomerDialog';
 import { NewCustomerDialog } from 'components/dialogs/NewCustomerDialog';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
+import { Customer } from '@local/shared';
 
 const componentStyles = () => ({
     cardFlex: {
@@ -28,8 +29,8 @@ const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 export const AdminCustomerPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [customers, setCustomers] = useState(null);
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [customers, setCustomers] = useState<any>(null);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [newCustomerOpen, setNewCustomerOpen] = useState(false);
     const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
     if (error) { 
@@ -57,7 +58,7 @@ export const AdminCustomerPage = () => {
                 {customers?.map((c, index) =>
                 <CustomerCard 
                     key={index}
-                    onEdit={setSelectedCustomer}
+                    onEdit={(data) => setSelectedCustomer(data)}
                     customer={c}
                 />)}
             </div>

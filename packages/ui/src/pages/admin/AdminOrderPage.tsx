@@ -36,13 +36,13 @@ export const AdminOrderPage = ({
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
-    const [orders, setOrders] = useState(null);
+    const [orders, setOrders] = useState([]);
     const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter !== 'All' ? filter : undefined }, pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
-        setOrders(data?.orders);
+        setOrders(data?.orders ?? []);
     }, [data])
 
     useEffect(() => {
@@ -67,9 +67,9 @@ export const AdminOrderPage = ({
                 handleChange={(e) => setFilter(e.target.value)}
                 inputAriaLabel='order-type-selector-label'
                 label="Sort By" />
-            <h3>Count: {orders?.length ?? 0}</h3>
+            <h3>Count: {orders.length ?? 0}</h3>
             <div className={classes.cardFlex}>
-                {orders?.map((o) => <OrderCard key={o.id} order={o} onEdit={() => setCurrOrder(o)} />)}
+                {orders.map((o: any) => <OrderCard key={o.id} order={o} onEdit={() => setCurrOrder(o)} />)}
             </div>
         </div >
     );

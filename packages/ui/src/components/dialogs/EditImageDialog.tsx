@@ -24,7 +24,7 @@ interface Props {
     open: boolean;
     data: any;
     onClose: () => any;
-    onSave: () => any;
+    onSave: (data: any) => any;
 }
 
 export const EditImageDialog = ({

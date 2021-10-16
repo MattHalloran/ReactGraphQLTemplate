@@ -27,6 +27,7 @@
     "include": [
         "src",
         "../shared/src/models.ts",
+        "fonts.d.ts",
         "types.d.ts"
     ],
     "exclude": [

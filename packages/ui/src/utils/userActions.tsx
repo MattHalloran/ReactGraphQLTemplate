@@ -59,7 +59,7 @@ const createAction = (action: ActionArray) => {
 export const createActions = (actions: ActionArray[]) => actions.map(a => createAction(a));
 
 // Display actions as a list
-export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick }) => {
+export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick = () => {} }) => {
     return actions.map(({ label, value, link, onClick, Icon, numNotifications }) => (
         <ListItem
             key={value}

@@ -71,9 +71,7 @@ export const Hamburger = ({
         let openSub = PubSub.subscribe(PUBS.BurgerMenuOpen, (_, b) => {
             setOpen(open => b === 'toggle' ? !open : b);
         });
-        return (() => {
-            PubSub.unsubscribe(openSub);
-        })
+        return () => { PubSub.unsubscribe(openSub) };
     }, [])
 
     const closeMenu = () => PubSub.publish(PUBS.BurgerMenuOpen, false);

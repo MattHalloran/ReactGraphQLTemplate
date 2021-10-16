@@ -22,7 +22,7 @@ const useStyles = makeStyles(() => ({
 
 interface Props {
     sortBy: string;
-    filters: any[];
+    filters: {};
     searchString: string;
 }
 

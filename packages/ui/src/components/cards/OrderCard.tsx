@@ -79,7 +79,7 @@ export const OrderCard = ({
                     Status: {order?.status}
                 </Typography>
                 <Typography variant="body1" component="h4">
-                    Requested Date: {order?.desiredDeliveryDate ? new Date(order?.desiredDeliveryDate).toDateString('en-US') : 'Unset'}
+                    Requested Date: {order?.desiredDeliveryDate ? new Date(order?.desiredDeliveryDate).toDateString() : 'Unset'}
                 </Typography>
                 <Typography variant="body1" component="h4">
                     Items: {order?.items?.length ?? 0}

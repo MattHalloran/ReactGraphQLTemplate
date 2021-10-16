@@ -36,7 +36,7 @@ interface Props {
     onEdit: () => any;
     data: any;
     index: number;
-    moveCard: () => any;
+    moveCard: (dragIndex: number, hoverIndex: number) => any;
 }
 
 export const ImageCard = ({
@@ -56,7 +56,7 @@ export const ImageCard = ({
                 handlerId: monitor.getHandlerId(),
             };
         },
-        hover(item) {
+        hover(item: any) {
             if (!ref.current) {
                 return;
             }

@@ -4,11 +4,11 @@ import { IMAGE_SIZE, IMAGE_EXTENSION } from '@local/shared';
 import probe from 'probe-image-size';
 //import convert from 'heic-convert'; // Often breaks the build process for some unknown reason, but needed for iOS photo upload support. Use with caution
 import sharp from 'sharp';
-import imghash from 'imghash';
+import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
-
 const prisma = new PrismaClient()
+const HASHING_ROUNDS = 1;
 
 // How many times a file name should be checked before giving up
 // ex: if 'billy.png' is taken, tries 'billy-1.png', 'billy-2.png', etc.
@@ -153,7 +153,7 @@ export async function saveImage({ file, alt, description, labels, errorOnDuplica
         //     extCheck = 'jpg'
         // }
         // Determine image hash
-        const hash = await imghash.hash(image_buffer);
+        const hash = bcrypt.hashSync(image_buffer, HASHING_ROUNDS);
         // Check if hash already exists (image previously uploaded)
         const previously_uploaded = await prisma.image.findUnique({ where: { hash } });
         if (previously_uploaded && errorOnDuplicate) throw Error('File has already been uploaded');

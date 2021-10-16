@@ -98,12 +98,13 @@ const CustomerCard = ({
         });
     }, [customer, modifyCustomer])
 
-    let edit_action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
-    let unlock_action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
-    let lock_action = [() => modifyCustomer(AccountStatus.HARD_LOCKED, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
-    let undelete_action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
-    let delete_action = [confirmDelete, <DeleteIcon className={classes.icon} />, 'Delete user'];
-    let permanent_delete_action = [confirmPermanentDelete, <DeleteForeverIcon className={classes.icon} />, 'Permanently delete user']
+    type Action = [(data: any) => any, any, string, any?, string?];
+    let edit_action: Action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
+    let unlock_action: Action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
+    let lock_action: Action = [() => modifyCustomer(AccountStatus.HARD_LOCKED, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
+    let undelete_action: Action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
+    let delete_action: Action = [confirmDelete, <DeleteIcon className={classes.icon} />, 'Delete user'];
+    let permanent_delete_action: Action = [confirmPermanentDelete, <DeleteForeverIcon className={classes.icon} />, 'Permanently delete user']
 
     let actions = [edit_action];
     // Actions for customer accounts (i.e. not an owner or admin)
