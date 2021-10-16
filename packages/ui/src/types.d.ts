@@ -1,10 +1,16 @@
+// Define common props
 import { Order, Role } from "@local/shared";
 
-// Define common props
+export type SessionChecked = boolean;
+export type OnSessionUpdate = any;
+export type Business = any;
+export type UserRoles = Role[] | null;
+export type Cart = Order | null;
+
 export interface CommonProps {
-    sessionChecked: boolean;
-    onSessionUpdate: any;
-    business: any;
-    userRoles: Role[];
-    cart: Order | null;
+    sessionChecked: SessionChecked;
+    onSessionUpdate: OnSessionUpdate;
+    business: Business;
+    userRoles: UserRoles;
+    cart: Cart;
 }

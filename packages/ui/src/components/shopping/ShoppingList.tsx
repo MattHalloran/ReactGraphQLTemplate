@@ -38,9 +38,9 @@ export const ShoppingList = ({
     const [products, setProducts] = useState([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
-    const urlParams = useParams();
+    const urlParams = useParams<{sku?: string}>();
     // Find current product and current sku
-    const currProduct = Array.isArray(products) ? products.find(p => p.skus.some(s => s.sku === urlParams.sku)) : null;
+    const currProduct: any = Array.isArray(products) ? products.find((p: any) => p.skus.some(s => s.sku === urlParams.sku)) : null;
     const currSku = currProduct?.skus ? currProduct.skus.find(s => s.sku === urlParams.sku) : null;
     const { data: productData } = useQuery(productsQuery,  { variables: { sortBy, searchString, active: true } });
     const [upsertOrderItem] = useMutation(upsertOrderItemMutation);
@@ -53,7 +53,7 @@ export const ShoppingList = ({
             setProducts(productData?.products);
             return;
         }
-        let filtered_products = [];
+        let filtered_products: any = [];
         for (const product of productData?.products) {
             let found = false;
             for (const [key, value] of Object.entries(filters)) {
@@ -104,7 +104,6 @@ export const ShoppingList = ({
     return (
         <div className={classes.root} id={track_scrolling_id}>
             {(currProduct) ? <ProductDialog
-                onSessionUpdate
                 product={currProduct}
                 selectedSku={currSku}
                 onAddToCart={addToCart}

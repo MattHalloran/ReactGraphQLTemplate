@@ -4,8 +4,8 @@ import { readAssetsQuery } from 'graphql/query/readAssets';
 import ReactMarkdown from 'react-markdown';
 import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
-import { useTheme } from "@emotion/react";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { Theme } from "@material-ui/core";
 import { CommonProps } from "types";
 

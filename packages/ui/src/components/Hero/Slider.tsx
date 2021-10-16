@@ -36,8 +36,7 @@ export const Slider = ({
     const [slideIndex, setSlideIndex] = useState(0);
     const [translate, setTranslate] = useState(0);
     const [transition, setTransition] = useState(0);
-    const sliderRef = useRef();
-    const timeoutRef = useRef<NodeJS.Timer | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Play and wait have circular dependencies, so they must be memoized together
     const { wait } = useMemo(() => {
@@ -56,12 +55,13 @@ export const Slider = ({
     }, [timeoutRef, images, slidingDelay, slidingDuration, width])
 
     useEffect(() => {
-        const onResize = window.addEventListener('resize', () => setWidth(window.innerWidth))
+        const onResize = () => setWidth(window.innerWidth);
+        window.addEventListener('resize', onResize);
         if (autoPlay) wait(0);
 
         return () => {
             window.removeEventListener('resize', onResize)
-            clearTimeout(timeoutRef.current);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         }
     }, [autoPlay, wait])
 
@@ -77,7 +77,7 @@ export const Slider = ({
     }, [width, images])
 
     return (
-        <div className={classes.slider} ref={sliderRef}>
+        <div className={classes.slider}>
             <SliderContent
                 translate={translate}
                 transition={transition}

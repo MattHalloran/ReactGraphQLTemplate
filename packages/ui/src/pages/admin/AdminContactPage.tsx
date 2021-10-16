@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { AdminBreadcrumbs } from 'components';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
@@ -13,7 +14,6 @@ import {
 import { useMutation } from '@apollo/client';
 import { writeAssetsMutation } from 'graphql/mutation';
 import { mutationWrapper } from 'graphql/utils/wrappers';
-import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
 import { CommonProps } from 'types';

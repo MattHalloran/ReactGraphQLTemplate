@@ -8,8 +8,8 @@ import {
     CustomerCard
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { Button, Typography } from '@material-ui/core';
-import { useTheme } from '@emotion/react';
 import { CustomerDialog } from 'components/dialogs/CustomerDialog';
 import { NewCustomerDialog } from 'components/dialogs/NewCustomerDialog';
 import { pageStyles } from '../styles';

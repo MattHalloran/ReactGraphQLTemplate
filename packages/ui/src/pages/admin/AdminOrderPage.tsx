@@ -4,6 +4,7 @@ import { useQuery } from '@apollo/client';
 import { combineStyles, ORDER_FILTERS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import {
     AdminBreadcrumbs,
     OrderCard,
@@ -11,7 +12,6 @@ import {
     Selector,
 } from 'components';
 import { Theme, Typography } from '@material-ui/core';
-import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 import { CommonProps } from 'types';
 

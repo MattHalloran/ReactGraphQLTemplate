@@ -14,13 +14,13 @@ import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/styles';
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider';
-import { useHistory } from 'react-router';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import { useMutation, useQuery } from '@apollo/client';
 import { readAssetsQuery } from 'graphql/query/readAssets';
 import { loginMutation } from 'graphql/mutation';
 import Lato from 'assets/fonts/Lato.woff';
+import { Business, Cart, UserRoles } from 'types';
 
 const useStyles = makeStyles(() => ({
     "@global": {
@@ -68,18 +68,18 @@ export function App() {
     const classes = useStyles();
     // Session cookie should automatically expire in time determined by server,
     // so no need to validate session on first load
-    const [session, setSession] = useState(null);
+    const [session, setSession] = useState<any>(null);
     const [theme, setTheme] = useState(themes.light);
-    const [cart, setCart] = useState(null);
+    const [cart, setCart] = useState<Cart>(null);
+    const [roles, setRoles] = useState<UserRoles>(null);
     const [loading, setLoading] = useState(false);
-    const timerRef = useRef();
-    const [business, setBusiness] = useState(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [business, setBusiness] = useState<Business>(null)
     const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     const [login] = useMutation(loginMutation);
-    let history = useHistory();
 
     useEffect(() => () => {
-        clearTimeout(timerRef.current);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setLoading(false);
     }, []);
 
@@ -97,6 +97,7 @@ export function App() {
         else if (session && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.dark);
         else setTheme(themes.light);
         setCart(session?.cart ?? null);
+        setRoles(session?.roles ?? null);
     }, [session])
 
     const handlers = {
@@ -108,7 +109,7 @@ export function App() {
         },
     };
 
-    const checkLogin = useCallback((session) => {
+    const checkLogin = useCallback((session?: any) => {
         if (session) {
             setSession(session);
             return;
@@ -125,9 +126,9 @@ export function App() {
         checkLogin();
         // Handle loading spinner, which can have a delay
         let loadingSub = PubSub.subscribe(PUBS.Loading, (_, data) => {
-            clearTimeout(timerRef.current);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             if (Number.isInteger(data)) {
-                timerRef.current = window.setTimeout(() => setLoading(true), Math.abs(data));
+                timeoutRef.current = setTimeout(() => setLoading(true), Math.abs(data));
             } else {
                 setLoading(Boolean(data));
             }
@@ -141,15 +142,13 @@ export function App() {
         })
     }, [checkLogin])
 
-    const redirect = (link: string) => history.push(link);
-
     return (
         <StyledEngineProvider injectFirst>
             <CssBaseline />
             <ThemeProvider theme={theme}>
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
-                        <GlobalHotKeys keyMap={keyMap} handlers={handlers} root={true} />
+                        <GlobalHotKeys keyMap={keyMap} handlers={handlers} />
                         <main
                             id="page-container"
                             style={{
@@ -160,8 +159,7 @@ export function App() {
                             <div id="content-wrap" className={classes.contentWrap}>
                                 <Navbar
                                     business={business}
-                                    onSessionUpdate={checkLogin}
-                                    userRoles={session?.roles}
+                                    userRoles={roles}
                                     cart={cart}
                                 />
                                 {loading ?
@@ -175,12 +173,12 @@ export function App() {
                                     sessionChecked={session !== null && session !== undefined}
                                     onSessionUpdate={checkLogin}
                                     business={business}
-                                    userRoles={session?.roles}
+                                    userRoles={roles}
                                     cart={cart}
                                 />
                             </div>
-                            <BottomNav userRoles={session?.roles} cart={cart} />
-                            <Footer userRoles={session?.roles} business={business} />
+                            <BottomNav userRoles={roles} cart={cart} />
+                            <Footer userRoles={roles} business={business} />
                         </main>
                     </div>
                 </DndProvider>

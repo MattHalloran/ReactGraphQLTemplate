@@ -1,18 +1,17 @@
 import { InformationalBreadcrumbs } from 'components';
-import {
-    Grid,
-    Theme,
-    Typography
-} from '@material-ui/core';
 import Facebook from 'assets/img/Facebook.png';
 import Instagram from 'assets/img/Instagram.png';
-import { makeStyles, Styles } from '@material-ui/styles';
-import { useTheme } from '@emotion/react';
+import { makeStyles } from '@material-ui/styles';
+import { 
+    Grid,
+    Typography,
+    useTheme 
+} from '@material-ui/core';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
 import { CommonProps } from 'types';
 
-const componentStyles: Styles<Theme, {}> = () => ({
+const componentStyles = () => ({
     social: {
         width: '80px',
         height: '80px',

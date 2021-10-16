@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { FormControl, InputLabel, Select, MenuItem, Chip } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/styles';
+import { Chip, FormControl, InputLabel, MenuItem, Select, useTheme } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
 import isArray from 'lodash/isArray';
 import isEqual from 'lodash/isEqual';
 
@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => ({
 interface Props {
     options: any[];
     selected: any;
-    handleChange: () => any;
+    handleChange: (change: any) => any;
     fullWidth?: boolean;
     multiple?: boolean;
     inputAriaLabel?: string;

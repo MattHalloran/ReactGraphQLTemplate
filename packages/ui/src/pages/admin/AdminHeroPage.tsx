@@ -3,6 +3,7 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { imagesByLabelQuery } from 'graphql/query';
 import { addImagesMutation, updateImagesMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
@@ -12,7 +13,6 @@ import {
     WrappedImageList 
 } from 'components';
 import { mutationWrapper } from 'graphql/utils/wrappers';
-import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 
 const useStyles = makeStyles(pageStyles);

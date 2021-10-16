@@ -24,8 +24,8 @@ import {
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { mutationWrapper } from 'graphql/utils/wrappers';
-import { useTheme } from '@emotion/react';
 import { pageStyles } from '../styles';
 
 const componentStyles = () => ({

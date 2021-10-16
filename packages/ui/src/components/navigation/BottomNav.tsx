@@ -33,7 +33,7 @@ export const BottomNav = ({
     let actions = actionsToBottomNav({
         actions: getUserActions({ userRoles, cart, exclude: ['logout'] }),
         history,
-        classes: { action: classes.icon }
+        classes: { root: classes.icon }
     });
 
     return (

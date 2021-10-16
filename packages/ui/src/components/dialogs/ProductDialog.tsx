@@ -1,5 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
-import { makeStyles, useTheme } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import {
     AppBar,
     Avatar,
@@ -83,7 +84,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface Props {
     product: any;
     selectedSku: any;
-    onAddToCart: () => any;
+    onAddToCart: (name: string, sku: string, quantity: number) => any;
     open?: boolean;
     onClose: () => any;
 }
@@ -103,7 +104,7 @@ export const ProductDialog = ({
     const classes = useStyles();
     const theme = useTheme();
     const [quantity, setQuantity] = useState(1);
-    const [orderOptions, setOrderOptions] = useState([]);
+    const [orderOptions, setOrderOptions] = useState<any[]>([]);
     const [detailsOpen, setDetailsOpen] = useState(true);
     // Stores the id of the selected sku
     const [currSku, setCurrSku] = useState(selectedSku);
@@ -132,7 +133,7 @@ export const ProductDialog = ({
         thumbnail: `${SERVER_URL}/${getImageSrc(d.image, IMAGE_SIZE.M)}`
     })) : [];
 
-    const traitIconList = (traitName, Icon, title, alt) => {
+    const traitIconList = (traitName: string, Icon: any, title: string, alt: string) => {
         if (!alt) alt = title;
         const traitValue = getProductTrait(traitName, product);
         if (!traitValue) return null;
@@ -172,7 +173,6 @@ export const ProductDialog = ({
                     style={{height: '100%'}}
                     min_value={0}
                     max_value={Math.max.apply(Math, product.skus.map(s => s.availability))}
-                    initial_value={1}
                     value={quantity}
                     valueFunc={setQuantity} />
             </Grid>
@@ -222,7 +222,7 @@ export const ProductDialog = ({
                     </Grid>
                     <Grid item lg={6} xs={12}>
                         {product.description ?
-                            <Collapse style={{ height: '20%' }} title="Description">
+                            <Collapse style={{ height: '20%' }}>
                                 <p>{product.description}</p>
                             </Collapse>
                             : null}

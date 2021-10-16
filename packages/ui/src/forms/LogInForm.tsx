@@ -24,7 +24,7 @@ export const LogInForm = ({
 }: Pick<CommonProps, 'onSessionUpdate'>) => {
     const classes = useStyles();
     const history = useHistory();
-    const urlParams = useParams();
+    const urlParams = useParams<{code?: string}>();
     const [login, { loading }] = useMutation(loginMutation);
 
     const formik = useFormik({

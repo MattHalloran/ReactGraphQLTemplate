@@ -22,7 +22,7 @@ export const ResetPasswordForm = ({
 }: Pick<CommonProps, 'onSessionUpdate'>) => {
     const classes = useStyles();
     const history = useHistory();
-    const urlParams = useParams();
+    const urlParams = useParams<{id?: string; code?: string}>();
     const [resetPassword, {loading}] = useMutation(resetPasswordMutation);
 
     const formik = useFormik({

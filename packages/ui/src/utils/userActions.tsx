@@ -6,7 +6,7 @@ import {
     Shop as ShopIcon,
     ShoppingCart as ShoppingCartIcon
 } from '@material-ui/icons';
-import { Order, Role, ROLES } from '@local/shared';
+import { ROLES } from '@local/shared';
 import { LINKS } from 'utils';
 import { initializeApollo } from 'graphql/utils/initialize';
 import { logoutMutation } from 'graphql/mutation';
@@ -19,24 +19,26 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@material-ui/core';
+import { Cart, UserRoles } from 'types';
+
+type ActionArray = [string, any, string, (() => any) | null, any, number];
 
 interface Props {
-    userRoles: Role[] | null | undefined;
-    cart: Order | null | undefined;
+    userRoles: UserRoles;
+    cart: Cart;
     exclude?: string[] | undefined;
 }
 
 // Returns navigational actions available to the user
 export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
-    let actions = [];
+    let actions: ActionArray[] = [];
 
     // If someone is not logged in, display sign up/log in links
     if (userRoles) {
         actions.push(['Log In', 'login', LINKS.LogIn, null, PersonAddIcon, 0]);
     } else {
         // If an owner admin is logged in, display owner links
-        const haveArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-        if (userRoles && haveArray.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title))) {
+        if (userRoles && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title))) {
             actions.push(['Manage Site', 'admin', LINKS.Admin, null, SettingsIcon, 0]);
         }
         actions.push(['Shop', 'shop', LINKS.Shopping, null, ShopIcon, 0],
@@ -49,22 +51,17 @@ export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
 }
 
 // Factory for creating action objects
-export const createAction = (label, value, link, onClick, Icon, numNotifications) => ({
-    label,
-    value,
-    link,
-    onClick,
-    Icon,
-    numNotifications,
-})
+export const createAction = (...data: ActionArray) => {
+    const keys = ['label', 'value', 'link', 'onClick', 'icon', 'numNotifications'];
+    return data.reduce((obj: {}, val: any, i: number) => { obj[keys[i]] = val; return obj }, {});
+}
 
 // Display actions as a list
-export const actionsToList = ({ actions, history, classes = { listItem: {}, listItemIcon: {} }, showIcon = true, onAnyClick }) => {
+export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick }) => {
     return actions.map(({ label, value, link, onClick, Icon, numNotifications }) => (
         <ListItem
             key={value}
-            className={classes.listItem}
-            button
+            classes={{ root: classes.listItem }}
             onClick={() => {
                 history.push(link);
                 if (onClick) onClick();
@@ -82,13 +79,13 @@ export const actionsToList = ({ actions, history, classes = { listItem: {}, list
 }
 
 // Display actions in a horizontal menu
-export const actionsToMenu = ({ actions, history, classes = { button: {} } }) => {
+export const actionsToMenu = ({ actions, history, classes = { root: '' } }) => {
     return actions.map(({ label, value, link, onClick }) => (
         <Button
             key={value}
             variant="text"
             size="large"
-            className={classes.button}
+            classes={classes}
             onClick={() => { history.push(link); if (onClick) onClick() }}
         >
             {label}
@@ -97,11 +94,11 @@ export const actionsToMenu = ({ actions, history, classes = { button: {} } }) =>
 }
 
 // Display actions in a bottom navigation
-export const actionsToBottomNav = ({ actions, history, classes = { action: {} } }) => {
+export const actionsToBottomNav = ({ actions, history, classes = { root: '' } }) => {
     return actions.map(({ label, value, link, onClick, Icon, numNotifications }) => (
         <BottomNavigationAction
             key={value}
-            className={classes.action}
+            classes={classes}
             label={label}
             value={value}
             onClick={() => { history.push(link); if (onClick) onClick() }}
@@ -110,9 +107,9 @@ export const actionsToBottomNav = ({ actions, history, classes = { action: {} } 
 }
 
 // Display an action as an icon button
-export const actionToIconButton = ({ action, history, classes = { button: {} } }) => {
+export const actionToIconButton = ({ action, history, classes = { root: '' } }) => {
     const { value, link, Icon, numNotifications } = action;
-    return <IconButton className={classes.button} edge="start" color="inherit" aria-label={value} onClick={() => history.push(link)}>
+    return <IconButton  classes={classes} edge="start" color="inherit" aria-label={value} onClick={() => history.push(link)}>
         <Badge badgeContent={numNotifications} color="error">
             <Icon />
         </Badge>

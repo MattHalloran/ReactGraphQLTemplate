@@ -86,7 +86,7 @@ export const NavList = ({
             {actionsToMenu({
                 actions: nav_actions,
                 history,
-                classes: { button: classes.navItem },
+                classes: { root: classes.navItem },
             })}
             {cart_button}
         </Container>

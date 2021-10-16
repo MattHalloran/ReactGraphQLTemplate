@@ -5,10 +5,10 @@ import { InformationalBreadcrumbs } from 'components';
 import { getImageSrc, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
-import { useTheme } from '@emotion/react';
 
 const useStyles = makeStyles(() => ({
     imageList: {

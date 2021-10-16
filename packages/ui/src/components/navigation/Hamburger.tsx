@@ -16,8 +16,8 @@ import {
 } from '@material-ui/icons';
 import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { CopyrightBreadcrumbs } from 'components';
-import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
 import { CommonProps } from 'types';
 

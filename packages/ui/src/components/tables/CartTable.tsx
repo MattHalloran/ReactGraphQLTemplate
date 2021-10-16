@@ -126,7 +126,7 @@ export const CartTable = ({
                     {editable ? (<QuantityBox
                         min_value={0}
                         max_value={data.sku?.availability ?? 100}
-                        initial_value={quantity}
+                        value={quantity}
                         valueFunc={(q) => updateItemQuantity(data.sku.sku, q)} />) : quantity}
                 </TableCell>
                 <TableCell className={classes.tableCol} align="right">{total}</TableCell>

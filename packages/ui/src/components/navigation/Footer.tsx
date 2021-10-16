@@ -1,5 +1,6 @@
 import { LINKS, printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { List, ListItem, ListItemIcon, ListItemText, Grid, Tooltip, Theme } from '@material-ui/core';
 import {
     Business as BusinessIcon,
@@ -7,7 +8,6 @@ import {
     Phone as PhoneIcon,
 } from '@material-ui/icons';
 import { CopyrightBreadcrumbs } from 'components';
-import { useTheme } from '@emotion/react';
 import { useHistory } from 'react-router';
 import { CommonProps } from 'types';
 

@@ -4,8 +4,8 @@ import { readAssetsQuery } from 'graphql/query/readAssets';
 import ReactMarkdown from 'react-markdown';
 import { PolicyBreadcrumbs } from 'components';
 import { convertToDot, valueFromDot } from "utils";
-import { useTheme } from "@emotion/react";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core';
 import { Theme } from "@material-ui/core";
 import { CommonProps } from 'types';
 
@@ -22,7 +22,7 @@ export const TermsPage = ({
 }: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
     const theme = useTheme();
-    const [terms, setTerms] = useState(null);
+    const [terms, setTerms] = useState<string | null>(null);
     const { data: termsData } = useQuery(readAssetsQuery, { variables: { files: ['terms.md'] } });
 
     useEffect(() => {
@@ -37,7 +37,7 @@ export const TermsPage = ({
     return (
         <div id="page" className={classes.root}>
             <PolicyBreadcrumbs textColor={theme.palette.secondary.dark} />
-            <ReactMarkdown>{ terms }</ReactMarkdown>
+            <ReactMarkdown>{ terms || '' }</ReactMarkdown>
         </div>
     );
 }

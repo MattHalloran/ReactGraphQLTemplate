@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { FormControl, IconButton, Input, InputLabel, Theme } from '@material-ui/core';
 import {
     Add as AddIcon,
@@ -42,38 +42,38 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
     label?: string;
-    initial_value?: number;
+    value?: number;
     min_value?: number;
     max_value?: number;
     step?: number;
     valueFunc: (updatedValue: number) => any;
-    errorFunc: (errorMessage: string) => any;
+    errorFunc?: (errorMessage: string) => any;
+    style?: {};
 }
 
 export const QuantityBox = ({
     label = 'Quantity',
-    initial_value = 0,
+    value = 0,
     min_value = -2097151,
     max_value = 2097151,
     step = 1,
-    valueFunc = () => {},
+    valueFunc,
     errorFunc = () => {},
+    style,
     ...props
 }: Props) => {
     const classes = useStyles();
     const id = makeID(5);
-    const [value, setValue] = useState(initial_value ?? '');
     // Time for a button press to become a hold
     const HOLD_DELAY = 250;
     // Time between hold increments
     const HOLD_INTERVAL = 50;
-    let holdTimeout = useRef<NodeJS.Timeout | null>(null);
-    let holdInterval = useRef<NodeJS.Timer | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<NodeJS.Timer | null>(null);
 
     const updateValue = (quantity) => {
         if (quantity > max_value) quantity = max_value;
         if (quantity < min_value) quantity = min_value;
-        setValue(quantity);
         valueFunc(quantity);
     }
 
@@ -86,21 +86,21 @@ export const QuantityBox = ({
     }
 
     const startTouch = (adding: boolean) => {
-        holdTimeout.current = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             if (adding)
-                holdInterval.current = setInterval(incTick, HOLD_INTERVAL);
+                intervalRef.current = setInterval(incTick, HOLD_INTERVAL);
             else
-                holdInterval.current = setInterval(decTick, HOLD_INTERVAL);
+                intervalRef.current = setInterval(decTick, HOLD_INTERVAL);
         }, HOLD_DELAY)
     }
 
     const stopTouch = () => {
-        clearTimeout(holdTimeout.current);
-        clearInterval(holdInterval.current);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (intervalRef.current) clearInterval(intervalRef.current);
     }
 
     return (
-        <div className={classes.root} {...props}>
+        <div className={classes.root} style={style} {...props}>
             <IconButton
                 className={`${classes.button} ${classes.minus}`}
                 aria-label='minus'
@@ -116,7 +116,6 @@ export const QuantityBox = ({
                     id={`quantity-box-${id}`} 
                     aria-describedby={`helper-text-${id}`} 
                     style={{color: 'black'}}
-                    variant="filled"
                     type="number"
                     inputProps={{ min: min_value, max: max_value }}
                     value={value}
