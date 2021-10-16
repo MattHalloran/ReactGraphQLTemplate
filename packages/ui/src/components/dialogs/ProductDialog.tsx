@@ -189,11 +189,12 @@ export const ProductDialog = ({
         </Grid>
     );
 
-    const displayedTraitData = [
-        ['hasWarpDrive', WarpIcon, 'Has Warp Drive?'],
-        ['note', NoteIcon, 'Note'],
-        ['topSpeed', SpeedometerIcon, 'Top Speed'],
-    ].map(d => traitIconList(...d)).filter(d => d !== null);
+    const unformattedTraitData: Array<[string, any, string, string]> = [
+        ['hasWarpDrive', WarpIcon, 'Has Warp Drive?', ''],
+        ['note', NoteIcon, 'Note', ''],
+        ['topSpeed', SpeedometerIcon, 'Top Speed', ''],
+    ]
+    const displayedTraitData = unformattedTraitData.map(d => traitIconList(...d)).filter(d => d !== null);
 
     return (
         <Dialog aria-describedby="modal-title" fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>

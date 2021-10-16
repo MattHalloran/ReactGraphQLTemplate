@@ -1,5 +1,4 @@
-import { TextField, InputAdornment, IconButton } from '@material-ui/core';
-import { Search as SearchIcon } from '@material-ui/icons';
+import { TextField } from '@material-ui/core';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 
 interface Props {
@@ -7,6 +6,8 @@ interface Props {
     value: string;
     onChange: (updatedText: string) => any;
     debounce?: number;
+    fullWidth?: boolean;
+    className?: string;
 }
 
 export const SearchBar = ({
@@ -14,27 +15,26 @@ export const SearchBar = ({
     value,
     onChange,
     debounce = 50,
+    fullWidth = false,
+    className,
     ...props
 }: Props) => {
 
-    const onChangeDebounced = AwesomeDebouncePromise(
-        onChange,
-        debounce,
-    );
-
     return (
         <TextField
+            className={className}
             label={label}
             value={value}
-            onChange={onChangeDebounced}
+            onChange={() => AwesomeDebouncePromise(onChange, debounce)}
+            fullWidth={fullWidth}
             InputProps={{
-                endAdornment: (
-                    <InputAdornment>
-                        <IconButton>
-                            <SearchIcon />
-                        </IconButton>
-                    </InputAdornment>
-                )
+                // endAdornment: (
+                //     <InputAdornment>
+                //         <IconButton>
+                //             <SearchIcon />
+                //         </IconButton>
+                //     </InputAdornment>
+                // )
             }}
             {...props}
         />

@@ -115,7 +115,7 @@ export const AdminInventoryPage = () => {
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <SearchBar fullWidth onChange={(e) => setSearchString(e.target.value)} />
+                    <SearchBar fullWidth value={searchString} onChange={(newString) => setSearchString(newString)} />
                 </Grid>
             </Grid>
             <div className={classes.cardFlex}>

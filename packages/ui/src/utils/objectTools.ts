@@ -25,7 +25,7 @@ export const valueFromDot = (object, notation) => {
 // Maps the keys of an object to dot notation
 export function convertToDot(obj, parent = [], keyValue = {}) {
     for (let key in obj) {
-      let keyPath = [...parent, key];
+      let keyPath: any = [...parent, key];
       if (obj[key]!== null && typeof obj[key] === 'object') {
           Object.assign(keyValue, convertToDot(obj[key], keyPath, keyValue));
       } else {

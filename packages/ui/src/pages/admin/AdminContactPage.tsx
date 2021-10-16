@@ -70,10 +70,10 @@ export const AdminContactPage = ({
 
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
+            <Grid className={classes.gridItem} item xs={12} sm={6}>
                 <Button fullWidth disabled={business?.hours === hours} onClick={applyHours}>Apply Changes</Button>
             </Grid>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={6}>
+            <Grid className={classes.gridItem} item xs={12} sm={6}>
                 <Button fullWidth disabled={business?.hours === hours} onClick={revertHours}>Revert Changes</Button>
             </Grid>
         </Grid>

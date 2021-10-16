@@ -31,7 +31,7 @@ COPY --chown=node:node ${server}/package.json ${server}/package.json
 RUN yarn install
 
 # Copy rest of repo over
-COPY --chown=node:node ${shared}/index.js ${shared}/src ${shared}/
+COPY --chown=node:node ${shared}/index.ts ${shared}/src ${shared}/
 COPY --chown=node:node ${server}/src ${server}/tools ${server}/
 COPY --chown=node:node scripts/server.sh scripts/wait-for.sh ${scripts}/
 

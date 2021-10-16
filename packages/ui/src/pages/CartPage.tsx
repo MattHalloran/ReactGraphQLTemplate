@@ -75,7 +75,7 @@ export const CartPage = ({
     const requestQuote = useCallback(() => {
         mutationWrapper({
             mutation: submitOrder,
-            data: { variables: { id: cart.id } },
+            data: { variables: { id: cart?.id } },
             onSuccess: () => {PubSub.publish(PUBS.AlertDialog, { message: 'Order submitted! We will be in touch with you soon😊' }); onSessionUpdate()},
             onError: () => PubSub.publish(PUBS.AlertDialog, {message: `Failed to submit order. Please contact ${business?.BUSINESS_NAME?.Short}`, severity: 'error'})
         })
@@ -88,7 +88,7 @@ export const CartPage = ({
             return;
         }
         // Disallow empty orders
-        if (cart.items.length <= 0) {
+        if (!cart?.items || cart.items.length <= 0) {
             PubSub.publish(PUBS.Snack, {message: 'Cannot finalize order - cart is empty.', severity: 'warning'});
             return;
         }
@@ -102,7 +102,7 @@ export const CartPage = ({
 
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+            <Grid className={classes.gridItem} item xs={12} sm={4}>
                 <Button 
                     fullWidth 
                     startIcon={<ArrowBackIcon />} 
@@ -110,7 +110,7 @@ export const CartPage = ({
                     disabled={loading || (changedCart !== null && !isEqual(cart, changedCart))}
                 >Continue Shopping</Button>
             </Grid>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+            <Grid className={classes.gridItem} item xs={12} sm={4}>
                 <Button 
                     fullWidth 
                     startIcon={<UpdateIcon />} 
@@ -118,7 +118,7 @@ export const CartPage = ({
                     disabled={loading || (changedCart === null || isEqual(cart, changedCart))}
                 >Update Order</Button>
             </Grid>
-            <Grid className={classes.gridItem} justify="center" item xs={12} sm={4}>
+            <Grid className={classes.gridItem} item xs={12} sm={4}>
                 <Button 
                     fullWidth 
                     endIcon={<ArrowForwardIcon />} 

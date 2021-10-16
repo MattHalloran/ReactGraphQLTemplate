@@ -52,12 +52,14 @@ interface Props {
     cart: any;
     onUpdate: (data: any) => any;
     editable?: boolean;
+    className?: string;
 }
 
 export const CartTable = ({
     cart,
     onUpdate,
     editable = true,
+    className,
     ...props
 }: Props) => {
     const classes = useStyles();
@@ -148,7 +150,7 @@ export const CartTable = ({
     if (editable) headCells.unshift(['close', '', 'left', 'none']);
 
     return (
-        <div {...props} >
+        <div className={className} {...props} >
             <TableContainer className={classes.tablePaper} component={Paper}>
                 <Table aria-label="cart table">
                     <TableHead className={classes.tableHead}>

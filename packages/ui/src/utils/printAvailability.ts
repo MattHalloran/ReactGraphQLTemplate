@@ -36,20 +36,34 @@ export const printAvailability = (priceVisible: boolean, title: string) => {
         const table_data = skusToTable(data, priceVisible);
         // Default export is a4 paper, portrait, using millimeters for units
         const doc = new jsPDF();
+        // Create title and subtitle
         doc.setFontSize(TITLE_FONT_SIZE);
         centeredText(title, doc, 10);
         let date = new Date();
         centeredText(`Availability: ${date.toDateString()}`, doc, 20);
-        doc.setFontSize(LIST_FONT_SIZE);
-        let header = priceVisible ? [['Product', 'Size', 'Availability', 'Price']] : [['Product', 'Size', 'Availability']]
-        doc.autoTable({
-            margin: { top: 30 },
-            head: header,
-            body: table_data,
-        })
+        // Setup list
+        doc.table(
+            0, 
+            0, 
+            // Data
+            table_data, 
+            // Headers
+            priceVisible ? ['Product', 'Size', 'Availability', 'Price'] : ['Product', 'Size', 'Availability'], 
+            // Table config
+            {
+                printHeaders: true,
+                autoSize: true,
+                margins: 30,
+                fontSize: LIST_FONT_SIZE,
+                padding: 10,
+                headerBackgroundColor: '#3D49B0',
+                headerTextColor: '#FFFFFF'
+            }
+        )
         let windowReference = window.open();
-        let blob = doc.output('blob', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
-        windowReference.location = URL.createObjectURL(blob);
+        let blob = doc.output('pdfobjectnewwindow', {filename:`availability_${date.getDay()}-${date.getMonth()}-${date.getFullYear()}.pdf`});
+        if(windowReference) windowReference.location = URL.createObjectURL(blob);
+        else throw Error('Could not open new window.')
     }).catch(error => {
         PubSub.publish(PUBS.Snack, {message: 'Failed to load inventory.', severity: 'error', data: error });
     });

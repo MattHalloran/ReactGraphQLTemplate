@@ -1,22 +1,31 @@
 import { Fragment, useEffect, useState } from 'react';
-import { IconButton, Button, Snackbar, Theme } from '@material-ui/core';
+import { IconButton, Button, Snackbar, Theme, SnackbarProps } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { makeStyles } from '@material-ui/styles';
+import { ValueOf } from '@local/shared';
 
-const DEFAULT_STATE = {
-    message: null,
-    severity: 'default', // one of ('default', 'warning', 'error')
-    data: null, // anything you'd like to print in development mode
-    buttonText: null,
-    buttonClicked: null,
-    autoHideDuration: 5000,
-    anchorOrigin: {
+export const SnackSeverity = {
+    Default: "default",
+    Warning: "warning",
+    Error: "error",
+}
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type SnackSeverity = ValueOf<typeof PUBS>;
+
+class SnackState {
+    message?: string | null =  null;
+    severity?: SnackSeverity = SnackSeverity.Default;
+    data?: any = null; // anything you'd like to print in development mode
+    buttonText?: string | null = null;
+    buttonClicked?: (event?: any) => any = () => {};
+    autoHideDuration?: number = 5000;
+    anchorOrigin: SnackbarProps['anchorOrigin'] = {
         vertical: 'bottom',
         horizontal: 'left',
-    },
-};
+    };
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
     default: {
@@ -38,24 +47,24 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 function Snack() {
     const classes = useStyles();
-    const [state, setState] = useState(DEFAULT_STATE)
+    const [state, setState] = useState<SnackState>(new SnackState())
 
-    function getSnackClass(severity) {
-        if (severity === 'error') return classes.error;
-        if (severity === 'warning') return classes.warning;
+    function getSnackClass(severity: SnackSeverity) {
+        if (severity === SnackSeverity.Error) return classes.error;
+        if (severity === SnackSeverity.Warning) return classes.warning;
         return classes.default;
     }
     let open = state.message !== null;
 
     useEffect(() => {
-        let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...DEFAULT_STATE, ...o }));
+        let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...(new SnackState()), ...o }));
         return () => { PubSub.unsubscribe(snackSub) };
     }, [])
 
     useEffect(() => {
         // Log snack errors if in development
         if (process.env.NODE_ENV === 'development' && state.data) {
-            if (state.severity === 'error') console.error('Snack data', state.data);
+            if (state.severity === SnackSeverity.Error) console.error('Snack data', state.data);
             else console.info('Snack data', state.data);
         }
     }, [state])
@@ -64,20 +73,20 @@ function Snack() {
         <Snackbar
         ContentProps={{
             classes: {
-              root: getSnackClass(state.severity)
+              root: getSnackClass(state.severity || SnackSeverity.Default)
             }
           }}
             anchorOrigin={state.anchorOrigin}
             open={open}
             autoHideDuration={state.autoHideDuration}
-            onClose={() => setState(DEFAULT_STATE)}
+            onClose={() => setState(new SnackState())}
             message={Array.isArray(state.message) && state.message.length > 0 ? state.message[0] : state.message}
             action={
                 <Fragment>
                     {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>
                         {state.buttonText}
                     </Button> : null}
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(DEFAULT_STATE)}>
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(new SnackState())}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
                 </Fragment>

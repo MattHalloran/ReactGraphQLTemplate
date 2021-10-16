@@ -167,7 +167,6 @@ export const NewCustomerDialog = ({
                                 fullWidth
                                 freeSolo
                                 id="pronouns"
-                                name="pronouns"
                                 options={DEFAULT_PRONOUNS}
                                 value={formik.values.pronouns}
                                 onChange={(_, value) => formik.setFieldValue('pronouns', value)}

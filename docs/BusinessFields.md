@@ -1,10 +1,10 @@
 # Setting business fields
-`assets/public/business.json` contains business fields - such as the name, phone number, and address. Storing this information in the backend allows users with an Admin or Owner role to update them without having to reload the website or mess with the server (there isn't a page that does this in this repo, but it would be similar to how `packages/ui/src/pages/admin/AdminContactPage/AdminContactPage.js` works).
+[assets/public/business.json](assets/public/business.json) contains business fields - such as the name, phone number, and address. Storing this information in the backend allows users with an Admin or Owner role to update them without having to reload the website or mess with the server (there isn't a page that does this in this repo, but it would be similar to how [packages/ui/src/pages/admin/AdminContactPage/AdminContactPage.ts](packages/ui/src/pages/admin/AdminContactPage/AdminContactPage.ts) works).
 
 You can find some examples of these fields being used in:  
-- `packages/server/src/worker/email/queue.js`
-- `packages/ui/src/App.js`
-- `packages/ui/src/pages/PrivacyPolicyPage/PrivacyPolicyPage.js`
+- [packages/server/src/worker/email/queue.ts](packages/server/src/worker/email/queue.ts)
+- [packages/ui/src/App.ts](packages/ui/src/App.ts)
+- [packages/ui/src/pages/PrivacyPolicyPage/PrivacyPolicyPage.ts](packages/ui/src/pages/PrivacyPolicyPage/PrivacyPolicyPage.ts)
 
 You can create any fields you want in this file, but here's an example:  
 ```

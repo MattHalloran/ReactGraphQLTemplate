@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { LINKS } from 'utils';
-import { Slider } from './Slider.js'
+import { Slider } from './Slider'
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 

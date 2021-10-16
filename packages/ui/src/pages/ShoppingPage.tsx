@@ -84,7 +84,7 @@ export const ShoppingPage = ({
         let selected = filters ? filters[field] : '';
         return (
             <Selector
-                className={`${classes.padBottom} ${classes.selector}`}
+                className={classes.padBottom}
                 fullWidth
                 options={options}
                 selected={selected || ''}
@@ -92,7 +92,7 @@ export const ShoppingPage = ({
                 inputAriaLabel={`${field}-selector-label`}
                 label={title} />
         )
-    }, [classes.padBottom, classes.selector, traitOptions, filters, handleFiltersChange])
+    }, [classes.padBottom, traitOptions, filters, handleFiltersChange])
 
     const resetSearchConstraints = () => {
         setSortBy(SORT_OPTIONS[0].value)
@@ -140,9 +140,9 @@ export const ShoppingPage = ({
                         inputAriaLabel='sort-selector-label'
                         label="Sort" />
                     <h2>Search</h2>
-                    <SearchBar className={classes.padBottom} fullWidth debounce={300} onChange={(e) => setSearchString(e.target.value)} />
+                    <SearchBar className={classes.padBottom} fullWidth debounce={300} value={searchString} onChange={(newString) => setSearchString(newString)} />
                     <h2>Filters</h2>
-                    {traitList.map(d => traitOptionsToSelector(...d))}
+                    {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
                     {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
                 </div>

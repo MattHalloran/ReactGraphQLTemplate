@@ -122,7 +122,7 @@ export const EditProductDialog = ({
     const [updateProduct] = useMutation(updateProductMutation);
     const [deleteProduct] = useMutation(deleteProductsMutation);
 
-    const [imageData, setImageData] = useState([]);
+    const [imageData, setImageData] = useState<any[]>([]);
     const [imagesChanged, setImagesChanged] = useState(false);
     const [addImages] = useMutation(addImagesMutation);
 
@@ -158,7 +158,7 @@ export const EditProductDialog = ({
                 pos: index
             })));
         } else {
-            setImageData(null);
+            setImageData([]);
         }
     }, [product])
 
@@ -331,9 +331,8 @@ export const EditProductDialog = ({
                                 fullWidth
                                 freeSolo
                                 id="setTraitField"
-                                name="setTraitField"
                                 options={Object.keys(PRODUCT_TRAITS)}
-                                onChange={(_, value) => setSelectedTrait(PRODUCT_TRAITS[value])}
+                                onChange={(_, value: any) => setSelectedTrait(PRODUCT_TRAITS[value])}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}

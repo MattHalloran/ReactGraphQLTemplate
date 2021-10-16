@@ -2,18 +2,18 @@
     "name": "server",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "index.ts",
     "type": "module",
     "directories": {
         "test": "tests"
     },
     "prisma": {
-        "seed": "node --experimental-modules --experimental-specifier-resolution=node ./src/db/seeds/init.js"
+        "seed": "node --experimental-modules --experimental-specifier-resolution=node ./src/db/seeds/init.ts"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start-development": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
-        "start-production": "node --experimental-modules --experimental-specifier-resolution=node ./src/index.js",
+        "start-development": "nodemon --experimental-modules --experimental-specifier-resolution=node ./src/index.ts",
+        "start-production": "node --experimental-modules --experimental-specifier-resolution=node ./src/index.ts",
         "clean": "node --experimental-modules --experimental-specifier-resolution=node ./tools/cleanImageData.js"
     },
     "author": "",
