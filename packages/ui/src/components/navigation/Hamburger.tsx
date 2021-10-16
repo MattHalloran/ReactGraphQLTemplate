@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { ContactInfo } from 'components';
-import { actionsToList, createAction, getUserActions, LINKS, PUBS } from 'utils';
+import { actionsToList, createActions, getUserActions, LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import {
     Close as CloseIcon,
@@ -91,11 +91,11 @@ export const Hamburger = ({
         window.open(link, "_blank");
     }
 
-    let nav_actions = getUserActions({ userRoles, cart });
-    let about_actions = [
-        ['About Us', 'about', LINKS.About, null, InfoIcon],
-        ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
-    ].map(a => createAction(...a));
+    const nav_actions = getUserActions({ userRoles, cart });
+    const about_actions = createActions([
+        ['About Us', 'about', LINKS.About, null, InfoIcon, 0],
+        ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon, 0]
+    ]);
 
     return (
         <Fragment>

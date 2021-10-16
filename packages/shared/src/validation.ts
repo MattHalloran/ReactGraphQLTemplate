@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { AccountStatus, DEFAULT_PRONOUNS, OrderStatus, SkuStatus } from './modelConsts';
+import { AccountStatus, DEFAULT_PRONOUNS, OrderStatus, SkuStatus } from './consts';
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;

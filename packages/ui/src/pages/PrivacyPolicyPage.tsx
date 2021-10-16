@@ -22,7 +22,7 @@ export const PrivacyPolicyPage = ({
 }: Pick<CommonProps, 'business'>) => {
     const classes = useStyles();
     const theme = useTheme();
-    const [privacy, setPrivacy] = useState(null);
+    const [privacy, setPrivacy] = useState<string | null>(null);
     const { data: privacyData } = useQuery(readAssetsQuery, { variables: { files: ['privacy.md'] } });
 
     useEffect(() => {
@@ -37,7 +37,7 @@ export const PrivacyPolicyPage = ({
     return (
         <div id="page" className={classes.root}>
             <PolicyBreadcrumbs textColor={theme.palette.secondary.dark} />
-            <ReactMarkdown>{ privacy }</ReactMarkdown>
+            <ReactMarkdown>{ privacy || '' }</ReactMarkdown>
         </div>
     );
 }

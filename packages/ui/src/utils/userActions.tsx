@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import { Cart, UserRoles } from 'types';
 
-type ActionArray = [string, any, string, (() => any) | null, any, number];
+export type ActionArray = [string, any, string, (() => any) | null, any, number];
 
 interface Props {
     userRoles: UserRoles;
@@ -34,11 +34,11 @@ export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
     let actions: ActionArray[] = [];
 
     // If someone is not logged in, display sign up/log in links
-    if (userRoles) {
+    if (!userRoles) {
         actions.push(['Log In', 'login', LINKS.LogIn, null, PersonAddIcon, 0]);
     } else {
         // If an owner admin is logged in, display owner links
-        if (userRoles && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title))) {
+        if (userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.title))) {
             actions.push(['Manage Site', 'admin', LINKS.Admin, null, SettingsIcon, 0]);
         }
         actions.push(['Shop', 'shop', LINKS.Shopping, null, ShopIcon, 0],
@@ -46,15 +46,17 @@ export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
             ['Cart', 'cart', LINKS.Cart, null, ShoppingCartIcon, cart?.items?.length ?? 0],
             ['Log out', 'logout', LINKS.Home, () => { const client = initializeApollo(); client.mutate({ mutation: logoutMutation }) }, ExitToAppIcon, 0]);
     }
-
-    return actions.map(a => createAction(...a)).filter(a => !exclude.includes(a.value));
+    return createActions(actions).filter((a: any) => !exclude.includes(a.value));
 }
 
 // Factory for creating action objects
-export const createAction = (...data: ActionArray) => {
+const createAction = (action: ActionArray) => {
     const keys = ['label', 'value', 'link', 'onClick', 'icon', 'numNotifications'];
-    return data.reduce((obj: {}, val: any, i: number) => { obj[keys[i]] = val; return obj }, {});
+    return action.reduce((obj: {}, val: any, i: number) => { obj[keys[i]] = val; return obj }, {});
 }
+
+// Factory for creating a list of action objects
+export const createActions = (actions: ActionArray[]) => actions.map(a => createAction(a));
 
 // Display actions as a list
 export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick }) => {

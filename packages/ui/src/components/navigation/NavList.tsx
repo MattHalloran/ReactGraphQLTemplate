@@ -2,7 +2,7 @@ import {
     ContactInfo,
     PopupMenu
 } from 'components';
-import { actionsToList, actionToIconButton, actionsToMenu, createAction, getUserActions, LINKS } from 'utils';
+import { actionsToList, actionToIconButton, actionsToMenu, getUserActions, LINKS, createActions } from 'utils';
 import { Container, List, Theme } from '@material-ui/core';
 import {
     Info as InfoIcon,
@@ -46,10 +46,10 @@ export const NavList = ({
     const history = useHistory();
 
     let nav_actions = getUserActions({ userRoles, cart });
-    let about_actions = [
-        ['About Us', 'about', LINKS.About, null, InfoIcon],
-        ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon]
-    ].map(a => createAction(...a))
+    const about_actions = createActions([
+        ['About Us', 'about', LINKS.About, null, InfoIcon, 0],
+        ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon, 0]
+    ]);
 
     // Cart is the only option displayed as an icon
     let cart_button;

@@ -1,10 +1,12 @@
+import { ValueOf } from '.';
+
 export const AccountStatus = {
     DELETED: 'Deleted',
     UNLOCKED: 'Unlocked',
     SOFT_LOCKED: 'SoftLock',
     HARD_LOCKED: 'HardLock'
-} as const;
-export type AccountStatus = typeof AccountStatus[keyof typeof AccountStatus];
+}
+export type AccountStatus = ValueOf<typeof AccountStatus>;
 
 export const DEFAULT_PRONOUNS = [
     "he/him/his",
@@ -23,8 +25,8 @@ export const IMAGE_EXTENSION = {
     Heic: '.heic',
     Heif: '.heif',
     Ico: '.ico'
-} as const;
-export type IMAGE_EXTENSION = typeof IMAGE_EXTENSION[keyof typeof IMAGE_EXTENSION];
+}
+export type IMAGE_EXTENSION = ValueOf<typeof IMAGE_EXTENSION>;
 
 // Possible image sizes stored, and their max size
 export const IMAGE_SIZE = {
@@ -36,15 +38,15 @@ export const IMAGE_SIZE = {
     L: 1024,
     XL: 2048,
     XXL: 4096,
-} as const;
-export type IMAGE_SIZE = typeof IMAGE_SIZE[keyof typeof IMAGE_SIZE];
+}
+export type IMAGE_SIZE = ValueOf<typeof IMAGE_SIZE>;
 
 export const ImageUse = {
     HERO: 'Hero',
     GALLERY: 'Gallery',
     PRODUCT_DISPLAY: 'Display'
-} as const;
-export type ImageUse = typeof ImageUse[keyof typeof ImageUse];
+}
+export type ImageUse = ValueOf<typeof ImageUse>;
 
 // CANCELED_BY_ADMIN    | Admin canceled the order at any point before delivery
 // CANCELED_BY_CUSTOMER |   1) Customer canceled order before approval (i.e. no admin approval needed), OR
@@ -68,8 +70,8 @@ export const OrderStatus = {
     SCHEDULED: 'SCHEDULED',
     IN_TRANSIT: 'IN_TRANSIT',
     DELIVERED: 'DELIVERED'
-} as const;
-export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+}
+export type OrderStatus = ValueOf<typeof OrderStatus>;
 
 export const PRODUCT_SORT_OPTIONS = {
     AZ: 'AZ',
@@ -77,8 +79,8 @@ export const PRODUCT_SORT_OPTIONS = {
     Featured: 'Featured',
     Newest: 'Newest',
     Oldest: 'Oldest'
-} as const;
-export type PRODUCT_SORT_OPTIONS = typeof PRODUCT_SORT_OPTIONS[keyof typeof PRODUCT_SORT_OPTIONS];
+}
+export type PRODUCT_SORT_OPTIONS = ValueOf<typeof PRODUCT_SORT_OPTIONS>;
 
 export const SKU_SORT_OPTIONS = {
     AZ: 'AZ',
@@ -88,25 +90,25 @@ export const SKU_SORT_OPTIONS = {
     Featured: 'Featured',
     Newest: 'Newest',
     Oldest: 'Oldest'
-} as const;
-export type SKU_SORT_OPTIONS = typeof SKU_SORT_OPTIONS[keyof typeof SKU_SORT_OPTIONS];
+}
+export type SKU_SORT_OPTIONS = ValueOf<typeof SKU_SORT_OPTIONS>;
 
 export const SkuStatus = {
     DELETED: 'DELETED',
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE',
-} as const;
-export type SkuStatus = typeof SkuStatus[keyof typeof SkuStatus];
+}
+export type SkuStatus = ValueOf<typeof SkuStatus>;
 
 export const THEME = {
     Light: 'light',
     Dark: 'dark'
-} as const;
-export type THEME = typeof THEME[keyof typeof THEME];
+}
+export type THEME = ValueOf<typeof THEME>;
 
 export const ROLES = {
     Customer: "Customer",
     Owner: "Owner",
     Admin: "Admin",
-} as const;
-export type ROLES = typeof ROLES[keyof typeof ROLES];
+}
+export type ROLES = ValueOf<typeof ROLES>;

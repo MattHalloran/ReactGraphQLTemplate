@@ -40,14 +40,14 @@ export const Selector = ({
 }: Props) => {
     const classes = useStyles();
     const theme = useTheme();
-    const displayColor = color ?? theme.palette.background.contrastText;
+    const displayColor = color ?? theme.palette.background.textPrimary;
 
     // Formats selected into label/value object array.
     // options - Formatted options (array of label/value pairs)
     const formatSelected = useCallback((options) => {
         const select_arr = isArray(selected) ? selected : [selected];
         if (!Array.isArray(options)) return select_arr;
-        let formatted_select = [];
+        let formatted_select: any[] = [];
         for (const curr_select of select_arr) {
             for (const curr_option of options) {
                 if (isEqual(curr_option.value, curr_select)) {
@@ -95,7 +95,7 @@ export const Selector = ({
                     return multiple ? (
                         <div className={classes.chips}>
                             {selected_formatted.map((o) => (
-                                <Chip label={o.label} key={o.value} className={classes.chip} />
+                                <Chip label={o.label} key={o.value} />
                             ))}
                         </div>
                     ) : selected_formatted ? selected_formatted[0].label : ''

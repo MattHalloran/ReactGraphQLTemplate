@@ -97,7 +97,7 @@ export function App() {
         else if (session && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(themes.dark);
         else setTheme(themes.light);
         setCart(session?.cart ?? null);
-        setRoles(session?.roles ?? null);
+        setRoles(session?.roles ? session.roles.map(r => r.role) : null);
     }, [session])
 
     const handlers = {

@@ -45,7 +45,7 @@ export const FormPage = ({
     const classes = useStyles();
 
     return (
-        <div id='page' maxWidth={maxWidth}>
+        <div id='page' style={{maxWidth: maxWidth}}>
             <div className={classes.container}>
                 <Container className={classes.formHeader}>
                     <Typography variant="h3" >{title}</Typography>
