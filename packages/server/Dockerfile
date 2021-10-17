@@ -14,7 +14,7 @@ RUN mkdir -p ${PROJECT_DIR}/assets/images ${PROJECT_DIR}/assets/public ${PROJECT
     chown -R node:node ${PROJECT_DIR}
 
 # Install global packages (must be done as the root user)
-RUN yarn global add nodemon prisma
+RUN yarn global add typescript ts-node nodemon prisma
 
 # Switch to a user with less permissions
 USER node
@@ -32,7 +32,7 @@ RUN yarn install
 
 # Copy rest of repo over
 COPY --chown=node:node ${shared}/index.ts ${shared}/src ${shared}/
-COPY --chown=node:node ${server}/src ${server}/tools ${server}/
+COPY --chown=node:node ${server}/src ${server}/tsconfig.json ${server}/nodemon.json ${server}/
 COPY --chown=node:node scripts/server.sh scripts/wait-for.sh ${scripts}/
 
 USER root

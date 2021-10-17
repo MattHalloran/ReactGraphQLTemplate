@@ -1,20 +1,23 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import * as auth from './auth';
+import * as auth from './auth.js';
 import cors from "cors";
 import { ApolloServer } from 'apollo-server-express';
-import { depthLimit } from './depthLimit';
+import { depthLimit } from './depthLimit.js';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
-import { schema } from './schema';
-import { context } from './context';
-import { envVariableExists } from 'utils/envVariableExists';
+import { schema } from './schema/index.js';
+import { context } from './context.js';
+import { envVariableExists } from './utils/envVariableExists';
+import { setupDatabase } from './utils/setupDatabase';
 
 console.info('Starting server...')
 
 // Check for required .env variables
 if (['JWT_SECRET', 'REACT_APP_SERVER_ROUTE'].some(name => !envVariableExists(name))) process.exit(1);
 
+// Setup database
+setupDatabase();
 
 const app = express();
 

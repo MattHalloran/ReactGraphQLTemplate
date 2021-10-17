@@ -2,14 +2,19 @@
   "name": "@local/shared",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "typings": "src/types.d.ts",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "yarn tsc"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "yup": "^0.32.9"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0"
   }
 }

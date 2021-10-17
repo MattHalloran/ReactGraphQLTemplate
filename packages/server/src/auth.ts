@@ -1,24 +1,25 @@
 import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
 import { CODE, COOKIE } from '@local/shared';
-import { CustomError } from './error';
+import { CustomError } from 'error.js';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 const SESSION_MILLI = 30*86400*1000;
 
 // Return array of customer roles (ex: ['admin', 'customer'])
-async function findCustomerRoles(customerId: any) {
+const findCustomerRoles = async(customerId: string): Promise<string[]> => {
     // Query customer's roles
-    const user: any = await prisma.customer.findUnique({ 
+    const user = await prisma.customer.findUnique({ 
         where: { id: customerId },
         select: { roles: { select: { role: { select: { title: true } } } } }
     });
-    return user.roles?.map((r: any) => r.role.title.toLowerCase()) || [];
+    return user?.roles?.map((r: any) => r.role.title.toLowerCase()) || [];
 }
 
 // Verifies if a user is authenticated, using an http cookie
-export async function authenticate(req: any, _: any, next: any) {
+export async function authenticate(req: Request, _: Response, next: NextFunction) {
     const { cookies } = req;
     // First, check if a valid session cookie was supplied
     const token = cookies[COOKIE.Session];
@@ -48,7 +49,7 @@ export async function authenticate(req: any, _: any, next: any) {
 }
 
 // Generates a JSON Web Token (JWT)
-export async function generateToken(res: any, customerId: any, businessId: any) {
+export async function generateToken(res: Response, customerId: any, businessId: any) {
     const customerRoles = await findCustomerRoles(customerId);
     const tokenContents = {
         iat: Date.now(),

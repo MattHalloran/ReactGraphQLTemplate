@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
-import { envVariableExists } from 'utils/envVariableExists';
-const { PrismaClient, AccountStatus } = pkg;
-const prisma = new PrismaClient();
+import { envVariableExists } from 'utils/envVariableExists.js';
+import { PrismaType } from 'types';
+const { AccountStatus } = pkg;
 const HASHING_ROUNDS = 8;
 
-async function main() {
+export async function init(prisma: PrismaType) {
     console.info('🌱 Starting database intial seed...');
 
     // First, check if required environment variables are set
@@ -61,9 +61,3 @@ async function main() {
     console.info(`✅ Database seeding complete.`);
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-}).finally(async () => {
-    await prisma.$disconnect();
-})

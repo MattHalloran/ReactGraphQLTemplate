@@ -1,5 +1,5 @@
 import { GraphQLError, Kind } from 'graphql';
-import arrify from 'arrify';
+import { isArray } from 'lodash';
 
 /**
  * Creates a validator for the GraphQL query depth
@@ -9,7 +9,7 @@ import arrify from 'arrify';
  * @param {Function} [callback] - Called each time validation runs. Receives an Object which is a map of the depths for each operation. 
  * @returns {Function} The validator function for GraphQL validation phase.
  */
-export const depthLimit = (maxDepth: any, options = {}, callback: any = () => { }) => (validationContext: any) => {
+export const depthLimit = (maxDepth: number, options = {}, callback: any = () => { }) => (validationContext: any) => {
     try {
         const { definitions } = validationContext.getDocument()
         const fragments = getFragments(definitions)
@@ -80,7 +80,8 @@ const determineDepth: any = (node: any, fragments: any, depthSoFar: any, maxDept
 }
 
 function seeIfIgnored(node: any, ignore: any) {
-    for (let rule of arrify(ignore)) {
+    const ignoreArray = isArray(ignore) ? ignore : [ignore];
+    for (let rule of ignoreArray) {
         const fieldName = node.name.value
         switch (rule.constructor) {
             case Function:

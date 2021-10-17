@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
-const { PrismaClient, AccountStatus } = pkg;
-const prisma = new PrismaClient();
+import { PrismaType } from 'types';
+const { AccountStatus } = pkg;
 const HASHING_ROUNDS = 8;
 
 // Create a user, with business, emails, phones, and roles
-async function createUser({ userData, businessData, emailsData, phonesData, roleIds }: any) {
+async function createUser({ prisma, userData, businessData, emailsData, phonesData, roleIds }: any) {
     let business = await prisma.business.findFirst({ where: { name: businessData.name }});
     if (!business) {
         console.info(`🏢 Creating business for ${userData.firstName}`);
@@ -31,7 +31,7 @@ async function createUser({ userData, businessData, emailsData, phonesData, role
     }
 }
 
-async function main() {
+export async function mock(prisma: PrismaType) {
     console.info('🎭 Creating mock data...');
 
     // Find existing roles
@@ -42,6 +42,7 @@ async function main() {
 
     // Create user with owner role
     await createUser({
+        prisma,
         businessData: { name: 'SpaceX' },
         userData: {
             firstName: 'Elon',
@@ -63,6 +64,7 @@ async function main() {
 
     // Create a few customers
     await createUser({
+        prisma,
         businessData: { name: 'Rocket supplier A' },
         userData: {
             firstName: 'John',
@@ -78,6 +80,7 @@ async function main() {
         roleIds: [customerRoleId]
     });
     await createUser({
+        prisma,
         businessData: { name: '🤘🏻A Steel Company' },
         userData: {
             firstName: 'Spongebob',
@@ -98,10 +101,3 @@ async function main() {
 
     console.info(`✅ Database mock complete.`);
 }
-
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-}).finally(async () => {
-    await prisma.$disconnect();
-})

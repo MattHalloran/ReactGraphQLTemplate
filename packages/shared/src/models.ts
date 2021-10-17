@@ -31,6 +31,10 @@ export interface Business {
     phones: Phone[];
 }
 
+export interface BusinessDiscounts {
+
+}
+
 export interface Customer {
     id: UUID;
     firstName: string;
@@ -47,6 +51,18 @@ export interface Customer {
     feedback: Feedback[];
     orders: Order[];
     phones: Phone[];
+}
+
+export interface CustomerRoles {
+    
+}
+
+export interface Email {
+
+}
+
+export interface Feedback {
+
 }
 
 export interface OrderItem {
@@ -70,6 +86,10 @@ export interface Order {
     customerId: Customer;
     customer: Customer;
     items: OrderItem[];
+}
+
+export interface Phone {
+
 }
 
 export interface Product {
