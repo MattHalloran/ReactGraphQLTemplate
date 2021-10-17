@@ -55,6 +55,7 @@ app.use(`${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, graphqlUploadExp
 // Set up GraphQL using Apollo
 // Context trickery allows request and response to be included in the context
 const apollo_options = new ApolloServer({
+    introspection: process.env.NODE_ENV === 'development',
     schema: schema,
     context: (c) => context(c),
     validationRules: [depthLimit(8)] // Prevents DoS attack from arbitrarily-nested query
@@ -68,5 +69,5 @@ apollo_options.start().then(() => {
     // Start Express server
     app.listen(process.env.VIRTUAL_PORT);
 
-    console.info(`🚀 Server running on port ${process.env.VIRTUAL_PORT}`)
+    console.info(`🚀 Server running at ${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}/${process.env.VIRTUAL_PORT}`)
 })

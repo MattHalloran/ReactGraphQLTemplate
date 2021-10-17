@@ -5,7 +5,7 @@ export const customersQuery = gql`
     ${customerContactFields}
     ${orderFields}
     ${orderItemFields}
-    query {
+    query customers {
         customers {
             ...customerContactFields
             status

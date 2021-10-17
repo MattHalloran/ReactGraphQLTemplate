@@ -4,7 +4,7 @@ import { productFields, skuFields } from 'graphql/fragment';
 export const productsQuery = gql`
     ${productFields}
     ${skuFields}
-    query ProductsQuery(
+    query products(
         $ids: [ID!]
         $sortBy: SkuSortBy
         $searchString: String

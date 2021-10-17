@@ -5,7 +5,7 @@ export const skusQuery = gql`
     ${skuFields}
     ${productFields}
     ${discountFields}
-    query SkusQuery(
+    query skus(
         $ids: [ID!]
         $sortBy: SkuSortBy
         $searchString: String

@@ -24,10 +24,8 @@ export const setupDatabase = async () => {
     // 1. Clean old images
     await cleanImageData();
     // 2. Seed database
-    console.info('Ensuring database is populated with minimal data');
     await executeSeed(init);
     if (process.env.CREATE_MOCK_DATA) {
-        console.info('Populating database with mock data');
         await executeSeed(mock);
     }
 }

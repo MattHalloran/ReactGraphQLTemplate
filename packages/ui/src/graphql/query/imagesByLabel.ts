@@ -3,7 +3,7 @@ import { imageFields } from 'graphql/fragment/imageFields';
 
 export const imagesByLabelQuery = gql`
     ${imageFields}
-    query ImagesByLabel(
+    query imagesByLabel(
         $label: String!
     ) {
         imagesByLabel(

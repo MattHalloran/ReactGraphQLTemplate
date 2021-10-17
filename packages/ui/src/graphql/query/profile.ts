@@ -1,7 +1,7 @@
 import { gql } from 'graphql-tag';
 
 export const profileQuery = gql`
-    query {
+    query profile {
         profile {
             id
             firstName
