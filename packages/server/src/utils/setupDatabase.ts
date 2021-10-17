@@ -5,14 +5,14 @@
 // 3. Seeding database with mock data
 import { cleanImageData } from "./cleanImageData.js";
 import pkg from '@prisma/client';
-import { init } from 'db/seeds/init.js';
-import { mock } from 'db/seeds/mock.js';
-import { PrismaType } from 'types';
+import { init } from '../db/seeds/init.js';
+import { mock } from '../db/seeds/mock.js';
+import { PrismaType } from '../types';
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
 const executeSeed = async (func: (prisma: PrismaType) => any) => {
-    func(prisma).catch((error: any) => {
+    await func(prisma).catch((error: any) => {
         console.error(error);
         process.exit(1);
     }).finally(async () => {

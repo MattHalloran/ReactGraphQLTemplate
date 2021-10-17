@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { CODE, COOKIE } from '@local/shared';
-import { CustomError } from 'error.js';
+import { CustomError } from './error';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 

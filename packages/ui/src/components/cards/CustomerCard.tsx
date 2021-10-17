@@ -108,7 +108,7 @@ const CustomerCard = ({
 
     let actions = [edit_action];
     // Actions for customer accounts (i.e. not an owner or admin)
-    if (!(customer.roles?.some(r => ['Owner', 'Admin'].includes(r.role.title)) || false)) {
+    if (!(customer.roles?.some(r => ['Owner', 'Admin'].includes(r.title)) || false)) {
         switch (customer.status) {
             case AccountStatus.UNLOCKED:
                 actions.push(lock_action);

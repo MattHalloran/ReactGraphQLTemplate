@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
-import { envVariableExists } from 'utils/envVariableExists.js';
-import { PrismaType } from 'types';
+import { envVariableExists } from '../../utils/envVariableExists.js';
+import { PrismaType } from '../../types';
 const { AccountStatus } = pkg;
 const HASHING_ROUNDS = 8;
 

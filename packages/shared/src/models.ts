@@ -54,7 +54,8 @@ export interface Customer {
 }
 
 export interface CustomerRoles {
-    
+    title: string;
+    description: string;
 }
 
 export interface Email {

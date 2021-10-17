@@ -1,13 +1,13 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import * as auth from './auth.js';
+import * as auth from './auth';
 import cors from "cors";
 import { ApolloServer } from 'apollo-server-express';
-import { depthLimit } from './depthLimit.js';
+import { depthLimit } from './depthLimit';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { API_VERSION } from '@local/shared';
-import { schema } from './schema/index.js';
-import { context } from './context.js';
+import { schema } from './schema';
+import { context } from './context';
 import { envVariableExists } from './utils/envVariableExists';
 import { setupDatabase } from './utils/setupDatabase';
 

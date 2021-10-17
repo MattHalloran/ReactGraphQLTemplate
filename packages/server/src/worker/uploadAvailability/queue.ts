@@ -1,7 +1,7 @@
 import Bull from 'bull';
 import { uploadAvailabilityProcess } from './process.js';
 import XLSX from 'xlsx';
-import { HOST, PORT } from 'worker/connection.js';
+import { HOST, PORT } from '../connection.js';
 
 const uploadAvailabilityQueue = new Bull('email', { redis: { port: PORT, host: HOST } });
 uploadAvailabilityQueue.process(uploadAvailabilityProcess);

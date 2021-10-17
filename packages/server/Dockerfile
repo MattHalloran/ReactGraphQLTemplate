@@ -24,15 +24,15 @@ WORKDIR ${PROJECT_DIR}
 
 # Copy packages over first. This helps with caching
 COPY --chown=node:node package.json package.json
-COPY --chown=node:node ${shared}/package.json ${shared}/package.json
-COPY --chown=node:node ${server}/package.json ${server}/package.json
+COPY --chown=node:node ${shared}/package.json ${shared}/tsconfig.json ${shared}/
+COPY --chown=node:node ${server}/package.json ${server}/tsconfig.json ${server}/nodemon.json ${server}/
 
 # Install packages
 RUN yarn install
 
 # Copy rest of repo over
-COPY --chown=node:node ${shared}/index.ts ${shared}/src ${shared}/
-COPY --chown=node:node ${server}/src ${server}/tsconfig.json ${server}/nodemon.json ${server}/
+COPY --chown=node:node ${shared}/src ${shared}/
+COPY --chown=node:node ${server}/src ${server}/
 COPY --chown=node:node scripts/server.sh scripts/wait-for.sh ${scripts}/
 
 USER root

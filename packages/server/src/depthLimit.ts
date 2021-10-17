@@ -1,5 +1,5 @@
 import { GraphQLError, Kind } from 'graphql';
-import { isArray } from 'lodash';
+import isArray from 'lodash/isArray';
 
 /**
  * Creates a validator for the GraphQL query depth

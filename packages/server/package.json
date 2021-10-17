@@ -10,8 +10,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "yarn tsc",
-        "start-development": "yarn build && nodemon dist/index.js",
-        "start-production": "yarn build && node dist/index.js"
+        "start-development": "yarn build && nodemon --experimental-modules --experimental-specifier-resolution=node dist/index.js",
+        "start-production": "yarn build && node --experimental-modules --experimental-specifier-resolution=node dist/index.js"
     },
     "author": "",
     "license": "MIT",

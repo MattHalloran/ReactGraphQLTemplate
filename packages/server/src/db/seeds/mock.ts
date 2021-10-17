@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import pkg from '@prisma/client';
-import { PrismaType } from 'types';
+import { PrismaType } from '../../types';
 const { AccountStatus } = pkg;
 const HASHING_ROUNDS = 8;
 
