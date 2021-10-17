@@ -59,7 +59,9 @@
         "build": "react-scripts build --max-old-space-size=8192 --optimize_for_size --max_executable_size=4096 --stack_size=4096",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "analyze": "source-map-explorer build/static/js/*"
+        "analyze": "source-map-explorer build/static/js/*",
+        "download-schema": "apollo client:download-schema --endpoint=http://localhost:5000/api src/graphql/schema.generated.gql",
+        "gen-graphql-types": "apollo client:codegen --target typescript --endpoint=http://localhost:5000/api --outputFlat --includes \"src/graphql/**\" --excludes \"src/graphql/generated\" src/graphql/generated"
     },
     "browserslist": {
         "production": [
@@ -74,14 +76,15 @@
         ]
     },
     "devDependencies": {
-        "@types/js-cookie": "^3.0.0",
-        "@types/react-router-dom": "^5.1.7",
-        "@types/react-swipeable-views": "^0.13.0",
         "@types/jest": "^27.0.2",
+        "@types/js-cookie": "^3.0.0",
         "@types/node": "^16.10.4",
         "@types/pubsub-js": "^1.8.3",
         "@types/react": "^17.0.29",
         "@types/react-dom": "^17.0.9",
+        "@types/react-router-dom": "^5.1.7",
+        "@types/react-swipeable-views": "^0.13.0",
+        "apollo": "^2.33.6",
         "chai": "^4.3.4",
         "eslint-plugin-react": "^7.24.0",
         "mocha": "^9.1.1",

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, Fragment } from 'react';
 import { SliderContent } from './SliderContent';
 import { Slide } from './Slide';
 import { Dots } from './Dots';
@@ -65,7 +65,7 @@ export const Slider = ({
         }
     }, [autoPlay, wait])
 
-    const slides = useMemo(() => {
+    const slides: JSX.Element[] = useMemo(() => {
         if (images?.length > 0) {
             let copy = [...images, images[0]];
             return copy.map((s, i) => (
@@ -81,9 +81,9 @@ export const Slider = ({
             <SliderContent
                 translate={translate}
                 transition={transition}
-                width={width * (slides?.length ?? 0)}
+                width={width * (slides.length)}
             >
-                {slides}
+                <Fragment>{slides}</Fragment>
             </SliderContent>
             <Dots quantity={images.length} activeIndex={slideIndex} />
         </div>

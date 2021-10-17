@@ -17,7 +17,7 @@ interface Props {
     width: number;
 }
 
-const Slide = memo(({ image, width }: Props) => {
+const Slide = memo(({ image, width }: Props): JSX.Element => {
     const classes = useStyles({ width });
     return (
         <img className={classes.slide} src={image ? `${SERVER_URL}/${getImageSrc(image, width)}` : ''} alt={image?.alt ?? ''} />

@@ -80,6 +80,7 @@ const determineDepth: any = (node: any, fragments: any, depthSoFar: any, maxDept
 }
 
 function seeIfIgnored(node: any, ignore: any) {
+    if (!ignore) return false;
     const ignoreArray = isArray(ignore) ? ignore : [ignore];
     for (let rule of ignoreArray) {
         const fieldName = node.name.value

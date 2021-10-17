@@ -22,15 +22,22 @@ import {
 import { Cart, UserRoles } from 'types';
 
 export type ActionArray = [string, any, string, (() => any) | null, any, number];
+interface Action {
+    label: string;
+    value: any;
+    link: string;
+    onClick: (() => any) | null;
+    Icon: any;
+    numNotifications: number;
+}
 
-interface Props {
+// Returns navigational actions available to the user
+interface GetUserActionsProps {
     userRoles: UserRoles;
     cart: Cart;
     exclude?: string[] | undefined;
 }
-
-// Returns navigational actions available to the user
-export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
+export function getUserActions({ userRoles, cart, exclude = [] }: GetUserActionsProps): Action[] {
     let actions: ActionArray[] = [];
 
     // If someone is not logged in, display sign up/log in links
@@ -50,16 +57,23 @@ export function getUserActions({ userRoles, cart, exclude = [] }: Props) {
 }
 
 // Factory for creating action objects
-const createAction = (action: ActionArray) => {
-    const keys = ['label', 'value', 'link', 'onClick', 'icon', 'numNotifications'];
-    return action.reduce((obj: {}, val: any, i: number) => { obj[keys[i]] = val; return obj }, {});
+const createAction = (action: ActionArray): Action => {
+    const keys = ['label', 'value', 'link', 'onClick', 'Icon', 'numNotifications'];
+    return action.reduce((obj: {}, val: any, i: number) => { obj[keys[i]] = val; return obj }, {}) as Action;
 }
 
 // Factory for creating a list of action objects
-export const createActions = (actions: ActionArray[]) => actions.map(a => createAction(a));
+export const createActions = (actions: ActionArray[]): Action[] => actions.map(a => createAction(a));
 
 // Display actions as a list
-export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick = () => {} }) => {
+interface ActionsToListProps {
+    actions: Action[];
+    history: any;
+    classes?: {[key: string]: string};
+    showIcon?: boolean;
+    onAnyClick?: () => any;
+}
+export const actionsToList = ({ actions, history, classes = { listItem: '', listItemIcon: '' }, showIcon = true, onAnyClick = () => {} }: ActionsToListProps) => {
     return actions.map(({ label, value, link, onClick, Icon, numNotifications }) => (
         <ListItem
             key={value}
@@ -74,14 +88,19 @@ export const actionsToList = ({ actions, history, classes = { listItem: '', list
                     <Badge badgeContent={numNotifications} color="error">
                         <Icon className={classes.listItemIcon} />
                     </Badge>
-                </ListItemIcon>) : null}
+                </ListItemIcon>) : ''}
             <ListItemText primary={label} />
         </ListItem>
     ))
 }
 
 // Display actions in a horizontal menu
-export const actionsToMenu = ({ actions, history, classes = { root: '' } }) => {
+interface ActionsToMenuProps {
+    actions: Action[];
+    history: any;
+    classes?: {[key: string]: string};
+}
+export const actionsToMenu = ({ actions, history, classes = { root: '' } }: ActionsToMenuProps) => {
     return actions.map(({ label, value, link, onClick }) => (
         <Button
             key={value}
@@ -96,7 +115,12 @@ export const actionsToMenu = ({ actions, history, classes = { root: '' } }) => {
 }
 
 // Display actions in a bottom navigation
-export const actionsToBottomNav = ({ actions, history, classes = { root: '' } }) => {
+interface ActionsToBottomNavProps {
+    actions: Action[];
+    history: any;
+    classes?: {[key: string]: string};
+}
+export const actionsToBottomNav = ({ actions, history, classes = { root: '' } }: ActionsToBottomNavProps) => {
     return actions.map(({ label, value, link, onClick, Icon, numNotifications }) => (
         <BottomNavigationAction
             key={value}
@@ -109,7 +133,12 @@ export const actionsToBottomNav = ({ actions, history, classes = { root: '' } })
 }
 
 // Display an action as an icon button
-export const actionToIconButton = ({ action, history, classes = { root: '' } }) => {
+interface ActionToIconButtonProps {
+    action: Action;
+    history: any;
+    classes?: {[key: string]: string};
+}
+export const actionToIconButton = ({ action, history, classes = { root: '' } }: ActionToIconButtonProps) => {
     const { value, link, Icon, numNotifications } = action;
     return <IconButton  classes={classes} edge="start" color="inherit" aria-label={value} onClick={() => history.push(link)}>
         <Badge badgeContent={numNotifications} color="error">

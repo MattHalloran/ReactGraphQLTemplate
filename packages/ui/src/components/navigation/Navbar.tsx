@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Logo from 'assets/img/Logo.svg';
 import { LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger, Theme } from '@material-ui/core';
@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface HideOnScrollProps {
-    children: ReactNode;
+    children: JSX.Element;
 }
 
 const HideOnScroll = ({
