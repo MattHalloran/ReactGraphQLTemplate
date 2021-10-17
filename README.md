@@ -43,7 +43,11 @@ To work with Prisma, types for your models must be generated.
 ### 5. Business data
 Edit the file `assets/public/business.json` to match your business's data.
 ### 6. Docker
-By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
+By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
+Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
+### 7. Enter website information
+This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
+Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
 
 ## Open Graph Tags
