@@ -41,11 +41,11 @@ model business {
   subscribedToNewsletters Boolean              @default(true)
   created_at              DateTime             @default(now()) @db.Timestamptz(6)
   updated_at              DateTime             @default(now()) @db.Timestamptz(6)
-  address                 address[]
+  addresses               address[]
   discounts               business_discounts[]
   employees               customer[]
-  email                   email[]
-  phone                   phone[]
+  emails                  email[]
+  phones                  phone[]
 }
 
 // Joining table to apply discounts to businesses

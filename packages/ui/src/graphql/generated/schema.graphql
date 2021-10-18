@@ -1,0 +1,480 @@
+"""
+Direct the client to resolve this field locally, either from the cache or local resolvers.
+"""
+directive @client(
+  """
+  When true, the client will never use the cache for this value. See
+  https://www.apollographql.com/docs/react/essentials/local-state/#forcing-resolvers-with-clientalways-true
+  """
+  always: Boolean
+) on FIELD | FRAGMENT_DEFINITION | INLINE_FRAGMENT
+
+"""
+Export this locally resolved field as a variable to be used in the remainder of this query. See
+https://www.apollographql.com/docs/react/essentials/local-state/#using-client-fields-as-variables
+"""
+directive @export(
+  """The variable name to export this field as."""
+  as: String!
+) on FIELD
+
+"""
+Specify a custom store key for this result. See
+https://www.apollographql.com/docs/react/advanced/caching/#the-connection-directive
+"""
+directive @connection(
+  """Specify the store key."""
+  key: String!
+
+  """
+  An array of query argument names to include in the generated custom store key.
+  """
+  filter: [String!]
+) on FIELD
+
+"""Custom description for the date scalar"""
+scalar Date
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type Count {
+  count: Int
+}
+
+type Response {
+  code: Int
+  message: String!
+}
+
+type Query {
+  readAssets(files: [String!]!): [String]!
+  addresses: [Address!]!
+  businesses: [Business!]!
+  customers: [Customer!]!
+  profile: Customer!
+  discounts: [Discount!]!
+  emails: [Email!]!
+  feedbacks: [Feedback!]!
+  imagesByLabel(label: String!): [Image!]!
+  orders(ids: [ID!], status: OrderStatus, searchString: String): [Order!]!
+  phones: [Phone!]!
+  products(ids: [ID!], sortBy: SkuSortBy, searchString: String, active: Boolean): [Product!]!
+  traitNames: [String!]!
+  traitValues(name: String!): [String!]!
+  traitOptions: [TraitOptions!]!
+  roles: [Role!]!
+  skus(ids: [ID!], sortBy: SkuSortBy, searchString: String, onlyInStock: Boolean): [Sku!]!
+  tasks(ids: [ID!], status: TaskStatus): [Task!]!
+}
+
+type Mutation {
+  writeAssets(files: [Upload!]!): Boolean
+  addAddress(input: AddressInput!): Address!
+  updateAddress(input: AddressInput!): Address!
+  deleteAddresses(ids: [ID!]!): Count!
+  addBusiness(input: BusinessInput!): Business!
+  updateBusiness(input: BusinessInput!): Business!
+  deleteBusinesses(ids: [ID!]!): Count!
+  login(email: String, password: String, verificationCode: String): Customer!
+  logout: Boolean
+  signUp(firstName: String!, lastName: String!, pronouns: String, business: String!, email: String!, phone: String!, theme: String!, marketingEmails: Boolean!, password: String!): Customer!
+  addCustomer(input: CustomerInput!): Customer!
+  updateCustomer(input: CustomerInput!, currentPassword: String!, newPassword: String): Customer!
+  deleteCustomer(id: ID!, password: String): Boolean
+  requestPasswordChange(email: String!): Boolean
+  resetPassword(id: ID!, code: String!, newPassword: String!): Customer!
+  changeCustomerStatus(id: ID!, status: AccountStatus!): Boolean
+  addCustomerRole(id: ID!, roleId: ID!): Customer!
+  removeCustomerRole(id: ID!, roleId: ID!): Count!
+  addDiscount(input: DiscountInput!): Discount!
+  updateDiscount(input: DiscountInput!): Discount!
+  deleteDiscounts(ids: [ID!]!): Count!
+  addEmail(input: EmailInput!): Email!
+  updateEmail(input: EmailInput!): Email!
+  deleteEmails(ids: [ID!]!): Count!
+  addFeedback(input: FeedbackInput!): Feedback!
+  deleteFeedbacks(ids: [ID!]!): Count!
+  addImages(files: [Upload!]!, alts: [String], descriptions: [String], labels: [String!]): [AddImageResponse!]!
+  updateImages(data: [ImageUpdate!]!, deleting: [String!], label: String): Boolean!
+  deleteImages(hashes: [String!]!): Count!
+  deleteImagesByLabel(labels: [String!]!): Count!
+  updateOrder(input: OrderInput): Order!
+  submitOrder(id: ID!): Boolean
+  cancelOrder(id: ID!): OrderStatus
+  deleteOrders(ids: [ID!]!): Count!
+  upsertOrderItem(quantity: Int!, orderId: ID, skuId: ID!): OrderItem!
+  deleteOrderItems(ids: [ID!]!): Count!
+  addPhone(input: PhoneInput!): Phone!
+  updatePhone(input: PhoneInput!): Phone!
+  deletePhones(ids: [ID!]!): Count!
+  addProduct(input: ProductInput!): Product!
+  updateProduct(input: ProductInput!): Product!
+  deleteProducts(ids: [ID!]!): Count!
+  addRole(input: RoleInput!): Role!
+  updateRole(input: RoleInput!): Role!
+  deleteRoles(ids: [ID!]!): Count!
+  uploadAvailability(file: Upload!): Boolean
+  addSku(input: SkuInput!): Sku!
+  updateSku(input: SkuInput!): Sku!
+  deleteSkus(ids: [ID!]!): Count!
+}
+
+input AddressInput {
+  id: ID
+  tag: String
+  name: String
+  country: String!
+  administrativeArea: String!
+  subAdministrativeArea: String
+  locality: String!
+  postalCode: String!
+  throughfare: String!
+  premise: String
+  deliveryInstructions: String
+  businessId: ID!
+}
+
+type Address {
+  id: ID!
+  tag: String
+  name: String
+  country: String!
+  administrativeArea: String!
+  subAdministrativeArea: String
+  locality: String!
+  postalCode: String!
+  throughfare: String!
+  premise: String
+  business: Business!
+  orders: [Order!]!
+}
+
+input BusinessInput {
+  id: ID
+  name: String!
+  subscribedToNewsletters: Boolean
+  discountIds: [ID!]
+  employeeIds: [ID!]
+}
+
+type Business {
+  id: ID!
+  name: String!
+  subscribedToNewsletters: Boolean!
+  addresses: [Address!]!
+  phones: [Phone!]!
+  emails: [Email!]!
+  employees: [Customer!]!
+  discounts: [Discount!]!
+}
+
+enum AccountStatus {
+  DELETED
+  UNLOCKED
+  SOFT_LOCKED
+  HARD_LOCKED
+}
+
+input CustomerInput {
+  id: ID
+  firstName: String
+  lastName: String
+  pronouns: String
+  emails: [EmailInput!]
+  phones: [PhoneInput!]
+  business: BusinessInput
+  theme: String
+  status: AccountStatus
+}
+
+type Customer {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  pronouns: String!
+  emails: [Email!]!
+  phones: [Phone!]!
+  business: Business
+  theme: String!
+  emailVerified: Boolean!
+  status: AccountStatus!
+  cart: Order
+  orders: [Order!]!
+  roles: [CustomerRole!]!
+  feedback: [Feedback!]!
+}
+
+input DiscountInput {
+  id: ID
+  title: String!
+  discount: Float!
+  comment: String
+  terms: String
+  businessIds: [ID!]
+  skuIds: [ID!]
+}
+
+type Discount {
+  id: ID!
+  discount: Float!
+  title: String!
+  comment: String
+  terms: String
+  businesses: [Business!]!
+  skus: [Sku!]!
+}
+
+input EmailInput {
+  id: ID
+  emailAddress: String!
+  receivesDeliveryUpdates: Boolean
+  customerId: ID
+  businessId: ID
+}
+
+type Email {
+  id: ID!
+  emailAddress: String!
+  receivesDeliveryUpdates: Boolean!
+  customer: Customer
+  business: Business
+}
+
+input FeedbackInput {
+  id: ID
+  text: String!
+  customerId: ID
+}
+
+type Feedback {
+  id: ID!
+  text: String!
+  customer: Customer
+}
+
+enum ImageSize {
+  XXS
+  XS
+  S
+  M
+  ML
+  L
+  XL
+  XXL
+}
+
+input ImageUpdate {
+  hash: String!
+  alt: String
+  description: String
+}
+
+type AddImageResponse {
+  success: Boolean!
+  src: String
+  hash: String
+}
+
+type ImageFile {
+  hash: String!
+  src: String!
+  width: Int!
+  height: Int!
+}
+
+type Image {
+  hash: String!
+  alt: String
+  description: String
+  files: [ImageFile!]
+}
+
+enum OrderStatus {
+  CANCELED_BY_ADMIN
+  CANCELED_BY_CUSTOMER
+  PENDING_CANCEL
+  REJECTED
+  DRAFT
+  PENDING
+  APPROVED
+  SCHEDULED
+  IN_TRANSIT
+  DELIVERED
+}
+
+input OrderInput {
+  id: ID
+  status: OrderStatus
+  specialInstructions: String
+  desiredDeliveryDate: Date
+  isDelivery: Boolean
+  items: [OrderItemInput!]
+}
+
+type Order {
+  id: ID!
+  status: OrderStatus!
+  specialInstructions: String
+  desiredDeliveryDate: Date
+  expectedDeliveryDate: Date
+  isDelivery: Boolean
+  address: Address
+  customer: Customer!
+  items: [OrderItem!]!
+}
+
+input OrderItemInput {
+  id: ID!
+  quantity: Int
+}
+
+type OrderItem {
+  id: ID!
+  quantity: Int!
+  order: Order!
+  sku: Sku!
+}
+
+input PhoneInput {
+  id: ID
+  number: String!
+  receivesDeliveryUpdates: Boolean
+  customerId: ID
+  businessID: ID
+}
+
+type Phone {
+  id: ID!
+  number: String!
+  receivesDeliveryUpdates: Boolean!
+  customer: Customer
+  business: Business
+}
+
+input ProductTraitInput {
+  name: String!
+  value: String!
+}
+
+input ProductImageInput {
+  hash: String!
+  isDisplay: Boolean
+}
+
+input ProductInput {
+  id: ID
+  name: String!
+  traits: [ProductTraitInput]!
+  images: [ProductImageInput!]
+  skus: [SkuInput!]
+}
+
+type ProductImage {
+  index: Int!
+  isDisplay: Boolean!
+  image: Image!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  featured: Boolean!
+  traits: [ProductTrait!]
+  images: [ProductImage!]
+  skus: [Sku!]
+}
+
+type ProductTrait {
+  id: ID!
+  name: String!
+  value: String!
+}
+
+type TraitOptions {
+  name: String!
+  values: [String!]!
+}
+
+input RoleInput {
+  id: ID
+  title: String!
+  description: String
+  customerIds: [ID!]
+}
+
+type CustomerRole {
+  customer: Customer!
+  role: Role!
+}
+
+type Role {
+  id: ID!
+  title: String!
+  description: String
+  customers: [Customer!]!
+}
+
+enum SkuStatus {
+  DELETED
+  INACTIVE
+  ACTIVE
+}
+
+enum SkuSortBy {
+  AZ
+  ZA
+  PriceLowHigh
+  PriceHighLow
+  Featured
+  Newest
+  Oldest
+}
+
+input SkuInput {
+  id: ID
+  sku: String!
+  isDiscountable: Boolean
+  size: String
+  note: String
+  availability: Int
+  price: String
+  status: SkuStatus
+  productId: ID
+  discountIds: [ID!]
+}
+
+type SkuDiscount {
+  discount: Discount!
+}
+
+type Sku {
+  id: ID!
+  sku: String!
+  isDiscountable: Boolean!
+  size: String
+  note: String
+  availability: Int!
+  price: String
+  status: SkuStatus!
+  product: Product!
+  discounts: [SkuDiscount!]
+}
+
+enum TaskStatus {
+  UNKNOWN
+  FAILED
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+type Task {
+  id: ID!
+  taskId: Int!
+  name: String!
+  status: TaskStatus!
+  description: String
+  result: String
+  resultCode: Int
+}

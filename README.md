@@ -27,8 +27,8 @@ A fully-functioning template for building modern, maintainable websites.
 
 
 ## How to start  
-### 1. Prerequisites
- Before developing a website from this template, make sure you have the following installed:   
+### 1. Prerequisites  
+Before developing a website from this template, make sure you have the following installed:   
 1. [Docker](https://www.docker.com/)
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
 ### 2. Download this repository
@@ -36,10 +36,18 @@ A fully-functioning template for building modern, maintainable websites.
 ### 3. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
-### 4. Business data
-In the assets/public folder, there is a file named `business.json`. Edit this file to match your business's data.
-### 5. Docker
-By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`
+### 4. Generate prisma client  
+To work with Prisma, types for your models must be generated.  
+1. `cd packages/server`  
+2. `prisma generate --schema src/prisma/schema.prisma`
+### 5. Business data
+Edit the file `assets/public/business.json` to match your business's data.
+### 6. Docker
+By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
+Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
+### 7. Enter website information
+This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
+Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
 
 ## Open Graph Tags
@@ -92,15 +100,15 @@ If you are planning to support Progressive Web Apps (PWA), then you should also 
 
 
 ## Theming
-Picking the correct colors for your site can be easy or complicated, depending on how deeply you want to go into it (you could use color theory, for example). You also have to make sure that your theme's colors are different enough from each other to be distinguisable. I use [this color tool](https://material.io/resources/color/#!/?view.left=0&view.right=0) to create a solid starting point. The site's theme is set in `packages/ui/src/utils/theme.js`.
+Picking the correct colors for your site can be easy or complicated, depending on how deeply you want to go into it (you could use color theory, for example). You also have to make sure that your theme's colors are different enough from each other to be distinguisable. I use [this color tool](https://material.io/resources/color/#!/?view.left=0&view.right=0) to create a solid starting point. The site's theme is set in [packages/ui/src/utils/theme.ts](packages/ui/src/utils/theme.ts).
 
-By default, this site automatically sets dark or light theme depending on your browser's settings. This is accomplished in `packages/ui/src/App.js`.
+By default, this site automatically sets dark or light theme depending on your browser's settings. This is accomplished in [packages/ui/src/App.ts](packages/ui/src/App.ts).
 
 
 ## Custom fonts
-The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into `packages/ui/public/index.html`. Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
+The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into [packages/ui/public/index.html](packages/ui/public/index.html). Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
 
-Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a .woff file for your desired font. This can be placed in `packages/ui/src/assets/fonts`, and registered in the global css section of `packages/ui/src/App.js` like so:  
+Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a .woff file for your desired font. This can be placed in [packages/ui/src/assets/fonts](packages/ui/src/assets/fonts), and registered in the global css section of [packages/ui/src/App.ts]() like so:  
 ```javascript
     import SakBunderan from './assets/fonts/SakBunderan.woff';
     ...
@@ -124,21 +132,44 @@ Then, when you need to use the font, you can reference it like this:
     },
 ```
 
+## GraphQL
+[GraphQL](https://graphql.org/) is a query language for APIs. It is a faster, understandable, and modernan alternative to REST APIs.
 
-## GraphQL debugging
+### GraphQL debugging
 GraphQL syntax errors are notoriously hard to debug, as they often do not give a location. Luckily, this project is structured in a way that allows these issues to be tracked down. 
 
-In the [schema directory](packages/service/src/schema), the GraphQL resolvers are split up into individual files, which are stitched together in the [index file](packages/service/src/schema/index.js). In this file, the `models` object is used to combine all of the individual schemas. If you make this an empty array, you can comment out imports until the problem goes away. This allows you to pinpoint which schema file is causing the error. Common errors are empty parentheses (ex: `users():` instead of `users:`) and empty brackets.
+In the [schema directory](packages/service/src/schema), the GraphQL resolvers are split up into individual files, which are stitched together in the [index file](packages/service/src/schema/index.ts). In this file, the `models` object is used to combine all of the individual schemas. If you make this an empty array, you can comment out imports until the problem goes away. This allows you to pinpoint which schema file is causing the error. Common errors are empty parentheses (ex: `users():` instead of `users:`) and empty brackets.
+
+### GraphQL TypeScript generation
+GraphQL is already typed, but it unfortunately doesn't play well with TypeScript's typing system. Instead of creating TypeScript types yourself (which is tedious), they can be generated automatically from a `schema.graphql` file.  
+If you already have a `schema.graphql` file you'd like to use, the process is very simple:  
+1. Start project locally (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
+2. `cd packages/ui` 
+3. `yarn gen-graphql-types`  
+
+If you need to generate a `schema.graphql` file from your own server, the process is slightly more complicated:    
+1. Set `NODE_ENV` to `development` in .env file. This enables GraphQL instrospection
+2. Start application (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
+2. `cd packages/ui` 
+3. `yarn download-schema` (make sure to check out what this command is doing in [packages/ui/package.json](packages/ui/package.json) in case your needs vary)
+3. `yarn gen-graphql-types`    
+
+If you need to generate a `schema.graphql` file from an external API:  
+1. Edit `download-schema` command in [packages/ui/package.json](packages/ui/package.json) to point to the desired API.
+2. `cd packages/ui` 
+3. `yarn gen-graphql-types`  
+
+See [this video](https://youtu.be/Tw_wn6XUfnU) for more details.
 
 
 ## Local testing on another device
-Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index/js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/server/src/index.js); and (2) [packages/shared/src/apiConsts.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/shared/src/apiConsts.js).
+Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/server/src/index.ts); and (2) [packages/shared/src/apiConsts.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/shared/src/apiConsts.ts).
 
 
 ## Testing performance, accessibility, and SEO
 [Lighthouse](https://developers.google.com/web/tools/lighthouse) is an open-source tool for testing any website's (even localhost) performance, accessibility, and Search Engine Optimization (SEO). This can be accessed in Chrome Dev Tools. The tool generates a report in less than a minute, which gives plenty of details and resources that you can look through. This website template is designed to maximize Lighthouse performance by default, but your specific needs may vary. Some places to look at are:  
 - Compress static images - The easiest way to reduce request payloads is by compressing static images. This can be done on many sites, such as [this one for PNGs](https://compresspng.com/) and [this one](https://jakearchibald.github.io/svgomg/) for SVGs.
-- [Sitemap.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/src/Sitemap.js) and [Routes.js](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/src/Routes.js) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
+- [Sitemap.ts](packages/ui/src/Sitemap.ts) and [Routes.ts](packages/ui/src/Routes.ts) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
 - Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):    
     1. In project's root directory, enter `yarn global add depcheck`  
     2. `depcheck`  
@@ -147,9 +178,9 @@ Before removing packages, please make sure that depcheck was correct. If you are
 - Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
 - Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
 - Peek inside code bundles - Seeing what's inside the code bundles can help you determine what areas of the code should be lazy loaded, and what is taking the most space. To do this:  
-    1. cd packages/ui  
-    2. npm run build
-    3. npm run analyze
+    1. `cd packages/ui ` 
+    2. `yarn build`
+    3. `yarn analyze`
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
 
