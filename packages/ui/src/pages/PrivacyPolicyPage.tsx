@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { Theme } from "@material-ui/core";
 import { CommonProps } from "types";
+import { readAssets, readAssetsVariables } from "graphql/generated/readAssets";
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -23,14 +24,14 @@ export const PrivacyPolicyPage = ({
     const classes = useStyles();
     const theme = useTheme();
     const [privacy, setPrivacy] = useState<string | null>(null);
-    const { data: privacyData } = useQuery(readAssetsQuery, { variables: { files: ['privacy.md'] } });
+    const { data: privacyData } = useQuery<readAssets, readAssetsVariables>(readAssetsQuery, { variables: { files: ['privacy.md'] } });
 
     useEffect(() => {
         if (privacyData === undefined) return;
         let data = privacyData.readAssets[0];
         // Replace variables
         const business_fields = Object.keys(convertToDot(business));
-        business_fields.forEach(f => data = data.replaceAll(`<${f}>`, valueFromDot(business, f) || ''));
+        business_fields.forEach(f => data = data?.replaceAll(`<${f}>`, valueFromDot(business, f) || '') ?? '');
         setPrivacy(data);
     }, [privacyData, business])
 

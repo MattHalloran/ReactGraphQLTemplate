@@ -14,7 +14,7 @@ import { CustomerDialog } from 'components/dialogs/CustomerDialog';
 import { NewCustomerDialog } from 'components/dialogs/NewCustomerDialog';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
-import { Customer } from '@local/shared';
+import { customers, customers_customers } from 'graphql/generated/customers';
 
 const componentStyles = () => ({
     cardFlex: {
@@ -29,15 +29,15 @@ const useStyles = makeStyles(combineStyles(pageStyles, componentStyles));
 export const AdminCustomerPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [customers, setCustomers] = useState<any>(null);
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [customers, setCustomers] = useState<customers_customers[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<customers_customers | null>(null);
     const [newCustomerOpen, setNewCustomerOpen] = useState(false);
-    const { error, data } = useQuery(customersQuery, { pollInterval: 5000 });
+    const { error, data } = useQuery<customers>(customersQuery, { pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
-        setCustomers(data?.customers);
+        setCustomers(data?.customers ?? []);
     }, [data])
 
     return (

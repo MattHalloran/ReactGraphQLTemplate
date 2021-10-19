@@ -19,12 +19,15 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { changeCustomerStatusMutation, deleteCustomerMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
-import { AccountStatus, Customer } from '@local/shared';
+import { AccountStatus } from '@local/shared';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { emailLink, mapIfExists, phoneLink, PUBS, showPhone } from 'utils';
 import PubSub from 'pubsub-js';
 import { ListDialog } from 'components';
 import { cardStyles } from './styles';
+import { changeCustomerStatus } from 'graphql/generated/changeCustomerStatus';
+import { deleteCustomer } from 'graphql/generated/deleteCustomer';
+import { Customer } from 'types';
 
 const useStyles = makeStyles(cardStyles);
 
@@ -38,8 +41,8 @@ const CustomerCard = ({
     onEdit,
 }: Props) => {
     const classes = useStyles();
-    const [changeCustomerStatus] = useMutation(changeCustomerStatusMutation);
-    const [deleteCustomer] = useMutation(deleteCustomerMutation);
+    const [changeCustomerStatus] = useMutation<changeCustomerStatus>(changeCustomerStatusMutation);
+    const [deleteCustomer] = useMutation<deleteCustomer>(deleteCustomerMutation);
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
 
@@ -108,7 +111,7 @@ const CustomerCard = ({
 
     let actions = [edit_action];
     // Actions for customer accounts (i.e. not an owner or admin)
-    if (!(customer.roles?.some(r => ['Owner', 'Admin'].includes(r.title)) || false)) {
+    if (!(customer.roles?.some(r => ['Owner', 'Admin'].includes(r.role.title)) || false)) {
         switch (customer.status) {
             case AccountStatus.UNLOCKED:
                 actions.push(lock_action);

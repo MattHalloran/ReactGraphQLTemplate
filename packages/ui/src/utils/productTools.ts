@@ -3,13 +3,13 @@
 import { addToArray, updateArray } from "./arrayTools";
 import { updateObject } from "./objectTools";
 
-export const getProductTrait = (traitName, productData) => {
+export const getProductTrait = (traitName: string, productData) => {
     if (!(typeof traitName === 'string')) return null;
     const lowered = traitName.toLowerCase();
     return productData?.traits ? productData.traits.find(t => t.name.toLowerCase() === lowered)?.value : null;
 }
 
-export const setProductTrait = (name, value, productData, createIfNotExists=false) => {
+export const setProductTrait = (name: string, value, productData, createIfNotExists=false) => {
     if (!productData?.traits) return null;
     if (!(typeof name === 'string')) return null;
     const lowered = name.toLowerCase();

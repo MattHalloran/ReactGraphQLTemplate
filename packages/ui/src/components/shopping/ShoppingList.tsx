@@ -3,14 +3,17 @@ import { useParams, useHistory } from "react-router-dom";
 import { productsQuery } from 'graphql/query';
 import { upsertOrderItemMutation } from 'graphql/mutation';
 import { useQuery, useMutation } from '@apollo/client';
-import { getProductTrait, LINKS, SORT_OPTIONS } from "utils";
+import { getProductTrait, LINKS } from "utils";
 import {
     ProductCard,
     ProductDialog
 } from 'components';
 import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from "graphql/utils/wrappers";
-import { CommonProps } from 'types';
+import { CommonProps, Product, Sku } from 'types';
+import { products, productsVariables, products_products } from "graphql/generated/products";
+import { upsertOrderItem } from "graphql/generated/upsertOrderItem";
+import { SkuSortBy } from "graphql/generated/globalTypes";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -21,7 +24,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface Props {
-    sortBy: string;
+    sortBy: SkuSortBy;
     filters: {};
     searchString: string;
 }
@@ -29,32 +32,32 @@ interface Props {
 export const ShoppingList = ({
     onSessionUpdate,
     cart,
-    sortBy = SORT_OPTIONS[0].value,
+    sortBy = SkuSortBy.AZ,
     filters,
     searchString = '',
 }: Pick<CommonProps, 'onSessionUpdate' | 'cart'> & Props) => {
     const classes = useStyles();
     // Product data for all visible products (i.e. not filtered)
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
     const urlParams = useParams<{sku?: string}>();
     // Find current product and current sku
-    const currProduct: any = Array.isArray(products) ? products.find((p: any) => p.skus.some(s => s.sku === urlParams.sku)) : null;
-    const currSku = currProduct?.skus ? currProduct.skus.find(s => s.sku === urlParams.sku) : null;
-    const { data: productData } = useQuery(productsQuery,  { variables: { sortBy, searchString, active: true } });
-    const [upsertOrderItem] = useMutation(upsertOrderItemMutation);
+    const currProduct: Product | null = products?.find((p: Product) => p?.skus?.some((s: Sku) => s.sku === urlParams.sku)) ?? null;
+    const currSku = currProduct?.skus ? currProduct.skus.find((s: Sku) => s.sku === urlParams.sku) : null;
+    const { data: productData } = useQuery<products, productsVariables>(productsQuery,  { variables: { sortBy, searchString } });
+    const [upsertOrderItem] = useMutation<upsertOrderItem>(upsertOrderItemMutation);
 
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
     // Determine which skus will be visible to the customer (i.e. not filtered out)
     useEffect(() => {
         if (!filters || Object.values(filters).length === 0) {
-            setProducts(productData?.products);
+            setProducts(productData?.products ?? []);
             return;
         }
-        let filtered_products: any = [];
-        for (const product of productData?.products) {
+        let filtered_products: products_products[] = [];
+        for (const product of productData?.products ?? []) {
             let found = false;
             for (const [key, value] of Object.entries(filters)) {
                 if (found) break;

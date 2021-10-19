@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 import { COOKIE, OrderStatus, ValueOf } from '@local/shared';
+import { SkuSortBy } from 'graphql/generated/globalTypes';
 
 export const ORDER_FILTERS = [
     {
@@ -47,31 +48,31 @@ export const ORDER_FILTERS = [
 export const SORT_OPTIONS = [
     {
         label: 'A-Z',
-        value: 'AZ',
+        value: SkuSortBy.AZ,
     },
     {
         label: 'Z-A',
-        value: 'ZA',
+        value: SkuSortBy.ZA,
     },
     {
         label: 'Price: Low to High',
-        value: 'PriceLowHigh',
+        value: SkuSortBy.PriceLowHigh,
     },
     {
         label: 'Price: High to Low',
-        value: 'PriceHighLow',
+        value: SkuSortBy.PriceHighLow,
     },
     {
         label: 'Featured',
-        value: 'Featured',
+        value: SkuSortBy.Featured,
     },
     {
         label: 'Newest',
-        value: 'Newest',
+        value: SkuSortBy.Newest,
     },
     {
         label: 'Oldest',
-        value: 'Oldest',
+        value: SkuSortBy.Oldest,
     }
 ]
 

@@ -17,6 +17,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
 import { CommonProps } from 'types';
+import { writeAssets } from 'graphql/generated/writeAssets';
 
 const componentStyles = (theme: Theme) => ({
     tall: {
@@ -45,7 +46,7 @@ export const AdminContactPage = ({
     const classes = useStyles();
     const theme = useTheme();
     const [hours, setHours] = useState('');
-    const [updateHours] = useMutation(writeAssetsMutation);
+    const [updateHours] = useMutation<writeAssets>(writeAssetsMutation);
 
     useEffect(() => {
         setHours(business?.hours);

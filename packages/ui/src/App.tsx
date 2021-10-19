@@ -21,6 +21,8 @@ import { readAssetsQuery } from 'graphql/query/readAssets';
 import { loginMutation } from 'graphql/mutation';
 import Lato from 'assets/fonts/Lato.woff';
 import { Business, Cart, UserRoles } from 'types';
+import { readAssets, readAssetsVariables } from 'graphql/generated/readAssets';
+import { login } from 'graphql/generated/login';
 
 const useStyles = makeStyles(() => ({
     "@global": {
@@ -75,8 +77,8 @@ export function App() {
     const [loading, setLoading] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [business, setBusiness] = useState<Business>(null)
-    const { data: businessData } = useQuery(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
-    const [login] = useMutation(loginMutation);
+    const { data: businessData } = useQuery<readAssets, readAssetsVariables>(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
+    const [login] = useMutation<login>(loginMutation);
 
     useEffect(() => () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -115,7 +117,7 @@ export function App() {
             return;
         }
         login().then((response) => {
-            setSession(response.data.login);
+            setSession(response?.data?.login);
         }).catch((response) => {
             if (process.env.NODE_ENV === 'development') console.error('Error: cannot login', response);
             setSession({})

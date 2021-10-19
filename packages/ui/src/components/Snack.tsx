@@ -12,7 +12,7 @@ export const SnackSeverity = {
     Error: "error",
 }
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SnackSeverity = ValueOf<typeof PUBS>;
+export type SnackSeverity = ValueOf<typeof SnackSeverity>;
 
 class SnackState {
     message?: string | null =  null;

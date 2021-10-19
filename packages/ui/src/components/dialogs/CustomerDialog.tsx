@@ -27,6 +27,9 @@ import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { useMutation } from '@apollo/client';
 import { UpTransition } from 'components';
+import { updateCustomer } from 'graphql/generated/updateCustomer';
+import { deleteCustomer } from 'graphql/generated/deleteCustomer';
+import { Customer } from 'types';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -64,7 +67,7 @@ const statusToggle = {
 }
 
 interface Props {
-    customer: any;
+    customer: Customer | null;
     open?: boolean;
     onClose: () => any;
 }
@@ -76,9 +79,9 @@ export const CustomerDialog = ({
 }: Props) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
-    const [currCustomer, setCurrCustomer] = useState(customer);
-    const [updateCustomerMut] = useMutation(updateCustomerMutation);
-    const [deleteCustomerMut] = useMutation(deleteCustomerMutation);
+    const [currCustomer, setCurrCustomer] = useState<Customer | null>(customer);
+    const [updateCustomerMut] = useMutation<updateCustomer>(updateCustomerMutation);
+    const [deleteCustomerMut] = useMutation<deleteCustomer>(deleteCustomerMutation);
 
     useEffect(() => {
         setCurrCustomer(customer);
@@ -87,7 +90,7 @@ export const CustomerDialog = ({
     const revert = () => setCurrCustomer(customer);
 
     const statusToggleData = useMemo(() => {
-        if (!(currCustomer?.status in statusToggle)) return ['', '', null, null];
+        if (!currCustomer?.status || !(currCustomer?.status in statusToggle)) return ['', '', null, null];
         return statusToggle[currCustomer.status];
     }, [currCustomer])
 
@@ -95,11 +98,11 @@ export const CustomerDialog = ({
     const toggleLock = useCallback(() => {
         mutationWrapper({
             mutation: updateCustomerMut,
-            data: { variables: { id: currCustomer.id, status: statusToggleData[2] } },
+            data: { variables: { id: currCustomer?.id, status: statusToggleData[2] } },
             successMessage: () => 'Customer updated.',
             errorMessage: () => 'Failed to update customer.'
         })
-    }, [currCustomer.id, statusToggleData, updateCustomerMut])
+    }, [currCustomer?.id, statusToggleData, updateCustomerMut])
 
     const deleteCustomer = useCallback(() => {
         mutationWrapper({
@@ -112,7 +115,7 @@ export const CustomerDialog = ({
     
     const confirmDelete = useCallback(() => {
         PubSub.publish(PUBS.AlertDialog, {
-            message: `Are you sure you want to delete the account for ${currCustomer.firstName} ${currCustomer.lastName}?`,
+            message: `Are you sure you want to delete the account for ${currCustomer?.firstName} ${currCustomer?.lastName}?`,
             firstButtonText: 'Yes',
             firstButtonClicked: deleteCustomer,
             secondButtonText: 'No',

@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
 import { useHistory } from 'react-router';
+import { resetPassword } from 'graphql/generated/resetPassword';
 
 const useStyles = makeStyles(formStyles);
 
@@ -23,7 +24,7 @@ export const ResetPasswordForm = ({
     const classes = useStyles();
     const history = useHistory();
     const urlParams = useParams<{id?: string; code?: string}>();
-    const [resetPassword, {loading}] = useMutation(resetPasswordMutation);
+    const [resetPassword, {loading}] = useMutation<resetPassword>(resetPasswordMutation);
 
     const formik = useFormik({
         initialValues: {

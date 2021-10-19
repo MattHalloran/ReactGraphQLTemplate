@@ -14,6 +14,8 @@ import {
 import { Theme, Typography } from '@material-ui/core';
 import { pageStyles } from '../styles';
 import { CommonProps } from 'types';
+import { orders, ordersVariables, orders_orders } from 'graphql/generated/orders';
+import { OrderStatus } from 'graphql/generated/globalTypes';
 
 const componentStyles = (theme: Theme) => ({
     cardFlex: {
@@ -36,8 +38,8 @@ export const AdminOrderPage = ({
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
-    const [orders, setOrders] = useState([]);
-    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter !== 'All' ? filter : undefined }, pollInterval: 5000 });
+    const [orders, setOrders] = useState<orders_orders[]>([]);
+    const { error, data, refetch } = useQuery<orders, ordersVariables>(ordersQuery, { variables: { status: filter !== 'All' ? (filter as OrderStatus) : undefined }, pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }

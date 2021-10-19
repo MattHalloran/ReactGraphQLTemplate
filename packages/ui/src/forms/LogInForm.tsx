@@ -16,6 +16,7 @@ import PubSub from 'pubsub-js';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
+import { login } from 'graphql/generated/login';
 
 const useStyles = makeStyles(formStyles);
 
@@ -25,7 +26,7 @@ export const LogInForm = ({
     const classes = useStyles();
     const history = useHistory();
     const urlParams = useParams<{code?: string}>();
-    const [login, { loading }] = useMutation(loginMutation);
+    const [login, { loading }] = useMutation<login>(loginMutation);
 
     const formik = useFormik({
         initialValues: {

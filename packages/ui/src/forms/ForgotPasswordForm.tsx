@@ -14,13 +14,14 @@ import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
+import { requestPasswordChange } from 'graphql/generated/requestPasswordChange';
 
 const useStyles = makeStyles(formStyles);
 
 export const ForgotPasswordForm = () => {
     const classes = useStyles();
     const history = useHistory();
-    const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
+    const [requestPasswordChange, {loading}] = useMutation<requestPasswordChange>(requestPasswordChangeMutation);
 
     const formik = useFormik({
         initialValues: {

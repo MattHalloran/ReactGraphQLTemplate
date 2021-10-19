@@ -7,6 +7,7 @@ import { LINKS } from 'utils';
 import { Slider } from './Slider'
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
+import { imagesByLabel, imagesByLabelVariables, imagesByLabel_imagesByLabel } from 'graphql/generated/imagesByLabel';
 
 const useStyles = makeStyles(() => ({
     hero: {
@@ -64,10 +65,10 @@ export const Hero = ({
 }: Props) => {
     let history = useHistory();
     const classes = useStyles();
-    const [images, setImages] = useState([]);
-    const { data } = useQuery(imagesByLabelQuery, { variables: { label: 'hero' } });
+    const [images, setImages] = useState<imagesByLabel_imagesByLabel[]>([]);
+    const { data } = useQuery<imagesByLabel, imagesByLabelVariables>(imagesByLabelQuery, { variables: { label: 'hero' } });
     useEffect(() => {
-        setImages(data?.imagesByLabel);
+        setImages(data?.imagesByLabel ?? []);
     }, [data])
 
     return (

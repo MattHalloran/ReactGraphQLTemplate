@@ -40,6 +40,10 @@ import PubSub from 'pubsub-js';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { UpTransition } from 'components';
+import { updateProduct } from 'graphql/generated/updateProduct';
+import { deleteProducts } from 'graphql/generated/deleteProducts';
+import { addImages } from 'graphql/generated/addImages';
+import { Product, Sku } from 'types';
 
 // Common product traits, and their corresponding field names
 const PRODUCT_TRAITS = {
@@ -105,8 +109,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface Props {
-    product: any;
-    selectedSku: any;
+    product: Product;
+    selectedSku: Sku;
     open?: boolean;
     onClose: () => any;
 }
@@ -118,13 +122,13 @@ export const EditProductDialog = ({
     onClose,
 }: Props) => {
     const classes = useStyles();
-    const [changedProduct, setChangedProduct] = useState(product);
-    const [updateProduct] = useMutation(updateProductMutation);
-    const [deleteProduct] = useMutation(deleteProductsMutation);
+    const [changedProduct, setChangedProduct] = useState<Product>(product);
+    const [updateProduct] = useMutation<updateProduct>(updateProductMutation);
+    const [deleteProduct] = useMutation<deleteProducts>(deleteProductsMutation);
 
     const [imageData, setImageData] = useState<any[]>([]);
     const [imagesChanged, setImagesChanged] = useState(false);
-    const [addImages] = useMutation(addImagesMutation);
+    const [addImages] = useMutation<addImages>(addImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
         mutationWrapper({

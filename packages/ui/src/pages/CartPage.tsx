@@ -17,7 +17,9 @@ import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from './styles';
 import { combineStyles } from 'utils';
-import { CommonProps } from 'types';
+import { Cart, CommonProps } from 'types';
+import { updateOrder } from 'graphql/generated/updateOrder';
+import { submitOrder } from 'graphql/generated/submitOrder';
 
 const componentStyles = (theme: Theme) => ({
     padTop: {
@@ -45,9 +47,9 @@ export const CartPage = ({
     let history = useHistory();
     const classes = useStyles();
     // Holds cart changes before update is final
-    const [changedCart, setChangedCart] = useState<any>(null);
-    const [updateOrder, {loading}] = useMutation(updateOrderMutation);
-    const [submitOrder] = useMutation(submitOrderMutation);
+    const [changedCart, setChangedCart] = useState<Cart | null>(null);
+    const [updateOrder, {loading}] = useMutation<updateOrder>(updateOrderMutation);
+    const [submitOrder] = useMutation<submitOrder>(submitOrderMutation);
 
     useEffect(() => {
         setChangedCart(cart);
@@ -61,11 +63,11 @@ export const CartPage = ({
         mutationWrapper({
             mutation: updateOrder,
             data: { variables: { input: { 
-                id: changedCart.id,
-                desiredDeliveryDate: changedCart.desiredDeliveryDate,
-                isDelivery: changedCart.isDelivery,
-                specialInstructions: changedCart.specialInstructions,
-                items: changedCart.items.map(i => ({ id: i.id, quantity: i.quantity }))} } },
+                id: changedCart?.id,
+                desiredDeliveryDate: changedCart?.desiredDeliveryDate,
+                isDelivery: changedCart?.isDelivery,
+                specialInstructions: changedCart?.specialInstructions,
+                items: changedCart?.items?.map(i => ({ id: i.id, quantity: i.quantity }))} } },
             successCondition: (response) => response.data.updateOrder,
             onSuccess: () => onSessionUpdate(),
             successMessage: () => 'Order successfully updated.',

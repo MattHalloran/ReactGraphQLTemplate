@@ -12,16 +12,23 @@ import {
 } from 'components';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from '../styles';
+import { imagesByLabel, imagesByLabelVariables, imagesByLabel_imagesByLabel } from 'graphql/generated/imagesByLabel';
+import { addImages } from 'graphql/generated/addImages';
+import { updateImages } from 'graphql/generated/updateImages';
 
 const useStyles = makeStyles(pageStyles);
+
+interface imageData extends imagesByLabel_imagesByLabel {
+    pos: number;
+}
 
 export const AdminGalleryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [imageData, setImageData] = useState<any[]>([]);
-    const { data: currImages, refetch: refetchImages } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery' } });
-    const [addImages] = useMutation(addImagesMutation);
-    const [updateImages] = useMutation(updateImagesMutation);
+    const [imageData, setImageData] = useState<imageData[]>([]);
+    const { data: currImages, refetch: refetchImages } = useQuery<imagesByLabel, imagesByLabelVariables>(imagesByLabelQuery, { variables: { label: 'gallery' } });
+    const [addImages] = useMutation<addImages>(addImagesMutation);
+    const [updateImages] = useMutation<updateImages>(updateImagesMutation);
 
     const uploadImages = (acceptedFiles) => {
         mutationWrapper({
@@ -37,7 +44,7 @@ export const AdminGalleryPage = () => {
         setImageData(currImages?.imagesByLabel?.map((d, index) => ({
             ...d,
             pos: index
-        })));
+        })) ?? []);
     }, [currImages])
 
     const applyChanges = useCallback((changed) => {

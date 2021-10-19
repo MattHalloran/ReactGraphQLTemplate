@@ -27,6 +27,8 @@ import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from '../styles';
+import { products, productsVariables } from 'graphql/generated/products';
+import { uploadAvailability } from 'graphql/generated/uploadAvailability';
 
 const componentStyles = () => ({
     cardFlex: {
@@ -50,8 +52,8 @@ export const AdminInventoryPage = () => {
     const [selected, setSelected] = useState<any>(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
-    const { data: productData } = useQuery(productsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
-    const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
+    const { data: productData } = useQuery<products, productsVariables>(productsQuery, { variables: { sortBy, searchString }, pollInterval: 5000 });
+    const [uploadAvailability, { loading }] = useMutation<uploadAvailability>(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
         mutationWrapper({

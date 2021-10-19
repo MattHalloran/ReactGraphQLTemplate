@@ -9,13 +9,13 @@ import { SKU_SORT_OPTIONS } from '@local/shared';
 const TITLE_FONT_SIZE = 30;
 const LIST_FONT_SIZE = 24;
 
-const centeredText = (text, doc, y) => {
+const centeredText = (text: string, doc, y: number) => {
     let textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
     let textOffset = (doc.internal.pageSize.width - textWidth) / 2;
     doc.text(textOffset, y, text);
 }
 
-const skusToTable = (skus, priceVisible) => {
+const skusToTable = (skus, priceVisible: boolean) => {
     return skus.map(sku => {
         const displayName = sku.product?.name ?? sku.sku;
         const size = isNaN(sku.size) ? sku.size : `#${sku.size}`;

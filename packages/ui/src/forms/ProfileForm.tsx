@@ -5,7 +5,7 @@ import { updateCustomerMutation } from 'graphql/mutation';
 import { profileQuery } from 'graphql/query';
 import { useFormik } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
-import { combineStyles, PUBS } from 'utils';
+import { arrayValueFromDot, combineStyles, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { Button, Container, FormHelperText, Grid, TextField, Checkbox, FormControlLabel, Theme } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
@@ -14,6 +14,8 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import { makeStyles } from '@material-ui/styles';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
+import { profile } from 'graphql/generated/profile';
+import { updateCustomer } from 'graphql/generated/updateCustomer';
 
 const componentStyles = (theme: Theme) => ({
     buttons: {
@@ -30,8 +32,8 @@ const useStyles = makeStyles(combineStyles(formStyles, componentStyles));
 export const ProfileForm = () => {
     const classes = useStyles()
     const [editing, setEditing] = useState(false);
-    const { data: profile } = useQuery(profileQuery);
-    const [updateCustomer, { loading }] = useMutation(updateCustomerMutation);
+    const { data: profile } = useQuery<profile>(profileQuery);
+    const [updateCustomer, { loading }] = useMutation<updateCustomer>(updateCustomerMutation);
 
     const formik = useFormik({
         enableReinitialize: true,
@@ -40,10 +42,10 @@ export const ProfileForm = () => {
             lastName: profile?.profile?.lastName ?? '',
             business: profile?.profile?.business?.name ?? '',
             pronouns: profile?.profile?.pronouns ?? '',
-            email: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].emailAddress : '',
-            phone: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].number : '1',
+            email: arrayValueFromDot(profile, 'profile.emails', 0)?.emailAddress ?? '',
+            phone: arrayValueFromDot(profile, 'profile.phones', 0)?.number ?? '1',
             theme: profile?.profile?.theme ?? 'light',
-            marketingEmails: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].receivesDeliveryUpdates : false,
+            marketingEmails: arrayValueFromDot(profile, 'profile.emails', 0)?.receivesDeliveryUpdates ?? false,
             currentPassword: '',
             newPassword: '',
             newPasswordConfirmation: ''
@@ -51,32 +53,32 @@ export const ProfileForm = () => {
         validationSchema: profileSchema,
         onSubmit: (values) => {
             let input = ({
-                id: profile.profile.id,
+                id: profile?.profile?.id,
                 firstName: values.firstName,
                 lastName: values.lastName,
                 business: {
-                    id: profile.profile.business.id,
+                    id: profile?.profile?.business?.id,
                     name: values.business
                 },
                 pronouns: values.pronouns,
                 emails: [
                     {
-                        id: profile?.profile?.emails?.length > 0 ? profile.profile.emails[0].id : '',
+                        id: arrayValueFromDot(profile, 'profile.emails', 0)?.id ?? '',
                         emailAddress: values.email,
                         receivesDeliveryUpdates: values.marketingEmails
                     }
                 ],
                 phones: [
                     {
-                        id: profile?.profile?.phones?.length > 0 ? profile.profile.phones[0].id : '',
+                        id: arrayValueFromDot(profile, 'profile.phones', 0)?.emailAddress ?? '',
                         number: values.phone
                     }
                 ],
                 theme: values.theme,
             });
             // Only add email and phone ids if they previously existed
-            if (profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
-            if (profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
+            if (profile?.profile?.emails && profile?.profile?.emails?.length > 0) input.emails[0].id = profile.profile.emails[0].id;
+            if (profile?.profile?.phones && profile?.profile?.phones?.length > 0) input.phones[0].id = profile.profile.phones[0].id;
             mutationWrapper({
                 mutation: updateCustomer,
                 data: {

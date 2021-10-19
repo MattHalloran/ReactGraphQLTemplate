@@ -20,6 +20,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
+import { signUp } from 'graphql/generated/signUp';
 
 const componentStyles = () => ({
     phoneInput: {
@@ -36,7 +37,7 @@ export const SignUpForm = ({
     const classes = useStyles();
     const theme = useTheme();
     const history = useHistory();
-    const [signUp, { loading }] = useMutation(signUpMutation);
+    const [signUp, { loading }] = useMutation<signUp>(signUpMutation);
 
     const formik = useFormik({
         initialValues: {

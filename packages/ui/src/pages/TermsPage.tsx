@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { Theme } from "@material-ui/core";
 import { CommonProps } from 'types';
+import { readAssets, readAssetsVariables } from "graphql/generated/readAssets";
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -23,14 +24,14 @@ export const TermsPage = ({
     const classes = useStyles();
     const theme = useTheme();
     const [terms, setTerms] = useState<string | null>(null);
-    const { data: termsData } = useQuery(readAssetsQuery, { variables: { files: ['terms.md'] } });
+    const { data: termsData } = useQuery<readAssets, readAssetsVariables>(readAssetsQuery, { variables: { files: ['terms.md'] } });
 
     useEffect(() => {
         if (termsData === undefined) return;
         let data = termsData.readAssets[0];
         // Replace variables
         const business_fields = Object.keys(convertToDot(business));
-        business_fields.forEach(f => data = data.replaceAll(`<${f}>`, valueFromDot(business, f) || ''));
+        business_fields.forEach(f => data = data?.replaceAll(`<${f}>`, valueFromDot(business, f) || '') ?? '');
         setTerms(data);
     }, [termsData, business])
 

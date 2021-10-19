@@ -22,6 +22,7 @@ import { addCustomerMutation } from 'graphql/mutation';
 import { useFormik } from 'formik';
 import { useMutation } from '@apollo/client';
 import { UpTransition } from 'components';
+import { addCustomer } from 'graphql/generated/addCustomer';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -67,7 +68,7 @@ export const NewCustomerDialog = ({
 }: Props) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
-    const [addCustomer] = useMutation(addCustomerMutation);
+    const [addCustomer] = useMutation<addCustomer>(addCustomerMutation);
 
     const formik = useFormik({
         initialValues: {

@@ -17,6 +17,7 @@ import {
 } from '@material-ui/icons';
 import { printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
+import { traitOptions } from 'graphql/generated/traitOptions';
 
 const useStyles = makeStyles((theme: Theme) => ({
     drawerPaper: {
@@ -50,7 +51,7 @@ export const ShoppingPage = ({
 }: Props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const { data: traitOptionsData } = useQuery(traitOptionsQuery);
+    const { data: traitOptionsData } = useQuery<traitOptions>(traitOptionsQuery);
     const [traitOptions, setTraitOptions] = useState({});
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);

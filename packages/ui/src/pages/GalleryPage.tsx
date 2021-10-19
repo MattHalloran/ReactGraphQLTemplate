@@ -9,6 +9,7 @@ import { useTheme } from '@material-ui/core';
 import { imagesByLabelQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { IMAGE_SIZE, SERVER_URL } from '@local/shared';
+import { imagesByLabel, imagesByLabelVariables } from 'graphql/generated/imagesByLabel';
 
 const useStyles = makeStyles(() => ({
     imageList: {
@@ -35,11 +36,17 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
+interface imageData {
+    alt: string | null;
+    src: string;
+    thumbnail: string;
+}
+
 export const GalleryPage = () => {
     const classes = useStyles();
     const theme = useTheme();
-    const [images, setImages] = useState([]);
-    const { data: imageData, error } = useQuery(imagesByLabelQuery, { variables: { label: 'gallery' } });
+    const [images, setImages] = useState<imageData[]>([]);
+    const { data: imageData, error } = useQuery<imagesByLabel, imagesByLabelVariables>(imagesByLabelQuery, { variables: { label: 'gallery' } });
 
     if (error) PubSub.publish(PUBS.Snack, { message: error.message ?? 'Unknown error occurred', severity: 'error', data: error });
 
@@ -48,11 +55,11 @@ export const GalleryPage = () => {
             setImages([]);
             return;
         }
-        setImages(imageData.imagesByLabel.map((data) => ({ 
+        setImages(imageData?.imagesByLabel?.map((data) => ({ 
             alt: data.alt, 
             src: `${SERVER_URL}/${getImageSrc(data)}`, 
             thumbnail: `${SERVER_URL}/${getImageSrc(data, IMAGE_SIZE.M)}`
-        })))
+        })) ?? [])
     }, [imageData])
 
     // useHotkeys('escape', () => setCurrImg([null, null]));
