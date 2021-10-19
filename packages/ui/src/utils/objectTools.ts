@@ -18,7 +18,7 @@ export const deleteObjectKey = (object, key) => {
 // Grabs data from an object using dot notation (ex: 'parent.child.property')
 export const valueFromDot = (object, notation) => {
     function index(object, i) { return object[i] }
-    if (!notation) return null;
+    if (!object || !notation) return null;
     return notation.split('.').reduce(index, object);
 }
 

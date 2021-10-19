@@ -47,7 +47,6 @@ export const ShoppingList = ({
     const currSku = currProduct?.skus ? currProduct.skus.find((s: Sku) => s.sku === urlParams.sku) : null;
     const { data: productData } = useQuery<products, productsVariables>(productsQuery,  { variables: { sortBy, searchString } });
     const [upsertOrderItem] = useMutation<upsertOrderItem>(upsertOrderItemMutation);
-
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
     // Determine which skus will be visible to the customer (i.e. not filtered out)
@@ -80,7 +79,7 @@ export const ShoppingList = ({
         setProducts(filtered_products);
     }, [productData, filters, searchString])
 
-    const expandSku = (sku) => {
+    const expandSku = (sku: string) => {
         history.push(LINKS.Shopping + "/" + sku);
     };
 

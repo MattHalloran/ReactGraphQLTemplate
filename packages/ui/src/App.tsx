@@ -8,7 +8,6 @@ import {
 } from 'components';
 import PubSub from 'pubsub-js';
 import { PUBS, themes } from 'utils';
-import { GlobalHotKeys } from "react-hotkeys";
 import { Routes } from 'Routes';
 import { CssBaseline, CircularProgress } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
@@ -23,6 +22,7 @@ import Lato from 'assets/fonts/Lato.woff';
 import { Business, Cart, UserRoles } from 'types';
 import { readAssets, readAssetsVariables } from 'graphql/generated/readAssets';
 import { login } from 'graphql/generated/login';
+import hotkeys from 'hotkeys-js';
 
 const useStyles = makeStyles(() => ({
     "@global": {
@@ -59,13 +59,6 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const keyMap = {
-    OPEN_MENU: "left",
-    TOGGLE_MENU: "m",
-    CLOSE_MENU: "right",
-    CLOSE_MENU_OR_POPUP: ["escape", "backspace"]
-};
-
 export function App() {
     const classes = useStyles();
     // Session cookie should automatically expire in time determined by server,
@@ -80,9 +73,22 @@ export function App() {
     const { data: businessData } = useQuery<readAssets, readAssetsVariables>(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     const [login] = useMutation<login>(loginMutation);
 
-    useEffect(() => () => {
+    useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setLoading(false);
+
+        const handlers = {
+            OPEN_MENU: () => {console.log('penis');PubSub.publish(PUBS.BurgerMenuOpen, true)},
+            TOGGLE_MENU: () => {console.log('bepis');PubSub.publish(PUBS.BurgerMenuOpen, 'toggle')},
+            CLOSE_MENU: () => {console.log('yeeeeeeet');PubSub.publish(PUBS.BurgerMenuOpen, false)},
+            CLOSE_MENU_OR_POPUP: () => {
+                handlers.CLOSE_MENU();
+            }
+        }
+        hotkeys('left', handlers.OPEN_MENU);
+        hotkeys('right', handlers.CLOSE_MENU);
+        hotkeys('m', handlers.TOGGLE_MENU);
+        hotkeys('escape,backspace', handlers.CLOSE_MENU_OR_POPUP);
     }, []);
 
     useEffect(() => {
@@ -101,15 +107,6 @@ export function App() {
         setCart(session?.cart ?? null);
         setRoles(session?.roles ? session.roles.map(r => r.role) : null);
     }, [session])
-
-    const handlers = {
-        OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
-        TOGGLE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle'),
-        CLOSE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, false),
-        CLOSE_MENU_OR_POPUP: () => {
-            handlers.CLOSE_MENU();
-        },
-    };
 
     const checkLogin = useCallback((session?: any) => {
         if (session) {
@@ -150,7 +147,6 @@ export function App() {
             <ThemeProvider theme={theme}>
                 <DndProvider backend={HTML5Backend}>
                     <div id="App">
-                        <GlobalHotKeys keyMap={keyMap} handlers={handlers} />
                         <main
                             id="page-container"
                             style={{
