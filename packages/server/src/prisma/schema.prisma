@@ -268,7 +268,7 @@ model sku {
   size              Decimal?        @db.Decimal(8, 2)
   note              String?         @db.VarChar(2048)
   availability      Int             @default(0)
-  price             Decimal?        @db.Decimal(8, 2)
+  price             Decimal?        @db.Decimal(15, 2)
   status            SkuStatus       @default(ACTIVE)
   productId         String          @db.Uuid
   created_at        DateTime        @default(now()) @db.Timestamptz(6)

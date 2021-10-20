@@ -78,9 +78,9 @@ export function App() {
         setLoading(false);
 
         const handlers = {
-            OPEN_MENU: () => {console.log('penis');PubSub.publish(PUBS.BurgerMenuOpen, true)},
-            TOGGLE_MENU: () => {console.log('bepis');PubSub.publish(PUBS.BurgerMenuOpen, 'toggle')},
-            CLOSE_MENU: () => {console.log('yeeeeeeet');PubSub.publish(PUBS.BurgerMenuOpen, false)},
+            OPEN_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, true),
+            TOGGLE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, 'toggle'),
+            CLOSE_MENU: () => PubSub.publish(PUBS.BurgerMenuOpen, false),
             CLOSE_MENU_OR_POPUP: () => {
                 handlers.CLOSE_MENU();
             }
