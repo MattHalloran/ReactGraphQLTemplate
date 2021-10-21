@@ -18,7 +18,7 @@ import { DndProvider } from 'react-dnd';
 import { useMutation, useQuery } from '@apollo/client';
 import { readAssetsQuery } from 'graphql/query/readAssets';
 import { loginMutation } from 'graphql/mutation';
-import Lato from 'assets/fonts/Lato.woff';
+import Lato from 'assets/fonts/Lato.woff2';
 import { Business, Cart, UserRoles } from 'types';
 import { readAssets, readAssetsVariables } from 'graphql/generated/readAssets';
 import { login } from 'graphql/generated/login';
