@@ -132,7 +132,7 @@ Then, when you need to use the font, you can reference it like this:
     },
 ```
 
-When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/). In web development, size matters😉
+When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/tools/webfont-generator). In web development, size matters😉
 
 ## GraphQL
 [GraphQL](https://graphql.org/) is a query language for APIs. It is a faster, understandable, and modernan alternative to REST APIs.
