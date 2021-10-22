@@ -21,6 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
 import { signUp } from 'graphql/generated/signUp';
+import { useCallback } from 'react';
 
 const componentStyles = () => ({
     phoneInput: {
@@ -81,6 +82,10 @@ export const SignUpForm = ({
         },
     });
 
+    const setPronouns = useCallback((_, value) => formik.setFieldValue('pronouns', value), [formik]);
+    const toLogIn = useCallback(() => history.push(LINKS.LogIn), [history]);
+    const toForgotPassword = useCallback(() => history.push(LINKS.ForgotPassword), [history]);
+
     return (
         <form className={classes.form} onSubmit={formik.handleSubmit}>
             <Grid container spacing={2}>
@@ -118,7 +123,7 @@ export const SignUpForm = ({
                         id="pronouns"
                         options={DEFAULT_PRONOUNS}
                         value={formik.values.pronouns}
-                        onChange={(_, value) => formik.setFieldValue('pronouns', value)}
+                        onChange={setPronouns}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -225,14 +230,14 @@ export const SignUpForm = ({
             </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.LogIn)}>
+                    <Link onClick={toLogIn}>
                         <Typography className={classes.clickSize}>
                             Already have an account? Log in
                         </Typography>
                     </Link>
                 </Grid>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.ForgotPassword)}>
+                    <Link onClick={toForgotPassword}>
                         <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
                             Forgot Password?
                         </Typography>

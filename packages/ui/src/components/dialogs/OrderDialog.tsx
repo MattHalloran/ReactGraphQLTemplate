@@ -205,6 +205,8 @@ export const OrderDialog = ({
         </Grid>
     )
 
+    const onOrderChange = useCallback((data) => setChangedOrder(data), []);
+
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
@@ -227,7 +229,7 @@ export const OrderDialog = ({
             <div className={classes.container}>
                 <div className={classes.pad}>
                     <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                    <CartTable cart={order} editable={order?.status && editableStatuses.includes(order?.status)} onUpdate={(data) => setChangedOrder(data)} />
+                    <CartTable cart={order} editable={order?.status && editableStatuses.includes(order?.status)} onUpdate={onOrderChange} />
                 </div>
                 <div className={classes.bottom}>
                     {options}

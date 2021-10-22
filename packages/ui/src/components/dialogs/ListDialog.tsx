@@ -7,6 +7,7 @@ import {
     Theme
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -38,13 +39,14 @@ const ListDialog = ({
     ...props
 }: Props) => {
     const classes = useStyles();
+    const close = useCallback(() => onClose(), [onClose]);
 
     return (
         <Dialog
             PaperProps={{
                 className: classes.root,
             }}
-            onClose={() => onClose()}
+            onClose={close}
             aria-labelledby="simple-dialog-title"
             open={open}
             {...props}>

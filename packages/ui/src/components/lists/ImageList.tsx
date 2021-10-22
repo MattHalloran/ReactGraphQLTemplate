@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import update from 'immutability-helper';
 import { makeStyles } from '@material-ui/styles';
 import { ImageCard } from 'components';
@@ -44,30 +44,36 @@ export const ImageList = ({
         setSelected(-1);
     }, [selected, data, onUpdate])
 
-    const deleteImage = (index) => {
+    const deleteImage = useCallback((index) => {
         let updated = [...data];
         updated.splice(index, 1);
         onUpdate(updated);
-    }
+    }, [data, onUpdate]);
+
+    const onDialogClose = useCallback(() => setSelected(-1), []);
+
+    const imageCards = useMemo(() => (
+        data?.map((item, index) => (
+            <ImageCard
+                key={index}
+                index={index}
+                data={item}
+                onDelete={() => deleteImage(index)}
+                onEdit={() => setSelected(index)}
+                moveCard={moveCard}
+            />
+        ))
+    ), [data, deleteImage, moveCard]);
 
     return (
         <div className={classes.flexed}>
             <EditImageDialog
                 open={selected >= 0}
                 data={selected >= 0 ? data[selected] : null}
-                onClose={() => setSelected(-1)}
+                onClose={onDialogClose}
                 onSave={saveImageData}
             />
-            {data?.map((item, index) => (
-                <ImageCard
-                    key={index}
-                    index={index}
-                    data={item}
-                    onDelete={() => deleteImage(index)}
-                    onEdit={() => setSelected(index)}
-                    moveCard={moveCard}
-                />
-            ))}
+            {imageCards}
         </div>
     );
 }

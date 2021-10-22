@@ -43,8 +43,11 @@ const CustomerCard = ({
     const classes = useStyles();
     const [changeCustomerStatus] = useMutation<changeCustomerStatus>(changeCustomerStatusMutation);
     const [deleteCustomer] = useMutation<deleteCustomer>(deleteCustomerMutation);
-    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+
+    const openPhoneDialog = () => setPhoneDialogOpen(true);
+    const openEmailDialog = () => setEmailDialogOpen(true);
 
     const callPhone = (phoneLink?: string | null) => {
         setPhoneDialogOpen(false);
@@ -56,16 +59,14 @@ const CustomerCard = ({
         if (emailLink) window.open(emailLink, '_blank', 'noopener,noreferrer')
     }
 
+    const editCustomer = useCallback(() => onEdit(customer), [customer, onEdit]);
+
     const status_map = useMemo(() => ({
         [AccountStatus.DELETED]: 'Deleted',
         [AccountStatus.UNLOCKED]: 'Unlocked',
         [AccountStatus.SOFT_LOCKED]: 'Soft Locked',
         [AccountStatus.HARD_LOCKED]: 'Hard Locked',
     }), [])
-
-    const edit = () => {
-        onEdit(customer);
-    }
 
     const modifyCustomer = useCallback((status, message) => {
         mutationWrapper({
@@ -102,7 +103,7 @@ const CustomerCard = ({
     }, [customer, modifyCustomer])
 
     type Action = [(data: any) => any, any, string, any?, string?];
-    let edit_action: Action = [edit, <EditIcon className={classes.icon} />, 'Edit customer']
+    let edit_action: Action = [editCustomer, <EditIcon className={classes.icon} />, 'Edit customer']
     let unlock_action: Action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account unlocked.'), <LockOpenIcon className={classes.icon} />, 'Unlock customer account'];
     let lock_action: Action = [() => modifyCustomer(AccountStatus.HARD_LOCKED, 'Customer account locked.'), <LockIcon className={classes.icon} />, 'Lock customer account'];
     let undelete_action: Action = [() => modifyCustomer(AccountStatus.UNLOCKED, 'Customer account restored.'), <LockOpenIcon className={classes.icon} />, 'Restore deleted account'];
@@ -148,7 +149,7 @@ const CustomerCard = ({
                     data={emailList}
                     onClose={sendEmail} />
             ) : null}
-            <CardContent className={classes.content} onClick={() => onEdit(customer)}>
+            <CardContent className={classes.content} onClick={editCustomer}>
                 <Typography gutterBottom variant="h6" component="h2">
                     {customer.firstName} {customer.lastName}
                 </Typography>
@@ -166,14 +167,14 @@ const CustomerCard = ({
                 )}
                 {(phoneList && phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
-                        <IconButton onClick={() => setPhoneDialogOpen(true)}>
+                        <IconButton onClick={openPhoneDialog}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
                 {(emailList && emailList?.length > 0) ?
                     (<Tooltip title="View emails" placement="bottom">
-                        <IconButton onClick={() => setEmailDialogOpen(true)}>
+                        <IconButton onClick={openEmailDialog}>
                             <EmailIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)

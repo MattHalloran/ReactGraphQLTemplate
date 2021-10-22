@@ -102,13 +102,17 @@ export const CartPage = ({
         });
     }, [changedCart, cart, requestQuote, business]);
 
+    const toShopping = useCallback(() => history.push(LINKS.Shopping), [history]);
+
+    const onCartUpdate = useCallback((d) => setChangedCart(d), []);
+
     let options = (
         <Grid className={classes.padTop} container spacing={2}>
             <Grid className={classes.gridItem} item xs={12} sm={4}>
                 <Button 
                     fullWidth 
                     startIcon={<ArrowBackIcon />} 
-                    onClick={() => history.push(LINKS.Shopping)}
+                    onClick={toShopping}
                     disabled={loading || (changedCart !== null && !isEqual(cart, changedCart))}
                 >Continue Shopping</Button>
             </Grid>
@@ -137,7 +141,7 @@ export const CartPage = ({
                 <Typography variant="h3" component="h1">Cart</Typography>
             </div>
             { options}
-            <CartTable className={classes.padTop} cart={changedCart} onUpdate={(d) => setChangedCart(d)} />
+            <CartTable className={classes.padTop} cart={changedCart} onUpdate={onCartUpdate} />
             { options}
         </div>
     );

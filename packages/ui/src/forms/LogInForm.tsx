@@ -17,6 +17,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
 import { login } from 'graphql/generated/login';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles(formStyles);
 
@@ -52,6 +53,9 @@ export const LogInForm = ({
             })
         },
     });
+
+    const toForgotPassword = useCallback(() => history.push(LINKS.ForgotPassword), [history]);
+    const toRegister = useCallback(() => history.push(LINKS.Register), [history]);
 
     return (
         <form className={classes.form} onSubmit={formik.handleSubmit}>
@@ -95,14 +99,14 @@ export const LogInForm = ({
             </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.ForgotPassword)}>
+                    <Link onClick={toForgotPassword}>
                         <Typography className={classes.clickSize}>
                             Forgot Password?
                         </Typography>
                     </Link>
                 </Grid>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.Register)}>
+                    <Link onClick={toRegister}>
                         <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
                             Don't have an account? Sign up
                         </Typography>

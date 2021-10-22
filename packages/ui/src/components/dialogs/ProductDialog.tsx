@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import {
@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         borderRadius: 0,
     },
     icon: {
-        fill: theme.palette.mode === 'light' ? 'black': 'white',
+        fill: theme.palette.mode === 'light' ? 'black' : 'white',
     },
     optionsContainer: {
         padding: theme.spacing(2),
@@ -138,22 +138,23 @@ export const ProductDialog = ({
         const traitValue = getProductTrait(traitName, product);
         if (!traitValue) return null;
         return (
-            <div>
-                <ListItem>
-                    <ListItemAvatar>
-                        <Avatar className={classes.avatar}>
-                            <Icon alt={alt} className={classes.icon} />
-                        </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={title} secondary={traitValue} />
-                </ListItem>
-            </div>
+            <ListItem>
+                <ListItemAvatar>
+                    <Avatar className={classes.avatar}>
+                        <Icon alt={alt} className={classes.icon} />
+                    </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={title} secondary={traitValue} />
+            </ListItem>
         )
     }
 
     const handleDetailsClick = () => {
         setDetailsOpen(!detailsOpen);
     };
+
+    const selectSku = useCallback((e) => setCurrSku(e.target.value), []);
+    const onClickAddCart = useCallback(() => onAddToCart(product.name, currSku, quantity), [currSku, onAddToCart, product.name, quantity]);
 
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
@@ -162,7 +163,7 @@ export const ProductDialog = ({
                     fullWidth
                     options={orderOptions}
                     selected={currSku}
-                    handleChange={(e) => setCurrSku(e.target.value)}
+                    handleChange={selectSku}
                     inputAriaLabel='size-selector-label'
                     label="Size"
                     color={theme.palette.primary.contrastText}
@@ -170,7 +171,7 @@ export const ProductDialog = ({
             </Grid>
             <Grid item xs={6} sm={4}>
                 <QuantityBox
-                    style={{height: '100%'}}
+                    style={{ height: '100%' }}
                     min_value={0}
                     max_value={Math.max.apply(Math, product.skus.map(s => s.availability))}
                     value={quantity}
@@ -180,10 +181,10 @@ export const ProductDialog = ({
                 <Button
                     disabled={!currSku}
                     fullWidth
-                    style={{height: '100%'}}
+                    style={{ height: '100%' }}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(product.name, currSku, quantity)}
+                    onClick={onClickAddCart}
                 >Order</Button>
             </Grid>
         </Grid>
@@ -228,7 +229,7 @@ export const ProductDialog = ({
                             </Collapse>
                             : null}
                         {displayedTraitData.length > 0 ? (
-                            <Fragment>
+                            <>
                                 <ListItem button onClick={handleDetailsClick}>
                                     <ListItemIcon><InfoIcon /></ListItemIcon>
                                     <ListItemText primary="Details" />
@@ -237,7 +238,7 @@ export const ProductDialog = ({
                                 <Collapse in={detailsOpen} timeout='auto' unmountOnExit>
                                     <List>{displayedTraitData}</List>
                                 </Collapse>
-                            </Fragment>
+                            </>
                         ) : null}
                     </Grid>
                 </Grid>

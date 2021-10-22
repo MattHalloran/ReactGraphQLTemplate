@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { customersQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { PUBS } from 'utils';
@@ -33,34 +33,42 @@ export const AdminCustomerPage = () => {
     const [selectedCustomer, setSelectedCustomer] = useState<customers_customers | null>(null);
     const [newCustomerOpen, setNewCustomerOpen] = useState(false);
     const { error, data } = useQuery<customers>(customersQuery, { pollInterval: 5000 });
-    if (error) { 
+    if (error) {
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
     useEffect(() => {
         setCustomers(data?.customers ?? []);
     }, [data])
 
+    const clearSelected = useCallback(() => setSelectedCustomer(null), []);
+    const openDialog = useCallback(() => setNewCustomerOpen(true), []);
+    const closeDialog = useCallback(() => setNewCustomerOpen(false), []);
+
+    const customerCards = useMemo(() => (
+        customers?.map((c, index) =>
+            <CustomerCard
+                key={index}
+                onEdit={(data) => setSelectedCustomer(data)}
+                customer={c}
+            />)
+    ), [customers])
+
     return (
         <div id="page">
             <CustomerDialog
                 customer={selectedCustomer}
                 open={selectedCustomer !== null}
-                onClose={() => setSelectedCustomer(null)} />
+                onClose={clearSelected} />
             <NewCustomerDialog
                 open={newCustomerOpen}
-                onClose={() => setNewCustomerOpen(false)} />
+                onClose={closeDialog} />
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Customers</Typography>
-                <Button color="secondary" onClick={() => setNewCustomerOpen(true)}>Create Customer</Button>
+                <Button color="secondary" onClick={openDialog}>Create Customer</Button>
             </div>
             <div className={classes.cardFlex}>
-                {customers?.map((c, index) =>
-                <CustomerCard 
-                    key={index}
-                    onEdit={(data) => setSelectedCustomer(data)}
-                    customer={c}
-                />)}
+                {customerCards}
             </div>
         </div >
     );

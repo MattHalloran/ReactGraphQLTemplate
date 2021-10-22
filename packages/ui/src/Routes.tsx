@@ -62,6 +62,18 @@ const Routes = (props: CommonProps) => {
                 />
                 <Route
                     exact
+                    path={LINKS.Home}
+                    sitemapIndex={true}
+                    priority={1.0}
+                    changefreq="monthly"
+                    render={() => (
+                        <Page title={title('Home')} {...props}>
+                            <HomePage />
+                        </Page>
+                    )}
+                />
+                <Route
+                    exact
                     path={LINKS.About}
                     sitemapIndex={true}
                     priority={0.7}

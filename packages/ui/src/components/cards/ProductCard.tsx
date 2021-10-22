@@ -16,6 +16,7 @@ import { NoImageWithTextIcon } from 'assets/img';
 import { ImageUse, SERVER_URL } from '@local/shared';
 import { cardStyles } from './styles';
 import { Product } from 'types';
+import { useCallback } from 'react';
 
 const componentStyles = (theme: Theme) => ({
     displayImage: {
@@ -59,8 +60,10 @@ export const ProductCard = ({
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
+    const editProduct = useCallback(() => onClick({ product, selectedSku: product.skus[0] }), [product, onClick])
+
     return (
-        <Card className={classes.cardRoot} onClick={() => onClick({ product, selectedSku: product.skus[0] })}>
+        <Card className={classes.cardRoot} onClick={editProduct}>
             <CardActionArea>
                 {display}
                 <CardContent className={`${classes.content} ${classes.topMargin}`}>
@@ -71,7 +74,7 @@ export const ProductCard = ({
             </CardActionArea>
             <CardActions>
                 <Tooltip title="View" placement="bottom">
-                    <IconButton onClick={onClick}>
+                    <IconButton onClick={editProduct}>
                         <LaunchIcon className={classes.icon} />
                     </IconButton>
                 </Tooltip>

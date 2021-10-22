@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { productsQuery } from 'graphql/query';
 import { upsertOrderItemMutation } from 'graphql/mutation';
@@ -41,11 +41,11 @@ export const ShoppingList = ({
     const [products, setProducts] = useState<Product[]>([]);
     const track_scrolling_id = 'scroll-tracked';
     let history = useHistory();
-    const urlParams = useParams<{sku?: string}>();
+    const urlParams = useParams<{ sku?: string }>();
     // Find current product and current sku
     const currProduct: Product | null = products?.find((p: Product) => p?.skus?.some((s: Sku) => s.sku === urlParams.sku)) ?? null;
     const currSku = currProduct?.skus ? currProduct.skus.find((s: Sku) => s.sku === urlParams.sku) : null;
-    const { data: productData } = useQuery<products, productsVariables>(productsQuery,  { variables: { sortBy, searchString } });
+    const { data: productData } = useQuery<products, productsVariables>(productsQuery, { variables: { sortBy, searchString } });
     const [upsertOrderItem] = useMutation<upsertOrderItem>(upsertOrderItemMutation);
     // useHotkeys('Escape', () => setCurrSku([null, null, null]));
 
@@ -61,14 +61,14 @@ export const ShoppingList = ({
             for (const [key, value] of Object.entries(filters)) {
                 if (found) break;
                 const traitValue = getProductTrait(key, product);
-                if (traitValue && traitValue.toLowerCase() === (value+'').toLowerCase()) {
+                if (traitValue && traitValue.toLowerCase() === (value + '').toLowerCase()) {
                     found = true;
                     break;
                 }
                 if (!Array.isArray(product.skus)) continue;
                 for (let i = 0; i < product.skus.length; i++) {
                     const skuValue = product.skus[i][key];
-                    if (skuValue && skuValue.toLowerCase() === (value+'').toLowerCase()) {
+                    if (skuValue && skuValue.toLowerCase() === (value + '').toLowerCase()) {
                         found = true;
                         break;
                     }
@@ -103,19 +103,25 @@ export const ShoppingList = ({
         })
     }
 
+    const goBack = useCallback(() => history.goBack(), [history]);
+
+    const productsList = useMemo(() => (
+        products?.map((item, index) =>
+            <ProductCard key={index}
+                onClick={(data) => expandSku(data.selectedSku?.sku)}
+                product={item} />)
+    ), [expandSku, products])
+
     return (
         <div className={classes.root} id={track_scrolling_id}>
-            {(currProduct) ? <ProductDialog
+            {currProduct ? <ProductDialog
                 product={currProduct}
                 selectedSku={currSku}
                 onAddToCart={addToCart}
                 open={currProduct !== null}
-                onClose={() => history.goBack()} /> : null}
-            
-            {products?.map((item, index) =>
-                <ProductCard key={index}
-                    onClick={(data) => expandSku(data.selectedSku?.sku)}
-                    product={item} />)}
+                onClose={goBack} /> : null}
+
+            {productsList}
         </div>
     );
 }
