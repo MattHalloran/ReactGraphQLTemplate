@@ -41,10 +41,10 @@ export const WrappedImageList = ({
     )
 
     return (
-        <div>
+        <>
             { options}
                 <ImageList data={changed} onUpdate={(d) => setChanged(d)}/>
             { options}
-        </div>
+        </>
     );
 }

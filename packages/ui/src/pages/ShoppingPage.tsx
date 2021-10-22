@@ -130,23 +130,21 @@ export const ShoppingPage = ({
 
     return (
         <div id='page'>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={()=>{}} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={() => { }} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
                 {optionsContainer}
-                <div>
-                    <Selector
-                        fullWidth
-                        options={SORT_OPTIONS}
-                        selected={sortBy}
-                        handleChange={(e) => setSortBy(e.target.value)}
-                        inputAriaLabel='sort-selector-label'
-                        label="Sort" />
-                    <h2>Search</h2>
-                    <SearchBar className={classes.padBottom} fullWidth debounce={300} value={searchString} onChange={(newString) => setSearchString(newString)} />
-                    <h2>Filters</h2>
-                    {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
-                    {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
+                <Selector
+                    fullWidth
+                    options={SORT_OPTIONS}
+                    selected={sortBy}
+                    handleChange={(e) => setSortBy(e.target.value)}
+                    inputAriaLabel='sort-selector-label'
+                    label="Sort" />
+                <h2>Search</h2>
+                <SearchBar className={classes.padBottom} fullWidth debounce={300} value={searchString} onChange={(newString) => setSearchString(newString)} />
+                <h2>Filters</h2>
+                {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
+                {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
                     {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
-                </div>
                 {optionsContainer}
             </SwipeableDrawer>
             <div className={classes.formControl}>

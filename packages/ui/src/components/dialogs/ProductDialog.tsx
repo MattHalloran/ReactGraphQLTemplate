@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         borderRadius: 0,
     },
     icon: {
-        fill: theme.palette.mode === 'light' ? 'black': 'white',
+        fill: theme.palette.mode === 'light' ? 'black' : 'white',
     },
     optionsContainer: {
         padding: theme.spacing(2),
@@ -138,16 +138,14 @@ export const ProductDialog = ({
         const traitValue = getProductTrait(traitName, product);
         if (!traitValue) return null;
         return (
-            <div>
-                <ListItem>
-                    <ListItemAvatar>
-                        <Avatar className={classes.avatar}>
-                            <Icon alt={alt} className={classes.icon} />
-                        </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={title} secondary={traitValue} />
-                </ListItem>
-            </div>
+            <ListItem>
+                <ListItemAvatar>
+                    <Avatar className={classes.avatar}>
+                        <Icon alt={alt} className={classes.icon} />
+                    </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={title} secondary={traitValue} />
+            </ListItem>
         )
     }
 
@@ -170,7 +168,7 @@ export const ProductDialog = ({
             </Grid>
             <Grid item xs={6} sm={4}>
                 <QuantityBox
-                    style={{height: '100%'}}
+                    style={{ height: '100%' }}
                     min_value={0}
                     max_value={Math.max.apply(Math, product.skus.map(s => s.availability))}
                     value={quantity}
@@ -180,7 +178,7 @@ export const ProductDialog = ({
                 <Button
                     disabled={!currSku}
                     fullWidth
-                    style={{height: '100%'}}
+                    style={{ height: '100%' }}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
                     onClick={() => onAddToCart(product.name, currSku, quantity)}

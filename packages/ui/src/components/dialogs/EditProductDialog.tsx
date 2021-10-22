@@ -302,20 +302,18 @@ export const EditProductDialog = ({
                             </ListItem>
                         ))}
                     </List>
-                    <div>
-                        {currSkuIndex >= 0 ?
-                            <Tooltip title="Delete SKU">
-                                <IconButton onClick={removeSku}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </Tooltip>
-                            : null}
-                        <Tooltip title="New SKU">
-                            <IconButton onClick={newSku}>
-                                <AddBoxIcon />
+                    {currSkuIndex >= 0 ?
+                        <Tooltip title="Delete SKU">
+                            <IconButton onClick={removeSku}>
+                                <DeleteIcon />
                             </IconButton>
                         </Tooltip>
-                    </div>
+                        : null}
+                    <Tooltip title="New SKU">
+                        <IconButton onClick={newSku}>
+                            <AddBoxIcon />
+                        </IconButton>
+                    </Tooltip>
                 </div>
                 <div className={classes.content}>
                     <Typography className={classes.title} variant="h5" component="h3">Edit product info</Typography>
