@@ -14,6 +14,8 @@ const useStyles = makeStyles(() => ({
         position: 'relative',
         overflow: 'hidden',
         pointerEvents: 'none',
+        height: '100vh',
+        width: '100vw',
     },
     contentWrapper: {
         position: 'absolute',

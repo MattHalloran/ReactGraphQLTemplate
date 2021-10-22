@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, Fragment } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { SliderContent } from './SliderContent';
 import { Slide } from './Slide';
 import { Dots } from './Dots';
@@ -10,8 +10,8 @@ const DEFAULT_DURATION = 1000;
 const useStyles = makeStyles({
     slider: {
         position: 'relative',
-        height: '100vh',
-        width: '100vw',
+        height: '100%',
+        width: '100%',
         margin: '0 auto',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
@@ -83,7 +83,7 @@ export const Slider = ({
                 transition={transition}
                 width={width * (slides.length)}
             >
-                <Fragment>{slides}</Fragment>
+                <>{slides}</>
             </SliderContent>
             <Dots quantity={images.length} activeIndex={slideIndex} />
         </div>

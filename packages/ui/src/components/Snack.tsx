@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconButton, Button, Snackbar, Theme, SnackbarProps } from '@material-ui/core';
 import { Close as CloseIcon } from '@material-ui/icons';
 import { PUBS } from 'utils';
@@ -82,14 +82,14 @@ function Snack() {
             onClose={() => setState(new SnackState())}
             message={Array.isArray(state.message) && state.message.length > 0 ? state.message[0] : state.message}
             action={
-                <Fragment>
+                <>
                     {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>
                         {state.buttonText}
                     </Button> : null}
                     <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(new SnackState())}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
-                </Fragment>
+                </>
             }
         />
     );

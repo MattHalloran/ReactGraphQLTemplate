@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import {
@@ -228,7 +228,7 @@ export const ProductDialog = ({
                             </Collapse>
                             : null}
                         {displayedTraitData.length > 0 ? (
-                            <Fragment>
+                            <>
                                 <ListItem button onClick={handleDetailsClick}>
                                     <ListItemIcon><InfoIcon /></ListItemIcon>
                                     <ListItemText primary="Details" />
@@ -237,7 +237,7 @@ export const ProductDialog = ({
                                 <Collapse in={detailsOpen} timeout='auto' unmountOnExit>
                                     <List>{displayedTraitData}</List>
                                 </Collapse>
-                            </Fragment>
+                            </>
                         ) : null}
                     </Grid>
                 </Grid>
