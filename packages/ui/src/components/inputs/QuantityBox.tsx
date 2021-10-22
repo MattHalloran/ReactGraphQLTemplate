@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { FormControl, IconButton, Input, InputLabel, Theme } from '@material-ui/core';
 import {
     Add as AddIcon,
@@ -71,43 +71,37 @@ export const QuantityBox = ({
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const intervalRef = useRef<NodeJS.Timer | null>(null);
 
-    const updateValue = (quantity) => {
+    const updateValue = useCallback((quantity) => {
         if (quantity > max_value) quantity = max_value;
         if (quantity < min_value) quantity = min_value;
         valueFunc(quantity);
-    }
+    }, [max_value, min_value, valueFunc])
 
-    const incTick = () => {
-        updateValue(v => Math.min(v + step, max_value));
-    }
-
-    const decTick = () => {
-        updateValue(v => v - step);
-    }
-
-    const startTouch = (adding: boolean) => {
-        timeoutRef.current = setTimeout(() => {
-            if (adding)
-                intervalRef.current = setInterval(incTick, HOLD_INTERVAL);
-            else
-                intervalRef.current = setInterval(decTick, HOLD_INTERVAL);
-        }, HOLD_DELAY)
-    }
+    const startTouch = (tick: () => void) => timeoutRef.current = setTimeout(() => setInterval(tick, HOLD_INTERVAL), HOLD_DELAY);
+    const startTouchMinus = useCallback(() => startTouch(() => updateValue((v: number) => Math.min(v + step, max_value))), [max_value, step, updateValue]);
+    const startTouchPlus = useCallback(() => startTouch(() => updateValue((v: number) => v - step)), [step, updateValue]);
 
     const stopTouch = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         if (intervalRef.current) clearInterval(intervalRef.current);
     }
 
+    const clickMinus = useCallback(() => updateValue(value*1 - step), [step, updateValue, value]);
+    const clickPlus = useCallback(() => updateValue(value*1 + step), [step, updateValue, value]);
+
+    const inputChange = useCallback((e) => updateValue(e.target.value), [updateValue]);
+
+    const preventDefault = useCallback((e) => e.preventDefault(), []);
+
     return (
         <div className={classes.root} style={style} {...props}>
             <IconButton
                 className={`${classes.button} ${classes.minus}`}
                 aria-label='minus'
-                onClick={() => updateValue(value*1 - step)}
-                onTouchStart={() => startTouch(false)}
+                onClick={clickMinus}
+                onTouchStart={startTouchMinus}
                 onTouchEnd={stopTouch}
-                onContextMenu={(e) => e.preventDefault()}>
+                onContextMenu={preventDefault}>
                 <RemoveIcon />
             </IconButton>
             <FormControl className={classes.main}>
@@ -119,16 +113,16 @@ export const QuantityBox = ({
                     type="number"
                     inputProps={{ min: min_value, max: max_value }}
                     value={value}
-                    onChange={(e) => updateValue(e.target.value)}
+                    onChange={inputChange}
                 />
             </FormControl>
             <IconButton
                 className={`${classes.button} ${classes.plus}`}
                 aria-label='plus'
-                onClick={() => updateValue(value*1 + step)}
-                onTouchStart={() => startTouch(true)}
+                onClick={clickPlus}
+                onTouchStart={startTouchPlus}
                 onTouchEnd={stopTouch}
-                onContextMenu={(e) => e.preventDefault()} >
+                onContextMenu={preventDefault} >
                 <AddIcon />
             </IconButton>
         </div>

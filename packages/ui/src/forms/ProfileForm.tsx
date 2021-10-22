@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { DEFAULT_PRONOUNS, profileSchema } from '@local/shared';
 import { useMutation, useQuery } from '@apollo/client';
 import { updateCustomerMutation } from 'graphql/mutation';
@@ -98,6 +98,9 @@ export const ProfileForm = () => {
         setEditing(edit => !edit);
     }
 
+    const setTheme = useCallback((e) => { formik.handleChange(e); PubSub.publish(PUBS.Theme, e.target.value) }, [formik])
+    const setPronouns = useCallback((_, value) => formik.setFieldValue('pronouns', value), [formik]);
+
     return (
         <form className={classes.form} onSubmit={formik.handleSubmit}>
             <fieldset disabled={!editing}>
@@ -137,7 +140,7 @@ export const ProfileForm = () => {
                                 id="pronouns"
                                 options={DEFAULT_PRONOUNS}
                                 value={formik.values.pronouns}
-                                onChange={(_, value) => formik.setFieldValue('pronouns', value)}
+                                onChange={setPronouns}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -196,7 +199,7 @@ export const ProfileForm = () => {
                                     name="theme"
                                     aria-label="theme-check"
                                     value={formik.values.theme}
-                                    onChange={(e) => { formik.handleChange(e); PubSub.publish(PUBS.Theme, e.target.value) }}
+                                    onChange={setTheme}
                                 >
                                     <FormControlLabel value="light" control={<Radio />} label="Light ☀️" />
                                     <FormControlLabel value="dark" control={<Radio />} label="Dark 🌙" />

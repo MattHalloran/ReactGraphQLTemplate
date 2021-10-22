@@ -10,6 +10,7 @@ import {
 import { CopyrightBreadcrumbs } from 'components';
 import { useHistory } from 'react-router';
 import { CommonProps } from 'types';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -53,6 +54,11 @@ export const Footer = ({
         ['contact-email', 'Email Us', business?.EMAIL?.Link, business?.EMAIL?.Label, EmailIcon],
     ]
 
+    const toAbout = useCallback(() => history.push(LINKS.About), [history]);
+    const toGallery = useCallback(() => history.push(LINKS.Gallery), [history]);
+    const toShopping = useCallback(() => history.push(LINKS.Shopping), [history]);
+    const availabilityPrint = useCallback(() => printAvailability(Array.isArray(userRoles), business?.BUSINESS_NAME?.Long), [business?.BUSINESS_NAME?.Long, userRoles]);
+
     return (
         <div className={classes.root}>
             <Grid container justifyContent='center' spacing={1}>
@@ -61,16 +67,16 @@ export const Footer = ({
                         <ListItem component="h3" >
                             <ListItemText className={classes.upper} primary="Resources" />
                         </ListItem>
-                        <ListItem button component="a" onClick={() => history.push(LINKS.About)} >
+                        <ListItem button component="a" onClick={toAbout} >
                             <ListItemText primary="About Us" />
                         </ListItem>
-                        <ListItem button component="a" onClick={() => history.push(LINKS.Gallery)} >
+                        <ListItem button component="a" onClick={toGallery} >
                             <ListItemText primary="Gallery" />
                         </ListItem>
-                        <ListItem button component="a" onClick={() => history.push(LINKS.Shopping)} >
+                        <ListItem button component="a" onClick={toShopping} >
                             <ListItemText primary="Shop" />
                         </ListItem>
-                        <ListItem button component="a" onClick={() => printAvailability(Array.isArray(userRoles), business?.BUSINESS_NAME?.Long)} >
+                        <ListItem button component="a" onClick={availabilityPrint} >
                             <ListItemText primary="Print Availability" />
                         </ListItem>
                     </List>

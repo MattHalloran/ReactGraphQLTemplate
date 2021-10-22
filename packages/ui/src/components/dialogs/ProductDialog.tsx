@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import {
@@ -153,6 +153,9 @@ export const ProductDialog = ({
         setDetailsOpen(!detailsOpen);
     };
 
+    const selectSku = useCallback((e) => setCurrSku(e.target.value), []);
+    const onClickAddCart = useCallback(() => onAddToCart(product.name, currSku, quantity), [currSku, onAddToCart, product.name, quantity]);
+
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
             <Grid item xs={6} sm={4}>
@@ -160,7 +163,7 @@ export const ProductDialog = ({
                     fullWidth
                     options={orderOptions}
                     selected={currSku}
-                    handleChange={(e) => setCurrSku(e.target.value)}
+                    handleChange={selectSku}
                     inputAriaLabel='size-selector-label'
                     label="Size"
                     color={theme.palette.primary.contrastText}
@@ -181,7 +184,7 @@ export const ProductDialog = ({
                     style={{ height: '100%' }}
                     color="secondary"
                     startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCart(product.name, currSku, quantity)}
+                    onClick={onClickAddCart}
                 >Order</Button>
             </Grid>
         </Grid>

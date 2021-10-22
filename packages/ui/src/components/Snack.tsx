@@ -47,14 +47,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 function Snack() {
     const classes = useStyles();
-    const [state, setState] = useState<SnackState>(new SnackState())
-
-    function getSnackClass(severity: SnackSeverity) {
-        if (severity === SnackSeverity.Error) return classes.error;
-        if (severity === SnackSeverity.Warning) return classes.warning;
-        return classes.default;
-    }
-    let open = state.message !== null;
+    const [state, setState] = useState<SnackState>(new SnackState());
 
     useEffect(() => {
         let snackSub = PubSub.subscribe(PUBS.Snack, (_, o) => setState({ ...(new SnackState()), ...o }));
@@ -69,6 +62,15 @@ function Snack() {
         }
     }, [state])
 
+    const getSnackClass = (severity: SnackSeverity) => {
+        if (severity === SnackSeverity.Error) return classes.error;
+        if (severity === SnackSeverity.Warning) return classes.warning;
+        return classes.default;
+    }
+    let open = state.message !== null;
+
+    const resetState = () => setState(new SnackState());
+
     return (
         <Snackbar
         ContentProps={{
@@ -79,14 +81,14 @@ function Snack() {
             anchorOrigin={state.anchorOrigin}
             open={open}
             autoHideDuration={state.autoHideDuration}
-            onClose={() => setState(new SnackState())}
+            onClose={resetState}
             message={Array.isArray(state.message) && state.message.length > 0 ? state.message[0] : state.message}
             action={
                 <>
                     {state.buttonText ? <Button className={classes.button} variant="text" size="small" onClick={state.buttonClicked}>
                         {state.buttonText}
                     </Button> : null}
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setState(new SnackState())}>
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={resetState}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
                 </>

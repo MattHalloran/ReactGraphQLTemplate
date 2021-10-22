@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { AdminBreadcrumbs } from 'components';
@@ -80,6 +80,8 @@ export const AdminContactPage = ({
         </Grid>
     )
 
+    const onUpdateHours = useCallback((e) => setHours(e.target.value), []);
+
     return (
         <div id="page" className={classes.root}>
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
@@ -98,7 +100,7 @@ export const AdminContactPage = ({
                         multiline
                         rows={4}
                         value={hours}
-                        onChange={(e) => setHours(e.target.value)}
+                        onChange={onUpdateHours}
                     />
                 </Grid>
                 <Grid item sm={12} md={6}>

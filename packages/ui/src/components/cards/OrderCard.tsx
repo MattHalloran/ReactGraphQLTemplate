@@ -41,8 +41,11 @@ export const OrderCard = ({
     order,
 }: Props) => {
     const classes = useStyles();
-    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+    const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+
+    const openPhoneDialog = () => setPhoneDialogOpen(true);
+    const openEmailDialog = () => setEmailDialogOpen(true);
 
     const callPhone = (phoneLink?: string | null) => {
         setPhoneDialogOpen(false);
@@ -89,14 +92,14 @@ export const OrderCard = ({
                 <Button className={classes.button} variant="text" onClick={onEdit}>View</Button>
                 {(phoneList && phoneList?.length > 0) ?
                     (<Tooltip title="View phone numbers" placement="bottom">
-                        <IconButton onClick={() => setPhoneDialogOpen(true)}>
+                        <IconButton onClick={openPhoneDialog}>
                             <PhoneIcon className={classes.icon} />
                         </IconButton>
                     </Tooltip>)
                     : null}
                 {(emailList && emailList?.length > 0) ?
                 (<Tooltip title="View emails" placement="bottom">
-                    <IconButton onClick={() => setEmailDialogOpen(true)}>
+                    <IconButton onClick={openEmailDialog}>
                         <EmailIcon className={classes.icon} />
                     </IconButton>
                 </Tooltip>)

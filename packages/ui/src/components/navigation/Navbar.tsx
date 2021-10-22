@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Logo from 'assets/img/Logo.svg';
 import { LINKS } from 'utils';
 import { AppBar, Toolbar, Typography, Slide, useScrollTrigger, Theme } from '@material-ui/core';
@@ -96,11 +96,13 @@ export const Navbar = ({
 
     const updateWindowDimensions = () => setShowHamburger(window.innerWidth <= SHOW_HAMBURGER_AT);
 
+    const toHome = useCallback(() => history.push(LINKS.Home), [history]);
+
     return (
         <HideOnScroll>
             <AppBar>
                 <Toolbar className={classes.root}>
-                    <div className={classes.navLogoContainer} onClick={() => history.push(LINKS.Home)}>
+                    <div className={classes.navLogoContainer} onClick={toHome}>
                         <div className={classes.navLogoDiv}>
                             <img src={Logo} alt={`${business?.BUSINESS_NAME?.Short} Logo`} className={classes.navLogo} />
                         </div>

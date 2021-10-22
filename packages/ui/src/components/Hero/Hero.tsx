@@ -1,5 +1,5 @@
 // Code inspired by https://github.com/rmolinamir/hero-slider
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -73,6 +73,8 @@ export const Hero = ({
         setImages(data?.imagesByLabel ?? []);
     }, [data])
 
+    const toShopping = useCallback(() => history.push(LINKS.Shopping), [history]);
+
     return (
         <div className={classes.hero}>
             <Slider images={images} autoPlay={true} />
@@ -83,7 +85,7 @@ export const Hero = ({
                     type="submit"
                     color="secondary"
                     className={classes.mainButton}
-                    onClick={() => history.push(LINKS.Shopping)}
+                    onClick={toShopping}
                 >
                     Request Quote
                 </Button>

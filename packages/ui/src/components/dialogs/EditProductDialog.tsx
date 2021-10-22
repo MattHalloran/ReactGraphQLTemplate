@@ -244,6 +244,15 @@ export const EditProductDialog = ({
         }));
     }
 
+    const updateTraitField = useCallback((_, value: any) => setSelectedTrait(PRODUCT_TRAITS[value]), []);
+
+    const imageListUpdate = useCallback((d) => { setImageData(d); setImagesChanged(true) }, []);
+    
+    const updateSkuSku = useCallback((e) => updateSkuField('sku', e.target.value), [updateSkuField]);
+    const updateSkuSize = useCallback((e) => updateSkuField('size', e.target.value), [updateSkuField]);
+    const updateSkuPrice = useCallback((e) => updateSkuField('price', e.target.value), [updateSkuField]);
+    const updateSkuAvailability = useCallback((e) => updateSkuField('availability', e.target.value), [updateSkuField]);
+
     let changes_made = !isEqual(product, changedProduct) || imagesChanged;
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
@@ -334,7 +343,7 @@ export const EditProductDialog = ({
                                 freeSolo
                                 id="setTraitField"
                                 options={Object.keys(PRODUCT_TRAITS)}
-                                onChange={(_, value: any) => setSelectedTrait(PRODUCT_TRAITS[value])}
+                                onChange={updateTraitField}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -368,7 +377,7 @@ export const EditProductDialog = ({
                         </Grid>
                         {/* And edit existing images */}
                         <Grid item xs={12}>
-                            <ImageList data={imageData} onUpdate={(d) => { setImageData(d); setImagesChanged(true) }} />
+                            <ImageList data={imageData} onUpdate={imageListUpdate} />
                         </Grid>
                     </Grid>
                     <Typography className={classes.title} variant="h5" component="h3">Edit SKU info</Typography>
@@ -379,7 +388,7 @@ export const EditProductDialog = ({
                                 size="small"
                                 label="Product Code"
                                 value={getSkuField('sku')}
-                                onChange={e => updateSkuField('sku', e.target.value)}
+                                onChange={updateSkuSku}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -388,7 +397,7 @@ export const EditProductDialog = ({
                                 size="small"
                                 label="SKU Size"
                                 value={getSkuField('size')}
-                                onChange={e => updateSkuField('size', e.target.value)}
+                                onChange={updateSkuSize}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -397,7 +406,7 @@ export const EditProductDialog = ({
                                 size="small"
                                 label="Price"
                                 value={getSkuField('price')}
-                                onChange={e => updateSkuField('price', e.target.value)}
+                                onChange={updateSkuPrice}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -406,7 +415,7 @@ export const EditProductDialog = ({
                                 size="small"
                                 label="Availability"
                                 value={getSkuField('availability')}
-                                onChange={e => updateSkuField('availability', e.target.value)}
+                                onChange={updateSkuAvailability}
                             />
                         </Grid>
                     </Grid>

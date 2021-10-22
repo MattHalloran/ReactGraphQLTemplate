@@ -26,6 +26,9 @@ import hotkeys from 'hotkeys-js';
 
 const useStyles = makeStyles(() => ({
     "@global": {
+        html: {
+            overflowX: 'hidden',
+        },
         body: {
             backgroundColor: 'black',
         },

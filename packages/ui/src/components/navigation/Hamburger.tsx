@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ContactInfo } from 'components';
 import { actionsToList, createActions, getUserActions, LINKS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
@@ -85,15 +85,16 @@ export const Hamburger = ({
         setSocialOpen(!socialOpen);
     }
 
-    const newTab = (link) => {
-        window.open(link, "_blank");
-    }
+    const newTab = useCallback((link: string) => window.open(link, "_blank"), []);
 
     const nav_actions = getUserActions({ userRoles, cart });
     const about_actions = createActions([
         ['About Us', 'about', LINKS.About, null, InfoIcon, 0],
         ['Gallery', 'gallery', LINKS.Gallery, null, PhotoLibraryIcon, 0]
     ]);
+
+    const openFacebook = useCallback(() => newTab(business?.SOCIAL?.Facebook), [business, newTab]);
+    const openInstagram = useCallback(() => newTab(business?.SOCIAL?.Instagram), [business, newTab]);
 
     return (
         <>
@@ -121,13 +122,13 @@ export const Hamburger = ({
                         {socialOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={socialOpen} timeout="auto" unmountOnExit>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Facebook)}>
+                        <ListItem className={classes.menuItem} button onClick={openFacebook}>
                             <ListItemIcon>
                                 <FacebookIcon className={classes.facebook} />
                             </ListItemIcon>
                             <ListItemText primary="Facebook" />
                         </ListItem>
-                        <ListItem className={classes.menuItem} button onClick={() => newTab(business?.SOCIAL?.Instagram)}>
+                        <ListItem className={classes.menuItem} button onClick={openInstagram}>
                             <ListItemIcon>
                                 <InstagramIcon className={classes.instagram} />
                             </ListItemIcon>
