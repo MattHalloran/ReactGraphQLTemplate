@@ -108,7 +108,7 @@ By default, this site automatically sets dark or light theme depending on your b
 ## Custom fonts
 The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into [packages/ui/public/index.html](packages/ui/public/index.html). Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
 
-Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a .woff file for your desired font. This can be placed in [packages/ui/src/assets/fonts](packages/ui/src/assets/fonts), and registered in the global css section of [packages/ui/src/App.ts]() like so:  
+Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a `.woff` or `.woff2` file for your desired font. This can be placed in [packages/ui/src/assets/fonts](packages/ui/src/assets/fonts), and registered in the global css section of [packages/ui/src/App.ts]() like so:  
 ```javascript
     import SakBunderan from './assets/fonts/SakBunderan.woff';
     ...
@@ -131,6 +131,8 @@ Then, when you need to use the font, you can reference it like this:
         fontFamily: `SakBunderan`,
     },
 ```
+
+When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/). In web development, size matters😉
 
 ## GraphQL
 [GraphQL](https://graphql.org/) is a query language for APIs. It is a faster, understandable, and modernan alternative to REST APIs.
@@ -176,7 +178,6 @@ Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only 
     3. Repeat in each package (packages/server, packages/shared, packages/ui)  
 Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
 - Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
-- Add `<link rel="preconnect" href="https://yourwebsitebackend.com">` (with your actual backend address) to [index.html](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/ui/public/index.html). See [this article](https://web.dev/uses-rel-preconnect/?utm_source=lighthouse&utm_medium=devtools) for more info.
 - Peek inside code bundles - Seeing what's inside the code bundles can help you determine what areas of the code should be lazy loaded, and what is taking the most space. To do this:  
     1. `cd packages/ui ` 
     2. `yarn build`

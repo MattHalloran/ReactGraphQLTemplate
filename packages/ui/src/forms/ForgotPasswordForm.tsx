@@ -14,13 +14,15 @@ import { LINKS } from 'utils';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
+import { requestPasswordChange } from 'graphql/generated/requestPasswordChange';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles(formStyles);
 
 export const ForgotPasswordForm = () => {
     const classes = useStyles();
     const history = useHistory();
-    const [requestPasswordChange, {loading}] = useMutation(requestPasswordChangeMutation);
+    const [requestPasswordChange, {loading}] = useMutation<requestPasswordChange>(requestPasswordChangeMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -37,6 +39,9 @@ export const ForgotPasswordForm = () => {
             })
         },
     });
+
+    const toRegister = useCallback(() => history.push(LINKS.Register), [history]);
+    const toLogIn = useCallback(() => history.push(LINKS.LogIn), [history]);
 
     return (
         <form className={classes.form} onSubmit={formik.handleSubmit}>
@@ -67,14 +72,14 @@ export const ForgotPasswordForm = () => {
             </Button>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.LogIn)}>
+                    <Link onClick={toLogIn}>
                         <Typography className={classes.clickSize}>
                             Remember? Back to Log In
                         </Typography>
                     </Link>
                 </Grid>
                 <Grid item xs={6}>
-                    <Link onClick={() => history.push(LINKS.Register)}>
+                    <Link onClick={toRegister}>
                         <Typography className={`${classes.clickSize} ${classes.linkRight}`}>
                             Don't have an account? Sign up
                         </Typography>

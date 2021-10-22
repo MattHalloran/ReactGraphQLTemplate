@@ -17,6 +17,7 @@ import {
 } from '@material-ui/icons';
 import { printAvailability } from 'utils';
 import { makeStyles } from '@material-ui/styles';
+import { traitOptions } from 'graphql/generated/traitOptions';
 
 const useStyles = makeStyles((theme: Theme) => ({
     drawerPaper: {
@@ -50,7 +51,7 @@ export const ShoppingPage = ({
 }: Props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const { data: traitOptionsData } = useQuery(traitOptionsQuery);
+    const { data: traitOptionsData } = useQuery<traitOptions>(traitOptionsQuery);
     const [traitOptions, setTraitOptions] = useState({});
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
@@ -121,43 +122,46 @@ export const ShoppingPage = ({
         </Grid>
     );
 
-    let traitList = [
+    const traitList = [
         ['hasWarpDrive', 'Has Warp Drive?'],
         ['note', 'Note'],
         ['topSpeed', 'Top Speed'],
     ]
 
+    const closeFilter = useCallback(() => PubSub.publish(PUBS.ArrowMenuOpen, false), []);
+    const toggleFilterOpen = useCallback(() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle'), []);
+
+    const onSortChange = useCallback((e) => setSortBy(e.target.value), []);
+    const onSearchChange = useCallback((newString) => setSearchString(newString), []);
+    const availabilityPrint = useCallback(() => printAvailability(true, business?.BUSINESS_NAME?.Long), [business?.BUSINESS_NAME?.Long]);
+
     return (
         <div id='page'>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={()=>{}} onClose={() => PubSub.publish(PUBS.ArrowMenuOpen, false)}>
+            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={() => { }} onClose={closeFilter}>
                 {optionsContainer}
-                <div>
-                    <Selector
-                        fullWidth
-                        options={SORT_OPTIONS}
-                        selected={sortBy}
-                        handleChange={(e) => setSortBy(e.target.value)}
-                        inputAriaLabel='sort-selector-label'
-                        label="Sort" />
-                    <h2>Search</h2>
-                    <SearchBar className={classes.padBottom} fullWidth debounce={300} value={searchString} onChange={(newString) => setSearchString(newString)} />
-                    <h2>Filters</h2>
-                    {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
-                    {/* {filters_to_checkbox(['Yes', 'No'], 'Jersey Native')}
-                    {filters_to_checkbox(['Yes', 'No'], 'Discountable')} */}
-                </div>
+                <Selector
+                    fullWidth
+                    options={SORT_OPTIONS}
+                    selected={sortBy}
+                    handleChange={onSortChange}
+                    inputAriaLabel='sort-selector-label'
+                    label="Sort" />
+                <h2>Search</h2>
+                <SearchBar className={classes.padBottom} fullWidth debounce={300} value={searchString} onChange={onSearchChange} />
+                <h2>Filters</h2>
+                {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
                 {optionsContainer}
             </SwipeableDrawer>
             <div className={classes.formControl}>
                 <Button
                     color="secondary"
                     startIcon={<FilterListIcon />}
-                    onClick={() => PubSub.publish(PUBS.ArrowMenuOpen, 'toggle')}
+                    onClick={toggleFilterOpen}
                 >Filter</Button>
                 <Button
                     color="secondary"
                     startIcon={<PrintIcon />}
-                    onClick={() => printAvailability(true, business?.BUSINESS_NAME?.Long)}
+                    onClick={availabilityPrint}
                 >Print</Button>
             </div>
             <ShoppingList

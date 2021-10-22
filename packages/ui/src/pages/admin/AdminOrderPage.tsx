@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ordersQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
 import { combineStyles, ORDER_FILTERS, PUBS } from 'utils';
@@ -14,6 +14,8 @@ import {
 import { Theme, Typography } from '@material-ui/core';
 import { pageStyles } from '../styles';
 import { CommonProps } from 'types';
+import { orders, ordersVariables, orders_orders } from 'graphql/generated/orders';
+import { OrderStatus } from 'graphql/generated/globalTypes';
 
 const componentStyles = (theme: Theme) => ({
     cardFlex: {
@@ -36,8 +38,8 @@ export const AdminOrderPage = ({
     const [filter, setFilter] = useState(ORDER_FILTERS[0].value);
     // Selected order data. Used for popup
     const [currOrder, setCurrOrder] = useState(null);
-    const [orders, setOrders] = useState([]);
-    const { error, data, refetch } = useQuery(ordersQuery, { variables: { status: filter !== 'All' ? filter : undefined }, pollInterval: 5000 });
+    const [orders, setOrders] = useState<orders_orders[]>([]);
+    const { error, data, refetch } = useQuery<orders, ordersVariables>(ordersQuery, { variables: { status: filter !== 'All' ? (filter as OrderStatus) : undefined }, pollInterval: 5000 });
     if (error) { 
         PubSub.publish(PUBS.Snack, { message: error.message, severity: 'error', data: error });
     }
@@ -49,13 +51,20 @@ export const AdminOrderPage = ({
         refetch();
     }, [filter, refetch])
 
+    const clearCurrOrder = useCallback(() => setCurrOrder(null), []);
+    const handleFilter = useCallback((e) => setFilter(e.target.value), []);
+
+    const cardsList = useMemo(() => (
+        orders.map((o: any) => <OrderCard key={o.id} order={o} onEdit={() => setCurrOrder(o)} />)
+    ), [orders])
+
     return (
         <div id="page">
             {currOrder ? (<OrderDialog 
                 userRoles={userRoles}
                 order={currOrder}
                 open={currOrder !== null}
-                onClose={() => setCurrOrder(null)} />) : null}
+                onClose={clearCurrOrder} />) : null}
             <AdminBreadcrumbs className={classes.padBottom} textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Orders</Typography>
@@ -64,12 +73,12 @@ export const AdminOrderPage = ({
                 fullWidth
                 options={ORDER_FILTERS}
                 selected={filter}
-                handleChange={(e) => setFilter(e.target.value)}
+                handleChange={handleFilter}
                 inputAriaLabel='order-type-selector-label'
                 label="Sort By" />
             <h3>Count: {orders.length ?? 0}</h3>
             <div className={classes.cardFlex}>
-                {orders.map((o: any) => <OrderCard key={o.id} order={o} onEdit={() => setCurrOrder(o)} />)}
+                {cardsList}
             </div>
         </div >
     );

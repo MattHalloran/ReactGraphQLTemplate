@@ -26,10 +26,13 @@ import { CartTable } from 'components';
 import { updateOrderMutation } from 'graphql/mutation';
 import { useMutation } from '@apollo/client';
 import { findWithAttr, ORDER_FILTERS } from 'utils';
-import { OrderStatus, ROLES } from '@local/shared';
+import { ROLES } from '@local/shared';
 import isEqual from 'lodash/isEqual';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { UpTransition } from 'components';
+import { updateOrder } from 'graphql/generated/updateOrder';
+import { Order, UserRoles } from 'types';
+import { OrderStatus } from 'graphql/generated/globalTypes';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -61,8 +64,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 const editableStatuses = [OrderStatus.PENDING_CANCEL, OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.SCHEDULED]
 
 interface Props {
-    order: any;
-    userRoles: any;
+    order: Order | null;
+    userRoles: UserRoles;
     open?: boolean;
     onClose: () => any;
 }
@@ -75,8 +78,8 @@ export const OrderDialog = ({
 }: Props) => {
     const classes = useStyles();
     // Holds order changes before update is final
-    const [changedOrder, setChangedOrder] = useState(order);
-    const [updateOrder, { loading }] = useMutation(updateOrderMutation);
+    const [changedOrder, setChangedOrder] = useState<Order | null>(order);
+    const [updateOrder, { loading }] = useMutation<updateOrder>(updateOrderMutation);
 
     useEffect(() => {
         setChangedOrder(order);
@@ -88,10 +91,10 @@ export const OrderDialog = ({
             data: {
                 variables: {
                     input: {
-                        id: changedOrder.id,
-                        desiredDeliveryDate: changedOrder.desiredDeliveryDate,
-                        isDelivery: changedOrder.isDelivery,
-                        items: changedOrder.items.map(i => ({ id: i.id, quantity: i.quantity }))
+                        id: changedOrder?.id,
+                        desiredDeliveryDate: changedOrder?.desiredDeliveryDate,
+                        isDelivery: changedOrder?.isDelivery,
+                        items: changedOrder?.items?.map(i => ({ id: i.id, quantity: i.quantity }))
                     }
                 }
             },
@@ -104,7 +107,7 @@ export const OrderDialog = ({
     const setOrderStatus = useCallback((status, successMessage, errorMessage) => {
         mutationWrapper({
             mutation: updateOrder,
-            data: { variables: { input: { id: order.id, status: status } } },
+            data: { variables: { input: { id: order?.id, status: status } } },
             successMessage: () => successMessage,
             errorMessage: () => errorMessage,
         })
@@ -115,10 +118,11 @@ export const OrderDialog = ({
     // First item is a check to detemine if action is currently available.
     // The rest is the data needed to display the action and call mutationWrapper.
     const changeStatus = useMemo(() => {
-        const isCustomer = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Customer].includes(r?.role?.title));
-        const isOwner = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.role?.title));
-        const isCanceled = [OrderStatus.CANCELED_BY_ADMIN, OrderStatus.CANCELED_BY_CUSTOMER, OrderStatus.REJECTED].includes(order?.status);
-        const isOutTheDoor = [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED].includes(order?.status);
+        if (!order?.status) return [];
+        const isCustomer = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Customer].includes(r?.title));
+        const isOwner = Array.isArray(userRoles) && userRoles.some(r => [ROLES.Owner, ROLES.Admin].includes(r?.title));
+        const isCanceled = [OrderStatus.CANCELED_BY_ADMIN, OrderStatus.CANCELED_BY_CUSTOMER, OrderStatus.REJECTED].includes(order.status);
+        const isOutTheDoor = [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED].includes(order.status);
         return {
             [OrderStatus.CANCELED_BY_ADMIN]: [
                 isOwner && !isCanceled,
@@ -201,6 +205,8 @@ export const OrderDialog = ({
         </Grid>
     )
 
+    const onOrderChange = useCallback((data) => setChangedOrder(data), []);
+
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={UpTransition}>
             <AppBar className={classes.appBar}>
@@ -223,7 +229,7 @@ export const OrderDialog = ({
             <div className={classes.container}>
                 <div className={classes.pad}>
                     <Typography variant="body1" gutterBottom>{status_string}</Typography>
-                    <CartTable cart={order} editable={editableStatuses.includes(order?.status)} onUpdate={(data) => setChangedOrder(data)} />
+                    <CartTable cart={order} editable={order?.status && editableStatuses.includes(order?.status)} onUpdate={onOrderChange} />
                 </div>
                 <div className={classes.bottom}>
                     {options}

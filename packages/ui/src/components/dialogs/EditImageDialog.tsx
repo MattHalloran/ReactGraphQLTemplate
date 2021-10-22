@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import {
     Button,
@@ -42,6 +42,8 @@ export const EditImageDialog = ({
         setDescription(data?.description ?? '');
     }, [data])
 
+    const save = useCallback(() => onSave({ alt: alt, description: description }), [alt, description, onSave]);
+
     return (
         <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title">
             <DialogTitle className={classes.title} id="form-dialog-title">Edit Image Data</DialogTitle>
@@ -65,7 +67,7 @@ export const EditImageDialog = ({
                 <Button className={classes.button} onClick={onClose} variant="text">
                     Cancel
                 </Button>
-                <Button className={classes.button} onClick={() => onSave({ alt: alt, description: description })} variant="text">
+                <Button className={classes.button} onClick={save} variant="text">
                     Save
                 </Button>
             </DialogActions>

@@ -69,9 +69,9 @@ export const CartTable = ({
         onUpdate(updateObject(cart, fieldName, value));
     }, [cart, onUpdate])
 
-    const setNotes = (notes) => updateCartField('specialInstructions', notes);
-    const setDeliveryDate = (date) => updateCartField('desiredDeliveryDate', +date);
-    const handleDeliveryChange = (value) => updateCartField('isDelivery', value);
+    const onNotesChange = useCallback((e) => updateCartField('specialInstructions', e.target.value), [updateCartField]);
+    const onDeliveryTypeChange = useCallback((e) => updateCartField('isDelivery', e.target.value), [updateCartField]);
+    const onDeliveryDateChange = useCallback((date) => updateCartField('desiredDeliveryDate', +date), [updateCartField]);
 
     const updateItemQuantity = useCallback((sku, quantity) => {
         let index = cart.items.findIndex(i => i.sku.sku === sku);
@@ -179,7 +179,7 @@ export const CartTable = ({
                         required
                         options={DELIVERY_OPTIONS}
                         selected={cart?.isDelivery ? DELIVERY_OPTIONS[1].value : DELIVERY_OPTIONS[0].value}
-                        handleChange={(e) => handleDeliveryChange(e.target.value)}
+                        handleChange={onDeliveryTypeChange}
                         inputAriaLabel='delivery-selector-label'
                         label="Productping Method" />
                 </Grid>
@@ -189,9 +189,7 @@ export const CartTable = ({
                             label="Delivery Date"
                             disabled={!editable}
                             value={cart?.desiredDeliveryDate ? new Date(cart.desiredDeliveryDate) : +(new Date())}
-                            onChange={(date) => {
-                                setDeliveryDate(date)
-                            }}
+                            onChange={onDeliveryDateChange}
                             renderInput={(params) => <TextField fullWidth {...params} />}
                         />
                     </LocalizationProvider>
@@ -204,7 +202,7 @@ export const CartTable = ({
                         fullWidth
                         multiline
                         value={cart?.specialInstructions ?? ''}
-                        onChange={e => setNotes(e.target.value)}
+                        onChange={onNotesChange}
                     />
                 </Grid>
             </Grid>

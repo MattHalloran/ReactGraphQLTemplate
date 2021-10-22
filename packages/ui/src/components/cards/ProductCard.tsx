@@ -15,6 +15,8 @@ import { combineStyles, getImageSrc } from 'utils';
 import { NoImageWithTextIcon } from 'assets/img';
 import { ImageUse, SERVER_URL } from '@local/shared';
 import { cardStyles } from './styles';
+import { Product } from 'types';
+import { useCallback } from 'react';
 
 const componentStyles = (theme: Theme) => ({
     displayImage: {
@@ -40,7 +42,7 @@ const useStyles = makeStyles(combineStyles(cardStyles, componentStyles));
 
 interface Props {
     onClick: (...props: any[]) => any;
-    product: any;
+    product: Product;
 }
 
 export const ProductCard = ({
@@ -50,16 +52,18 @@ export const ProductCard = ({
     const classes = useStyles();
 
     let display: {} | null | undefined;
-    let display_data = product.images.find(image => image.usedFor === ImageUse.PRODUCT_DISPLAY)?.image;
-    if (!display_data && product.images.length > 0) display_data = product.images[0].image;
+    let display_data = product?.images?.find(image => image.usedFor === ImageUse.PRODUCT_DISPLAY)?.image;
+    if (!display_data && product?.images?.length > 0) display_data = product?.images[0].image;
     if (display_data) {
         display = <CardMedia component="img" src={`${SERVER_URL}/${getImageSrc(display_data)}`} className={classes.displayImage} alt={display_data.alt} title={product.name} />
     } else {
         display = <NoImageWithTextIcon className={classes.displayImage} />
     }
 
+    const editProduct = useCallback(() => onClick({ product, selectedSku: product.skus[0] }), [product, onClick])
+
     return (
-        <Card className={classes.cardRoot} onClick={() => onClick({ product, selectedSku: product.skus[0] })}>
+        <Card className={classes.cardRoot} onClick={editProduct}>
             <CardActionArea>
                 {display}
                 <CardContent className={`${classes.content} ${classes.topMargin}`}>
@@ -70,7 +74,7 @@ export const ProductCard = ({
             </CardActionArea>
             <CardActions>
                 <Tooltip title="View" placement="bottom">
-                    <IconButton onClick={onClick}>
+                    <IconButton onClick={editProduct}>
                         <LaunchIcon className={classes.icon} />
                     </IconButton>
                 </Tooltip>

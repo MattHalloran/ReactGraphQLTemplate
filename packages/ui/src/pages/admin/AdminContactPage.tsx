@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { AdminBreadcrumbs } from 'components';
@@ -17,6 +17,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from '../styles';
 import { combineStyles } from 'utils';
 import { CommonProps } from 'types';
+import { writeAssets } from 'graphql/generated/writeAssets';
 
 const componentStyles = (theme: Theme) => ({
     tall: {
@@ -45,7 +46,7 @@ export const AdminContactPage = ({
     const classes = useStyles();
     const theme = useTheme();
     const [hours, setHours] = useState('');
-    const [updateHours] = useMutation(writeAssetsMutation);
+    const [updateHours] = useMutation<writeAssets>(writeAssetsMutation);
 
     useEffect(() => {
         setHours(business?.hours);
@@ -79,6 +80,8 @@ export const AdminContactPage = ({
         </Grid>
     )
 
+    const onUpdateHours = useCallback((e) => setHours(e.target.value), []);
+
     return (
         <div id="page" className={classes.root}>
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
@@ -97,7 +100,7 @@ export const AdminContactPage = ({
                         multiline
                         rows={4}
                         value={hours}
-                        onChange={(e) => setHours(e.target.value)}
+                        onChange={onUpdateHours}
                     />
                 </Grid>
                 <Grid item sm={12} md={6}>

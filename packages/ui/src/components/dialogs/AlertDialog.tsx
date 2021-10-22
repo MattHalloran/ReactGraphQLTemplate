@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -37,15 +37,20 @@ const AlertDialog = () => {
         return () => { PubSub.unsubscribe(dialogSub) };
     }, [])
 
-    const handleClick = (action: (() => void) | null | undefined) => {
+    const handleClick = useCallback((action: (() => void) | null | undefined) => {
         if (action) action();
         setState(default_state);
-    }
+    }, []);
+
+    const clickFirst = useCallback(() => handleClick(state.firstButtonClicked), [handleClick, state.firstButtonClicked]);
+    const clickSecond = useCallback(() => handleClick(state.secondButtonClicked), [handleClick, state.secondButtonClicked]);
+
+    const resetState = useCallback(() => setState(default_state), []);
 
     return (
         <Dialog
             open={open}
-            onClose={() => setState(default_state)}
+            onClose={resetState}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
@@ -56,11 +61,11 @@ const AlertDialog = () => {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => handleClick(state.firstButtonClicked)} color="secondary">
+                <Button onClick={clickFirst} color="secondary">
                     {state.firstButtonText}
                 </Button>
                 {state.secondButtonText ? (
-                    <Button onClick={() => handleClick(state.secondButtonClicked)} color="secondary">
+                    <Button onClick={clickSecond} color="secondary">
                         {state.secondButtonText}
                     </Button>
                 ) : null}

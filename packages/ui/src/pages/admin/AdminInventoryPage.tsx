@@ -3,7 +3,7 @@
 // 2) Edit existing SKU data, including general product info, availability, etc.
 // 3) Create a new SKU, either from scratch or by using product species info
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { uploadAvailabilityMutation } from 'graphql/mutation';
 import { productsQuery } from 'graphql/query';
 import { useQuery, useMutation } from '@apollo/client';
@@ -27,6 +27,8 @@ import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { mutationWrapper } from 'graphql/utils/wrappers';
 import { pageStyles } from '../styles';
+import { products, productsVariables } from 'graphql/generated/products';
+import { uploadAvailability } from 'graphql/generated/uploadAvailability';
 
 const componentStyles = () => ({
     cardFlex: {
@@ -50,8 +52,8 @@ export const AdminInventoryPage = () => {
     const [selected, setSelected] = useState<any>(null);
 
     const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
-    const { data: productData } = useQuery(productsQuery, { variables: { sortBy, searchString, active: showActive }, pollInterval: 5000 });
-    const [uploadAvailability, { loading }] = useMutation(uploadAvailabilityMutation);
+    const { data: productData } = useQuery<products, productsVariables>(productsQuery, { variables: { sortBy, searchString }, pollInterval: 5000 });
+    const [uploadAvailability, { loading }] = useMutation<uploadAvailability>(uploadAvailabilityMutation);
 
     const availabilityUpload = (acceptedFiles) => {
         mutationWrapper({
@@ -64,13 +66,18 @@ export const AdminInventoryPage = () => {
         })
     }
 
+    const clearSelected = useCallback(() => setSelected(null), []);
+    const handleSort = useCallback((e) => setSortBy(e.target.value), []);
+    const handleActiveToggle = useCallback((_, value) => setShowActive(value), []);
+    const handleSearch = useCallback((newString) => setSearchString(newString), []);
+
     return (
         <div id="page">
             <EditProductDialog
                 product={selected?.product}
                 selectedSku={selected?.selectedSku}
                 open={selected !== null}
-                onClose={() => setSelected(null)} />
+                onClose={clearSelected} />
             <AdminBreadcrumbs textColor={theme.palette.secondary.dark} />
             <div className={classes.header}>
                 <Typography variant="h3" component="h1">Manage Inventory</Typography>
@@ -98,7 +105,7 @@ export const AdminInventoryPage = () => {
                         fullWidth
                         options={SORT_OPTIONS}
                         selected={sortBy}
-                        handleChange={(e) => setSortBy(e.target.value)}
+                        handleChange={handleSort}
                         inputAriaLabel='sort-products-selector-label'
                         label="Sort" />
                 </Grid>
@@ -107,7 +114,7 @@ export const AdminInventoryPage = () => {
                         control={
                             <Switch
                                 checked={showActive}
-                                onChange={(_, value) => setShowActive(value)}
+                                onChange={handleActiveToggle}
                                 color="secondary"
                             />
                         }
@@ -115,7 +122,7 @@ export const AdminInventoryPage = () => {
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <SearchBar fullWidth value={searchString} onChange={(newString) => setSearchString(newString)} />
+                    <SearchBar fullWidth value={searchString} onChange={handleSearch} />
                 </Grid>
             </Grid>
             <div className={classes.cardFlex}>

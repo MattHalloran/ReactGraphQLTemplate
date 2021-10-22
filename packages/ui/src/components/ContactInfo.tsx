@@ -63,12 +63,9 @@ export const ContactInfo = ({
     }
 
     // Parse business hours markdown into 2D array, remove |'s, and reduce to 1D array
-    let hours;
+    let hours: string[] = [];
     try {
-        hours = business?.hours ? 
-            business.hours.split('\n').slice(2).map(row => row.split('|').map(r => r.trim()).filter(r => r !== '')) :
-            [];
-        hours = hours.map(row => `${row[0]}: ${row[1]}`)
+        hours = business?.hours?.split('\n')?.slice(2)?.map(row => row.split('|')?.map(r => r.trim())?.filter(r => r !== ''))?.map(row => `${row[0]}: ${row[1]}`) ?? [];
     } catch (error) {
         console.error('Failed to read business hours', error);
     }
@@ -101,7 +98,7 @@ export const ContactInfo = ({
             </TableContainer>
             <BottomNavigation className={classes.nav} showLabels>
                 {contactInfo.map(([tooltip, label, link, Icon]) => (
-                    <Tooltip title={tooltip} placement="top">
+                    <Tooltip title={tooltip} placement="top" key={label}>
                         <BottomNavigationAction className={classes.navAction} label={label} onClick={(e) => openLink(e, link)} icon={
                             <IconButton className={classes.iconButton}>
                                 <Icon />

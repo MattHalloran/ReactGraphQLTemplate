@@ -22,6 +22,8 @@ import { addCustomerMutation } from 'graphql/mutation';
 import { useFormik } from 'formik';
 import { useMutation } from '@apollo/client';
 import { UpTransition } from 'components';
+import { addCustomer } from 'graphql/generated/addCustomer';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
@@ -67,7 +69,7 @@ export const NewCustomerDialog = ({
 }: Props) => {
     const classes = useStyles();
     // Stores the modified customer data before updating
-    const [addCustomer] = useMutation(addCustomerMutation);
+    const [addCustomer] = useMutation<addCustomer>(addCustomerMutation);
 
     const formik = useFormik({
         initialValues: {
@@ -96,6 +98,8 @@ export const NewCustomerDialog = ({
         },
     });
 
+    const submit = useCallback(() => formik.handleSubmit(), [formik]);
+    const setPronouns = useCallback((_, value) => formik.setFieldValue('pronouns', value), [formik]);
 
     let options = (
         <Grid className={classes.optionsContainer} container spacing={2}>
@@ -103,7 +107,7 @@ export const NewCustomerDialog = ({
                 <Button
                     fullWidth
                     startIcon={<AddCircleIcon />}
-                    onClick={() => formik.handleSubmit()}
+                    onClick={submit}
                 >Create</Button>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -169,7 +173,7 @@ export const NewCustomerDialog = ({
                                 id="pronouns"
                                 options={DEFAULT_PRONOUNS}
                                 value={formik.values.pronouns}
-                                onChange={(_, value) => formik.setFieldValue('pronouns', value)}
+                                onChange={setPronouns}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}

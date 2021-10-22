@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { Button, Grid, Theme } from '@material-ui/core';
 import { ImageList } from './ImageList';
@@ -29,22 +29,26 @@ export const WrappedImageList = ({
         setChanged(data);
     }, [data])
 
+    const onApplyClick = useCallback(() => onApply(changed), [changed, onApply]);
+    const onRevertClick = useCallback(() => setChanged(data), [data]);
+    const onUpdate = useCallback((d) => setChanged(d), []);
+
     let options = (
         <Grid classes={{ container: classes.pad }} container spacing={2}>
             <Grid className={classes.gridItem} item xs={12} sm={6}>
-                <Button fullWidth onClick={() => onApply(changed)}>Apply Changes</Button>
+                <Button fullWidth onClick={onApplyClick}>Apply Changes</Button>
             </Grid>
             <Grid className={classes.gridItem} item xs={12} sm={6}>
-                <Button fullWidth onClick={() => setChanged(data)}>Revert Changes</Button>
+                <Button fullWidth onClick={onRevertClick}>Revert Changes</Button>
             </Grid>
         </Grid>
     )
 
     return (
-        <div>
+        <>
             { options}
-                <ImageList data={changed} onUpdate={(d) => setChanged(d)}/>
+                <ImageList data={changed} onUpdate={onUpdate}/>
             { options}
-        </div>
+        </>
     );
 }
