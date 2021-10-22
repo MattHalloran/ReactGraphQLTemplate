@@ -23,6 +23,7 @@ import { Business, Cart, UserRoles } from 'types';
 import { readAssets, readAssetsVariables } from 'graphql/generated/readAssets';
 import { login } from 'graphql/generated/login';
 import hotkeys from 'hotkeys-js';
+import { useLocation } from 'react-router';
 
 const useStyles = makeStyles(() => ({
     "@global": {
@@ -64,6 +65,7 @@ const useStyles = makeStyles(() => ({
 
 export function App() {
     const classes = useStyles();
+    const { pathname, hash } = useLocation();
     // Session cookie should automatically expire in time determined by server,
     // so no need to validate session on first load
     const [session, setSession] = useState<any>(null);
@@ -75,6 +77,24 @@ export function App() {
     const [business, setBusiness] = useState<Business>(null)
     const { data: businessData } = useQuery<readAssets, readAssetsVariables>(readAssetsQuery, { variables: { files: ['hours.md', 'business.json'] } });
     const [login] = useMutation<login>(loginMutation);
+    
+    // If anchor tag in url, scroll to element
+    useEffect(() => {
+        // if not a hash link, scroll to top
+        if (hash === '') {
+          window.scrollTo(0, 0);
+        }
+        // else scroll to id
+        else {
+          setTimeout(() => {
+            const id = hash.replace('#', '');
+            const element = document.getElementById(id);
+            if (element) {
+              element.scrollIntoView();
+            }
+          }, 0);
+        }
+      }, [pathname]); // do this on route change
 
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
