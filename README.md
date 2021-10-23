@@ -71,7 +71,7 @@ Open Graph is a metadata format that describes how your website should be shown 
 
 
 ## Linting
-[Linting](https://en.wikipedia.org/wiki/Lint_(software)) is handled by [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react). Follow their README for more information
+The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.
 
 
 ## Database migrations
