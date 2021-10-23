@@ -94,7 +94,7 @@ export function App() {
             }
           }, 0);
         }
-      }, [pathname]); // do this on route change
+      }, [hash, pathname]); // do this on route change
 
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);

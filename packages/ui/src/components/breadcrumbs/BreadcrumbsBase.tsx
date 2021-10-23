@@ -6,7 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import merge from 'lodash/merge';
 import { BreadcrumbsBaseProps } from './types';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 const useStyles = makeStyles(() => ({
     root: {

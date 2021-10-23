@@ -79,9 +79,9 @@ export const ShoppingList = ({
         setProducts(filtered_products);
     }, [productData, filters, searchString])
 
-    const expandSku = (sku: string) => {
+    const expandSku = useCallback((sku: string) => {
         history.push(LINKS.Shopping + "/" + sku);
-    };
+    }, [history]);
 
     const toCart = () => {
         history.push(LINKS.Cart);

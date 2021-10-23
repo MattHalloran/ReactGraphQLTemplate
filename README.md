@@ -33,19 +33,24 @@ Before developing a website from this template, make sure you have the following
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
 ### 2. Download this repository
 `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`
-### 3. Set environment variables  
-1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
-2. Rename the file to .env
+### 3. Install packages
+1. `cd ReactGraphQLTemplate`  
+2. `yarn`
+3. Restart code editor
 ### 4. Generate prisma client  
 To work with Prisma, types for your models must be generated.  
 1. `cd packages/server`  
-2. `prisma generate --schema src/prisma/schema.prisma`
-### 5. Business data
+2. `yarn prisma-generate`
+3. Restart code editor
+### 5. Set environment variables  
+1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
+2. Rename the file to .env
+### 6. Business data
 Edit the file `assets/public/business.json` to match your business's data.
-### 6. Docker
+### 7. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
 Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
-### 7. Enter website information
+### 8. Enter website information
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
@@ -66,7 +71,7 @@ Open Graph is a metadata format that describes how your website should be shown 
 
 
 ## Linting
-[Linting](https://en.wikipedia.org/wiki/Lint_(software)) is handled by [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react). Follow their README for more information
+The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.
 
 
 ## Database migrations
