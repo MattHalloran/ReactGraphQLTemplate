@@ -148,23 +148,17 @@ GraphQL syntax errors are notoriously hard to debug, as they often do not give a
 In the [schema directory](packages/service/src/schema), the GraphQL resolvers are split up into individual files, which are stitched together in the [index file](packages/service/src/schema/index.ts). In this file, the `models` object is used to combine all of the individual schemas. If you make this an empty array, you can comment out imports until the problem goes away. This allows you to pinpoint which schema file is causing the error. Common errors are empty parentheses (ex: `users():` instead of `users:`) and empty brackets.
 
 ### GraphQL TypeScript generation
-GraphQL is already typed, but it unfortunately doesn't play well with TypeScript's typing system. Instead of creating TypeScript types yourself (which is tedious), they can be generated automatically from a `schema.graphql` file.  
-If you already have a `schema.graphql` file you'd like to use, the process is very simple:  
-1. Start project locally (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
-2. `cd packages/ui` 
-3. `yarn gen-graphql-types`  
+GraphQL is already typed, but it unfortunately doesn't play well with TypeScript's typing system. Instead of creating TypeScript types yourself (which is tedious), they can be generated automatically from an endpoint. This requires the backend server to be running.
 
-If you need to generate a `schema.graphql` file from your own server, the process is slightly more complicated:    
-1. Set `NODE_ENV` to `development` in .env file. This enables GraphQL instrospection
-2. Start application (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
-2. `cd packages/ui` 
-3. `yarn download-schema` (make sure to check out what this command is doing in [packages/ui/package.json](packages/ui/package.json) in case your needs vary)
-3. `yarn gen-graphql-types`    
+#### Server TypeScript generation
+1. Start project locally **in development mode** (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
+2. `cd packages/server`
+3. `yarn graphql-generate`
 
-If you need to generate a `schema.graphql` file from an external API:  
-1. Edit `download-schema` command in [packages/ui/package.json](packages/ui/package.json) to point to the desired API.
+#### UI TypeScript generation
+1. Start project locally **in development mode** (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
 2. `cd packages/ui` 
-3. `yarn gen-graphql-types`  
+3. `yarn graphql-generate`  
 
 See [this video](https://youtu.be/Tw_wn6XUfnU) for more details.
 

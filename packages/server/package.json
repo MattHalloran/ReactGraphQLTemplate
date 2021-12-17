@@ -12,7 +12,8 @@
         "build": "yarn tsc",
         "start-development": "yarn build && nodemon --experimental-modules --experimental-specifier-resolution=node dist/index.js",
         "start-production": "yarn build && node --experimental-modules --experimental-specifier-resolution=node dist/index.js",
-        "prisma-generate": "prisma generate --schema src/prisma/schema.prisma"
+        "prisma-generate": "prisma generate --schema src/prisma/schema.prisma",
+        "graphql-generate": "graphql-codegen && mv generatedTypes.ts src/schema/types.ts"
     },
     "author": "",
     "license": "MIT",
@@ -41,6 +42,8 @@
         "xlsx": "^0.17.0"
     },
     "devDependencies": {
+        "@graphql-codegen/cli": "^2.3.0",
+        "@graphql-codegen/typescript": "^2.4.1",
         "@types/bcrypt": "^5.0.0",
         "@types/bull": "^3.15.5",
         "@types/cookie-parser": "^1.4.2",
