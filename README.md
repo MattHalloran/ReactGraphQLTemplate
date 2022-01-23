@@ -202,20 +202,28 @@ Once that is complete, you can use the [PWABuilder tool](https://www.pwabuilder.
 
 
 ## Deploying project
-Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
+There are two main things to keep in mind when deploying your project:
+- How many concurrent users you're expecting the website *could* have at any given time (i.e. the maximum load).
+- How decentralized you want your website to be.
 
+If you are expecting tens of thousands of users or less a day, and do not care about decentralization, the best option is likely a Virtual Private Server (VPS). [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
 
-### 1. Set up DNS
+If you are expecting more users, and still don't care about decentralization, you can look into deploying with [Kubernetes](https://kubernetes.io/). Kubernetes is a cloud-based container orchestration system that is designed to be easy to use and easy to deploy. Another alternative is Amazon's [Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/).
+
+If you *do* care about decentralization, the best option so far (I think) is deploying on [Akash Network](https://akash.network/). This requires more steps to set up than traditional methods, but is also (supposedly) the cheapest deployment option. Follow the guide [here](https://docs.akash.network/guides/deploy/akashlytics-deploy-installation) for more information.
+
+### Set up DNS
 The site can be accessed by the VPS's IP address, but in most cases you'll want to associate the server with a domain name. There are many places to buy domains, but I use [Google Domains](https://domains.google)
 
 Once you buy a domain, you must set up the correct DNS records. This can be done through the site that you bought the domain from, or the site that you bought the VPS from. [Here](https://www.youtube.com/watch?v=wYDDYahCg60) is a good example. **Note**: DNS changes may take several hours to take effect
 
-### 2. Set up VPS - Reverse proxy
+### Deploying via VPS
+#### 1. Set up VPS - Reverse proxy
 The VPS you'll be running this website on must be configured to handle website traffic. This is done through Nginx https://olex.biz/2019/09/hosting-with-docker-nginx-reverse-proxy-letsencrypt/
 
 I've created a project that automates this process, which you can find [here](https://github.com/MattHalloran/NginxSSLReverseProxy#getting-started).
 
-### 3. Set up VPS - Main code
+#### 2. Set up VPS - Main code
 1. `cd ~`
 2. `git clone ${PROJECT_URL}`
 3. `cd ${PROJECT_NAME}`
@@ -223,3 +231,15 @@ I've created a project that automates this process, which you can find [here](ht
 5. **Make sure that the urls in `packages/ui/public/index.html` point to the correct website**
 6. `chmod +x ./scripts/*`
 7. `docker-compose up -d`
+
+### Deploying via Akash Network
+Akash creates Docker containers using published images. These images must be published to DockerHub (I am aware of the irony here; luckily, a [decentralized container registry](https://forum.akash.network/t/openregistry-an-open-and-reliable-container-registry/515/5) is in the works). To publish your image:
+
+1. Update `deploy.yaml` with your own data
+2. Build production version of container locally - `docker-compose up --build --force-recreate -d`
+3. Commit image - `docker commit ${container_id} ${dockerusername}/${image_name}/${version number (i.e. tag)}` TODO this isn't working. Image is created, but running image gives src/env.d.ts missing error.
+4. Make sure you have are logged into DockerHub - `docker login`
+5. Push image to container registry - `docker push ${dockerusername}/${image_name}`  
+6. Follow Akashlytics Deploy steps. Replace the deployment file with the contents of your `deploy.yaml` edited in step 1.
+
+There are some limitations to this process (such as setting environment variables from a `.env` file), but my knowledge of Akash is limited. Please submit an issue or pull request if you have any issues/suggestions.
