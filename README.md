@@ -201,6 +201,14 @@ A trusted web activity is a PWA that runs natively on Android devices. They can 
 Once that is complete, you can use the [PWABuilder tool](https://www.pwabuilder.com/) to generate other required files and receive further instructions.
 
 
+## Brave Rewards
+Brave Rewards is a service that allows users of the Brave browser to earn Basic Attention Tokens (BAT) for viewing ads. Enabling this on your website will also allow you to earn BAT. The ads appear as a small popup in the bottom right corner of the browser. To set this up:  
+1. Sign up your website (and your socials if you'd like) [here](https://publishers.basicattentiontoken.org/).
+2. On your website's server (see *Deploying Project* section to set this up), cd to `packages/ui/build` in your project's directory.
+3. `vim .well-known/brave-rewards-verification.txt`
+4. Paste the text given in step 1 into the file, and save.
+
+
 ## Deploying project
 Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
 
