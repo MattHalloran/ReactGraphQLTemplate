@@ -68,8 +68,9 @@ const main = async () => {
             process.env.VAPID_PRIVATE_KEY
         );
         // Create subscribe endpoint
-        app.post(`/subscribe`, (req, res) => {
+        app.post(`/api/subscribe`, (req, res) => {
             const subscription = req.body;
+            console.log('in push notifications endpoint', JSON.stringify(subscription), '\n\n')
             webPush.sendNotification(subscription, JSON.stringify({
                 title: 'New post',
                 body: 'New post has been published',

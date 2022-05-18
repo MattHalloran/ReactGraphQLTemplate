@@ -1,6 +1,8 @@
 // This optional code is used to register a service worker.
 // register() is not called by default.
 
+import { SERVER_URL } from "@local/shared";
+
 // This lets the app load faster on subsequent visits in production, and gives
 // it offline capabilities. However, it also means that developers (and users)
 // will only see deployed updates on subsequent visits to a page, after all the
@@ -45,8 +47,10 @@ export function register(config) {
             const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
 
             if (isLocalhost) {
+                console.log('goint to check valid serviceworker', swUrl);
                 // This is running on localhost. Let's check if a service worker still exists or not.
                 checkValidServiceWorker(swUrl, config);
+                console.log('checked valid serviceworker', config);
 
                 // Add some additional logging to localhost, pointing developers to the
                 // service worker/PWA documentation.
@@ -55,6 +59,7 @@ export function register(config) {
                         'This web app is being served cache-first by a service ' +
                         'worker. To learn more, visit https://cra.link/PWA'
                     );
+                    console.log('registering push notifications...')
                     // Register push notifications
                     registration.pushManager.subscribe({
                         userVisibleOnly: true,
@@ -62,9 +67,9 @@ export function register(config) {
                             process.env.REACT_APP_VAPID_PUBLIC_KEY
                         )
                     }).then(function (subscription) {
-                        console.log(subscription);
+                        console.log('registered!!!!', subscription);
                         // Send test push notification
-                        fetch('/subscribe', {
+                        fetch(`${SERVER_URL}/subscribe`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -74,7 +79,8 @@ export function register(config) {
 
                     }
                     ).catch(function (err) {
-                        console.log(err);
+                        alert('Error: You have specified that you want to receive push notifications, but your browser does not support the Push API. Please try again with a modern browser. If you are using Brave, please enable push notifications at brave://settings/privacy');
+                        console.log('failed to register push notifications', err);
                     }
                     );
                 });
