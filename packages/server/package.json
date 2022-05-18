@@ -24,6 +24,7 @@
         "@prisma/client": "^3.2.0",
         "apollo-server-express": "^3.3.0",
         "bcrypt": "^5.0.1",
+        "body-parser": "^1.20.0",
         "bull": "^3.22.4",
         "cookie-parser": "^1.4.5",
         "cors": "^2.8.5",
@@ -39,6 +40,7 @@
         "sharp": "^0.29.1",
         "twilio": "^3.61.0",
         "typescript": "^4.2.4",
+        "web-push": "^3.5.0",
         "xlsx": "^0.17.0"
     },
     "devDependencies": {
@@ -54,6 +56,7 @@
         "@types/nodemailer": "^6.4.4",
         "@types/probe-image-size": "^7.0.1",
         "@types/sharp": "^0.29.2",
+        "@types/web-push": "^3.3.2",
         "ts-node": "^10.2.1"
     }
 }

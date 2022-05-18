@@ -1,5 +1,7 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import webPush from 'web-push';
 import * as auth from './auth';
 import cors from "cors";
 import { ApolloServer } from 'apollo-server-express';
@@ -27,6 +29,7 @@ const main = async () => {
     // // For parsing application/xwww-
     // app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser(process.env.JWT_SECRET));
+    app.use(bodyParser.json());
 
     // For authentication
     app.use(auth.authenticate);
@@ -52,6 +55,33 @@ const main = async () => {
 
     // Set up image uploading
     app.use(`${process.env.REACT_APP_SERVER_ROUTE}/${API_VERSION}`, graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 100 }),)
+
+    // Setup web push, if keys are provided. 
+    // We will use the same contact email as letsencrypt
+    if (typeof process.env.LETSENCRYPT_EMAIL === 'string' &&
+        typeof process.env.VAPID_PRIVATE_KEY === 'string' &&
+        typeof process.env.VAPID_PUBLIC_KEY === 'string') {
+        // Set vapid keys
+        webPush.setVapidDetails(
+            `mailto:${process.env.LETSENCRYPT_EMAIL}`,
+            process.env.VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+        );
+        // Create subscribe endpoint
+        app.post(`/subscribe`, (req, res) => {
+            const subscription = req.body;
+            webPush.sendNotification(subscription, JSON.stringify({
+                title: 'New post',
+                body: 'New post has been published',
+                // icon: `${process.env.REACT_APP_SERVER_ROUTE}/images/logo.png`,
+                // link: `${process.env.REACT_APP_SERVER_ROUTE}/private/posts`
+            })).catch(error => {
+                console.error('Caught error in push subscription', error);
+                res.status(500).send(error);
+            });
+            res.sendStatus(200);
+        })
+    }   
 
     // Set up GraphQL using Apollo
     // Context trickery allows request and response to be included in the context

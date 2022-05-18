@@ -200,6 +200,14 @@ A trusted web activity is a PWA that runs natively on Android devices. They can 
 
 Once that is complete, you can use the [PWABuilder tool](https://www.pwabuilder.com/) to generate other required files and receive further instructions.
 
+## Push Notifications
+Push notifications are a way to send messages to users, using their device's native messaging system. This is a great way to send updates to users, or to let them know that something has happened.
+
+Services exist for handling push notifications, which support all devices. However, these cost money. If you're fine with only supporting [these environments](https://caniuse.com/push-api), then you can get away with using web-push for free like this repo does. 
+
+To set up push notifications, you need to complete the following:  
+1. Generate vapid keys - from the project directory, enter `./node_modules/.bin/web-push generate-vapid-keys`
+2. Use the generated keys to populate the `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` variables in the .env file.
 
 ## Brave Rewards
 Brave Rewards is a service that allows users of the Brave browser to earn Basic Attention Tokens (BAT) for viewing ads. Enabling this on your website will also allow you to earn BAT. The ads appear as a small popup in the bottom right corner of the browser. To set this up:  
