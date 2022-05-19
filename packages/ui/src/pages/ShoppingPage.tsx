@@ -8,7 +8,7 @@ import { SORT_OPTIONS, PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 import { traitOptionsQuery } from 'graphql/query';
 import { useQuery } from '@apollo/client';
-import { Grid, Button, SwipeableDrawer, Theme } from '@material-ui/core';
+import { Grid, Button, Drawer, Theme } from '@material-ui/core';
 import {
     Close as CloseIcon,
     FilterList as FilterListIcon,
@@ -137,7 +137,7 @@ export const ShoppingPage = ({
 
     return (
         <div id='page'>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onOpen={() => { }} onClose={closeFilter}>
+            <Drawer classes={{ paper: classes.drawerPaper }} anchor="left" open={open} onClose={closeFilter}>
                 {optionsContainer}
                 <Selector
                     fullWidth
@@ -151,7 +151,7 @@ export const ShoppingPage = ({
                 <h2>Filters</h2>
                 {traitList.map(d => traitOptionsToSelector(d[0], d[1]))}
                 {optionsContainer}
-            </SwipeableDrawer>
+            </Drawer>
             <div className={classes.formControl}>
                 <Button
                     color="secondary"

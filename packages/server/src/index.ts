@@ -61,12 +61,14 @@ const main = async () => {
     if (typeof process.env.LETSENCRYPT_EMAIL === 'string' &&
         typeof process.env.VAPID_PRIVATE_KEY === 'string' &&
         typeof process.env.VAPID_PUBLIC_KEY === 'string') {
+        console.log('setting up vapid keys')
         // Set vapid keys
         webPush.setVapidDetails(
             `mailto:${process.env.LETSENCRYPT_EMAIL}`,
             process.env.VAPID_PUBLIC_KEY,
             process.env.VAPID_PRIVATE_KEY
         );
+        console.log('creating subscribe endpoint')
         // Create subscribe endpoint
         app.post(`/api/subscribe`, (req, res) => {
             const subscription = req.body;

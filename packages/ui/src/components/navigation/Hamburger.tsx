@@ -14,7 +14,7 @@ import {
     PhotoLibrary as PhotoLibraryIcon,
     Share as ShareIcon,
 } from '@material-ui/icons';
-import { IconButton, SwipeableDrawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText, Theme } from '@material-ui/core';
+import { IconButton, Drawer, List, ListItem, ListItemIcon, Collapse, Divider, ListItemText, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core';
 import { CopyrightBreadcrumbs } from 'components';
@@ -101,7 +101,7 @@ export const Hamburger = ({
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleOpen}>
                 <MenuIcon />
             </IconButton>
-            <SwipeableDrawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onOpen={() => { }} onClose={closeMenu}>
+            <Drawer classes={{ paper: classes.drawerPaper }} anchor="right" open={open} onClose={closeMenu}>
                 <IconButton className={classes.close} onClick={closeMenu}>
                     <CloseIcon fontSize="large" />
                 </IconButton>
@@ -150,7 +150,7 @@ export const Hamburger = ({
                     })}
                 </List>
                 <CopyrightBreadcrumbs className={classes.copyright} business={business} textColor={theme.palette.primary.contrastText} />
-            </SwipeableDrawer>
+            </Drawer>
         </>
     );
 }
