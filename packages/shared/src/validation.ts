@@ -128,6 +128,7 @@ export const signUpSchema = yup.object().shape({
     email: yup.string().email().required(),
     phone: yup.string().max(20).required(),
     marketingEmails: yup.boolean().required(),
+    notifications: yup.boolean().required(),
     password: passwordSchema.required(),
     passwordConfirmation: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match')
 });

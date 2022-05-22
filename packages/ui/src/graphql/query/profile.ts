@@ -6,6 +6,7 @@ export const profileQuery = gql`
             id
             firstName
             lastName
+            notifications
             pronouns
             theme
             business {

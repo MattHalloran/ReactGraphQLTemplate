@@ -28,6 +28,7 @@ export const typeDef = gql`
         firstName: String
         lastName: String
         pronouns: String
+        notifications: String
         emails: [EmailInput!]
         phones: [PhoneInput!]
         business: BusinessInput
@@ -74,6 +75,7 @@ export const typeDef = gql`
             phone: String!
             theme: String!
             marketingEmails: Boolean!
+            notifications: Boolean!
             password: String!
         ): Customer!
         addCustomer(input: CustomerInput!): Customer!

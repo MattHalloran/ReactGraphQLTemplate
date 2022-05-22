@@ -21,7 +21,8 @@ import { useHistory } from 'react-router-dom';
 import { formStyles } from './styles';
 import { CommonProps } from 'types';
 import { signUp } from 'graphql/generated/signUp';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { checkPushNotifications } from 'serviceWorkerRegistration';
 
 const componentStyles = () => ({
     phoneInput: {
@@ -42,7 +43,8 @@ export const SignUpForm = ({
 
     const formik = useFormik({
         initialValues: {
-            marketingEmails: "true",
+            marketingEmails: true,
+            notifications: false,
             firstName: '',
             lastName: '',
             pronouns: '',
@@ -56,11 +58,14 @@ export const SignUpForm = ({
         onSubmit: (values) => {
             mutationWrapper({
                 mutation: signUp,
-                data: { variables: { 
-                    ...values, 
-                    marketingEmails: Boolean(values.marketingEmails),
-                    theme: theme.palette.mode ?? 'light',
-                } },
+                data: {
+                    variables: {
+                        ...values,
+                        marketingEmails: Boolean(values.marketingEmails),
+                        notifications: Boolean(values.notifications),
+                        theme: theme.palette.mode ?? 'light',
+                    }
+                },
                 onSuccess: (response) => {
                     onSessionUpdate(response.data.signUp);
                     PubSub.publish(PUBS.AlertDialog, {
@@ -81,6 +86,13 @@ export const SignUpForm = ({
             })
         },
     });
+
+    /**
+     * Register push notifications for the user.
+     */
+    useEffect(() => {
+        if (Boolean(formik.values.notifications)) checkPushNotifications();
+    }, [formik.values.notifications]);
 
     const setPronouns = useCallback((_, value) => formik.setFieldValue('pronouns', value), [formik]);
     const toLogIn = useCallback(() => history.push(LINKS.LogIn), [history]);
@@ -209,13 +221,26 @@ export const SignUpForm = ({
                             <Checkbox
                                 id="marketingEmails"
                                 name="marketingEmails"
-                                value="marketingEmails"
                                 color="secondary"
-                                checked={Boolean(formik.values.marketingEmails)}
+                                checked={formik.values.marketingEmails}
                                 onChange={formik.handleChange}
                             />
                         }
                         label="I want to receive marketing promotions and updates via email."
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                id="notifications"
+                                name="notifications"
+                                color="secondary"
+                                checked={formik.values.notifications}
+                                onChange={formik.handleChange}
+                            />
+                        }
+                        label="I want to receive notifications."
                     />
                 </Grid>
             </Grid>

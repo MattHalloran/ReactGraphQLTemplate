@@ -10,16 +10,42 @@ import {
 import { PUBS } from 'utils';
 import PubSub from 'pubsub-js';
 
-interface State {
+/**
+ * Props for opening an alert dialog from a publish event
+ */
+export interface AlertDialogData {
+    /**
+     * Title of the dialog
+     */
     title?: string | null;
+    /**
+     * Main text of the dialog
+     */
     message?: string | null;
+    /**
+     * Text of the first button. If not provided, defaults to 'Ok'
+     */
     firstButtonText?: string;
+    /**
+     * Action to perform when the first button is clicked. 
+     * All buttons close the dialog.
+     */
     firstButtonClicked?: (() => void) | null;
+    /**
+     * Text of the second button. If not provided, no second button is shown
+     */
     secondButtonText?: string | null;
+    /**
+     * Action to perform when the second button is clicked. 
+     * All buttons close the dialog.
+     */
     secondButtonClicked?: (() => void) | null;
 }
 
-const default_state: State = {
+/**
+ * Default state for the alert dialog
+ */
+const default_state: AlertDialogData = {
     title: null,
     message: null,
     firstButtonText: 'Ok',
@@ -28,8 +54,8 @@ const default_state: State = {
     secondButtonClicked: null,
 };
 
-const AlertDialog = () => {
-    const [state, setState] = useState<State>(default_state)
+export const AlertDialog = () => {
+    const [state, setState] = useState<AlertDialogData>(default_state)
     let open = state.title !== null || state.message !== null;
 
     useEffect(() => {
@@ -73,5 +99,3 @@ const AlertDialog = () => {
         </Dialog>
     );
 }
-
-export { AlertDialog };

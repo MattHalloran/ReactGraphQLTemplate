@@ -145,5 +145,6 @@ export interface signUpVariables {
   phone: string;
   theme: string;
   marketingEmails: boolean;
+  notificataions: boolean;
   password: string;
 }

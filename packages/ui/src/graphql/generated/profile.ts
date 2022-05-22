@@ -37,6 +37,7 @@ export interface profile_profile {
   business: profile_profile_business | null;
   emails: profile_profile_emails[];
   phones: profile_profile_phones[];
+  notifications: boolean;
 }
 
 export interface profile {

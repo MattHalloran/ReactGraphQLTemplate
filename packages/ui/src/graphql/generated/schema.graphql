@@ -78,7 +78,7 @@ type Mutation {
   deleteBusinesses(ids: [ID!]!): Count!
   login(email: String, password: String, verificationCode: String): Customer!
   logout: Boolean
-  signUp(firstName: String!, lastName: String!, pronouns: String, business: String!, email: String!, phone: String!, theme: String!, marketingEmails: Boolean!, password: String!): Customer!
+  signUp(firstName: String!, lastName: String!, pronouns: String, business: String!, email: String!, phone: String!, theme: String!, marketingEmails: Boolean!, notifications: Boolean!, password: String!): Customer!
   addCustomer(input: CustomerInput!): Customer!
   updateCustomer(input: CustomerInput!, currentPassword: String!, newPassword: String): Customer!
   deleteCustomer(id: ID!, password: String): Boolean

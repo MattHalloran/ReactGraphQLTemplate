@@ -14,6 +14,7 @@ export const signUpMutation = gql`
         $phone: String!
         $theme: String!
         $marketingEmails: Boolean!
+        $notifications: Boolean!
         $password: String!
     ) {
     signUp(
@@ -25,6 +26,7 @@ export const signUpMutation = gql`
         phone: $phone
         theme: $theme
         marketingEmails: $marketingEmails
+        notificaitons: $notifications
         password: $password
     ) {
         ...customerSessionFields

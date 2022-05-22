@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_PRONOUNS, profileSchema } from '@local/shared';
 import { useMutation, useQuery } from '@apollo/client';
 import { updateCustomerMutation } from 'graphql/mutation';
@@ -16,6 +16,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 import { profile } from 'graphql/generated/profile';
 import { updateCustomer } from 'graphql/generated/updateCustomer';
+import { checkPushNotifications } from 'serviceWorkerRegistration';
 
 const componentStyles = (theme: Theme) => ({
     buttons: {
@@ -46,6 +47,7 @@ export const ProfileForm = () => {
             phone: arrayValueFromDot(profile, 'profile.phones', 0)?.number ?? '1',
             theme: profile?.profile?.theme ?? 'light',
             marketingEmails: arrayValueFromDot(profile, 'profile.emails', 0)?.receivesDeliveryUpdates ?? false,
+            notifications: profile?.profile?.notifications ?? false,
             currentPassword: '',
             newPassword: '',
             newPasswordConfirmation: ''
@@ -92,6 +94,13 @@ export const ProfileForm = () => {
             })
         },
     });
+
+    /**
+     * Register push notifications for the user.
+     */
+    useEffect(() => {
+        if (Boolean(formik.values.notifications)) checkPushNotifications();
+    }, [formik.values.notifications]);
 
     const toggleEdit = (event) => {
         event.preventDefault();
@@ -213,13 +222,26 @@ export const ProfileForm = () => {
                                     <Checkbox
                                         id="marketingEmails"
                                         name="marketingEmails"
-                                        value="marketingEmails"
                                         color="secondary"
                                         checked={formik.values.marketingEmails}
                                         onChange={formik.handleChange}
                                     />
                                 }
                                 label="I want to receive marketing promotions and updates via email."
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        id="notifications"
+                                        name="notifications"
+                                        color="secondary"
+                                        checked={formik.values.notifications}
+                                        onChange={formik.handleChange}
+                                    />
+                                }
+                                label="I want to receive notifications."
                             />
                         </Grid>
                     </Grid>

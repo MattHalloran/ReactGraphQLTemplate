@@ -437,6 +437,7 @@ export type MutationSignUpArgs = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   marketingEmails: Scalars['Boolean'];
+  notifications: Scalars['Boolean'];
   password: Scalars['String'];
   phone: Scalars['String'];
   pronouns?: InputMaybe<Scalars['String']>;
