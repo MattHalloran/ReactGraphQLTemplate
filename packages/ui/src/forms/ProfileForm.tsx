@@ -16,7 +16,7 @@ import { mutationWrapper } from 'graphql/utils/wrappers';
 import { formStyles } from './styles';
 import { profile } from 'graphql/generated/profile';
 import { updateCustomer } from 'graphql/generated/updateCustomer';
-import { checkPushNotifications } from 'serviceWorkerRegistration';
+import { checkPushNotifications, unsubscribeFromPushNotifications } from 'serviceWorkerRegistration';
 
 const componentStyles = (theme: Theme) => ({
     buttons: {
@@ -100,6 +100,7 @@ export const ProfileForm = () => {
      */
     useEffect(() => {
         if (Boolean(formik.values.notifications)) checkPushNotifications();
+        else unsubscribeFromPushNotifications();
     }, [formik.values.notifications]);
 
     const toggleEdit = (event) => {

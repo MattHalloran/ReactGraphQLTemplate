@@ -22,7 +22,7 @@ import { formStyles } from './styles';
 import { CommonProps } from 'types';
 import { signUp } from 'graphql/generated/signUp';
 import { useCallback, useEffect } from 'react';
-import { checkPushNotifications } from 'serviceWorkerRegistration';
+import { checkPushNotifications, unsubscribeFromPushNotifications } from 'serviceWorkerRegistration';
 
 const componentStyles = () => ({
     phoneInput: {
@@ -92,6 +92,7 @@ export const SignUpForm = ({
      */
     useEffect(() => {
         if (Boolean(formik.values.notifications)) checkPushNotifications();
+        else unsubscribeFromPushNotifications();
     }, [formik.values.notifications]);
 
     const setPronouns = useCallback((_, value) => formik.setFieldValue('pronouns', value), [formik]);

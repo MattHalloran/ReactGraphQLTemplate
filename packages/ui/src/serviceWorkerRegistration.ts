@@ -37,6 +37,10 @@ const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
  * If the build is running in a mode that supports service workers.
  */
 const supportsServiceWorkers: boolean = process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator;
+/**
+ * If the build is running in a mode that supports Notifications.
+ */
+const supportsNotifications: boolean = process.env.NODE_ENV === 'production' && 'Notification' in window;
 
 export function register(config) {
     if (!supportsServiceWorkers) return;
@@ -182,6 +186,7 @@ export async function subscribeToPushNotifications(registration: ServiceWorkerRe
         }).then(function (response) {
             console.log('subscription registered with server', response);
             success = true;
+            PubSub.publish(PUBS.Snack, { message: 'Push notifications enabled', severity: 'success' });
         }).catch(function (error) {
             PubSub.publish(PUBS.Snack, { message: 'Unknown error occurred', severity: 'error', data: error });
         });
@@ -204,18 +209,15 @@ export async function subscribeToPushNotifications(registration: ServiceWorkerRe
  * Checks if push notifications are enabled on this browser. 
  * Requests push notifications permission from the user if not already granted. 
  * Push notifications are supported on the following: https://caniuse.com/?search=web-push
- * @param forceCheck If true, the user will be prompted even if they've already denied push notifications.
  * @param failedAlertData Custom data for rendering the alert when this function fails. 
  */
-export async function checkPushNotifications(forceCheck: boolean = false, failedAlertData: AlertDialogData = {}): Promise<boolean> {
-    if (!supportsServiceWorkers) return false;
+export async function checkPushNotifications(failedAlertData: AlertDialogData = {}): Promise<boolean> {
+    if (!supportsNotifications) {
+        console.info('Browser does not support notifications');
+        return false;
+    }
     let success = false;
     try {
-        // Check if the user has previously denied push notifications.
-        if (!forceCheck && localStorage.getItem('pushNotifications') === 'false') {
-            console.info('Push notifications have been denied by the user.');
-            return false;
-        }
         console.log('registering push notifications...')
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
@@ -223,18 +225,19 @@ export async function checkPushNotifications(forceCheck: boolean = false, failed
             console.log('already subbeddd', subscription)
             success = true;
         } else {
-            const permissionResult = await Notification.requestPermission();
+            const permissionResult = await Notification.requestPermission()
             // If the user accepts, let's create a new subscription
             if (permissionResult === NotificationPermissions.granted) {
                 success = await subscribeToPushNotifications(registration, failedAlertData);
-                // Store decision in local storage 
-                localStorage.setItem('pushNotifications', 'true');
             }
-            // If the user denies (either by closing dialog or selecting not to), we'll just disable push notifications
+            // If the user denies (either by closing dialog or selecting not to), let the user know 
+            // how to enable push notifications
             else {
                 console.info('Push notifications permission denied by user');
-                // Store decision in local storage
-                localStorage.setItem('pushNotifications', 'false');
+                PubSub.publish(PUBS.AlertDialog, {
+                    title: 'Notifications disabled',
+                    message: 'To enable notifications, please open your browser settings and enable push notifications.',
+                })
             }
         }
     }
@@ -257,4 +260,18 @@ export function unregister(): void {
         .catch((error) => {
             console.error(error.message);
         });
+}
+
+/**
+ * Unsubscribes the user from push notifications
+ */
+export async function unsubscribeFromPushNotifications(): Promise<void> {
+    if (!supportsServiceWorkers) return;
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (subscription) {
+        await subscription.unsubscribe();
+        PubSub.publish(PUBS.Snack, { message: 'Push notifications disabled' });
+        //TODO - remove subscription from server
+    }
 }
