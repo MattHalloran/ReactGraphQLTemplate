@@ -27,30 +27,48 @@ A fully-functioning template for building modern, maintainable websites.
 
 
 ## How to start  
+
 ### 1. Prerequisites  
 Before developing a website from this template, make sure you have the following installed:   
 1. [Docker](https://www.docker.com/)
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*
-### 2. Download this repository
+
+### 2. Configure VSCode  
+The commands in this guide follow the Unix syntax. If you are using VSCode on Windows, the terminal will not support this syntax by default. To change the terminal:  
+1. Enter `CTRL+SHIFT+P` to open the Command Palette
+2. Search and select `Terminal: Select Default Profile`
+3. Change the terminal to `Git Bash`     
+
+You also need to make sure that the project's script files aren't converted to Windows line endings. To accomplish this:  
+1. Open a `Git Bash` terminal in VSCode (should be the default now)
+2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
+
+### 3. Download this repository
 `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`
-### 3. Install packages
+
+### 4. Install packages
 1. `cd ReactGraphQLTemplate`  
 2. `yarn`
 3. Restart code editor
-### 4. Generate prisma client  
+
+### 5. Generate prisma client  
 To work with Prisma, types for your models must be generated.  
 1. `cd packages/server`  
 2. `yarn prisma-generate`
 3. Restart code editor
-### 5. Set environment variables  
+
+### 6. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
-### 6. Business data
+
+### 7. Business data
 Edit the file `assets/public/business.json` to match your business's data.
-### 7. Docker
+
+### 8. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
 Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
-### 8. Enter website information
+
+### 9. Enter website information
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
