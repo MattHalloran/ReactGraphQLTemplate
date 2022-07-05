@@ -44,7 +44,8 @@ There are a few global dependencies which are required, and can be downloaded fr
 5. `react-scripts`
 6. `serve`
 7. `ts-node`
-8. `typescript`
+8. `typescript`  
+
 The code may specify specific versions of these dependencies. If that is the case, it is a good idea to ensure that the global packages are the same version (e.g. `yarn global add apollo@2.34.0`). Any dependency used in a `Dockerfile` or the `scripts` section of a `package.json` file should be global, so you can check these places.
 
 ### 3. Configure VSCode  
