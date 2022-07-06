@@ -32,7 +32,7 @@ A fully-functioning template for building modern, maintainable websites.
 Before developing a website from this template, make sure you have the following installed:   
 1. *Windows only*: [Windows Terminal](https://www.microsoft.com/store/productId/9N0DX20HK701)
 2. *Windows only*: [Ubuntu](https://www.microsoft.com/store/productId/9PNKSF5ZN4SW)
-3. [Docker](https://www.docker.com/)
+3. [Docker](https://www.docker.com/). On Windows, Docker will guide you through enabling Windows Subsystem for Linux (WSL)
 4. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*  
 5. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
 6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
@@ -52,7 +52,7 @@ There are a few global dependencies which are required, and can be downloaded fr
 
 The code may specify specific versions of these dependencies. If that is the case, it is a good idea to ensure that the global packages are the same version (e.g. `yarn global add apollo@2.34.0`). Any dependency used in a `Dockerfile` or the `scripts` section of a `package.json` file should be global, so you can check these places.
 
-### 3. Configure VSCode (Windows Only) 
+### 3. Configure for WSL (Windows Only) 
 VSCode and Docker require additional setup on Windows, since you must use the Windows Subsystem for Linux (WSL). First, make sure the WSL status indicator can appear in VSCode:   
 1. Open VSCode  
 2. Right click the status bar, and make sure "Remote Host" is checked
