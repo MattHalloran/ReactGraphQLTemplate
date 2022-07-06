@@ -30,15 +30,17 @@ A fully-functioning template for building modern, maintainable websites.
 
 ### 1. Prerequisites  
 Before developing a website from this template, make sure you have the following installed:   
-1. [Docker](https://www.docker.com/)
-2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*  
-3. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
-4. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
-5. *Windows only*: [Windows Terminal](https://www.microsoft.com/store/productId/9N0DX20HK701)
-6. *Windows only*: [Ubuntu](https://www.microsoft.com/store/productId/9PNKSF5ZN4SW)
+1. *Windows only*: [Windows Terminal](https://www.microsoft.com/store/productId/9N0DX20HK701)
+2. *Windows only*: [Ubuntu](https://www.microsoft.com/store/productId/9PNKSF5ZN4SW)
+3. [Docker](https://www.docker.com/)
+4. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*  
+5. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
+6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
+
+**Note**: On Windows, NPM and Yarn should be installed from Ubuntu directly.
 
 ### 2. Global dependencies
-There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add`:  
+There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add` (do this from Ubuntu if on Windows):  
 1. `apollo`  
 2. `nodemon`  
 3. `graphql-codegen`
