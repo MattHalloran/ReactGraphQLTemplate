@@ -50,18 +50,30 @@ There are a few global dependencies which are required, and can be downloaded fr
 
 The code may specify specific versions of these dependencies. If that is the case, it is a good idea to ensure that the global packages are the same version (e.g. `yarn global add apollo@2.34.0`). Any dependency used in a `Dockerfile` or the `scripts` section of a `package.json` file should be global, so you can check these places.
 
-### 3. Configure VSCode  
-The commands in this guide follow the Unix syntax. If you are using VSCode on Windows, the terminal will not support this syntax by default. To change the terminal:  
-1. Enter `CTRL+SHIFT+P` to open the Command Palette
-2. Search and select `Terminal: Select Default Profile`
-3. Change the terminal to `Git Bash`     
+### 3. Configure VSCode (Windows Only) 
+VSCode and Docker require additional setup on Windows, since you must use the Windows Subsystem for Linux (WSL). First, make sure the WSL status indicator can appear in VSCode:   
+1. Open VSCode  
+2. Right click the status bar, and make sure "Remote Host" is checked
 
-You also need to make sure that the project's script files aren't converted to Windows line endings. To accomplish this:  
-1. Open a `Git Bash` terminal in VSCode (should be the default now)
-2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
+Next, make sure Docker's WSL integation uses the Ubuntu distro downloaded in step 1:  
+1. Open Docker Desktop
+2. Go to Resources -> WSL Integration  
+3. Select the Ubuntu distro
+4. Apply and restart
+
+The next steps should not be needed if you use WSL correctly. But if you end up changing things without using WSL, complete the following:   
+1. Change the default terminal to support Unix commands:  
+    1. Enter `CTRL+SHIFT+P` to open the Command Palette
+    2. Search and select `Terminal: Select Default Profile`
+    3. Change the terminal to `Git Bash`     
+2. Make sure that the project's script files aren't converted to Windows line endings. To accomplish this:  
+    1. Open a `Git Bash` terminal in VSCode (should be the default now)
+    2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
 
 ### 4. Download this repository
-In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.
+In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
+
+To open the project from the command line, enter `code <PROJECT_NAME>` from the directory you cloned in, or `code .` from the project's directory.
 
 ### 5. Install packages
 1. `cd ReactGraphQLTemplate`  
