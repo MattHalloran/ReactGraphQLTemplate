@@ -34,6 +34,8 @@ Before developing a website from this template, make sure you have the following
 2. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*  
 3. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
 4. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
+5. *Windows only*: [Windows Terminal](https://www.microsoft.com/store/productId/9N0DX20HK701)
+6. *Windows only*: [Ubuntu](https://www.microsoft.com/store/productId/9PNKSF5ZN4SW)
 
 ### 2. Global dependencies
 There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add`:  
@@ -59,7 +61,7 @@ You also need to make sure that the project's script files aren't converted to W
 2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
 
 ### 4. Download this repository
-`git clone https://github.com/MattHalloran/ReactGraphQLTemplate`
+In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.
 
 ### 5. Install packages
 1. `cd ReactGraphQLTemplate`  
@@ -206,7 +208,7 @@ Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only 
 - [Sitemap.ts](packages/ui/src/Sitemap.ts) and [Routes.ts](packages/ui/src/Routes.ts) - Automatically generates a sitemap for your website. This helps web crawlers determine which pages are important, and what the pages contain. See [this article](https://developers.google.com/search/docs/advanced/sitemaps/overview) for more information
 - Remove unused dependencies - The easiest way I've found to discover unused dependencies is with [depcheck](https://www.npmjs.com/package/depcheck):    
     1. In project's root directory, enter `yarn global add depcheck`  
-    2. `depcheck`  
+    2. `depcheck` or `npx depcheck`  
     3. Repeat in each package (packages/server, packages/shared, packages/ui)  
 Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
 - Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
