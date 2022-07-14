@@ -225,7 +225,7 @@ Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only 
     2. `depcheck` or `npx depcheck`  
     3. Repeat in each package (packages/server, packages/shared, packages/ui)  
 Before removing packages, please make sure that depcheck was correct. If you are only using the package in a Dockerfile, for example, it may not catch it!
-- Remove unused components and pages - This template is sure to have features you don't need. Every byte counts with web responsiveness! 
+- Remove unused components and pages - Every byte counts with web responsiveness! One method for finding unused code is to use [ts-unused-exports](https://github.com/pzavolinsky/ts-unused-exports).
 - Peek inside code bundles - Seeing what's inside the code bundles can help you determine what areas of the code should be lazy loaded, and what is taking the most space. To do this:  
     1. `cd packages/ui ` 
     2. `yarn build`
