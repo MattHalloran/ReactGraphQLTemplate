@@ -37,7 +37,8 @@ Before developing a website from this template, make sure you have the following
 5. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
 6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
 
-**Note**: On Windows, NPM and Yarn should be installed from Ubuntu directly.
+**Note 1**: On Windows, NPM and Yarn should be installed from Ubuntu directly.  
+**Note 2**: If you want to develop on a remote server (e.g. computer too slow, don't have admin privileges for Docker), you can follow the [deployment steps](https://github.com/MattHalloran/ReactGraphQLTemplate#deploying-project) to learn how to create one and set it up correctly. The [setup script](https://github.com/MattHalloran/NginxSSLReverseProxy/blob/main/scripts/fullSetup.sh) downloads all prerequisites, except for VSCode. You can install this on your local machine, and follow the [instructions for setting up the Remote Development extension]()
 
 ### 2. Global dependencies
 There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add` (do this from Ubuntu if on Windows):  
@@ -52,7 +53,7 @@ There are a few global dependencies which are required, and can be downloaded fr
 
 The code may specify specific versions of these dependencies. If that is the case, it is a good idea to ensure that the global packages are the same version (e.g. `yarn global add apollo@2.34.0`). Any dependency used in a `Dockerfile` or the `scripts` section of a `package.json` file should be global, so you can check these places.
 
-### 3. Configure for WSL (Windows Only) 
+### 3. Configure for WSL (Windows only) 
 VSCode and Docker require additional setup on Windows, since you must use the Windows Subsystem for Linux (WSL). First, make sure the WSL status indicator can appear in VSCode:   
 1. Open VSCode  
 2. Right click the status bar, and make sure "Remote Host" is checked
@@ -71,35 +72,40 @@ The next steps should not be needed if you use WSL correctly. But if you end up 
 2. Make sure that the project's script files aren't converted to Windows line endings. To accomplish this:  
     1. Open a `Git Bash` terminal in VSCode (should be the default now)
     2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
+    
+### 4. Configure VSCode Remote Development extension (Remote development only)  
+1. [Download the extension](https://code.visualstudio.com/docs/remote/remote-overview)  
+2. Enter `CTRL+SHIFT+P` to open the Command Palette  
+3. Search and select ``
 
-### 4. Download this repository
+### 5. Download this repository
 In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
 
 To open the project from the command line, enter `code <PROJECT_NAME>` from the directory you cloned in, or `code .` from the project's directory.
 
-### 5. Install packages
+### 6. Install packages
 1. `cd ReactGraphQLTemplate`  
 2. `yarn`
 3. Restart code editor
 
-### 6. Generate prisma client  
+### 7. Generate prisma client  
 To work with Prisma, types for your models must be generated.  
 1. `cd packages/server`  
 2. `yarn prisma-generate`
 3. Restart code editor
 
-### 7. Set environment variables  
+### 8. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
 
-### 8. Business data
+### 9. Business data
 Edit the file `assets/public/business.json` to match your business's data.
 
-### 9. Docker
+### 10. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
 Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
 
-### 10. Enter website information
+### 11. Enter website information
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
@@ -270,7 +276,7 @@ Once you buy a domain, you must set up the correct DNS records. This can be done
 ### 2. Set up VPS - Reverse proxy
 The VPS you'll be running this website on must be configured to handle website traffic. This is done through Nginx https://olex.biz/2019/09/hosting-with-docker-nginx-reverse-proxy-letsencrypt/
 
-I've created a project that automates this process, which you can find [here](https://github.com/MattHalloran/NginxSSLReverseProxy#getting-started).
+I've created [a project that automates this process](https://github.com/MattHalloran/NginxSSLReverseProxy#getting-started).
 
 ### 3. Set up VPS - Main code
 1. `cd ~`
