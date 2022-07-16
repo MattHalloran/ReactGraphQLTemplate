@@ -38,7 +38,7 @@ Before developing a website from this template, make sure you have the following
 6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
 
 **Note 1**: On Windows, NPM and Yarn should be installed from Ubuntu directly.  
-**Note 2**: If you want to develop on a remote server (e.g. computer too slow, don't have admin privileges for Docker), you can follow the [deployment steps](https://github.com/MattHalloran/ReactGraphQLTemplate#deploying-project) to learn how to create one and set it up correctly. The [setup script](https://github.com/MattHalloran/NginxSSLReverseProxy/blob/main/scripts/fullSetup.sh) downloads all prerequisites, except for VSCode. You can install this on your local machine, and follow the [instructions for setting up the Remote Development extension]()
+**Note 2**: If you want to develop on a remote server (e.g. computer too slow, don't have admin privileges for Docker), you can follow the [instructions for setting this up](). If this is the case, the only prerequisite you need is VSCode.
 
 ### 2. Global dependencies
 There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add` (do this from Ubuntu if on Windows):  
@@ -73,10 +73,25 @@ The next steps should not be needed if you use WSL correctly. But if you end up 
     1. Open a `Git Bash` terminal in VSCode (should be the default now)
     2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
     
-### 4. Configure VSCode Remote Development extension (Remote development only)  
-1. [Download the extension](https://code.visualstudio.com/docs/remote/remote-overview)  
+### 4. Set up Remote Development (if you can't develop locally)  
+A more detailed guide (minus step 1) can be [found here](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin).
+1. Follow the [deployment steps](https://github.com/MattHalloran/ReactGraphQLTemplate#deploying-project) to learn how to host a VPS and set it up correctly  
+2. Set up a pair of SSH keys. Make note of the file location that the keys are stored in
+1. In VSCode, download the [Remote Development extension](https://code.visualstudio.com/docs/remote/remote-overview)  
 2. Enter `CTRL+SHIFT+P` to open the Command Palette  
-3. Search and select ``
+3. Search and select `Remote-SSH: Open Configuration File...`  
+4. Edit configuration file to contain an entry with this format:  
+    ```
+    Host <any_name_for_remote_server>
+        HostName <your_server_ip_or_hostname>
+        User <your_username>
+        IdentityFile <ssh_keys_location>
+    ```
+    **Note 1**: You can now reference your host by the name you chose, instead of its IP address  
+    **Note 2**: `User` is likely `root`  
+5. Open Command Palette again and select `Remote-SSH: Connect to Host...`   
+6. A new VSCode terminal should open. Answer the questions (e.g. server type, server password), and you should be connected!  
+7. Locate the repo on the remote server. If you haven't cloned it yet, you can do so from VSCode's terminal
 
 ### 5. Download this repository
 In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
