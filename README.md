@@ -33,27 +33,12 @@ Before developing a website from this template, make sure you have the following
 1. *Windows only*: [Windows Terminal](https://www.microsoft.com/store/productId/9N0DX20HK701)
 2. *Windows only*: [Ubuntu](https://www.microsoft.com/store/productId/9PNKSF5ZN4SW)
 3. [Docker](https://www.docker.com/). On Windows, Docker will guide you through enabling Windows Subsystem for Linux (WSL)
-4. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*  
-5. [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)  
-6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)    
+4. [VSCode](https://code.visualstudio.com/) *(also look into enabling Settings Sync)*    
 
 **Note 1**: On Windows, NPM and Yarn should be installed from Ubuntu directly.  
-**Note 2**: If you want to develop on a remote server (e.g. computer too slow, don't have admin privileges for Docker), you can follow the [instructions for setting this up](). If this is the case, the only prerequisite you need is VSCode.
+**Note 2**: If you want to develop on a remote server (e.g. computer too slow, don't have admin privileges for Docker), you can follow the [instructions for setting this up](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/remote-development/README.md#4-set-up-remote-development-if-you-cant-develop-locally). If this is the case, the only prerequisite you need is VSCode.
 
-### 2. Global dependencies
-There are a few global dependencies which are required, and can be downloaded from the terminal using `yarn global add` (do this from Ubuntu if on Windows):  
-1. `apollo`  
-2. `nodemon`  
-3. `graphql-codegen`
-4. `prisma`
-5. `react-scripts`
-6. `serve`
-7. `ts-node`
-8. `typescript`  
-
-The code may specify specific versions of these dependencies. If that is the case, it is a good idea to ensure that the global packages are the same version (e.g. `yarn global add apollo@2.34.0`). Any dependency used in a `Dockerfile` or the `scripts` section of a `package.json` file should be global, so you can check these places.
-
-### 3. Configure for WSL (Windows only) 
+### 2. Configure for WSL (Windows only) 
 VSCode and Docker require additional setup on Windows, since you must use the Windows Subsystem for Linux (WSL). First, make sure the WSL status indicator can appear in VSCode:   
 1. Open VSCode  
 2. Right click the status bar, and make sure "Remote Host" is checked
@@ -73,7 +58,7 @@ The next steps should not be needed if you use WSL correctly. But if you end up 
     1. Open a `Git Bash` terminal in VSCode (should be the default now)
     2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
     
-### 4. Set up Remote Development (if you can't develop locally)  
+### 3. Set up Remote Development (if you can't develop locally)  
 A more detailed guide (minus step 1) can be [found here](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin).
 1. Follow the [deployment steps](https://github.com/MattHalloran/ReactGraphQLTemplate#deploying-project) to learn how to host a VPS and set it up correctly  
 2. Set up a pair of SSH keys. Make note of the file location that the keys are stored in
@@ -91,36 +76,32 @@ A more detailed guide (minus step 1) can be [found here](https://www.digitalocea
     **Note 2**: `User` is likely `root`  
 5. Open Command Palette again and select `Remote-SSH: Connect to Host...`   
 6. A new VSCode terminal should open. Answer the questions (e.g. server type, server password), and you should be connected!  
-7. Locate the repo on the remote server. If you haven't cloned it yet, you can do so from VSCode's terminal
+7. Open the `Extensions` page in VSCode, and download the extensions you want to use
 
-### 5. Download this repository
+### 4. Download this repository
 In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
 
 To open the project from the command line, enter `code <PROJECT_NAME>` from the directory you cloned in, or `code .` from the project's directory.
 
-### 6. Install packages
+### 5. Install packages
 1. `cd ReactGraphQLTemplate`  
-2. `yarn`
-3. Restart code editor
+2. `chmod +x ./scripts/* && ./scripts/setup.sh`
+4. Restart code editor  
 
-### 7. Generate prisma client  
-To work with Prisma, types for your models must be generated.  
-1. `cd packages/server`  
-2. `yarn prisma-generate`
-3. Restart code editor
+**Note:** The global dependencies in `setup.sh` are global because they're either used by a `Dockerfile` or `package.json`. If you want to make sure the dependency versions are correct, you should check those files
 
-### 8. Set environment variables  
+### 6. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
 
-### 9. Business data
+### 7. Business data
 Edit the file `assets/public/business.json` to match your business's data.
 
-### 10. Docker
+### 8. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
 Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
 
-### 11. Enter website information
+### 9. Enter website information
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
