@@ -76,7 +76,9 @@ A more detailed guide (minus step 1) can be [found here](https://www.digitalocea
     **Note 2**: `User` is likely `root`  
 5. Open Command Palette again and select `Remote-SSH: Connect to Host...`   
 6. A new VSCode terminal should open. Answer the questions (e.g. server type, server password), and you should be connected!  
-7. Open the `Extensions` page in VSCode, and download the extensions you want to use
+7. Open the `Extensions` page in VSCode, and download the extensions you want to use  
+8. After following the [environment variables setup](https://github.com/MattHalloran/ReactGraphQLTemplate#6-set-environment-variables), open the Command Palette and select `Ports: Focus on Ports View`  
+9. Enter the port numbers of every port in the `.env` file. When running the project, you can now use localhost to access it
 
 ### 4. Download this repository
 In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
