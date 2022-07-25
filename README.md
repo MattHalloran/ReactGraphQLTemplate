@@ -47,18 +47,19 @@ Next, make sure Docker's WSL integation uses the Ubuntu distro downloaded in ste
 1. Open Docker Desktop
 2. Go to Resources -> WSL Integration  
 3. Select the Ubuntu distro
-4. Apply and restart
-
-The next steps should not be needed if you use WSL correctly. But if you end up changing things without using WSL, complete the following:   
-1. Change the default terminal to support Unix commands:  
-    1. Enter `CTRL+SHIFT+P` to open the Command Palette
-    2. Search and select `Terminal: Select Default Profile`
-    3. Change the terminal to `Git Bash`     
-2. Make sure that the project's script files aren't converted to Windows line endings. To accomplish this:  
-    1. Open a `Git Bash` terminal in VSCode (should be the default now)
-    2. Enter `git config --global core.autocrlf false`. If you already downloaded the project, you may need to delete it and redownload. Alternatively, I'm sure you could find a script online that converts file line endings.  
+4. Apply and restart 
     
-### 3. Set up Remote Development (if you can't develop locally)  
+### 3. Make sure files are using `LF` line endings (Windows only)
+1. Open a terminal in the WSL distro you're using for the project (either from Windows Terminal or the built-in terminal in VSCode)  
+2. `git config --global core.autocrlf false`  
+3. `git config --global core.eol lf`  
+4. To apply this retroactively:    
+    4.1. `git rm --cached -rf .`  
+    4.2. `git diff --cached --name-only -z | xargs -n 50 -0 git add -f`  
+    4.3. `git ls-files -z | xargs -0 rm`  
+    4.4. `git checkout .`  
+    
+### 4. Set up Remote Development (if you can't develop locally)  
 A more detailed guide (minus step 1) can be [found here](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin).
 1. Follow the [deployment steps](https://github.com/MattHalloran/ReactGraphQLTemplate#deploying-project) to learn how to host a VPS and set it up correctly  
 2. Set up a pair of SSH keys. Make note of the file location that the keys are stored in
@@ -80,30 +81,30 @@ A more detailed guide (minus step 1) can be [found here](https://www.digitalocea
 8. After following the [environment variables setup](https://github.com/MattHalloran/ReactGraphQLTemplate#6-set-environment-variables), open the Command Palette and select `Ports: Focus on Ports View`  
 9. Enter the port numbers of every port in the `.env` file. When running the project, you can now use localhost to access it
 
-### 4. Download this repository
+### 5. Download this repository
 In the directory of your choice, enter `git clone https://github.com/MattHalloran/ReactGraphQLTemplate`. On Windows, make sure this is done from an Ubuntu terminal in Windows Terminal. If the code is stored on the Windows file system, then docker will be **extremely** slow - and likely unusable.  
 
 To open the project from the command line, enter `code <PROJECT_NAME>` from the directory you cloned in, or `code .` from the project's directory.
 
-### 5. Install packages
+### 6. Install packages
 1. `cd ReactGraphQLTemplate`  
 2. `chmod +x ./scripts/* && ./scripts/setup.sh`
 4. Restart code editor  
 
 **Note:** The global dependencies in `setup.sh` are global because they're either used by a `Dockerfile` or `package.json`. If you want to make sure the dependency versions are correct, you should check those files
 
-### 6. Set environment variables  
+### 7. Set environment variables  
 1. Edit environment variables in [.env-example](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/.env-example)
 2. Rename the file to .env
 
-### 7. Business data
+### 8. Business data
 Edit the file `assets/public/business.json` to match your business's data.
 
-### 8. Docker
+### 9. Docker
 By default, the docker containers rely on an external network. This network is used for the server's nginx docker container. During development, there is no need to run an nginx container. Instead, you can enter: `docker network create nginx-proxy`   
 Once the docker network is set up, you can start the entire application by entering in the root directory: `docker-compose up --build --force-recreate -d`
 
-### 9. Enter website information
+### 10. Enter website information
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
