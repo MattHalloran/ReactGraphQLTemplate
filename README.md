@@ -247,12 +247,17 @@ One common issue that arises here is "Manifest doesn't have a maskable icon". Cl
 
 ## Trusted Web Activity (TWA)
 A trusted web activity is a PWA that runs natively on Android devices. They can also be listed on the Google Play store, making them almost identical to traditional apps. If this sounds interesting to you, make sure that the `packages/ui/public/site.manifest` or `packages/ui/public/manifest.json` file has the following data:  
-1. orientation
+1. orientation and display to define how the app should feel (likely "any" and "standalone" to feel like a native app)
 2. screenshots (displayed in the store)  
-3. 
-, along with everything mentioned in the Favicons and PWA sections of this guide. All known manifest fields can be found [here](https://developer.mozilla.org/en-US/docs/Web/Manifest/categories).
+3. name, short name, and description   
+4. dir (direction of text) and lang for localization
+5. icons
+6. start_url and scope
+, along with everything else mentioned in the Favicons and PWA sections of this guide. All known manifest fields can be found [here](https://developer.mozilla.org/en-US/docs/Web/Manifest/categories).
 
 Once that is complete, you can use the [PWABuilder tool](https://www.pwabuilder.com/) to generate other required files and receive further instructions.
+
+When you're ready to test or deploy your app to the Google Play store, visit [Google Play Console](https://play.google.com/) to receive instructions.
 
 
 ## Brave Rewards
