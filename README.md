@@ -191,7 +191,18 @@ Then, when you need to use the font, you can reference it like this:
     },
 ```
 
-When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/tools/webfont-generator). In web development, size matters😉
+When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/tools/webfont-generator). If you know which characters you need (such as for a logo), you can also delete unneeded characters via an app like [FontForge](https://fontforge.org/). In web development, size matters😉  
+
+If you want to go even further (though it is probably not necessary), you can also encode your font as a base64 string so it can be used without fetching. On a Unix-based terminal, a `.woff` can be converted to base64 using the command `base64 -w 0 yourfont.woff > yourfont-64.txt`. Then, you can enter that string into the `@font-face` src like so: 
+
+```javascript
+    ...
+    '@font-face': {
+        ...
+        src: `local('SakBunderan'), url(data:font/woff;charset=utf-8;base64,insertyourbase64stringhere) format('truetype')`,
+        ...
+    }
+```
 
 ## GraphQL
 [GraphQL](https://graphql.org/) is a query language for APIs. It is a faster, understandable, and modernan alternative to REST APIs.
