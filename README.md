@@ -125,7 +125,12 @@ Open Graph is a metadata format that describes how your website should be shown 
 
 
 ## Linting
-The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.
+The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.  
+
+Since linting can be computationally expensive, the linter only works on opened files. If you want to lint the entire project:  
+1. Enter `CTRL+SHIFT+P` to open the Command Palette  
+2. Select `Tasks: Run Task`  
+3. Select `eslint: lint whole folder`
 
 
 ## Database migrations
