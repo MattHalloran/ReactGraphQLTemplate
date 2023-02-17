@@ -136,12 +136,27 @@ Since linting can be computationally expensive, the linter only works on opened 
 ## Database migrations
 Database migrations are handled by Prisma. Full documentation can be found [here](https://www.prisma.io/docs/concepts/components/prisma-migrate)
 
+
 ## Database seeding
 Database seeding is also handled by Prisma, with full documentation [here](https://www.prisma.io/docs/guides/database/seed-database).
 
 
 ## Non-database storage
 It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
+
+
+## Remote debugging
+If you have scripts to back up the database or logs from a remote server, you probably want them to run automatically. This can be done through `Tash Scheduling`.
+
+### Task scheduling on Windows (with WSL)
+1. Open `Task Scheduler` from the Windows start menu 
+2. Select `Create Task`
+3. Enter a task name and description
+4. In the Triggers tab, select "New" and select "At startup" as the trigger.
+5. In the Actions tab, select "New" and select "Start a program" as the action.
+6. In the "Program/script" field, enter this command to open WSL: `C:\Windows\System32\wsl.exe`
+7. In the "Add arguments" field, enter the path to the .sh script you created in step 3, using Linux-style paths. For example: ```/root/Programming/ReactGraphQLTemplate/scripts/listen.sh``` 
+8. Press `Ok` to save the task
 
 
 ## Email setup
