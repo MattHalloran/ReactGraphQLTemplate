@@ -299,6 +299,13 @@ Brave Rewards is a service that allows users of the Brave browser to earn Basic 
 3. `vim .well-known/brave-rewards-verification.txt`
 4. Paste the text given in step 1 into the file, and save.
 
+## Ads
+I hate ads as much as anyone else, but they're still an important monetization tool. The easiest way to set up ads is through [Google AdSense](https://www.google.com/adsense). If you'd like to specify where the ads appear, you should follow [these instructions](https://support.google.com/adsense/answer/9274025) to set up an "ad unit".
+
+Some tips for implementing ads:  
+1. Make sure the font matches your site's font (`Lato` in this repo).
+2. Make sure that pages and dialogs leave enough padding at the bottom so that nothing is cut off by a banner ad  
+3. Make sure to change `data-ad-client` and related fields from this repo's ad components (if I've implemented them yet), so you receive the ad revenue instead of me.
 
 ## Deploying project
 Currently, the cheapest way to deploy a web project seems to be through VPS hosting. [Here](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ubuntu-20-04-server-on-a-digitalocean-droplet) is an example of how to do this on DigitalOcean. Instead of a plain Ubuntu server, however, it is easier to install one that already contains Docker.
