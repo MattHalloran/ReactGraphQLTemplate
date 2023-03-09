@@ -144,7 +144,6 @@ Database seeding is also handled by Prisma, with full documentation [here](https
 ## Non-database storage
 It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
 
-
 ## Remote debugging
 If you have scripts to back up the database or logs from a remote server, you probably want them to run automatically. This can be done through `Task Scheduling`.
 
@@ -162,6 +161,20 @@ If you have scripts to back up the database or logs from a remote server, you pr
 Sometimes, generating TypeScript will give a "JavaScript heap out of memory" error. This is difficult to debug, so it is important that you try to catch these early. Sometimes this is caused by packages using different TypeScript versions.
 
 If that doesn't solve this issue, you can debug TypeScript by changing `yarn tsc` to `yarn tsc --generate trace-data`. This will create a folder called `trace-data`, which contains a log that you can upload to `about://tracing` on Edge or Chrome. See [TypeScript's performance tracing guide](https://github.com/microsoft/TypeScript/wiki/Performance#performance-tracing) for more information.
+
+## Server debugging
+When debugging the UI, we have a lot of options. There are console logs, Lighthouse testing, and [React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi). The server, on the other hand, is a bit more complicated. 
+
+The server also supports console logs, but they aren't available during production. Instead, we can look at logs. These are generated at `data/logs`. You can also track logs from a remote server, which is described in the *Remote debugging* section of this document.
+
+For performance measuring, we can use the [0x profiling tool](https://github.com/davidmarkclements/0x) to generate flame graphs. Getting this to work with Docker is a little cumbersome, but the result is worth it. You have to:   
+1. Change `nodemon` or `node` (depending on if you're calling the development or server script) to `0x --node`. Leave the arguments after the same.  
+2. Start the project as normal. You should see a file named `isolate-<random_characters>.log`. This is not the flamegraph yet, but is used to generate it.  
+3. Perform whatever test you need so that `0x` can gather data. 
+4. To generate the flame graph, we have to stop the `0x` process manually. Start by entering the server container: `docker exec -it server sh`
+5. Enter `ps` and look for a process with `node` and `0x` in the name. Make note of the PID (the number on the left)
+6. Enter `kill -SIGINT <0x_PID>`. This will generate a folder called `<0x_PID.0x`.
+7. Open the `.html` file in the generated folder to view the flame graph
 
 ## Email setup
 It is often useful to send and receives emails with the website's address. Instructions to set that up can be found [here](/docs/MessengerSetup.txt)
