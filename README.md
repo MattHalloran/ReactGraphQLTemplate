@@ -146,7 +146,7 @@ It is generally recommended to store data on an external server, but for smaller
 
 
 ## Remote debugging
-If you have scripts to back up the database or logs from a remote server, you probably want them to run automatically. This can be done through `Tash Scheduling`.
+If you have scripts to back up the database or logs from a remote server, you probably want them to run automatically. This can be done through `Task Scheduling`.
 
 ### Task scheduling on Windows (with WSL)
 1. Open `Task Scheduler` from the Windows start menu 
@@ -158,6 +158,8 @@ If you have scripts to back up the database or logs from a remote server, you pr
 7. In the "Add arguments" field, enter the path to the .sh script you created in step 3, using Linux-style paths. For example: ```/root/Programming/ReactGraphQLTemplate/scripts/listen.sh``` 
 8. Press `Ok` to save the task
 
+## TypeScript generation debugging  
+Sometimes, generating TypeScript will give a "JavaScript heap out of memory" error. This is difficult to debug, so it is important that you try to catch these early. One way to debug this is by changing `yarn tsc` to `yarn tsc --generate trace-data`. This will create a folder called `trace-data`, which contains a log that you can upload to `about://tracing` on Edge or Chrome. See [TypeScript's performance tracing guide](https://github.com/microsoft/TypeScript/wiki/Performance#performance-tracing) for more information.
 
 ## Email setup
 It is often useful to send and receives emails with the website's address. Instructions to set that up can be found [here](/docs/MessengerSetup.txt)
@@ -246,9 +248,6 @@ See [this video](https://youtu.be/Tw_wn6XUfnU) for more details.
 1. Start project locally **in development mode** (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
 2. `cd packages/ui` 
 3. `yarn graphql-generate`  
-
-#### TypeScript generation debugging  
-Sometimes, generating TypeScript will give a "JavaScript heap out of memory" error. This is difficult to debug, so it is important that you try to catch these early. One way to debug this is by changing `yarn tsc` to `yarn tsc --generate trace-data`. This will create a folder called `trace-data`, which contains a log that you can upload to `about://tracing` on Edge or Chrome. See [TypeScript's performance tracing guide](https://github.com/microsoft/TypeScript/wiki/Performance#performance-tracing) for more information.
 
 ## Local testing on another device
 Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/server/src/index.ts); and (2) [packages/shared/src/apiConsts.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/shared/src/apiConsts.ts).
