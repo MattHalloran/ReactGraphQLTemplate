@@ -233,7 +233,9 @@ GraphQL syntax errors are notoriously hard to debug, as they often do not give a
 In the [schema directory](packages/service/src/schema), the GraphQL resolvers are split up into individual files, which are stitched together in the [index file](packages/service/src/schema/index.ts). In this file, the `models` object is used to combine all of the individual schemas. If you make this an empty array, you can comment out imports until the problem goes away. This allows you to pinpoint which schema file is causing the error. Common errors are empty parentheses (ex: `users():` instead of `users:`) and empty brackets.
 
 ### GraphQL TypeScript generation
-GraphQL is already typed, but it unfortunately doesn't play well with TypeScript's typing system. Instead of creating TypeScript types yourself (which is tedious), they can be generated automatically from an endpoint. This requires the backend server to be running.
+GraphQL is already typed, but it unfortunately doesn't play well with TypeScript's typing system. Instead of creating TypeScript types yourself (which is tedious), they can be generated automatically from an endpoint. This requires the backend server to be running.  
+
+See [this video](https://youtu.be/Tw_wn6XUfnU) for more details.
 
 #### Server TypeScript generation
 1. Start project locally **in development mode** (if ui is not runnable, that's fine. We just need a working server) - `docker-compose up -d`
@@ -245,8 +247,8 @@ GraphQL is already typed, but it unfortunately doesn't play well with TypeScript
 2. `cd packages/ui` 
 3. `yarn graphql-generate`  
 
-See [this video](https://youtu.be/Tw_wn6XUfnU) for more details.
-
+#### TypeScript generation debugging  
+Sometimes, generating TypeScript will give a "JavaScript heap out of memory" error. This is difficult to debug, so it is important that you try to catch these early. One way to debug this is by changing `yarn tsc` to `yarn tsc --generate trace-data`. This will create a folder called `trace-data`, which contains a log that you can upload to `about://tracing` on Edge or Chrome. See [TypeScript's performance tracing guide](https://github.com/microsoft/TypeScript/wiki/Performance#performance-tracing) for more information.
 
 ## Local testing on another device
 Mobile devices can be simulated in Chrome Dev Tools, so testing is usually only done on your main development computer. However, if you'd still like to test on a different device, it will unfortunately not work out-the-box. This is because development uses the `localhost` alias. Your device will not be able to resolve this to the correct IP address (ex: `192.168.0.2`), so you have to change it manually. There are 2 places where this must be done: (1) [packages/server/src/index.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/server/src/index.ts); and (2) [packages/shared/src/apiConsts.ts](https://github.com/MattHalloran/ReactGraphQLTemplate/blob/master/packages/shared/src/apiConsts.ts).
