@@ -36,21 +36,8 @@ Edit the file `assets/public/business.json` to match your business's data.
 This project is set up so an admin can update various aspects without needing to mess with servers/code. To log in as an admin, use the admin credentials set in the `.env` file.  
 Once you are logged in, you should see a navigation option for "manage site". This includes links and descriptions to all of the admin functions. For inventory upload, there is an file that works with the example database, located in [assets/private](assets/private).
 
-
 ## Open Graph Tags
 Open Graph is a metadata format that describes how your website should be shown when shared on social media. This data is set in the header, and can be edited at `packages/ui/public/index.html`. For more information, [here](https://developers.facebook.com/docs/sharing/webmasters/) is a guide from Facebook.
-
-
-## Common commands
-- Start: `docker-compose up -d`
-- Stop: `docker-compose down`
-- Force stop all containers: `docker kill $(docker ps -q)`
-- Delete all containers: `docker system prune --all`
-- Delete all containers and volumes: `docker system prune --all --volumes`
-- Full deployment test (except for Nginx, as that's handled by a different container): `docker-compose down && docker-compose up --build --force-recreate`
-- Rebuild with fresh database: `docker-compose down && rm -rf "${PROJECT_DIR}/data/postgres" && docker-compose up --build --force-recreate`
-- Check logs for a docker container: `docker logs <container-name>`
-
 
 ## Linting
 The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.  
