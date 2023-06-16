@@ -197,7 +197,7 @@ Before removing packages, please make sure that depcheck was correct. If you are
     1. `cd packages/ui ` 
     2. `yarn build`
     3. `yarn analyze`
-**Note**: If `yarn analyze` is not working, then the source-map-explorer is likely unable to open your web browser. In this case, try running it directly with the `--html` flag (i.e. `npx source-map-explorer --html source-tree.html <bundles_location>`). Then open the generated file directly
+**Note**: If `yarn analyze` is not working, then the source-map-explorer is likely unable to open your web browser. In this case, try running it directly with the `--html` flag (i.e. `npx source-map-explorer --html source-tree.html <bundles_location>`) (vite example [must have sourcemap set to `true`]: `npx source-map-explorer --html source-tree.html dist/assets/*`). Then open the generated file directly
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
 
