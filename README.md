@@ -27,7 +27,7 @@ A fully-functioning template for building modern, maintainable websites.
 
 
 ## [👩🏼‍💻 Developer setup][setup-guide]
-Linked is our guide for setting up all Vrooli repos. In addition to the common steps, you'll need to do the following:
+Here is our [guide for setting up all Vrooli repos][setup-guide]. In addition to the common steps, you'll need to do the following:
 
 ### 1. Edit Business data
 Edit the file `assets/public/business.json` to match your business's data.
@@ -39,38 +39,8 @@ Once you are logged in, you should see a navigation option for "manage site". Th
 ## Open Graph Tags
 Open Graph is a metadata format that describes how your website should be shown when shared on social media. This data is set in the header, and can be edited at `packages/ui/public/index.html`. For more information, [here](https://developers.facebook.com/docs/sharing/webmasters/) is a guide from Facebook.
 
-## Linting
-The ESLint VSCode extension is great for catching errors and warnings. It can be configured with an `.eslintrc` file.  
-
-Since linting can be computationally expensive, the linter only works on opened files. If you want to lint the entire project:  
-1. Enter `CTRL+SHIFT+P` to open the Command Palette  
-2. Select `Tasks: Run Task`  
-3. Select `eslint: lint whole folder`
-
-
-## Database migrations
-Database migrations are handled by Prisma. Full documentation can be found [here](https://www.prisma.io/docs/concepts/components/prisma-migrate)
-
-
-## Database seeding
-Database seeding is also handled by Prisma, with full documentation [here](https://www.prisma.io/docs/guides/database/seed-database).
-
-
 ## Non-database storage
 It is generally recommended to store data on an external server, but for smaller projects, local upload/download can also be useful. In this project, admins have a wide array of customization features, such as changing the images in a hero banner. Uploaded data is stored at `<project_dir>`/assets
-
-## Remote debugging
-If you have scripts to back up the database or logs from a remote server, you probably want them to run automatically. This can be done through `Task Scheduling`.
-
-### Task scheduling on Windows (with WSL)
-1. Open `Task Scheduler` from the Windows start menu 
-2. Select `Create Task`
-3. Enter a task name and description
-4. In the Triggers tab, select "New" and select "At startup" as the trigger.
-5. In the Actions tab, select "New" and select "Start a program" as the action.
-6. In the "Program/script" field, enter this command to open WSL: `C:\Windows\System32\wsl.exe`
-7. In the "Add arguments" field, enter the path to the .sh script you created in step 3, using Linux-style paths. For example: ```/root/Programming/ReactGraphQLTemplate/scripts/listen.sh``` 
-8. Press `Ok` to save the task
 
 ## TypeScript generation debugging  
 Sometimes, generating TypeScript will give a "JavaScript heap out of memory" error. This is difficult to debug, so it is important that you try to catch these early. Sometimes this is caused by packages using different TypeScript versions.
@@ -94,27 +64,10 @@ For performance measuring, we can use the [0x profiling tool](https://github.com
 ## Email setup
 It is often useful to send and receives emails with the website's address. Instructions to set that up can be found [here](/docs/MessengerSetup.txt)
 
-
-## Favicons
-A favicon is the image displayed in a browser's tab window. It also has other uses, such as being the icon displayed if the site is added to the home screen on a phone. There are a lot of different formats out there, so it's easiest to use a site like [realfavicongenerator](https://realfavicongenerator.net/) to guide you through this process. All you need is an svg file of your desired image (usually your company logo).
-
-Favicons should be placed in `packages/ui/public`. The link and meta tags should be added to `packages/ui/public/index.html`. After your favicon files are in the correct location, if you have a `site.manifest` or `manifest.json` file, make sure you have the following fields to qualify as a Progressive Web Application (PWA):  
-1. `name` - Name of application in install dialog and Chrome Web Store. Maximum 45 characters  
-2. `short_name` - Short version of application name. Maximum 12 characters  
-3. `display` - either `fullscreen`, `standalone`, `minimal-ui`, or `browser`
-4. `scope` - usually `/`
-4. `start_url` - usually `/`  
-
-See [here](https://web.dev/add-manifest/) for more information on manifest fields.
-
-If you are planning to support Progressive Web Apps (PWA), then you should also have a square version of your logo referenced in the manifest file. [Here](https://maskable.app/editor) is a useful site for checking how your image looks with different masks.
-
-
 ## Theming
 Picking the correct colors for your site can be easy or complicated, depending on how deeply you want to go into it (you could use color theory, for example). You also have to make sure that your theme's colors are different enough from each other to be distinguisable. I use [this color tool](https://material.io/resources/color/#!/?view.left=0&view.right=0) to create a solid starting point. The site's theme is set in [packages/ui/src/utils/theme.ts](packages/ui/src/utils/theme.ts).
 
 By default, this site automatically sets dark or light theme depending on your browser's settings. This is accomplished in [packages/ui/src/App.ts](packages/ui/src/App.ts).
-
 
 ## Custom fonts
 The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into [packages/ui/public/index.html](packages/ui/public/index.html). Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
@@ -200,27 +153,6 @@ Before removing packages, please make sure that depcheck was correct. If you are
 **Note**: If `yarn analyze` is not working, then the source-map-explorer is likely unable to open your web browser. In this case, try running it directly with the `--html` flag (i.e. `npx source-map-explorer --html source-tree.html <bundles_location>`) (vite example [must have sourcemap set to `true`]: `npx source-map-explorer --html source-tree.html dist/assets/*`). Then open the generated file directly
 
 **NOTE**: When testing for performance, make sure you are running a production build. This can be set with `NODE_ENV` in the .env file. If you would like to test performance locally, make sure the `SERVER_LOCATION` variable is set to 'local'. Just be mindful that certain performance features (such as cache policy) may be handled by Nginx, so they won't be available locally.
-
-
-## Progressive Web App (PWA)
-A PWA is a website that can be installed on mobile devices. These don't have quite the same functionality as native apps, but hopefully one day they will. To make your website PWA-compatable, perform an audit on Lighthouse. Then, follow the steps it provides. **Make sure `NODE_ENV` is set to `production` when testing PWA.**
-
-One common issue that arises here is "Manifest doesn't have a maskable icon". Clicking on it provides more information, but the gist is that you need a square version of your project's logo. See [here](https://w3c.github.io/manifest/#icon-masks) for how it should be designed.
-
-
-## Trusted Web Activity (TWA)
-A trusted web activity is a PWA that runs natively on Android devices. They can also be listed on the Google Play store, making them almost identical to traditional apps. If this sounds interesting to you, make sure that the `packages/ui/public/site.manifest` or `packages/ui/public/manifest.json` file has the following data:  
-1. orientation and display to define how the app should feel (likely "any" and "standalone" to feel like a native app)
-2. screenshots (displayed in the store)  
-3. name, short name, and description   
-4. dir (direction of text) and lang for localization
-5. icons
-6. start_url and scope
-, along with everything else mentioned in the Favicons and PWA sections of this guide. All known manifest fields can be found [here](https://developer.mozilla.org/en-US/docs/Web/Manifest/categories).
-
-Once that is complete, you can use the [PWABuilder tool](https://www.pwabuilder.com/) to generate other required files and receive further instructions.
-
-When you're ready to test or deploy your app to the Google Play store, visit [Google Play Console](https://play.google.com/) to receive instructions.
 
 
 ## Brave Rewards
