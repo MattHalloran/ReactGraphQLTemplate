@@ -197,4 +197,4 @@ I've created [a project that automates this process](https://github.com/MattHall
 ## Contributions
 Contributions are always welcome! If you have suggestions for improvements, please create an issue or a pull request💖
 
-[setup-guide]: https://docs.vrooli.com/setup/getting_started.html
+[setup-guide]: https://docs.vrooli.com/setup/overview.html
