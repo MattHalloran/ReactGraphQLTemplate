@@ -69,46 +69,6 @@ Picking the correct colors for your site can be easy or complicated, depending o
 
 By default, this site automatically sets dark or light theme depending on your browser's settings. This is accomplished in [packages/ui/src/App.ts](packages/ui/src/App.ts).
 
-## Custom fonts
-The easiest way to use custom fonts is by using [Google Fonts](https://fonts.google.com/). Once a font is selected, you should see some html needed for the font to be loaded. This can be pasted into [packages/ui/public/index.html](packages/ui/public/index.html). Then the font can be applied with the font-family CSS tag, as also shown on Google Fonts.
-
-Alternatively, you can supply your own fonts. Using a site such as [1001 Fonts](https://www.1001fonts.com/) allows you to download a `.woff` or `.woff2` file for your desired font. This can be placed in [packages/ui/src/assets/fonts](packages/ui/src/assets/fonts), and registered in the global css section of [packages/ui/src/App.ts]() like so:  
-```javascript
-    import SakBunderan from './assets/fonts/SakBunderan.woff';
-    ...
-    "@global": {
-        ...
-        '@font-face': {
-            fontFamily: 'SakBunderan',
-            src: `local('SakBunderan'), url(${SakBunderan}) format('truetype')`,
-            fontDisplay: 'swap',
-        }
-    },
-```
-
-Then, when you need to use the font, you can reference it like this:
-
-```javascript
-    navName: {
-        ...
-        fontSize: '3.5em',
-        fontFamily: `SakBunderan`,
-    },
-```
-
-When using a custom font, it is a good idea to compress it using [Font Squirrel](https://www.fontsquirrel.com/tools/webfont-generator). If you know which characters you need (such as for a logo), you can also delete unneeded characters via an app like [FontForge](https://fontforge.org/). In web development, size matters😉  
-
-If you want to go even further (though it is probably not necessary), you can also encode your font as a base64 string so it can be used without fetching. On a Unix-based terminal, a `.woff` can be converted to base64 using the command `base64 -w 0 yourfont.woff > yourfont-64.txt`. Then, you can enter that string into the `@font-face` src like so: 
-
-```javascript
-    ...
-    '@font-face': {
-        ...
-        src: `local('SakBunderan'), url(data:font/woff;charset=utf-8;base64,insertyourbase64stringhere) format('truetype')`,
-        ...
-    }
-```
-
 ## GraphQL
 [GraphQL](https://graphql.org/) is a query language for APIs. It is a faster, understandable, and modernan alternative to REST APIs.
 
